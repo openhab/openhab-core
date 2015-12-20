@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+    <groupId>org.openhab</groupId>
+    <artifactId>pom-tycho</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <relativePath>../poms/tycho/pom.xml</relativePath>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.openhab.bundles</groupId>
+  <artifactId>pom</artifactId>
+
+  <name>openHAB Bundles</name>
+
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>org.openhab.core</module>
+    <module>org.openhab.core.init</module>
+    <module>org.openhab.core.compat1x</module>
+    <module>org.openhab.core.compat1x.test</module>
+    <module>org.openhab.core.karaf</module>
+    <module>org.openhab.io.transport.serial</module>
+    <module>org.openhab.io.jetty.certificate</module>
+    <module>org.openhab.io.rest.docs</module>
+    <module>org.openhab.ui.dashboard</module>
+    <module>org.openhab.ui.iconset.classic</module>
+    <module>org.openhab.ui.basicui</module>
+    <module>org.openhab.ui.classicui</module>
+    <module>org.openhab.ui.paperui</module>
+  </modules>
+
+</project>

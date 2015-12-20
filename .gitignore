@@ -1,0 +1,5 @@
+**/target/
+.metadata/
+
+/*features*/*/src/main/history/
+maven-metadata-local.xml
