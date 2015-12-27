@@ -9,7 +9,6 @@
     <relativePath>../poms/tycho/pom.xml</relativePath>
   </parent>
 
-  <groupId>org.openhab</groupId>
   <artifactId>targetplatform</artifactId>
 
   <name>openHAB Target Platform</name>
