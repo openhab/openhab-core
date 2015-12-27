@@ -4,20 +4,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.openhab.features</groupId>
-        <artifactId>pom</artifactId>
+        <groupId>org.openhab.core</groupId>
+        <artifactId>pom-features</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openhab.features.karaf</artifactId>
+    <artifactId>openhab-core</artifactId>
     <packaging>feature</packaging>
 
     <name>openHAB Karaf Features</name>
     <description>openHAB Core Features</description>
-
-    <dependencies>
-        <!-- add the artifacts that should be in the kar in the dependencies set -->
-    </dependencies>
 
     <build>
         <plugins>
