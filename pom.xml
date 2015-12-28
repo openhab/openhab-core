@@ -42,6 +42,10 @@
             <id>bintray</id>
             <url>https://api.bintray.com/maven/openhab/mvn/openhab-core/;publish=1</url>
         </repository>
+        <snapshotRepository>
+            <id>jfrog</id>
+            <url>http://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <properties>
