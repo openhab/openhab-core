@@ -1,18 +1,14 @@
-# Contributing to openHAB
+# Contributing to openHAB Core components
 
-Want to hack on openHAB? Awesome! Here are instructions to get you
-started. They are probably not perfect, please let us know if anything
-feels wrong or incomplete.
+Warning: Note that this is most likely not the project you are looking for.
 
-## Reporting Issues
+openHAB mainly consist out of the core components from Eclipse SmartHome (https://github.com/eclipse/smarthome),
+extensions that are openHAB1-compatible from https://github.com/openhab/openhab and extensions that are 
+openHAB2-compatible from https://github.com/openhab/openhab2. All is then packaged into a distribution in
+https://github.com/openhab/openhab-distro.
 
-Please report [openHAB2 specific issues here](https://github.com/openhab/openhab2/issues), while issues that are related to the core framework should be reported in the [bugzilla of Eclipse SmartHome](https://bugs.eclipse.org/bugs/buglist.cgi?product=SmartHome&component=Core).
-Do not worry, if you are not clear, which category your issue belongs to - we will redirect you, if necessary.
-
-## Build Environment
-
-For instructions on setting up your development environment, please
-see our dedicated [IDE setup guide](https://github.com/openhab/openhab/wiki/IDE-Setup).
+This project here only contains a few bundles of the core runtime that are openHAB specific and thus not contained
+in the Eclipse SmartHome project.
 
 ## Contribution guidelines
 
@@ -33,24 +29,11 @@ that feature *on top of* openHAB.
 
 ### Discuss your design on the mailing list
 
-We recommend discussing your plans [in the discussion forum](https://community.openhab.org/c/openhab-2)
+We recommend discussing your plans [in the discussion forum](https://community.openhab.org/)
 before starting to code - especially for more ambitious contributions.
 This gives other contributors a chance to point you in the right
 direction, give feedback on your design, and maybe point out if someone
 else is working on the same thing.
-
-### Create issues...
-
-Any significant improvement should be documented as [a GitHub
-issue](https://github.com/openhab/openhab2/issues?labels=enhancement&page=1&state=open) before anybody
-starts working on it.
-
-### ...but check for existing issues first!
-
-Please take a moment to check that an issue doesn't already exist
-documenting your bug report or improvement proposal. If it does, it
-never hurts to add a quick "+1" or "I have this problem too". This will
-help prioritize the most common problems and requests.
 
 ### Conventions
 
@@ -99,18 +82,6 @@ Add your name to the AUTHORS file, but make sure the list is sorted and your
 name and email address match your git configuration. The AUTHORS file is
 regenerated occasionally from the git commit history, so a mismatch may result
 in your changes being overwritten.
-
-### Merge approval
-
-openHAB maintainers use LGTM (Looks Good To Me) in comments on the code review
-to indicate acceptance.
-
-A change requires LGTMs from an absolute majority of the maintainers of each
-component affected. For example, if a change affects `docs/` and `addons/`, it
-needs an absolute majority from the maintainers of `docs/` AND, separately, an
-absolute majority of the maintainers of `addons/`.
-
-For more details see [MAINTAINERS.md](project-orga/MAINTAINERS.md)
 
 ### Sign your work
 
@@ -165,30 +136,12 @@ then you just add a line to every git commit message:
 
 using your real name (sorry, no pseudonyms or anonymous contributions.)
 
-One way to automate this, is customise your get ``commit.template`` by adding
-a ``prepare-commit-msg`` hook to your openHAB checkout:
-
-```
-curl -L -o .git/hooks/prepare-commit-msg https://raw.github.com/openhab/openhab2/master/contrib/prepare-commit-msg.hook && chmod +x .git/hooks/prepare-commit-msg
-```
-
-* Note: the above script expects to find your GitHub user name in ``git config --get github.user``
-
 #### Small patch exception
 
 There are several exceptions to the signing requirement. Currently these are:
 
 * Your patch fixes spelling or grammar errors.
 * Your patch is a single line change to documentation.
-
-### How can I become a maintainer?
-
-* Step 1: learn the component inside out
-* Step 2: make yourself useful by contributing code, bugfixes, support etc.
-* Step 3: volunteer on [the discussion group] (https://github.com/openhab/openhab2/issues?labels=question&page=1&state=open)
-
-Don't forget: being a maintainer is a time investment. Make sure you will have time to make yourself available.
-You don't have to be a maintainer to make a difference on the project!
 
 ## Community Guidelines
 
