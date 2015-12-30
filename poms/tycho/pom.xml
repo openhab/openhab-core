@@ -46,7 +46,7 @@
                     <pomDependencies>consider</pomDependencies>
                     <target>
                         <artifact>
-                            <groupId>org.openhab</groupId>
+                            <groupId>org.openhab.core</groupId>
                             <artifactId>targetplatform</artifactId>
                             <version>${project.version}</version>
                             <classifier>openhab</classifier>
