@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+    xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
+        http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
+
+    <config-description uri="service:addons">
+        <parameter name="package" type="text" required="true">
+            <label>Package</label>
+            <description>The runtime package to use for this openHAB instance</description>
+            <options>
+                <option value="minimal">Minimal</option>
+                <option value="standard">Standard</option>
+                <option value="standard">Demo</option>
+            </options>
+        </parameter>
+    </config-description>
+
+</config-description:config-descriptions>

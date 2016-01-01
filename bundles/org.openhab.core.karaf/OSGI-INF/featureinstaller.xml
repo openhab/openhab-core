@@ -9,8 +9,11 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" configuration-policy="require" name="org.openhab.addons">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" configuration-policy="require" modified="modified" name="org.openhab.addons">
    <implementation class="org.openhab.core.karaf.internal.FeatureInstaller"/>
    <reference bind="setFeaturesService" cardinality="1..1" interface="org.apache.karaf.features.FeaturesService" name="FeaturesService" policy="static" unbind="unsetFeaturesService"/>
    <property name="service.pid" type="String" value="org.openhab.addons"/>
+   <property name="service.config.description.uri" type="String" value="service:addons"/>
+   <property name="service.config.label" type="String" value="Package"/>
+   <property name="service.config.category" type="String" value="core"/>
 </scr:component>
