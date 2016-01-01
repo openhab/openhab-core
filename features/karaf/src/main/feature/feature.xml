@@ -11,8 +11,9 @@
 -->
 <features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
-    <feature name="openhab-runtime-base" description="openHAB Minimal Runtime" version="${project.version}">
+    <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
         <feature>shk-esh-base</feature>
+        <feature>shk-esh-io-console-karaf</feature>
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
         <feature dependency="true">shell</feature>
         <bundle prerequisite="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${dep.karaf.version}</bundle>
@@ -21,13 +22,20 @@
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
     </feature>
 
-    <feature name="openhab-runtime" description="${project.name}" version="${project.version}">
-        <details>${project.description}</details>
-        <feature>shk-esh-io-console-karaf</feature>
+    <feature name="openhab-package-minimal" description="openHAB Minimal Package" version="${project.version}">
+        <feature>openhab-runtime-base</feature>
+        <feature>openhab-dashboard</feature>
+        <feature>openhab-misc-restdocs</feature>
+    </feature>
+
+    <feature name="openhab-package-standard" description="openHAB Standard Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>openhab-dashboard</feature>
         <feature>openhab-misc-restdocs</feature>
         <feature>openhab-misc-certificate</feature>
+        <feature>openhab-ui-paper</feature>
+        <feature>openhab-ui-basic</feature>
+        <feature>openhab-ui-classic</feature>
     </feature>
 
     <feature name="openhab-runtime-compat1x" description="Compatibility layer for openHAB 1 addons" version="${project.version}">
