@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.slf4j.Logger;
@@ -68,8 +69,10 @@ public class FeatureInstaller {
 
     private void installFeatures(String type, String install) {
         for (String addon : install.split(",")) {
-            String name = PREFIX + type + "-" + addon.trim();
-            installFeature(name);
+            if (StringUtils.isNotBlank(addon)) {
+                String name = PREFIX + type + "-" + addon.trim();
+                installFeature(name);
+            }
         }
     }
 
