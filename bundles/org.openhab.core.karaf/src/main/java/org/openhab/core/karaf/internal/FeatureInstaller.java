@@ -78,8 +78,11 @@ public class FeatureInstaller {
 
     private void installFeature(String name) {
         try {
-            featuresService.installFeature(name);
-            logger.info("Installed '{}'", name);
+            Feature feature = featuresService.getFeature(name);
+            if (feature != null && !featuresService.isInstalled(feature)) {
+                featuresService.installFeature(name);
+                logger.info("Installed '{}'", name);
+            }
         } catch (Exception e) {
             logger.error("Failed installing '{}': {}", name, e.getMessage());
         }
