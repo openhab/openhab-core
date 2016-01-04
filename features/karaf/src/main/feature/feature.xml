@@ -12,13 +12,21 @@
 <features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
     <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
-        <feature>shk-esh-base</feature>
-        <feature>shk-esh-io-console-karaf</feature>
-        <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
+        <feature>esh-base</feature>
+        <feature>esh-io-console-karaf</feature>
+        <feature>esh-io-rest-sitemap</feature>
+        <feature>esh-model-item-runtime</feature>
+        <feature>esh-model-persistence-runtime</feature>
+        <feature>esh-model-rule-runtime</feature>
+        <feature>esh-model-script-runtime</feature>
+        <feature>esh-model-sitemap-runtime</feature>
+        <feature>esh-model-thing-runtime</feature>
+        <feature>esh-storage-mapdb</feature>
+        <feature>esh-ui-iconset-classic</feature>
         <feature dependency="true">shell</feature>
+        <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
         <bundle prerequisite="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${dep.karaf.version}</bundle>
         <bundle prerequisite="true">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${dep.karaf.version}</bundle>
-        <bundle>mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
     </feature>
 
@@ -40,15 +48,20 @@
 
     <feature name="openhab-runtime-compat1x" description="Compatibility layer for openHAB 1 addons" version="${project.version}">
         <feature>openhab-runtime-base</feature>
+        <feature>esh-model-item</feature>
+        <feature>esh-model-persistence</feature>
+        <feature>esh-model-script</feature>
+        <feature>esh-model-sitemap</feature>
+        <feature>esh-ui</feature>
         <bundle>mvn:org.openhab.core/org.openhab.core.compat1x/${project.version}</bundle>
     </feature>
 
     <feature name="openhab-transport-mdns" description="mDNS Transport" version="${project.version}">
-        <feature>shk-esh-io-transport-mdns</feature>
+        <feature>esh-io-transport-mdns</feature>
     </feature>
 
     <feature name="openhab-transport-mqtt" description="MQTT Transport" version="${project.version}">
-        <feature>shk-esh-io-transport-mqtt</feature>
+        <feature>esh-io-transport-mqtt</feature>
     </feature>
 
     <feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
@@ -57,11 +70,11 @@
     </feature>
 
     <feature name="openhab-transport-upnp" description="UPnP Transport" version="${project.version}">
-        <feature>shk-esh-io-transport-upnp</feature>
+        <feature>esh-io-transport-upnp</feature>
     </feature>
 
     <feature name="openhab-misc-restdocs" description="REST Documentation" version="${project.version}">
-        <feature>shk-esh-base</feature>
+        <feature>esh-base</feature>
         <feature>shk-jax-rs-provider-swagger</feature>
         <feature>openhab-dashboard</feature>
         <bundle>mvn:org.openhab.core/org.openhab.io.rest.docs/${project.version}</bundle>
@@ -74,14 +87,15 @@
     <!-- ui -->
 
     <feature name="openhab-dashboard" description="Dashboard" version="${project.version}">
-        <feature>shk-esh-base</feature>
+        <feature>esh-base</feature>
         <bundle>mvn:org.openhab.core/org.openhab.ui.dashboard/${project.version}</bundle>
     </feature>
 
     <feature name="openhab-ui-basic" description="Basic UI" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>openhab-dashboard</feature>
-        <feature>shk-esh-ui-basic</feature>
+        <feature>esh-ui-basic</feature>
+        <feature>esh-ui-icon</feature>
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.basicui/${project.version}</bundle>
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.iconset.classic/${project.version}</bundle>
 		<config name="org.eclipse.smarthome.basicui">
@@ -93,7 +107,8 @@
     <feature name="openhab-ui-classic" description="Classic UI" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>openhab-dashboard</feature>
-        <feature>shk-esh-ui-classic</feature>
+        <feature>esh-ui-classic</feature>
+        <feature>esh-ui-icon</feature>
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.classicui/${project.version}</bundle>
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.iconset.classic/${project.version}</bundle>
 		<config name="org.eclipse.smarthome.classicui">
@@ -104,7 +119,7 @@
     <feature name="openhab-ui-paper" description="Paper UI" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>openhab-dashboard</feature>
-        <feature>shk-esh-ui-paper</feature>
+        <feature>esh-ui-paper</feature>
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.paperui/${project.version}</bundle>
     </feature>
 
