@@ -30,6 +30,11 @@
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
     </feature>
 
+    <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
+        <bundle start-level="20">mvn:org.openhab.core/org.openhab.io.jetty.certificate/${project.version}</bundle>
+    </feature>
+
+
     <feature name="openhab-package-minimal" description="openHAB Minimal Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>openhab-dashboard</feature>
@@ -38,9 +43,9 @@
 
     <feature name="openhab-package-standard" description="openHAB Standard Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
+        <feature>openhab-runtime-certificate</feature>
         <feature>openhab-dashboard</feature>
         <feature>openhab-misc-restdocs</feature>
-        <feature>openhab-misc-certificate</feature>
         <feature>openhab-ui-paper</feature>
         <feature>openhab-ui-basic</feature>
         <feature>openhab-ui-classic</feature>
@@ -78,10 +83,6 @@
         <feature>shk-jax-rs-provider-swagger</feature>
         <feature>openhab-dashboard</feature>
         <bundle>mvn:org.openhab.core/org.openhab.io.rest.docs/${project.version}</bundle>
-    </feature>
-
-    <feature name="openhab-misc-certificate" description="SSL Generator" version="${project.version}">
-        <bundle start-level="20">mvn:org.openhab.core/org.openhab.io.jetty.certificate/${project.version}</bundle>
     </feature>
 
     <!-- ui -->
