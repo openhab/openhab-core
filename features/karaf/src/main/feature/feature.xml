@@ -23,6 +23,7 @@
         <feature>esh-model-thing-runtime</feature>
         <feature>esh-storage-mapdb</feature>
         <feature>esh-ui-iconset-classic</feature>
+        <feature>openhab-runtime-certificate</feature>
         <feature dependency="true">shell</feature>
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
         <bundle prerequisite="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${dep.karaf.version}</bundle>
@@ -43,7 +44,6 @@
 
     <feature name="openhab-package-standard" description="openHAB Standard Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <feature>openhab-runtime-certificate</feature>
         <feature>openhab-dashboard</feature>
         <feature>openhab-misc-restdocs</feature>
         <feature>openhab-ui-paper</feature>
