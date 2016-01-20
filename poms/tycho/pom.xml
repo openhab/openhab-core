@@ -44,14 +44,6 @@
                     <resolver>p2</resolver>
                     <ignoreTychoRepositories>true</ignoreTychoRepositories>
                     <pomDependencies>consider</pomDependencies>
-                    <target>
-                        <artifact>
-                            <groupId>org.openhab.core</groupId>
-                            <artifactId>targetplatform</artifactId>
-                            <version>${project.version}</version>
-                            <classifier>openhab</classifier>
-                        </artifact>
-                    </target>
                     <environments>
                         <environment>
                             <os>linux</os>
@@ -185,15 +177,21 @@
     </profiles>
 
 	<repositories>
-		<repository>
-			<id>eclipse</id>
-			<name>Eclipse Snapshot Repository</name>
-			<layout>default</layout>
-			<url>https://repo.eclipse.org/content/repositories/snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
+
+        <!-- SmartHome p2 repository -->
+        <repository>
+            <id>p2-smarthome</id>
+            <url>http://download.eclipse.org/smarthome/updates-stable</url>
+            <layout>p2</layout>
+        </repository>
+
+        <!-- openHAB dependencies p2 repository -->
+        <repository>
+            <id>p2-openhab-deps-repo</id>
+            <url>http://repository-openhab.forge.cloudbees.com/release/openhab-deps-repo/${ohdr.version}</url>
+            <layout>p2</layout>
+        </repository>
+
 	</repositories>
 
 </project>
