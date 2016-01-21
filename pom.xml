@@ -56,6 +56,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.compiler.compilerVersion>1.7</maven.compiler.compilerVersion>
 
+        <ohdr.version>1.0.0</ohdr.version>
         <esh.version>0.8.0.b2</esh.version>
         <shk.version>1.2</shk.version>
         <dep.karaf.version>4.0.3</dep.karaf.version>
@@ -157,38 +158,76 @@
     </build>
 
     <repositories>
+        <!-- openHAB releases -->
         <repository>
             <id>jcenter</id>
             <name>JCenter Repository</name>
             <url>https://jcenter.bintray.com/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
-        <repository>
-            <id>shk-bintray</id>
-            <name>Bintray Repository for shk</name>
-            <url>https://dl.bintray.com/maggu2810/maven</url>
-        </repository>             
+
+        <!-- openHAB snapshots -->
         <repository>
             <id>jfrog</id>
             <name>JFrog OSS Repository</name>
             <url>http://oss.jfrog.org/libs-snapshot/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
             <snapshots>
                 <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
-        <repository>
-            <id>eclipse-snapshots</id>
-            <name>Eclipse Snapshot Repository</name>
-            <layout>default</layout>
-            <url>https://repo.eclipse.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
+
+        <!-- ESH releases -->
         <repository>
             <id>eclipse-releases</id>
             <name>Eclipse Release Repository</name>
             <layout>default</layout>
             <url>https://repo.eclipse.org/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- ESH Snapshots -->
+        <repository>
+            <id>eclipse-snapshots</id>
+            <name>Eclipse Snapshot Repository</name>
+            <layout>default</layout>
+            <url>https://repo.eclipse.org/content/repositories/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+
+        <!-- SHK releases -->
+        <repository>
+            <id>shk-bintray</id>
+            <name>Bintray Repository for shk</name>
+            <url>https://dl.bintray.com/maggu2810/maven</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
