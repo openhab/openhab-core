@@ -11,6 +11,13 @@
 -->
 <features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
+    <feature name="esh-tp-jupnp" version="${project.version}">
+      <feature dependency="true">http</feature>
+      <feature>shk-apache-httpclient</feature>
+      <bundle>mvn:org.jupnp/org.jupnp/${jupnp.version}</bundle>
+      <capability>esh.tp;feature=jupnp</capability>
+    </feature>
+
     <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
         <feature>esh-base</feature>
         <feature>esh-io-console-karaf</feature>
@@ -34,7 +41,6 @@
     <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
         <bundle start-level="20">mvn:org.openhab.core/org.openhab.io.jetty.certificate/${project.version}</bundle>
     </feature>
-
 
     <feature name="openhab-package-minimal" description="openHAB Minimal Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
