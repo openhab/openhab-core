@@ -8,6 +8,9 @@
  */
 package org.openhab.core.compat1x.internal;
 
+import java.lang.reflect.Field;
+import java.util.Calendar;
+
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.HSBType;
@@ -65,7 +68,7 @@ public class TypeMapper {
         } else if (typeClass.equals(PercentType.class)) {
             result = new org.openhab.core.library.types.PercentType(type.toString());
         } else if (typeClass.equals(DateTimeType.class)) {
-            result = new org.openhab.core.library.types.DateTimeType(type.toString());
+            result = new org.openhab.core.library.types.DateTimeType(cloneCalendar(type));
         } else if (typeClass.equals(PointType.class)) {
             result = new org.openhab.core.library.types.PointType(type.toString());
         }
@@ -114,7 +117,7 @@ public class TypeMapper {
         } else if (typeClass.equals(org.openhab.core.library.types.PercentType.class)) {
             result = new PercentType(type.toString());
         } else if (typeClass.equals(org.openhab.core.library.types.DateTimeType.class)) {
-            result = new DateTimeType(type.toString());
+            result = new DateTimeType(cloneCalendar(type));
         } else if (typeClass.equals(org.openhab.core.library.types.PointType.class)) {
             result = new PointType(type.toString());
         } else if (typeClass.equals(org.openhab.library.tel.types.CallType.class)) {
@@ -122,6 +125,17 @@ public class TypeMapper {
         }
 
         return result;
+    }
+
+    private static Calendar cloneCalendar(Object type) {
+        try {
+            Field calField = type.getClass().getDeclaredField("calendar");
+            calField.setAccessible(true);
+            Calendar cal = (Calendar) calField.get(type);
+            return (Calendar) cal.clone();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }
