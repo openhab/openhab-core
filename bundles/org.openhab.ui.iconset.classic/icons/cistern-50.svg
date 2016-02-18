@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64">
   <defs>
     <path id="0" d="m46 10v-4h-28v4c-4.4 0-8 3.6-8 8v34c0 4.4 3.6 8 8 8h28c4.4 0 8-3.6 8-8v-34c0-4.4-3.6-8-8-8"/>
     <clipPath id="1">

@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64">
   <defs>
-    <linearGradient id="6" gradientUnits="userSpaceOnUse" y1="53.4891" x2="0" y2="52.1296" xlink:href="#7"/>
-    <linearGradient id="5" gradientUnits="userSpaceOnUse" y1="61" x2="0" y2="13.3611">
+    <linearGradient id="6" gradientUnits="userSpaceOnUse" y1="61" x2="0" y2="13.3611">
       <stop style="stop-color:#a35c48"/>
       <stop offset="1" style="stop-color:#cd814c"/>
     </linearGradient>
-    <linearGradient id="7" gradientUnits="userSpaceOnUse" x1="25.2326" x2="34.6551">
+    <linearGradient id="5" gradientUnits="userSpaceOnUse" x1="25.2326" x2="34.6551">
       <stop style="stop-color:#4d2c19"/>
       <stop offset="1" style="stop-color:#793b20"/>
     </linearGradient>
-    <linearGradient id="4" gradientUnits="userSpaceOnUse" y1="46.4858" x2="0" y2="45.1296" xlink:href="#7"/>
-    <linearGradient id="3" gradientUnits="userSpaceOnUse" y1="40.4859" x2="0" y2="39.2037" xlink:href="#7"/>
-    <linearGradient id="0" gradientUnits="userSpaceOnUse" y1="28.4897" x2="0" y2="27.2407" xlink:href="#7"/>
-    <linearGradient id="2" gradientUnits="userSpaceOnUse" y1="23.484" x2="0" y2="22.2407" xlink:href="#7"/>
-    <linearGradient id="1" gradientUnits="userSpaceOnUse" y1="34.4779" x2="0" y2="33.2037" xlink:href="#7"/>
+    <linearGradient id="7" gradientUnits="userSpaceOnUse" y1="53.4891" x2="0" y2="52.1296" xlink:href="#5"/>
+    <linearGradient id="4" gradientUnits="userSpaceOnUse" y1="46.4858" x2="0" y2="45.1296" xlink:href="#5"/>
+    <linearGradient id="3" gradientUnits="userSpaceOnUse" y1="40.4859" x2="0" y2="39.2037" xlink:href="#5"/>
+    <linearGradient id="0" gradientUnits="userSpaceOnUse" y1="34.4779" x2="0" y2="33.2037" xlink:href="#5"/>
+    <linearGradient id="2" gradientUnits="userSpaceOnUse" y1="28.4897" x2="0" y2="27.2407" xlink:href="#5"/>
+    <linearGradient id="1" gradientUnits="userSpaceOnUse" y1="23.484" x2="0" y2="22.2407" xlink:href="#5"/>
   </defs>
   <g style="stroke-miterlimit:10">
-    <path d="m29 16.36c0 0-4.38 42.56-3 44s5 0 5 0 1.44 1.06 1-15c-.44-16.06 2-32 2-32l-5 3z" style="fill:url(#5);stroke:url(#7)"/>
+    <path d="m29 16.36c0 0-4.38 42.56-3 44s5 0 5 0 1.44 1.06 1-15c-.44-16.06 2-32 2-32l-5 3z" style="fill:url(#6);stroke:url(#5)"/>
     <g style="fill:none">
-      <path d="m26 53c0 0 3.92-.83 6 0" style="stroke:url(#6)"/>
+      <path d="m26 53c0 0 3.92-.83 6 0" style="stroke:url(#7)"/>
       <path d="m26 46c0 0 3.42-.83 6 0" style="stroke:url(#4)"/>
       <path d="m27 40c0 0 2.75-.67 4 0" style="stroke:url(#3)"/>
-      <path d="m28 34c0 0 2.17-.67 3 0" style="stroke:url(#1)"/>
-      <path d="m28 28c0 0 2.83-.58 4 0" style="stroke:url(#0)"/>
-      <path d="m29 23c0 0 2.25-.58 3 0" style="stroke:url(#2)"/>
+      <path d="m28 34c0 0 2.17-.67 3 0" style="stroke:url(#0)"/>
+      <path d="m28 28c0 0 2.83-.58 4 0" style="stroke:url(#2)"/>
+      <path d="m29 23c0 0 2.25-.58 3 0" style="stroke:url(#1)"/>
     </g>
   </g>
   <path d="m38.92 33.12c-1.26-1.19-2.42-2.53-3.45-3.98l.77-2.06-1.56.89c-4.05-6.31-4.55-12.56-4.55-12.62l-.01-.09-5.22-1.04-.02.13c-1.29 8.39-9.35 13.06-10.73 13.8.11-1.15.25-2.29.41-3.39l1.53-1.3.39-.34-1.73.43c1.76-10.42 5.27-12.05 5.31-12.07l.46-.2-.5-.04c-.44-.03-.88-.05-1.32-.05-5.06 0-9.84 2.12-11.3 2.84 5.27-7.34 11.54-7.54 11.6-7.54l13.96 4.99 6.08-2c10.33.39 12.43 9.35 12.77 11.46-.51-.62-1.03-1.22-1.58-1.82l-.11-.77-.04-.24-.41.41c-6.75-7.07-12.03-7.28-12.61-7.28h-.17l-.01.17c1.39 4.26 2.21 8.61 2.46 12.92l-1.66 1.11 1.73.34c.01.41.02.8.02 1.18l-1.8.36 1.78.89c-.09 2.57-.38 4.32-.49 4.91" style="fill:#063"/>
