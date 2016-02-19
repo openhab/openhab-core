@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64">
   <circle cx="32" cy="6" r="6" style="fill:#dae1e4"/>
   <circle cx="32" cy="6" r="5" style="fill:#c4cacc"/>
   <path d="m26 6h12v50h-12z" style="fill:#dae1e4"/>

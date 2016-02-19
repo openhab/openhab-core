@@ -2,11 +2,14 @@
 #
 #  Minify .png files using imageoptim.
 #
-#  Can be installed with NPM. (Note: You must already have the GUI application installed.)
+#  Can be installed with NPM.
 #  npm install -g imageoptim-cli
 #
+#  Note: The GUI application also has to be installed.
+#  brew cask install imageoptim
+#
 
-if hash imageoptim; then
+if type imageoptim &>/dev/null; then
 
   if [ "$1" != '' ] ; then
 
@@ -15,7 +18,7 @@ if hash imageoptim; then
     done
 
 	else
-		imageoptim -d `dirname $0`
+		imageoptim -d "$(dirname $0)"
 	fi
 
 fi

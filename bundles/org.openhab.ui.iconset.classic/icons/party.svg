@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64">
   <path d="M53.5,10.21l0.02-0.02C50.32,8.32,42.34,7,33,7s-17.32,1.32-20.51,3.19l0.02,0.02h-0.03   L33,33.5l20.53-23.29H53.5z" style="fill:#e5395e;opacity:.9"/>
   <g style="fill:none;stroke-miterlimit:10;stroke:#cec6c6">
     <ellipse cx="33" cy="8.5" rx="22" ry="5" style="opacity:.9"/>

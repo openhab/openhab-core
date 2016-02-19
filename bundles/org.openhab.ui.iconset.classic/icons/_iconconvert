@@ -1,37 +1,39 @@
 #!/bin/sh
 
 for file in $1*.svg; do
+
   if [[ $file != 'none'* ]]; then
+
     png=`echo $file | sed s/.svg/.png/`
-    
+
     # 1. Clean up SVG file.
-    if hash xmllint; then
+    if type xmllint &>/dev/null; then
+
       # Should be pre-installed on OS X.
       xmllint $file -o $file --pretty 1
+
     fi
-    
+
     # 2. Convert SVG files to PNG.
-    if hash rsvg-convert; then
+    if [ ! -f "$png" ]; then
 
-      # Can be installed with Homebrew. (Installation is slow, but conversion is fast.)
-      # brew install librsvg
-      rsvg-convert $file -o $png
+      if type rsvg-convert &>/dev/null; then
 
-    elif hash svgexport; then
+        # Can be installed with Homebrew. (Installation is slow, but conversion is fast.)
+        # brew install librsvg
+        echo "rsvg-convert: converting $file"
+        rsvg-convert $file -o $png
 
-      # Can be installed with NPM. (Installation is fast, but conversion is slow.)
-      # npm install -g svgexport
-      svgexport $file $png
+      elif type svgexport &>/dev/null; then
 
-    fi
-    
-    # 3. Minify PNG files.
-    if hash imageoptim; then
+        # Can be installed with NPM. (Installation is fast, but conversion is slow.)
+        # npm install -g svgexport
+        echo "svgexport: converting $file"
+        svgexport $file $png
 
-      # Can be installed with NPM. (Note: You must already have the GUI application installed.)
-      # npm install -g imageoptim-cli
-      echo $png | imageoptim
+      fi
 
     fi
-  fi  
+
+  fi
 done
