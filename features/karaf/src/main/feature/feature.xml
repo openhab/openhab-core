@@ -18,6 +18,11 @@
       <capability>esh.tp;feature=jupnp</capability>
     </feature>
 
+    <feature name="esh-tp-jmdns" version="${project.version}">
+      <bundle>mvn:org.jmdns/jmdns/${jmdns.version}</bundle>
+      <capability>esh.tp;feature=jmdns</capability>
+    </feature>
+
     <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
         <feature>esh-base</feature>
         <feature>esh-io-console-karaf</feature>
