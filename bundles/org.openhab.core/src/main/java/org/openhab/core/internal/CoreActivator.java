@@ -8,16 +8,10 @@
  */
 package org.openhab.core.internal;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-
 import org.eclipse.smarthome.model.rule.runtime.RuleEngine;
-import org.openhab.core.OpenHAB;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is the activator of the core openHAB bundle.
@@ -28,25 +22,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CoreActivator implements BundleActivator {
 
-    private static Logger logger = LoggerFactory.getLogger(CoreActivator.class);
-
     @Override
     public void start(BundleContext context) throws Exception {
-        String version = OpenHAB.getVersion();
-        String buildId = OpenHAB.getBuildId();
-
-        if (buildId.equals("")) {
-            logger.info("openHAB runtime has been started (v{}).", version);
-        } else {
-            logger.info("openHAB runtime has been started (v{}, build {}).", version, buildId);
-        }
-
-        if (logger.isDebugEnabled()) {
-            RuntimeMXBean rb = ManagementFactory.getRuntimeMXBean();
-            long uptime = rb.getUptime();
-            logger.debug("Startup took {} ms", uptime);
-        }
-
         startRuleEngine(context);
     }
 
@@ -74,7 +51,6 @@ public class CoreActivator implements BundleActivator {
      */
     @Override
     public void stop(BundleContext context) throws Exception {
-        logger.info("openHAB runtime has been terminated.");
     }
 
 }
