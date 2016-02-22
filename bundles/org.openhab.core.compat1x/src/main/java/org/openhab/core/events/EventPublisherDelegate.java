@@ -9,7 +9,6 @@
 package org.openhab.core.events;
 
 import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.ItemRegistry;
 import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
 import org.eclipse.smarthome.core.items.events.ItemEventFactory;
 import org.eclipse.smarthome.core.items.events.ItemStateEvent;
@@ -21,43 +20,51 @@ import org.slf4j.LoggerFactory;
 
 public class EventPublisherDelegate implements org.openhab.core.events.EventPublisher {
 
-	private static final Logger logger = LoggerFactory.getLogger(EventPublisherDelegate.class);
-	
-	private EventPublisher eventPublisher;
-	
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
-	}
+    private static final Logger logger = LoggerFactory.getLogger(EventPublisherDelegate.class);
 
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = null;
-	}
+    private EventPublisher eventPublisher;
 
-	@Override
-	public void sendCommand(String itemName, Command command) {
-	    // we do not offer synchronous sending of commands anymore
-	    postCommand(itemName, command);
-	}
+    public void setEventPublisher(EventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
-	@Override
-	public void postCommand(String itemName, Command command) {
-		org.eclipse.smarthome.core.types.Command eshCommand = (org.eclipse.smarthome.core.types.Command) TypeMapper.mapToESHType(command);
-        if(eshCommand!=null) {
+    public void unsetEventPublisher(EventPublisher eventPublisher) {
+        this.eventPublisher = null;
+    }
+
+    @Override
+    public void sendCommand(String itemName, Command command) {
+        // we do not offer synchronous sending of commands anymore
+        postCommand(itemName, command);
+    }
+
+    @Override
+    public void postCommand(String itemName, Command command) {
+        org.eclipse.smarthome.core.types.Command eshCommand = (org.eclipse.smarthome.core.types.Command) TypeMapper
+                .mapToESHType(command);
+        if (eshCommand != null) {
             ItemCommandEvent event = ItemEventFactory.createCommandEvent(itemName, eshCommand);
             eventPublisher.post(event);
+        } else if (command != null) {
+            logger.warn("Compatibility layer could not convert {} of type {}.", command,
+                    command.getClass().getSimpleName());
         } else {
-            logger.warn("Compatibility layer could not convert {} of type {}.", command.toString(), command.getClass().getSimpleName() );
+            logger.warn("given command is NULL, couldn't post command for '{}'", itemName);
         }
-	}
+    }
 
-	@Override
-	public void postUpdate(String itemName, State newState) {
-		org.eclipse.smarthome.core.types.State eshState = (org.eclipse.smarthome.core.types.State) TypeMapper.mapToESHType(newState);
-		if(eshState!=null) {
+    @Override
+    public void postUpdate(String itemName, State newState) {
+        org.eclipse.smarthome.core.types.State eshState = (org.eclipse.smarthome.core.types.State) TypeMapper
+                .mapToESHType(newState);
+        if (eshState != null) {
             ItemStateEvent event = ItemEventFactory.createStateEvent(itemName, eshState);
             eventPublisher.post(event);
-		} else {
-		    logger.warn("Compatibility layer could not convert {} of type {}.", newState.toString(), newState.getClass().getSimpleName() );
-		}
-	}
+        } else if (newState != null) {
+            logger.warn("Compatibility layer could not convert {} of type {}.", newState,
+                    newState.getClass().getSimpleName());
+        } else {
+            logger.warn("given new state is NULL, couldn't post update for '{}'", itemName);
+        }
+    }
 }
