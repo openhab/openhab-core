@@ -12,8 +12,39 @@
   <groupId>org.openhab.core.features</groupId>
   <artifactId>org.openhab.repo</artifactId>
 
-  <name>openHAB P2 Repository</name>
+  <name>openHAB Core P2 Repository</name>
 
   <packaging>eclipse-repository</packaging>
+
+    <build>
+        <plugins>
+          <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+            <version>2.4.3</version>
+          <executions>
+            <execution>
+              <id>default-resources</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}</outputDirectory>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/filtered-resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
 
 </project>
