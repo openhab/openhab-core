@@ -60,7 +60,7 @@
         <esh.version>0.8.0-SNAPSHOT</esh.version>
         <shk.version>1.2</shk.version>
         <jupnp.version>2.1.0</jupnp.version>
-        <jmdns.version>3.4.3</jmdns.version>
+        <jmdns.version>3.5.0</jmdns.version>
         <dep.karaf.version>4.0.3</dep.karaf.version>
         <karaf.maven.plugin.version>4.0.3</karaf.maven.plugin.version>
         <karaf.features.version>4.0.3</karaf.features.version>
