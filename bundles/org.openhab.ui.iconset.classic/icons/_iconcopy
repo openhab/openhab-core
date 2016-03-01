@@ -145,6 +145,8 @@ cp -f signal-3.png          qualityofservice-3.png
 cp -f signal-3.svg          qualityofservice-3.svg
 cp -f signal-4.png          qualityofservice-4.png
 cp -f signal-4.svg          qualityofservice-4.svg
+cp -f signal.png            qualityofservice.png
+cp -f signal.svg            qualityofservice.svg
 
 cp -f microphone.png        recorder.png
 cp -f microphone.svg        recorder.svg
