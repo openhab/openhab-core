@@ -8,26 +8,26 @@
  */
 package org.openhab.io.multimedia.tts.internal;
 
-import org.eclipse.smarthome.io.multimedia.tts.TTSService;
+import org.eclipse.smarthome.io.voice.tts.TTSService;
 
 /**
  * This class serves as a mapping from the "old" org.openhab namespace to the
  * new org.eclipse.smarthome namespace for the action service. It wraps an
  * instance with the old interface into a class with the new interface.
- * 
+ *
  * @author Tobias Bräutigam - Initial contribution and API
  */
 public class TTSServiceDelegate implements TTSService {
 
-	private org.openhab.io.multimedia.tts.TTSService service;
+    private org.openhab.io.multimedia.tts.TTSService service;
 
-	public TTSServiceDelegate(org.openhab.io.multimedia.tts.TTSService service) {
-		this.service = service;
-	}
+    public TTSServiceDelegate(org.openhab.io.multimedia.tts.TTSService service) {
+        this.service = service;
+    }
 
-	@Override
-	public void say(String text, String voice, String outputDevice) {
-		service.say(text, voice, outputDevice);
-	}
+    @Override
+    public void say(String text, String voice, String outputDevice) {
+        service.say(text, voice, outputDevice);
+    }
 
 }
