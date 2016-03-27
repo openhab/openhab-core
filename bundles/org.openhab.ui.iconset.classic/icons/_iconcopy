@@ -52,6 +52,9 @@ cp -f lock-closed.svg       lock.svg
 cp -f receiver-on.png       receiver.png
 cp -f receiver-on.svg       receiver.svg
 
+cp -f signal-4.png          signal.png
+cp -f signal-4.svg          signal.svg
+
 cp -f siren-on.png          siren.png
 cp -f siren-on.svg          siren.svg
 
