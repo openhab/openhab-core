@@ -56,10 +56,10 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.compiler.compilerVersion>1.7</maven.compiler.compilerVersion>
 
-        <ohdr.version>1.0.0</ohdr.version>
+        <ohdr.version>1.0.3</ohdr.version>
         <esh.version>0.8.0-SNAPSHOT</esh.version>
         <shk.version>1.2</shk.version>
-        <jupnp.version>2.1.0</jupnp.version>
+        <jupnp.version>2.2.0</jupnp.version>
         <jmdns.version>3.5.0</jmdns.version>
         <dep.karaf.version>4.0.3</dep.karaf.version>
         <karaf.maven.plugin.version>4.0.3</karaf.maven.plugin.version>
