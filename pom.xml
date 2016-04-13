@@ -61,9 +61,7 @@
         <shk.version>1.2</shk.version>
         <jupnp.version>2.2.0</jupnp.version>
         <jmdns.version>3.5.0</jmdns.version>
-        <dep.karaf.version>4.0.3</dep.karaf.version>
-        <karaf.maven.plugin.version>4.0.3</karaf.maven.plugin.version>
-        <karaf.features.version>4.0.3</karaf.features.version>
+        <karaf.version>4.0.3</karaf.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <build.helper.maven.plugin.version>1.9.1</build.helper.maven.plugin.version>
         <license.maven.plugin.version>2.10</license.maven.plugin.version>
@@ -93,7 +91,7 @@
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>
-                    <version>${karaf.maven.plugin.version}</version>
+                    <version>${karaf.version}</version>
                     <extensions>true</extensions>
                 </plugin>
                 <plugin>
