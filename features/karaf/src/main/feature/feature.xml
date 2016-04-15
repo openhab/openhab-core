@@ -9,18 +9,70 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+
+    <repository>mvn:de.maggu2810.kat.features/apache-commons/${kat.version}/xml/features</repository>
+    <repository>mvn:de.maggu2810.kat.features/gson/${kat.version}/xml/features</repository>
+    <repository>mvn:de.maggu2810.kat.features/jmdns/${kat.version}/xml/features</repository>
+    <repository>mvn:de.maggu2810.kat.features/jupnp/${kat.version}/xml/features</repository>
+    <repository>mvn:de.maggu2810.kat.features/paho/${kat.version}/xml/features</repository>
+    <repository>mvn:de.maggu2810.kat.features/xtext/${kat.version}/xml/features</repository>
+
+    <feature name="shk-jax-rs-min" version="5.3">
+      <feature dependency="true">http</feature>
+      <bundle dependency="true">mvn:com.eclipsesource.jaxrs/jersey-min/2.22.1</bundle>
+      <bundle>mvn:com.eclipsesource.jaxrs/publisher/5.3</bundle>
+    </feature>
+
+    <feature name="shk-jax-rs-provider-gson" version="2.3">
+      <feature dependency="true" version="[5.3,5.4)">shk-jax-rs-min</feature>
+      <feature dependency="true" version="[2.3,2.4)">kat-gson</feature>
+      <bundle>mvn:com.eclipsesource.jaxrs/provider-gson/2.3</bundle>
+    </feature>
+
+    <feature name="shk-jax-rs-provider-swagger" version="1.0.sp1">
+      <feature dependency="true" version="[5.3,5.4)">shk-jax-rs-min</feature>
+      <bundle>mvn:de.maggu2810.thirdparty.modified.com.eclipsesource.jaxrs/swagger-all/1.5.5.sp1</bundle>
+      <bundle>mvn:com.eclipsesource.jaxrs/provider-swagger/1.1</bundle>
+    </feature>
+
+    <feature name="esh-tp-base" description="TargetPlatform Base" version="${project.version}">
+      <feature>eventadmin</feature>
+      <feature>scr</feature>
+      <feature>shk-jax-rs-min</feature>
+      <feature>shk-jax-rs-provider-gson</feature>
+      <feature>shk-jax-rs-provider-swagger</feature>
+      <bundle>mvn:io.swagger/swagger-annotations/1.5.5</bundle>
+    </feature>
+
+    <feature name="esh-tp-commons" version="${project.version}">
+      <feature dependency="true">kat-apache-commons-codec</feature>
+      <feature dependency="true">kat-apache-commons-collections</feature>
+      <feature dependency="true">kat-apache-commons-exec</feature>
+      <feature dependency="true">kat-apache-commons-httpclient</feature>
+      <feature dependency="true">kat-apache-commons-io</feature>
+      <feature dependency="true">kat-apache-commons-lang</feature>
+      <feature dependency="true">kat-apache-commons-net</feature>
+    </feature>
 
     <feature name="esh-tp-jupnp" version="${project.version}">
-      <feature dependency="true">http</feature>
-      <feature>shk-apache-httpclient</feature>
-      <bundle>mvn:org.jupnp/org.jupnp/${jupnp.version}</bundle>
+      <feature version="[2.2.0,3)">kat-jupnp</feature>
       <capability>esh.tp;feature=jupnp</capability>
     </feature>
 
     <feature name="esh-tp-jmdns" version="${project.version}">
-      <bundle>mvn:org.jmdns/jmdns/${jmdns.version}</bundle>
+      <feature version="[3.5.0,4)">kat-jmdns</feature>
       <capability>esh.tp;feature=jmdns</capability>
+    </feature>
+
+    <feature name="esh-tp-paho" version="${project.version}">
+      <feature>kat-paho-client-mqttv3</feature>
+      <capability>esh.tp;feature=paho</capability>
+    </feature>
+
+    <feature name="esh-tp-xtext" version="${project.version}">
+      <feature version="[2.9.2,2.9.3)">kat-xtext</feature>
+      <capability>esh.tp;feature=xtext;version=2.9.2</capability>
     </feature>
 
     <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
@@ -38,8 +90,8 @@
         <feature>openhab-runtime-certificate</feature>
         <feature dependency="true">shell</feature>
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
-        <bundle prerequisite="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${dep.karaf.version}</bundle>
-        <bundle prerequisite="true">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${dep.karaf.version}</bundle>
+        <bundle prerequisite="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${karaf.version}</bundle>
+        <bundle prerequisite="true">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${karaf.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
     </feature>
 
