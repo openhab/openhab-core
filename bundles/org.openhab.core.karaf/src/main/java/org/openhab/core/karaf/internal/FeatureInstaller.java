@@ -32,7 +32,7 @@ public class FeatureInstaller {
     public static final String[] addonTypes = new String[] { "binding", "ui", "persistence", "action", "tts",
             "transformation", "misc" };
 
-    private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
+    private static final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
     private FeaturesService featuresService;
 
@@ -53,13 +53,13 @@ public class FeatureInstaller {
         scheduler.execute(new Runnable() {
             @Override
             public void run() {
-                installPackage(config);
+                installPackage(featuresService, config);
 
                 // install addons
                 for (String type : addonTypes) {
                     Object install = config.get(type);
                     if (install instanceof String) {
-                        installFeatures(type, (String) install);
+                        installFeatures(featuresService, type, (String) install);
                     }
                 }
             }
@@ -67,19 +67,18 @@ public class FeatureInstaller {
         });
     }
 
-    private void installFeatures(String type, String install) {
+    private void installFeatures(FeaturesService featuresService, String type, String install) {
         for (String addon : install.split(",")) {
             if (StringUtils.isNotBlank(addon)) {
                 String name = PREFIX + type + "-" + addon.trim();
-                installFeature(name);
+                installFeature(featuresService, name);
             }
         }
     }
 
-    private void installFeature(String name) {
+    private static void installFeature(FeaturesService featuresService, String name) {
         try {
-            Feature feature = featuresService.getFeature(name);
-            if (feature != null && !featuresService.isInstalled(feature)) {
+            if (!isInstalled(featuresService, name)) {
                 featuresService.installFeature(name);
                 logger.info("Installed '{}'", name);
             }
@@ -88,26 +87,40 @@ public class FeatureInstaller {
         }
     }
 
-    private void installPackage(final Map<String, Object> config) {
+    private static void installPackage(FeaturesService featuresService, final Map<String, Object> config) {
         Object packageName = config.get("package");
-        String name = PREFIX + PREFIX_PACKAGE + ((String) packageName).trim();
-        installFeature(name);
+        if (packageName instanceof String) {
+            String name = PREFIX + PREFIX_PACKAGE + ((String) packageName).trim();
+            installFeature(featuresService, name);
 
-        // uninstall all other packages
-        try {
-            for (Feature feature : featuresService.listFeatures()) {
-                if (feature.getName().startsWith(PREFIX + PREFIX_PACKAGE) && !feature.getName().equals(name)
-                        && featuresService.isInstalled(feature)) {
-                    try {
-                        featuresService.uninstallFeature(feature.getName());
-                    } catch (Exception e) {
-                        logger.error("Failed uninstalling '{}': {}", feature.getName(), e.getMessage());
+            // uninstall all other packages
+            try {
+                for (Feature feature : featuresService.listFeatures()) {
+                    if (feature.getName().startsWith(PREFIX + PREFIX_PACKAGE) && !feature.getName().equals(name)
+                            && featuresService.isInstalled(feature)) {
+                        try {
+                            featuresService.uninstallFeature(feature.getName());
+                        } catch (Exception e) {
+                            logger.error("Failed uninstalling '{}': {}", feature.getName(), e.getMessage());
+                        }
                     }
+                }
+            } catch (Exception e) {
+                logger.error("Failed retrieving features: {}", e.getMessage());
+            }
+        }
+    }
+
+    private static boolean isInstalled(FeaturesService featuresService, String name) {
+        try {
+            for (Feature feature : featuresService.listInstalledFeatures()) {
+                if (feature.getName().equals(name)) {
+                    return true;
                 }
             }
         } catch (Exception e) {
             logger.error("Failed retrieving features: {}", e.getMessage());
         }
+        return false;
     }
-
 }
