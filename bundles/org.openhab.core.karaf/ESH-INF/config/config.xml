@@ -5,15 +5,16 @@
     xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
         http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
 
-    <config-description uri="service:addons">
+    <config-description uri="system:addons">
         <parameter name="package" type="text" required="true">
             <label>Package</label>
             <description>The runtime package to use for this openHAB instance</description>
             <options>
                 <option value="minimal">Minimal</option>
                 <option value="standard">Standard</option>
-                <option value="standard">Demo</option>
+                <option value="demo">Demo</option>
             </options>
+            <default>standard</default>
         </parameter>
     </config-description>
 
