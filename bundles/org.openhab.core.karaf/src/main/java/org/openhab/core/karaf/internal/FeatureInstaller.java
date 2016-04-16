@@ -49,17 +49,18 @@ public class FeatureInstaller {
     }
 
     protected void modified(final Map<String, Object> config) {
+        final FeaturesService service = featuresService;
         ExecutorService scheduler = Executors.newSingleThreadExecutor();
         scheduler.execute(new Runnable() {
             @Override
             public void run() {
-                installPackage(featuresService, config);
+                installPackage(service, config);
 
                 // install addons
                 for (String type : addonTypes) {
                     Object install = config.get(type);
                     if (install instanceof String) {
-                        installFeatures(featuresService, type, (String) install);
+                        installFeatures(service, type, (String) install);
                     }
                 }
             }
