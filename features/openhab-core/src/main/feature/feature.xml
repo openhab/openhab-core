@@ -84,20 +84,6 @@
         <bundle>mvn:org.openhab.core/org.openhab.io.rest.docs/${project.version}</bundle>
     </feature>
 
-    <feature name="openhab-misc-ruleengine" description="New Rule Engine" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <feature dependency="true">esh-automation-api</feature>
-        <feature dependency="true">esh-automation-commands</feature>
-        <feature dependency="true">esh-automation-core</feature>
-        <feature dependency="true">esh-automation-module-core</feature>
-        <feature dependency="true">esh-automation-module-script</feature>
-        <feature dependency="true">esh-automation-module-script-defaultscope</feature>
-        <feature dependency="true">esh-automation-module-timer</feature>
-        <feature dependency="true">esh-automation-parser-gson</feature>
-        <feature dependency="true">esh-automation-providers</feature>
-        <feature dependency="true">esh-automation-rest</feature>
-    </feature>
-	
     <!-- ui -->
 
     <feature name="openhab-dashboard" description="Dashboard" version="${project.version}">
