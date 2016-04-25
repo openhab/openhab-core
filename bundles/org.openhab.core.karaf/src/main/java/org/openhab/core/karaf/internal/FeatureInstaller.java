@@ -16,6 +16,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,6 +30,8 @@ import org.osgi.service.cm.ConfigurationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
+
 /**
  * This service reads addons.cfg and installs listed addons (= Karaf features) and the selected package.
  * It furthermore allows configuration of the base package through the Paper UI as well as administrating Karaf to
@@ -38,32 +41,28 @@ import org.slf4j.LoggerFactory;
  */
 public class FeatureInstaller implements ConfigurationListener {
 
+    private static final String CFG_REMOTE = "remote";
     private static final String CFG_EXPERIMENTAL = "experimental";
-
     private static final String CFG_LEGACY = "legacy";
 
     private static final String ADDONS_SERVICE_PID = "org.openhab.addons";
-
-    private static final String CFG_REMOTE = "remote";
-
     private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
-
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
 
     private static final String OH_SNAPSHOT_REPO = "http://oss.jfrog.org/libs-snapshot@id=oh-snapshot-repo@snapshots@noreleases";
-
     private static final String OH_RELEASES_REPO = "https://jcenter.bintray.com@id=oh-releases-repo";
+    private static final String ESH_SNAPSHOT_REPO = "https://repo.eclipse.org/content/repositories/snapshots@id=esh-snapshot-repo@snapshots@noreleases";
+    private static final String ESH_RELEASES_REPO = "https://repo.eclipse.org/content/repositories/releases@id=esh-release-repo";
+    private static final Set<String> ONLINE_REPOS = Sets.newHashSet(OH_RELEASES_REPO, OH_SNAPSHOT_REPO,
+            ESH_RELEASES_REPO, ESH_SNAPSHOT_REPO);
 
     private static final URI LEGACY_FEATURES_URI = URI
             .create("mvn:org.openhab.addons/openhab-addons-legacy/LATEST/xml/features");
-
     private static final URI EXPERIMENTAL_FEATURES_URI = URI
             .create("mvn:org.openhab.addons/openhab-addons-experimental/LATEST/xml/features");
 
     public static final String STANDARD_PACKAGE = "standard";
-
     public static final String PREFIX = "openhab-";
-
     public static final String PREFIX_PACKAGE = "package-";
 
     public static final String[] addonTypes = new String[] { "binding", "ui", "persistence", "action", "tts",
@@ -176,9 +175,12 @@ public class FeatureInstaller implements ConfigurationListener {
             List<String> repoCfg;
             if (repos instanceof String) {
                 repoCfg = Arrays.asList(((String) repos).split(","));
-                if (repoCfg.contains(OH_RELEASES_REPO) && repoCfg.contains(OH_SNAPSHOT_REPO)) {
-                    return true;
+                for (String r : ONLINE_REPOS) {
+                    if (!repoCfg.contains(r)) {
+                        return false;
+                    }
                 }
+                return true;
             }
         } catch (IOException e) {
             logger.error("Failed setting the extension management online/offline mode: {}", e.toString());
@@ -202,22 +204,21 @@ public class FeatureInstaller implements ConfigurationListener {
                 repoCfg.remove("");
             }
             if (status) {
-                if (!(repoCfg.contains(OH_RELEASES_REPO) && repoCfg.contains(OH_SNAPSHOT_REPO))) {
-                    repoCfg.add(OH_RELEASES_REPO);
-                    repoCfg.add(OH_SNAPSHOT_REPO);
-                    properties.put(PROPERTY_MVN_REPOS, StringUtils.join(repoCfg.toArray(), ","));
-                    paxCfgUpdated = false;
-                    paxCfg.update(properties);
+                for (String r : ONLINE_REPOS) {
+                    if (!repoCfg.contains(r)) {
+                        repoCfg.add(r);
+                    }
                 }
             } else {
-                if (repoCfg.contains(OH_RELEASES_REPO) || repoCfg.contains(OH_SNAPSHOT_REPO)) {
-                    repoCfg.remove(OH_RELEASES_REPO);
-                    repoCfg.remove(OH_SNAPSHOT_REPO);
-                    properties.put(PROPERTY_MVN_REPOS, StringUtils.join(repoCfg.toArray(), ","));
-                    paxCfgUpdated = false;
-                    paxCfg.update(properties);
+                for (String r : ONLINE_REPOS) {
+                    if (repoCfg.contains(r)) {
+                        repoCfg.remove(r);
+                    }
                 }
             }
+            properties.put(PROPERTY_MVN_REPOS, StringUtils.join(repoCfg.toArray(), ","));
+            paxCfgUpdated = false;
+            paxCfg.update(properties);
         } catch (IOException e) {
             logger.error("Failed setting the extension management online/offline mode: {}", e.toString());
         }
