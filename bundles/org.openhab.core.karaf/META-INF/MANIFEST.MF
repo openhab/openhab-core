@@ -14,4 +14,6 @@ Import-Package: org.apache.commons.lang,
  org.apache.karaf.shell.support.ansi,
  org.apache.karaf.wrapper,
  org.eclipse.smarthome.core.extension,
+ org.osgi.service.cm,
+ org.osgi.service.event,
  org.slf4j
