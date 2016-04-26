@@ -99,10 +99,10 @@ public class KarafExtensionService implements ExtensionService {
         List<ExtensionType> typeList = new ArrayList<>(6);
         typeList.add(new ExtensionType("binding", "Bindings"));
         typeList.add(new ExtensionType("ui", "User Interfaces"));
-        typeList.add(new ExtensionType("persistence", "Persistence Services"));
+        typeList.add(new ExtensionType("persistence", "Persistence"));
         typeList.add(new ExtensionType("action", "Actions"));
         typeList.add(new ExtensionType("transformation", "Transformations"));
-        typeList.add(new ExtensionType("tts", "Text-2-Speech"));
+        typeList.add(new ExtensionType("voice", "Voice"));
         typeList.add(new ExtensionType("misc", "Misc"));
         return typeList;
     }
