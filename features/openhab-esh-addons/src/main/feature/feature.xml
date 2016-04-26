@@ -65,4 +65,10 @@
         <feature>esh-transform-xslt</feature>
     </feature>
 
+    <!-- voice -->   
+
+    <feature name="openhab-voice-mactts" description="MacOS Text-to-Speech" version="${esh.version}">
+        <feature>esh-voice-mactts</feature>
+    </feature>
+
 </features>

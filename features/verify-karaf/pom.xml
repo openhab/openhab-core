@@ -37,6 +37,13 @@
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
+        <dependency>
+            <groupId>org.openhab.core</groupId>
+            <artifactId>openhab-esh-addons</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -68,6 +75,7 @@
                                 <descriptor>mvn:org.eclipse.smarthome/karaf/${esh.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.eclipse.smarthome/karaf-tp/${esh.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.openhab.core/openhab-core/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.openhab.core/openhab-esh-addons/${project.version}/xml/features</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
                             <javase>1.8</javase>
