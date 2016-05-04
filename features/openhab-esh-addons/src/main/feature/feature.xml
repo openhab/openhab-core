@@ -3,6 +3,10 @@
 
     <!-- binding -->
 
+    <feature name="openhab-binding-digitalstrom" description="digitalSTROM Binding" version="${esh.version}">
+        <feature>esh-binding-digitalstrom</feature>
+    </feature>
+
     <feature name="openhab-binding-hue" description="Hue Binding" version="${esh.version}">
         <feature>esh-binding-hue</feature>
     </feature>

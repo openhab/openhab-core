@@ -38,11 +38,11 @@
     <feature name="openhab-package-minimal" description="openHAB Minimal Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>openhab-dashboard</feature>
-        <feature>openhab-misc-restdocs</feature>
     </feature>
 
     <feature name="openhab-package-standard" description="openHAB Standard Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
+        <feature>openhab-transport-mdns</feature>
         <feature>openhab-dashboard</feature>
         <feature>openhab-misc-restdocs</feature>
         <feature>openhab-ui-paper</feature>
