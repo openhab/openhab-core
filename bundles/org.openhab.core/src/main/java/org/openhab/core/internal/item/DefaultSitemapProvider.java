@@ -11,19 +11,17 @@ package org.openhab.core.internal.item;
 import java.util.Collections;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
+import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
-import org.eclipse.smarthome.core.thing.setup.ThingSetupManager;
 import org.eclipse.smarthome.model.sitemap.Sitemap;
 import org.eclipse.smarthome.model.sitemap.SitemapFactory;
 import org.eclipse.smarthome.model.sitemap.SitemapProvider;
+import org.eclipse.smarthome.model.sitemap.impl.DefaultImpl;
 import org.eclipse.smarthome.model.sitemap.impl.FrameImpl;
-import org.eclipse.smarthome.model.sitemap.impl.GroupImpl;
 import org.eclipse.smarthome.model.sitemap.impl.SitemapImpl;
+import org.eclipse.smarthome.model.sitemap.impl.TextImpl;
 
 /**
  * This class dynamically provides a default sitemap which comprises
@@ -36,17 +34,8 @@ public class DefaultSitemapProvider implements SitemapProvider {
 
     private static final String SITEMAP_NAME = "_default";
 
-    private ItemRegistry itemRegistry;
     private ThingRegistry thingRegistry;
     private ItemChannelLinkRegistry linkRegistry;
-
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
 
     protected void setThingRegistry(ThingRegistry thingRegistry) {
         this.thingRegistry = thingRegistry;
@@ -77,36 +66,36 @@ public class DefaultSitemapProvider implements SitemapProvider {
             sitemap.setName(SITEMAP_NAME);
 
             for (Thing thing : thingRegistry.getAll()) {
-                    GroupImpl group = (GroupImpl) SitemapFactory.eINSTANCE.createGroup();
-                    group.setItem(thing.getUID().getAsString());
-                    group.setLabel(thing.getLabel());
-                    // String category = thing.getCategory();
-//                    if (category != null) {
-//                        group.setIcon(category);
-//                    }
+                TextImpl thingWidget = (TextImpl) SitemapFactory.eINSTANCE.createText();
+                thingWidget.setLabel(thing.getLabel());
+                thingWidget.setIcon("player");
 
-
-                    for(Channel channel : thing.getChannels()) {
-                        mainFrame.getChildren().add(group);
+                for (Channel channel : thing.getChannels()) {
+                    Set<String> items = linkRegistry.getLinkedItems(channel.getUID());
+                    if (!items.isEmpty()) {
+                        DefaultImpl widget = (DefaultImpl) SitemapFactory.eINSTANCE.createDefault();
+                        widget.setItem(items.iterator().next());
+                        thingWidget.getChildren().add(widget);
                     }
-                        thingFrame.getChildren().add(group);
-                    }
+                }
+                if (!thingWidget.getChildren().isEmpty()) {
+                    thingFrame.getChildren().add(thingWidget);
                 }
             }
 
-    if(!mainFrame.getChildren().isEmpty())
+            if (!mainFrame.getChildren().isEmpty()) {
+                sitemap.getChildren().add(mainFrame);
+            }
+            if (!thingFrame.getChildren().isEmpty()) {
+                sitemap.getChildren().add(thingFrame);
+            }
 
-    {
-        sitemap.getChildren().add(mainFrame);
-    } if(!thingFrame.getChildren().isEmpty())
+            return sitemap;
 
-    {
-        sitemap.getChildren().add(thingFrame);
+        }
+        return null;
+
     }
-
-    return sitemap;
-
-    }return null;}
 
     @Override
     public Set<String> getSitemapNames() {
