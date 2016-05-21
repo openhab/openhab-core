@@ -11,78 +11,91 @@ package org.openhab.core.internal.item;
 import java.util.Collections;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.thing.setup.ThingSetupManager;
+import org.eclipse.smarthome.core.thing.Channel;
+import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingRegistry;
+import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
 import org.eclipse.smarthome.model.sitemap.Sitemap;
 import org.eclipse.smarthome.model.sitemap.SitemapFactory;
 import org.eclipse.smarthome.model.sitemap.SitemapProvider;
+import org.eclipse.smarthome.model.sitemap.impl.DefaultImpl;
 import org.eclipse.smarthome.model.sitemap.impl.FrameImpl;
-import org.eclipse.smarthome.model.sitemap.impl.GroupImpl;
 import org.eclipse.smarthome.model.sitemap.impl.SitemapImpl;
+import org.eclipse.smarthome.model.sitemap.impl.TextImpl;
 
 /**
  * This class dynamically provides a default sitemap which comprises
  * all group items that do not have any parent group.
- * 
+ *
  * @author Kai Kreuzer
  *
  */
 public class DefaultSitemapProvider implements SitemapProvider {
 
-	private static final String SITEMAP_NAME = "_default";
-	
-    private ItemRegistry itemRegistry;
+    private static final String SITEMAP_NAME = "_default";
 
-	protected void setItemRegistry(ItemRegistry itemRegistry) {
-		this.itemRegistry = itemRegistry;
-	}
+    private ThingRegistry thingRegistry;
+    private ItemChannelLinkRegistry linkRegistry;
 
-	protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-		this.itemRegistry = null;
-	}
+    protected void setThingRegistry(ThingRegistry thingRegistry) {
+        this.thingRegistry = thingRegistry;
+    }
 
-	@Override
-	public Sitemap getSitemap(String sitemapName) {
-		if(sitemapName.equals(SITEMAP_NAME)) {
-			SitemapImpl sitemap = (SitemapImpl) SitemapFactory.eINSTANCE.createSitemap();
-			FrameImpl mainFrame = (FrameImpl) SitemapFactory.eINSTANCE.createFrame();
+    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
+        this.thingRegistry = null;
+    }
 
-	        FrameImpl thingFrame = (FrameImpl) SitemapFactory.eINSTANCE.createFrame();
-	        thingFrame.setLabel("Things");
+    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry linkRegistry) {
+        this.linkRegistry = linkRegistry;
+    }
 
-			sitemap.setLabel("Home");
-			sitemap.setName(SITEMAP_NAME);
+    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry linkRegistry) {
+        this.linkRegistry = null;
+    }
 
-			for(Item item : itemRegistry.getAll()) {
-				if(item instanceof GroupItem && (item.getTags().contains(ThingSetupManager.TAG_HOME_GROUP) || item.getTags().contains(ThingSetupManager.TAG_THING))) {
-					GroupImpl group = (GroupImpl) SitemapFactory.eINSTANCE.createGroup();
-					group.setItem(item.getName());
-					group.setLabel(item.getLabel());
-					String category = item.getCategory();
-					if(category != null) {
-					    group.setIcon(item.getCategory());
-					}
-					if(item.getTags().contains(ThingSetupManager.TAG_HOME_GROUP)) {
-                        mainFrame.getChildren().add(group);
-					} else {
-                        thingFrame.getChildren().add(group);
-					}
-				}
-			}
-			
-			if(!mainFrame.getChildren().isEmpty()) {
-		         sitemap.getChildren().add(mainFrame);
-			}
-            if(!thingFrame.getChildren().isEmpty()) {
-               sitemap.getChildren().add(thingFrame);
+    @Override
+    public Sitemap getSitemap(String sitemapName) {
+        if (sitemapName.equals(SITEMAP_NAME)) {
+            SitemapImpl sitemap = (SitemapImpl) SitemapFactory.eINSTANCE.createSitemap();
+            FrameImpl mainFrame = (FrameImpl) SitemapFactory.eINSTANCE.createFrame();
+
+            FrameImpl thingFrame = (FrameImpl) SitemapFactory.eINSTANCE.createFrame();
+            thingFrame.setLabel("Things");
+
+            sitemap.setLabel("Home");
+            sitemap.setName(SITEMAP_NAME);
+
+            for (Thing thing : thingRegistry.getAll()) {
+                TextImpl thingWidget = (TextImpl) SitemapFactory.eINSTANCE.createText();
+                thingWidget.setLabel(thing.getLabel());
+                thingWidget.setIcon("player");
+
+                for (Channel channel : thing.getChannels()) {
+                    Set<String> items = linkRegistry.getLinkedItems(channel.getUID());
+                    if (!items.isEmpty()) {
+                        DefaultImpl widget = (DefaultImpl) SitemapFactory.eINSTANCE.createDefault();
+                        widget.setItem(items.iterator().next());
+                        thingWidget.getChildren().add(widget);
+                    }
+                }
+                if (!thingWidget.getChildren().isEmpty()) {
+                    thingFrame.getChildren().add(thingWidget);
+                }
             }
-			
-			return sitemap;
-		}
-		return null;
-	}
+
+            if (!mainFrame.getChildren().isEmpty()) {
+                sitemap.getChildren().add(mainFrame);
+            }
+            if (!thingFrame.getChildren().isEmpty()) {
+                sitemap.getChildren().add(thingFrame);
+            }
+
+            return sitemap;
+
+        }
+        return null;
+
+    }
 
     @Override
     public Set<String> getSitemapNames() {

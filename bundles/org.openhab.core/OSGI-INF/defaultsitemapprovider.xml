@@ -14,5 +14,6 @@
    <service>
       <provide interface="org.eclipse.smarthome.model.sitemap.SitemapProvider"/>
    </service>
-   <reference bind="setItemRegistry" cardinality="1..1" interface="org.eclipse.smarthome.core.items.ItemRegistry" name="ItemRegistry" policy="static" unbind="unsetItemRegistry"/>
+   <reference bind="setThingRegistry" cardinality="1..1" interface="org.eclipse.smarthome.core.thing.ThingRegistry" name="ThingRegistry" policy="static" unbind="unsetThingRegistry"/>
+   <reference bind="setItemChannelLinkRegistry" cardinality="1..1" interface="org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry" name="ItemChannelLinkRegistry" policy="static" unbind="unsetItemChannelLinkRegistry"/>
 </scr:component>
