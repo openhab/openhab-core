@@ -23,9 +23,9 @@ body, h1, h2, h3 {
 }
 
 header {
-    background: #FFF;
-    height: 70px;
-    line-height: 70px;
+    background: #F60;
+    height: 80px;
+    line-height: 80px;
     text-align: center;
     position: fixed;
     top: 0;
