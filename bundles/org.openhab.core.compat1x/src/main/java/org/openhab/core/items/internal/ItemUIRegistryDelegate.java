@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
+import org.eclipse.smarthome.core.items.ItemUtil;
 import org.openhab.core.compat1x.internal.ItemMapper;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -88,7 +89,7 @@ public class ItemUIRegistryDelegate
 
     @Override
     public boolean isValidItemName(String itemName) {
-        return itemUIRegistry.isValidItemName(itemName);
+        return ItemUtil.isValidItemName(itemName);
     }
 
     @Override
