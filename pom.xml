@@ -57,7 +57,7 @@
         <maven.compiler.compilerVersion>1.7</maven.compiler.compilerVersion>
 
         <ohdr.version>1.0.6</ohdr.version>
-        <esh.version>0.8.0-SNAPSHOT</esh.version>
+        <esh.version>0.9.0-SNAPSHOT</esh.version>
         <kat.version>1.4.1</kat.version>
         <karaf.version>4.0.4</karaf.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
