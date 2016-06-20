@@ -96,8 +96,8 @@
         <feature>openhab-dashboard</feature>
         <feature>esh-ui-basic</feature>
         <feature>esh-ui-icon</feature>
+        <feature>esh-ui-iconset-classic</feature>
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.basicui/${project.version}</bundle>
-        <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.iconset.classic/${project.version}</bundle>
         <config name="org.eclipse.smarthome.basicui">
             defaultSitemap = _default
             iconType = svg
@@ -109,8 +109,8 @@
         <feature>openhab-dashboard</feature>
         <feature>esh-ui-classic</feature>
         <feature>esh-ui-icon</feature>
+        <feature>esh-ui-iconset-classic</feature>
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.classicui/${project.version}</bundle>
-        <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.iconset.classic/${project.version}</bundle>
         <config name="org.eclipse.smarthome.classicui">
             defaultSitemap = _default
         </config>
