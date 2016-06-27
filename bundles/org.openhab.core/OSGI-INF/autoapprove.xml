@@ -13,5 +13,4 @@
    <implementation class="org.openhab.core.internal.inbox.AutoApproveService"/>
    <reference bind="setInbox" cardinality="1..1" interface="org.eclipse.smarthome.config.discovery.inbox.Inbox" name="Inbox" policy="static" unbind="unsetInbox"/>
    <property name="service.pid" type="String" value="org.openhab.autoapprove"/>
-   <reference bind="setThingSetupManager" cardinality="1..1" interface="org.eclipse.smarthome.core.thing.setup.ThingSetupManager" name="ThingSetupManager" policy="static" unbind="unsetThingSetupManager"/>
 </scr:component>
