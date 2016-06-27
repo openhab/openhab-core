@@ -8,15 +8,12 @@
  */
 package org.openhab.core.internal.inbox;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
 import org.eclipse.smarthome.config.discovery.inbox.Inbox;
 import org.eclipse.smarthome.config.discovery.inbox.InboxListener;
-import org.eclipse.smarthome.core.thing.setup.ThingSetupManager;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +30,6 @@ import org.slf4j.LoggerFactory;
 public class AutoApproveService implements InboxListener {
 
     final static private Logger logger = LoggerFactory.getLogger(AutoApproveService.class);
-
-    private ThingSetupManager thingSetupManager;
 
     private Inbox inbox;
 
@@ -64,11 +59,7 @@ public class AutoApproveService implements InboxListener {
     @Override
     public void thingAdded(Inbox source, DiscoveryResult result) {
         logger.debug("Approving inbox entry '{}'", result.toString());
-        Map<String, Object> props = new HashMap<>(result.getProperties());
-
-        Configuration conf = new Configuration(props);
-
-        thingSetupManager.addThing(result.getThingUID(), conf, result.getBridgeUID(), result.getLabel());
+        inbox.approve(result.getThingUID(), result.getLabel());
     }
 
     @Override
@@ -86,14 +77,6 @@ public class AutoApproveService implements InboxListener {
     protected void unsetInbox(Inbox inbox) {
         this.inbox.removeInboxListener(this);
         this.inbox = null;
-    }
-
-    protected void setThingSetupManager(ThingSetupManager thingSetupManager) {
-        this.thingSetupManager = thingSetupManager;
-    }
-
-    protected void unsetThingSetupManager(ThingSetupManager thingSetupManager) {
-        this.thingSetupManager = null;
     }
 
 }
