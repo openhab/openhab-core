@@ -18,7 +18,6 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,15 +32,10 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.apache.commons.collections.Closure;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.io.voice.tts.TTSService;
-import org.openhab.core.compat1x.internal.CompatibilityActivator;
+import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.scriptengine.action.ActionDoc;
 import org.openhab.core.scriptengine.action.ParamDoc;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +44,6 @@ import javazoom.jl.player.Player;
 
 public class Audio {
 
-    private static final String RUNTIME_DIR = "runtime";
     private static final String SOUND_DIR = "sounds";
     private static final Logger logger = LoggerFactory.getLogger(Audio.class);
 
@@ -65,7 +58,8 @@ public class Audio {
     @ActionDoc(text = "plays a sound from the sounds folder")
     static public void playSound(@ParamDoc(name = "filename", text = "the filename with extension") String filename) {
         try {
-            InputStream is = new FileInputStream(RUNTIME_DIR + File.separator + SOUND_DIR + File.separator + filename);
+            InputStream is = new FileInputStream(
+                    ConfigConstants.getConfigFolder() + File.separator + SOUND_DIR + File.separator + filename);
             if (filename.toLowerCase().endsWith(".mp3")) {
                 Player player = new Player(is);
                 playInThread(player);
@@ -157,46 +151,46 @@ public class Audio {
 
     /**
      * Says the given text..
-     * 
+     *
      * <p>
      * This method checks for registered TTS services. If there is a service
      * available for the current OS, this will be chosen. Otherwise, it
      * will pick a (the first) TTS service that is platform-independent.
      * </p>
-     * 
+     *
      * @param text the text to speak
      */
     @ActionDoc(text = "says a given text through the default TTS service")
     static public void say(@ParamDoc(name = "text") Object text) {
-        say(text.toString(), null);
+        AudioActionService.voiceManager.say(text.toString());
     }
 
     /**
      * Text-to-speech with a given voice.
-     * 
+     *
      * <p>
      * This method checks for registered TTS services. If there is a service
      * available for the current OS, this will be chosen. Otherwise, it
      * will pick a (the first) TTS service that is platform-independent.
      * </p>
-     * 
+     *
      * @param text the text to speak
      * @param voice the name of the voice to use or null, if the default voice should be used
      */
     @ActionDoc(text = "says a given text through the default TTS service with a given voice")
     static public void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") String voice) {
-        say(text, voice, null);
+        AudioActionService.voiceManager.say(text.toString(), voice);
     }
 
     /**
      * Text-to-speech with a given voice.
-     * 
+     *
      * <p>
      * This method checks for registered TTS services. If there is a service
      * available for the current OS, this will be chosen. Otherwise, it
      * will pick a (the first) TTS service that is platform-independent.
      * </p>
-     * 
+     *
      * @param text the text to speak
      * @param voice the name of the voice to use or null, if the default voice should be used
      * @param device the name of audio device to be used to play the audio or null, if the default output device should
@@ -204,18 +198,8 @@ public class Audio {
      */
     @ActionDoc(text = "says a given text through the default TTS service with a given voice")
     static public void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") String voice,
-            @ParamDoc(name = "device") String device) {
-        if (StringUtils.isNotBlank(text.toString())) {
-            TTSService ttsService = getTTSService(CompatibilityActivator.getContext(), System.getProperty("osgi.os"));
-            if (ttsService == null) {
-                ttsService = getTTSService(CompatibilityActivator.getContext(), "any");
-            }
-            if (ttsService != null) {
-                ttsService.say(text.toString(), voice, device);
-            } else {
-                logger.error("No TTS service available - tried to say: {}", text);
-            }
-        }
+            @ParamDoc(name = "sink") String sink) {
+        AudioActionService.voiceManager.say(text.toString(), voice, sink);
     }
 
     @ActionDoc(text = "sets the master volume of the host")
@@ -385,31 +369,6 @@ public class Audio {
                 }
             }
         }.start();
-    }
-
-    /**
-     * Queries the OSGi service registry for a service that provides a TTS implementation
-     * for a given platform.
-     * 
-     * @param context the bundle context to access the OSGi service registry
-     * @param os a valid osgi.os string value or "any" if service should be platform-independent
-     * @return a service instance or null, if none could be found
-     */
-    static private TTSService getTTSService(BundleContext context, String os) {
-        if (context != null) {
-            String filter = os != null ? "(os=" + os + ")" : null;
-            try {
-                Collection<ServiceReference<TTSService>> refs = context.getServiceReferences(TTSService.class, filter);
-                if (refs != null && refs.size() > 0) {
-                    return context.getService(refs.iterator().next());
-                } else {
-                    return null;
-                }
-            } catch (InvalidSyntaxException e) {
-                // this should never happen
-            }
-        }
-        return null;
     }
 
     private static boolean isMacOSX() {

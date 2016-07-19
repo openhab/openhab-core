@@ -8,19 +8,28 @@
  */
 package org.openhab.io.multimedia.actions;
 
+import org.eclipse.smarthome.core.voice.VoiceManager;
 import org.openhab.core.scriptengine.action.ActionService;
 
 public class AudioActionService implements ActionService {
 
-	@Override
-	public String getActionClassName() {
-		return Audio.class.getCanonicalName();
-	}
+    public static VoiceManager voiceManager;
 
-	@Override
-	public Class<?> getActionClass() {
-		return Audio.class;
-	}
+    @Override
+    public String getActionClassName() {
+        return Audio.class.getCanonicalName();
+    }
 
+    @Override
+    public Class<?> getActionClass() {
+        return Audio.class;
+    }
+
+    protected void setVoiceManager(VoiceManager voiceManager) {
+        AudioActionService.voiceManager = voiceManager;
+    }
+
+    protected void unsetVoiceManager(VoiceManager voiceManager) {
+        AudioActionService.voiceManager = null;
+    }
 }
- 
