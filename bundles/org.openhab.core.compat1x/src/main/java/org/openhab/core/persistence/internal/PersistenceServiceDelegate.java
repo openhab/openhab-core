@@ -8,6 +8,8 @@
  */
 package org.openhab.core.persistence.internal;
 
+import java.util.Locale;
+
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.persistence.PersistenceService;
 import org.openhab.core.compat1x.internal.ItemMapper;
@@ -34,7 +36,7 @@ public class PersistenceServiceDelegate implements PersistenceService {
     }
 
     @Override
-    public String getLabel() {
+    public String getLabel(Locale locale) {
         return service.getName();
     }
 
