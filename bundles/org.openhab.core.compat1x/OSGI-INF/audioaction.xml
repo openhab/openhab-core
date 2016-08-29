@@ -11,8 +11,8 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.openhab.action.audio">
    <implementation class="org.openhab.io.multimedia.actions.AudioActionService"/>
-   <service>
-      <provide interface="org.openhab.core.scriptengine.action.ActionService"/>
-   </service>
    <reference bind="setVoiceManager" cardinality="1..1" interface="org.eclipse.smarthome.core.voice.VoiceManager" name="VoiceManager" policy="static" unbind="unsetVoiceManager"/>
+   <service>
+      <provide interface="org.eclipse.smarthome.model.script.engine.action.ActionService"/>
+   </service>
 </scr:component>
