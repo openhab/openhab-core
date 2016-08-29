@@ -15,6 +15,7 @@
         <feature>esh-base</feature>
         <feature>esh-io-console-karaf</feature>
         <feature>esh-io-rest-sitemap</feature>
+        <feature>esh-io-javasound</feature>
         <feature>esh-model-item-runtime</feature>
         <feature>esh-model-persistence-runtime</feature>
         <feature>esh-model-rule-runtime</feature>
