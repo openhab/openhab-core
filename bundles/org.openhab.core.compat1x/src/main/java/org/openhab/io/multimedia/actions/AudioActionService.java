@@ -9,7 +9,7 @@
 package org.openhab.io.multimedia.actions;
 
 import org.eclipse.smarthome.core.voice.VoiceManager;
-import org.openhab.core.scriptengine.action.ActionService;
+import org.eclipse.smarthome.model.script.engine.action.ActionService;
 
 public class AudioActionService implements ActionService {
 
