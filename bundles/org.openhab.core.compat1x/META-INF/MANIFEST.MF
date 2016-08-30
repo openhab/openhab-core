@@ -105,4 +105,3 @@ Bundle-ClassPath: lib/jl1.0.1.jar,
  lib/jackson-core-asl-1.9.2.jar,
  lib/jackson-mapper-asl-1.9.2.jar
 Service-Component: OSGI-INF/*.xml
-Bundle-ActivationPolicy: lazy

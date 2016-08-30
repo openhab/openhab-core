@@ -9,7 +9,7 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.openhab.action.audio">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="false" name="org.openhab.action.audio">
    <implementation class="org.openhab.io.multimedia.actions.AudioActionService"/>
    <reference bind="setVoiceManager" cardinality="1..1" interface="org.eclipse.smarthome.core.voice.VoiceManager" name="VoiceManager" policy="static" unbind="unsetVoiceManager"/>
    <service>
