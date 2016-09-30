@@ -23,6 +23,7 @@
     <module>org.openhab.io.transport.serial</module>
     <module>org.openhab.io.jetty.certificate</module>
     <module>org.openhab.io.rest.docs</module>
+    <module>org.openhab.io.sound</module>
     <module>org.openhab.ui.dashboard</module>
     <module>org.openhab.ui.basicui</module>
     <module>org.openhab.ui.classicui</module>

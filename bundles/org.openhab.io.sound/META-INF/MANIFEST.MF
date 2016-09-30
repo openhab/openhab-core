@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: openHAB Sound Support
+Bundle-SymbolicName: org.openhab.io.sound
+Bundle-Version: 2.0.0.qualifier
+Import-Package: org.apache.commons.collections,
+ org.apache.commons.io,
+ org.eclipse.smarthome.core.audio,
+ org.eclipse.smarthome.core.common,
+ org.slf4j
+Service-Component: OSGI-INF/*.xml
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Fragment-Host: org.eclipse.smarthome.io.javasound
+Bundle-ClassPath: lib/jl1.0.1.jar,
+ .
+Bundle-ActivationPolicy: lazy
