@@ -30,6 +30,7 @@
         <bundle prerequisite="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${karaf.version}</bundle>
         <bundle prerequisite="true">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${karaf.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
+        <bundle>mvn:org.openhab.core/org.openhab.io.sound/${project.version}</bundle>
     </feature>
 
     <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">

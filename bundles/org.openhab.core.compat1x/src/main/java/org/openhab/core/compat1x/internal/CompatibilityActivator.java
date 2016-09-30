@@ -11,7 +11,6 @@ package org.openhab.core.compat1x.internal;
 import org.eclipse.smarthome.model.script.engine.ScriptEngine;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.io.multimedia.actions.Audio;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -59,7 +58,6 @@ public class CompatibilityActivator implements BundleActivator {
         itemRegistryTracker.close();
         eventPublisherTracker.close();
         scriptEngineTracker.close();
-        Audio.playStream(null);
     }
 
 }
