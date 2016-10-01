@@ -24,6 +24,7 @@
         <feature>esh-model-thing-runtime</feature>
         <feature>esh-storage-mapdb</feature>
         <feature>esh-ui-iconset-classic</feature>
+        <feature>esh-io-javasound</feature>
         <feature>openhab-runtime-certificate</feature>
         <feature dependency="true">shell</feature>
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
