@@ -7,8 +7,6 @@
  */
 package org.openhab.io.sound.internal;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -76,11 +74,11 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
                     return;
                 }
             }
-            try (InputStream stream = audioStream) {
-                Player player = new Player(stream);
+            try {
+                Player player = new Player(audioStream);
                 streamPlayer = player;
                 playInThread(player);
-            } catch (JavaLayerException | IOException e) {
+            } catch (JavaLayerException e) {
                 logger.error("An exception occurred while playing audio : '{}'", e.getMessage());
             }
         }
