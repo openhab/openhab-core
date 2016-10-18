@@ -75,19 +75,27 @@ public class DimmerItem extends SwitchItem {
 		}
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public State getStateAs(Class<? extends State> typeClass) {
-		if(typeClass==OnOffType.class) {
-			// if it is not completely off, we consider the dimmer to be on
-			return state.equals(PercentType.ZERO) ? OnOffType.OFF : OnOffType.ON;
-		} else if(typeClass==DecimalType.class) {
-			if(state instanceof PercentType) {
-				return new DecimalType(((PercentType) state).toBigDecimal().divide(new BigDecimal(100), 8, RoundingMode.UP));
-			}
-		}
-		return super.getStateAs(typeClass);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public State getStateAs(Class<? extends State> typeClass) {
+        if (state.getClass() == typeClass) {
+            return state;
+        } else if (typeClass == OnOffType.class) {
+            // if it is not completely off, we consider the dimmer to be on
+            return state.equals(PercentType.ZERO) ? OnOffType.OFF : OnOffType.ON;
+        } else if (typeClass == DecimalType.class) {
+            if (state instanceof PercentType) {
+                return new DecimalType(
+                        ((PercentType) state).toBigDecimal().divide(new BigDecimal(100), 8, RoundingMode.UP));
+            }
+        } else if (typeClass == PercentType.class) {
+            if (state instanceof DecimalType) {
+                return new PercentType(((DecimalType) state).toBigDecimal().multiply(new BigDecimal(100)));
+            }
+        }
+
+        return super.getStateAs(typeClass);
+    }
 }
