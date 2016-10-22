@@ -34,6 +34,12 @@
         <bundle prerequisite="true">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${karaf.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.io.sound/${project.version}</bundle>
+        <config name="org.eclipse.smarthome.audio">
+            defaultSink = enhancedjavasound
+        </config>
+        <config name="org.eclipse.smarthome.voice">
+            defaultHLI = rulehli
+        </config>
     </feature>
 
     <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
