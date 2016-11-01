@@ -71,7 +71,7 @@ public class DefaultSitemapProvider implements SitemapProvider {
                 thingWidget.setIcon("player");
 
                 for (Channel channel : thing.getChannels()) {
-                    Set<String> items = linkRegistry.getLinkedItems(channel.getUID());
+                    Set<String> items = linkRegistry.getLinkedItemNames(channel.getUID());
                     if (!items.isEmpty()) {
                         DefaultImpl widget = (DefaultImpl) SitemapFactory.eINSTANCE.createDefault();
                         widget.setItem(items.iterator().next());
