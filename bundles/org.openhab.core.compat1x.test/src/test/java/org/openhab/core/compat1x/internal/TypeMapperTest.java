@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.openhab.core.library.types.DateTimeType;
+import org.openhab.library.tel.types.CallType;
 
 public class TypeMapperTest {
 
@@ -22,4 +23,10 @@ public class TypeMapperTest {
         assertEquals(ohType1, ohType2);
     }
 
+    @Test
+    public void testCallType() {
+        CallType ohType1 = new CallType("123##456");
+        CallType ohType2 = (CallType) TypeMapper.mapToOpenHABType(TypeMapper.mapToESHType(ohType1));
+        assertEquals(ohType1, ohType2);
+    }
 }

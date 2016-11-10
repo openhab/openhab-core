@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.library.types.OpenClosedType;
 import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.library.types.PointType;
 import org.eclipse.smarthome.core.library.types.StopMoveType;
+import org.eclipse.smarthome.core.library.types.StringListType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.library.types.UpDownType;
 import org.eclipse.smarthome.core.types.Type;
@@ -71,6 +72,8 @@ public class TypeMapper {
             result = new org.openhab.core.library.types.DateTimeType(cloneCalendar(type));
         } else if (typeClass.equals(PointType.class)) {
             result = new org.openhab.core.library.types.PointType(type.toString());
+        } else if (typeClass.equals(StringListType.class)) {
+            result = new org.openhab.library.tel.types.CallType(type.toString().replace(",", "##"));
         }
 
         return result;
@@ -121,7 +124,7 @@ public class TypeMapper {
         } else if (typeClass.equals(org.openhab.core.library.types.PointType.class)) {
             result = new PointType(type.toString());
         } else if (typeClass.equals(org.openhab.library.tel.types.CallType.class)) {
-            result = new org.openhab.library.tel.types.ESHCallType(type.toString());
+            result = new StringListType(type.toString().replace("##", ","));
         }
 
         return result;
