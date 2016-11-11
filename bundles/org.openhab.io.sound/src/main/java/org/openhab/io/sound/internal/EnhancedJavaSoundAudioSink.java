@@ -53,7 +53,7 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
 
     @Override
     public String getLabel(Locale locale) {
-        return "System Speaker";
+        return "System Speaker (with mp3 support)";
     }
 
     @Override
