@@ -124,6 +124,7 @@
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.classicui/${project.version}</bundle>
         <config name="org.eclipse.smarthome.classicui">
             defaultSitemap = _default
+            iconType = png
         </config>
     </feature>
 
