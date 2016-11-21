@@ -25,7 +25,7 @@
 
     <feature name="openhab-binding-sonos" description="Sonos Binding" version="${esh.version}">
         <feature>esh-binding-sonos</feature>
-        <config name="org.eclipse.smarthome.binding.sonos">
+        <config name="binding.sonos">
             opmlUrl = http://opml.radiotime.com/Describe.ashx?c=nowplaying&amp;partnerId=IAeIhU42&amp;id=%id&amp;serial=%serial
         </config>
     </feature>
