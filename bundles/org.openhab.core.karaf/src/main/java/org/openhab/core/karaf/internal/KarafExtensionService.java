@@ -35,9 +35,18 @@ import org.slf4j.LoggerFactory;
  */
 public class KarafExtensionService implements ExtensionService {
 
-    private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
+    private final Logger logger = LoggerFactory.getLogger(KarafExtensionService.class);
 
     private FeaturesService featuresService;
+    private FeatureInstaller featureInstaller;
+
+    protected void setFeatureInstaller(FeatureInstaller featureInstaller) {
+        this.featureInstaller = featureInstaller;
+    }
+
+    protected void unsetFeatureInstaller(FeatureInstaller featureInstaller) {
+        this.featureInstaller = null;
+    }
 
     protected void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
@@ -55,7 +64,11 @@ public class KarafExtensionService implements ExtensionService {
                 if (feature.getName().startsWith(FeatureInstaller.PREFIX)
                         && Arrays.asList(FeatureInstaller.addonTypes).contains(getType(feature.getName()))) {
                     Extension extension = getExtension(feature);
-                    extensions.add(extension);
+                    // for simple packaging, we filter out all openHAB 1 add-ons as they cannot be used through the UI
+                    if (!"simple".equals(featureInstaller.getCurrentPackage())
+                            || !extension.getVersion().startsWith("1.")) {
+                        extensions.add(extension);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -98,10 +111,12 @@ public class KarafExtensionService implements ExtensionService {
     public List<ExtensionType> getTypes(Locale locale) {
         List<ExtensionType> typeList = new ArrayList<>(6);
         typeList.add(new ExtensionType("binding", "Bindings"));
-        typeList.add(new ExtensionType("ui", "User Interfaces"));
-        typeList.add(new ExtensionType("persistence", "Persistence"));
-        typeList.add(new ExtensionType("action", "Actions"));
-        typeList.add(new ExtensionType("transformation", "Transformations"));
+        if (!"simple".equals(featureInstaller.getCurrentPackage())) {
+            typeList.add(new ExtensionType("ui", "User Interfaces"));
+            typeList.add(new ExtensionType("persistence", "Persistence"));
+            typeList.add(new ExtensionType("action", "Actions"));
+            typeList.add(new ExtensionType("transformation", "Transformations"));
+        }
         typeList.add(new ExtensionType("voice", "Voice"));
         typeList.add(new ExtensionType("misc", "Misc"));
         return typeList;
@@ -109,20 +124,12 @@ public class KarafExtensionService implements ExtensionService {
 
     @Override
     public void install(String id) {
-        try {
-            featuresService.installFeature(FeatureInstaller.PREFIX + id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        featureInstaller.addAddon(getType(id), getName(id));
     }
 
     @Override
     public void uninstall(String id) {
-        try {
-            featuresService.uninstallFeature(FeatureInstaller.PREFIX + id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        featureInstaller.removeAddon(getType(id), getName(id));
     }
 
     private String getType(String name) {
@@ -130,15 +137,14 @@ public class KarafExtensionService implements ExtensionService {
             name = name.substring(FeatureInstaller.PREFIX.length());
             return StringUtils.substringBefore(name, "-");
         }
-        return "";
+        return StringUtils.substringBefore(name, "-");
     }
 
     private String getName(String name) {
         if (name.startsWith(FeatureInstaller.PREFIX)) {
             name = name.substring(FeatureInstaller.PREFIX.length());
-            return StringUtils.substringAfter(name, "-");
         }
-        return name;
+        return StringUtils.substringAfter(name, "-");
     }
 
 }

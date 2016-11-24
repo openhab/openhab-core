@@ -79,7 +79,7 @@ section {
     background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%);
     opacity: 1;
     z-index: 10;
-    font-size: 80px;
+    font-size: 50px;
     color: white;
     line-height: 150px;
 }

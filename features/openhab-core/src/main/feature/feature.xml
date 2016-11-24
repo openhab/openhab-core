@@ -28,12 +28,14 @@
         <feature>esh-io-javasound</feature>
         <feature>esh-io-webaudio</feature>
         <feature>openhab-runtime-certificate</feature>
+        <feature>openhab-transport-mdns</feature>
         <feature dependency="true">shell</feature>
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
         <bundle prerequisite="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${karaf.version}</bundle>
         <bundle prerequisite="true">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${karaf.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.io.sound/${project.version}</bundle>
+        <bundle>mvn:org.openhab.core/org.openhab.ui.dashboard/${project.version}</bundle>
         <config name="org.eclipse.smarthome.audio">
             defaultSink = enhancedjavasound
         </config>
@@ -48,20 +50,38 @@
 
     <feature name="openhab-package-minimal" description="openHAB Minimal Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <feature>openhab-dashboard</feature>
+        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="true">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-minimal</configfile>
+        <config name="org.eclipse.smarthome.links">
+			autoLinks = false
+        </config>
+    </feature>
+
+    <feature name="openhab-package-simple" description="openHAB Simple Package" version="${project.version}">
+        <feature>openhab-runtime-base</feature>
+        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="true">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-simple</configfile>
+        <config name="org.eclipse.smarthome.links">
+			autoLinks = true
+        </config>
     </feature>
 
     <feature name="openhab-package-standard" description="openHAB Standard Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <feature>openhab-transport-mdns</feature>
-        <feature>openhab-dashboard</feature>
-        <feature>openhab-misc-restdocs</feature>
-        <feature>openhab-ui-paper</feature>
-        <feature>openhab-ui-basic</feature>
-        <feature>openhab-ui-classic</feature>
+        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="true">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-standard</configfile>
+        <config name="org.eclipse.smarthome.links">
+			autoLinks = false
+        </config>
     </feature>
 
-    <feature name="openhab-runtime-compat1x" description="Compatibility layer for openHAB 1 addons" version="${project.version}">
+    <feature name="openhab-package-expert" description="openHAB Expert Package" version="${project.version}">
+        <feature>openhab-runtime-base</feature>
+        <feature>openhab-runtime-compat1x</feature>
+        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="true">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-expert</configfile>
+        <config name="org.eclipse.smarthome.links">
+			autoLinks = false
+        </config>
+    </feature>
+
+    <feature name="openhab-runtime-compat1x" description="Compatibility layer for openHAB 1 add-ons" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>esh-model-item</feature>
         <feature>esh-model-persistence</feature>
@@ -89,22 +109,29 @@
     </feature>
 
     <feature name="openhab-misc-restdocs" description="REST Documentation" version="${project.version}">
-        <feature>esh-base</feature>
+        <feature>openhab-runtime-base</feature>
         <requirement>esh.tp;filter:="(feature=jax-rs-provider-swagger)"</requirement>
-        <feature>openhab-dashboard</feature>
         <bundle>mvn:org.openhab.core/org.openhab.io.rest.docs/${project.version}</bundle>
+    </feature>
+
+    <feature name="openhab-misc-ruleengine" description="Rule Engine (Experimental)" version="${project.version}">
+        <feature>openhab-runtime-base</feature>
+        <feature>esh-automation-api</feature>
+        <feature>esh-automation-commands</feature>
+        <feature>esh-automation-core</feature>
+        <feature>esh-automation-module-core</feature>
+        <feature>esh-automation-module-script</feature>
+        <feature>esh-automation-module-script-defaultscope</feature>
+        <feature>esh-automation-module-timer</feature>
+        <feature>esh-automation-parser-gson</feature>
+        <feature>esh-automation-providers</feature>
+        <feature>esh-automation-rest</feature>
     </feature>
 
     <!-- ui -->
 
-    <feature name="openhab-dashboard" description="Dashboard" version="${project.version}">
-        <feature>esh-base</feature>
-        <bundle>mvn:org.openhab.core/org.openhab.ui.dashboard/${project.version}</bundle>
-    </feature>
-
     <feature name="openhab-ui-basic" description="Basic UI" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <feature>openhab-dashboard</feature>
         <feature>esh-ui-basic</feature>
         <feature>esh-ui-icon</feature>
         <feature>esh-ui-iconset-classic</feature>
@@ -117,7 +144,6 @@
 
     <feature name="openhab-ui-classic" description="Classic UI" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <feature>openhab-dashboard</feature>
         <feature>esh-ui-classic</feature>
         <feature>esh-ui-icon</feature>
         <feature>esh-ui-iconset-classic</feature>
@@ -129,7 +155,6 @@
 
     <feature name="openhab-ui-paper" description="Paper UI" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <feature>openhab-dashboard</feature>
         <feature>esh-ui-paper</feature>
         <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.paperui/${project.version}</bundle>
     </feature>

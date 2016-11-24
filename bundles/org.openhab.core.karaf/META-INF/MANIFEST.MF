@@ -14,7 +14,10 @@ Import-Package: com.google.common.collect,
  org.apache.karaf.shell.api.action.lifecycle,
  org.apache.karaf.shell.support.ansi,
  org.apache.karaf.wrapper,
+ org.eclipse.smarthome.core.events,
  org.eclipse.smarthome.core.extension,
+ org.openhab.core,
  org.osgi.service.cm,
  org.osgi.service.event,
  org.slf4j
+Bundle-ActivationPolicy: lazy

@@ -18,6 +18,13 @@ import org.osgi.framework.FrameworkUtil;
  *
  */
 public class OpenHAB {
+
+    /** the service pid used for the definition of the base package and addons */
+    public static final String ADDONS_SERVICE_PID = "org.openhab.addons";
+
+    /** the configuraton parameter name used for the base package */
+    public static final String CFG_PACKAGE = "package";
+
     /**
      * Returns the current openHAB version, retrieving the information from the core bundle version.
      *

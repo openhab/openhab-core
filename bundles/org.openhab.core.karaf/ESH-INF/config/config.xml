@@ -6,16 +6,6 @@
         http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
 
     <config-description uri="system:addons">
-        <parameter name="package" type="text" required="true">
-            <label>Base Package</label>
-            <description>The runtime package to use for this openHAB instance</description>
-            <options>
-                <option value="minimal">Minimal</option>
-                <option value="standard">Standard</option>
-                <option value="demo">Demo</option>
-            </options>
-            <default>standard</default>
-        </parameter>
         <parameter name="remote" type="boolean" required="true">
             <label>Access Remote Repositories</label>
             <description>Defines whether the runtime should access remote repositories for extensions.</description>
@@ -24,11 +14,6 @@
         <parameter name="legacy" type="boolean" required="true">
             <label>Include Legacy 1.x Bindings</label>
             <description>Also allows the installation of 1.x bindings for which there is already a 2.x version available (requires remote repo access).</description>
-            <default>false</default>
-        </parameter>
-        <parameter name="experimental" type="boolean" required="true">
-            <label>Include Experimental Extensions</label>
-            <description>Also allows the installation of extensions that are not (yet) part of the official distribution and need further testing (requires remote repo access).</description>
             <default>false</default>
         </parameter>
     </config-description>
