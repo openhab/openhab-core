@@ -9,7 +9,7 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" configuration-policy="require" modified="modified" name="org.openhab.addons">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" configuration-policy="require" immediate="true" modified="modified" name="org.openhab.addons">
    <implementation class="org.openhab.core.karaf.internal.FeatureInstaller"/>
    <reference bind="setFeaturesService" cardinality="1..1" interface="org.apache.karaf.features.FeaturesService" name="FeaturesService" policy="static" unbind="unsetFeaturesService"/>
    <reference bind="setConfigurationAdmin" cardinality="1..1" interface="org.osgi.service.cm.ConfigurationAdmin" name="ConfigurationAdmin" policy="static" unbind="unsetConfigurationAdmin"/>      
@@ -21,4 +21,5 @@
       <provide interface="org.openhab.core.karaf.internal.FeatureInstaller"/>
       <provide interface="org.osgi.service.cm.ConfigurationListener"/>
    </service>
+   <reference bind="setEventPublisher" cardinality="1..1" interface="org.eclipse.smarthome.core.events.EventPublisher" name="EventPublisher" policy="static" unbind="unsetEventPublisher"/>
 </scr:component>

@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,14 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.eclipse.smarthome.core.events.Event;
+import org.eclipse.smarthome.core.events.EventPublisher;
+import org.eclipse.smarthome.core.extension.ExtensionEventFactory;
+import org.openhab.core.OpenHAB;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -42,10 +48,8 @@ import com.google.common.collect.Sets;
 public class FeatureInstaller implements ConfigurationListener {
 
     private static final String CFG_REMOTE = "remote";
-    private static final String CFG_EXPERIMENTAL = "experimental";
     private static final String CFG_LEGACY = "legacy";
 
-    private static final String ADDONS_SERVICE_PID = "org.openhab.addons";
     private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
 
@@ -58,8 +62,6 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private static final URI LEGACY_FEATURES_URI = URI
             .create("mvn:org.openhab.addons/openhab-addons-legacy/LATEST/xml/features");
-    private static final URI EXPERIMENTAL_FEATURES_URI = URI
-            .create("mvn:org.openhab.addons/openhab-addons-experimental/LATEST/xml/features");
 
     public static final String STANDARD_PACKAGE = "standard";
     public static final String PREFIX = "openhab-";
@@ -72,9 +74,12 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private FeaturesService featuresService;
     private ConfigurationAdmin configurationAdmin;
+    private static EventPublisher eventPublisher;
 
     private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
                                           // configuration as this must be waited for before trying to add feature repos
+
+    private static String currentPackage = null;
 
     protected void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
@@ -90,6 +95,14 @@ public class FeatureInstaller implements ConfigurationListener {
 
     protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = null;
+    }
+
+    protected void setEventPublisher(EventPublisher eventPublisher) {
+        FeatureInstaller.eventPublisher = eventPublisher;
+    }
+
+    protected void unsetEventPublisher(EventPublisher eventPublisher) {
+        FeatureInstaller.eventPublisher = null;
     }
 
     protected void activate(final Map<String, Object> config) {
@@ -123,11 +136,55 @@ public class FeatureInstaller implements ConfigurationListener {
                     }
                 }
                 setLegacyExtensions(service, config);
-                setExperimentalExtensions(service, config);
                 installPackage(service, config);
                 installAddons(service, config);
             }
         });
+    }
+
+    public boolean addAddon(String type, String id) {
+        try {
+            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID);
+            Dictionary<String, Object> props = cfg.getProperties();
+            Object typeProp = props.get(type);
+            String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
+            if (!ArrayUtils.contains(addonIds, id)) {
+                ArrayList<String> newAddonIds = new ArrayList<>(addonIds.length + 1);
+                newAddonIds.addAll(Arrays.asList(addonIds));
+                newAddonIds.add(id);
+                props.put(type, StringUtils.join(newAddonIds, ','));
+                cfg.update(props);
+                return true;
+            } else {
+                // it is already contained
+                return false;
+            }
+        } catch (IOException e) {
+            logger.warn("Adding add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean removeAddon(String type, String id) {
+        try {
+            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID);
+            Dictionary<String, Object> props = cfg.getProperties();
+            Object typeProp = props.get(type);
+            String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
+            if (ArrayUtils.contains(addonIds, id)) {
+                ArrayList<String> newAddonIds = new ArrayList<>(Arrays.asList(addonIds));
+                boolean success = newAddonIds.remove(id);
+                props.put(type, StringUtils.join(newAddonIds, ','));
+                cfg.update(props);
+                return success;
+            } else {
+                // it is not contained, so we cannot remove it
+                return false;
+            }
+        } catch (IOException e) {
+            logger.warn("Removing add-on 'openhab-{}-{}' failed: {}", type, id, e.getMessage());
+            return false;
+        }
     }
 
     private void setLegacyExtensions(FeaturesService service, Map<String, Object> config) {
@@ -143,23 +200,6 @@ public class FeatureInstaller implements ConfigurationListener {
                 service.removeRepository(LEGACY_FEATURES_URI);
             } catch (Exception e) {
                 logger.error("Failed removing feature repo of legacy features: {}", e.getMessage());
-            }
-        }
-    }
-
-    private void setExperimentalExtensions(FeaturesService service, Map<String, Object> config) {
-        if (config.get(CFG_EXPERIMENTAL) != null && "true".equals(config.get(CFG_EXPERIMENTAL).toString())) {
-            try {
-                service.addRepository(EXPERIMENTAL_FEATURES_URI);
-            } catch (Exception e) {
-                logger.debug("Failed adding feature repo for experimental features - we might be offline: {}",
-                        e.getMessage());
-            }
-        } else {
-            try {
-                service.removeRepository(EXPERIMENTAL_FEATURES_URI);
-            } catch (Exception e) {
-                logger.error("Failed removing feature repo of experimental features: {}", e.getMessage());
             }
         }
     }
@@ -233,7 +273,7 @@ public class FeatureInstaller implements ConfigurationListener {
             @Override
             public void run() {
                 try {
-                    Configuration cfg = service.getConfiguration(ADDONS_SERVICE_PID);
+                    Configuration cfg = service.getConfiguration(OpenHAB.ADDONS_SERVICE_PID);
                     Dictionary<String, Object> properties = cfg.getProperties();
                     if (properties == null) {
                         properties = new Hashtable<>();
@@ -245,7 +285,7 @@ public class FeatureInstaller implements ConfigurationListener {
                         cfg.update(properties);
                     }
                 } catch (IOException e) {
-                    logger.error("Failed updating the remote configuration: {}", e.toString());
+                    logger.error("Failed updating the remote configuration: {}", e.getMessage());
                 }
             }
         });
@@ -255,16 +295,44 @@ public class FeatureInstaller implements ConfigurationListener {
         for (String type : addonTypes) {
             Object install = config.get(type);
             if (install instanceof String) {
-                installFeatures(service, type, (String) install);
+                String[] addons = ((String) install).split(",");
+                installFeatures(service, type, addons);
+                Set<String> addonsToUninstall = getAllAddonsOfType(type);
+                addonsToUninstall.removeAll(Arrays.asList(addons));
+                uninstallFeatures(service, type, addonsToUninstall.toArray(new String[addonsToUninstall.size()]));
             }
         }
     }
 
-    private void installFeatures(FeaturesService featuresService, String type, String install) {
-        for (String addon : install.split(",")) {
+    private Set<String> getAllAddonsOfType(String type) {
+        Set<String> addons = new HashSet<>();
+        String prefix = FeatureInstaller.PREFIX + type + "-";
+        try {
+            for (Feature feature : featuresService.listFeatures()) {
+                if (feature.getName().startsWith(prefix)) {
+                    addons.add(feature.getName().substring(prefix.length()));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Failed retrieving features: {}", e.getMessage());
+        }
+        return addons;
+    }
+
+    private void installFeatures(FeaturesService featuresService, String type, String[] addons) {
+        for (String addon : addons) {
             if (StringUtils.isNotBlank(addon)) {
                 String name = PREFIX + type + "-" + addon.trim();
                 installFeature(featuresService, name);
+            }
+        }
+    }
+
+    private void uninstallFeatures(FeaturesService service, String type, String[] addons) {
+        for (String addon : addons) {
+            if (StringUtils.isNotBlank(addon)) {
+                String name = PREFIX + type + "-" + addon.trim();
+                uninstallFeature(featuresService, name);
             }
         }
     }
@@ -274,28 +342,37 @@ public class FeatureInstaller implements ConfigurationListener {
             if (!isInstalled(featuresService, name)) {
                 featuresService.installFeature(name);
                 logger.info("Installed '{}'", name);
+                postInstalledEvent(name);
             }
         } catch (Exception e) {
             logger.error("Failed installing '{}': {}", name, e.getMessage());
         }
     }
 
+    private static void uninstallFeature(FeaturesService featuresService, String name) {
+        try {
+            if (isInstalled(featuresService, name)) {
+                featuresService.uninstallFeature(name);
+                logger.info("Uninstalled '{}'", name);
+                postUninstalledEvent(name);
+            }
+        } catch (Exception e) {
+            logger.error("Failed uninstalling '{}': {}", name, e.getMessage());
+        }
+    }
+
     private static void installPackage(FeaturesService featuresService, final Map<String, Object> config) {
-        Object packageName = config.get("package") != null ? config.get("package") : STANDARD_PACKAGE;
+        Object packageName = config.get(OpenHAB.CFG_PACKAGE);
         if (packageName instanceof String) {
+            currentPackage = (String) packageName;
             String name = PREFIX + PREFIX_PACKAGE + ((String) packageName).trim();
             installFeature(featuresService, name);
 
             // uninstall all other packages
             try {
                 for (Feature feature : featuresService.listFeatures()) {
-                    if (feature.getName().startsWith(PREFIX + PREFIX_PACKAGE) && !feature.getName().equals(name)
-                            && featuresService.isInstalled(feature)) {
-                        try {
-                            featuresService.uninstallFeature(feature.getName());
-                        } catch (Exception e) {
-                            logger.error("Failed uninstalling '{}': {}", feature.getName(), e.getMessage());
-                        }
+                    if (feature.getName().startsWith(PREFIX + PREFIX_PACKAGE) && !feature.getName().equals(name)) {
+                        uninstallFeature(featuresService, feature.getName());
                     }
                 }
             } catch (Exception e) {
@@ -322,5 +399,25 @@ public class FeatureInstaller implements ConfigurationListener {
         if (event.getPid().equals(PAX_URL_PID) && event.getType() == ConfigurationEvent.CM_UPDATED) {
             paxCfgUpdated = true;
         }
+    }
+
+    private static void postInstalledEvent(String featureName) {
+        String extensionId = featureName.substring(PREFIX.length());
+        if (eventPublisher != null) {
+            Event event = ExtensionEventFactory.createExtensionInstalledEvent(extensionId);
+            eventPublisher.post(event);
+        }
+    }
+
+    private static void postUninstalledEvent(String featureName) {
+        String extensionId = featureName.substring(PREFIX.length());
+        if (eventPublisher != null) {
+            Event event = ExtensionEventFactory.createExtensionUninstalledEvent(extensionId);
+            eventPublisher.post(event);
+        }
+    }
+
+    String getCurrentPackage() {
+        return currentPackage;
     }
 }

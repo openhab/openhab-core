@@ -5,12 +5,15 @@ Bundle-SymbolicName: org.openhab.ui.dashboard
 Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: openHAB.org
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Service-Component: OSGI-INF/dashboardservice.xml
+Service-Component: OSGI-INF/*.xml
 Import-Package: javax.servlet,
  javax.servlet.http,
  org.apache.commons.io,
+ org.openhab.core,
  org.osgi.framework,
+ org.osgi.service.cm,
  org.osgi.service.component,
  org.osgi.service.http,
  org.slf4j
 Export-Package: org.openhab.ui.dashboard
+Bundle-ActivationPolicy: lazy
