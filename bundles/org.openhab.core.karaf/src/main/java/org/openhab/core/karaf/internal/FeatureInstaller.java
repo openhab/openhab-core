@@ -298,7 +298,9 @@ public class FeatureInstaller implements ConfigurationListener {
                 String[] addons = ((String) install).split(",");
                 installFeatures(service, type, addons);
                 Set<String> addonsToUninstall = getAllAddonsOfType(type);
-                addonsToUninstall.removeAll(Arrays.asList(addons));
+                for (String addon : addons) {
+                    addonsToUninstall.remove(addon.trim());
+                }
                 uninstallFeatures(service, type, addonsToUninstall.toArray(new String[addonsToUninstall.size()]));
             }
         }
