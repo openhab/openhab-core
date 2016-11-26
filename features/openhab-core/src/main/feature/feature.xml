@@ -50,7 +50,7 @@
 
     <feature name="openhab-package-minimal" description="openHAB Minimal Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="true">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-minimal</configfile>
+        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="false">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-minimal</configfile>
         <config name="org.eclipse.smarthome.links">
 			autoLinks = false
         </config>
@@ -58,7 +58,7 @@
 
     <feature name="openhab-package-simple" description="openHAB Simple Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="true">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-simple</configfile>
+        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="false">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-simple</configfile>
         <config name="org.eclipse.smarthome.links">
 			autoLinks = true
         </config>
@@ -66,7 +66,7 @@
 
     <feature name="openhab-package-standard" description="openHAB Standard Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="true">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-standard</configfile>
+        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="false">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-standard</configfile>
         <config name="org.eclipse.smarthome.links">
 			autoLinks = false
         </config>
@@ -75,7 +75,7 @@
     <feature name="openhab-package-expert" description="openHAB Expert Package" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>openhab-runtime-compat1x</feature>
-        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="true">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-expert</configfile>
+        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="false">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-expert</configfile>
         <config name="org.eclipse.smarthome.links">
 			autoLinks = false
         </config>
