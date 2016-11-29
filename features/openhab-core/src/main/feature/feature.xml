@@ -23,7 +23,7 @@
         <feature>esh-model-script-runtime</feature>
         <feature>esh-model-sitemap-runtime</feature>
         <feature>esh-model-thing-runtime</feature>
-        <feature>esh-storage-mapdb</feature>
+        <feature>esh-storage-json</feature>
         <feature>esh-ui-iconset-classic</feature>
         <feature>esh-io-javasound</feature>
         <feature>esh-io-webaudio</feature>
