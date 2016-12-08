@@ -32,3 +32,24 @@
 .icon-html5:before {
 	content: "\e7ba";
 }
+
+@keyframes anim-rotate {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    display: inline-block;
+    line-height: 1;
+    animation: anim-rotate 2s infinite linear;
+    color: #333;
+    text-shadow: 0 0 .25em rgba(255,255,255, .3);
+}
+
+.spinner--steps {
+    animation: anim-rotate 1s infinite steps(12);
+}
