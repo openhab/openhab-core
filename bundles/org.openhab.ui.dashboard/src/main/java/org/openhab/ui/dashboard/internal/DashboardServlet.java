@@ -76,6 +76,11 @@ public class DashboardServlet extends HttpServlet {
             entries.append(entry);
         }
         resp.setContentType("text/html;charset=UTF-8");
+        if (tiles.size() == 0) {
+            entries.append(
+                    "&nbsp;&nbsp;&nbsp;&nbsp;<div class=\"spinner spinner--steps\"><img src=\"img/spinner.svg\"></div>&nbsp;&nbsp;");
+            entries.append("Please stand by while UIs are being installed. This can take several minutes.");
+        }
         resp.getWriter().append(indexTemplate.replace("<!--entries-->", entries.toString()));
         resp.getWriter().close();
     }
