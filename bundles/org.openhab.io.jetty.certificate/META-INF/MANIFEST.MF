@@ -3,11 +3,23 @@ Bundle-ManifestVersion: 2
 Bundle-Name: openHAB SSL Certificate Generator
 Bundle-SymbolicName: org.openhab.io.jetty.certificate;singleton:=true
 Bundle-Version: 2.0.0.qualifier
-Bundle-Activator: org.openhab.io.jetty.certificate.internal.CertificateGenerator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: openHAB.org
 Bundle-Classpath: .,
  lib/bcpkix-jdk15on-1.52.jar,
- lib/bcprov-jdk15on-1.52.jar
-Import-Package: org.osgi.framework,
+ lib/bcprov-jdk15on-1.52.jar,
+ lib/acme4j-client-0.8.jar,
+ lib/acme4j-utils-0.8.jar,
+ lib/jose4j-0.5.2.jar
+Service-Component: OSGI-INF/*.xml
+Import-Package: javax.servlet,
+ javax.servlet.http,
+ org.eclipse.smarthome.core.common,
+ org.eclipse.smarthome.core.common.osgi,
+ org.eclipse.smarthome.core.net,
+ org.osgi.framework,
+ org.osgi.service.cm,
+ org.osgi.service.component,
+ org.osgi.service.component.annotations,
+ org.osgi.service.http,
  org.slf4j
