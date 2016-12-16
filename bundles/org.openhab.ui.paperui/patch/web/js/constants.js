@@ -15,4 +15,6 @@ angular.module('PaperUI.constants', [])
   'rules': true,
   'preferences': true,
   'groups': false
+}).constant('moduleLabels', {
+    'extensions' : 'Add-ons'
 });
