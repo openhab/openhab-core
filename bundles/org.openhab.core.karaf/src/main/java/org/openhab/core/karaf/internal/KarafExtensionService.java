@@ -99,12 +99,18 @@ public class KarafExtensionService implements ExtensionService {
     }
 
     private Extension getExtension(Feature feature) {
-        String extId = getType(feature.getName()) + "-" + getName(feature.getName());
+        String name = getName(feature.getName());
         String type = getType(feature.getName());
+        String extId = type + "-" + name;
         String label = feature.getDescription();
         String version = feature.getVersion();
+        String link = null;
+        if (type.equals("binding") && !version.startsWith("1")) {
+            // we have a native openHAB 2 binding
+            link = "http://docs.openhab.org/addons/bindings/" + name + "/readme.html";
+        }
         boolean installed = featuresService.isInstalled(feature);
-        return new Extension(extId, type, label, version, installed);
+        return new Extension(extId, type, label, version, link, installed);
     }
 
     @Override
