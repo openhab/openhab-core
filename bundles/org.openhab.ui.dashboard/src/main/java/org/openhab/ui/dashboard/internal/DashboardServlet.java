@@ -77,9 +77,14 @@ public class DashboardServlet extends HttpServlet {
         }
         resp.setContentType("text/html;charset=UTF-8");
         if (tiles.size() == 0) {
-            entries.append(
-                    "&nbsp;&nbsp;&nbsp;&nbsp;<div class=\"spinner spinner--steps\"><img src=\"img/spinner.svg\"></div>&nbsp;&nbsp;");
-            entries.append("Please stand by while UIs are being installed. This can take several minutes.");
+            if ("minimal".equals(getPackage())) {
+                entries.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+                entries.append("No user interfaces installed.");
+            } else {
+                entries.append(
+                        "&nbsp;&nbsp;&nbsp;&nbsp;<div class=\"spinner spinner--steps\"><img src=\"img/spinner.svg\"></div>&nbsp;&nbsp;");
+                entries.append("Please stand by while UIs are being installed. This can take several minutes.");
+            }
         }
         resp.getWriter().append(indexTemplate.replace("<!--entries-->", entries.toString()));
         resp.getWriter().close();
@@ -112,14 +117,18 @@ public class DashboardServlet extends HttpServlet {
     }
 
     private boolean isSetup() {
+        return getPackage() != null;
+    }
+
+    private String getPackage() {
         try {
             Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID);
             if (cfg != null && cfg.getProperties() != null && cfg.getProperties().get(OpenHAB.CFG_PACKAGE) != null) {
-                return true;
+                return cfg.getProperties().get(OpenHAB.CFG_PACKAGE).toString();
             }
         } catch (IOException e) {
             logger.error("Error while accessing the configuration admin: {}", e.getMessage());
         }
-        return false;
+        return null;
     }
 }
