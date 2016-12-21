@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -144,7 +145,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     public boolean addAddon(String type, String id) {
         try {
-            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID);
+            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
             Dictionary<String, Object> props = cfg.getProperties();
             Object typeProp = props.get(type);
             String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
@@ -167,7 +168,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     public boolean removeAddon(String type, String id) {
         try {
-            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID);
+            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
             Dictionary<String, Object> props = cfg.getProperties();
             Object typeProp = props.get(type);
             String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
@@ -206,7 +207,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private boolean getOnlineStatus() {
         try {
-            Configuration paxCfg = configurationAdmin.getConfiguration(PAX_URL_PID);
+            Configuration paxCfg = configurationAdmin.getConfiguration(PAX_URL_PID, null);
             Dictionary<String, Object> properties = paxCfg.getProperties();
             if (properties == null) {
                 return false;
@@ -231,7 +232,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private void setOnlineStatus(boolean status) {
         try {
-            Configuration paxCfg = configurationAdmin.getConfiguration(PAX_URL_PID);
+            Configuration paxCfg = configurationAdmin.getConfiguration(PAX_URL_PID, null);
             paxCfg.setBundleLocation("?");
             Dictionary<String, Object> properties = paxCfg.getProperties();
             if (properties == null) {
@@ -291,17 +292,36 @@ public class FeatureInstaller implements ConfigurationListener {
         });
     }
 
-    private void installAddons(final FeaturesService service, final Map<String, Object> config) {
+    private synchronized void installAddons(final FeaturesService service, final Map<String, Object> config) {
+        Set<String> installAddons = new HashSet<>();
+        Set<String> uninstallAddons = new HashSet<>();
         for (String type : addonTypes) {
             Object install = config.get(type);
             if (install instanceof String) {
-                String[] addons = ((String) install).split(",");
-                installFeatures(service, type, addons);
-                Set<String> addonsToUninstall = getAllAddonsOfType(type);
-                for (String addon : addons) {
-                    addonsToUninstall.remove(addon.trim());
+                String[] entries = ((String) install).split(",");
+                for (String addon : entries) {
+                    if (!StringUtils.isEmpty(addon)) {
+                        installAddons.add(PREFIX + type + "-" + addon.trim());
+                    }
                 }
-                uninstallFeatures(service, type, addonsToUninstall.toArray(new String[addonsToUninstall.size()]));
+                // we collect all possible addons first
+                for (String addon : getAllAddonsOfType(type)) {
+                    if (!StringUtils.isEmpty(addon)) {
+                        uninstallAddons.add(PREFIX + type + "-" + addon.trim());
+                    }
+                }
+            }
+        }
+        // now remove everything from the list that we want to keep installed
+        for (String addon : installAddons) {
+            uninstallAddons.remove(addon);
+        }
+        if (!installAddons.isEmpty()) {
+            installFeatures(service, installAddons);
+        }
+        if (!uninstallAddons.isEmpty()) {
+            for (String addon : uninstallAddons) {
+                uninstallFeature(service, addon);
             }
         }
     }
@@ -321,29 +341,24 @@ public class FeatureInstaller implements ConfigurationListener {
         return addons;
     }
 
-    private void installFeatures(FeaturesService featuresService, String type, String[] addons) {
-        for (String addon : addons) {
-            if (StringUtils.isNotBlank(addon)) {
-                String name = PREFIX + type + "-" + addon.trim();
-                installFeature(featuresService, name);
+    private synchronized void installFeatures(FeaturesService featuresService, Set<String> addons) {
+        try {
+            featuresService.installFeatures(addons,
+                    EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoFailOnFeatureNotFound));
+            logger.debug("Installed '{}'", StringUtils.join(addons, ", "));
+            for (String addon : addons) {
+                postInstalledEvent(addon);
             }
+        } catch (Exception e) {
+            logger.error("Failed installing '{}': {}", StringUtils.join(addons, ", "), e.getMessage());
         }
     }
 
-    private void uninstallFeatures(FeaturesService service, String type, String[] addons) {
-        for (String addon : addons) {
-            if (StringUtils.isNotBlank(addon)) {
-                String name = PREFIX + type + "-" + addon.trim();
-                uninstallFeature(featuresService, name);
-            }
-        }
-    }
-
-    private static void installFeature(FeaturesService featuresService, String name) {
+    private static synchronized void installFeature(FeaturesService featuresService, String name) {
         try {
             if (!isInstalled(featuresService, name)) {
                 featuresService.installFeature(name);
-                logger.info("Installed '{}'", name);
+                logger.debug("Installed '{}'", name);
                 postInstalledEvent(name);
             }
         } catch (Exception e) {
@@ -351,7 +366,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private static void uninstallFeature(FeaturesService featuresService, String name) {
+    private static synchronized void uninstallFeature(FeaturesService featuresService, String name) {
         try {
             if (isInstalled(featuresService, name)) {
                 featuresService.uninstallFeature(name);
@@ -363,7 +378,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private static void installPackage(FeaturesService featuresService, final Map<String, Object> config) {
+    private static synchronized void installPackage(FeaturesService featuresService, final Map<String, Object> config) {
         Object packageName = config.get(OpenHAB.CFG_PACKAGE);
         if (packageName instanceof String) {
             currentPackage = (String) packageName;
