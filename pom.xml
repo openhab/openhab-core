@@ -56,10 +56,10 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.compiler.compilerVersion>1.7</maven.compiler.compilerVersion>
 
-        <ohdr.version>1.0.6</ohdr.version>
+        <ohdr.version>1.0.9</ohdr.version>
         <esh.version>0.9.0-SNAPSHOT</esh.version>
         <kat.version>1.4.1</kat.version>
-        <karaf.version>4.0.4</karaf.version>
+        <karaf.version>4.0.8</karaf.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <build.helper.maven.plugin.version>1.9.1</build.helper.maven.plugin.version>
         <license.maven.plugin.version>2.10</license.maven.plugin.version>

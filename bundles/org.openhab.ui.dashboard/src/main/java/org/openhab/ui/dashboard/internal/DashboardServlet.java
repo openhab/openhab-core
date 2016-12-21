@@ -103,7 +103,7 @@ public class DashboardServlet extends HttpServlet {
 
     private void setPackage(String parameter) {
         try {
-            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID);
+            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
             Dictionary<String, Object> props = cfg.getProperties();
             if (props == null) {
                 props = new Hashtable<>();
@@ -122,7 +122,7 @@ public class DashboardServlet extends HttpServlet {
 
     private String getPackage() {
         try {
-            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID);
+            Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
             if (cfg != null && cfg.getProperties() != null && cfg.getProperties().get(OpenHAB.CFG_PACKAGE) != null) {
                 return cfg.getProperties().get(OpenHAB.CFG_PACKAGE).toString();
             }
