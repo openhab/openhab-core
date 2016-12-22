@@ -58,8 +58,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private static final String OH_RELEASES_REPO = "https://jcenter.bintray.com@id=oh-releases-repo";
     private static final String ESH_SNAPSHOT_REPO = "https://repo.eclipse.org/content/repositories/snapshots@id=esh-snapshot-repo@snapshots@noreleases";
     private static final String ESH_RELEASES_REPO = "https://repo.eclipse.org/content/repositories/releases@id=esh-release-repo";
-    private static final Set<String> ONLINE_REPOS = Sets.newHashSet(OH_RELEASES_REPO, OH_SNAPSHOT_REPO,
-            ESH_RELEASES_REPO, ESH_SNAPSHOT_REPO);
+    private static final Set<String> ONLINE_REPOS = Sets.newHashSet(OH_RELEASES_REPO, ESH_RELEASES_REPO);
 
     private static final URI LEGACY_FEATURES_URI = URI
             .create("mvn:org.openhab.addons/openhab-addons-legacy/LATEST/xml/features");
