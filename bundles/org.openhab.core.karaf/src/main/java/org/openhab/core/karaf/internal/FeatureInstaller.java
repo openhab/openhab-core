@@ -294,6 +294,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private synchronized void installAddons(final FeaturesService service, final Map<String, Object> config) {
         Set<String> installAddons = new HashSet<>();
+        Set<String> installedAddons = new HashSet<>();
         Set<String> uninstallAddons = new HashSet<>();
         for (String type : addonTypes) {
             Object install = config.get(type);
@@ -301,7 +302,11 @@ public class FeatureInstaller implements ConfigurationListener {
                 String[] entries = ((String) install).split(",");
                 for (String addon : entries) {
                     if (!StringUtils.isEmpty(addon)) {
-                        installAddons.add(PREFIX + type + "-" + addon.trim());
+                        String id = PREFIX + type + "-" + addon.trim();
+                        installedAddons.add(id);
+                        if (!isInstalled(service, id)) {
+                            installAddons.add(id);
+                        }
                     }
                 }
                 // we collect all possible addons first
@@ -313,7 +318,7 @@ public class FeatureInstaller implements ConfigurationListener {
             }
         }
         // now remove everything from the list that we want to keep installed
-        for (String addon : installAddons) {
+        for (String addon : installedAddons) {
             uninstallAddons.remove(addon);
         }
         if (!installAddons.isEmpty()) {
