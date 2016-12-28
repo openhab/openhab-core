@@ -101,7 +101,7 @@
 
     <feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
         <feature>openhab-runtime-base</feature>
-        <bundle start-level="80">mvn:org.openhab.core/org.openhab.io.transport.serial/${project.version}</bundle>
+        <bundle start-level="80">mvn:org.openhab/nrjavaserial/${nrjavaserial.version}</bundle>
     </feature>
 
     <feature name="openhab-transport-upnp" description="UPnP Transport" version="${project.version}">
