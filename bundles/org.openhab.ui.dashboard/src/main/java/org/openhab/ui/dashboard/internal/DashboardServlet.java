@@ -44,17 +44,21 @@ public class DashboardServlet extends HttpServlet {
 
     private String entryTemplate;
 
+    private String warnTemplate;
+
     private String setupTemplate;
 
     private Set<DashboardTile> tiles;
 
     public DashboardServlet(ConfigurationAdmin configurationAdmin, String indexTemplate, String entryTemplate,
-            String setupTemplate, Set<DashboardTile> tiles) {
+            String warnTemplate, String setupTemplate, Set<DashboardTile> tiles) {
         this.configurationAdmin = configurationAdmin;
         this.indexTemplate = indexTemplate;
         this.entryTemplate = entryTemplate;
+        this.warnTemplate = warnTemplate;
         this.setupTemplate = setupTemplate;
         this.tiles = tiles;
+        isExposed(null);
     }
 
     @Override
@@ -86,7 +90,9 @@ public class DashboardServlet extends HttpServlet {
                 entries.append("Please stand by while UIs are being installed. This can take several minutes.");
             }
         }
-        resp.getWriter().append(indexTemplate.replace("<!--entries-->", entries.toString()));
+        String warn = isExposed(req) ? warnTemplate : "";
+        resp.getWriter()
+                .append(indexTemplate.replace("<!--entries-->", entries.toString()).replace("<!--warn-->", warn));
         resp.getWriter().close();
     }
 
@@ -110,6 +116,46 @@ public class DashboardServlet extends HttpServlet {
             }
             props.put(OpenHAB.CFG_PACKAGE, parameter);
             cfg.setBundleLocation(null);
+            cfg.update(props);
+        } catch (IOException e) {
+            logger.error("Error while accessing the configuration admin: {}", e.getMessage());
+        }
+    }
+
+    private boolean isExposed(HttpServletRequest req) {
+        if (req != null) {
+            if ("ihavelearnedmylesson".equals(req.getParameter("warn"))) {
+                setExposed(false);
+            } else if ("activate".equals(req.getParameter("warn"))) {
+                setExposed(true);
+            }
+        }
+        try {
+            Configuration cfg = configurationAdmin.getConfiguration("org.openhab.dashboard");
+            if (cfg != null && cfg.getProperties() != null && cfg.getProperties().get("exposed") != null) {
+                if (cfg.getProperties().get("nowarning") == null) {
+                    boolean value = cfg.getProperties().get("exposed").toString().equals(Boolean.TRUE.toString());
+                    if (value) {
+                        logger.error(
+                                "WARNING - YOUR HOME IS EXPOSED! It is accessible from the Internet without authentication - please take immediate action!");
+                    }
+                    return value;
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error while accessing the configuration admin: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    private void setExposed(boolean value) {
+        try {
+            Configuration cfg = configurationAdmin.getConfiguration("org.openhab.dashboard");
+            Dictionary<String, Object> props = cfg.getProperties();
+            if (props == null) {
+                props = new Hashtable<>();
+            }
+            props.put("exposed", value);
             cfg.update(props);
         } catch (IOException e) {
             logger.error("Error while accessing the configuration admin: {}", e.getMessage());
