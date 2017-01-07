@@ -74,8 +74,10 @@ public class DashboardServlet extends HttpServlet {
         StringBuilder entries = new StringBuilder();
         for (DashboardTile tile : tiles) {
             String entry = entryTemplate.replace("<!--name-->", tile.getName());
+            String overlay = tile.getOverlay() == null ? "none" : tile.getOverlay();
+
             entry = entry.replace("<!--url-->", tile.getUrl());
-            entry = entry.replace("<!--overlay-->", tile.getOverlay());
+            entry = entry.replace("<!--overlay-->", overlay);
             entry = entry.replace("<!--icon-->", tile.getImageUrl());
             entries.append(entry);
         }
