@@ -61,7 +61,7 @@ public class RESTDashboardTile implements DashboardTile {
 
     @Override
     public String getOverlay() {
-        return "html5";
+        return null;
     }
 
     @Override

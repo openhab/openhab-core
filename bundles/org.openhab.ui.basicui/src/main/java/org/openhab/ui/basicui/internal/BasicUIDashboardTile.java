@@ -12,7 +12,7 @@ import org.openhab.ui.dashboard.DashboardTile;
 
 /**
  * The dashboard tile for the Basic UI
- * 
+ *
  * @author Kai Kreuzer
  *
  */
@@ -30,7 +30,7 @@ public class BasicUIDashboardTile implements DashboardTile {
 
     @Override
     public String getOverlay() {
-        return "html5";
+        return null;
     }
 
     @Override
