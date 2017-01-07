@@ -23,10 +23,8 @@
         <feature>esh-model-script-runtime</feature>
         <feature>esh-model-sitemap-runtime</feature>
         <feature>esh-model-thing-runtime</feature>
+        <feature>esh-ui-icon</feature>
         <feature>esh-storage-json</feature>
-        <feature>esh-ui-iconset-classic</feature>
-        <feature>esh-io-javasound</feature>
-        <feature>esh-io-webaudio</feature>
         <feature>openhab-runtime-certificate</feature>
         <feature>openhab-transport-mdns</feature>
         <feature dependency="true">shell</feature>
@@ -36,6 +34,9 @@
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.io.sound/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.ui.dashboard/${project.version}</bundle>
+        <bundle>mvn:org.eclipse.smarthome.extension.ui.iconset/org.eclipse.smarthome.ui.iconset.classic/${esh.version}</bundle>
+        <bundle>mvn:org.eclipse.smarthome.io/org.eclipse.smarthome.io.javasound/${esh.version}</bundle>
+        <bundle>mvn:org.eclipse.smarthome.io/org.eclipse.smarthome.io.webaudio/${esh.version}</bundle>
         <config name="org.eclipse.smarthome.audio">
             defaultSink = enhancedjavasound
         </config>
@@ -46,39 +47,6 @@
 
     <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
         <bundle start-level="20">mvn:org.openhab.core/org.openhab.io.jetty.certificate/${project.version}</bundle>
-    </feature>
-
-    <feature name="openhab-package-minimal" description="openHAB Minimal Package" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="false">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-minimal</configfile>
-        <config name="org.eclipse.smarthome.links">
-			autoLinks = false
-        </config>
-    </feature>
-
-    <feature name="openhab-package-simple" description="openHAB Simple Package" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="false">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-simple</configfile>
-        <config name="org.eclipse.smarthome.links">
-			autoLinks = true
-        </config>
-    </feature>
-
-    <feature name="openhab-package-standard" description="openHAB Standard Package" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="false">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-standard</configfile>
-        <config name="org.eclipse.smarthome.links">
-			autoLinks = false
-        </config>
-    </feature>
-
-    <feature name="openhab-package-expert" description="openHAB Expert Package" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <feature>openhab-runtime-compat1x</feature>
-        <configfile finalname="${openhab.userdata}/etc/org.openhab.addons.cfg" override="false">mvn:${project.groupId}/openhab-core-resources/${project.version}/cfg/addons-expert</configfile>
-        <config name="org.eclipse.smarthome.links">
-			autoLinks = false
-        </config>
     </feature>
 
     <feature name="openhab-runtime-compat1x" description="Compatibility layer for openHAB 1 add-ons" version="${project.version}">
@@ -108,12 +76,6 @@
         <feature>esh-io-transport-upnp</feature>
     </feature>
 
-    <feature name="openhab-misc-restdocs" description="REST Documentation" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <requirement>esh.tp;filter:="(feature=jax-rs-provider-swagger)"</requirement>
-        <bundle>mvn:org.openhab.core/org.openhab.io.rest.docs/${project.version}</bundle>
-    </feature>
-
     <feature name="openhab-misc-ruleengine" description="Rule Engine (Experimental)" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>esh-automation-api</feature>
@@ -127,37 +89,6 @@
         <feature>esh-automation-parser-gson</feature>
         <feature>esh-automation-providers</feature>
         <feature>esh-automation-rest</feature>
-    </feature>
-
-    <!-- ui -->
-
-    <feature name="openhab-ui-basic" description="Basic UI" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <feature>esh-ui-basic</feature>
-        <feature>esh-ui-icon</feature>
-        <feature>esh-ui-iconset-classic</feature>
-        <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.basicui/${project.version}</bundle>
-        <config name="org.eclipse.smarthome.basicui">
-            defaultSitemap = _default
-            iconType = svg
-        </config>
-    </feature>
-
-    <feature name="openhab-ui-classic" description="Classic UI" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <feature>esh-ui-classic</feature>
-        <feature>esh-ui-icon</feature>
-        <feature>esh-ui-iconset-classic</feature>
-        <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.classicui/${project.version}</bundle>
-        <config name="org.eclipse.smarthome.classicui">
-            defaultSitemap = _default
-        </config>
-    </feature>
-
-    <feature name="openhab-ui-paper" description="Paper UI" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <feature>esh-ui-paper</feature>
-        <bundle start-level="80">mvn:org.openhab.core/org.openhab.ui.paperui/${project.version}</bundle>
     </feature>
 
 </features>

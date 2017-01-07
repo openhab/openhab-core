@@ -7,13 +7,13 @@
 
     <config-description uri="system:addons">
         <parameter name="remote" type="boolean" required="true">
-            <label>Access Remote Repositories</label>
-            <description>Defines whether the runtime should access remote repositories for extensions.</description>
-            <default>false</default>
+            <label>Access Remote Repository</label>
+            <description>Defines whether openHAB should access the remote repository for add-on installation.</description>
+            <default>true</default>
         </parameter>
         <parameter name="legacy" type="boolean" required="true">
             <label>Include Legacy 1.x Bindings</label>
-            <description>Also allows the installation of 1.x bindings for which there is already a 2.x version available (requires remote repo access).</description>
+            <description>Also allows the installation of 1.x bindings for which there is already a 2.x version available (requires remote repo access!).</description>
             <default>false</default>
         </parameter>
     </config-description>

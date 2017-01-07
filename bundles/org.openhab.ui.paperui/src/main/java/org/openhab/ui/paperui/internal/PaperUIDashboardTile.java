@@ -25,7 +25,7 @@ public class PaperUIDashboardTile implements DashboardTile {
 
     @Override
     public String getUrl() {
-        return "../ui/index.html";
+        return "../paperui/index.html";
     }
 
     @Override
@@ -35,6 +35,6 @@ public class PaperUIDashboardTile implements DashboardTile {
 
     @Override
     public String getImageUrl() {
-        return "../ui/img/dashboardtile.png";
+        return "../paperui/img/dashboardtile.png";
     }
 }
