@@ -15,9 +15,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>openhab-core-resources</module>
         <module>openhab-core</module>
-        <module>openhab-esh-addons</module>
         <module>verify-karaf</module>
         <module>p2</module>
         <module>repo</module>
