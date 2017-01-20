@@ -6,7 +6,7 @@
 BINTRAY_URL=https://api.bintray.com/
 BINTRAY_REPO=p2
 BINTRAY_PACKAGE=openhab-core
-PACKAGE_VERSION=2.0.0.x
+PACKAGE_VERSION=${repo.version}
 PACKAGE_ARCHIVE=${project.build.finalName}.zip
 PACKAGE_PATH=openhab-core/$PACKAGE_VERSION
 
