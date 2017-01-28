@@ -57,7 +57,7 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
     }
 
     @Override
-    public void process(final AudioStream audioStream) throws UnsupportedAudioFormatException {
+    public synchronized void process(final AudioStream audioStream) throws UnsupportedAudioFormatException {
         if (audioStream != null && audioStream.getFormat().getCodec() != AudioFormat.CODEC_MP3) {
             // we can only deal with mp3, so delegate the rest
             super.process(audioStream);
@@ -72,14 +72,23 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
                 if (audioStream == null) {
                     // the call was only for stopping the currently playing stream
                     return;
+                } else {
+                    try {
+                        // we start a new continuous stream and store its handle
+                        streamPlayer = new Player(audioStream);
+                        playInThread(streamPlayer);
+                    } catch (JavaLayerException e) {
+                        logger.error("An exception occurred while playing url audio stream : '{}'", e.getMessage());
+                    }
+                    return;
                 }
-            }
-            try {
-                Player player = new Player(audioStream);
-                streamPlayer = player;
-                playInThread(player);
-            } catch (JavaLayerException e) {
-                logger.error("An exception occurred while playing audio : '{}'", e.getMessage());
+            } else {
+                // we are playing some normal file (no url stream)
+                try {
+                    playInThread(new Player(audioStream));
+                } catch (JavaLayerException e) {
+                    logger.error("An exception occurred while playing audio : '{}'", e.getMessage());
+                }
             }
         }
     }
@@ -105,7 +114,7 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
         }.start();
     }
 
-    protected void deactivate() {
+    protected synchronized void deactivate() {
         if (streamPlayer != null) {
             // stop playing streams on shutdown
             streamPlayer.close();
