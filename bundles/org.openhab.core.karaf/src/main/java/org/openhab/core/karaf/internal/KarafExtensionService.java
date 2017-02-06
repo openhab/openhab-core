@@ -105,9 +105,12 @@ public class KarafExtensionService implements ExtensionService {
         String label = feature.getDescription();
         String version = feature.getVersion();
         String link = null;
-        if (type.equals("binding") && !version.startsWith("1")) {
-            // we have a native openHAB 2 binding
+        if (type.equals("binding")) {
             link = "http://docs.openhab.org/addons/bindings/" + name + "/readme.html";
+        } else if (type.equals("action")) {
+            link = "http://docs.openhab.org/addons/actions/" + name + "/readme.html";
+        } else if (type.equals("persistence")) {
+            link = "http://docs.openhab.org/addons/persistence/" + name + "/readme.html";
         }
         boolean installed = featuresService.isInstalled(feature);
         return new Extension(extId, type, label, version, link, installed);
