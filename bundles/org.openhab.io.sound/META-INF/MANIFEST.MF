@@ -9,7 +9,7 @@ Import-Package: org.apache.commons.collections,
  org.eclipse.smarthome.core.common,
  org.slf4j
 Service-Component: OSGI-INF/*.xml
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: org.eclipse.smarthome.io.javasound
 Bundle-ClassPath: lib/jl1.0.1.jar,
  .

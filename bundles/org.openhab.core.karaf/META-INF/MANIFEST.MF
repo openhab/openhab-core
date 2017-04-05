@@ -4,7 +4,7 @@ Bundle-Name: openHAB Karaf Integration
 Bundle-SymbolicName: org.openhab.core.karaf
 Bundle-Version: 2.1.0.qualifier
 Bundle-Vendor: openHAB.org
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Karaf-Commands: org.openhab.core.karaf.internal.command
 Service-Component: OSGI-INF/*.xml
 Import-Package: com.google.common.collect,

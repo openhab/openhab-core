@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.openhab.core.compat1x
 Bundle-Version: 2.1.0.qualifier
 Bundle-Activator: org.openhab.core.compat1x.internal.CompatibilityActivator
 Bundle-Vendor: openHAB.org
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.base,
  javax.servlet,
  javax.servlet.http,
