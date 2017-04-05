@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.openhab.core.compat1x.test
 Bundle-Version: 2.1.0.qualifier
 Bundle-Vendor: openHAB.org
 Fragment-Host: org.openhab.core.compat1x
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: groovy.lang,
  org.codehaus.groovy.reflection,
  org.codehaus.groovy.runtime,

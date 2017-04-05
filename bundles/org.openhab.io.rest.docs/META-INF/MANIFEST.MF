@@ -16,4 +16,4 @@ Import-Package: com.google.gson,
  org.osgi.service.http,
  org.slf4j
 Service-Component: OSGI-INF/*.xml
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
