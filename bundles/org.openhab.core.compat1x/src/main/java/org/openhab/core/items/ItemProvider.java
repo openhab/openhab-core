@@ -14,21 +14,21 @@ import java.util.Collection;
  * An item provider provides instances of {@link GenericItem}. These
  * items can be constructed from some static configuration files or
  * they can be derived from some dynamic logic.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public interface ItemProvider {
-	
-	/**
-	 * Provides an array of items.
-	 * 
-	 * @return a collection of items
-	 */
-	Collection<Item> getItems();
-	
-	public void addItemChangeListener(ItemsChangeListener listener);
-	
-	public void removeItemChangeListener(ItemsChangeListener listener);
+
+    /**
+     * Provides an array of items.
+     *
+     * @return a collection of items
+     */
+    Collection<Item> getItems();
+
+    public void addItemChangeListener(ItemsChangeListener listener);
+
+    public void removeItemChangeListener(ItemsChangeListener listener);
 }

@@ -14,20 +14,24 @@ package org.openhab.core.types;
  * message on the bus is - does "item ON" mean that its state has changed to
  * ON or that it should turn itself ON? To decide this, we send the event
  * type as an additional information on the event bus for each message.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public enum EventType {
-	COMMAND, UPDATE;
-	
-	public String toString() {
-		switch(this) {
-			case COMMAND: return "command";
-			case UPDATE:  return "update";
-		}
-		return "";
-	}
+    COMMAND,
+    UPDATE;
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case COMMAND:
+                return "command";
+            case UPDATE:
+                return "update";
+        }
+        return "";
+    }
 
 }

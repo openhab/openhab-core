@@ -28,7 +28,7 @@ public abstract class AbstractBinding<P extends BindingProvider> extends Abstrac
 
     /** to keep track of all binding providers */
 
-    protected Collection<P> providers = new CopyOnWriteArraySet<P>();
+    protected Collection<P> providers = new CopyOnWriteArraySet<>();
 
     protected EventPublisher eventPublisher = null;
 
@@ -51,7 +51,7 @@ public abstract class AbstractBinding<P extends BindingProvider> extends Abstrac
      * adds <code>this</code> as {@link BindingConfigChangeListener}. If
      * <code>provider</code> contains any binding an the refresh-Thread is
      * stopped it will be started.
-     * 
+     *
      * @param provider the new {@link BindingProvider} to add
      */
     @SuppressWarnings("unchecked")
@@ -64,7 +64,7 @@ public abstract class AbstractBinding<P extends BindingProvider> extends Abstrac
     /**
      * Removes <code>provider</code> from the list of providers. If there is no
      * provider left the refresh thread is getting interrupted.
-     * 
+     *
      * @param provider the {@link BindingProvider} to remove
      */
     public void removeBindingProvider(BindingProvider provider) {
@@ -100,7 +100,7 @@ public abstract class AbstractBinding<P extends BindingProvider> extends Abstrac
     /**
      * Is called by <code>receiveCommand()</code> only if one of the
      * {@link BindingProvider}s provide a binding for <code>itemName</code>.
-     * 
+     *
      * @param itemName the item on which <code>command</code> will be executed
      * @param command the {@link Command} to be executed on <code>itemName</code>
      */
@@ -122,7 +122,7 @@ public abstract class AbstractBinding<P extends BindingProvider> extends Abstrac
     /**
      * Is called by <code>receiveUpdate()</code> only if one of the
      * {@link BindingProvider}s provide a binding for <code>itemName</code>.
-     * 
+     *
      * @param itemName the item on which <code>command</code> will be executed
      * @param newState the {@link State} to be update
      */
@@ -131,7 +131,7 @@ public abstract class AbstractBinding<P extends BindingProvider> extends Abstrac
 
     /**
      * checks if any of the bindingProviders contains an adequate mapping
-     * 
+     *
      * @param itemName the itemName to check
      * @return <code>true</code> if any of the bindingProviders contains an
      *         adequate mapping for <code>itemName</code> and <code>false</code>

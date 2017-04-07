@@ -18,6 +18,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ParamDoc {
-	String name();
-	String text() default "";
+    String name();
+
+    String text() default "";
 }

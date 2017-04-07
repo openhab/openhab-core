@@ -10,7 +10,6 @@
  */
 package org.openhab.model.sitemap;
 
-
 /**
  * <!-- begin-user-doc -->
  * A representation of the model object '<em><b>Text</b></em>'.
@@ -21,6 +20,5 @@ package org.openhab.model.sitemap;
  * @model
  * @generated
  */
-public interface Text extends LinkableWidget
-{
+public interface Text extends LinkableWidget {
 } // Text

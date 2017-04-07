@@ -19,31 +19,33 @@ import org.openhab.core.types.UnDefType;
 
 /**
  * A DateTimeItem stores a timestamp including a valid time zone.
- * 
+ *
  * @author Thomas.Eichstaedt-Engelen
  * @author Kai Kreuzer
- * 
+ *
  * @since 0.8.0
  */
 public class DateTimeItem extends GenericItem {
-	
-	private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-	private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
 
-	static {
-		acceptedDataTypes.add((DateTimeType.class));
-		acceptedDataTypes.add(UnDefType.class);
-	}
-	
-	public DateTimeItem(String name) {
-		super(name);
-	}
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
-	public List<Class<? extends State>> getAcceptedDataTypes() {
-		return acceptedDataTypes;
-	}
+    static {
+        acceptedDataTypes.add((DateTimeType.class));
+        acceptedDataTypes.add(UnDefType.class);
+    }
 
-	public List<Class<? extends Command>> getAcceptedCommandTypes() {
-		return acceptedCommandTypes;
-	}
+    public DateTimeItem(String name) {
+        super(name);
+    }
+
+    @Override
+    public List<Class<? extends State>> getAcceptedDataTypes() {
+        return acceptedDataTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return acceptedCommandTypes;
+    }
 }

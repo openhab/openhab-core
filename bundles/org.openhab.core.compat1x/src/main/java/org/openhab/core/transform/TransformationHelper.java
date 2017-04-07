@@ -18,51 +18,50 @@ import org.slf4j.LoggerFactory;
 
 public class TransformationHelper {
 
-	private static Logger logger = LoggerFactory.getLogger(TransformationHelper.class);
+    private static Logger logger = LoggerFactory.getLogger(TransformationHelper.class);
 
-	/**
-	 * Queries the OSGi service registry for a service that provides a transformation service of
-	 * a given transformation type (e.g. REGEX, XSLT, etc.)
-	 * 
-	 * @param transformationType the desired transformation type
-	 * @return a service instance or null, if none could be found
-	 */
-	static public TransformationService getTransformationService(BundleContext context, String transformationType) {
-		if(context!=null) {
-			String filter = "(smarthome.transform=" + transformationType + ")";
-			try {
-				Collection<ServiceReference<org.eclipse.smarthome.core.transform.TransformationService>> refs = 
-						context.getServiceReferences(org.eclipse.smarthome.core.transform.TransformationService.class, filter);
-				if(refs!=null && refs.size() > 0) {
-					return new TransformationServiceDelegate(
-							(org.eclipse.smarthome.core.transform.TransformationService) context.getService(refs.iterator().next()));
-				} else {
-					logger.warn("Cannot get service reference for transformation service of type " + transformationType);
-				}
-			} catch (InvalidSyntaxException e) {
-				logger.warn("Cannot get service reference for transformation service of type " + transformationType, e);
-			}
-		}
-		return null;
-	}
+    /**
+     * Queries the OSGi service registry for a service that provides a transformation service of
+     * a given transformation type (e.g. REGEX, XSLT, etc.)
+     *
+     * @param transformationType the desired transformation type
+     * @return a service instance or null, if none could be found
+     */
+    static public TransformationService getTransformationService(BundleContext context, String transformationType) {
+        if (context != null) {
+            String filter = "(smarthome.transform=" + transformationType + ")";
+            try {
+                Collection<ServiceReference<org.eclipse.smarthome.core.transform.TransformationService>> refs = context
+                        .getServiceReferences(org.eclipse.smarthome.core.transform.TransformationService.class, filter);
+                if (refs != null && refs.size() > 0) {
+                    return new TransformationServiceDelegate(context.getService(refs.iterator().next()));
+                } else {
+                    logger.warn(
+                            "Cannot get service reference for transformation service of type " + transformationType);
+                }
+            } catch (InvalidSyntaxException e) {
+                logger.warn("Cannot get service reference for transformation service of type " + transformationType, e);
+            }
+        }
+        return null;
+    }
 
-	static private class TransformationServiceDelegate implements TransformationService {
+    static private class TransformationServiceDelegate implements TransformationService {
 
-		org.eclipse.smarthome.core.transform.TransformationService delegate;
-		
-		public TransformationServiceDelegate(org.eclipse.smarthome.core.transform.TransformationService delegate) {
-			this.delegate = delegate;
-		}
-		
-		@Override
-		public String transform(String function, String source)
-				throws TransformationException {
-			try {
-				return delegate.transform(function, source);
-			} catch (org.eclipse.smarthome.core.transform.TransformationException e) {
-				throw new TransformationException(e.getMessage());
-			}
-		}
-		
-	}
+        org.eclipse.smarthome.core.transform.TransformationService delegate;
+
+        public TransformationServiceDelegate(org.eclipse.smarthome.core.transform.TransformationService delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public String transform(String function, String source) throws TransformationException {
+            try {
+                return delegate.transform(function, source);
+            } catch (org.eclipse.smarthome.core.transform.TransformationException e) {
+                throw new TransformationException(e.getMessage());
+            }
+        }
+
+    }
 }

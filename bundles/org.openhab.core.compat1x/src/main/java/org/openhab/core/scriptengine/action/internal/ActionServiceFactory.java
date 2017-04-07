@@ -65,7 +65,7 @@ public class ActionServiceFactory {
     private void registerDelegateService(ActionService actionService) {
         if (!delegates.containsKey(actionService.getActionClassName())) {
             ActionServiceDelegate service = new ActionServiceDelegate(actionService);
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Dictionary<String, Object> props = new Hashtable<>();
             ServiceRegistration<org.eclipse.smarthome.model.script.engine.action.ActionService> serviceReg = context
                     .registerService(org.eclipse.smarthome.model.script.engine.action.ActionService.class, service,
                             props);

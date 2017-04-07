@@ -12,10 +12,12 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 
 public enum StopMoveType implements PrimitiveType, Command {
-	STOP, MOVE;
-	
-	public String format(String pattern) {
-		return String.format(pattern, this.toString());
-	}
+    STOP,
+    MOVE;
+
+    @Override
+    public String format(String pattern) {
+        return String.format(pattern, this.toString());
+    }
 
 }

@@ -14,24 +14,29 @@ package org.openhab.core.types;
  * received an state update so far) or because their state is ambiguous
  * (e.g. a dimmed light that is treated as a switch (ON/OFF) will have
  * an undefined state if it is dimmed to 50%).
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public enum UnDefType implements PrimitiveType, State {
-	UNDEF, NULL;
-	
-	public String toString() {
-		switch(this) {
-			case UNDEF: return "Undefined";
-			case NULL:  return "Uninitialized";
-		}
-		return "";
-	}
-	
-	public String format(String pattern) {
-		return String.format(pattern, this.toString());
-	}
+    UNDEF,
+    NULL;
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case UNDEF:
+                return "Undefined";
+            case NULL:
+                return "Uninitialized";
+        }
+        return "";
+    }
+
+    @Override
+    public String format(String pattern) {
+        return String.format(pattern, this.toString());
+    }
 
 }

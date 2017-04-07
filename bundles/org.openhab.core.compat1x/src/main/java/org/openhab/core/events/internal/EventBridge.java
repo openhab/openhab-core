@@ -32,7 +32,7 @@ import org.osgi.service.event.EventHandler;
  * This class acts as a bridge between events from openHAB 1.x (using "openhab" as a topic prefix) and
  * Eclipse SmartHome (using "smarthome" as a topic prefix).
  * It simply duplicates events with an updated topic prefix and works both ways.
- * 
+ *
  * @author Kai Kreuzer - Initial contribution and API
  *
  */
@@ -86,21 +86,21 @@ public class EventBridge implements EventHandler, EventSubscriber {
         Map<String, Object> properties = new HashMap<>();
         if (event instanceof ItemCommandEvent) {
             ItemCommandEvent icEvent = (ItemCommandEvent) event;
-            String itemName = (String) icEvent.getItemName();
+            String itemName = icEvent.getItemName();
             properties.put("item", itemName);
             Type eshType = TypeMapper.mapToOpenHABType(icEvent.getItemCommand());
             if (eshType instanceof Command) {
-                properties.put("command", (Command) eshType);
+                properties.put("command", eshType);
             } else {
                 return null;
             }
         } else {
             ItemStateEvent isEvent = (ItemStateEvent) event;
-            String itemName = (String) isEvent.getItemName();
+            String itemName = isEvent.getItemName();
             properties.put("item", itemName);
             Type eshType = TypeMapper.mapToOpenHABType(isEvent.getItemState());
             if (eshType instanceof State) {
-                properties.put("state", (State) eshType);
+                properties.put("state", eshType);
             } else {
                 return null;
             }

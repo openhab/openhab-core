@@ -22,45 +22,47 @@ import org.openhab.core.types.UnDefType;
 /**
  * A StringItem can be used for any kind of string to either send or receive
  * from a device.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public class StringItem extends GenericItem {
-	
-	private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-	private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
 
-	static {
-		acceptedDataTypes.add(StringType.class);
-		acceptedDataTypes.add((DateTimeType.class));
-		acceptedDataTypes.add(UnDefType.class);
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
-		acceptedCommandTypes.add(StringType.class);
-	}
-	
-	public StringItem(String name) {
-		super(name);
-	}
+    static {
+        acceptedDataTypes.add(StringType.class);
+        acceptedDataTypes.add((DateTimeType.class));
+        acceptedDataTypes.add(UnDefType.class);
 
-	public List<Class<? extends State>> getAcceptedDataTypes() {
-		return acceptedDataTypes;
-	}
+        acceptedCommandTypes.add(StringType.class);
+    }
 
-	public List<Class<? extends Command>> getAcceptedCommandTypes() {
-		return acceptedCommandTypes;
-	}
-	
-	@Override
-	public State getStateAs(Class<? extends State> typeClass) {
-		ArrayList<Class<? extends State>> list = new ArrayList<Class<? extends State>>();
-		list.add(typeClass);
-		State convertedState = TypeParser.parseState(list, state.toString());
-		if(convertedState!=null) {
-			return convertedState;
-		} else {
-			return super.getStateAs(typeClass);
-		}
-	}
+    public StringItem(String name) {
+        super(name);
+    }
+
+    @Override
+    public List<Class<? extends State>> getAcceptedDataTypes() {
+        return acceptedDataTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return acceptedCommandTypes;
+    }
+
+    @Override
+    public State getStateAs(Class<? extends State> typeClass) {
+        ArrayList<Class<? extends State>> list = new ArrayList<>();
+        list.add(typeClass);
+        State convertedState = TypeParser.parseState(list, state.toString());
+        if (convertedState != null) {
+            return convertedState;
+        } else {
+            return super.getStateAs(typeClass);
+        }
+    }
 }

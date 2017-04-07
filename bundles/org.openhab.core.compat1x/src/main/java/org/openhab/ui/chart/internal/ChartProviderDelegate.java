@@ -15,26 +15,25 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.smarthome.core.items.ItemNotFoundException;
 import org.openhab.ui.chart.ChartProvider;
 
-
 /**
  * This class serves as a mapping from the "old" org.openhab namespace to the new org.eclipse.smarthome
  * namespace for the action service. It wraps an instance with the old interface
- * into a class with the new interface. 
- * 
+ * into a class with the new interface.
+ *
  * @author Kai Kreuzer - Initial contribution and API
  */
 public class ChartProviderDelegate implements org.eclipse.smarthome.ui.chart.ChartProvider {
 
-	private ChartProvider provider;
+    private ChartProvider provider;
 
-	public ChartProviderDelegate(ChartProvider chartProvider) {
-		this.provider = chartProvider;
-	}
+    public ChartProviderDelegate(ChartProvider chartProvider) {
+        this.provider = chartProvider;
+    }
 
-	@Override
-	public String getName() {
-		return provider.getName();
-	}
+    @Override
+    public String getName() {
+        return provider.getName();
+    }
 
     @Override
     public BufferedImage createChart(String service, String theme, Date startTime, Date endTime, int height, int width,

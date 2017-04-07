@@ -68,7 +68,7 @@ public class ItemUIRegistryDelegate
     @Override
     public Collection<Item> getItems() {
         Collection<org.eclipse.smarthome.core.items.Item> eshItems = itemUIRegistry.getItems();
-        Collection<Item> ohItems = new HashSet<Item>(eshItems.size());
+        Collection<Item> ohItems = new HashSet<>(eshItems.size());
 
         for (org.eclipse.smarthome.core.items.Item eshItem : eshItems) {
             ohItems.add(ItemMapper.mapToOpenHABItem(eshItem));
@@ -79,7 +79,7 @@ public class ItemUIRegistryDelegate
     @Override
     public Collection<Item> getItems(String pattern) {
         Collection<org.eclipse.smarthome.core.items.Item> eshItems = itemUIRegistry.getItems(pattern);
-        Collection<Item> ohItems = new HashSet<Item>(eshItems.size());
+        Collection<Item> ohItems = new HashSet<>(eshItems.size());
 
         for (org.eclipse.smarthome.core.items.Item eshItem : eshItems) {
             ohItems.add(ItemMapper.mapToOpenHABItem(eshItem));

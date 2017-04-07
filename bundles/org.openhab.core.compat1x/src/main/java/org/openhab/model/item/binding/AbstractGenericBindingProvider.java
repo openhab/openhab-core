@@ -42,16 +42,16 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractGenericBindingProvider.class);
 
-    private Set<BindingChangeListener> listeners = new CopyOnWriteArraySet<BindingChangeListener>();
+    private Set<BindingChangeListener> listeners = new CopyOnWriteArraySet<>();
 
     /** caches binding configurations. maps itemNames to {@link BindingConfig}s */
-    protected Map<String, BindingConfig> bindingConfigs = new ConcurrentHashMap<String, BindingConfig>();
+    protected Map<String, BindingConfig> bindingConfigs = new ConcurrentHashMap<>();
 
     /**
      * stores information about the context of items. The map has this content
      * structure: context -> Set of Items
      */
-    protected Map<String, Set<Item>> contextMap = new ConcurrentHashMap<String, Set<Item>>();
+    protected Map<String, Set<Item>> contextMap = new ConcurrentHashMap<>();
 
     public AbstractGenericBindingProvider() {
         super();
@@ -85,7 +85,7 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
         synchronized (contextMap) {
             Set<Item> items = contextMap.get(context);
             if (items == null) {
-                items = new HashSet<Item>();
+                items = new HashSet<>();
                 contextMap.put(context, items);
             }
             items.add(item);
@@ -149,7 +149,7 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
      */
     @Override
     public Collection<String> getItemNames() {
-        return new ArrayList<String>(bindingConfigs.keySet());
+        return new ArrayList<>(bindingConfigs.keySet());
     }
 
 }

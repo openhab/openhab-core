@@ -51,7 +51,7 @@ public class DashboardService {
     protected void activate(ComponentContext componentContext) {
         try {
             bundleContext = componentContext.getBundleContext();
-            Hashtable<String, String> props = new Hashtable<String, String>();
+            Hashtable<String, String> props = new Hashtable<>();
             httpService.registerServlet(DASHBOARD_ALIAS + "/" + SERVLET_NAME, createServlet(), props,
                     httpService.createDefaultHttpContext());
             httpService.registerResources(DASHBOARD_ALIAS, "web", null);

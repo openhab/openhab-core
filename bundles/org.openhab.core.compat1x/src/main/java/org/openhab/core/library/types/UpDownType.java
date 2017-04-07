@@ -9,14 +9,16 @@
 package org.openhab.core.library.types;
 
 import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 import org.openhab.core.types.PrimitiveType;
+import org.openhab.core.types.State;
 
 public enum UpDownType implements PrimitiveType, State, Command {
-	UP, DOWN;
-		
-	public String format(String pattern) {
-		return String.format(pattern, this.toString());
-	}
+    UP,
+    DOWN;
+
+    @Override
+    public String format(String pattern) {
+        return String.format(pattern, this.toString());
+    }
 
 }
