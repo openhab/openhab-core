@@ -18,6 +18,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ActionDoc {
-	String text();
-	String returns() default "";
+    String text();
+
+    String returns() default "";
 }

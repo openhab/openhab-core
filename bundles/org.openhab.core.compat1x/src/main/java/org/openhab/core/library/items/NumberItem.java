@@ -22,32 +22,34 @@ import org.openhab.core.types.UnDefType;
  * of sensors, like temperature, brightness, wind, etc.
  * It can also be used as a counter or as any other thing that can be expressed
  * as a number.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public class NumberItem extends GenericItem {
-	
-	private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-	private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
 
-	static {
-		acceptedDataTypes.add(DecimalType.class);
-		acceptedDataTypes.add(UnDefType.class);
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
-		acceptedCommandTypes.add(DecimalType.class);
-	}
-	
-	public NumberItem(String name) {
-		super(name);
-	}
+    static {
+        acceptedDataTypes.add(DecimalType.class);
+        acceptedDataTypes.add(UnDefType.class);
 
-	public List<Class<? extends State>> getAcceptedDataTypes() {
-		return acceptedDataTypes;
-	}
+        acceptedCommandTypes.add(DecimalType.class);
+    }
 
-	public List<Class<? extends Command>> getAcceptedCommandTypes() {
-		return acceptedCommandTypes;
-	}
+    public NumberItem(String name) {
+        super(name);
+    }
+
+    @Override
+    public List<Class<? extends State>> getAcceptedDataTypes() {
+        return acceptedDataTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return acceptedCommandTypes;
+    }
 }

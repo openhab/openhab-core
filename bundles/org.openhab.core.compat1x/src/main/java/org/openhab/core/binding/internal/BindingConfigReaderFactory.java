@@ -22,61 +22,62 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * This class listens for services that implement the old binding config reader interface and registers
  * an according service for each under the new interface.
- * 
+ *
  * @author Kai Kreuzer - Initial contribution and API
  */
 public class BindingConfigReaderFactory {
 
-	private Map<String, ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader>> delegates = new HashMap<>();
-	private BundleContext context;
-	
-	private Set<BindingConfigReader> readers = new HashSet<>();
-	
-	public void activate(BundleContext context) {
-		this.context = context;
-		for(BindingConfigReader reader : readers) {
-			registerDelegateService(reader);
-		}
-	}
-	
-	public void deactivate() {
-		for(ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader> serviceReg : delegates.values()) {
-			serviceReg.unregister();
-		}
-		delegates.clear();
-		this.context = null;
-	}
-	
-	public void addBindingConfigReader(BindingConfigReader reader) {
-		if(context!=null) {
-			registerDelegateService(reader);			
-		} else {
-			readers.add(reader);
-		}
-	}
+    private Map<String, ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader>> delegates = new HashMap<>();
+    private BundleContext context;
 
-	public void removeBindingConfigReader(BindingConfigReader reader) {
-		if(context!=null) {
-			unregisterDelegateService(reader);
-		}
-	}
+    private Set<BindingConfigReader> readers = new HashSet<>();
 
-	private void registerDelegateService(BindingConfigReader reader) {
-		if(!delegates.containsKey(reader.getBindingType())) {
-			BindingConfigReaderDelegate service = new BindingConfigReaderDelegate(reader);
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
-			ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader> serviceReg = 
-					context.registerService(org.eclipse.smarthome.model.item.BindingConfigReader.class, service, props);
-			delegates.put(reader.getBindingType(), serviceReg);
-		}
-	}
+    public void activate(BundleContext context) {
+        this.context = context;
+        for (BindingConfigReader reader : readers) {
+            registerDelegateService(reader);
+        }
+    }
 
-	private void unregisterDelegateService(BindingConfigReader reader) {
-		if(delegates.containsKey(reader.getBindingType())) {
-			ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader> serviceReg = 
-					delegates.get(reader.getBindingType());
-			delegates.remove(reader.getBindingType());
-			serviceReg.unregister();
-		}
-	}
+    public void deactivate() {
+        for (ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader> serviceReg : delegates
+                .values()) {
+            serviceReg.unregister();
+        }
+        delegates.clear();
+        this.context = null;
+    }
+
+    public void addBindingConfigReader(BindingConfigReader reader) {
+        if (context != null) {
+            registerDelegateService(reader);
+        } else {
+            readers.add(reader);
+        }
+    }
+
+    public void removeBindingConfigReader(BindingConfigReader reader) {
+        if (context != null) {
+            unregisterDelegateService(reader);
+        }
+    }
+
+    private void registerDelegateService(BindingConfigReader reader) {
+        if (!delegates.containsKey(reader.getBindingType())) {
+            BindingConfigReaderDelegate service = new BindingConfigReaderDelegate(reader);
+            Dictionary<String, Object> props = new Hashtable<>();
+            ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader> serviceReg = context
+                    .registerService(org.eclipse.smarthome.model.item.BindingConfigReader.class, service, props);
+            delegates.put(reader.getBindingType(), serviceReg);
+        }
+    }
+
+    private void unregisterDelegateService(BindingConfigReader reader) {
+        if (delegates.containsKey(reader.getBindingType())) {
+            ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader> serviceReg = delegates
+                    .get(reader.getBindingType());
+            delegates.remove(reader.getBindingType());
+            serviceReg.unregister();
+        }
+    }
 }

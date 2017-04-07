@@ -16,41 +16,49 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.service.http.HttpContext;
 
-
 /**
- * Implementation of {@link HttpContext} which adds Basic-Authentication 
+ * Implementation of {@link HttpContext} which adds Basic-Authentication
  * functionality to openHAB.
- * 
+ *
  * @author Thomas.Eichstaedt-Engelen
  * @since 0.9.0
  */
 public class SecureHttpContext implements HttpContext {
 
-	private HttpContext defaultContext = null;
+    private HttpContext defaultContext = null;
 
-	public SecureHttpContext() {
-	}
-	
-	public SecureHttpContext(HttpContext defaultContext, final String realm) {
-		this.defaultContext = defaultContext;
-	}
+    public SecureHttpContext() {
+    }
 
-	
-	/**
-	 * <p>@{inheritDoc}</p>
-	 * <p>Delegates to <code>defaultContext.getMimeType()</code> 
-	 */
-	public String getMimeType(String name) {
-		return this.defaultContext.getMimeType(name);
-	}
+    public SecureHttpContext(HttpContext defaultContext, final String realm) {
+        this.defaultContext = defaultContext;
+    }
 
-	/**
-	 * <p>@{inheritDoc}</p>
-	 * <p>Delegates to <code>defaultContext.getResource()</code> 
-	 */
-	public URL getResource(String name) {
-		return this.defaultContext.getResource(name);
-	}
+    /**
+     * <p>
+     * 
+     * @{inheritDoc}
+     *               </p>
+     *               <p>
+     *               Delegates to <code>defaultContext.getMimeType()</code>
+     */
+    @Override
+    public String getMimeType(String name) {
+        return this.defaultContext.getMimeType(name);
+    }
+
+    /**
+     * <p>
+     * 
+     * @{inheritDoc}
+     *               </p>
+     *               <p>
+     *               Delegates to <code>defaultContext.getResource()</code>
+     */
+    @Override
+    public URL getResource(String name) {
+        return this.defaultContext.getResource(name);
+    }
 
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {

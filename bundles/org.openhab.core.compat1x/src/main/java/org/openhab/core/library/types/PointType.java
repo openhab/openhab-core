@@ -166,7 +166,7 @@ public class PointType implements ComplexType, Command, State {
 
     @Override
     public SortedMap<String, PrimitiveType> getConstituents() {
-        SortedMap<String, PrimitiveType> result = new TreeMap<String, PrimitiveType>();
+        SortedMap<String, PrimitiveType> result = new TreeMap<>();
         result.put(KEY_LATITUDE, getLatitude());
         result.put(KEY_LONGITUDE, getLongitude());
         result.put(KEY_ALTITUDE, getAltitude());

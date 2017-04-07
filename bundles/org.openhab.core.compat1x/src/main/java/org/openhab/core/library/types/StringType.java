@@ -9,53 +9,57 @@
 package org.openhab.core.library.types;
 
 import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 import org.openhab.core.types.PrimitiveType;
+import org.openhab.core.types.State;
 
 public class StringType implements PrimitiveType, State, Command {
 
-	public final static StringType EMPTY = new StringType("");
-	
-	private final String value;
+    public final static StringType EMPTY = new StringType("");
 
-	public StringType(String value) {
-		this.value = value;
-	}
-	
-	public String toString() {
-		return value;
-	}
-	
-	public static StringType valueOf(String value) {
-		return new StringType(value);
-	}
+    private final String value;
 
-	public String format(String pattern) {
-		return String.format(pattern, value);
-	}
+    public StringType(String value) {
+        this.value = value;
+    }
 
-	@Override
-	public int hashCode() {
-		return value.hashCode();
-	}
+    @Override
+    public String toString() {
+        return value;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if(obj instanceof String) {
-			return obj.equals(value);
-		}
-		if (getClass() != obj.getClass())
-			return false;
-		StringType other = (StringType) obj;
-		if (!value.equals(other.value)) {
-			return false;
-		}
-		return true;
-	}
-	
+    public static StringType valueOf(String value) {
+        return new StringType(value);
+    }
+
+    @Override
+    public String format(String pattern) {
+        return String.format(pattern, value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof String) {
+            return obj.equals(value);
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        StringType other = (StringType) obj;
+        if (!value.equals(other.value)) {
+            return false;
+        }
+        return true;
+    }
 
 }

@@ -9,14 +9,16 @@
 package org.openhab.core.library.types;
 
 import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 import org.openhab.core.types.PrimitiveType;
+import org.openhab.core.types.State;
 
 public enum OpenClosedType implements PrimitiveType, State, Command {
-	OPEN, CLOSED;
-		
-	public String format(String pattern) {
-		return String.format(pattern, this.toString());
-	}
+    OPEN,
+    CLOSED;
+
+    @Override
+    public String format(String pattern) {
+        return String.format(pattern, this.toString());
+    }
 
 }

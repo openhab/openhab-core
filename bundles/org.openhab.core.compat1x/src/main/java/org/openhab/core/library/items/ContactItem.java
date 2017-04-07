@@ -22,48 +22,50 @@ import org.openhab.core.types.UnDefType;
 /**
  * A ContactItem can be used for sensors that return an "open" or "close" as a state.
  * This is useful for doors, windows, etc.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public class ContactItem extends GenericItem {
-	
-	private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-	private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
-	
-	static {
-		acceptedDataTypes.add(OpenClosedType.class);
-		acceptedDataTypes.add(UnDefType.class);
-	}
-	
-	public ContactItem(String name) {
-		super(name);
-	}
 
-	public void send(OpenClosedType command) {
-		internalSend(command);
-	}
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
-	public List<Class<? extends State>> getAcceptedDataTypes() {
-		return acceptedDataTypes;
-	}
+    static {
+        acceptedDataTypes.add(OpenClosedType.class);
+        acceptedDataTypes.add(UnDefType.class);
+    }
 
-	public List<Class<? extends Command>> getAcceptedCommandTypes() {
-		return acceptedCommandTypes;
-	}
+    public ContactItem(String name) {
+        super(name);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public State getStateAs(Class<? extends State> typeClass) {
-		if(typeClass==DecimalType.class) {
-			return state==OpenClosedType.OPEN ? new DecimalType(1) : DecimalType.ZERO;
-		} else if(typeClass==PercentType.class) {
-			return state==OpenClosedType.OPEN ? PercentType.HUNDRED : PercentType.ZERO;
-		} else {
-			return super.getStateAs(typeClass);
-		}
-	}
+    public void send(OpenClosedType command) {
+        internalSend(command);
+    }
+
+    @Override
+    public List<Class<? extends State>> getAcceptedDataTypes() {
+        return acceptedDataTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return acceptedCommandTypes;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public State getStateAs(Class<? extends State> typeClass) {
+        if (typeClass == DecimalType.class) {
+            return state == OpenClosedType.OPEN ? new DecimalType(1) : DecimalType.ZERO;
+        } else if (typeClass == PercentType.class) {
+            return state == OpenClosedType.OPEN ? PercentType.HUNDRED : PercentType.ZERO;
+        } else {
+            return super.getStateAs(typeClass);
+        }
+    }
 }

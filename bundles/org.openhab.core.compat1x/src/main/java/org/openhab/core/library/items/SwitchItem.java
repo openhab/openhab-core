@@ -22,47 +22,49 @@ import org.openhab.core.types.UnDefType;
 /**
  * A SwitchItem represents a normal switch that can be ON or OFF.
  * Useful for normal lights, presence detection etc.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public class SwitchItem extends GenericItem {
-	
-	private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-	private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
 
-	static {
-		acceptedDataTypes.add(OnOffType.class);
-		acceptedDataTypes.add(UnDefType.class);
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
-		acceptedCommandTypes.add(OnOffType.class);
-	}
-	
-	public SwitchItem(String name) {
-		super(name);
-	}
+    static {
+        acceptedDataTypes.add(OnOffType.class);
+        acceptedDataTypes.add(UnDefType.class);
 
-	public void send(OnOffType command) {
-		internalSend(command);
-	}
+        acceptedCommandTypes.add(OnOffType.class);
+    }
 
-	public List<Class<? extends State>> getAcceptedDataTypes() {
-		return acceptedDataTypes;
-	}
+    public SwitchItem(String name) {
+        super(name);
+    }
 
-	public List<Class<? extends Command>> getAcceptedCommandTypes() {
-		return acceptedCommandTypes;
-	}
-	
-	@Override
-	public State getStateAs(Class<? extends State> typeClass) {
-		if(typeClass==DecimalType.class) {
-			return state==OnOffType.ON ? new DecimalType(1) : DecimalType.ZERO;
-		} else if(typeClass==PercentType.class) {
-			return state==OnOffType.ON ? PercentType.HUNDRED : PercentType.ZERO;
-		} else {
-			return super.getStateAs(typeClass);
-		}
-	}
+    public void send(OnOffType command) {
+        internalSend(command);
+    }
+
+    @Override
+    public List<Class<? extends State>> getAcceptedDataTypes() {
+        return acceptedDataTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return acceptedCommandTypes;
+    }
+
+    @Override
+    public State getStateAs(Class<? extends State> typeClass) {
+        if (typeClass == DecimalType.class) {
+            return state == OnOffType.ON ? new DecimalType(1) : DecimalType.ZERO;
+        } else if (typeClass == PercentType.class) {
+            return state == OnOffType.ON ? PercentType.HUNDRED : PercentType.ZERO;
+        } else {
+            return super.getStateAs(typeClass);
+        }
+    }
 }

@@ -36,14 +36,14 @@ public class CompatibilityActivator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         CompatibilityActivator.context = bundleContext;
 
-        itemRegistryTracker = new ServiceTracker<ItemRegistry, ItemRegistry>(bundleContext, ItemRegistry.class, null);
+        itemRegistryTracker = new ServiceTracker<>(bundleContext, ItemRegistry.class, null);
         itemRegistryTracker.open();
 
-        eventPublisherTracker = new ServiceTracker<EventPublisher, EventPublisher>(bundleContext, EventPublisher.class,
+        eventPublisherTracker = new ServiceTracker<>(bundleContext, EventPublisher.class,
                 null);
         eventPublisherTracker.open();
 
-        scriptEngineTracker = new ServiceTracker<ScriptEngine, ScriptEngine>(bundleContext, ScriptEngine.class, null);
+        scriptEngineTracker = new ServiceTracker<>(bundleContext, ScriptEngine.class, null);
         scriptEngineTracker.open();
     }
 

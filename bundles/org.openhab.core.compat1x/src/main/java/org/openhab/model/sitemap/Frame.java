@@ -10,7 +10,6 @@
  */
 package org.openhab.model.sitemap;
 
-
 /**
  * <!-- begin-user-doc -->
  * A representation of the model object '<em><b>Frame</b></em>'.
@@ -21,6 +20,5 @@ package org.openhab.model.sitemap;
  * @model
  * @generated
  */
-public interface Frame extends LinkableWidget
-{
+public interface Frame extends LinkableWidget {
 } // Frame

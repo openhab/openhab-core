@@ -8,14 +8,13 @@
  */
 package org.openhab.core.types;
 
-
 /**
  * A primitive type consists of a single value like a string, a number, etc.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public interface PrimitiveType extends Type {
-	
+
 }

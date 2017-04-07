@@ -30,7 +30,7 @@ public class CallType implements ComplexType, Command, State {
     public static final State EMPTY = new CallType(new StringType(""), new StringType(""));
 
     public CallType() {
-        callDetails = new TreeMap<String, PrimitiveType>();
+        callDetails = new TreeMap<>();
     }
 
     public CallType(String value) {

@@ -22,6 +22,5 @@ import org.eclipse.emf.ecore.EObject;
  * @model
  * @generated
  */
-public interface SitemapModel extends EObject
-{
+public interface SitemapModel extends EObject {
 } // SitemapModel

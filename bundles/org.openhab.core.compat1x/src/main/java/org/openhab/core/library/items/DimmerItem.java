@@ -24,57 +24,59 @@ import org.openhab.core.types.UnDefType;
 /**
  * A DimmerItem can be used as a switch (ON/OFF), but it also accepts percent values
  * to reflect the dimmed state.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
  */
 public class DimmerItem extends SwitchItem {
 
-	private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-	private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
-	static {
-		acceptedDataTypes.add(OnOffType.class);
-		acceptedDataTypes.add(PercentType.class);
-		acceptedDataTypes.add(UnDefType.class);
+    static {
+        acceptedDataTypes.add(OnOffType.class);
+        acceptedDataTypes.add(PercentType.class);
+        acceptedDataTypes.add(UnDefType.class);
 
-		acceptedCommandTypes.add(OnOffType.class);		
-		acceptedCommandTypes.add(IncreaseDecreaseType.class);
-		acceptedCommandTypes.add(PercentType.class);
-	}
-	
-	public DimmerItem(String name) {
-		super(name);
-	}
+        acceptedCommandTypes.add(OnOffType.class);
+        acceptedCommandTypes.add(IncreaseDecreaseType.class);
+        acceptedCommandTypes.add(PercentType.class);
+    }
 
-	public void send(PercentType command) {
-		internalSend(command);
-	}
-	
-	public List<Class<? extends State>> getAcceptedDataTypes() {
-		return acceptedDataTypes;
-	}
+    public DimmerItem(String name) {
+        super(name);
+    }
 
-	public List<Class<? extends Command>> getAcceptedCommandTypes() {
-		return acceptedCommandTypes;
-	}
+    public void send(PercentType command) {
+        internalSend(command);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setState(State state) {
-		// we map ON/OFF values to the percent values 0 and 100
-		if(state==OnOffType.OFF) {
-			super.setState(PercentType.ZERO);
-		} else if(state==OnOffType.ON) {
-			super.setState(PercentType.HUNDRED);
-		} else {
-			super.setState(state);
-		}
-	}
-	
+    @Override
+    public List<Class<? extends State>> getAcceptedDataTypes() {
+        return acceptedDataTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return acceptedCommandTypes;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setState(State state) {
+        // we map ON/OFF values to the percent values 0 and 100
+        if (state == OnOffType.OFF) {
+            super.setState(PercentType.ZERO);
+        } else if (state == OnOffType.ON) {
+            super.setState(PercentType.HUNDRED);
+        } else {
+            super.setState(state);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */

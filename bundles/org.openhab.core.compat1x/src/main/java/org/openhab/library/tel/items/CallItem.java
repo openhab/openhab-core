@@ -18,25 +18,27 @@ import org.openhab.core.types.UnDefType;
 import org.openhab.library.tel.types.CallType;
 
 public class CallItem extends GenericItem {
-	
-	private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-	private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
 
-	static {
-		acceptedDataTypes.add(CallType.class);
-		acceptedDataTypes.add(UnDefType.class);
-	}
-	
-	public CallItem(String name) {
-		super(name);
-	}
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
-	public List<Class<? extends State>> getAcceptedDataTypes() {
-		return acceptedDataTypes;
-	}
+    static {
+        acceptedDataTypes.add(CallType.class);
+        acceptedDataTypes.add(UnDefType.class);
+    }
 
-	public List<Class<? extends Command>> getAcceptedCommandTypes() {
-		return acceptedCommandTypes;
-	}
-	
+    public CallItem(String name) {
+        super(name);
+    }
+
+    @Override
+    public List<Class<? extends State>> getAcceptedDataTypes() {
+        return acceptedDataTypes;
+    }
+
+    @Override
+    public List<Class<? extends Command>> getAcceptedCommandTypes() {
+        return acceptedCommandTypes;
+    }
+
 }

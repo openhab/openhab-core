@@ -8,9 +8,9 @@
  */
 package org.openhab.core.types;
 
-/** 
+/**
  * This is a marker interface for all command types.
- * 
+ *
  * @author Kai Kreuzer
  * @since 0.1.0
  *
