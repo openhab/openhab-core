@@ -247,6 +247,26 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>check-bindings</id>
+      <activation>
+        <file>
+          <exists>ESH-INF/binding/binding.xml</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+              <groupId>org.openhab.tools</groupId>
+              <artifactId>static-code-analysis</artifactId>
+              <version>${sat.version}</version>
+          </plugin>
+          <configuration>
+            <checkstyleProperties>src/sat/binding.properties</checkstyleProperties>
+          </configuration>
+        </plugins>
+      </build>
+    </profile>
     </profiles>
 
     <pluginRepositories>
