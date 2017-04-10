@@ -260,10 +260,10 @@
               <groupId>org.openhab.tools</groupId>
               <artifactId>static-code-analysis</artifactId>
               <version>${sat.version}</version>
+              <configuration>
+                 <checkstyleProperties>src/sat/binding.properties</checkstyleProperties>
+              </configuration>
           </plugin>
-          <configuration>
-            <checkstyleProperties>src/sat/binding.properties</checkstyleProperties>
-          </configuration>
         </plugins>
       </build>
     </profile>
