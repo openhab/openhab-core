@@ -8,6 +8,7 @@
  */
 package org.openhab.core.karaf.internal;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -139,6 +140,11 @@ public class KarafExtensionService implements ExtensionService {
     @Override
     public void uninstall(String id) {
         featureInstaller.removeAddon(getType(id), getName(id));
+    }
+
+    @Override
+    public String getExtensionId(URI extensionURI) {
+        return null;
     }
 
     private String getType(String name) {
