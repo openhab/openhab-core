@@ -86,6 +86,7 @@
         <feature>esh-automation-module-media</feature>
         <feature>esh-automation-module-script</feature>
         <feature>esh-automation-module-script-defaultscope</feature>
+        <feature>esh-automation-module-script-rulesupport</feature>
         <feature>esh-automation-module-timer</feature>
         <feature>esh-automation-parser-gson</feature>
         <feature>esh-automation-providers</feature>
