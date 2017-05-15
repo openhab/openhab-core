@@ -71,6 +71,7 @@ public class DashboardServlet extends HttpServlet {
     }
 
     private void serveDashboard(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String index = indexTemplate.replace("<!--version-->", OpenHAB.getVersion() + " " + OpenHAB.buildString());
         StringBuilder entries = new StringBuilder();
         for (DashboardTile tile : tiles) {
             String entry = entryTemplate.replace("<!--name-->", tile.getName());
@@ -93,8 +94,7 @@ public class DashboardServlet extends HttpServlet {
             }
         }
         String warn = isExposed(req) ? warnTemplate : "";
-        resp.getWriter()
-                .append(indexTemplate.replace("<!--entries-->", entries.toString()).replace("<!--warn-->", warn));
+        resp.getWriter().append(index.replace("<!--entries-->", entries.toString()).replace("<!--warn-->", warn));
         resp.getWriter().close();
     }
 
@@ -104,7 +104,8 @@ public class DashboardServlet extends HttpServlet {
             resp.sendRedirect(req.getRequestURI());
         } else {
             resp.setContentType("text/html;charset=UTF-8");
-            resp.getWriter().append(setupTemplate);
+            resp.getWriter().append(
+                    setupTemplate.replace("<!--version-->", OpenHAB.getVersion() + " " + OpenHAB.buildString()));
             resp.getWriter().close();
         }
     }
