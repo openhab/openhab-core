@@ -8,7 +8,13 @@
  */
 package org.openhab.core;
 
+import java.io.FileInputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
+
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.osgi.framework.FrameworkUtil;
 
 /**
@@ -39,4 +45,20 @@ public class OpenHAB {
         return versionString;
     }
 
+    static public String buildString() {
+        Properties prop = new Properties();
+
+        Path versionFilePath = Paths.get(ConfigConstants.getUserDataFolder(), "etc", "version.properties");
+        try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
+            prop.load(fis);
+            String buildNo = prop.getProperty("build-no");
+            if (buildNo != null && !buildNo.isEmpty()) {
+                return buildNo;
+            }
+        } catch (Exception e) {
+            // ignore if the file is not there or not readable
+        }
+        return "Unknown Build No.";
+
+    }
 }
