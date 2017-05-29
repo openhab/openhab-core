@@ -24,9 +24,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/openhab/openhab-core.git</connection>
-        <developerConnection>scm:git:https://github.com/openhab/openhab-core.git</developerConnection>
-        <url>https://github.com/openhab/openhab-core</url>
+        <connection>scm:git:${scm.gitBaseUrl}/openhab-core.git</connection>
+        <developerConnection>scm:git:${scm.gitBaseUrl}/openhab-core.git</developerConnection>
+        <url>${scm.gitBaseUrl}/openhab-core</url>
     </scm>
 
     <issueManagement>
@@ -36,12 +36,14 @@
 
     <distributionManagement>
         <repository>
-            <id>bintray</id>
-            <url>https://api.bintray.com/maven/openhab/mvn/openhab-core/;publish=1</url>
+            <id>jfrog-sandbox-release</id>
+            <name>openhab-releases</name>
+            <url>https://openhab.jfrog.io/openhab/sandbox-release</url>
         </repository>
         <snapshotRepository>
-            <id>jfrog</id>
-            <url>https://openhab.jfrog.io/openhab/libs-snapshot-local</url>
+            <id>jfrog-sandbox-snapshot</id>
+            <name>openhab-snapshots</name>
+            <url>https://openhab.jfrog.io/openhab/sandbox-snapshot</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -68,6 +70,8 @@
         <license.maven.plugin.version>2.10</license.maven.plugin.version>
         <tycho-version>1.0.0</tycho-version>
         <tycho-groupid>org.eclipse.tycho</tycho-groupid>
+
+        <scm.gitBaseUrl>https://github.com/openhab</scm.gitBaseUrl>
     </properties>
 
     <description>This is the open Home Automation Bus (openHAB)</description>
@@ -141,6 +145,18 @@
                             <supportedProjectType>eclipse-plugin</supportedProjectType>
                         </supportedProjectTypes>
                     </configuration>
+                </plugin>
+                <plugin>
+                  <groupId>com.itemis.maven.plugins</groupId>
+                  <artifactId>unleash-maven-plugin</artifactId>
+                  <version>2.6.0</version>
+                  <dependencies>
+                    <dependency>
+                      <groupId>com.itemis.maven.plugins</groupId>
+                      <artifactId>unleash-scm-provider-git</artifactId>
+                      <version>2.1.0</version>
+                    </dependency>
+                  </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
