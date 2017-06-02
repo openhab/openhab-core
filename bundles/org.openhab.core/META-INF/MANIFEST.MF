@@ -6,7 +6,7 @@ Ignore-Package: org.openhab.core.internal.items,org.openhab.core.inter
  nal,org.openhab.core.internal.events
 Bundle-Name: openHAB Core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-Vendor: openHAB.org
+Bundle-Vendor: openHAB
 Bundle-Version: 2.1.0.qualifier
 Bundle-Activator: org.openhab.core.internal.CoreActivator
 Bundle-ManifestVersion: 2

@@ -5,5 +5,7 @@ Bundle-SymbolicName: org.openhab.ui.classicui
 Bundle-Version: 2.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
-Service-Component: OSGI-INF/dashboardtile.xml
+Service-Component: OSGI-INF/*.xml
 Import-Package: org.openhab.ui.dashboard
+Bundle-Vendor: openHAB
+Bundle-ActivationPolicy: lazy

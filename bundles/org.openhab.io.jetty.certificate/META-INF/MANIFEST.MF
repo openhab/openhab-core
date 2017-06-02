@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.openhab.io.jetty.certificate;singleton:=true
 Bundle-Version: 2.1.0.qualifier
 Bundle-Activator: org.openhab.io.jetty.certificate.internal.CertificateGenerator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-Vendor: openHAB.org
+Bundle-Vendor: openHAB
 Bundle-Classpath: .,
  lib/bcpkix-jdk15on-1.52.jar,
  lib/bcprov-jdk15on-1.52.jar

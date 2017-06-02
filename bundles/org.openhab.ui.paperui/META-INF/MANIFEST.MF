@@ -7,3 +7,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: org.eclipse.smarthome.ui.paper
 Bundle-ClassPath: patch/,.
 Import-Package: org.openhab.ui.dashboard
+Bundle-Vendor: openHAB
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy

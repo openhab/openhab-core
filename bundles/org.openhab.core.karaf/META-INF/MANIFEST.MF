@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Karaf Integration
 Bundle-SymbolicName: org.openhab.core.karaf
 Bundle-Version: 2.1.0.qualifier
-Bundle-Vendor: openHAB.org
+Bundle-Vendor: openHAB
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Karaf-Commands: org.openhab.core.karaf.internal.command
 Service-Component: OSGI-INF/*.xml

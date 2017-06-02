@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Dashboard UI
 Bundle-SymbolicName: org.openhab.ui.dashboard
 Bundle-Version: 2.1.0.qualifier
-Bundle-Vendor: openHAB.org
+Bundle-Vendor: openHAB
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Import-Package: javax.servlet,
