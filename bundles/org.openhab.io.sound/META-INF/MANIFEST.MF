@@ -14,3 +14,4 @@ Fragment-Host: org.eclipse.smarthome.io.javasound
 Bundle-ClassPath: lib/jl1.0.1.jar,
  .
 Bundle-ActivationPolicy: lazy
+Bundle-Vendor: openHAB

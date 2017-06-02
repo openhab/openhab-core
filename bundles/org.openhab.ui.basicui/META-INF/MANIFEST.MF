@@ -6,6 +6,7 @@ Bundle-Version: 2.1.0.qualifier
 Fragment-Host: org.eclipse.smarthome.ui.basic
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: patch/,.
-Service-Component: OSGI-INF/dashboardtile.xml
+Service-Component: OSGI-INF/*.xml
 Import-Package: org.openhab.ui.dashboard
-Bundle-Vendor: openHAB.org
+Bundle-Vendor: openHAB
+Bundle-ActivationPolicy: lazy

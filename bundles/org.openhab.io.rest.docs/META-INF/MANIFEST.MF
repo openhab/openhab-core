@@ -17,3 +17,5 @@ Import-Package: com.google.gson,
  org.slf4j
 Service-Component: OSGI-INF/*.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: openHAB
+Bundle-ActivationPolicy: lazy
