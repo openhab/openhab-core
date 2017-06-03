@@ -60,12 +60,11 @@
         <bundle>mvn:org.openhab.core/org.openhab.core.compat1x/${project.version}</bundle>
     </feature>
 
-    <feature name="openhab-transport-coap" description="Serial Transport" version="${project.version}">
+    <feature name="openhab-transport-coap" description="CoAP Transport" version="${project.version}">
         <bundle start-level="80">mvn:org.eclipse.californium/californium-osgi/${californium.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.californium/element-connector/${californium.version}</bundle>
-        <bundle start-level="80">mvn:org.eclipse.californium/scandium/${californium.version}	</bundle>
+        <bundle start-level="80">mvn:org.eclipse.californium/scandium/${californium.version}</bundle>
     </feature>
-
 
     <feature name="openhab-transport-mdns" description="mDNS Transport" version="${project.version}">
         <feature>esh-io-transport-mdns</feature>
