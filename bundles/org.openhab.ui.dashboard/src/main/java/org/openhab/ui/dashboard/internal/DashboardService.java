@@ -18,6 +18,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.smarthome.core.net.HttpServiceUtil;
+import org.eclipse.smarthome.core.net.NetUtil;
 import org.openhab.ui.dashboard.DashboardTile;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -55,7 +57,15 @@ public class DashboardService {
             httpService.registerServlet(DASHBOARD_ALIAS + "/" + SERVLET_NAME, createServlet(), props,
                     httpService.createDefaultHttpContext());
             httpService.registerResources(DASHBOARD_ALIAS, "web", null);
-            logger.info("Started dashboard at " + DASHBOARD_ALIAS);
+
+            if (HttpServiceUtil.getHttpServicePort(bundleContext) > 0) {
+                logger.info("Started dashboard at http://{}:{}", NetUtil.getLocalIpv4HostAddress(),
+                        HttpServiceUtil.getHttpServicePort(bundleContext));
+            }
+            if (HttpServiceUtil.getHttpServicePortSecure(bundleContext) > 0) {
+                logger.info("Started dashboard at https://{}:{}", NetUtil.getLocalIpv4HostAddress(),
+                        HttpServiceUtil.getHttpServicePortSecure(bundleContext));
+            }
         } catch (NamespaceException | ServletException e) {
             logger.error("Error during dashboard startup: {}", e.getMessage());
         }
