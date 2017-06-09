@@ -9,6 +9,7 @@ Service-Component: OSGI-INF/*.xml
 Import-Package: javax.servlet,
  javax.servlet.http,
  org.apache.commons.io,
+ org.eclipse.smarthome.core.net,
  org.openhab.core,
  org.osgi.framework,
  org.osgi.service.cm,
