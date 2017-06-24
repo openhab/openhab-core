@@ -11,6 +11,9 @@
 <link type="text/css" href="bootstrap.min.css" rel="stylesheet"></link>
 <link type="text/css" href="main.css" rel="stylesheet"></link>
 <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon"><link>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/geolocation.js"></script>
 </head>
 
 <body>
@@ -30,6 +33,12 @@
             <!--entries-->
         </div>
         <div class="line">
+            <div class="geolocation">
+                <div class="decorator"></div>
+                <hr />
+                <p>If you allow your browser to access your location, openHAB will use it for weather and astro information.</p>
+                <p><span>Your location: </span><span id="geolocation"></span></p>
+            </div>
             <div class="decorator"></div>
             <hr />
         </div>

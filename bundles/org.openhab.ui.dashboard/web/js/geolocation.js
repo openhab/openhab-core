@@ -12,7 +12,7 @@
         }
 
         function error() {
-            output.html("Unable to retrieve your location.")
+            $('.geolocation').hide()
         }
 
         $('.geolocation').hide()
@@ -27,7 +27,7 @@
         $.getJSON('../rest/services/org.eclipse.smarthome.core.i18nprovider/config', function(response) {
             if (!response.location) {
                 $('.geolocation').show()
-                output.html("Retrieving your location…")
+                output.html("<div class=\"spinner spinner--steps\"><img src=\"img/spinner.svg\"></div>")
                 navigator.geolocation.getCurrentPosition(success, error)
             }
         })
