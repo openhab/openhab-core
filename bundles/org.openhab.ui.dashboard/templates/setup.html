@@ -10,6 +10,9 @@
 <link type="text/css" href="bootstrap.min.css" rel="stylesheet"></link>
 <link type="text/css" href="main.css" rel="stylesheet"></link>
 <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon"><link>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/geolocation.js"></script>
 </head>
 
 <body>
@@ -21,6 +24,12 @@
     <section class="container">
         <h1>Welcome to openHAB 2 - Initial Setup</h1>
         <div class="line">
+            <div class="geolocation">
+                <div class="decorator"></div>
+                <hr />
+                <p>In order to setup the location of your openHAB instance please accept the request from your browser. The location will be used for weather and date/time information.</p>
+                <p><span>Location: </span><span id="geolocation"></span></p>
+            </div>
             <div class="decorator"></div>
             <div>
                 <p><br/>openHAB comes with many different add-ons. To allow an easy start, there are four pre-defined packages available that are a good starting point.
@@ -79,8 +88,7 @@
                 </div>
             </div>
         </div>
-        <a href="#" onclick="location.href = 'index?type=minimal'">Skip the package selection...</a>.             
-             
+        <a href="#" onclick="location.href = 'index?type=minimal'">Skip the package selection...</a>.  
         <div class="line">
             <div class="decorator"></div>
             <hr />
