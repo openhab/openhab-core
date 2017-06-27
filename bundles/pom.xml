@@ -30,4 +30,5 @@
     <module>org.openhab.ui.paperui</module>
   </modules>
 
+<version>2.1.0</version>
 </project>
