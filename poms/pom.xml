@@ -57,7 +57,7 @@
 
         <ohdr.version>1.0.12</ohdr.version>
         <esh.version>0.9.0-SNAPSHOT</esh.version>
-        <repo.version>2.1.x</repo.version>
+        <repo.version>2.2.x</repo.version>
         <karaf.version>4.0.8</karaf.version>
         <jetty.version>9.2.19.v20160908</jetty.version>
         <jackson.version>1.9.13</jackson.version>
