@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Sound Support
 Bundle-SymbolicName: org.openhab.io.sound
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 2.2.0.qualifier
 Import-Package: org.apache.commons.collections,
  org.apache.commons.io,
  org.eclipse.smarthome.core.audio,

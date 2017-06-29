@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB REST Documentation
 Bundle-SymbolicName: org.openhab.io.rest.docs
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 2.2.0.qualifier
 Import-Package: com.google.gson,
  com.google.gson.annotations,
  javax.servlet,

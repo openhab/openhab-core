@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Basic UI Fragment
 Bundle-SymbolicName: org.openhab.ui.basicui
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 2.2.0.qualifier
 Fragment-Host: org.eclipse.smarthome.ui.basic
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: patch/,.
