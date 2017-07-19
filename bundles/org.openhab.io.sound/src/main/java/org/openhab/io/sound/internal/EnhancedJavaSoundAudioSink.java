@@ -15,6 +15,7 @@ import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioStream;
 import org.eclipse.smarthome.core.audio.URLAudioStream;
 import org.eclipse.smarthome.core.audio.UnsupportedAudioFormatException;
+import org.eclipse.smarthome.core.audio.UnsupportedAudioStreamException;
 import org.eclipse.smarthome.io.javasound.internal.JavaSoundAudioSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,8 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
     }
 
     @Override
-    public synchronized void process(final AudioStream audioStream) throws UnsupportedAudioFormatException {
+    public synchronized void process(final AudioStream audioStream)
+            throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
         if (audioStream != null && audioStream.getFormat().getCodec() != AudioFormat.CODEC_MP3) {
             // we can only deal with mp3, so delegate the rest
             super.process(audioStream);
