@@ -57,6 +57,7 @@
         <feature>esh-model-script</feature>
         <feature>esh-model-sitemap</feature>
         <feature>esh-ui</feature>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-httpclient/3.1_7</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.compat1x/${project.version}</bundle>
     </feature>
 
