@@ -4,3 +4,5 @@
 /*features*/*/src/main/history/
 maven-metadata-local.xml
 dependency-reduced-pom.xml
+**/node_modules/
+npm-debug.log
