@@ -79,7 +79,7 @@
 				<version>${groovy.eclipse.compiler.version}</version>
 				<extensions>true</extensions>
 			</plugin>
-            <plugin>
+			<plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
         </plugins>
