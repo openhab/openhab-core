@@ -79,6 +79,9 @@
 				<version>${groovy.eclipse.compiler.version}</version>
 				<extensions>true</extensions>
 			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
         </plugins>
 
         <pluginManagement>
@@ -91,20 +94,52 @@
                         <encoding>UTF-8</encoding>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
-	 					<compilerId>groovy-eclipse-compiler</compilerId>
+                        <compilerId>jdt</compilerId>
+                        <extraClasspathElements>
+                            <extraClasspathElement>
+                                <groupId>com.google.code.findbugs</groupId>
+                                <artifactId>jsr305</artifactId>
+                                <version>3.0.2</version>
+                            </extraClasspathElement>
+                        </extraClasspathElements>
+                        <compilerArgs>
+                            <arg>-err:+nullAnnot(javax.annotation.Nullable|javax.annotation.Nonnull|org.eclipse.jdt.annotation.NonNullByDefault)</arg>
+                            <arg>-warn:+null</arg>
+                        </compilerArgs>
  					</configuration>
- 					<dependencies>
- 						<dependency>
- 							<groupId>org.codehaus.groovy</groupId>
- 							<artifactId>groovy-eclipse-compiler</artifactId>
- 							<version>${groovy.eclipse.compiler.version}</version>
- 						</dependency>
- 						<dependency>
- 							<groupId>org.codehaus.groovy</groupId>
- 							<artifactId>groovy-eclipse-batch</artifactId>
- 							<version>${groovy.eclipse.batch.version}</version>
- 						</dependency>
- 					</dependencies>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.6.1</version>
+                    <configuration>
+                        <compilerId>groovy-eclipse-compiler</compilerId>
+                        <extraClasspathElements>
+                            <extraClasspathElement>
+                                <groupId>com.google.code.findbugs</groupId>
+                                <artifactId>jsr305</artifactId>
+                                <version>3.0.2</version>
+                            </extraClasspathElement>
+                        </extraClasspathElements>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.groovy</groupId>
+                            <artifactId>groovy-eclipse-compiler</artifactId>
+                            <version>2.9.2-01</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.codehaus.groovy</groupId>
+                            <artifactId>groovy-eclipse-batch</artifactId>
+                            <version>2.4.3-01</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
