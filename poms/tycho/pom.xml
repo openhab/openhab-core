@@ -103,8 +103,8 @@
                             </extraClasspathElement>
                         </extraClasspathElements>
                         <compilerArgs>
-                            <arg>-err:+nullAnnot(javax.annotation.Nullable|javax.annotation.Nonnull|org.eclipse.jdt.annotation.NonNullByDefault),+inheritNullAnnot</arg>
-                            <arg>-warn:+null</arg>
+                            <arg>-err:+nullAnnot(javax.annotation.Nullable|javax.annotation.Nonnull|org.eclipse.jdt.annotation.NonNullByDefault),+inheritNullAnnot,-nullUncheckedConversion,-nullAnnotRedundant</arg>
+                            <arg>-warn:+null,+nullUncheckedConversion,+nullAnnotRedundant</arg>
                         </compilerArgs>
  					</configuration>
                 </plugin>
