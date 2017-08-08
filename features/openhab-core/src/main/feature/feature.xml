@@ -27,10 +27,9 @@
         <feature>esh-storage-json</feature>
         <feature>openhab-runtime-certificate</feature>
         <feature>openhab-transport-mdns</feature>
-        <feature dependency="true">shell</feature>
+        <feature prerequisite="true">shell</feature>
+        <feature prerequisite="true">wrapper</feature>
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
-        <bundle prerequisite="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${karaf.version}</bundle>
-        <bundle prerequisite="true">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${karaf.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.io.sound/${project.version}</bundle>
