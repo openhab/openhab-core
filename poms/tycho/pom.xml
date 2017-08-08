@@ -96,15 +96,15 @@
                         <target>${maven.compiler.target}</target>
                         <compilerId>jdt</compilerId>
                         <extraClasspathElements>
-                            <extraClasspathElement>
-                                <groupId>com.google.code.findbugs</groupId>
-                                <artifactId>jsr305</artifactId>
-                                <version>3.0.2</version>
-                            </extraClasspathElement>
+                          <extraClasspathElement>
+                            <groupId>org.eclipse.jdt</groupId>
+                            <artifactId>org.eclipse.jdt.annotation</artifactId>
+                            <version>${jdt-annotations.version}</version>
+                          </extraClasspathElement>
                         </extraClasspathElements>
                         <compilerArgs>
-                            <arg>-err:+nullAnnot(javax.annotation.Nullable|javax.annotation.Nonnull|org.eclipse.jdt.annotation.NonNullByDefault),+inheritNullAnnot,-nullUncheckedConversion,-nullAnnotRedundant</arg>
-                            <arg>-warn:+null,+nullUncheckedConversion,+nullAnnotRedundant</arg>
+                            <arg>-err:+nullAnnot(org.eclipse.jdt.annotation.Nullable|org.eclipse.jdt.annotation.NonNull|org.eclipse.jdt.annotation.NonNullByDefault),+inheritNullAnnot</arg>
+                            <arg>-warn:+null,+inheritNullAnnot,+nullAnnotConflict,+nullUncheckedConversion,+nullAnnotRedundant,+nullDereference</arg>
                         </compilerArgs>
  					</configuration>
                 </plugin>
@@ -113,13 +113,6 @@
                     <version>3.6.1</version>
                     <configuration>
                         <compilerId>groovy-eclipse-compiler</compilerId>
-                        <extraClasspathElements>
-                            <extraClasspathElement>
-                                <groupId>com.google.code.findbugs</groupId>
-                                <artifactId>jsr305</artifactId>
-                                <version>3.0.2</version>
-                            </extraClasspathElement>
-                        </extraClasspathElements>
                     </configuration>
                     <executions>
                         <execution>
