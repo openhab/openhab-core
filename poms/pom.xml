@@ -68,6 +68,7 @@
         <license.maven.plugin.version>2.10</license.maven.plugin.version>
         <tycho-version>1.0.0</tycho-version>
         <tycho-groupid>org.eclipse.tycho</tycho-groupid>
+        <jdt-annotations.version>2.1.0</jdt-annotations.version>
     </properties>
 
     <description>This is the open Home Automation Bus (openHAB)</description>
