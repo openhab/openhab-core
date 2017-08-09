@@ -26,7 +26,7 @@ import org.eclipse.emf.common.util.EList;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getSwitch()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Switch extends NonLinkableWidget {
     /**
@@ -42,7 +42,6 @@ public interface Switch extends NonLinkableWidget {
      * @return the value of the '<em>Mappings</em>' containment reference list.
      * @see org.openhab.model.sitemap.SitemapPackage#getSwitch_Mappings()
      * @model containment="true"
-     * @generated
      */
     EList<Mapping> getMappings();
 

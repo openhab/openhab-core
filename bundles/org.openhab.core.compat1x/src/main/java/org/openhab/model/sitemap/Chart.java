@@ -26,7 +26,7 @@ package org.openhab.model.sitemap;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getChart()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Chart extends NonLinkableWidget {
     /**
@@ -42,7 +42,6 @@ public interface Chart extends NonLinkableWidget {
      * @see #setService(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getChart_Service()
      * @model
-     * @generated
      */
     String getService();
 
@@ -53,7 +52,6 @@ public interface Chart extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Service</em>' attribute.
      * @see #getService()
-     * @generated
      */
     void setService(String value);
 
@@ -70,7 +68,6 @@ public interface Chart extends NonLinkableWidget {
      * @see #setRefresh(int)
      * @see org.openhab.model.sitemap.SitemapPackage#getChart_Refresh()
      * @model
-     * @generated
      */
     int getRefresh();
 
@@ -81,7 +78,6 @@ public interface Chart extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Refresh</em>' attribute.
      * @see #getRefresh()
-     * @generated
      */
     void setRefresh(int value);
 
@@ -98,7 +94,6 @@ public interface Chart extends NonLinkableWidget {
      * @see #setPeriod(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getChart_Period()
      * @model
-     * @generated
      */
     String getPeriod();
 
@@ -109,7 +104,6 @@ public interface Chart extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Period</em>' attribute.
      * @see #getPeriod()
-     * @generated
      */
     void setPeriod(String value);
 

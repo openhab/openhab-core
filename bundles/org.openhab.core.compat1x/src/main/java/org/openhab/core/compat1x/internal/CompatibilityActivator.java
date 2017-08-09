@@ -15,6 +15,10 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class CompatibilityActivator implements BundleActivator {
 
     private static BundleContext context;
@@ -39,8 +43,7 @@ public class CompatibilityActivator implements BundleActivator {
         itemRegistryTracker = new ServiceTracker<>(bundleContext, ItemRegistry.class, null);
         itemRegistryTracker.open();
 
-        eventPublisherTracker = new ServiceTracker<>(bundleContext, EventPublisher.class,
-                null);
+        eventPublisherTracker = new ServiceTracker<>(bundleContext, EventPublisher.class, null);
         eventPublisherTracker.open();
 
         scriptEngineTracker = new ServiceTracker<>(bundleContext, ScriptEngine.class, null);

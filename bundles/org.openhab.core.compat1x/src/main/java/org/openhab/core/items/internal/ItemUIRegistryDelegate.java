@@ -26,6 +26,10 @@ import org.openhab.model.sitemap.Sitemap;
 import org.openhab.model.sitemap.Widget;
 import org.openhab.ui.items.ItemUIRegistry;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class ItemUIRegistryDelegate
         implements ItemUIRegistry, RegistryChangeListener<org.eclipse.smarthome.core.items.Item> {
 

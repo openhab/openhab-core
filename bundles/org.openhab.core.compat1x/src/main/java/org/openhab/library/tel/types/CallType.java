@@ -19,6 +19,10 @@ import org.openhab.core.types.ComplexType;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class CallType implements ComplexType, Command, State {
 
     protected static final String DEST_NUM = "destNum";

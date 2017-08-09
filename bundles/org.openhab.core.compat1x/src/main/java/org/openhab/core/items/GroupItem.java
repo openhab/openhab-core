@@ -20,6 +20,10 @@ import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class GroupItem extends GenericItem implements StateChangeListener {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupItem.class);

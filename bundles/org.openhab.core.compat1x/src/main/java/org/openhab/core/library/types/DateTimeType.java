@@ -18,6 +18,10 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class DateTimeType implements PrimitiveType, State, Command {
 
     public static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";

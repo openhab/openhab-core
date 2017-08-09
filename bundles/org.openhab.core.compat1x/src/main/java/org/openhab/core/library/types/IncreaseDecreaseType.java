@@ -11,6 +11,10 @@ package org.openhab.core.library.types;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public enum IncreaseDecreaseType implements PrimitiveType, Command {
     INCREASE,
     DECREASE;

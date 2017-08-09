@@ -162,19 +162,19 @@ public abstract class AbstractActiveService {
 
         @Override
         public void run() {
-            logger.info(getName() + " has been started");
+            logger.info("{} has been started", getName());
 
             while (!shutdown) {
                 try {
                     execute();
                 } catch (RuntimeException e) {
-                    logger.error("Error while executing background thread " + getName(), e);
+                    logger.error("Error while executing background thread {}", getName(), e);
                 }
                 pause(refreshInterval);
             }
 
             refreshThread = null;
-            logger.info(getName() + " has been shut down");
+            logger.info("{} has been shut down", getName());
         }
 
         /**
@@ -188,7 +188,7 @@ public abstract class AbstractActiveService {
             try {
                 Thread.sleep(refreshInterval);
             } catch (InterruptedException e) {
-                logger.debug("pausing thread " + super.getName() + " interrupted");
+                logger.debug("pausing thread {} interrupted", super.getName());
             }
         }
 

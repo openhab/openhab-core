@@ -45,11 +45,11 @@ public class Transformation {
             try {
                 result = service.transform(function, value);
             } catch (TransformationException e) {
-                logger.error("Error executing the transformation '" + type + "': " + e.getMessage());
+                logger.error("Error executing the transformation '{}': {}", type, e.getMessage());
                 result = value;
             }
         } else {
-            logger.warn("No transformation service '" + type + "' could be found.");
+            logger.warn("No transformation service '{}' could be found.", type);
             result = value;
         }
         return result;

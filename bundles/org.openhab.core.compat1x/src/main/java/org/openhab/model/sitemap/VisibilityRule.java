@@ -29,7 +29,7 @@ import org.eclipse.emf.ecore.EObject;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getVisibilityRule()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface VisibilityRule extends EObject {
     /**
@@ -45,7 +45,6 @@ public interface VisibilityRule extends EObject {
      * @see #setItem(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getVisibilityRule_Item()
      * @model
-     * @generated
      */
     String getItem();
 
@@ -56,7 +55,6 @@ public interface VisibilityRule extends EObject {
      *
      * @param value the new value of the '<em>Item</em>' attribute.
      * @see #getItem()
-     * @generated
      */
     void setItem(String value);
 
@@ -73,7 +71,6 @@ public interface VisibilityRule extends EObject {
      * @see #setCondition(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getVisibilityRule_Condition()
      * @model
-     * @generated
      */
     String getCondition();
 
@@ -85,7 +82,6 @@ public interface VisibilityRule extends EObject {
      *
      * @param value the new value of the '<em>Condition</em>' attribute.
      * @see #getCondition()
-     * @generated
      */
     void setCondition(String value);
 
@@ -102,7 +98,6 @@ public interface VisibilityRule extends EObject {
      * @see #setSign(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getVisibilityRule_Sign()
      * @model
-     * @generated
      */
     String getSign();
 
@@ -113,7 +108,6 @@ public interface VisibilityRule extends EObject {
      *
      * @param value the new value of the '<em>Sign</em>' attribute.
      * @see #getSign()
-     * @generated
      */
     void setSign(String value);
 
@@ -130,7 +124,6 @@ public interface VisibilityRule extends EObject {
      * @see #setState(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getVisibilityRule_State()
      * @model
-     * @generated
      */
     String getState();
 
@@ -141,7 +134,6 @@ public interface VisibilityRule extends EObject {
      *
      * @param value the new value of the '<em>State</em>' attribute.
      * @see #getState()
-     * @generated
      */
     void setState(String value);
 

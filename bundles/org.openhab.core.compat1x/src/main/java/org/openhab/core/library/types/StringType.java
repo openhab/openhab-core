@@ -12,6 +12,10 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class StringType implements PrimitiveType, State, Command {
 
     public final static StringType EMPTY = new StringType("");

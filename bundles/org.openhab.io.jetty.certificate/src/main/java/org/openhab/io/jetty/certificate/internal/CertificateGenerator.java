@@ -56,6 +56,10 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class CertificateGenerator implements BundleActivator {
 
     private static final String JETTY_KEYSTORE_PATH_PROPERTY = "jetty.keystore.path";

@@ -20,7 +20,7 @@ import org.eclipse.emf.ecore.EObject;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getSitemapModel()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface SitemapModel extends EObject {
 } // SitemapModel

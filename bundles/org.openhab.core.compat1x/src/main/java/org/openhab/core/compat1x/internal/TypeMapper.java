@@ -26,6 +26,10 @@ import org.eclipse.smarthome.core.library.types.UpDownType;
 import org.eclipse.smarthome.core.types.Type;
 import org.eclipse.smarthome.core.types.UnDefType;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class TypeMapper {
 
     public static org.openhab.core.types.Type mapToOpenHABType(Type type) {

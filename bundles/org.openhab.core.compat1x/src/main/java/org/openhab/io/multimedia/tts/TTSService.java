@@ -4,6 +4,10 @@ package org.openhab.io.multimedia.tts;
 // openHAB 2 is NOT compatible with these services, not even through the compatibility layer.
 // Instead, ESH/openHAB2 compatible TTS services should be used.
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public interface TTSService {
 
     void say(String text, String voiceName, String outputDevice);
