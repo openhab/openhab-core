@@ -61,7 +61,7 @@
         <karaf.version>4.0.8</karaf.version>
         <jetty.version>9.2.19.v20160908</jetty.version>
         <jackson.version>1.9.13</jackson.version>
-        <sat.version>0.1.0</sat.version>
+        <sat.version>0.2.0</sat.version>
         <nrjavaserial.version>3.12.0.OH</nrjavaserial.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <build.helper.maven.plugin.version>1.9.1</build.helper.maven.plugin.version>
