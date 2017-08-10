@@ -24,7 +24,7 @@ package org.openhab.model.sitemap;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getColorpicker()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Colorpicker extends NonLinkableWidget {
     /**
@@ -40,7 +40,6 @@ public interface Colorpicker extends NonLinkableWidget {
      * @see #setFrequency(int)
      * @see org.openhab.model.sitemap.SitemapPackage#getColorpicker_Frequency()
      * @model
-     * @generated
      */
     int getFrequency();
 
@@ -51,7 +50,6 @@ public interface Colorpicker extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Frequency</em>' attribute.
      * @see #getFrequency()
-     * @generated
      */
     void setFrequency(int value);
 

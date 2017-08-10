@@ -17,6 +17,10 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 import org.openhab.library.tel.types.CallType;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class CallItem extends GenericItem {
 
     private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();

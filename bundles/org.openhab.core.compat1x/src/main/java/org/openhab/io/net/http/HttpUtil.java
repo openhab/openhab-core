@@ -186,9 +186,9 @@ public class HttpUtil {
 
         if (logger.isDebugEnabled()) {
             try {
-                logger.debug("About to execute '" + method.getURI().toString() + "'");
+                logger.debug("About to execute '{}'", method.getURI());
             } catch (URIException e) {
-                logger.debug(e.getMessage());
+                logger.debug("{}", e.getMessage());
             }
         }
 
@@ -196,12 +196,12 @@ public class HttpUtil {
 
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
-                logger.warn("Method failed: " + method.getStatusLine());
+                logger.warn("Method failed: {}", method.getStatusLine());
             }
 
             String responseBody = IOUtils.toString(method.getResponseBodyAsStream());
             if (!responseBody.isEmpty()) {
-                logger.debug(responseBody);
+                logger.debug("{}", responseBody);
             }
 
             return responseBody;

@@ -123,7 +123,7 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
             try {
                 listener.bindingChanged(this, item.getName());
             } catch (Exception e) {
-                logger.error("Binding " + listener.getClass().getName() + " threw an exception: ", e);
+                logger.error("Binding {} threw an exception: ", listener.getClass().getName(), e);
             }
         }
     }

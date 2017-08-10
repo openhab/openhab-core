@@ -32,7 +32,7 @@ import org.eclipse.emf.ecore.EObject;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getWidget()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Widget extends EObject {
     /**
@@ -48,7 +48,6 @@ public interface Widget extends EObject {
      * @see #setItem(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getWidget_Item()
      * @model
-     * @generated
      */
     String getItem();
 
@@ -59,7 +58,6 @@ public interface Widget extends EObject {
      *
      * @param value the new value of the '<em>Item</em>' attribute.
      * @see #getItem()
-     * @generated
      */
     void setItem(String value);
 
@@ -76,7 +74,6 @@ public interface Widget extends EObject {
      * @see #setLabel(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getWidget_Label()
      * @model
-     * @generated
      */
     String getLabel();
 
@@ -87,7 +84,6 @@ public interface Widget extends EObject {
      *
      * @param value the new value of the '<em>Label</em>' attribute.
      * @see #getLabel()
-     * @generated
      */
     void setLabel(String value);
 
@@ -104,7 +100,6 @@ public interface Widget extends EObject {
      * @see #setIcon(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getWidget_Icon()
      * @model
-     * @generated
      */
     String getIcon();
 
@@ -115,7 +110,6 @@ public interface Widget extends EObject {
      *
      * @param value the new value of the '<em>Icon</em>' attribute.
      * @see #getIcon()
-     * @generated
      */
     void setIcon(String value);
 
@@ -132,7 +126,6 @@ public interface Widget extends EObject {
      * @return the value of the '<em>Label Color</em>' containment reference list.
      * @see org.openhab.model.sitemap.SitemapPackage#getWidget_LabelColor()
      * @model containment="true"
-     * @generated
      */
     EList<ColorArray> getLabelColor();
 
@@ -149,7 +142,6 @@ public interface Widget extends EObject {
      * @return the value of the '<em>Value Color</em>' containment reference list.
      * @see org.openhab.model.sitemap.SitemapPackage#getWidget_ValueColor()
      * @model containment="true"
-     * @generated
      */
     EList<ColorArray> getValueColor();
 
@@ -166,7 +158,6 @@ public interface Widget extends EObject {
      * @return the value of the '<em>Visibility</em>' containment reference list.
      * @see org.openhab.model.sitemap.SitemapPackage#getWidget_Visibility()
      * @model containment="true"
-     * @generated
      */
     EList<VisibilityRule> getVisibility();
 

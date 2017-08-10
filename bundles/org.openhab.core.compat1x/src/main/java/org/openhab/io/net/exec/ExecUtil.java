@@ -15,7 +15,6 @@ import java.util.Arrays;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -64,7 +63,7 @@ public class ExecUtil {
                 logger.info("executed commandLine '{}'", commandLine);
             }
         } catch (IOException e) {
-            logger.error("couldn't execute commandLine '" + commandLine + "'", e);
+            logger.error("couldn't execute commandLine '{}'", commandLine, e);
         }
     }
 
@@ -130,7 +129,7 @@ public class ExecUtil {
             int exitCode = resultHandler.getExitValue();
             retval = StringUtils.chomp(stdout.toString());
             if (resultHandler.getException() != null) {
-                logger.warn(resultHandler.getException().getMessage());
+                logger.warn("{}", resultHandler.getException().getMessage());
             } else {
                 logger.debug("exit code '{}', result '{}'", exitCode, retval);
             }

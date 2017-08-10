@@ -27,7 +27,7 @@ import org.eclipse.emf.ecore.EObject;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getMapping()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Mapping extends EObject {
     /**
@@ -43,7 +43,6 @@ public interface Mapping extends EObject {
      * @see #setCmd(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getMapping_Cmd()
      * @model
-     * @generated
      */
     String getCmd();
 
@@ -54,7 +53,6 @@ public interface Mapping extends EObject {
      *
      * @param value the new value of the '<em>Cmd</em>' attribute.
      * @see #getCmd()
-     * @generated
      */
     void setCmd(String value);
 
@@ -71,7 +69,6 @@ public interface Mapping extends EObject {
      * @see #setLabel(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getMapping_Label()
      * @model
-     * @generated
      */
     String getLabel();
 
@@ -82,7 +79,6 @@ public interface Mapping extends EObject {
      *
      * @param value the new value of the '<em>Label</em>' attribute.
      * @see #getLabel()
-     * @generated
      */
     void setLabel(String value);
 

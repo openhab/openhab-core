@@ -24,7 +24,7 @@ package org.openhab.model.sitemap;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getVideo()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Video extends NonLinkableWidget {
     /**
@@ -40,7 +40,6 @@ public interface Video extends NonLinkableWidget {
      * @see #setUrl(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getVideo_Url()
      * @model
-     * @generated
      */
     String getUrl();
 
@@ -51,7 +50,6 @@ public interface Video extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Url</em>' attribute.
      * @see #getUrl()
-     * @generated
      */
     void setUrl(String value);
 

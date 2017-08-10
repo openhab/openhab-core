@@ -16,6 +16,10 @@ import org.openhab.core.types.State;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 abstract public class AbstractEventSubscriber implements EventHandler {
 
     /**

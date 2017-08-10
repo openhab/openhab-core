@@ -26,7 +26,7 @@ import org.eclipse.emf.common.util.EList;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getLinkableWidget()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface LinkableWidget extends Widget {
     /**
@@ -42,7 +42,6 @@ public interface LinkableWidget extends Widget {
      * @return the value of the '<em>Children</em>' containment reference list.
      * @see org.openhab.model.sitemap.SitemapPackage#getLinkableWidget_Children()
      * @model containment="true"
-     * @generated
      */
     EList<Widget> getChildren();
 

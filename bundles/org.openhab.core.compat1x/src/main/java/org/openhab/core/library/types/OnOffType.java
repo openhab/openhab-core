@@ -12,6 +12,10 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public enum OnOffType implements PrimitiveType, State, Command {
     ON,
     OFF;

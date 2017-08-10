@@ -18,6 +18,10 @@ import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class EventPublisherDelegate implements org.openhab.core.events.EventPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisherDelegate.class);

@@ -18,7 +18,7 @@ package org.openhab.model.sitemap;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getFrame()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Frame extends LinkableWidget {
 } // Frame

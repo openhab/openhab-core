@@ -10,3 +10,4 @@ Import-Package: org.openhab.ui.dashboard
 Bundle-Vendor: openHAB
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
+

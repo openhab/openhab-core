@@ -14,6 +14,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 @Target(ElementType.PARAMETER)
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

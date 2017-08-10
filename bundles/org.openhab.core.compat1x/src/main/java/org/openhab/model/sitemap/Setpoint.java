@@ -28,7 +28,7 @@ import java.math.BigDecimal;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getSetpoint()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Setpoint extends NonLinkableWidget {
     /**
@@ -44,7 +44,6 @@ public interface Setpoint extends NonLinkableWidget {
      * @see #setMinValue(BigDecimal)
      * @see org.openhab.model.sitemap.SitemapPackage#getSetpoint_MinValue()
      * @model
-     * @generated
      */
     BigDecimal getMinValue();
 
@@ -55,7 +54,6 @@ public interface Setpoint extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Min Value</em>' attribute.
      * @see #getMinValue()
-     * @generated
      */
     void setMinValue(BigDecimal value);
 
@@ -72,7 +70,6 @@ public interface Setpoint extends NonLinkableWidget {
      * @see #setMaxValue(BigDecimal)
      * @see org.openhab.model.sitemap.SitemapPackage#getSetpoint_MaxValue()
      * @model
-     * @generated
      */
     BigDecimal getMaxValue();
 
@@ -83,7 +80,6 @@ public interface Setpoint extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Max Value</em>' attribute.
      * @see #getMaxValue()
-     * @generated
      */
     void setMaxValue(BigDecimal value);
 
@@ -100,7 +96,6 @@ public interface Setpoint extends NonLinkableWidget {
      * @see #setStep(BigDecimal)
      * @see org.openhab.model.sitemap.SitemapPackage#getSetpoint_Step()
      * @model
-     * @generated
      */
     BigDecimal getStep();
 
@@ -111,7 +106,6 @@ public interface Setpoint extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Step</em>' attribute.
      * @see #getStep()
-     * @generated
      */
     void setStep(BigDecimal value);
 

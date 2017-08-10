@@ -24,7 +24,7 @@ package org.openhab.model.sitemap;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getList()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface List extends NonLinkableWidget {
     /**
@@ -40,7 +40,6 @@ public interface List extends NonLinkableWidget {
      * @see #setSeparator(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getList_Separator()
      * @model
-     * @generated
      */
     String getSeparator();
 
@@ -51,7 +50,6 @@ public interface List extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Separator</em>' attribute.
      * @see #getSeparator()
-     * @generated
      */
     void setSeparator(String value);
 

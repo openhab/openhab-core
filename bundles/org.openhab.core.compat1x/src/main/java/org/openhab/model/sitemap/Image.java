@@ -28,7 +28,7 @@ import org.eclipse.emf.common.util.EList;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getImage()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Image extends LinkableWidget {
     /**
@@ -44,7 +44,6 @@ public interface Image extends LinkableWidget {
      * @see #setUrl(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getImage_Url()
      * @model
-     * @generated
      */
     String getUrl();
 
@@ -55,7 +54,6 @@ public interface Image extends LinkableWidget {
      *
      * @param value the new value of the '<em>Url</em>' attribute.
      * @see #getUrl()
-     * @generated
      */
     void setUrl(String value);
 
@@ -72,7 +70,6 @@ public interface Image extends LinkableWidget {
      * @see #setRefresh(int)
      * @see org.openhab.model.sitemap.SitemapPackage#getImage_Refresh()
      * @model
-     * @generated
      */
     int getRefresh();
 
@@ -83,7 +80,6 @@ public interface Image extends LinkableWidget {
      *
      * @param value the new value of the '<em>Refresh</em>' attribute.
      * @see #getRefresh()
-     * @generated
      */
     void setRefresh(int value);
 
@@ -100,7 +96,6 @@ public interface Image extends LinkableWidget {
      * @return the value of the '<em>Icon Color</em>' containment reference list.
      * @see org.openhab.model.sitemap.SitemapPackage#getImage_IconColor()
      * @model containment="true"
-     * @generated
      */
     EList<ColorArray> getIconColor();
 

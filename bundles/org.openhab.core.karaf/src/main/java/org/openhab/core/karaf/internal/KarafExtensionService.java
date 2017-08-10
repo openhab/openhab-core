@@ -161,5 +161,4 @@ public class KarafExtensionService implements ExtensionService {
         }
         return StringUtils.substringAfter(name, "-");
     }
-
 }

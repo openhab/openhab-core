@@ -25,7 +25,7 @@ package org.openhab.model.sitemap;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getWebview()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Webview extends NonLinkableWidget {
     /**
@@ -41,7 +41,6 @@ public interface Webview extends NonLinkableWidget {
      * @see #setHeight(int)
      * @see org.openhab.model.sitemap.SitemapPackage#getWebview_Height()
      * @model
-     * @generated
      */
     int getHeight();
 
@@ -52,7 +51,6 @@ public interface Webview extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Height</em>' attribute.
      * @see #getHeight()
-     * @generated
      */
     void setHeight(int value);
 
@@ -69,7 +67,6 @@ public interface Webview extends NonLinkableWidget {
      * @see #setUrl(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getWebview_Url()
      * @model
-     * @generated
      */
     String getUrl();
 
@@ -80,7 +77,6 @@ public interface Webview extends NonLinkableWidget {
      *
      * @param value the new value of the '<em>Url</em>' attribute.
      * @see #getUrl()
-     * @generated
      */
     void setUrl(String value);
 

@@ -30,7 +30,7 @@ import org.eclipse.emf.ecore.EObject;
  *
  * @see org.openhab.model.sitemap.SitemapPackage#getColorArray()
  * @model
- * @generated
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ColorArray extends EObject {
     /**
@@ -46,7 +46,6 @@ public interface ColorArray extends EObject {
      * @see #setItem(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getColorArray_Item()
      * @model
-     * @generated
      */
     String getItem();
 
@@ -57,7 +56,6 @@ public interface ColorArray extends EObject {
      *
      * @param value the new value of the '<em>Item</em>' attribute.
      * @see #getItem()
-     * @generated
      */
     void setItem(String value);
 
@@ -74,7 +72,6 @@ public interface ColorArray extends EObject {
      * @see #setCondition(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getColorArray_Condition()
      * @model
-     * @generated
      */
     String getCondition();
 
@@ -85,7 +82,6 @@ public interface ColorArray extends EObject {
      *
      * @param value the new value of the '<em>Condition</em>' attribute.
      * @see #getCondition()
-     * @generated
      */
     void setCondition(String value);
 
@@ -102,7 +98,6 @@ public interface ColorArray extends EObject {
      * @see #setSign(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getColorArray_Sign()
      * @model
-     * @generated
      */
     String getSign();
 
@@ -113,7 +108,6 @@ public interface ColorArray extends EObject {
      *
      * @param value the new value of the '<em>Sign</em>' attribute.
      * @see #getSign()
-     * @generated
      */
     void setSign(String value);
 
@@ -130,7 +124,6 @@ public interface ColorArray extends EObject {
      * @see #setState(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getColorArray_State()
      * @model
-     * @generated
      */
     String getState();
 
@@ -141,7 +134,6 @@ public interface ColorArray extends EObject {
      *
      * @param value the new value of the '<em>State</em>' attribute.
      * @see #getState()
-     * @generated
      */
     void setState(String value);
 
@@ -158,7 +150,6 @@ public interface ColorArray extends EObject {
      * @see #setArg(String)
      * @see org.openhab.model.sitemap.SitemapPackage#getColorArray_Arg()
      * @model
-     * @generated
      */
     String getArg();
 
@@ -169,7 +160,6 @@ public interface ColorArray extends EObject {
      *
      * @param value the new value of the '<em>Arg</em>' attribute.
      * @see #getArg()
-     * @generated
      */
     void setArg(String value);
 

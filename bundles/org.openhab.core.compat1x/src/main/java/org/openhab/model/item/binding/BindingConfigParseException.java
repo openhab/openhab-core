@@ -8,6 +8,10 @@
  */
 package org.openhab.model.item.binding;
 
+/**
+ *
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class BindingConfigParseException extends Exception {
 
     private static final long serialVersionUID = 1434607160082879845L;
