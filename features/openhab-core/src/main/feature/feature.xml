@@ -26,11 +26,11 @@
         <feature>esh-ui-icon</feature>
         <feature>esh-storage-json</feature>
         <feature>openhab-runtime-certificate</feature>
+        <feature>openhab-runtime-httpclient</feature>
         <feature>openhab-transport-mdns</feature>
         <feature prerequisite="true">shell</feature>
         <feature prerequisite="true">wrapper</feature>
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.io.sound/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.ui.dashboard/${project.version}</bundle>
@@ -43,6 +43,14 @@
         <config name="org.eclipse.smarthome.voice">
             defaultHLI = rulehli
         </config>
+    </feature>
+
+    <feature name="openhab-runtime-httpclient" description="HTTP and Websocket Client" version="${project.version}">
+        <feature dependency="true">http</feature>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
     </feature>
 
     <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
