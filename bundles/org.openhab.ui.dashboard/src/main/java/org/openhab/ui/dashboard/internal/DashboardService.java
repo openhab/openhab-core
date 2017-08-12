@@ -11,6 +11,7 @@ package org.openhab.ui.dashboard.internal;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -50,7 +51,13 @@ public class DashboardService {
 
     private BundleContext bundleContext;
 
-    protected void activate(ComponentContext componentContext) {
+    private final static String LINK_NAME = "link-name";
+    private final static String LINK_URL = "link-url";
+    private final static String LINK_OVERLAY = "link-overlay";
+    private final static String LINK_IMAGEURL = "link-imageurl";
+
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+
         try {
             bundleContext = componentContext.getBundleContext();
             Hashtable<String, String> props = new Hashtable<>();
@@ -69,6 +76,8 @@ public class DashboardService {
         } catch (NamespaceException | ServletException e) {
             logger.error("Error during dashboard startup: {}", e.getMessage());
         }
+
+        addTilesToExternalServices(properties);
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -152,5 +161,31 @@ public class DashboardService {
 
         return new DashboardServlet(configurationAdmin, indexTemplate, entryTemplate, warnTemplate, setupTemplate,
                 tiles);
+    }
+
+    private void addTilesToExternalServices(Map<String, Object> properties) {
+        for (String key : properties.keySet()) {
+            if (key.startsWith(LINK_NAME)) {
+                if (key.length() > LINK_NAME.length()) {
+                    try {
+                        // get index number from link name
+                        int index = Integer.parseInt(key.substring(LINK_NAME.length()));
+
+                        String name = (String) properties.get(LINK_NAME + Integer.toString(index));
+                        String url = (String) properties.get(LINK_URL + Integer.toString(index));
+                        String overlay = (String) properties.get(LINK_OVERLAY + Integer.toString(index));
+                        String imageUrl = (String) properties.get(LINK_IMAGEURL + Integer.toString(index));
+
+                        logger.debug("Add link: {}", name);
+
+                        addDashboardTile(new DashboardTileImp.DashboardTileBuilder().withName(name).withUrl(url)
+                                .withOverlay(overlay).withImageUrl(imageUrl).build());
+                    } catch (NumberFormatException e) {
+                        logger.error("Syntax error in dashboard tile '{}'", key);
+                    }
+
+                }
+            }
+        }
     }
 }
