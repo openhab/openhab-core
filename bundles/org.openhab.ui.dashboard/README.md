@@ -1,34 +1,34 @@
-# Dashboard tiles
+# Dashboard
 
-OpenHAB dashboard is landing page for the user where all openHAB UI's can be found. Dashboard support also links to external services. Links can be added to dashboard by ```conf/services/dashboard.cfg``` configuration file.
+openHAB dashboard is landing page for the user where all openHAB UIs can be found. Dashboard support also links to external services. Links can be added to the dashboard by editing the ```conf/services/dashboard.cfg``` configuration file.
 
 ## Link Configuration
 
 | Parameter name  | Type    | Description                                                                             |
 |-----------------|---------|-----------------------------------------------------------------------------------------|
-| link-nameX      | String  | Name which is shown in the openHAB dashboard.                                           |
-| link-urlX       | String  | URL to external service.                                                                |
-| link-overlayX   | String  | Image overlay icon. Supported values are empty (no icon), "html5", "android" or "apple" |
-| link-imageurlX  | String  | URL to image.                                                                           |
+| X.link-name     | String  | Name which is shown in the openHAB dashboard.                                           |
+| X.link-url      | String  | URL to external service.                                                                |
+| X.link-overlay  | String  | Image overlay icon. Supported values are empty (no icon), "html5", "android" or "apple" |
+| X.link-imageurl | String  | URL to image which is shown in the dashboard.                                           |
 
-Where X is link unique number (see examples). All configuration parameters need to start with ```org.openhab.ui.dashboard:``` prefix.
+Where X is link unique identifier (see examples).
 
 ## Image URL
 
-Image URL support several URL formats. URL support direct http links to local or Internet servers, but also the "data" URL scheme (RFC2397) is supported. See e.g. [https://www.base64-image.de](https://www.base64-image.de) to convert images to base64 coded data.
+Browser fetch image from image URL. URL can be direct http link or data URIs according to [RFC2397](https://tools.ietf.org/html/rfc2397). If data URIs are used, browser should support them as well. All five major browsers (Chrome, Firefox, IE, Opera and Safari) support data URIs . See e.g. [https://www.base64-image.de](https://www.base64-image.de) to convert images to base64 coded data. 
 
 ## Example configuration file
 ```
-org.openhab.ui.dashboard:link-name1=openHAB Log Viewer
-org.openhab.ui.dashboard:link-url1=http://localhost:9001
-org.openhab.ui.dashboard:link-overlay1=
-org.openhab.ui.dashboard:link-imageurl1=http://localhost:8080/static/image.png
+frontail.link-name=openHAB Log Viewer
+frontail.link-url=http://<server-adddress>:9001
+frontail.link-overlay=
+frontail.link-imageurl=../static/image.png
 
-org.openhab.ui.dashboard:link-name2=Node-RED
-org.openhab.ui.dashboard:link-url2=http://localhost:1880
-org.openhab.ui.dashboard:link-overlay2=
-org.openhab.ui.dashboard:link-imageurl2=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAIAAA...QmCC
+nodered.link-name=Node-RED
+nodered.link-url=http://<server-adddress>:1880
+nodered.link-overlay=
+nodered.link-imageurl=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAIAAA...QmCC
 
 ```
 
-Note: **Link 2** image data URL is not valid (it's shorten for the sake of clarity).
+Note: **nodered** image data URL is not valid (it's shorten for the sake of clarity).

@@ -15,13 +15,13 @@ import org.openhab.ui.dashboard.DashboardTile;
  *
  * @author Pauli Anttila - Initial contribution
  */
-public class DashboardTileImp implements DashboardTile {
+public class ExternalServiceTile implements DashboardTile {
     private String name;
     private String url;
     private String overlay;
     private String imageUrl;
 
-    private DashboardTileImp(DashboardTileBuilder builder) {
+    private ExternalServiceTile(DashboardTileBuilder builder) {
         this.name = builder.name;
         this.url = builder.url;
         this.overlay = builder.overlay;
@@ -75,8 +75,8 @@ public class DashboardTileImp implements DashboardTile {
             return this;
         }
 
-        public DashboardTileImp build() {
-            return new DashboardTileImp(this);
+        public ExternalServiceTile build() {
+            return new ExternalServiceTile(this);
         }
     }
 }

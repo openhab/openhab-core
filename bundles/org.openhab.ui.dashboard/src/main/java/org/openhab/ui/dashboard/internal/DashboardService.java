@@ -77,7 +77,7 @@ public class DashboardService {
             logger.error("Error during dashboard startup: {}", e.getMessage());
         }
 
-        addTilesToExternalServices(properties);
+        addTilesForExternalServices(properties);
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -163,22 +163,22 @@ public class DashboardService {
                 tiles);
     }
 
-    private void addTilesToExternalServices(Map<String, Object> properties) {
+    private void addTilesForExternalServices(Map<String, Object> properties) {
         for (String key : properties.keySet()) {
-            if (key.startsWith(LINK_NAME)) {
+            if (key.endsWith(LINK_NAME)) {
                 if (key.length() > LINK_NAME.length()) {
                     try {
-                        // get index number from link name
-                        int index = Integer.parseInt(key.substring(LINK_NAME.length()));
+                        // get suffix from link name
+                        String linkname = key.substring(0, key.length() - LINK_NAME.length());
 
-                        String name = (String) properties.get(LINK_NAME + Integer.toString(index));
-                        String url = (String) properties.get(LINK_URL + Integer.toString(index));
-                        String overlay = (String) properties.get(LINK_OVERLAY + Integer.toString(index));
-                        String imageUrl = (String) properties.get(LINK_IMAGEURL + Integer.toString(index));
+                        String name = (String) properties.get(linkname + LINK_NAME);
+                        String url = (String) properties.get(linkname + LINK_URL);
+                        String overlay = (String) properties.get(linkname + LINK_OVERLAY);
+                        String imageUrl = (String) properties.get(linkname + LINK_IMAGEURL);
 
                         logger.debug("Add link: {}", name);
 
-                        addDashboardTile(new DashboardTileImp.DashboardTileBuilder().withName(name).withUrl(url)
+                        addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
                                 .withOverlay(overlay).withImageUrl(imageUrl).build());
                     } catch (NumberFormatException e) {
                         logger.error("Syntax error in dashboard tile '{}'", key);
