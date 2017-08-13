@@ -167,23 +167,18 @@ public class DashboardService {
         for (String key : properties.keySet()) {
             if (key.endsWith(LINK_NAME)) {
                 if (key.length() > LINK_NAME.length()) {
-                    try {
-                        // get suffix from link name
-                        String linkname = key.substring(0, key.length() - LINK_NAME.length());
+                    // get prefix from link name
+                    String linkname = key.substring(0, key.length() - LINK_NAME.length());
 
-                        String name = (String) properties.get(linkname + LINK_NAME);
-                        String url = (String) properties.get(linkname + LINK_URL);
-                        String overlay = (String) properties.get(linkname + LINK_OVERLAY);
-                        String imageUrl = (String) properties.get(linkname + LINK_IMAGEURL);
+                    String name = (String) properties.get(linkname + LINK_NAME);
+                    String url = (String) properties.get(linkname + LINK_URL);
+                    String overlay = (String) properties.get(linkname + LINK_OVERLAY);
+                    String imageUrl = (String) properties.get(linkname + LINK_IMAGEURL);
 
-                        logger.debug("Add link: {}", name);
+                    logger.debug("Add link: {}", name);
 
-                        addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
-                                .withOverlay(overlay).withImageUrl(imageUrl).build());
-                    } catch (NumberFormatException e) {
-                        logger.error("Syntax error in dashboard tile '{}'", key);
-                    }
-
+                    addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
+                            .withOverlay(overlay).withImageUrl(imageUrl).build());
                 }
             }
         }
