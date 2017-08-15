@@ -24,7 +24,9 @@
 
         var output = $('#geolocation')
 
-        $.getJSON('../rest/services/org.eclipse.smarthome.core.i18nprovider/config', function(response) {
+        $.getJSON(window.location.origin + '/rest/services/org.eclipse.smarthome.core.i18nprovider/config', function(response) {
+            window.language = response;
+
             if (!response.location) {
                 $('.geolocation').show()
                 output.html("<div class=\"spinner spinner--steps\"><img src=\"img/spinner.svg\"></div>")
@@ -35,7 +37,7 @@
 
     function send(configuration) {
         $.ajax({
-            url : '../rest/services/org.eclipse.smarthome.core.i18nprovider/config',
+            url : window.location.origin + '/rest/services/org.eclipse.smarthome.core.i18nprovider/config',
             data : JSON.stringify(configuration),
             type : 'PUT',
             dataType : 'json',

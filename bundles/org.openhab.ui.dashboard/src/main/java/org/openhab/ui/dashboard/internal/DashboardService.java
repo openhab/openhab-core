@@ -20,11 +20,17 @@ import javax.servlet.http.HttpServlet;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.smarthome.core.net.HttpServiceUtil;
-import org.eclipse.smarthome.core.net.NetUtil;
+import org.eclipse.smarthome.core.net.NetworkAddressService;
 import org.openhab.ui.dashboard.DashboardTile;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -35,6 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Component(service = DashboardService.class, immediate = true)
 public class DashboardService {
 
     public static final String DASHBOARD_ALIAS = "/start";
@@ -46,6 +53,7 @@ public class DashboardService {
 
     protected HttpService httpService;
     protected ConfigurationAdmin configurationAdmin;
+    protected NetworkAddressService networkAddressService;
 
     protected Set<DashboardTile> tiles = new CopyOnWriteArraySet<>();
 
@@ -56,8 +64,8 @@ public class DashboardService {
     private final static String LINK_OVERLAY = "link-overlay";
     private final static String LINK_IMAGEURL = "link-imageurl";
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-
         try {
             bundleContext = componentContext.getBundleContext();
             Hashtable<String, String> props = new Hashtable<>();
@@ -66,11 +74,11 @@ public class DashboardService {
             httpService.registerResources(DASHBOARD_ALIAS, "web", null);
 
             if (HttpServiceUtil.getHttpServicePort(bundleContext) > 0) {
-                logger.info("Started dashboard at http://{}:{}", NetUtil.getLocalIpv4HostAddress(),
+                logger.info("Started dashboard at http://{}:{}", networkAddressService.getPrimaryIpv4HostAddress(),
                         HttpServiceUtil.getHttpServicePort(bundleContext));
             }
             if (HttpServiceUtil.getHttpServicePortSecure(bundleContext) > 0) {
-                logger.info("Started dashboard at https://{}:{}", NetUtil.getLocalIpv4HostAddress(),
+                logger.info("Started dashboard at https://{}:{}", networkAddressService.getPrimaryIpv4HostAddress(),
                         HttpServiceUtil.getHttpServicePortSecure(bundleContext));
             }
         } catch (NamespaceException | ServletException e) {
@@ -80,11 +88,13 @@ public class DashboardService {
         addTilesForExternalServices(properties);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         httpService.unregister(DASHBOARD_ALIAS);
         logger.info("Stopped dashboard");
     }
 
+    @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
@@ -93,6 +103,7 @@ public class DashboardService {
         this.configurationAdmin = null;
     }
 
+    @Reference
     protected void setHttpService(HttpService httpService) {
         this.httpService = httpService;
     }
@@ -101,6 +112,16 @@ public class DashboardService {
         this.httpService = null;
     }
 
+    @Reference
+    protected void setNetworkAddressService(NetworkAddressService networkAddressService) {
+        this.networkAddressService = networkAddressService;
+    }
+
+    protected void unsetNetworkAddressService(NetworkAddressService networkAddressService) {
+        this.networkAddressService = null;
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addDashboardTile(DashboardTile tile) {
         tiles.add(tile);
     }
