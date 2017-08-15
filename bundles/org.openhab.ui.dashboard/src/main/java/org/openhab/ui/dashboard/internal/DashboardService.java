@@ -113,7 +113,7 @@ public class DashboardService {
         this.networkAddressService = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addDashboardTile(DashboardTile tile) {
         tiles.add(tile);
     }
