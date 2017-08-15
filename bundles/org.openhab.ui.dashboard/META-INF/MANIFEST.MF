@@ -14,6 +14,7 @@ Import-Package: javax.servlet,
  org.osgi.framework,
  org.osgi.service.cm,
  org.osgi.service.component,
+ org.osgi.service.component.annotations;resolution:=optional,
  org.osgi.service.http,
  org.slf4j
 Export-Package: org.openhab.ui.dashboard
