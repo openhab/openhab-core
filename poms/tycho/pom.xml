@@ -23,6 +23,12 @@
             <version>3.4.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <version>${ds-annotations.version}</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
@@ -82,6 +88,18 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-scr-scrdescriptor</id>
+						<goals>
+							<goal>scr</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
 
         <pluginManagement>
@@ -101,6 +119,11 @@
                             <artifactId>org.eclipse.jdt.annotation</artifactId>
                             <version>${jdt-annotations.version}</version>
                           </extraClasspathElement>
+                          <extraClasspathElement>
+                            <groupId>org.apache.felix</groupId>
+                            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+                          <version>${ds-annotations.version}</version>
+                        </extraClasspathElement>
                         </extraClasspathElements>
                         <compilerArgs>
                             <arg>-err:+nullAnnot(org.eclipse.jdt.annotation.Nullable|org.eclipse.jdt.annotation.NonNull|org.eclipse.jdt.annotation.NonNullByDefault),+inheritNullAnnot</arg>
