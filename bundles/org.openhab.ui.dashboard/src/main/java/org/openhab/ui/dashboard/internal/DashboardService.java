@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(service = DashboardService.class, immediate = true)
+@Component(service = DashboardService.class, immediate = true, name = "org.openhab.dashboard")
 public class DashboardService {
 
     public static final String DASHBOARD_ALIAS = "/start";
