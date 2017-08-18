@@ -11,6 +11,7 @@ package org.openhab.ui.dashboard.internal;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -40,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(service = DashboardService.class, immediate = true)
+@Component(service = DashboardService.class, immediate = true, name = "org.openhab.dashboard")
 public class DashboardService {
 
     public static final String DASHBOARD_ALIAS = "/start";
@@ -58,8 +59,12 @@ public class DashboardService {
 
     private BundleContext bundleContext;
 
+    private final static String LINK_NAME = "link-name";
+    private final static String LINK_URL = "link-url";
+    private final static String LINK_IMAGEURL = "link-imageurl";
+
     @Activate
-    protected void activate(ComponentContext componentContext) {
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         try {
             bundleContext = componentContext.getBundleContext();
             Hashtable<String, String> props = new Hashtable<>();
@@ -78,6 +83,8 @@ public class DashboardService {
         } catch (NamespaceException | ServletException e) {
             logger.error("Error during dashboard startup: {}", e.getMessage());
         }
+
+        addTilesForExternalServices(properties);
     }
 
     @Deactivate
@@ -174,5 +181,25 @@ public class DashboardService {
 
         return new DashboardServlet(configurationAdmin, indexTemplate, entryTemplate, warnTemplate, setupTemplate,
                 tiles);
+    }
+
+    private void addTilesForExternalServices(Map<String, Object> properties) {
+        for (String key : properties.keySet()) {
+            if (key.endsWith(LINK_NAME)) {
+                if (key.length() > LINK_NAME.length()) {
+                    // get prefix from link name
+                    String linkname = key.substring(0, key.length() - LINK_NAME.length());
+
+                    String name = (String) properties.get(linkname + LINK_NAME);
+                    String url = (String) properties.get(linkname + LINK_URL);
+                    String imageUrl = (String) properties.get(linkname + LINK_IMAGEURL);
+
+                    logger.debug("Add link: {}", name);
+
+                    addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
+                            .withImageUrl(imageUrl).build());
+                }
+            }
+        }
     }
 }
