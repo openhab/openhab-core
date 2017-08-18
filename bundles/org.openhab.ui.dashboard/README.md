@@ -10,7 +10,6 @@ Links can be added to the dashboard by editing the `conf/services/dashboard.cfg`
 |-----------------------------|---------|-----------------------------------------------------------------------------------------|
 | <unique-name>.link-name     | String  | Name which is shown in the openHAB dashboard.                                           |
 | <unique-name>.link-url      | String  | URL to external service.                                                                |
-| <unique-name>.link-overlay  | String  | Image overlay icon. Supported values are empty (no icon), "html5", "android" or "apple" |
 | <unique-name>.link-imageurl | String  | URL to image which is shown in the dashboard.                                           |
 
 Where `<unique-name>` is link unique identifier (see examples).
@@ -24,12 +23,10 @@ Browser fetch image from image URL. URL can be direct http link or data URIs acc
 ```
 frontail.link-name=openHAB Log Viewer
 frontail.link-url=http://<server-adddress>:9001
-frontail.link-overlay=
 frontail.link-imageurl=../static/image.png
 
 nodered.link-name=Node-RED
 nodered.link-url=http://<server-adddress>:1880
-nodered.link-overlay=
 nodered.link-imageurl=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAIAAA...QmCC
 
 ```

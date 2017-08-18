@@ -61,7 +61,6 @@ public class DashboardService {
 
     private final static String LINK_NAME = "link-name";
     private final static String LINK_URL = "link-url";
-    private final static String LINK_OVERLAY = "link-overlay";
     private final static String LINK_IMAGEURL = "link-imageurl";
 
     @Activate
@@ -193,13 +192,12 @@ public class DashboardService {
 
                     String name = (String) properties.get(linkname + LINK_NAME);
                     String url = (String) properties.get(linkname + LINK_URL);
-                    String overlay = (String) properties.get(linkname + LINK_OVERLAY);
                     String imageUrl = (String) properties.get(linkname + LINK_IMAGEURL);
 
                     logger.debug("Add link: {}", name);
 
                     addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
-                            .withOverlay(overlay).withImageUrl(imageUrl).build());
+                            .withImageUrl(imageUrl).build());
                 }
             }
         }
