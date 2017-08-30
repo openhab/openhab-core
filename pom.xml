@@ -10,6 +10,10 @@
     <name>openHAB</name>
     <description>This project contains the core components of openHAB</description>
 
+    <properties>
+        <scm.gitBaseUrl>https://github.com/openhab</scm.gitBaseUrl>
+    </properties>
+
     <organization>
         <name>openHAB.org</name>
         <url>http://www.openhab.org</url>
@@ -23,9 +27,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/openhab/openhab-core.git</connection>
-        <developerConnection>scm:git:https://github.com/openhab/openhab-core.git</developerConnection>
-        <url>https://github.com/openhab/openhab-core</url>
+        <connection>scm:git:${scm.gitBaseUrl}/openhab-core.git</connection>
+        <developerConnection>scm:git:${scm.gitBaseUrl}/openhab-core.git</developerConnection>
+        <url>${scm.gitBaseUrl}/openhab-core</url>
     </scm>
 
     <issueManagement>
@@ -51,5 +55,25 @@
         <module>features</module>
         <module>targetplatform</module>
     </modules>
+
+
+    <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>com.itemis.maven.plugins</groupId>
+              <artifactId>unleash-maven-plugin</artifactId>
+              <version>2.6.0</version>
+              <dependencies>
+                <dependency>
+                  <groupId>com.itemis.maven.plugins</groupId>
+                  <artifactId>unleash-scm-provider-git</artifactId>
+                  <version>2.1.0</version>
+                </dependency>
+              </dependencies>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+     </build>
 
 </project>
