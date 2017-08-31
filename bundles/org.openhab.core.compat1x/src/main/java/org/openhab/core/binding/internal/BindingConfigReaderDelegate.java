@@ -60,6 +60,8 @@ public class BindingConfigReaderDelegate implements BindingConfigReader {
             throws BindingConfigParseException {
 
         switch (itemType) {
+            case "Group":
+                return new org.openhab.core.items.GroupItem(itemName);
             case "Switch":
                 return new org.openhab.core.library.items.SwitchItem(itemName);
             case "Dimmer":
