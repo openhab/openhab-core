@@ -24,7 +24,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.openhab</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <version>${ds-annotations.version}</version>
             <optional>true</optional>
@@ -120,7 +120,7 @@
                             <version>${jdt-annotations.version}</version>
                           </extraClasspathElement>
                           <extraClasspathElement>
-                            <groupId>org.apache.felix</groupId>
+                            <groupId>org.openhab</groupId>
                             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                           <version>${ds-annotations.version}</version>
                         </extraClasspathElement>
