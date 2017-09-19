@@ -55,9 +55,6 @@ public class ContactItem extends GenericItem {
         return acceptedCommandTypes;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public State getStateAs(Class<? extends State> typeClass) {
         if (typeClass == DecimalType.class) {

@@ -64,9 +64,6 @@ public class ColorItem extends DimmerItem {
         return acceptedCommandTypes;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setState(State state) {
         State currentState = this.state;
@@ -98,9 +95,6 @@ public class ColorItem extends DimmerItem {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public State getStateAs(Class<? extends State> typeClass) {
         if (typeClass == HSBType.class) {

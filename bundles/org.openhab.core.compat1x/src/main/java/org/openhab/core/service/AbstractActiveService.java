@@ -86,9 +86,6 @@ public abstract class AbstractActiveService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isRunning() {
         if (this.refreshThread != null) {
             return this.refreshThread.isAlive();
