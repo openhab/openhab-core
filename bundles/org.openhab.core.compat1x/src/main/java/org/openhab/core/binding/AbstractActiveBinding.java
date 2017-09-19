@@ -58,9 +58,6 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void bindingChanged(BindingProvider provider, String itemName) {
         super.bindingChanged(provider, itemName);
@@ -72,9 +69,6 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void allBindingsChanged(BindingProvider provider) {
         super.allBindingsChanged(provider);
@@ -131,18 +125,11 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
 
     /** private inner class, which delegates method calls to the outer binding instance */
     private class BindingActiveService extends AbstractActiveService {
-
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected void start() {
             super.start();
         }
 
-        /**
-         * @{inheritDoc}
-         */
         @Override
         public void interrupt() {
             if (!bindingsExist()) {

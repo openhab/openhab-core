@@ -57,25 +57,16 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addBindingChangeListener(BindingChangeListener listener) {
         listeners.add(listener);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeBindingChangeListener(BindingChangeListener listener) {
         listeners.remove(listener);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void processBindingConfiguration(String context, Item item, String bindingConfig)
             throws BindingConfigParseException {
@@ -92,9 +83,6 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeConfigurations(String context) {
         Set<Item> items = null;
@@ -128,25 +116,16 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
         }
     }
 
-    /**
-     * @{inheritDoc}
-     */
     @Override
     public boolean providesBindingFor(String itemName) {
         return bindingConfigs.get(itemName) != null;
     }
 
-    /**
-     * @{inheritDoc}
-     */
     @Override
     public boolean providesBinding() {
         return !bindingConfigs.isEmpty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Collection<String> getItemNames() {
         return new ArrayList<>(bindingConfigs.keySet());
