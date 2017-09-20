@@ -1,13 +1,15 @@
 Manifest-Version: 1.0
+Bundle-Activator: org.openhab.io.jetty.certificate.internal.CertificateG
+ enerator
+Bundle-Classpath: .,lib/bcpkix-jdk15on-1.52.jar,lib/bcprov-jdk15on-1.52.
+ jar
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB SSL Certificate Generator
-Bundle-SymbolicName: org.openhab.io.jetty.certificate;singleton:=true
-Bundle-Version: 2.2.0.qualifier
-Bundle-Activator: org.openhab.io.jetty.certificate.internal.CertificateGenerator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.openhab.io.jetty.certificate;singleton:=true
 Bundle-Vendor: openHAB
-Bundle-Classpath: .,
- lib/bcpkix-jdk15on-1.52.jar,
- lib/bcprov-jdk15on-1.52.jar
-Import-Package: org.osgi.framework,
+Bundle-Version: 2.2.0.qualifier
+Import-Package: 
+ org.eclipse.jdt.annotation;resolution:=optional,
+ org.osgi.framework,
  org.slf4j
