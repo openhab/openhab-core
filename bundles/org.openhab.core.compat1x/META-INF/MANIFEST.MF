@@ -1,8 +1,10 @@
 Manifest-Version: 1.0
 Bundle-Activator: org.openhab.core.compat1x.internal.CompatibilityActiva
  tor
-Bundle-ClassPath: .,lib/jackson-core-asl-1.9.2.jar,lib/jackson-mapper-as
- l-1.9.2.jar
+Bundle-ClassPath: 
+ .,
+ lib/jackson-core-asl-1.9.2.jar,
+ lib/jackson-mapper-asl-1.9.2.jar
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB 1.x Compatibility Layer
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

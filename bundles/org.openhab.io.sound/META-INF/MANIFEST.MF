@@ -1,6 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: lib/jl1.0.1.jar,.
+Bundle-ClassPath: 
+ lib/jl1.0.1.jar,
+ .
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Sound Support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

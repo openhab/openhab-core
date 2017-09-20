@@ -1,6 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: patch/,.
+Bundle-ClassPath: 
+ patch/,
+ .
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Basic UI Fragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
