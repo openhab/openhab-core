@@ -24,9 +24,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/openhab/openhab-core.git</connection>
-        <developerConnection>scm:git:https://github.com/openhab/openhab-core.git</developerConnection>
-        <url>https://github.com/openhab/openhab-core</url>
+        <connection>scm:git:${scm.gitBaseUrl}/openhab-core.git</connection>
+        <developerConnection>scm:git:${scm.gitBaseUrl}/openhab-core.git</developerConnection>
+        <url>${scm.gitBaseUrl}/openhab-core</url>
     </scm>
 
     <issueManagement>
@@ -48,6 +48,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <scm.gitBaseUrl>https://github.com/openhab</scm.gitBaseUrl>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -153,6 +154,18 @@
                             <supportedProjectType>eclipse-plugin</supportedProjectType>
                         </supportedProjectTypes>
                     </configuration>
+                </plugin>
+                <plugin>
+                  <groupId>com.itemis.maven.plugins</groupId>
+                  <artifactId>unleash-maven-plugin</artifactId>
+                  <version>2.6.0</version>
+                  <dependencies>
+                    <dependency>
+                      <groupId>com.itemis.maven.plugins</groupId>
+                      <artifactId>unleash-scm-provider-git</artifactId>
+                      <version>2.1.0</version>
+                    </dependency>
+                  </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
