@@ -1,19 +1,20 @@
 Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Karaf Integration
-Bundle-SymbolicName: org.openhab.core.karaf
-Bundle-Version: 2.2.0.qualifier
-Bundle-Vendor: openHAB
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Karaf-Commands: org.openhab.core.karaf.internal.command
-Service-Component: OSGI-INF/*.xml
-Import-Package: com.google.common.collect,
+Bundle-SymbolicName: org.openhab.core.karaf
+Bundle-Vendor: openHAB
+Bundle-Version: 2.2.0.qualifier
+Import-Package: 
+ com.google.common.collect,
  org.apache.commons.lang,
  org.apache.karaf.features,
  org.apache.karaf.shell.api.action,
  org.apache.karaf.shell.api.action.lifecycle,
  org.apache.karaf.shell.support.ansi,
  org.apache.karaf.wrapper,
+ org.eclipse.jdt.annotation;resolution:=optional,
  org.eclipse.smarthome.config.core,
  org.eclipse.smarthome.core.events,
  org.eclipse.smarthome.core.extension,
@@ -21,4 +22,5 @@ Import-Package: com.google.common.collect,
  org.osgi.service.cm,
  org.osgi.service.event,
  org.slf4j
-Bundle-ActivationPolicy: lazy
+Karaf-Commands: org.openhab.core.karaf.internal.command
+Service-Component: OSGI-INF/*.xml

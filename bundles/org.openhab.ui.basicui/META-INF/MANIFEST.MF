@@ -1,12 +1,16 @@
 Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: 
+ patch/,
+ .
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Basic UI Fragment
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.ui.basicui
+Bundle-Vendor: openHAB
 Bundle-Version: 2.2.0.qualifier
 Fragment-Host: org.eclipse.smarthome.ui.basic
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ClassPath: patch/,.
+Import-Package: 
+ org.eclipse.jdt.annotation;resolution:=optional,
+ org.openhab.ui.dashboard
 Service-Component: OSGI-INF/*.xml
-Import-Package: org.openhab.ui.dashboard
-Bundle-Vendor: openHAB
-Bundle-ActivationPolicy: lazy
