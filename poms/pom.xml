@@ -167,6 +167,57 @@
                     </dependency>
                   </dependencies>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                      <properties>
+                        <property>
+                          <name>esh.version</name>
+                          <dependencies>
+                            <dependency>
+                              <groupId>org.eclipse.smarthome</groupId>
+                              <artifactId>smarthome</artifactId>
+                            </dependency>
+                          </dependencies>
+                        </property>
+                        <property>
+                          <name>ohc.version</name>
+                          <searchReactor>true</searchReactor>
+                          <preferReactor>true</preferReactor>
+                          <dependencies>
+                            <dependency>
+                              <groupId>org.openhab</groupId>
+                              <artifactId>pom</artifactId>
+                            </dependency>
+                          </dependencies>
+                        </property>
+                        <property>
+                          <name>oh2.version</name>
+                          <searchReactor>true</searchReactor>
+                          <preferReactor>true</preferReactor>
+                          <dependencies>
+                            <dependency>
+                              <groupId>org.openhab</groupId>
+                              <artifactId>pom</artifactId>
+                            </dependency>
+                          </dependencies>
+                        </property>
+                        <property>
+                          <name>oh1.version</name>
+                          <searchReactor>true</searchReactor>
+                          <preferReactor>true</preferReactor>
+                          <dependencies>
+                            <dependency>
+                              <groupId>org.openhab</groupId>
+                              <artifactId>pom-addons1</artifactId>
+                            </dependency>
+                          </dependencies>
+                        </property>
+                      </properties>
+                    </configuration>
+                  </plugin>
             </plugins>
         </pluginManagement>
     </build>
