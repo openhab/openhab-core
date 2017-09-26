@@ -37,7 +37,7 @@ public class ChartProviderDelegate implements org.eclipse.smarthome.ui.chart.Cha
 
     @Override
     public BufferedImage createChart(String service, String theme, Date startTime, Date endTime, int height, int width,
-            String items, String groups) throws ItemNotFoundException {
+            String items, String groups, Integer dpi, Boolean legend) throws ItemNotFoundException {
         try {
             return provider.createChart(service, theme, startTime, endTime, height, width, items, groups);
         } catch (org.openhab.core.items.ItemNotFoundException e) {
