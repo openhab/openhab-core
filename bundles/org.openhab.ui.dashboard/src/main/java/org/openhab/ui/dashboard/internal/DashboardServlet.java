@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * that are registered as a service.
  *
  * @author Kai Kreuzer
+ * @author Laurent Garnier - internationalization
  *
  */
 public class DashboardServlet extends HttpServlet {
@@ -50,14 +51,17 @@ public class DashboardServlet extends HttpServlet {
 
     private Set<DashboardTile> tiles;
 
+    private DashboardService dashboardService;
+
     public DashboardServlet(ConfigurationAdmin configurationAdmin, String indexTemplate, String entryTemplate,
-            String warnTemplate, String setupTemplate, Set<DashboardTile> tiles) {
+            String warnTemplate, String setupTemplate, Set<DashboardTile> tiles, DashboardService dashboardService) {
         this.configurationAdmin = configurationAdmin;
         this.indexTemplate = indexTemplate;
         this.entryTemplate = entryTemplate;
         this.warnTemplate = warnTemplate;
         this.setupTemplate = setupTemplate;
         this.tiles = tiles;
+        this.dashboardService = dashboardService;
         isExposed(null);
     }
 
@@ -71,7 +75,14 @@ public class DashboardServlet extends HttpServlet {
     }
 
     private void serveDashboard(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String index = indexTemplate.replace("<!--version-->", OpenHAB.getVersion() + " " + OpenHAB.buildString());
+        String language = dashboardService.getUsedLanguage();
+        String index = indexTemplate.replace("<!--language-->", language == null ? "en" : language);
+        index = index.replace("<!--version-->", OpenHAB.getVersion() + " " + OpenHAB.buildString());
+        index = index.replace("<!--index.welcome-->", dashboardService.localizeText("@text/index.welcome"));
+        index = index.replace("<!--index.location-info-->", dashboardService.localizeText("@text/index.location-info"));
+        index = index.replace("<!--index.your-location-->", dashboardService.localizeText("@text/index.your-location"));
+        index = index.replace("<!--common.getting-started-->",
+                dashboardService.localizeText("@text/common.getting-started"));
         StringBuilder entries = new StringBuilder();
         for (DashboardTile tile : tiles) {
             String entry = entryTemplate.replace("<!--name-->", tile.getName());
@@ -86,14 +97,25 @@ public class DashboardServlet extends HttpServlet {
         if (tiles.size() == 0) {
             if ("minimal".equals(getPackage())) {
                 entries.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-                entries.append("No user interfaces installed.");
+                entries.append(dashboardService.localizeText("@text/entry.no-ui-installed"));
             } else {
                 entries.append(
                         "&nbsp;&nbsp;&nbsp;&nbsp;<div class=\"spinner spinner--steps\"><img src=\"img/spinner.svg\"></div>&nbsp;&nbsp;");
-                entries.append("Please stand by while UIs are being installed. This can take several minutes.");
+                entries.append(dashboardService.localizeText("@text/entry.install-running"));
             }
         }
-        String warn = isExposed(req) ? warnTemplate : "";
+        String warn = "";
+        if (isExposed(req)) {
+            warn = warnTemplate.replace("<!--warn.exposed-->", dashboardService.localizeText("@text/warn.exposed"));
+            warn = warn.replace("<!--warn.explanation-->", dashboardService.localizeText("@text/warn.explanation"));
+            warn = warn.replace("<!--warn.advice-->", dashboardService.localizeText("@text/warn.advice"));
+            warn = warn.replace("<!--warn.understood-before-->",
+                    dashboardService.localizeText("@text/warn.understood-before"));
+            warn = warn.replace("<!--warn.understood-click-->",
+                    dashboardService.localizeText("@text/warn.understood-click"));
+            warn = warn.replace("<!--warn.understood-after-->",
+                    dashboardService.localizeText("@text/warn.understood-after"));
+        }
         resp.getWriter().append(index.replace("<!--entries-->", entries.toString()).replace("<!--warn-->", warn));
         resp.getWriter().close();
     }
@@ -103,9 +125,37 @@ public class DashboardServlet extends HttpServlet {
             setPackage(req.getParameter("type"));
             resp.sendRedirect(req.getRequestURI());
         } else {
+            String language = dashboardService.getUsedLanguage();
+            String setup = setupTemplate.replace("<!--language-->", language == null ? "en" : language);
+            setup = setup.replace("<!--version-->", OpenHAB.getVersion() + " " + OpenHAB.buildString());
+            setup = setup.replace("<!--setup.subtitle-->", dashboardService.localizeText("@text/setup.subtitle"));
+            setup = setup.replace("<!--setup.welcome-->", dashboardService.localizeText("@text/setup.welcome"));
+            setup = setup.replace("<!--setup.intro-->", dashboardService.localizeText("@text/setup.intro"));
+            setup = setup.replace("<!--setup.check-doc-->", dashboardService.localizeText("@text/setup.check-doc"));
+            setup = setup.replace("<!--setup.choose-package-->",
+                    dashboardService.localizeText("@text/setup.choose-package"));
+            setup = setup.replace("<!--setup.package-simple-overlay-->",
+                    dashboardService.localizeText("@text/setup.package-simple-overlay"));
+            setup = setup.replace("<!--setup.package-simple-footer-->",
+                    dashboardService.localizeText("@text/setup.package-simple-footer"));
+            setup = setup.replace("<!--setup.package-standard-overlay-->",
+                    dashboardService.localizeText("@text/setup.package-standard-overlay"));
+            setup = setup.replace("<!--setup.package-standard-footer-->",
+                    dashboardService.localizeText("@text/setup.package-standard-footer"));
+            setup = setup.replace("<!--setup.package-expert-overlay-->",
+                    dashboardService.localizeText("@text/setup.package-expert-overlay"));
+            setup = setup.replace("<!--setup.package-expert-footer-->",
+                    dashboardService.localizeText("@text/setup.package-expert-footer"));
+            setup = setup.replace("<!--setup.package-demo-overlay-->",
+                    dashboardService.localizeText("@text/setup.package-demo-overlay"));
+            setup = setup.replace("<!--setup.package-demo-footer-->",
+                    dashboardService.localizeText("@text/setup.package-demo-footer"));
+            setup = setup.replace("<!--setup.skip-package-->",
+                    dashboardService.localizeText("@text/setup.skip-package"));
+            setup = setup.replace("<!--common.getting-started-->",
+                    dashboardService.localizeText("@text/common.getting-started"));
             resp.setContentType("text/html;charset=UTF-8");
-            resp.getWriter().append(
-                    setupTemplate.replace("<!--version-->", OpenHAB.getVersion() + " " + OpenHAB.buildString()));
+            resp.getWriter().append(setup);
             resp.getWriter().close();
         }
     }

@@ -19,6 +19,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.smarthome.core.i18n.I18nUtil;
+import org.eclipse.smarthome.core.i18n.LocaleProvider;
+import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.net.HttpServiceUtil;
 import org.eclipse.smarthome.core.net.NetworkAddressService;
 import org.openhab.ui.dashboard.DashboardTile;
@@ -40,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * This component registers the dashboard resources.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - internationalization
  */
 @Component(service = DashboardService.class, immediate = true, name = "org.openhab.dashboard")
 public class DashboardService {
@@ -54,6 +58,8 @@ public class DashboardService {
     protected HttpService httpService;
     protected ConfigurationAdmin configurationAdmin;
     protected NetworkAddressService networkAddressService;
+    protected TranslationProvider i18nProvider;
+    protected LocaleProvider localeProvider;
 
     protected Set<DashboardTile> tiles = new CopyOnWriteArraySet<>();
 
@@ -120,6 +126,24 @@ public class DashboardService {
         this.networkAddressService = null;
     }
 
+    @Reference
+    protected void setLocaleProvider(final LocaleProvider localeProvider) {
+        this.localeProvider = localeProvider;
+    }
+
+    protected void unsetLocaleProvider(final LocaleProvider localeProvider) {
+        this.localeProvider = null;
+    }
+
+    @Reference
+    public void setTranslationProvider(TranslationProvider i18nProvider) {
+        this.i18nProvider = i18nProvider;
+    }
+
+    public void unsetTranslationProvider(TranslationProvider i18nProvider) {
+        this.i18nProvider = null;
+    }
+
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addDashboardTile(DashboardTile tile) {
         tiles.add(tile);
@@ -180,7 +204,7 @@ public class DashboardService {
         }
 
         return new DashboardServlet(configurationAdmin, indexTemplate, entryTemplate, warnTemplate, setupTemplate,
-                tiles);
+                tiles, this);
     }
 
     private void addTilesForExternalServices(Map<String, Object> properties) {
@@ -201,5 +225,35 @@ public class DashboardService {
                 }
             }
         }
+    }
+
+    /**
+     * Get a localized text considering the current locale (language)
+     *
+     * @param key the key starting with &#64;text/ of to the localization string, e.g &#64;text/index.welcome
+     *
+     * @return the localized text if the key is found, or an empty string if not
+     */
+    public String localizeText(String key) {
+        String result = "";
+        if (I18nUtil.isConstant(key)) {
+            result = i18nProvider.getText(bundleContext.getBundle(), I18nUtil.stripConstant(key), "",
+                    localeProvider.getLocale());
+        }
+        return result;
+    }
+
+    /**
+     * Check if a translation file is provided for the current local (language)
+     *
+     * @return the language code if the file exists, null if not
+     */
+    public String getUsedLanguage() {
+        String lang = null;
+        if (bundleContext.getBundle().getEntry(
+                "ESH-INF/i18n/dashboard_" + localeProvider.getLocale().getLanguage() + ".properties") != null) {
+            lang = localeProvider.getLocale().getLanguage();
+        }
+        return lang;
     }
 }
