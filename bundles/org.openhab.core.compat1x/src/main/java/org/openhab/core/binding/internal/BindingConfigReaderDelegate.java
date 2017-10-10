@@ -8,6 +8,7 @@
  */
 package org.openhab.core.binding.internal;
 
+import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.model.item.BindingConfigParseException;
 import org.eclipse.smarthome.model.item.BindingConfigReader;
 
@@ -42,8 +43,8 @@ public class BindingConfigReaderDelegate implements BindingConfigReader {
     }
 
     @Override
-    public void processBindingConfiguration(String context, String itemType, String itemName, String bindingConfig)
-            throws BindingConfigParseException {
+    public void processBindingConfiguration(String context, String itemType, String itemName, String bindingConfig,
+            Configuration configuration) throws BindingConfigParseException {
         try {
             reader.processBindingConfiguration(context, getOpenHABItem(itemType, itemName), bindingConfig);
         } catch (org.openhab.model.item.binding.BindingConfigParseException e) {
