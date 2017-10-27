@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="<!--language-->">
+<html lang="${locale}">
 <head>
 
 <meta charset="utf-8" />
@@ -23,29 +23,29 @@
         </div>
     </header>
     <section class="container">
-        <h1><!--index.welcome--></h1>
+        <h1>${index.welcome}</h1>
         <div class="line">
             <div class="decorator"></div>
             <hr />
         </div>
-        <!--warn-->
+        ${warn}
         <div class="links row">
-            <!--entries-->
+            ${entries}
         </div>
         <div class="line">
             <div class="geolocation">
                 <div class="decorator"></div>
                 <hr />
-                <p><!--index.location-info--></p>
-                <p><span><!--index.your-location--> </span><span id="geolocation"></span></p>
+                <p>${index.location-info}</p>
+                <p><span>${index.your-location} </span><span id="geolocation"></span></p>
             </div>
             <div class="decorator"></div>
             <hr />
         </div>
-        <!--common.getting-started-->             
+        ${common.getting-started}
     </section>
     <footer>
-        <p>openHAB <!--version--></p>
+        <p>openHAB ${version}</p>
     </footer>
 </body>
 </html>

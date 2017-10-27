@@ -11,6 +11,7 @@ package org.openhab.ui.dashboard.internal;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -19,7 +20,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.i18n.I18nUtil;
 import org.eclipse.smarthome.core.i18n.LocaleProvider;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.net.HttpServiceUtil;
@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - internationalization
+ * @author Hilbrand Bouwkamp - internationalization
  */
 @Component(service = DashboardService.class, immediate = true, name = "org.openhab.dashboard")
 public class DashboardService {
@@ -204,7 +205,7 @@ public class DashboardService {
         }
 
         return new DashboardServlet(configurationAdmin, indexTemplate, entryTemplate, warnTemplate, setupTemplate,
-                tiles, this);
+                tiles, this::getLocalizedText);
     }
 
     private void addTilesForExternalServices(Map<String, Object> properties) {
@@ -228,32 +229,21 @@ public class DashboardService {
     }
 
     /**
-     * Get a localized text considering the current locale (language)
+     * Returns the localized text for the given key. When the key is 'locale' it returns the locale. If no locale or
+     * fall-back would be present it returns the key.
      *
-     * @param key the key starting with &#64;text/ of to the localization string, e.g &#64;text/index.welcome
-     *
-     * @return the localized text if the key is found, or an empty string if not
+     * @param key key to get locale from
+     * @param locale known locale
+     * @return localized text for the key
      */
-    public String localizeText(String key) {
-        String result = "";
-        if (I18nUtil.isConstant(key)) {
-            result = i18nProvider.getText(bundleContext.getBundle(), I18nUtil.stripConstant(key), "",
-                    localeProvider.getLocale());
-        }
-        return result;
-    }
 
-    /**
-     * Check if a translation file is provided for the current local (language)
-     *
-     * @return the language code if the file exists, null if not
-     */
-    public String getUsedLanguage() {
-        String lang = null;
-        if (bundleContext.getBundle().getEntry(
-                "ESH-INF/i18n/dashboard_" + localeProvider.getLocale().getLanguage() + ".properties") != null) {
-            lang = localeProvider.getLocale().getLanguage();
+    private String getLocalizedText(String key, Locale locale) {
+        Locale useLocale = locale == null ? localeProvider.getLocale() : locale;
+
+        if ("locale".equals(key)) {
+            return useLocale.toString();
+        } else {
+            return i18nProvider.getText(bundleContext.getBundle(), key, key, useLocale);
         }
-        return lang;
     }
 }
