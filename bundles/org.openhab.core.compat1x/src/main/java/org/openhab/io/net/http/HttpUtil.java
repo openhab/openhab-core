@@ -196,7 +196,7 @@ public class HttpUtil {
 
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
-                logger.warn("Method failed: {}", method.getStatusLine());
+                logger.debug("Method failed: {}", method.getStatusLine());
             }
 
             String responseBody = IOUtils.toString(method.getResponseBodyAsStream());
