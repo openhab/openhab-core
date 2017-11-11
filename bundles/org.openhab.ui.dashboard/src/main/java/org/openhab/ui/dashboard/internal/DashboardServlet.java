@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,8 +113,8 @@ public class DashboardServlet extends HttpServlet {
         replaceMap.put("warn", isExposed(req) ? warnTemplate : "");
         // Set the messages in the session
         resp.setContentType("text/html;charset=UTF-8");
-        resp.getWriter().append(replaceKeysWithFunction(replaceKeysFromMap(indexTemplate, replaceMap), req.getLocale(),
-                localizeFunction));
+        resp.getWriter()
+                .append(replaceKeysWithLocaleFunction(replaceKeysFromMap(indexTemplate, replaceMap), req.getLocale()));
         resp.getWriter().close();
     }
 
@@ -125,8 +126,8 @@ public class DashboardServlet extends HttpServlet {
             Map<String, String> replaceMap = new HashMap<>();
             replaceMap.put("version", OpenHAB.getVersion() + " " + OpenHAB.buildString());
             resp.setContentType("text/html;charset=UTF-8");
-            resp.getWriter().append(replaceKeysWithFunction(replaceKeysFromMap(setupTemplate, replaceMap),
-                    req.getLocale(), localizeFunction));
+            resp.getWriter().append(
+                    replaceKeysWithLocaleFunction(replaceKeysFromMap(setupTemplate, replaceMap), req.getLocale()));
             resp.getWriter().close();
         }
     }
@@ -202,18 +203,22 @@ public class DashboardServlet extends HttpServlet {
         return null;
     }
 
-    private String replaceKeysFromMap(String template, Map<String, String> map) {
-        return replaceKeysWithFunction(template, null, (k, l) -> map.getOrDefault(k, "\\${" + k + '}'));
+    private String replaceKeysWithLocaleFunction(String template, Locale locale) {
+        return replaceKeysWithFunction(template, (key) -> localizeFunction.apply(key, locale));
     }
 
-    private String replaceKeysWithFunction(String template, Locale locale,
-            BiFunction<String, Locale, String> getMessage) {
+    private String replaceKeysFromMap(String template, Map<String, String> map) {
+        return replaceKeysWithFunction(template,
+                (key) -> Matcher.quoteReplacement(map.getOrDefault(key, "${" + key + '}')));
+    }
+
+    private String replaceKeysWithFunction(String template, Function<String, String> getMessage) {
         Matcher m = MESSAGE_KEY_PATTERN.matcher(template);
         StringBuffer sb = new StringBuffer();
 
         while (m.find()) {
             String key = m.group(1);
-            m.appendReplacement(sb, getMessage.apply(key, locale));
+            m.appendReplacement(sb, getMessage.apply(key));
         }
         m.appendTail(sb);
         return sb.toString();

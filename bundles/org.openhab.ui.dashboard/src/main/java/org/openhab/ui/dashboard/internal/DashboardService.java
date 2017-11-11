@@ -241,7 +241,11 @@ public class DashboardService {
         Locale useLocale = locale == null ? localeProvider.getLocale() : locale;
 
         if ("locale".equals(key)) {
-            return useLocale.toString();
+            // The return value for "locale" key is an ISO 639-1 language code
+            // In case there is no translation for the used locale provided with the dashboard, "en" is returned
+            return bundleContext.getBundle()
+                    .getEntry("ESH-INF/i18n/dashboard_" + useLocale.getLanguage() + ".properties") != null
+                            ? useLocale.getLanguage() : "en";
         } else {
             return i18nProvider.getText(bundleContext.getBundle(), key, key, useLocale);
         }
