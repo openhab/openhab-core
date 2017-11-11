@@ -1,11 +1,11 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="${locale}">
 <head>
 
 <meta charset="utf-8" />
 <meta name="viewport"
-	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>openHAB - Setup</title>
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>openHAB - ${setup.subtitle}</title>
 <link type="text/css" href="fonts/icomoon.css" rel="stylesheet" media="all">
 <link type="text/css" href="css/bootstrap.min.css" rel="stylesheet"></link>
 <link type="text/css" href="css/main.css" rel="stylesheet"></link>
@@ -19,14 +19,14 @@
         </div>
     </header>
     <section class="container">
-        <h1>Welcome to openHAB 2 - Initial Setup</h1>
+        <h1>${setup.welcome}</h1>
         <div class="line">
             <div class="decorator"></div>
             <div>
-                <p><br/>openHAB comes with many different add-ons. To allow an easy start, there are four pre-defined packages available that are a good starting point.
-                <br/>Check out the online documentation for a <a href="http://docs.openhab.org/configuration/packages.html" target="_blank">detailed description of those packages</a>.</p>
+                <p><br/>${setup.intro}
+                <br/>${setup.check-doc}</p>
                 <hr />
-                <p><b>Please choose a package:</b></p>
+                <p><b>${setup.choose-package}</b></p>
             </div>
         </div>
         <div class="links row">
@@ -34,11 +34,11 @@
                 <div class="link" onclick="location.href = 'index?type=simple'">    
                     <div class="body" style="background-image: url('img/simple.jpg')">
                         <div class="overlay">
-                            Simple
+                            ${setup.package-simple-overlay}
                         </div>
                     </div>
                     <div class="footer">
-                        <p>purely UI</p>
+                        <p>${setup.package-simple-footer}</p>
                     </div>
                 </div>
             </div>
@@ -46,11 +46,11 @@
                 <div class="link" onclick="location.href = 'index?type=standard'">    
                     <div class="body" style="background-image: url('img/standard.jpg')">
                         <div class="overlay">
-                            Standard
+                            ${setup.package-standard-overlay}
                         </div>
                     </div>
                     <div class="footer">
-                        <p>Recommended setup</p>
+                        <p>${setup.package-standard-footer}</p>
                     </div>
                 </div>
             </div>
@@ -58,11 +58,11 @@
                 <div class="link" onclick="location.href = 'index?type=expert'">    
                     <div class="body" style="background-image: url('img/expert.jpg')">
                         <div class="overlay">
-                            Expert
+                            ${setup.package-expert-overlay}
                         </div>
                     </div>
                     <div class="footer">
-                        <p>Best for 1.x users</p>
+                        <p>${setup.package-expert-footer}</p>
                     </div>
                 </div>
             </div>
@@ -70,24 +70,24 @@
                 <div class="link" onclick="location.href = 'index?type=demo'">    
                     <div class="body" style="background-image: url('img/demo.jpg')">
                         <div class="overlay">
-                            Demo
+                            ${setup.package-demo-overlay}
                         </div>
                     </div>
                     <div class="footer">
-                        <p>Sample setup</p>
+                        <p>${setup.package-demo-footer}</p>
                     </div>
                 </div>
             </div>
         </div>
-        <a href="#" onclick="location.href = 'index?type=minimal'">Skip the package selection...</a>.  
+        <a href="#" onclick="location.href = 'index?type=minimal'">${setup.skip-package}</a>.  
         <div class="line">
             <div class="decorator"></div>
             <hr />
         </div>
-        Getting started? Please refer to the <a href="http://docs.openhab.org/" target="_blank">online documentation</a>.             
+        ${common.getting-started}
     </section>
     <footer>
-        <p>openHAB <!--version--></p>
+        <p>openHAB ${version}</p>
     </footer>
 </body>
 </html>

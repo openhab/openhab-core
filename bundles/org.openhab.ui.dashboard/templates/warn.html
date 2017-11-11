@@ -2,13 +2,7 @@
             <div class="link-wrapper col-md-12 col-sm-12 col-xs-12">
                 <div class="body" style="background-color: #FF0000; padding: 20px">
                      <div class="overlay" style="font-size: 150%; color: #FFFFFF">
-                     <p><b>WARNING - YOUR HOME IS EXPOSED!</b></p>
-                     <p>It seems that you have configured your network in a way that you can remotely access your openHAB server.
-                     Unfortunately, it is not just you - almost <b>everybody on the Internet can access it!</b></p>
-                     <p>If this wasn't your plan, please act immediately. Stop the port forwarding of your router or make sure
-                     that you have a secure authentication mechanism in place, e.g. by using NGINX as a reverse proxy inbetween.</p>
-                     <p>If you have read and understood this message and you have taken appropriate actions, 
-                     please <a href="?warn=ihavelearnedmylesson" style="color: #DDDDDD">click here</a> to make this message disappear again.</p>                      
+                     ${warn.exposed}
                      </div>    
                 </div>
             </div>
