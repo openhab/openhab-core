@@ -78,9 +78,25 @@
     <packaging>pom</packaging>
 
     <build>
-
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.commonjava.maven.plugins</groupId>
+                    <artifactId>directory-maven-plugin</artifactId>
+                    <version>0.2</version>
+                    <executions>
+                        <execution>
+                            <id>directories</id>
+                            <goals>
+                                <goal>highest-basedir</goal>
+                            </goals>
+                            <phase>initialize</phase>
+                            <configuration>
+                                <property>basedirRoot</property>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>
@@ -281,7 +297,7 @@
           <plugin>
               <groupId>org.openhab.tools</groupId>
               <artifactId>static-code-analysis</artifactId>
-              <version>${sat.version}</version>              
+              <version>${sat.version}</version>
           </plugin>
         </plugins>
       </build>
