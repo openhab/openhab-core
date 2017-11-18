@@ -12,10 +12,8 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,11 +59,11 @@ public class DashboardServlet extends HttpServlet {
 
     private Set<DashboardTile> tiles;
 
-    private BiFunction<String, Locale, String> localizeFunction;
+    private Function<String, String> localizeFunction;
 
     public DashboardServlet(ConfigurationAdmin configurationAdmin, String indexTemplate, String entryTemplate,
             String warnTemplate, String setupTemplate, Set<DashboardTile> tiles,
-            BiFunction<String, Locale, String> localizeFunction) {
+            Function<String, String> localizeFunction) {
         this.configurationAdmin = configurationAdmin;
         this.indexTemplate = indexTemplate;
         this.entryTemplate = entryTemplate;
@@ -113,8 +111,7 @@ public class DashboardServlet extends HttpServlet {
         replaceMap.put("warn", isExposed(req) ? warnTemplate : "");
         // Set the messages in the session
         resp.setContentType("text/html;charset=UTF-8");
-        // We use for UI language the server locale rather than the browser locale that we can get with req.getLocale()
-        resp.getWriter().append(replaceKeysWithLocaleFunction(replaceKeysFromMap(indexTemplate, replaceMap), null));
+        resp.getWriter().append(replaceKeysWithLocaleFunction(replaceKeysFromMap(indexTemplate, replaceMap)));
         resp.getWriter().close();
     }
 
@@ -126,9 +123,7 @@ public class DashboardServlet extends HttpServlet {
             Map<String, String> replaceMap = new HashMap<>();
             replaceMap.put("version", OpenHAB.getVersion() + " " + OpenHAB.buildString());
             resp.setContentType("text/html;charset=UTF-8");
-            // We use for UI language the server locale rather than the browser locale that we can get with
-            // req.getLocale()
-            resp.getWriter().append(replaceKeysWithLocaleFunction(replaceKeysFromMap(setupTemplate, replaceMap), null));
+            resp.getWriter().append(replaceKeysWithLocaleFunction(replaceKeysFromMap(setupTemplate, replaceMap)));
             resp.getWriter().close();
         }
     }
@@ -204,8 +199,8 @@ public class DashboardServlet extends HttpServlet {
         return null;
     }
 
-    private String replaceKeysWithLocaleFunction(String template, Locale locale) {
-        return replaceKeysWithFunction(template, (key) -> localizeFunction.apply(key, locale));
+    private String replaceKeysWithLocaleFunction(String template) {
+        return replaceKeysWithFunction(template, (key) -> localizeFunction.apply(key));
     }
 
     private String replaceKeysFromMap(String template, Map<String, String> map) {
