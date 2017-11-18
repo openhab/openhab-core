@@ -233,19 +233,19 @@ public class DashboardService {
      * fall-back would be present it returns the key.
      *
      * @param key key to get locale from
-     * @param locale known locale
      * @return localized text for the key
      */
 
-    private String getLocalizedText(String key, Locale locale) {
-        Locale useLocale = locale == null ? localeProvider.getLocale() : locale;
+    private String getLocalizedText(String key) {
+        Locale useLocale = localeProvider.getLocale() == null ? Locale.ENGLISH : localeProvider.getLocale();
 
         if ("locale".equals(key)) {
             // The return value for "locale" key is an ISO 639-1 language code
             // In case there is no translation for the used locale provided with the dashboard, "en" is returned
             return bundleContext.getBundle()
                     .getEntry("ESH-INF/i18n/dashboard_" + useLocale.getLanguage() + ".properties") != null
-                            ? useLocale.getLanguage() : "en";
+                            ? useLocale.getLanguage()
+                            : "en";
         } else {
             return i18nProvider.getText(bundleContext.getBundle(), key, key, useLocale);
         }
