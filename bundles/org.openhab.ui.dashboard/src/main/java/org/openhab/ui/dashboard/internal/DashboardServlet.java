@@ -113,8 +113,8 @@ public class DashboardServlet extends HttpServlet {
         replaceMap.put("warn", isExposed(req) ? warnTemplate : "");
         // Set the messages in the session
         resp.setContentType("text/html;charset=UTF-8");
-        resp.getWriter()
-                .append(replaceKeysWithLocaleFunction(replaceKeysFromMap(indexTemplate, replaceMap), req.getLocale()));
+        // We use for UI language the server locale rather than the browser locale that we can get with req.getLocale()
+        resp.getWriter().append(replaceKeysWithLocaleFunction(replaceKeysFromMap(indexTemplate, replaceMap), null));
         resp.getWriter().close();
     }
 
@@ -126,8 +126,9 @@ public class DashboardServlet extends HttpServlet {
             Map<String, String> replaceMap = new HashMap<>();
             replaceMap.put("version", OpenHAB.getVersion() + " " + OpenHAB.buildString());
             resp.setContentType("text/html;charset=UTF-8");
-            resp.getWriter().append(
-                    replaceKeysWithLocaleFunction(replaceKeysFromMap(setupTemplate, replaceMap), req.getLocale()));
+            // We use for UI language the server locale rather than the browser locale that we can get with
+            // req.getLocale()
+            resp.getWriter().append(replaceKeysWithLocaleFunction(replaceKeysFromMap(setupTemplate, replaceMap), null));
             resp.getWriter().close();
         }
     }
