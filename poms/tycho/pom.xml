@@ -24,7 +24,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.openhab</groupId>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <version>${ds-annotations.version}</version>
             <optional>true</optional>
@@ -226,6 +226,12 @@
             <layout>p2</layout>
         </repository>
 
+        <!-- Eclipse p2 repository -->
+        <repository>
+            <id>eclipse-oxygen</id>
+            <url>http://download.eclipse.org/releases/oxygen/201709271000</url>
+            <layout>p2</layout>
+        </repository>
 	</repositories>
 
 </project>
