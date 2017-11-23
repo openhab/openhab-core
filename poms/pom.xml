@@ -56,7 +56,7 @@
         <groovy.eclipse.compiler.version>2.9.2-01</groovy.eclipse.compiler.version>
         <groovy.eclipse.batch.version>2.4.3-01</groovy.eclipse.batch.version>
 
-        <ohdr.version>1.0.18</ohdr.version>
+        <ohdr.version>1.0.19</ohdr.version>
         <esh.version>0.9.0-SNAPSHOT</esh.version>
         <repo.version>2.2.x</repo.version>
         <karaf.version>4.1.3</karaf.version>
