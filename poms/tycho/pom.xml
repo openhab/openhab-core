@@ -120,7 +120,7 @@
                             <version>${jdt-annotations.version}</version>
                           </extraClasspathElement>
                           <extraClasspathElement>
-                            <groupId>org.openhab</groupId>
+                            <groupId>org.apache.felix</groupId>
                             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                           <version>${ds-annotations.version}</version>
                         </extraClasspathElement>
