@@ -22,26 +22,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HomeBuilderDashboardTile implements DashboardTile {
 
-    @Override
-    public String getName() {
-        return "Home Builder";
-    }
-
-    @Override
-    public String getUrl() {
-        return "../homebuilder/index.html";
-    }
-
-    @Override
-    public String getOverlay() {
-        return null;
-    }
-
-    @Override
-    public String getImageUrl() {
-        return "../homebuilder/tile.png";
-    }
-
     public static final String HOMEBUILDER_ALIAS = "/homebuilder";
 
     private final Logger logger = LoggerFactory.getLogger(HomeBuilderDashboardTile.class);
@@ -68,6 +48,26 @@ public class HomeBuilderDashboardTile implements DashboardTile {
 
     protected void unsetHttpService(HttpService httpService) {
         this.httpService = null;
+    }
+
+    @Override
+    public String getName() {
+        return "Home Builder";
+    }
+
+    @Override
+    public String getUrl() {
+        return "../homebuilder/index.html";
+    }
+
+    @Override
+    public String getOverlay() {
+        return null;
+    }
+
+    @Override
+    public String getImageUrl() {
+        return "../homebuilder/tile.png";
     }
 
 }

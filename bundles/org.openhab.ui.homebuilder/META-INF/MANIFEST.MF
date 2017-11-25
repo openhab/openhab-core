@@ -16,6 +16,7 @@ Import-Package: com.google.gson,
  org.osgi.framework,
  org.osgi.service.cm,
  org.osgi.service.http,
+ org.osgi.service.component.annotations;resolution:=optional,
  org.slf4j
 Bundle-Vendor: openHAB
 Bundle-ActivationPolicy: lazy

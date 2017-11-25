@@ -147,7 +147,7 @@ export default {
             _.forOwn(roomsModel, (room) => { stack = [...stack, ...room] });
           }
 
-          stack.forEach(item => { 
+          stack.forEach(item => {
             if (!item.custom) {
               item.name = this.$i18n.t(item.value);
             }
@@ -157,9 +157,10 @@ export default {
     },
 
     resizeAffix(event) {
-      let bodyWidth = document.body.clientWidth;
-      let formWidth = document.getElementById('form').clientWidth;
+      let bodyWidth = document.body && document.body.clientWidth;
+      let formEl = document.getElementById('form');
       let previewEl = document.getElementById('preview');
+      let formWidth = formEl && form.clientWidth;
       let hidden = 'hidden-xs-up';
 
       previewEl.style.width = formWidth + 'px';

@@ -14,20 +14,12 @@ import { getItems } from './restItems'
 function generateType(item) {
     let type = item.type;
 
-    switch (item.entryType) {
-        case 'objectGroup':
-            type += ':' + item.groupType;
-
-            if (item.function && item.function.name) {
-                type += ':' + item.function.name;
-
-                if (item.function.params) {
-                    type += '(' + item.function.params.join(', ') + ')';
-                }
-            }
-            break;
-        default:
-            break;
+    if (item.entryType === 'objectGroup') {
+        type += ':' + item.groupType;
+        if (item.function) {
+            type += item.function.name ? ':' + item.function.name : '';
+            type += item.function.params ? '(' + item.function.params.join(', ') + ')' : '';
+        }
     }
 
     return type;
@@ -60,7 +52,7 @@ function generateIcon(item, model) {
  * @return {string}
  */
 function generateGroups(item) {
-    return item.groupNames ? '(' + item.groupNames.join(', ') + ')' : '';
+    return _.isEmpty(item.groupNames) ? '' : '(' + item.groupNames.join(', ') + ')';
 }
 
 /**
@@ -89,18 +81,10 @@ function generateChannel(item, model) {
  * Generates an array or items
  * to be later processed by AsciiTable
  * 
- * @param {string} entryType 
- * @param {Object} model 
- * @return {Array}
+ * @param {*} items 
  */
-function getItemsOfType(entryType, model) {
-    let allItems = getItems(model);
-    let items = _(allItems)
-        .filter({ entryType: entryType })
-        .uniq()
-        .value() || [];
-
-    let result = items.map((item) => {
+function generateTextualItems(items, model) {
+    let result = items.map(item => {
         return [
             generateType(item),
             item.name,
@@ -118,6 +102,24 @@ function getItemsOfType(entryType, model) {
     }
 
     return result;
+}
+
+/**
+ * Generates an array or items 
+ * for a given type
+ * 
+ * @param {string} entryType 
+ * @param {Object} model 
+ * @return {Array}
+ */
+function getItemsOfType(entryType, model) {
+    let allItems = getItems(model);
+    let items = _(allItems)
+        .filter({ entryType: entryType })
+        .uniq()
+        .value() || [];
+
+    return generateTextualItems(items, model);
 }
 
 /**

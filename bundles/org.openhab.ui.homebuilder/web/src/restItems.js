@@ -23,9 +23,9 @@ export function addRooms(floor, model) {
     let items = [];
 
     if (floor && floor.value && !_.isUndefined(model[floor.value])) {
-        model[floor.value].forEach(function(room) {
-            var roomObjects = floor.value + '_' + room.value + OBJECTS_SUFFIX;
-            var floorPrefix = model.floorsCount > 1 ? floor.abbr + '_' : '';
+        model[floor.value].forEach((room) => {
+            let roomObjects = floor.value + '_' + room.value + OBJECTS_SUFFIX;
+            let floorPrefix = model.floorsCount > 1 ? floor.abbr + '_' : '';
 
             items.push({
                 type: 'Group',
