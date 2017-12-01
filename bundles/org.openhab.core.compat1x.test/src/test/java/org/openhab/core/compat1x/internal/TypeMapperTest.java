@@ -20,7 +20,7 @@ public class TypeMapperTest {
     public void testDateTypeType() {
         DateTimeType ohType1 = new DateTimeType();
         DateTimeType ohType2 = (DateTimeType) TypeMapper.mapToOpenHABType(TypeMapper.mapToESHType(ohType1));
-        assertEquals(ohType1, ohType2);
+        assertEquals(ohType1.toString(), ohType2.toString());
     }
 
     @Test
