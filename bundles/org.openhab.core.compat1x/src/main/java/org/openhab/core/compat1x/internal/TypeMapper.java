@@ -10,6 +10,7 @@ package org.openhab.core.compat1x.internal;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -73,7 +74,8 @@ public class TypeMapper {
         } else if (typeClass.equals(PercentType.class)) {
             result = new org.openhab.core.library.types.PercentType(type.toString());
         } else if (typeClass.equals(DateTimeType.class)) {
-            result = new org.openhab.core.library.types.DateTimeType(cloneCalendar(type));
+            result = new org.openhab.core.library.types.DateTimeType(
+                    GregorianCalendar.from(((DateTimeType) type).getZonedDateTime()));
         } else if (typeClass.equals(PointType.class)) {
             result = new org.openhab.core.library.types.PointType(type.toString());
         } else if (typeClass.equals(StringListType.class)) {
