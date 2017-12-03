@@ -103,4 +103,9 @@
         <feature>esh-automation-rest</feature>
     </feature>
 
+    <feature name="openhab-ui-homebuilder" description="Home Builder" version="${project.version}">
+        <feature>openhab-runtime-base</feature>
+        <bundle>mvn:org.openhab.core/org.openhab.ui.homebuilder/${project.version}</bundle>
+    </feature>
+
 </features>
