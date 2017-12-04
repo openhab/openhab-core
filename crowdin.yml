@@ -1,0 +1,6 @@
+files:
+  - source: /bundles/org.openhab.ui.dashboard/ESH-INF/i18n/dashboard.properties
+    translation: >-
+      /bundles/org.openhab.ui.dashboard/ESH-INF/i18n/dashboard_%two_letters_code%.properties
+  - source: /bundles/org.openhab.ui.homebuilder/web/i18n/en-UK.json
+    translation: /bundles/org.openhab.ui.homebuilder/web/i18n/%locale%.json
