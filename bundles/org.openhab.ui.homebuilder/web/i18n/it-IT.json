@@ -1,11 +1,9 @@
-
 {
     "GroundFloor": "Piano Terra",
     "FirstFloor": "Primo Piano",
     "SecondFloor": "Secondo Piano",
     "ThirdFloor": "Terzo Piano",
     "FourthFloor": "Quarto Piano",
-
     "Attic": "Attico",
     "Balcony": "Balcone",
     "Backyard": "Cortile sul retro",
@@ -49,7 +47,6 @@
     "Toilet": "Bagno",
     "Terrace": "Terrazza",
     "Upstairs": "Piano di Sopra",
-
     "Light": "Luce",
     "Window": "Finestra",
     "Door": "Porta",
