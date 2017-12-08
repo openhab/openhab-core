@@ -190,7 +190,7 @@ pre {
     cursor: pointer;
     background-color: #ccc;
     border: 0;
-    border-radius: .25rem;
+    border-radius: 0;
     &:hover {
         background-color: #027de7;
     }
@@ -199,11 +199,6 @@ pre {
 .btn-clipboard {
     @include btn-muted();
     right: .5rem;
-}
-
-.btn-create-items {
-    @include btn-muted();
-    right: 5em;
 }
 
 @media only screen and (max-width: 599px) {

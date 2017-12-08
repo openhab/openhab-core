@@ -3,22 +3,37 @@
         <b-btn block v-b-toggle="uid" variant="info" v-html="heading"></b-btn>
         <b-collapse :id="uid" accordion="preview">
             <b-card>
-                <button @click="createItems" v-if="uid === 'items' && content instanceof Array" class="btn-clipboard btn-create-items">{{ createText }}</button>
-                <button @click="copy" class="btn-clipboard" title="Copy to clipboard">{{ copyText }}</button>
-
-                <span class="pb-1" v-if="uid === 'items' && content instanceof Array">
-                    Number of Items: {{content.length}}
-                </span>
+                <div class="text-center"
+                     v-if="uid === 'items' && content instanceof Array">
+                    <button @click="createItems"
+                        class="btn btn-create-items btn-outline-info">{{ createText }}</button>
+                </div>
+                <button @click="copy"
+                        v-if="!(uid === 'items' && content instanceof Array)"
+                        class="btn-clipboard"
+                        title="Copy to clipboard">{{ copyText }}</button>
 
                 <span class="pb-1" v-if="uid === 'habpanel'">
                     Paste the content in
                     <a href="../../habpanel/index.html#/settings/localconfig" target="_blank">this config page</a>.
                 </span>
-                <pre v-html='content'></pre>
+                <pre v-html='content'
+                     v-if="!(uid === 'items' && content instanceof Array)"></pre>
             </b-card>
         </b-collapse>
     </div>
 </template>
+
+<style lang="scss">
+.card-block {
+    padding: 0.5rem !important;
+
+    pre {
+        margin-top: 0;
+    }
+}
+</style>
+
 
 <script>
 import Vue from 'vue'
