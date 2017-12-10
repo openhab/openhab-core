@@ -1,24 +1,26 @@
 # Dashboard
 
 The openHAB dashboard is a landing page for the user where all openHAB UIs can be found.
-Dashboard support also links to external services.
-Links can be added to the dashboard by editing the `conf/services/dashboard.cfg` configuration file.
+The Dashboard also supports links to external services.
+Links can be added to the dashboard by editing the `$OPENHAB_CONF/services/dashboard.cfg` configuration file.
 
 ## Link Configuration
 
-| Parameter name              | Type    | Description                                                                             |
-|-----------------------------|---------|-----------------------------------------------------------------------------------------|
-| <unique-name>.link-name     | String  | Name which is shown in the openHAB dashboard.                                           |
-| <unique-name>.link-url      | String  | URL to external service.                                                                |
-| <unique-name>.link-imageurl | String  | URL to image which is shown in the dashboard.                                           |
+| Parameter Name                | Type    | Description                                   |
+|-------------------------------|---------|-----------------------------------------------|
+| `<unique-name>.link-name`     | String  | Name which is shown in the openHAB dashboard. |
+| `<unique-name>.link-url`      | String  | URL to external service.                      |
+| `<unique-name>.link-imageurl` | String  | URL to image which is shown in the dashboard. |
 
 Where `<unique-name>` is link unique identifier (see examples).
 
-## Image URL
+### Image
 
-Browser fetch image from image URL. URL can be direct http link or data URIs according to [RFC2397](https://tools.ietf.org/html/rfc2397). If data URIs are used, browser should support them as well. All five major browsers (Chrome, Firefox, IE, Opera and Safari) support data URIs. See e.g. [https://www.base64-image.de](https://www.base64-image.de) to convert images to base64 coded data. 
+A png image of 350px width and 200-250px height are recommended.
 
-## Example configuration file
+The `imageurl` property can either be a direct HTTP link or data URIs according to [RFC2397](https://tools.ietf.org/html/rfc2397). If data URIs are used, browser should support them as well. All five major browsers (Chrome, Firefox, IE, Opera and Safari) support data URIs. See e.g. [https://www.base64-image.de](https://www.base64-image.de) to convert images to base64 coded data. 
+
+## Example Configuration File
 
 ```
 frontail.link-name=openHAB Log Viewer
