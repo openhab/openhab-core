@@ -19,12 +19,15 @@ import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -42,6 +45,9 @@ import org.osgi.service.cm.ConfigurationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Maps;
+
 /**
  * This service reads addons.cfg and installs listed addons (= Karaf features) and the selected package.
  * It furthermore allows configuration of the base package through the Paper UI as well as administrating Karaf to
@@ -51,10 +57,12 @@ import org.slf4j.LoggerFactory;
  */
 public class FeatureInstaller implements ConfigurationListener {
 
+    public static final String MINIMAL_PACKAGE = "minimal";
     private static final String CFG_REMOTE = "remote";
     private static final String CFG_LEGACY = "legacy";
 
     private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
+    private static final String ADDONS_PID = "org.openhab.addons";
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
 
     public static final String STANDARD_PACKAGE = "standard";
@@ -64,7 +72,7 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String[] addonTypes = new String[] { "binding", "ui", "persistence", "action", "voice",
             "transformation", "misc" };
 
-    private static final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
+    private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
     private String online_repo_url = null;
     private URI legacy_addons_url = null;
@@ -72,6 +80,8 @@ public class FeatureInstaller implements ConfigurationListener {
     private FeaturesService featuresService;
     private ConfigurationAdmin configurationAdmin;
     private static EventPublisher eventPublisher;
+
+    private ScheduledExecutorService scheduler;
 
     private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
                                           // configuration as this must be waited for before trying to add feature repos
@@ -106,6 +116,26 @@ public class FeatureInstaller implements ConfigurationListener {
         setOnlineRepoUrl();
         setLegacyRepoUrl();
         modified(config);
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleWithFixedDelay(() -> {
+            logger.debug("Running scheduled sync job");
+            try {
+                Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(ADDONS_PID).getProperties();
+                Iterator<String> keysIter = Iterators.forEnumeration(cfg.keys());
+                Map<String, Object> cfgMap = Maps.toMap(keysIter, cfg::get);
+                modified(cfgMap);
+            } catch (IOException e) {
+                logger.debug("Failed to retrieve the addons configuration from configuration admin: {}",
+                        e.getMessage());
+            }
+        }, 1, 1, TimeUnit.MINUTES);
+    }
+
+    protected void deactivate() {
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+            scheduler = null;
+        }
     }
 
     protected void modified(final Map<String, Object> config) {
@@ -113,7 +143,7 @@ public class FeatureInstaller implements ConfigurationListener {
         boolean online = (config.get(CFG_REMOTE) == null && getOnlineStatus())
                 || (config.get(CFG_REMOTE) != null && "true".equals(config.get(CFG_REMOTE).toString()));
         if (getOnlineStatus() != online) {
-            setOnlineStatus(online);
+            changed = setOnlineStatus(online);
         }
 
         final boolean configChanged = changed;
@@ -302,11 +332,13 @@ public class FeatureInstaller implements ConfigurationListener {
                     if (!repoCfg.contains(online_repo_url)) {
                         repoCfg.add(online_repo_url);
                         changed = true;
+                        logger.debug("Added repo '{}' to feature repo list.", online_repo_url);
                     }
                 } else {
                     if (repoCfg.contains(online_repo_url)) {
                         repoCfg.remove(online_repo_url);
                         changed = true;
+                        logger.debug("Removed repo '{}' from feature repo list.", online_repo_url);
                     }
                 }
                 if (changed) {
@@ -413,7 +445,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private static synchronized boolean installFeature(FeaturesService featuresService, String name) {
+    private synchronized boolean installFeature(FeaturesService featuresService, String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
             if (!isInstalled(features, name)) {
@@ -431,7 +463,7 @@ public class FeatureInstaller implements ConfigurationListener {
         return false;
     }
 
-    private static synchronized boolean uninstallFeature(FeaturesService featuresService, String name) {
+    private synchronized boolean uninstallFeature(FeaturesService featuresService, String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
             if (isInstalled(features, name)) {
@@ -446,24 +478,26 @@ public class FeatureInstaller implements ConfigurationListener {
         return false;
     }
 
-    private static synchronized boolean installPackage(FeaturesService featuresService,
-            final Map<String, Object> config) {
+    private synchronized boolean installPackage(FeaturesService featuresService, final Map<String, Object> config) {
         boolean configChanged = false;
         Object packageName = config.get(OpenHAB.CFG_PACKAGE);
         if (packageName instanceof String) {
             currentPackage = (String) packageName;
-            String name = PREFIX + PREFIX_PACKAGE + ((String) packageName).trim();
-            if (installFeature(featuresService, name)) {
-                configChanged = true;
+            String fullName = PREFIX + PREFIX_PACKAGE + ((String) packageName).trim();
+            if (currentPackage.equals(MINIMAL_PACKAGE)) {
+                // no changes are done to the add-ons list, so the installer should proceed
+                configChanged = false;
+            } else {
+                if (installFeature(featuresService, fullName)) {
+                    configChanged = true;
+                }
             }
 
             // uninstall all other packages
             try {
                 for (Feature feature : featuresService.listFeatures()) {
-                    if (feature.getName().startsWith(PREFIX + PREFIX_PACKAGE) && !feature.getName().equals(name)) {
-                        if (uninstallFeature(featuresService, feature.getName()) && !configChanged) {
-                            configChanged = true;
-                        }
+                    if (feature.getName().startsWith(PREFIX + PREFIX_PACKAGE) && !feature.getName().equals(fullName)) {
+                        uninstallFeature(featuresService, feature.getName());
                     }
                 }
             } catch (Exception e) {
@@ -473,7 +507,7 @@ public class FeatureInstaller implements ConfigurationListener {
         return configChanged;
     }
 
-    private static boolean isInstalled(Feature[] features, String name) {
+    private boolean isInstalled(Feature[] features, String name) {
         try {
             for (Feature feature : features) {
                 if (feature.getName().equals(name)) {

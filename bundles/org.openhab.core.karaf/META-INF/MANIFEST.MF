@@ -3,10 +3,11 @@ Bundle-ActivationPolicy: lazy
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Karaf Integration
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-SymbolicName: org.openhab.core.karaf
+Bundle-SymbolicName: org.openhab.core.karaf;singleton:=true
 Bundle-Vendor: openHAB
 Bundle-Version: 2.2.0.qualifier
 Import-Package: 
+ com.google.common.base,
  com.google.common.collect,
  org.apache.commons.lang,
  org.apache.karaf.features,
