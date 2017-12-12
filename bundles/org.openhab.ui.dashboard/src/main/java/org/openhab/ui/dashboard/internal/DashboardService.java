@@ -96,6 +96,7 @@ public class DashboardService {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
+        httpService.unregister(DASHBOARD_ALIAS + "/" + SERVLET_NAME);
         httpService.unregister(DASHBOARD_ALIAS);
         logger.info("Stopped dashboard");
     }
