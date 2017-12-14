@@ -60,7 +60,6 @@
         <module>poms/tycho</module>
         <module>bundles</module>
         <module>features</module>
-        <module>targetplatform</module>
     </modules>
 
 
