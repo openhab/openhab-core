@@ -236,7 +236,6 @@ public class DashboardService {
      * @param key key to get locale from
      * @return localized text for the key
      */
-
     private String getLocalizedText(String key) {
         Locale useLocale = localeProvider.getLocale() == null ? Locale.ENGLISH : localeProvider.getLocale();
 
