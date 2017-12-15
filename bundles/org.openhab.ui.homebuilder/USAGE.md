@@ -1,6 +1,6 @@
 ---
 layout: documentation
-title: Android openHAB App
+title: Home Builder
 source: https://github.com/openhab/openhab-core/blob/master/bundles/org.openhab.ui.homebuilder/USAGE.md
 ---
 
