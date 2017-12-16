@@ -27,6 +27,7 @@
         <connection>scm:git:${scm.gitBaseUrl}/openhab-core.git</connection>
         <developerConnection>scm:git:${scm.gitBaseUrl}/openhab-core.git</developerConnection>
         <url>${scm.gitBaseUrl}/openhab-core</url>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
