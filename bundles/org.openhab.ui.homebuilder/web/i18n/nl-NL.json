@@ -22,7 +22,7 @@
     "FamilyRoom": "Familiekamer",
     "FrontYard": "Voortuin",
     "Garage": "Garage",
-    "GuestHouse": "",
+    "GuestHouse": "Gastverblijf",
     "GuestRoom": "Gastkamer",
     "Hallway": "Gang",
     "HomeCinema": "Thuisbioscoop",
@@ -52,11 +52,11 @@
     "Door": "Deur",
     "Motion": "Bewegingssensor",
     "Power": "Stopcontact",
-    "Shutter": "",
-    "Blind": "",
-    "Fan": "",
-    "AirCon": "",
-    "Heating": "",
-    "Temperature": "",
-    "Humidity": ""
+    "Shutter": "Rolluik",
+    "Blind": "Gordijn",
+    "Fan": "Ventilator",
+    "AirCon": "Airconditioner",
+    "Heating": "Verwarming",
+    "Temperature": "Temperatuur",
+    "Humidity": "Vochtigheid"
 }
