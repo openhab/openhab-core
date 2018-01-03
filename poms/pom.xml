@@ -112,7 +112,7 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>2.10</version>
+                    <version>3.0</version>
                     <configuration>
                         <basedir>${basedir}</basedir>
                         <header>src/etc/header.txt</header>
@@ -132,7 +132,7 @@
                         </excludes>
                         <useDefaultExcludes>true</useDefaultExcludes>
                         <properties>
-                            <year>2017</year>
+                            <year>2018</year>
                         </properties>
                         <encoding>UTF-8</encoding>
                     </configuration>
@@ -245,7 +245,7 @@
         <property>
           <name>!skipChecks</name>
         </property>
-      </activation>   
+      </activation>
       <build>
         <pluginManagement>
           <plugins>
@@ -333,7 +333,7 @@
     </pluginRepositories>
 
     <repositories>
-        
+
         <!-- releases -->
         <repository>
             <id>jcenter</id>
