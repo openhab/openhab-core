@@ -14,6 +14,15 @@ Links can be added to the dashboard by editing the `$OPENHAB_CONF/services/dashb
 
 Where `<unique-name>` is link unique identifier (see examples).
 
+Link-url and link-imageurl support following special words:
+
+| Special word                | Replaced to                  |
+|-----------------------------|------------------------------|
+| $DOMAINNAME                 | fully qualified domain name  |
+| $HOSTNAME                   | host name                    |
+| $HOSTADDRESS                | host IP address              |
+
+
 ### Image
 
 A png image of 350px width and 200-250px height are recommended.
@@ -29,6 +38,10 @@ frontail.link-imageurl=../static/image.png
 
 nodered.link-name=Node-RED
 nodered.link-url=http://<server-adddress>:1880
+nodered.link-imageurl=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAIAAA...QmCC
+
+nodered.link-name=Node-RED
+nodered.link-url=http://$HOSTNAME:1880
 nodered.link-imageurl=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXwAAACfCAIAAA...QmCC
 
 ```
