@@ -14,6 +14,25 @@
 
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/geolocation.js"></script>
+<script>
+$(function(){
+    var url = new URL(window.location.href);
+    console.log( "url: " + url.host );
+    $('div[class="link"]').each(function(index,item){
+        if ($(item).attr('onclick').indexOf('{HOST}') >= 0) {
+            console.log( 'orginal onclick: ' + $(item).attr('onclick') );
+            $(item).attr('onclick', $(item).attr('onclick').replace('{HOST}', url.host));
+            console.log( 'modified onclick: ' + $(item).attr('onclick') );
+        }
+        if ($(item).attr('onclick').indexOf('{HOSTNAME}') >= 0) {
+            console.log( 'orginal onclick: ' + $(item).attr('onclick') );
+            $(item).attr('onclick', $(item).attr('onclick').replace('{HOSTNAME}', url.hostname));
+            console.log( 'modified onclick: ' + $(item).attr('onclick') );
+        }
+    });
+ });
+</script>
+
 </head>
 
 <body>
