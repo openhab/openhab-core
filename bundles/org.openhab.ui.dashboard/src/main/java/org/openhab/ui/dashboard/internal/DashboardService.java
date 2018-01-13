@@ -9,9 +9,7 @@
 package org.openhab.ui.dashboard.internal;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
@@ -22,7 +20,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.LocaleProvider;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.net.HttpServiceUtil;
@@ -72,10 +69,6 @@ public class DashboardService {
     private final static String LINK_NAME = "link-name";
     private final static String LINK_URL = "link-url";
     private final static String LINK_IMAGEURL = "link-imageurl";
-
-    private final static String DOMAINNAME = "$DOMAINNAME";
-    private final static String HOSTNAME = "$HOSTNAME";
-    private final static String HOSTADDRESS = "$HOSTADDRESS";
 
     @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
@@ -227,55 +220,13 @@ public class DashboardService {
                     String url = (String) properties.get(linkname + LINK_URL);
                     String imageUrl = (String) properties.get(linkname + LINK_IMAGEURL);
 
-                    url = fillMagicWords(url);
-                    imageUrl = fillMagicWords(imageUrl);
+                    logger.debug("Add link: {}", name);
 
-                    if (url != null && !url.isEmpty()) {
-                        logger.debug("Add link: {}", name);
-
-                        addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
-                                .withImageUrl(imageUrl).build());
-                    } else {
-                        logger.warn("Ignoring empty URL link for tile '{}'", name);
-                    }
+                    addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
+                            .withImageUrl(imageUrl).build());
                 }
             }
         }
-    }
-
-    private @Nullable String fillMagicWords(@Nullable String linkname) {
-        String newlinkname = linkname;
-
-        if (newlinkname != null) {
-            if (newlinkname.contains(DOMAINNAME)) {
-                try {
-                    newlinkname = newlinkname.replace(DOMAINNAME, InetAddress.getLocalHost().getCanonicalHostName());
-                } catch (UnknownHostException e) {
-                    // domain name not available, let's try to fall back to host name
-                    newlinkname = newlinkname.replace(DOMAINNAME, HOSTNAME);
-                }
-            }
-
-            if (newlinkname.contains(HOSTNAME)) {
-                try {
-                    newlinkname = newlinkname.replace(HOSTNAME, InetAddress.getLocalHost().getHostName());
-                } catch (UnknownHostException e) {
-                    // host name not available, let's try to fall back to host address
-                    newlinkname = newlinkname.replace(HOSTNAME, HOSTADDRESS);
-                }
-            }
-
-            if (newlinkname.contains(HOSTADDRESS)) {
-                try {
-                    newlinkname = newlinkname.replace(HOSTADDRESS, InetAddress.getLocalHost().getHostAddress());
-                } catch (UnknownHostException e) {
-                    // host address not available, link won't work so let's return null
-                    newlinkname = null;
-                }
-            }
-        }
-
-        return newlinkname;
     }
 
     /**
