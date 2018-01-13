@@ -14,6 +14,18 @@
 
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/geolocation.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('a.link').each(function(index) {
+        var href = $(this)
+            .attr('href')
+            .replace(/{HOST}/g, window.location.host)
+            .replace(/{HOSTNAME}/g, window.location.hostname);
+        $(this).attr('href', href);
+    });
+});
+</script>
+
 </head>
 
 <body>
