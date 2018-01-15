@@ -80,15 +80,15 @@ public class DashboardService {
             httpService.registerResources(DASHBOARD_ALIAS, "web", null);
 
             if (HttpServiceUtil.getHttpServicePort(bundleContext) > 0) {
-                logger.info("Started dashboard at http://{}:{}", networkAddressService.getPrimaryIpv4HostAddress(),
+                logger.info("Started Dashboard at http://{}:{}", networkAddressService.getPrimaryIpv4HostAddress(),
                         HttpServiceUtil.getHttpServicePort(bundleContext));
             }
             if (HttpServiceUtil.getHttpServicePortSecure(bundleContext) > 0) {
-                logger.info("Started dashboard at https://{}:{}", networkAddressService.getPrimaryIpv4HostAddress(),
+                logger.info("Started Dashboard at https://{}:{}", networkAddressService.getPrimaryIpv4HostAddress(),
                         HttpServiceUtil.getHttpServicePortSecure(bundleContext));
             }
         } catch (NamespaceException | ServletException e) {
-            logger.error("Error during dashboard startup: {}", e.getMessage());
+            logger.error("Error during Dashboard startup: {}", e.getMessage());
         }
 
         addTilesForExternalServices(properties);
@@ -98,7 +98,7 @@ public class DashboardService {
     protected void deactivate(ComponentContext componentContext) {
         httpService.unregister(DASHBOARD_ALIAS + "/" + SERVLET_NAME);
         httpService.unregister(DASHBOARD_ALIAS);
-        logger.info("Stopped dashboard");
+        logger.info("Stopped Dashboard");
     }
 
     @Reference
@@ -169,7 +169,7 @@ public class DashboardService {
                 throw new RuntimeException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find index.html - failed to initialize dashboard servlet");
+            throw new RuntimeException("Cannot find index.html - failed to initialize Dashboard servlet");
         }
 
         URL entry = bundleContext.getBundle().getEntry("templates/entry.html");
@@ -180,7 +180,7 @@ public class DashboardService {
                 throw new RuntimeException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find entry.html - failed to initialize dashboard servlet");
+            throw new RuntimeException("Cannot find entry.html - failed to initialize Dashboard servlet");
         }
 
         URL warn = bundleContext.getBundle().getEntry("templates/warn.html");
@@ -191,7 +191,7 @@ public class DashboardService {
                 throw new RuntimeException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find warn.html - failed to initialize dashboard servlet");
+            throw new RuntimeException("Cannot find warn.html - failed to initialize Dashboard servlet");
         }
 
         URL setup = bundleContext.getBundle().getEntry("templates/setup.html");
@@ -202,7 +202,7 @@ public class DashboardService {
                 throw new RuntimeException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find setup.html - failed to initialize dashboard servlet");
+            throw new RuntimeException("Cannot find setup.html - failed to initialize Dashboard servlet");
         }
 
         return new DashboardServlet(configurationAdmin, indexTemplate, entryTemplate, warnTemplate, setupTemplate,
@@ -220,7 +220,7 @@ public class DashboardService {
                     String url = (String) properties.get(linkname + LINK_URL);
                     String imageUrl = (String) properties.get(linkname + LINK_IMAGEURL);
 
-                    logger.debug("Add link: {}", name);
+                    logger.debug("Tile added to Dashboard: {}", name);
 
                     addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
                             .withImageUrl(imageUrl).build());
