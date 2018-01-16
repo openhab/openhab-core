@@ -1,11 +1,9 @@
-
 {
     "GroundFloor": "Erdgeschoss",
     "FirstFloor": "Erster Stock",
     "SecondFloor": "Zweiter Stock",
     "ThirdFloor": "Dritter Stock",
     "FourthFloor": "Vierter Stock",
-
     "Attic": "Dachgeschoss",
     "Balcony": "Balkon",
     "Backyard": "Hinterhof",
@@ -49,7 +47,6 @@
     "Toilet": "Toilette",
     "Terrace": "Terrasse",
     "Upstairs": "Oben",
-
     "Light": "Licht",
     "Window": "Fenster",
     "Door": "Tür",

@@ -4,7 +4,6 @@
     "SecondFloor": "Третий этаж",
     "ThirdFloor": "Четвертый этаж",
     "FourthFloor": "Пятый этаж",
-
     "Attic": "Чердак",
     "Balcony": "Балкон",
     "Backyard": "Задний двор",
@@ -48,7 +47,6 @@
     "Toilet": "Туалет",
     "Terrace": "Терраса",
     "Upstairs": "Подъем",
-
     "Light": "Освещение",
     "Window": "Окно",
     "Door": "Дверь",
