@@ -56,6 +56,10 @@ section {
     margin-bottom: 70px;
 }
 
+a.link {
+    display: block;	
+}
+
 .link {
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
     margin-bottom: 20px;
