@@ -1,11 +1,9 @@
-
 {
     "GroundFloor": "1층",
     "FirstFloor": "2층",
     "SecondFloor": "3층",
     "ThirdFloor": "4층",
     "FourthFloor": "5층",
-
     "Attic": "다락방",
     "Balcony": "발코니",
     "Backyard": "뒷마당",
@@ -49,7 +47,6 @@
     "Toilet": "화장실",
     "Terrace": "테라스",
     "Upstairs": "위층",
-
     "Light": "라이트",
     "Window": "창",
     "Door": "문",
