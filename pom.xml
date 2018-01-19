@@ -67,8 +67,9 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.openhab.tools</groupId>
-                    <artifactId>static-code-analysis</artifactId>
+                    <groupId>org.openhab.tools.sat</groupId>
+                    <artifactId>sat-plugin</artifactId>
+                    <version>${sat.version}</version>
                     <configuration>
                         <checkstyleProperties>${basedirRoot}/tools/checkstyle.properties</checkstyleProperties>
                     </configuration>
