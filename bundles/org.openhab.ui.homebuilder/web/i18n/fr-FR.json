@@ -4,7 +4,6 @@
     "SecondFloor": "Deuxième étage",
     "ThirdFloor": "Troisième étage",
     "FourthFloor": "Quatrième étage",
-
     "Attic": "Grenier",
     "Balcony": "Balcon",
     "Backyard": "Jardin",
@@ -15,7 +14,6 @@
     "Wardrobe": "Armoire",
     "Cellar": "Sous-sol",
     "Corridor": "Couloir",
-
     "Deck": "Terrasse en bois",
     "Dining": "Salle à manger",
     "Downstairs": "En bas",
@@ -49,7 +47,6 @@
     "Toilet": "Toilettes",
     "Terrace": "Terrasse",
     "Upstairs": "En haut",
-
     "Light": "Lumière",
     "Window": "Fenêtre",
     "Door": "Porte",
