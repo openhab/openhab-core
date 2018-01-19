@@ -4,7 +4,6 @@
     "SecondFloor": "Drugie Piętro",
     "ThirdFloor": "Trzecie Piętro",
     "FourthFloor": "Czwarte Piętro",
-
     "Attic": "Poddasze",
     "Balcony": "Balkon",
     "Backyard": "Ogród",
@@ -48,17 +47,16 @@
     "Toilet": "Toaleta",
     "Terrace": "Taras",
     "Upstairs": "Na górze",
-
     "Light": "Światło",
     "Window": "Okno",
     "Door": "Drzwi",
     "Motion": "Czujnik ruchu",
+    "Power": "Gniazdko",
     "Shutter": "Roleta",
     "Blind": "Żaluzja",
     "Fan": "Wiatrak",
     "AirCon": "Klimatyzator",
     "Heating": "Ogrzewanie",
     "Temperature": "Temperatura",
-    "Humidity": "Wilgotność",
-    "Power": "Gniazdko"
+    "Humidity": "Wilgotność"
 }
