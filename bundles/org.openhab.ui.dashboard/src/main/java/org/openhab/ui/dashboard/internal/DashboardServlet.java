@@ -213,8 +213,12 @@ public class DashboardServlet extends HttpServlet {
         StringBuffer sb = new StringBuffer();
 
         while (m.find()) {
-            String key = m.group(1);
-            m.appendReplacement(sb, getMessage.apply(key));
+            try {
+                String key = m.group(1);
+                m.appendReplacement(sb, getMessage.apply(key));
+            } catch (Exception e) {
+                logger.debug("Error occurred during template filling, cause ", e);
+            }
         }
         m.appendTail(sb);
         return sb.toString();
