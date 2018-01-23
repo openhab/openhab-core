@@ -48,6 +48,18 @@ public class ExternalServiceTile implements DashboardTile {
         return imageUrl;
     }
 
+    @Override
+    public String toString() {
+        final int MAXLEN = 100;
+
+        String limitedImageUrl = imageUrl;
+        if (limitedImageUrl != null && limitedImageUrl.length() > MAXLEN) {
+            limitedImageUrl = imageUrl.substring(0, MAXLEN) + "...";
+        }
+
+        return "[name=" + name + ", url=" + url + ", overlay=" + overlay + ", imageUrl=" + limitedImageUrl + "]";
+    }
+
     public static class DashboardTileBuilder {
 
         private String name;

@@ -220,10 +220,15 @@ public class DashboardService {
                     String url = (String) properties.get(linkname + LINK_URL);
                     String imageUrl = (String) properties.get(linkname + LINK_IMAGEURL);
 
-                    logger.debug("Tile added to Dashboard: {}", name);
+                    DashboardTile newTile = new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
+                            .withImageUrl(imageUrl).build();
 
-                    addDashboardTile(new ExternalServiceTile.DashboardTileBuilder().withName(name).withUrl(url)
-                            .withImageUrl(imageUrl).build());
+                    if (name != null && url != null && !name.isEmpty() && !url.isEmpty()) {
+                        addDashboardTile(newTile);
+                        logger.debug("Tile added to Dashboard: {}", newTile);
+                    } else {
+                        logger.warn("Ignore invalid tile '{}': {}", linkname, newTile);
+                    }
                 }
             }
         }
