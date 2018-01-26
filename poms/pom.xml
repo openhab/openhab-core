@@ -297,7 +297,7 @@
         <plugins>
           <plugin>
               <groupId>org.openhab.tools.sat</groupId>
-              <artifactId>${sat.plugin}</artifactId>
+              <artifactId>sat-plugin</artifactId>
               <version>${sat.version}</version>
           </plugin>
         </plugins>
