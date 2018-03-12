@@ -120,6 +120,12 @@
                         <failIfMissing>true</failIfMissing>
                         <strictCheck>true</strictCheck>
                         <aggregate>true</aggregate>
+                        <mapping>
+                          <xml>xml-header-style</xml>
+                        </mapping>
+                        <headerDefinitions>
+                          <headerDefinition>src/etc/xml-header-style.xml</headerDefinition>
+                        </headerDefinitions>
                         <includes>
                             <include>**/org/openhab/**/*.java</include>
                             <include>**/feature.xml</include>
