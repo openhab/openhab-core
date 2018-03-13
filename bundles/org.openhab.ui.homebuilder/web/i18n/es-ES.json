@@ -1,11 +1,9 @@
-
 {
     "GroundFloor": "Planta Baja",
     "FirstFloor": "Primera Planta",
     "SecondFloor": "Segunda Planta",
     "ThirdFloor": "Tercera Planta",
     "FourthFloor": "Cuarta Planta",
-
     "Attic": "Ático",
     "Balcony": "Terraza",
     "Backyard": "Patio trasero",
@@ -49,7 +47,6 @@
     "Toilet": "Baño",
     "Terrace": "Terraza",
     "Upstairs": "Piso de arriba",
-
     "Light": "Luz",
     "Window": "Ventana",
     "Door": "Puerta",

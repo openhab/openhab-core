@@ -1,11 +1,9 @@
-
 {
     "GroundFloor": "Erdgeschoss",
     "FirstFloor": "Erster Stock",
     "SecondFloor": "Zweiter Stock",
     "ThirdFloor": "Dritter Stock",
     "FourthFloor": "Vierter Stock",
-
     "Attic": "Dachgeschoss",
     "Balcony": "Balkon",
     "Backyard": "Hinterhof",
@@ -40,7 +38,7 @@
     "NannyRoom": "Kindermädchenzimmer",
     "Office": "Büro",
     "Outside": "Draußen",
-    "Patio": "Patio",
+    "Patio": "Innenhof",
     "Porch": "Veranda",
     "Stairwell": "Treppenhaus",
     "StorageRoom": "Lagerraum",
@@ -49,7 +47,6 @@
     "Toilet": "Toilette",
     "Terrace": "Terrasse",
     "Upstairs": "Oben",
-
     "Light": "Licht",
     "Window": "Fenster",
     "Door": "Tür",
