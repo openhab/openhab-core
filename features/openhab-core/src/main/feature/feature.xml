@@ -63,6 +63,19 @@
         <bundle>mvn:org.openhab.core/org.openhab.core.compat1x/${project.version}</bundle>
     </feature>
 
+    <feature name="openhab-httpclient" version="${project.version}">
+        <capability>esh.tp;feature=httpclient;version=${jetty.version}</capability>
+        <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-api/${jetty.version}</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
+    </feature>
+
     <feature name="openhab-transport-coap" description="CoAP Transport" version="${project.version}">
         <feature>esh-io-transport-coap</feature>
     </feature>
