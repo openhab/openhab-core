@@ -241,7 +241,7 @@
         </repository>
 
         <!-- SmartHome p2 release repository -->
-        <repository>
+<!--        <repository>
             <id>p2-smarthome-release</id>
             <url>http://download.eclipse.org/smarthome/updates-release/${esh.releaseVersion}</url>
             <layout>p2</layout>
@@ -253,7 +253,7 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-
+-->
         <!-- openHAB dependencies p2 repository -->
         <repository>
             <id>p2-openhab-deps-repo</id>
