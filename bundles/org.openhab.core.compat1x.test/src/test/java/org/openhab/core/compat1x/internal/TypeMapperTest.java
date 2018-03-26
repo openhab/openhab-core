@@ -10,6 +10,10 @@ package org.openhab.core.compat1x.internal;
 
 import static org.junit.Assert.assertEquals;
 
+import javax.measure.quantity.Temperature;
+
+import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.junit.Test;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.library.tel.types.CallType;
@@ -28,5 +32,12 @@ public class TypeMapperTest {
         CallType ohType1 = new CallType("123##456");
         CallType ohType2 = (CallType) TypeMapper.mapToOpenHABType(TypeMapper.mapToESHType(ohType1));
         assertEquals(ohType1, ohType2);
+    }
+
+    @Test
+    public void testQuantityType() {
+        QuantityType<Temperature> eshType1 = new QuantityType<>("10 °C");
+        DecimalType eshType2 = (DecimalType) TypeMapper.mapToESHType(TypeMapper.mapToOpenHABType(eshType1));
+        assertEquals(eshType1.as(DecimalType.class), eshType2);
     }
 }

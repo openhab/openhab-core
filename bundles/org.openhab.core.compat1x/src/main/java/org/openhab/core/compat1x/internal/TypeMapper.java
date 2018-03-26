@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.OpenClosedType;
 import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.library.types.PointType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.library.types.StopMoveType;
 import org.eclipse.smarthome.core.library.types.StringListType;
 import org.eclipse.smarthome.core.library.types.StringType;
@@ -69,6 +70,8 @@ public class TypeMapper {
             result = new org.openhab.core.library.types.StringType(type.toString());
         } else if (typeClass.equals(DecimalType.class)) {
             result = new org.openhab.core.library.types.DecimalType(type.toString());
+        } else if (typeClass.equals(QuantityType.class)) {
+            result = new org.openhab.core.library.types.DecimalType(((QuantityType<?>) type).toBigDecimal());
         } else if (typeClass.equals(HSBType.class)) {
             result = new org.openhab.core.library.types.HSBType(type.toString());
         } else if (typeClass.equals(PercentType.class)) {
