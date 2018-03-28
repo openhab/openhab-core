@@ -223,6 +223,29 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>releasebuild</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <repositories>
+                <!-- SmartHome p2 release repository -->
+                <repository>
+                    <id>p2-smarthome-release</id>
+                    <url>http://download.eclipse.org/smarthome/updates-release/${esh.releaseVersion}</url>
+                    <layout>p2</layout>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
     </profiles>
 
 	<repositories>
@@ -254,31 +277,5 @@
             <layout>p2</layout>
         </repository>
 	</repositories>
-
-    <profiles>
-        <profile>
-            <id>releasebuild</id>
-            <activation>
-                <property>
-                    <name>release</name>
-                </property>
-            </activation>
-            <repositories>
-                <!-- SmartHome p2 release repository -->
-                <repository>
-                    <id>p2-smarthome-release</id>
-                    <url>http://download.eclipse.org/smarthome/updates-release/${esh.releaseVersion}</url>
-                    <layout>p2</layout>
-                    <releases>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-        </profile>
-    </profiles>
 
 </project>
