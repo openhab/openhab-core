@@ -9,6 +9,7 @@
 package org.openhab.core.binding.internal;
 
 import org.eclipse.smarthome.config.core.Configuration;
+import org.eclipse.smarthome.core.items.ItemUtil;
 import org.eclipse.smarthome.model.item.BindingConfigParseException;
 import org.eclipse.smarthome.model.item.BindingConfigReader;
 
@@ -60,7 +61,9 @@ public class BindingConfigReaderDelegate implements BindingConfigReader {
     private org.openhab.core.items.Item getOpenHABItem(String itemType, String itemName)
             throws BindingConfigParseException {
 
-        switch (itemType) {
+        String mainType = ItemUtil.getMainItemType(itemType);
+
+        switch (mainType) {
             case "Group":
                 return new org.openhab.core.items.GroupItem(itemName);
             case "Switch":
