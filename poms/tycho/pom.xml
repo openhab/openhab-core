@@ -104,7 +104,7 @@
                             <!--
                             <arg>-err:+nullAnnot(org.eclipse.jdt.annotation.Nullable|org.eclipse.jdt.annotation.NonNull|org.eclipse.jdt.annotation.NonNullByDefault),+inheritNullAnnot</arg>
                             -->
-                            <arg>-warn:+nullAnnot(org.eclipse.jdt.annotation.Nullable|org.eclipse.jdt.annotation.NonNull|org.eclipse.jdt.annotation.NonNullByDefault),+null,+inheritNullAnnot,+nullAnnotConflict,+nullUncheckedConversion,+nullAnnotRedundant,+nullDereference</arg>
+                            <arg>-warn:+nullAnnot(org.eclipse.jdt.annotation.Nullable|org.eclipse.jdt.annotation.NonNull|org.eclipse.jdt.annotation.NonNullByDefault),+null,+inheritNullAnnot,+nullAnnotConflict,-nullUncheckedConversion,+nullAnnotRedundant,+nullDereference</arg>
                         </compilerArgs>
                     </configuration>
                 </plugin>
