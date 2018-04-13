@@ -33,7 +33,7 @@ import javazoom.jl.player.Player;
  */
 public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
 
-    private final Logger logger = LoggerFactory.getLogger(EnhancedJavaSoundAudioSink.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedJavaSoundAudioSink.class);
 
     private static AudioFormat mp3 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, null, null,
             null, null);
@@ -81,7 +81,7 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
                         streamPlayer = new Player(audioStream);
                         playInThread(streamPlayer);
                     } catch (JavaLayerException e) {
-                        logger.error("An exception occurred while playing url audio stream : '{}'", e.getMessage());
+                        LOGGER.error("An exception occurred while playing url audio stream : '{}'", e.getMessage());
                     }
                     return;
                 }
@@ -90,7 +90,7 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
                 try {
                     playInThread(new Player(audioStream));
                 } catch (JavaLayerException e) {
-                    logger.error("An exception occurred while playing audio : '{}'", e.getMessage());
+                    LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
                 }
             }
         }
@@ -109,7 +109,7 @@ public class EnhancedJavaSoundAudioSink extends JavaSoundAudioSink {
                 try {
                     player.play();
                 } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
+                    LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
                 } finally {
                     player.close();
                 }
