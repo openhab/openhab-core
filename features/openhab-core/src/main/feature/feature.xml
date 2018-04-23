@@ -13,7 +13,6 @@
 
     <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
         <feature>esh-base</feature>
-        <feature>esh-config-serial</feature>
         <feature>esh-io-console-karaf</feature>
         <feature>esh-io-rest-sitemap</feature>
         <feature>esh-io-rest-voice</feature>
@@ -94,6 +93,8 @@
 
     <feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
         <feature>esh-io-transport-serial</feature>
+        <feature>esh-config-serial</feature>
+        <feature>esh-config-discovery-usbserial</feature>
     </feature>
 
     <feature name="openhab-transport-upnp" description="UPnP Transport" version="${project.version}">
