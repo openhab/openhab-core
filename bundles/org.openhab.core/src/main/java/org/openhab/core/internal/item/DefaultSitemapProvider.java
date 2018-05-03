@@ -15,6 +15,7 @@ import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
+import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
 import org.eclipse.smarthome.model.sitemap.Sitemap;
 import org.eclipse.smarthome.model.sitemap.SitemapFactory;
 import org.eclipse.smarthome.model.sitemap.SitemapProvider;
@@ -100,6 +101,14 @@ public class DefaultSitemapProvider implements SitemapProvider {
     @Override
     public Set<String> getSitemapNames() {
         return Collections.singleton(SITEMAP_NAME);
+    }
+
+    @Override
+    public void addModelChangeListener(ModelRepositoryChangeListener listener) {
+    }
+
+    @Override
+    public void removeModelChangeListener(ModelRepositoryChangeListener listener) {
     }
 
 }
