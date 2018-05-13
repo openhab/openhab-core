@@ -29,6 +29,250 @@
             <version>${ds-annotations.version}</version>
             <optional>true</optional>
         </dependency>
+        <!-- Eclipse Smarthome dependencies - CORE -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.autoupdate</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.persistence</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.thing</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.binding.xml</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.thing.xml</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.scheduler</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.transform</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.id</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome Core - Audio / Voice -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.audio</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.core</groupId>
+            <artifactId>org.eclipse.smarthome.core.voice</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome dependencies - CONFIG -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.core</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.discovery</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.discovery.mdns</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.discovery.upnp</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.xml</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.dispatch</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome dependencies - IO -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.console</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.console.rfc147</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.rest</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.rest.core</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.rest.sse</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.monitor</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.net</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.transport.upnp</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.transport.mdns</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome dependencies - Automation -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.core</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.api</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.commands</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.providers</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.parser.gson</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.rest</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.module.core</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.module.script</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.module.script.defaultscope</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.automation</groupId>
+            <artifactId>org.eclipse.smarthome.automation.module.timer</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome dependencies - Actions -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.model</groupId>
+            <artifactId>org.eclipse.smarthome.model.core</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.model</groupId>
+            <artifactId>org.eclipse.smarthome.model.item</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.model</groupId>
+            <artifactId>org.eclipse.smarthome.model.script</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.model</groupId>
+            <artifactId>org.eclipse.smarthome.model.persistence</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome dependencies - Storage -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.storage</groupId>
+            <artifactId>org.eclipse.smarthome.storage.json</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome dependencies - UI -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.extension.ui</groupId>
+            <artifactId>org.eclipse.smarthome.ui.paper</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome dependencies - IoT Market -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.extensionservice</groupId>
+            <artifactId>org.eclipse.smarthome.extensionservice.marketplace</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.extensionservice</groupId>
+            <artifactId>org.eclipse.smarthome.extensionservice.marketplace.automation</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+
+        <!-- Eclipse Smarthome dependencies - Test -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.test</groupId>
+            <artifactId>org.eclipse.smarthome.test</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -223,45 +467,9 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>releasebuild</id>
-            <activation>
-                <property>
-                    <name>release</name>
-                </property>
-            </activation>
-            <repositories>
-                <!-- SmartHome p2 release repository -->
-                <repository>
-                    <id>p2-smarthome-release</id>
-                    <url>http://download.eclipse.org/smarthome/updates-release/${esh.version}</url>
-                    <layout>p2</layout>
-                    <releases>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-        </profile>
     </profiles>
 
 	<repositories>
-
-        <!-- SmartHome p2 snapshot repository -->
-        <repository>
-            <id>p2-smarthome-snapshot</id>
-            <url>https://openhab.jfrog.io/openhab/eclipse-smarthome-stable</url>
-            <layout>p2</layout>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
 
         <!-- openHAB dependencies p2 repository -->
         <repository>
