@@ -14,4 +14,53 @@
 
   <packaging>eclipse-feature</packaging>
 
+  <dependencies>
+        <!-- Eclipse Smarthome dependencies specifically for the core -->
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.javasound</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.rest.sitemap</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.ui</groupId>
+            <artifactId>org.eclipse.smarthome.ui</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.extension.ui</groupId>
+            <artifactId>org.eclipse.smarthome.ui.basic</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.extension.ui</groupId>
+            <artifactId>org.eclipse.smarthome.ui.classic</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.extension.ui</groupId>
+            <artifactId>org.eclipse.smarthome.ui.paper</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.model</groupId>
+            <artifactId>org.eclipse.smarthome.model.rule</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.model</groupId>
+            <artifactId>org.eclipse.smarthome.model.rule.runtime</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.model</groupId>
+            <artifactId>org.eclipse.smarthome.model.sitemap</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+  </dependencies>
+
 </project>
