@@ -80,6 +80,7 @@
     </feature>
 
     <feature name="openhab-transport-http" description="HTTP Transport" version="${project.version}">
+        <feature>openhab-httpclient</feature>
         <feature>esh-io-transport-http</feature>
     </feature>
 
