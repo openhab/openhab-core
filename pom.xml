@@ -62,7 +62,6 @@
         <module>features</module>
     </modules>
 
-
     <build>
         <pluginManagement>
             <plugins>
