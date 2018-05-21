@@ -65,6 +65,7 @@ Export-Package:
  org.openhab.ui.items
 Import-Package: 
  com.google.common.base,
+ javax.measure,
  javax.servlet,
  javax.servlet.http,
  javax.sound.sampled,
