@@ -8,7 +8,7 @@ Bundle-Name: openHAB Paper UI Theme Fragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.ui.paperui
 Bundle-Vendor: openHAB
-Bundle-Version: 2.3.0.qualifier
+Bundle-Version: 2.3.0.RC1
 Fragment-Host: org.eclipse.smarthome.ui.paper
 Import-Package: 
  org.eclipse.jdt.annotation;resolution:=optional,

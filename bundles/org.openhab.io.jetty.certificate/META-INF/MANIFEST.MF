@@ -8,7 +8,7 @@ Bundle-Name: openHAB SSL Certificate Generator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.io.jetty.certificate;singleton:=true
 Bundle-Vendor: openHAB
-Bundle-Version: 2.3.0.qualifier
+Bundle-Version: 2.3.0.RC1
 Import-Package: 
  org.eclipse.jdt.annotation;resolution:=optional,
  org.osgi.framework,

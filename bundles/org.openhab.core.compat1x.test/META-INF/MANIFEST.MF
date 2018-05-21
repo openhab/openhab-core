@@ -4,7 +4,7 @@ Bundle-Name: openHAB 1.x Compatibility Layer Tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.core.compat1x.test
 Bundle-Vendor: openHAB
-Bundle-Version: 2.3.0.qualifier
+Bundle-Version: 2.3.0.RC1
 Fragment-Host: org.openhab.core.compat1x
 Import-Package: 
  groovy.lang,

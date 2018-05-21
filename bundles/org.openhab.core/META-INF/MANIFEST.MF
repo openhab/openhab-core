@@ -8,7 +8,7 @@ Bundle-Name: openHAB Core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.core
 Bundle-Vendor: openHAB
-Bundle-Version: 2.3.0.qualifier
+Bundle-Version: 2.3.0.RC1
 Export-Package: org.openhab.core
 Ignore-Package: org.openhab.core.internal.items,org.openhab.core.interna
  l,org.openhab.core.internal.events

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HomeBuilder User Interface
 Bundle-SymbolicName: org.openhab.ui.homebuilder
-Bundle-Version: 2.3.0.qualifier
+Bundle-Version: 2.3.0.RC1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Import-Package: com.google.gson,
