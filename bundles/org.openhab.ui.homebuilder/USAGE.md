@@ -10,15 +10,15 @@ source: https://github.com/openhab/openhab-core/blob/master/bundles/org.openhab.
 
 # Home Builder
 
-Boilerplate for the [Items](http://docs.openhab.org/configuration/items.html), [sitemap](http://docs.openhab.org/configuration/sitemaps.html) files and [HABPanel](http://docs.openhab.org/addons/uis/habpanel/readme.html) dashboard.
+Boilerplate for the [Items](https://www.openhab.org/docs/configuration/items.html), [sitemap](https://www.openhab.org/docs/configuration/sitemaps.html) files and [HABPanel](https://www.openhab.org/docs/configuration/habpanel.html) dashboard.
 
 ## Features
 
 - Classifies the objects within each room and creates groups for them
-- Optionally adds icons from [Classic Icon Set](http://docs.openhab.org/addons/iconsets/classic/readme.html) to the items
-- Optionally adds Tags to the items - convenient for [HomeKit](http://docs.openhab.org/addons/io/homekit/readme.html)/[Hue Emulation](http://docs.openhab.org/addons/io/hueemulation/readme.html#device-tagging) add-ons users
+- Optionally adds icons from [Classic Icon Set](https://www.openhab.org/docs/configuration/iconsets/classic/) to the items
+- Optionally adds Tags to the items - convenient for [HomeKit](https://www.openhab.org/addons/integrations/homekit/)/[Hue Emulation](https://www.openhab.org/addons/integrations/hueemulation/#device-tagging) add-ons users
 - Automatically aligns the items vertically
-- Generates a [Sitemap](http://docs.openhab.org/configuration/sitemaps.html) file
+- Generates a [Sitemap](https://www.openhab.org/docs/configuration/sitemaps.html) file
 - Generates a set of HABPanel Dashboards corresponding with the Items
 
 ## Usage
@@ -109,7 +109,7 @@ Last Frame inside the Sitemap is a list of Object's groups.
 
 ## HABPanel Dashboard
 
-Home Builder will help you with creating your set of dashboards for [HABPanel](http://docs.openhab.org/addons/uis/habpanel/readme.html) too.
+Home Builder will help you with creating your set of dashboards for [HABPanel](https://www.openhab.org/docs/configuration/habpanel.html) too.
 It creates a separate dashboard for each group of Objects.
 All you need to do is to copy the generated JSON structure and paste it in HABPanel settings page.
 The page is located in the following URL: `http://{youropenHAB:8080}/habpanel/index.html#/settings/localconfig`

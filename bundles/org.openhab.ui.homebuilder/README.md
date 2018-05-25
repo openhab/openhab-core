@@ -1,6 +1,6 @@
 # Home Builder
 
-> Boilerplate for the [Items](http://docs.openhab.org/configuration/items.html), [sitemap](http://docs.openhab.org/configuration/sitemaps.html) files and [HABPanel](http://docs.openhab.org/addons/uis/habpanel/readme.html) dashboard.
+> Boilerplate for the [Items](https://www.openhab.org/docs/configuration/items.html), [sitemap](https://www.openhab.org/docs/configuration/sitemaps.html) files and [HABPanel](https://www.openhab.org/docs/configuration/habpanel.html) dashboard.
 
 ## Usage
 
