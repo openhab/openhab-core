@@ -358,6 +358,19 @@
         </repository>
 
         <repository>
+            <id>bintray</id>
+            <name>openHAB SmartHome Repository</name>
+            <url>https://api.bintray.com/maven/openhab/mvn/smarthome</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        
+        <repository>
             <id>openhab-artifactory-release</id>
             <name>JFrog Artifactory Repository</name>
             <url>https://openhab.jfrog.io/openhab/libs-release</url>
