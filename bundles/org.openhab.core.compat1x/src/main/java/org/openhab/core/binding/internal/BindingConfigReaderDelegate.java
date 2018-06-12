@@ -38,9 +38,7 @@ public class BindingConfigReaderDelegate implements BindingConfigReader {
         try {
             reader.validateItemType(getOpenHABItem(itemType), bindingConfig);
         } catch (org.openhab.model.item.binding.BindingConfigParseException e) {
-            BindingConfigParseException ex = new BindingConfigParseException(e.getMessage());
-            ex.fillInStackTrace();
-            throw ex;
+            throw new BindingConfigParseException(e.getMessage(), e);
         }
     }
 
@@ -50,9 +48,7 @@ public class BindingConfigReaderDelegate implements BindingConfigReader {
         try {
             reader.processBindingConfiguration(context, getOpenHABItem(itemType, itemName), bindingConfig);
         } catch (org.openhab.model.item.binding.BindingConfigParseException e) {
-            BindingConfigParseException ex = new BindingConfigParseException(e.getMessage());
-            ex.fillInStackTrace();
-            throw ex;
+            throw new BindingConfigParseException(e.getMessage(), e);
         }
     }
 
