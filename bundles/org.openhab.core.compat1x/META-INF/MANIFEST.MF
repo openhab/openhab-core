@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: org.openhab.core.compat1x
 Bundle-Activator: org.openhab.core.compat1x.internal.CompatibilityActiva
  tor
 Bundle-ClassPath: 

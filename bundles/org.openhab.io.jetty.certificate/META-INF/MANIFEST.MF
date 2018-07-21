@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: org.openhab.io.jetty.certificate
 Bundle-Activator: org.openhab.io.jetty.certificate.internal.CertificateG
  enerator
 Bundle-Classpath: .,lib/bcpkix-jdk15on-1.52.jar,lib/bcprov-jdk15on-1.52.
