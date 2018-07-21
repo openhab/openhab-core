@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: org.openhab.ui.homebuilder
 Bundle-ManifestVersion: 2
 Bundle-Name: HomeBuilder User Interface
 Bundle-SymbolicName: org.openhab.ui.homebuilder

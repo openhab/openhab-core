@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: org.openhab.core.compat1x.test
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB 1.x Compatibility Layer Tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
