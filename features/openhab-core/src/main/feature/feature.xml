@@ -89,7 +89,7 @@
     </feature>
 
     <feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
-        <feature>esh-io-transport-serial</feature>
+        <feature>esh-io-transport-serial-rfc2217</feature>
         <feature>esh-config-serial</feature>
         <feature>esh-config-discovery-usbserial</feature>
     </feature>
