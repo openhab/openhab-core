@@ -38,11 +38,11 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
     }
 
     public DecimalType(long value) {
-        this.value = new BigDecimal(value);
+        this.value = BigDecimal.valueOf(value);
     }
 
     public DecimalType(double value) {
-        this.value = new BigDecimal(value);
+        this.value = BigDecimal.valueOf(value);
     }
 
     public DecimalType(String value) {
