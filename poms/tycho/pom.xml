@@ -111,6 +111,21 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.discovery.usbserial</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
+            <artifactId>org.eclipse.smarthome.config.serial</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.config</groupId>
             <artifactId>org.eclipse.smarthome.config.xml</artifactId>
             <version>${esh.version}</version>
         </dependency>
@@ -164,6 +179,26 @@
         <dependency>
             <groupId>org.eclipse.smarthome.io</groupId>
             <artifactId>org.eclipse.smarthome.io.transport.mdns</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.transport.mqtt</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.transport.serial</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.transport.serial.rxtx</artifactId>
+            <version>${esh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.smarthome.io</groupId>
+            <artifactId>org.eclipse.smarthome.io.transport.serial.rxtx</artifactId>
             <version>${esh.version}</version>
         </dependency>
 
