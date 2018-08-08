@@ -198,7 +198,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.smarthome.io</groupId>
-            <artifactId>org.eclipse.smarthome.io.transport.serial.rxtx</artifactId>
+            <artifactId>org.eclipse.smarthome.io.transport.serial.rxtx.rfc2217</artifactId>
             <version>${esh.version}</version>
         </dependency>
 
