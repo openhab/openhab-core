@@ -392,8 +392,6 @@
                     <artifactId>target-platform-configuration</artifactId>
                     <version>${tycho-version}</version>
                     <configuration>
-                        <resolver>p2</resolver>
-                        <ignoreTychoRepositories>true</ignoreTychoRepositories>
                         <pomDependencies>consider</pomDependencies>
                         <environments>
                             <environment>
