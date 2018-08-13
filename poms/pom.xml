@@ -350,13 +350,20 @@
               <version>${sat.version}</version>
               <executions>
                 <execution>
+                  <id>verify</id>
                   <goals>
                     <goal>checkstyle</goal>
                     <goal>pmd</goal>
                     <goal>spotbugs</goal>
-                    <goal>report</goal>
                   </goals>
                   <phase>verify</phase>
+                </execution>
+                <execution>
+                  <id>report</id>
+                  <goals>
+                    <goal>report</goal>
+                  </goals>
+                  <phase>install</phase>
                 </execution>
               </executions>
             </plugin>
