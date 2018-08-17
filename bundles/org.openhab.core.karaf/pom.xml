@@ -8,11 +8,6 @@
 		<version>2.4.0-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<bundle.symbolicName>org.openhab.core</bundle.symbolicName>
-		<bundle.namespace>org.openhab.core</bundle.namespace>
-	</properties>
-
 	<artifactId>org.openhab.core.karaf</artifactId>
 
 	<name>openHAB Karaf Integration</name>
