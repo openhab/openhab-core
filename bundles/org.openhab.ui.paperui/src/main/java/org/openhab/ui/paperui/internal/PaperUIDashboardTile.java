@@ -9,6 +9,7 @@
 package org.openhab.ui.paperui.internal;
 
 import org.openhab.ui.dashboard.DashboardTile;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * The dashboard tile for the Paper UI
@@ -16,6 +17,7 @@ import org.openhab.ui.dashboard.DashboardTile;
  * @author Kai Kreuzer
  *
  */
+@Component
 public class PaperUIDashboardTile implements DashboardTile {
 
     @Override
