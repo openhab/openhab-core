@@ -12,7 +12,7 @@
 <feature
       id="org.openhab.feature.p2"
       label="openHAB Core Components"
-      version="2.4.0.qualifier"
+      version="2.4.0.M3"
       provider-name="openHAB.org">
 
    <description>
