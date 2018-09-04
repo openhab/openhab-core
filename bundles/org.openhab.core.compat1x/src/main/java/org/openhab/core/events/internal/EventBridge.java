@@ -24,6 +24,9 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.EventType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
@@ -36,12 +39,14 @@ import org.osgi.service.event.EventHandler;
  * @author Kai Kreuzer - Initial contribution and API
  *
  */
+@Component(immediate = true, property = "event.topics=smarthome/*")
 public class EventBridge implements EventHandler, EventSubscriber {
 
     private static final String BRIDGEMARKER = "bridgemarker";
     private EventAdmin eventAdmin;
     private EventPublisher eventPublisher;
 
+    @Reference(policy = ReferencePolicy.DYNAMIC)
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -50,6 +55,7 @@ public class EventBridge implements EventHandler, EventSubscriber {
         this.eventAdmin = null;
     }
 
+    @Reference
     public void setEventPublisher(EventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
     }

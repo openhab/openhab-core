@@ -18,6 +18,12 @@ import java.util.Set;
 import org.openhab.model.item.binding.BindingConfigReader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * This class listens for services that implement the old binding config reader interface and registers
@@ -25,6 +31,7 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author Kai Kreuzer - Initial contribution and API
  */
+@Component
 public class BindingConfigReaderFactory {
 
     private Map<String, ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader>> delegates = new HashMap<>();
@@ -32,6 +39,7 @@ public class BindingConfigReaderFactory {
 
     private Set<BindingConfigReader> readers = new HashSet<>();
 
+    @Activate
     public void activate(BundleContext context) {
         this.context = context;
         for (BindingConfigReader reader : readers) {
@@ -39,6 +47,7 @@ public class BindingConfigReaderFactory {
         }
     }
 
+    @Deactivate
     public void deactivate() {
         for (ServiceRegistration<org.eclipse.smarthome.model.item.BindingConfigReader> serviceReg : delegates
                 .values()) {
@@ -48,6 +57,7 @@ public class BindingConfigReaderFactory {
         this.context = null;
     }
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addBindingConfigReader(BindingConfigReader reader) {
         if (context != null) {
             registerDelegateService(reader);

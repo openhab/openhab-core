@@ -18,6 +18,12 @@ import java.util.Set;
 import org.openhab.ui.chart.ChartProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * This class listens for services that implement the old chart provider service interface and registers
@@ -25,6 +31,7 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author Kai Kreuzer - Initial contribution and API
  */
+@Component(immediate = true)
 public class ChartProviderFactory {
 
     private Map<String, ServiceRegistration<org.eclipse.smarthome.ui.chart.ChartProvider>> delegates = new HashMap<>();
@@ -32,6 +39,7 @@ public class ChartProviderFactory {
 
     private Set<ChartProvider> chartProviders = new HashSet<>();
 
+    @Activate
     public void activate(BundleContext context) {
         this.context = context;
         for (ChartProvider provider : chartProviders) {
@@ -39,6 +47,7 @@ public class ChartProviderFactory {
         }
     }
 
+    @Deactivate
     public void deactivate() {
         for (ServiceRegistration<org.eclipse.smarthome.ui.chart.ChartProvider> serviceReg : delegates.values()) {
             serviceReg.unregister();
@@ -47,6 +56,7 @@ public class ChartProviderFactory {
         this.context = null;
     }
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addChartProvider(ChartProvider provider) {
         if (context != null) {
             registerDelegateProvider(provider);

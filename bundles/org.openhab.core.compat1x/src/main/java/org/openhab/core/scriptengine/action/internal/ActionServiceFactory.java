@@ -18,6 +18,12 @@ import java.util.Set;
 import org.openhab.core.scriptengine.action.ActionService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * This class listens for services that implement the old action service interface and registers
@@ -25,6 +31,7 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author Kai Kreuzer - Initial contribution and API
  */
+@Component
 public class ActionServiceFactory {
 
     private Map<String, ServiceRegistration<org.eclipse.smarthome.model.script.engine.action.ActionService>> delegates = new HashMap<>();
@@ -32,6 +39,7 @@ public class ActionServiceFactory {
 
     private Set<ActionService> actionServices = new HashSet<>();
 
+    @Activate
     public void activate(BundleContext context) {
         this.context = context;
         for (ActionService service : actionServices) {
@@ -39,6 +47,7 @@ public class ActionServiceFactory {
         }
     }
 
+    @Deactivate
     public void deactivate() {
         for (ServiceRegistration<org.eclipse.smarthome.model.script.engine.action.ActionService> serviceReg : delegates
                 .values()) {
@@ -48,6 +57,7 @@ public class ActionServiceFactory {
         this.context = null;
     }
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addActionService(ActionService service) {
         if (context != null) {
             registerDelegateService(service);
