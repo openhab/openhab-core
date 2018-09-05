@@ -22,6 +22,7 @@ import org.eclipse.smarthome.core.items.ItemRegistry;
 import org.eclipse.smarthome.core.items.Metadata;
 import org.eclipse.smarthome.core.items.MetadataKey;
 import org.eclipse.smarthome.core.items.MetadataProvider;
+import org.openhab.core.autoupdate.AutoUpdateBindingProvider;
 import org.openhab.core.binding.BindingChangeListener;
 import org.openhab.core.binding.BindingProvider;
 import org.osgi.service.component.annotations.Activate;
@@ -44,7 +45,7 @@ public class AutoUpdateProviderDelegate
 
     private static final String AUTOUPDATE_KEY = "autoupdate";
 
-    private Set<org.openhab.core.autoupdate.AutoUpdateBindingProvider> providers = new CopyOnWriteArraySet<>();
+    private Set<AutoUpdateBindingProvider> providers = new CopyOnWriteArraySet<>();
     private Set<ProviderChangeListener<Metadata>> listeners = new CopyOnWriteArraySet<>();
     private Set<String> itemUpdateVetos = new HashSet<>();
     private boolean started = false;
@@ -56,14 +57,14 @@ public class AutoUpdateProviderDelegate
         refreshItemUpdateVetos();
         started = true;
         itemRegistry.addRegistryChangeListener(this);
-        for (org.openhab.core.autoupdate.AutoUpdateBindingProvider provider : providers) {
+        for (AutoUpdateBindingProvider provider : providers) {
             provider.addBindingChangeListener(this);
         }
     }
 
     @Deactivate
     protected void deactivate() {
-        for (org.openhab.core.autoupdate.AutoUpdateBindingProvider provider : providers) {
+        for (AutoUpdateBindingProvider provider : providers) {
             provider.removeBindingChangeListener(this);
         }
         itemRegistry.removeRegistryChangeListener(this);
@@ -71,7 +72,7 @@ public class AutoUpdateProviderDelegate
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE)
-    public void addAutoUpdateBindingProvider(org.openhab.core.autoupdate.AutoUpdateBindingProvider provider) {
+    public void addAutoUpdateBindingProvider(AutoUpdateBindingProvider provider) {
         providers.add(provider);
         if (started) {
             refreshItemUpdateVetos();
@@ -79,7 +80,7 @@ public class AutoUpdateProviderDelegate
         }
     }
 
-    public void removeAutoUpdateBindingProvider(org.openhab.core.autoupdate.AutoUpdateBindingProvider provider) {
+    public void removeAutoUpdateBindingProvider(AutoUpdateBindingProvider provider) {
         providers.remove(provider);
         if (started) {
             refreshItemUpdateVetos();
@@ -125,7 +126,7 @@ public class AutoUpdateProviderDelegate
         synchronized (itemUpdateVetos) {
             itemUpdateVetos.clear();
             for (Item item : itemRegistry.getAll()) {
-                for (org.openhab.core.autoupdate.AutoUpdateBindingProvider provider : providers) {
+                for (AutoUpdateBindingProvider provider : providers) {
                     Boolean autoUpdate = provider.autoUpdate(item.getName());
                     if (Boolean.FALSE.equals(autoUpdate)) {
                         newVetos.add(item.getName());
@@ -183,8 +184,8 @@ public class AutoUpdateProviderDelegate
     private void refreshVetoForItem(String itemName) {
         synchronized (itemUpdateVetos) {
             boolean removed = itemUpdateVetos.remove(itemName);
-            for (org.openhab.core.autoupdate.AutoUpdateBindingProvider provider : providers) {
-                Object autoUpdate = provider.autoUpdate(itemName);
+            for (AutoUpdateBindingProvider provider : providers) {
+                Boolean autoUpdate = provider.autoUpdate(itemName);
                 if (Boolean.FALSE.equals(autoUpdate)) {
                     itemUpdateVetos.add(itemName);
                     notifyAboutAddedMetadata(itemName);
