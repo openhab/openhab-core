@@ -25,23 +25,27 @@ import org.openhab.model.sitemap.LinkableWidget;
 import org.openhab.model.sitemap.Sitemap;
 import org.openhab.model.sitemap.Widget;
 import org.openhab.ui.items.ItemUIRegistry;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Component(immediate = true)
 public class ItemUIRegistryDelegate
         implements ItemUIRegistry, RegistryChangeListener<org.eclipse.smarthome.core.items.Item> {
 
     private org.eclipse.smarthome.ui.items.ItemUIRegistry itemUIRegistry;
     private Set<ItemRegistryChangeListener> listeners = new HashSet<>();
 
+    @Reference
     protected void setItemUIRegistry(org.eclipse.smarthome.ui.items.ItemUIRegistry itemUIRegistry) {
         this.itemUIRegistry = itemUIRegistry;
         itemUIRegistry.addRegistryChangeListener(this);
     }
 
-    protected void unsetItemUIRegistry(org.eclipse.smarthome.core.items.ItemRegistry itemUIRegistry) {
+    protected void unsetItemUIRegistry(org.eclipse.smarthome.ui.items.ItemUIRegistry itemUIRegistry) {
         this.itemUIRegistry = null;
     }
 

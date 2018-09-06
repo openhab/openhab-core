@@ -15,6 +15,8 @@ import org.eclipse.smarthome.core.items.events.ItemStateEvent;
 import org.openhab.core.compat1x.internal.TypeMapper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,12 +24,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Component(immediate = true)
 public class EventPublisherDelegate implements org.openhab.core.events.EventPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisherDelegate.class);
 
     private EventPublisher eventPublisher;
 
+    @Reference
     public void setEventPublisher(EventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
     }
