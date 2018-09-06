@@ -45,7 +45,7 @@ public class ItemUIRegistryDelegate
         itemUIRegistry.addRegistryChangeListener(this);
     }
 
-    protected void unsetItemUIRegistry(org.eclipse.smarthome.core.items.ItemRegistry itemUIRegistry) {
+    protected void unsetItemUIRegistry(org.eclipse.smarthome.ui.items.ItemUIRegistry itemUIRegistry) {
         this.itemUIRegistry = null;
     }
 
