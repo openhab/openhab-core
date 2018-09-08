@@ -1,86 +1,87 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.openhab</groupId>
-        <artifactId>pom-tycho</artifactId>
-        <version>2.4.0-SNAPSHOT</version>
-        <relativePath>poms/tycho/pom.xml</relativePath>
-    </parent>
-
-    <groupId>org.openhab.core</groupId>
-    <artifactId>pom</artifactId>
+  <parent>
+    <groupId>org.openhab</groupId>
+    <artifactId>pom-tycho</artifactId>
     <version>2.4.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <relativePath>poms/tycho/pom.xml</relativePath>
+  </parent>
 
-    <name>openHAB</name>
-    <description>This project contains the core components of openHAB</description>
+  <groupId>org.openhab.core</groupId>
+  <artifactId>pom</artifactId>
+  <version>2.4.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-    <properties>
-        <scm.gitBaseUrl>https://github.com/openhab</scm.gitBaseUrl>
-    </properties>
+  <name>openHAB</name>
+  <description>This project contains the core components of openHAB</description>
 
-    <organization>
-        <name>openHAB.org</name>
-        <url>http://www.openhab.org</url>
-    </organization>
+  <organization>
+    <name>openHAB.org</name>
+    <url>http://www.openhab.org</url>
+  </organization>
 
-    <licenses>
-        <license>
-            <name>Eclipse Public License</name>
-            <url>http://www.eclipse.org/legal/epl-v10.html</url>
-        </license>
-    </licenses>
+  <licenses>
+    <license>
+      <name>Eclipse Public License</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
 
-    <scm>
-        <connection>scm:git:${scm.gitBaseUrl}/openhab-core.git</connection>
-        <developerConnection>scm:git:${scm.gitBaseUrl}/openhab-core.git</developerConnection>
-        <url>${scm.gitBaseUrl}/openhab-core</url>
-        <tag>HEAD</tag>
-    </scm>
+  <modules>
+    <module>poms</module>
+    <module>poms/tycho</module>
+    <module>bundles</module>
+    <module>features</module>
+  </modules>
 
-    <issueManagement>
-        <url>https://github.com/openhab/openhab-core/issues</url>
-        <system>Github</system>
-    </issueManagement>
+  <scm>
+    <connection>scm:git:${scm.gitBaseUrl}/openhab-core.git</connection>
+    <developerConnection>scm:git:${scm.gitBaseUrl}/openhab-core.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>${scm.gitBaseUrl}/openhab-core</url>
+  </scm>
 
-    <distributionManagement>
-        <repository>
-            <id>bintray</id>
-            <url>https://api.bintray.com/maven/openhab/mvn/openhab-core/;publish=1</url>
-        </repository>
-        <snapshotRepository>
-            <id>jfrog</id>
-            <url>https://openhab.jfrog.io/openhab/libs-snapshot-local</url>
-        </snapshotRepository>
-    </distributionManagement>
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/openhab/openhab-core/issues</url>
+  </issueManagement>
 
-    <modules>
-        <module>poms</module>
-        <module>poms/tycho</module>
-        <module>bundles</module>
-        <module>features</module>
-    </modules>
+  <distributionManagement>
+    <repository>
+      <id>bintray</id>
+      <url>https://api.bintray.com/maven/openhab/mvn/openhab-core/;publish=1</url>
+    </repository>
+    <snapshotRepository>
+      <id>jfrog</id>
+      <url>https://openhab.jfrog.io/openhab/libs-snapshot-local</url>
+    </snapshotRepository>
+  </distributionManagement>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.openhab.tools.sat</groupId>
-                    <artifactId>sat-plugin</artifactId>
-                    <version>${sat.version}</version>
-                    <configuration>
-                        <checkstyleProperties>${basedirRoot}/tools/checkstyle.properties</checkstyleProperties>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.commonjava.maven.plugins</groupId>
-                <artifactId>directory-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+  <properties>
+    <scm.gitBaseUrl>https://github.com/openhab</scm.gitBaseUrl>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.openhab.tools.sat</groupId>
+          <artifactId>sat-plugin</artifactId>
+          <version>${sat.version}</version>
+          <configuration>
+            <checkstyleProperties>${basedirRoot}/tools/checkstyle.properties</checkstyleProperties>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.commonjava.maven.plugins</groupId>
+        <artifactId>directory-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
