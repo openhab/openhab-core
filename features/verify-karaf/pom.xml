@@ -1,96 +1,97 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.openhab.core</groupId>
-        <artifactId>pom-features</artifactId>
-        <version>2.4.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>org.openhab.core</groupId>
+    <artifactId>pom-features</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>org.openhab.features.karaf.verify</artifactId>
-    <packaging>pom</packaging>
+  <artifactId>org.openhab.features.karaf.verify</artifactId>
+  <packaging>pom</packaging>
 
-    <name>openHAB Karaf Feature Verification</name>
-    <description>openHAB Core Feature Verification</description>
+  <name>openHAB Karaf Feature Verification</name>
+  <description>openHAB Core Feature Verification</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>framework</artifactId>
-            <version>${karaf.version}</version>
-            <type>kar</type>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome</groupId>
-            <artifactId>esh-core</artifactId>
-            <version>${esh.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome</groupId>
-            <artifactId>esh-tp</artifactId>
-            <version>${esh.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-        </dependency>
-        <dependency>
-            <groupId>org.openhab.core</groupId>
-            <artifactId>openhab-core</artifactId>
-            <version>${project.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>framework</artifactId>
+      <version>${karaf.version}</version>
+      <type>kar</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome</groupId>
+      <artifactId>esh-core</artifactId>
+      <version>${esh.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome</groupId>
+      <artifactId>esh-tp</artifactId>
+      <version>${esh.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core</groupId>
+      <artifactId>openhab-core</artifactId>
+      <version>${project.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+  </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>karaf-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <startLevel>80</startLevel>
-                    <aggregateFeatures>true</aggregateFeatures>
-                    <!--  <resolver>(obr)</resolver> -->
-                    <checkDependencyChange>true</checkDependencyChange>
-                    <failOnDependencyChange>false</failOnDependencyChange>
-                    <logDependencyChanges>true</logDependencyChanges>
-                    <overwriteChangedDependencies>true</overwriteChangedDependencies>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>verify</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.eclipse.smarthome/esh-core/${esh.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.eclipse.smarthome/esh-tp/${esh.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.openhab.core/openhab-core/${project.version}/xml/features</descriptor>
-                            </descriptors>
-                            <distribution>org.apache.karaf.features:framework</distribution>
-                            <javase>1.8</javase>
-                            <framework>
-                                <feature>framework</feature>
-                            </framework>
-                            <features>
-                                <feature>openhab-*</feature>
-                            </features>
-                            <verifyTransitive>false</verifyTransitive>
-                            <ignoreMissingConditions>true</ignoreMissingConditions>
-                            <fail>first</fail>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <startLevel>80</startLevel>
+          <aggregateFeatures>true</aggregateFeatures>
+          <!--  <resolver>(obr)</resolver> -->
+          <checkDependencyChange>true</checkDependencyChange>
+          <failOnDependencyChange>false</failOnDependencyChange>
+          <logDependencyChanges>true</logDependencyChanges>
+          <overwriteChangedDependencies>true</overwriteChangedDependencies>
+        </configuration>
+        <executions>
+          <execution>
+            <id>verify</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                <descriptor>mvn:org.eclipse.smarthome/esh-core/${esh.version}/xml/features</descriptor>
+                <descriptor>mvn:org.eclipse.smarthome/esh-tp/${esh.version}/xml/features</descriptor>
+                <descriptor>mvn:org.openhab.core/openhab-core/${project.version}/xml/features</descriptor>
+              </descriptors>
+              <distribution>org.apache.karaf.features:framework</distribution>
+              <javase>1.8</javase>
+              <framework>
+                <feature>framework</feature>
+              </framework>
+              <features>
+                <feature>openhab-*</feature>
+              </features>
+              <verifyTransitive>false</verifyTransitive>
+              <ignoreMissingConditions>true</ignoreMissingConditions>
+              <fail>first</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

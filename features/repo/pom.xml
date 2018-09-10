@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.openhab</groupId>
@@ -6,93 +9,90 @@
     <version>2.4.0-SNAPSHOT</version>
     <relativePath>../../poms/tycho/pom.xml</relativePath>
   </parent>
-
-  <modelVersion>4.0.0</modelVersion>
   <groupId>org.openhab.core.features</groupId>
   <artifactId>org.openhab.repo</artifactId>
 
-  <name>openHAB Core P2 Repository</name>
-
   <packaging>eclipse-repository</packaging>
 
-    <build>
-        <plugins>
-          <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-            <version>2.4.3</version>
-          <executions>
-            <execution>
-              <id>default-resources</id>
-              <phase>process-resources</phase>
-              <goals>
-                <goal>resources</goal>
-              </goals>
-              <configuration>
-                <outputDirectory>${project.build.directory}</outputDirectory>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        </plugins>
-
-        <resources>
-            <resource>
-                <directory>src/main/filtered-resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-        </resources>
-    </build>
+  <name>openHAB Core P2 Repository</name>
 
   <dependencies>
-        <!-- Eclipse Smarthome dependencies specifically for the core -->
-        <dependency>
-            <groupId>org.eclipse.smarthome.io</groupId>
-            <artifactId>org.eclipse.smarthome.io.javasound</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome.io</groupId>
-            <artifactId>org.eclipse.smarthome.io.rest.sitemap</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome.ui</groupId>
-            <artifactId>org.eclipse.smarthome.ui</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome.extension.ui</groupId>
-            <artifactId>org.eclipse.smarthome.ui.basic</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome.extension.ui</groupId>
-            <artifactId>org.eclipse.smarthome.ui.classic</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome.extension.ui</groupId>
-            <artifactId>org.eclipse.smarthome.ui.paper</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome.model</groupId>
-            <artifactId>org.eclipse.smarthome.model.rule</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome.model</groupId>
-            <artifactId>org.eclipse.smarthome.model.rule.runtime</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.smarthome.model</groupId>
-            <artifactId>org.eclipse.smarthome.model.sitemap</artifactId>
-            <version>${esh.version}</version>
-        </dependency>
+    <!-- Eclipse Smarthome dependencies specifically for the core -->
+    <dependency>
+      <groupId>org.eclipse.smarthome.io</groupId>
+      <artifactId>org.eclipse.smarthome.io.javasound</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.io</groupId>
+      <artifactId>org.eclipse.smarthome.io.rest.sitemap</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.ui</groupId>
+      <artifactId>org.eclipse.smarthome.ui</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.extension.ui</groupId>
+      <artifactId>org.eclipse.smarthome.ui.basic</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.extension.ui</groupId>
+      <artifactId>org.eclipse.smarthome.ui.classic</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.extension.ui</groupId>
+      <artifactId>org.eclipse.smarthome.ui.paper</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.model</groupId>
+      <artifactId>org.eclipse.smarthome.model.rule</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.model</groupId>
+      <artifactId>org.eclipse.smarthome.model.rule.runtime</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.model</groupId>
+      <artifactId>org.eclipse.smarthome.model.sitemap</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
   </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/filtered-resources</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.3</version>
+        <executions>
+          <execution>
+            <id>default-resources</id>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
