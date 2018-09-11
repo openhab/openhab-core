@@ -19,6 +19,7 @@ import org.openhab.core.compat1x.internal.ItemMapper;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemRegistryChangeListener;
 import org.openhab.core.types.State;
 import org.openhab.model.sitemap.LinkableWidget;
@@ -32,7 +33,7 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(immediate = true)
+@Component(service = { ItemRegistry.class, ItemUIRegistry.class })
 public class ItemUIRegistryDelegate
         implements ItemUIRegistry, RegistryChangeListener<org.eclipse.smarthome.core.items.Item> {
 
