@@ -18,6 +18,12 @@ import java.util.Set;
 import org.openhab.core.persistence.PersistenceService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * This class listens for services that implement the old persistence service interface and registers
@@ -25,6 +31,7 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author Kai Kreuzer - Initial contribution and API
  */
+@Component(immediate = true)
 public class PersistenceServiceFactory {
 
     private Map<String, ServiceRegistration<org.eclipse.smarthome.core.persistence.PersistenceService>> delegates = new HashMap<>();
@@ -32,6 +39,7 @@ public class PersistenceServiceFactory {
 
     private Set<PersistenceService> persistenceServices = new HashSet<>();
 
+    @Activate
     public void activate(BundleContext context) {
         this.context = context;
         for (PersistenceService service : persistenceServices) {
@@ -39,6 +47,7 @@ public class PersistenceServiceFactory {
         }
     }
 
+    @Deactivate
     public void deactivate() {
         for (ServiceRegistration<org.eclipse.smarthome.core.persistence.PersistenceService> serviceReg : delegates
                 .values()) {
@@ -48,6 +57,7 @@ public class PersistenceServiceFactory {
         this.context = null;
     }
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addPersistenceService(PersistenceService service) {
         if (context != null) {
             registerDelegateService(service);
