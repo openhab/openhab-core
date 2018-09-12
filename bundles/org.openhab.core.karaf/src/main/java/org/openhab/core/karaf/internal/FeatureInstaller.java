@@ -363,7 +363,7 @@ public class FeatureInstaller implements ConfigurationListener {
             if (install instanceof String) {
                 String[] entries = ((String) install).split(",");
                 try {
-                    Feature[] features = featuresService.listInstalledFeatures();
+                    Feature[] features = service.listInstalledFeatures();
                     for (String addon : entries) {
                         if (!StringUtils.isEmpty(addon)) {
                             String id = PREFIX + type + "-" + addon.trim();
@@ -375,7 +375,7 @@ public class FeatureInstaller implements ConfigurationListener {
                     }
 
                     // we collect all installed addons
-                    for (String addon : getAllAddonsOfType(type)) {
+                    for (String addon : getAllAddonsOfType(service, type)) {
                         if (!StringUtils.isEmpty(addon)) {
                             String id = PREFIX + type + "-" + addon.trim();
                             if (isInstalled(features, id)) {
@@ -404,7 +404,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private Set<String> getAllAddonsOfType(String type) {
+    private Set<String> getAllAddonsOfType(FeaturesService featuresService, String type) {
         Set<String> addons = new HashSet<>();
         String prefix = FeatureInstaller.PREFIX + type + "-";
         try {
