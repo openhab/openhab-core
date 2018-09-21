@@ -21,6 +21,7 @@
     <module>org.openhab.core.compat1x</module>
     <module>org.openhab.core.compat1x.test</module>
     <module>org.openhab.core.karaf</module>
+    <module>org.openhab.core.karaf.dep.war</module>
     <module>org.openhab.io.jetty.certificate</module>
     <module>org.openhab.io.rest.docs</module>
     <module>org.openhab.io.sound</module>
