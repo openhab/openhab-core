@@ -334,6 +334,7 @@
             <source>${maven.compiler.source}</source>
             <target>${maven.compiler.target}</target>
             <compilerId>jdt</compilerId>
+            <useProjectSettings>false</useProjectSettings>
             <extraClasspathElements>
               <extraClasspathElement>
                 <groupId>org.eclipse.jdt</groupId>
