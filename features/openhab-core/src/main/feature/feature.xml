@@ -14,7 +14,9 @@
     <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
         <bundle>mvn:org.eclipse.orbit.bundles/com.google.gson/2.7.0.v20170129-0911</bundle>
         <feature>esh-base</feature>
+        <feature>esh-auth-jaas</feature>
         <feature>esh-io-console-karaf</feature>
+        <feature>esh-io-rest-auth</feature>
         <feature>esh-io-rest-sitemap</feature>
         <feature>esh-io-rest-voice</feature>
         <feature>esh-io-rest-mdns</feature>
@@ -30,6 +32,7 @@
         <feature>openhab-runtime-certificate</feature>
         <feature>openhab-transport-mdns</feature>
         <feature>openhab-transport-http</feature>
+        <feature>esh-io-transport-http-auth-basic</feature>
         <feature prerequisite="true">shell</feature>
         <feature prerequisite="true">wrapper</feature>
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
