@@ -58,6 +58,11 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.smarthome.core</groupId>
+      <artifactId>org.eclipse.smarthome.core.semantics</artifactId>
+      <version>${esh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.smarthome.core</groupId>
       <artifactId>org.eclipse.smarthome.core.scheduler</artifactId>
       <version>${esh.version}</version>
     </dependency>
