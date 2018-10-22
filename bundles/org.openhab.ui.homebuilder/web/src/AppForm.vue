@@ -3,7 +3,7 @@
     <div class='col-sm-6' id="form">
       <vue-form-generator :schema='schema' :model='model' :options='formOptions'>
       </vue-form-generator>
-      <pre class='language-json hidden-xs-up'><code>{{ model }}</code></pre>
+      <pre class='language-json d-none'><code>{{ model }}</code></pre>
     </div>
     <div class='col-sm-6'>
       <affix id="preview" relative-element-selector="#form" :offset="{ top: 65, bottom: 0 }">
@@ -48,8 +48,9 @@ export default {
         itemsType: 'text',
         itemsChannel: true,
         itemsIcons: true,
+        itemsTags: true,
         floorsCount: 1,
-        GroundFloor: []
+        Cellar: []
       },
 
       schema: {
@@ -123,7 +124,7 @@ export default {
      * and assigns new `name` properties to the definitions.
      */
     fetchTranslations: function(language) {
-      let root = window.location.href.replace('/index.html', '');
+      let root = window.location.href.replace(/\/index.html.*/, '');
       this.$http
         .get(root + '/i18n/' + language + '.json')
         .then(response => {
@@ -161,7 +162,7 @@ export default {
       let formEl = document.getElementById('form');
       let previewEl = document.getElementById('preview');
       let formWidth = formEl && form.clientWidth;
-      let hidden = 'hidden-xs-up';
+      let hidden = 'd-none';
 
       previewEl.style.width = formWidth + 'px';
 

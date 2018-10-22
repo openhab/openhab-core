@@ -10,7 +10,7 @@ import { languages, floors, rooms, objects, OBJECTS_SUFFIX } from './definitions
  * @param {Object} newVal
  */
 function languageChanged(model, newVal) {
-    this.$parent.$parent.fetchTranslations(newVal);
+    this.$parent.$parent.$parent.fetchTranslations(newVal);
 }
 
 /**
@@ -115,7 +115,7 @@ function newObjectTag(newTag, id, options, value) {
  * @param {Object} field 
  */
 function roomsChanged(model, newVal, oldVal, field) {
-    let objectsFields = _.find(this.$options.parent.groups, { legend: 'Objects' }).fields;
+    let objectsFields = _.find(this.$options.parent.$parent.groups, { legend: 'Objects' }).fields;
     let floor = field.model;
     let oldList = oldVal ? _.map(oldVal, 'value') : [];
     let newList = _.map(newVal, 'value');
@@ -190,7 +190,7 @@ export var floorsFields = [{
     styleClasses: 'floors-number',
     values: [1, 2, 3, 4, 5],
     onChanged: function(model, newVal, oldVal, field) {
-        let roomsFields = _.find(this.$options.parent.groups, { legend: 'Rooms' }).fields;
+        let roomsFields = _.find(this.$options.parent.$parent.groups, { legend: 'Rooms' }).fields;
         if (newVal <= 5 && newVal > oldVal) {
             for (var i = oldVal; i < newVal; i++) {
                 let floor = floors[i];
@@ -209,6 +209,7 @@ export var floorsFields = [{
                 _.remove(roomsFields, { model: floorName });
                 delete model[floorName];
             }
+            this.$options.parent.$parent.$forceUpdate();
         }
     }
 }];
@@ -275,7 +276,7 @@ export var settingsFields = [{
         type: 'switch',
         label: 'Include tags',
         model: 'itemsTags',
-        default: false,
+        default: true,
         textOn: 'Yes',
         textOff: 'No',
         valueOn: true,
@@ -321,7 +322,7 @@ function roomsSelect(model, label) {
  * Field group schema for the rooms
  */
 export var roomsFields = [
-    roomsSelect('GroundFloor', 'Ground Floor')
+    roomsSelect('Cellar', 'Cellar')
 ];
 
 /**

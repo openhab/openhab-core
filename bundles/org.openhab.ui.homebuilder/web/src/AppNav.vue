@@ -4,7 +4,7 @@
 
     <button @click="togglePreview" type="button" aria-label="Toggle preview" class="navbar-toggler navbar-toggler-right">
       <span class="navbar-toggler-icon"></span>
-      <span class="navbar-close-icon hidden-xs-up">&times;</span>
+      <span class="navbar-close-icon d-none">&times;</span>
     </button>
 
   </nav>
@@ -32,9 +32,9 @@
 export default {
   methods: {
     togglePreview() {
-      document.getElementById('preview').classList.toggle('hidden-xs-up');
-      document.querySelector('.navbar-close-icon').classList.toggle('hidden-xs-up');
-      document.querySelector('.navbar-toggler-icon').classList.toggle('hidden-xs-up');
+      document.getElementById('preview').classList.toggle('d-none');
+      document.querySelector('.navbar-close-icon').classList.toggle('d-none');
+      document.querySelector('.navbar-toggler-icon').classList.toggle('d-none');
     }
   }
 }

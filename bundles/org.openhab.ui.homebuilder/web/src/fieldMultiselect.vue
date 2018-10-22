@@ -41,7 +41,7 @@
         @close="onClose"
         :option-height="selectOptions.optionHeight"
     >
-        <template slot="tag" scope="props">
+        <template slot="tag" slot-scope="props">
             <span class="multiselect__tag">
                 <img :src="generateIcon(props.option.icon)" />
                 <span>{{ props.option.name }}</span>
@@ -51,7 +51,7 @@
                     class="multiselect__tag-icon"></i>
             </span>
         </template>
-        <template slot="option" scope="props">
+        <template slot="option" slot-scope="props">
             <img class="option__image" :src="generateIcon(props.option.icon)" />
             <div class="option__desc">
                 <span class="option__title">{{ props.option.name }}</span>
