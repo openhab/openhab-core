@@ -30,6 +30,7 @@
     <module>org.openhab.ui.classicui</module>
     <module>org.openhab.ui.homebuilder</module>
     <module>org.openhab.ui.paperui</module>
+    <module>org.openhab.ui.start</module>
   </modules>
 
   <dependencies>

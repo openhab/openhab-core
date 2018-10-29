@@ -1,20 +1,17 @@
 Manifest-Version: 1.0
-Automatic-Module-Name: org.openhab.ui.dashboard
+Automatic-Module-Name: org.openhab.ui.start
 Bundle-ManifestVersion: 2
-Bundle-Name: openHAB Dashboard UI
+Bundle-Name: openHAB Start UI
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-SymbolicName: org.openhab.ui.dashboard
+Bundle-SymbolicName: org.openhab.ui.start
 Bundle-Vendor: openHAB
 Bundle-Version: 2.4.0.qualifier
-Export-Package: org.openhab.ui.dashboard
 Import-Package: 
  javax.servlet,
  javax.servlet.http,
- org.apache.commons.io,
+ org.apache.commons.io;version="2.2.0",
  org.eclipse.jdt.annotation;resolution:=optional,
- org.eclipse.smarthome.core.i18n,
- org.eclipse.smarthome.core.net,
- org.openhab.core,
+ org.openhab.ui.dashboard,
  org.osgi.framework,
  org.osgi.service.cm,
  org.osgi.service.component,
@@ -22,3 +19,4 @@ Import-Package:
  org.osgi.service.http,
  org.slf4j
 Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy

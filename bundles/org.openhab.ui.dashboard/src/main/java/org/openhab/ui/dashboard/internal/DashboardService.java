@@ -24,6 +24,7 @@ import org.eclipse.smarthome.core.i18n.LocaleProvider;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.net.HttpServiceUtil;
 import org.eclipse.smarthome.core.net.NetworkAddressService;
+import org.openhab.ui.dashboard.DashboardReady;
 import org.openhab.ui.dashboard.DashboardTile;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -46,8 +47,9 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - internationalization
  * @author Hilbrand Bouwkamp - internationalization
  */
-@Component(service = DashboardService.class, immediate = true, name = "org.openhab.dashboard")
-public class DashboardService {
+@Component(service = { DashboardService.class,
+        DashboardReady.class }, immediate = true, name = "org.openhab.dashboard")
+public class DashboardService implements DashboardReady {
 
     public static final String DASHBOARD_ALIAS = "/start";
 
