@@ -23,6 +23,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -114,20 +115,20 @@ public class RootServlet extends HttpServlet {
             try {
                 page404 = IOUtils.toString(notfound.openStream());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ComponentException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find 404.html - failed to initialize root servlet");
+            throw new ComponentException("Cannot find 404.html - failed to initialize root servlet");
         }
         URL status = context.getBundleContext().getBundle().getEntry("pages/status.html");
         if (status != null) {
             try {
                 pageStatus = IOUtils.toString(status.openStream());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ComponentException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find status.html - failed to initialize root servlet");
+            throw new ComponentException("Cannot find status.html - failed to initialize root servlet");
         }
 
         // we can determine whether the whole framework is shutdown by listening to a STOPPING event for bundle 0.
