@@ -24,10 +24,12 @@ import org.eclipse.smarthome.core.i18n.LocaleProvider;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.net.HttpServiceUtil;
 import org.eclipse.smarthome.core.net.NetworkAddressService;
+import org.openhab.ui.dashboard.DashboardReady;
 import org.openhab.ui.dashboard.DashboardTile;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -46,8 +48,8 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - internationalization
  * @author Hilbrand Bouwkamp - internationalization
  */
-@Component(service = DashboardService.class, immediate = true, name = "org.openhab.dashboard")
-public class DashboardService {
+@Component(service = { DashboardService.class, DashboardReady.class }, immediate = true, name = "org.openhab.dashboard")
+public class DashboardService implements DashboardReady {
 
     public static final String DASHBOARD_ALIAS = "/start";
 
@@ -166,10 +168,10 @@ public class DashboardService {
             try {
                 indexTemplate = IOUtils.toString(index.openStream());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ComponentException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find index.html - failed to initialize Dashboard servlet");
+            throw new ComponentException("Cannot find index.html - failed to initialize Dashboard servlet");
         }
 
         URL entry = bundleContext.getBundle().getEntry("templates/entry.html");
@@ -177,10 +179,10 @@ public class DashboardService {
             try {
                 entryTemplate = IOUtils.toString(entry.openStream());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ComponentException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find entry.html - failed to initialize Dashboard servlet");
+            throw new ComponentException("Cannot find entry.html - failed to initialize Dashboard servlet");
         }
 
         URL warn = bundleContext.getBundle().getEntry("templates/warn.html");
@@ -188,7 +190,7 @@ public class DashboardService {
             try {
                 warnTemplate = IOUtils.toString(warn.openStream());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ComponentException(e);
             }
         } else {
             throw new RuntimeException("Cannot find warn.html - failed to initialize Dashboard servlet");
@@ -199,10 +201,10 @@ public class DashboardService {
             try {
                 setupTemplate = IOUtils.toString(setup.openStream());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ComponentException(e);
             }
         } else {
-            throw new RuntimeException("Cannot find setup.html - failed to initialize Dashboard servlet");
+            throw new ComponentException("Cannot find setup.html - failed to initialize Dashboard servlet");
         }
 
         return new DashboardServlet(configurationAdmin, indexTemplate, entryTemplate, warnTemplate, setupTemplate,
