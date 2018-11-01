@@ -11,6 +11,7 @@ Import-Package:
  javax.servlet.http,
  org.apache.commons.io,
  org.eclipse.jdt.annotation;resolution:=optional,
+ org.eclipse.jetty.servlet,
  org.openhab.ui.dashboard,
  org.osgi.framework,
  org.osgi.service.cm,
