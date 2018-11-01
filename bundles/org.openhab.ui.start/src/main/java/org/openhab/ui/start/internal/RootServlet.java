@@ -72,6 +72,7 @@ public class RootServlet extends DefaultServlet {
             if (req.getRequestURI().equals("/")) {
                 resp.sendRedirect("/start/index");
             } else if (!req.getRequestURI().startsWith("/static/")) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 resp.setContentType("text/html;charset=UTF-8");
                 resp.getWriter().append(page404);
                 resp.getWriter().close();
