@@ -13,11 +13,11 @@ import java.net.URL;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.openhab.ui.dashboard.DashboardReady;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(immediate = true)
-public class RootServlet extends HttpServlet {
+public class RootServlet extends DefaultServlet {
 
     private static final long serialVersionUID = -2091860295954594917L;
 
@@ -71,11 +71,12 @@ public class RootServlet extends HttpServlet {
             // all is up and running
             if (req.getRequestURI().equals("/")) {
                 resp.sendRedirect("/start/index");
-            } else {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            } else if (!req.getRequestURI().startsWith("/static/")) {
                 resp.setContentType("text/html;charset=UTF-8");
                 resp.getWriter().append(page404);
                 resp.getWriter().close();
+            } else {
+                super.doGet(req, resp);
             }
         } else {
             // report current system state
