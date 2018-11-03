@@ -19,12 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.openhab.ui.dashboard.DashboardReady;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -73,6 +75,7 @@ public class RootServlet extends DefaultServlet {
 
     private DashboardReady dashboardStarted;
     private LifeCycleState lifecycleState = LifeCycleState.STARTING;
+    private ServiceRegistration handlerRef;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -126,11 +129,11 @@ public class RootServlet extends DefaultServlet {
         staticContent.setHandler(handler);
         Dictionary props = new Hashtable();
         props.put("contextPath", STATIC_CONTENT_URL);
-        context.getBundleContext().registerService(ContextHandler.class.getName(), staticContent, props);
+        handlerRef = context.getBundleContext().registerService(Handler.class.getName(), staticContent, props);
 
         // register servlet
         try {
-            httpService.registerServlet("/", this, new Properties(), httpService.createDefaultHttpContext());
+            httpService.registerServlet("/", this, new Properties(), null);
         } catch (ServletException | NamespaceException e) {
             logger.error("Failed registering root servlet!", e);
         }
@@ -168,7 +171,13 @@ public class RootServlet extends DefaultServlet {
     }
 
     @Deactivate
-    protected void deactivate() {
+    protected void deactivate(ComponentContext context) {
+        httpService.unregister("/");
+        if (handlerRef != null) {
+            handlerRef.unregister();
+            handlerRef = null;
+        }
+
         // reset, if this component is ever reused (should normally not be the case), it should be "starting" again.
         lifecycleState = LifeCycleState.STARTING;
     }
