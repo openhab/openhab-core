@@ -12,6 +12,7 @@ Import-Package:
  org.apache.commons.io,
  org.eclipse.jdt.annotation;resolution:=optional,
  org.eclipse.jetty.server,
+ org.eclipse.jetty.server.handler,
  org.eclipse.jetty.servlet,
  org.eclipse.jetty.util.resource,
  org.openhab.ui.dashboard,

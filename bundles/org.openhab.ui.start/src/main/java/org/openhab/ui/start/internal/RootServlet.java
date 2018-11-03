@@ -10,6 +10,8 @@ package org.openhab.ui.start.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -17,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.openhab.ui.dashboard.DashboardReady;
 import org.osgi.framework.Bundle;
@@ -105,8 +109,21 @@ public class RootServlet extends DefaultServlet {
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Activate
     protected void activate(ComponentContext context) {
+
+        // register static content context handler
+        ContextHandler staticContent = new ContextHandler();
+        ResourceHandler handler = new ResourceHandler();
+        handler.setDirectoriesListed(false);
+        handler.setResourceBase(System.getProperty("openhab.conf") + "/html");
+        staticContent.setHandler(handler);
+        Dictionary props = new Hashtable();
+        props.put("contextPath", "/static");
+        context.getBundleContext().registerService(ContextHandler.class.getName(), staticContent, props);
+
+        // register servlet
         try {
             httpService.registerServlet("/", this, new Properties(), httpService.createDefaultHttpContext());
         } catch (ServletException | NamespaceException e) {
