@@ -33,7 +33,8 @@
         <feature prerequisite="true">shell</feature>
         <feature prerequisite="true">wrapper</feature>
         <!-- This bundle needs to be started early as it registers the 404 and startup pages on Jetty -->
-        <bundle start-level="30">mvn:org.openhab.core/org.openhab.ui.start/${project.version}</bundle>
+        <!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422
+        <bundle start-level="30">mvn:org.openhab.core/org.openhab.ui.start/${project.version}</bundle> -->
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.io.sound/${project.version}</bundle>
