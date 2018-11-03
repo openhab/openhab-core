@@ -175,6 +175,7 @@ public class RootServlet extends DefaultServlet {
         httpService.unregister("/");
         if (handlerRef != null) {
             handlerRef.unregister();
+            handlerRef = null;
         }
 
         // reset, if this component is ever reused (should normally not be the case), it should be "starting" again.
