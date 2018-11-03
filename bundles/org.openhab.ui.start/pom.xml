@@ -11,4 +11,12 @@
 
   <packaging>eclipse-plugin</packaging>
   <name>openHAB Start UI</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core</groupId>
+      <artifactId>org.openhab.ui.dashboard</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 </project>
