@@ -10,6 +10,8 @@ package org.openhab.ui.start.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -17,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.openhab.ui.dashboard.DashboardReady;
 import org.osgi.framework.Bundle;
@@ -45,6 +49,11 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class RootServlet extends DefaultServlet {
 
+    private static final String STATIC_CONTENT_FOLDER = "html";
+    private static final String OPENHAB_CONF_SYSPROPERTY = "openhab.conf";
+    private static final String STATIC_CONTENT_URL = "/static";
+    public static final String START_URL = "/start/index";
+
     private static final long serialVersionUID = -2091860295954594917L;
 
     private final Logger logger = LoggerFactory.getLogger(RootServlet.class);
@@ -70,8 +79,8 @@ public class RootServlet extends DefaultServlet {
         if (dashboardStarted != null) {
             // all is up and running
             if (req.getRequestURI().equals("/")) {
-                resp.sendRedirect("/start/index");
-            } else if (!req.getRequestURI().startsWith("/static/")) {
+                resp.sendRedirect(START_URL);
+            } else if (!req.getRequestURI().startsWith(STATIC_CONTENT_URL)) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 resp.setContentType("text/html;charset=UTF-8");
                 resp.getWriter().append(page404);
@@ -105,8 +114,21 @@ public class RootServlet extends DefaultServlet {
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Activate
     protected void activate(ComponentContext context) {
+
+        // register static content context handler
+        ContextHandler staticContent = new ContextHandler();
+        ResourceHandler handler = new ResourceHandler();
+        handler.setDirectoriesListed(false);
+        handler.setResourceBase(System.getProperty(OPENHAB_CONF_SYSPROPERTY) + "/" + STATIC_CONTENT_FOLDER);
+        staticContent.setHandler(handler);
+        Dictionary props = new Hashtable();
+        props.put("contextPath", STATIC_CONTENT_URL);
+        context.getBundleContext().registerService(ContextHandler.class.getName(), staticContent, props);
+
+        // register servlet
         try {
             httpService.registerServlet("/", this, new Properties(), httpService.createDefaultHttpContext());
         } catch (ServletException | NamespaceException e) {
