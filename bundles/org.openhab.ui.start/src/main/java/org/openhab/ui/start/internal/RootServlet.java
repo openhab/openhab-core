@@ -49,6 +49,11 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class RootServlet extends DefaultServlet {
 
+    private static final String STATIC_CONTENT_FOLDER = "html";
+    private static final String OPENHAB_CONF_SYSPROPERTY = "openhab.conf";
+    private static final String STATIC_CONTENT_URL = "/static";
+    public static final String START_URL = "/start/index";
+
     private static final long serialVersionUID = -2091860295954594917L;
 
     private final Logger logger = LoggerFactory.getLogger(RootServlet.class);
@@ -74,8 +79,8 @@ public class RootServlet extends DefaultServlet {
         if (dashboardStarted != null) {
             // all is up and running
             if (req.getRequestURI().equals("/")) {
-                resp.sendRedirect("/start/index");
-            } else if (!req.getRequestURI().startsWith("/static/")) {
+                resp.sendRedirect(START_URL);
+            } else if (!req.getRequestURI().startsWith(STATIC_CONTENT_URL)) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 resp.setContentType("text/html;charset=UTF-8");
                 resp.getWriter().append(page404);
@@ -117,10 +122,10 @@ public class RootServlet extends DefaultServlet {
         ContextHandler staticContent = new ContextHandler();
         ResourceHandler handler = new ResourceHandler();
         handler.setDirectoriesListed(false);
-        handler.setResourceBase(System.getProperty("openhab.conf") + "/html");
+        handler.setResourceBase(System.getProperty(OPENHAB_CONF_SYSPROPERTY) + "/" + STATIC_CONTENT_FOLDER);
         staticContent.setHandler(handler);
         Dictionary props = new Hashtable();
-        props.put("contextPath", "/static");
+        props.put("contextPath", STATIC_CONTENT_URL);
         context.getBundleContext().registerService(ContextHandler.class.getName(), staticContent, props);
 
         // register servlet
