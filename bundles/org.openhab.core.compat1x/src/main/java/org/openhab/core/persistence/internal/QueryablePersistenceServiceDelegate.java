@@ -46,23 +46,25 @@ public class QueryablePersistenceServiceDelegate extends PersistenceServiceDeleg
         org.openhab.core.persistence.QueryablePersistenceService pService = (org.openhab.core.persistence.QueryablePersistenceService) service;
         Iterable<org.openhab.core.persistence.HistoricItem> historicItems = pService.query(mappedFilter);
         ArrayList<HistoricItem> result = new ArrayList<>();
-        for (final org.openhab.core.persistence.HistoricItem item : historicItems) {
-            result.add(new HistoricItem() {
-                @Override
-                public Date getTimestamp() {
-                    return item.getTimestamp();
-                }
+        if (historicItems != null) {
+            for (final org.openhab.core.persistence.HistoricItem item : historicItems) {
+                result.add(new HistoricItem() {
+                    @Override
+                    public Date getTimestamp() {
+                        return item.getTimestamp();
+                    }
 
-                @Override
-                public State getState() {
-                    return (State) TypeMapper.mapToESHType(item.getState());
-                }
+                    @Override
+                    public State getState() {
+                        return (State) TypeMapper.mapToESHType(item.getState());
+                    }
 
-                @Override
-                public String getName() {
-                    return item.getName();
-                }
-            });
+                    @Override
+                    public String getName() {
+                        return item.getName();
+                    }
+                });
+            }
         }
         return result;
     }
