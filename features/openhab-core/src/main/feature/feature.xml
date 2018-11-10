@@ -94,6 +94,7 @@
     </feature>
 
     <feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
+        <bundle>mvn:org.openhab/nrjavaserial/${nrjavaserial.version}</bundle>
         <feature>esh-io-transport-serial-rfc2217</feature>
         <feature>esh-config-serial</feature>
         <feature>esh-config-discovery-usbserial</feature>

@@ -68,7 +68,7 @@
     <jetty.version>9.4.11.v20180605</jetty.version>
     <jackson.version>1.9.13</jackson.version>
     <sat.version>0.5.0</sat.version>
-    <nrjavaserial.version>3.14.0</nrjavaserial.version>
+    <nrjavaserial.version>3.14.0.OH</nrjavaserial.version>
     <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
     <build.helper.maven.plugin.version>1.9.1</build.helper.maven.plugin.version>
     <license.maven.plugin.version>2.10</license.maven.plugin.version>
