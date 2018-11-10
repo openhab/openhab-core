@@ -1,14 +1,14 @@
 import * as _ from 'lodash'
 import * as AsciiTable from 'ascii-table'
-import { getItems } from './restItems'
+import {getItems} from './restItems'
 
 /**
  * Generates item's type
  * e.g. `Switch` or `Group`
  * or `Group:Switch:OR(ON, OFF)`
- * 
- * @param {Object} item 
- * @param {Object} model 
+ *
+ * @param {Object} item
+ * @param {Object} model
  * @return {string}
  */
 function generateType(item) {
@@ -27,7 +27,7 @@ function generateType(item) {
 
 /**
  * Generates a label for the Item
- * @param {Object} item 
+ * @param {Object} item
  * @return {string}
  */
 function generateLabel(item) {
@@ -36,9 +36,9 @@ function generateLabel(item) {
 
 /**
  * Generates an icon if there's any.
- * 
- * @param {Object} item 
- * @param {Object} model 
+ *
+ * @param {Object} item
+ * @param {Object} model
  * @return {string}
  */
 function generateIcon(item, model) {
@@ -80,8 +80,8 @@ function generateChannel(item, model) {
 /**
  * Generates an array or items
  * to be later processed by AsciiTable
- * 
- * @param {*} items 
+ *
+ * @param {*} items
  */
 function generateTextualItems(items, model) {
     let result = items.map(item => {
@@ -105,17 +105,17 @@ function generateTextualItems(items, model) {
 }
 
 /**
- * Generates an array or items 
+ * Generates an array or items
  * for a given type
- * 
- * @param {string} entryType 
- * @param {Object} model 
+ *
+ * @param {string} entryType
+ * @param {Object} model
  * @return {Array}
  */
 function getItemsOfType(entryType, model) {
     let allItems = getItems(model);
     let items = _(allItems)
-        .filter({ entryType: entryType })
+        .filter({entryType: entryType})
         .uniq()
         .value() || [];
 
@@ -125,7 +125,7 @@ function getItemsOfType(entryType, model) {
 /**
  * Transforms array of lines
  * into column-aligned table
- * @param {Array} lines 
+ * @param {Array} lines
  */
 function toTable(lines) {
     let table = new AsciiTable();
@@ -149,7 +149,7 @@ function toTable(lines) {
  * Generates a textual Items file based on user input
  * Needs several datapoints from the model such as
  * floorsCount, rooms collection, objects etc.
- * @param {*} model 
+ * @param {*} model
  * @return {string}
  */
 export function generateItems(model) {

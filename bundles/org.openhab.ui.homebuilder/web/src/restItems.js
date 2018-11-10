@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import { floors, objects, OBJECTS_SUFFIX } from './definitions'
+import {floors, objects, OBJECTS_SUFFIX} from './definitions'
 
 export const GROUP_PREFIX = 'g';
 
@@ -11,7 +11,7 @@ export function addFloors(floor, model) {
         category: model.itemsIcons ? floor.icon : '',
         groupNames: ['Home'],
         entryType: 'floor',
-        tags: floor.tags
+        tags: getTags(floor)
     }];
 }
 
@@ -33,7 +33,7 @@ export function addRooms(floor, model) {
                     model.floorsCount > 1 ? floor.abbr : ''
                 ]),
                 entryType: 'room',
-                tags: room.tags
+                tags: getTags(room)
             });
 
             items = [
@@ -62,23 +62,23 @@ export function addObjects(room, model, floorPrefix, roomObjects) {
             floorPrefix + room.value,
             GROUP_PREFIX + object.value
         ],
-        tags: object.tags,
+        tags: getTags(object),
         entryType: 'object'
     }));
 }
 
 /**
  * Generates a list of object groups
- * 
- * @param {Object} model 
+ *
+ * @param {Object} model
  * @return {string}
  */
 export function addObjectGroups(model) {
     let items = [];
     let chosenObjects = getChosenObjects(model);
 
-    chosenObjects.forEach(function(dev) {
-        let object = _.find(objects, { value: dev });
+    chosenObjects.forEach(function (dev) {
+        let object = _.find(objects, {value: dev});
 
         if (object) {
             let type = object.type.split(':');
@@ -96,7 +96,7 @@ export function addObjectGroups(model) {
                 groupNames: ['Home'],
                 groupType: groupType,
                 entryType: 'objectGroup',
-                tags: object.tags
+                tags: getTags(object)
             };
 
             if (groupFuncName) {
@@ -121,8 +121,8 @@ export function addObjectGroups(model) {
 /**
  * Gets list of objects chosen
  * from collection
- * 
- * @param {*} model 
+ *
+ * @param {*} model
  * @return {Array}
  */
 export function getChosenObjects(model) {
@@ -132,6 +132,10 @@ export function getChosenObjects(model) {
         .map((item) => item.value)
         .uniq()
         .value() || [];
+}
+
+function getTags(entry) {
+    return entry.tags || [];
 }
 
 export function getItems(model) {
@@ -157,7 +161,7 @@ export function getItems(model) {
     items = [
         ...items,
         ...addObjectGroups(model)
-    ]
+    ];
 
     return items;
 }
@@ -166,8 +170,8 @@ export function getItems(model) {
  * Returns array of Items
  * without `entryType` which is not a valid parameter
  * for the request
- * 
- * @param {*} model 
+ *
+ * @param {*} model
  */
 export function generateItemsJson(model) {
     let items = getItems(model);

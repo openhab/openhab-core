@@ -10,7 +10,6 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'vue-form-generator/dist/vfg.css'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 import App from './App.vue'
-import fieldMultiselect from './fieldMultiselect.vue'
 
 Vue.use(BootstrapVue);
 Vue.use(VueFormGenerator);
@@ -18,7 +17,6 @@ Vue.use(Affix);
 Vue.use(VueResource);
 Vue.use(VueI18n);
 Vue.component('multiselect', Multiselect);
-Vue.component('fieldMultiselect', fieldMultiselect);
 
 let i18n = new VueI18n({
     locale: 'en-UK'
