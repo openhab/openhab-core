@@ -262,7 +262,7 @@ export var settingsFields = [
  */
 export function roomsSelect(model, label) {
     return {
-        type: 'vueMultiSelect',
+        type: 'multiselect',
         label: label,
         styleClasses: 'rooms-list',
         model: model,
@@ -292,7 +292,7 @@ export function roomsSelect(model, label) {
  */
 export function objectSelect(model, label) {
     return {
-        type: 'vueMultiSelect',
+        type: 'multiselect',
         label: label,
         styleClasses: 'rooms-list',
         model: model,
@@ -300,13 +300,13 @@ export function objectSelect(model, label) {
         placeholder: 'Type to search or add object',
         selectOptions: {
             multiple: true,
+            hideSelected: true,
+            closeOnSelect: false,
+            selectLabel: '',
             trackBy: 'value',
             label: 'name',
-            selectLabel: '',
             searchable: true,
             taggable: true,
-            closeOnSelect: false,
-            hideSelected: true,
             tagPlaceholder: 'Add this as a new object',
             onNewTag: newObjectTag
         }

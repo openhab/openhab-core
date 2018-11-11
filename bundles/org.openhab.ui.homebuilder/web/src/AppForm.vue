@@ -76,7 +76,7 @@
                     let floor = floors[i];
                     if (this.model[floor.value]) {
                         this.model[floor.value].forEach((element) => {
-                            let name = element.name || element.value;
+                            let name = (element.name || element.value)  + ' (' + floor.name + ')';
                             let fieldName = floor.value + '_' + element.value + OBJECTS_SUFFIX;
                             objectsFields.push(objectSelect(fieldName, name));
                         });

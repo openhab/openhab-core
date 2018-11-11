@@ -11,7 +11,7 @@ export function addFloors(floor, model) {
         category: model.itemsIcons ? floor.icon : '',
         groupNames: ['Home'],
         entryType: 'floor',
-        tags: getTags(floor)
+        tags: getTags(model, floor)
     }];
 }
 
@@ -33,7 +33,7 @@ export function addRooms(floor, model) {
                     model.floorsCount > 1 ? floor.abbr : ''
                 ]),
                 entryType: 'room',
-                tags: getTags(room)
+                tags: getTags(model, room)
             });
 
             items = [
@@ -62,7 +62,7 @@ export function addObjects(room, model, floorPrefix, roomObjects) {
             floorPrefix + room.value,
             GROUP_PREFIX + object.value
         ],
-        tags: getTags(object),
+        tags: getTags(model, object),
         entryType: 'object'
     }));
 }
@@ -96,7 +96,7 @@ export function addObjectGroups(model) {
                 groupNames: ['Home'],
                 groupType: groupType,
                 entryType: 'objectGroup',
-                tags: getTags(object)
+                tags: getTags(model, object)
             };
 
             if (groupFuncName) {
@@ -134,8 +134,8 @@ export function getChosenObjects(model) {
         .value() || [];
 }
 
-function getTags(entry) {
-    return entry.tags || [];
+function getTags(model, entry) {
+    return model.itemsTags  ? entry.tags || [] : [];
 }
 
 export function getItems(model) {
@@ -145,7 +145,7 @@ export function getItems(model) {
         label: model.homeName,
         category: model.itemsIcons ? 'house' : '',
         entryType: 'home',
-        tags: ['Building']
+        tags: model.itemsTags ? ['Building'] : []
     }];
 
     for (var i = 0; i < model.floorsCount; i++) {
