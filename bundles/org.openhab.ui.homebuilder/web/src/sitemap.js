@@ -8,7 +8,7 @@ export let sitemapName = '';
 function getFloorItem(floor, model) {
     let floorFrame = 'Frame ';
 
-    if (model.floorsCount > 1) {
+    if (model.floors.length > 1) {
         let icon = model.itemsIcons && floor.icon ? '" icon="' + floor.icon : '';
         floorFrame += 'label="' + (floor.name || floor.value) + icon + '" ';
     }
@@ -29,11 +29,10 @@ function getRoomGroups(floor, model, floorPrefix) {
 function addFloorFrames(model) {
     let lines = [];
 
-    for (let i = 0; i < model.floorsCount; i++) {
-        let floor = floors[i];
+    model.floors.forEach((floor) => {
         let floorPrefix = '';
 
-        if (model.floorsCount > 1) {
+        if (model.floors.length > 1) {
             floorPrefix = floor.abbr + '_';
         }
 
@@ -44,10 +43,8 @@ function addFloorFrames(model) {
             s.pad(' ', 4) + '}'
         ];
 
-        if (i < model.floorsCount) {
-            lines.push('');
-        }
-    }
+        lines.push('');
+    });
 
     return lines;
 }

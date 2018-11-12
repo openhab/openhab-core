@@ -21,7 +21,7 @@ export function addRooms(floor, model) {
     if (floor && floor.value && !_.isUndefined(model[floor.value])) {
         model[floor.value].forEach((room) => {
             let roomObjects = floor.value + '_' + room.value + OBJECTS_SUFFIX;
-            let floorPrefix = model.floorsCount > 1 ? floor.abbr + '_' : '';
+            let floorPrefix = model.floors.length > 1 ? floor.abbr + '_' : '';
 
             items.push({
                 type: 'Group',
@@ -30,7 +30,7 @@ export function addRooms(floor, model) {
                 category: model.itemsIcons ? room.icon : '',
                 groupNames: _.compact([
                     'Home',
-                    model.floorsCount > 1 ? floor.abbr : ''
+                    model.floors.length > 1 ? floor.abbr : ''
                 ]),
                 entryType: 'room',
                 tags: getTags(model, room)
@@ -148,15 +148,14 @@ export function getItems(model) {
         tags: model.itemsTags ? ['Building'] : []
     }];
 
-    for (var i = 0; i < model.floorsCount; i++) {
-        var floor = floors[i];
+    model.floors.forEach((floor) => {
 
         items = [
             ...items,
             ...addFloors(floor, model),
             ...addRooms(floor, model)
         ];
-    }
+    });
 
     items = [
         ...items,

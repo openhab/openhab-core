@@ -23,11 +23,13 @@ export var languages = [
  */
 export var floors = [
     {abbr: 'C', value: 'Cellar', icon: 'cellar', tags: ['Basement']},
+    {abbr: 'OU', value: 'Outside', icon: 'garden', tags: ['Outdoor']},
     {abbr: 'GF', value: 'GroundFloor', icon: 'groundfloor', tags: ['GroundFloor']},
     {abbr: 'FF', value: 'FirstFloor', icon: 'firstfloor', tags: ['FirstFloor']},
     {abbr: 'F2', value: 'SecondFloor', icon: 'attic', tags: ['Attic']},
     {abbr: 'F3', value: 'ThirdFloor', icon: 'attic', tags: ['Attic']},
-    {abbr: 'F4', value: 'FourthFloor', icon: 'attic', tags: ['Attic']}
+    {abbr: 'F4', value: 'FourthFloor', icon: 'attic', tags: ['Attic']},
+    {abbr: 'AT', value: 'Attic', icon: 'attic', tags: ['Attic']}
 ];
 
 export var rooms = [

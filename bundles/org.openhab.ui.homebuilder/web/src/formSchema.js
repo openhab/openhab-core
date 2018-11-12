@@ -102,6 +102,38 @@ function newObjectTag(newTag, id, options, value) {
 }
 
 /**
+ * Creates a custom floor entry
+ *
+ * @param {string} newTag
+ * @param {string} id
+ * @param {Object} options
+ * @param {string} value
+ */
+function newFloorTag(newTag, id, options, value) {
+    const tag = {
+        abbr: s(newTag)
+            .trim()
+            .toUpperCase()
+            .cleanDiacritics()
+            .substr(0, 1)
+            .value(),
+        name: newTag,
+        icon: 'none',
+        custom: true,
+        value: s(newTag)
+            .trim()
+            .toLowerCase()
+            .cleanDiacritics()
+            .classify()
+            .value()
+    };
+    floors.push(tag);
+    if (value) {
+        value.push(tag);
+    }
+}
+
+/**
  * Is being executed when
  * collection of rooms in floor vueMultiSelect field
  * has changed.
@@ -160,20 +192,34 @@ export var basicFields = [
 ];
 
 export var floorsFields = [{
-    type: 'radios',
-    model: 'floorsCount',
-    label: 'Number of floors',
-    styleClasses: 'floors-number',
-    values: [1, 2, 3, 4, 5],
+    type: 'multiselect',
+    label: 'Floors',
+    styleClasses: 'rooms-list',
+    model: 'floors',
+    values: floors,
+    placeholder: 'Type to search or add floor',
+    selectOptions: {
+        multiple: true,
+        hideSelected: true,
+        closeOnSelect: false,
+        selectLabel: '',
+        trackBy: 'value',
+        label: 'name',
+        searchable: true,
+        taggable: true,
+        tagPlaceholder: 'Add this as a new floor',
+        onNewTag: newFloorTag
+    },
     onChanged: function (model, newVal, oldVal, field) {
-        if (newVal < oldVal) {
-            for (let i = newVal; i < oldVal; i++) {
-                let floor = floors[i];
-                delete model[floor.value];
-                for (let property in model) {
-                    if (model.hasOwnProperty(property) && property.startsWith(floor.value + '_')) {
-                        delete model[property];
-                    }
+        let oldList = oldVal ? _.map(oldVal, 'value') : [];
+        let newList = _.map(newVal, 'value');
+        let lastRemoved = _.first(_.difference(oldList, newList));
+
+        if (lastRemoved) {
+            delete model[lastRemoved];
+            for (let property in model) {
+                if (model.hasOwnProperty(property) && property.startsWith(lastRemoved + '_')) {
+                    delete model[property];
                 }
             }
         }

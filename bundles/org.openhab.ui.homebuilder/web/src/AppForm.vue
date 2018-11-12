@@ -52,7 +52,7 @@
                     itemsChannel: true,
                     itemsIcons: true,
                     itemsTags: true,
-                    floorsCount: 1
+                    floors: []
                 },
 
                 formOptions: {
@@ -66,14 +66,12 @@
         computed: {
             schema() {
                 let roomsFields = [];
-                for (let i = 0; i < this.model.floorsCount; i++) {
-                    let floor = floors[i];
+                this.model.floors.forEach((floor) => {
                     roomsFields.push(roomsSelect(floor.value, floor.name || floor.value));
-                }
+                });
 
                 let objectsFields = [];
-                for (let i = 0; i < this.model.floorsCount; i++) {
-                    let floor = floors[i];
+                this.model.floors.forEach((floor) => {
                     if (this.model[floor.value]) {
                         this.model[floor.value].forEach((element) => {
                             let name = (element.name || element.value)  + ' (' + floor.name + ')';
@@ -81,7 +79,7 @@
                             objectsFields.push(objectSelect(fieldName, name));
                         });
                     }
-                }
+                });
 
                 return {
                     groups: [
