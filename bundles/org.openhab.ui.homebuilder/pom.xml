@@ -75,6 +75,9 @@
             <goals>
               <goal>npm</goal>
             </goals>
+            <configuration>
+              <arguments>install --no-save</arguments>
+            </configuration>
           </execution>
 
           <execution>
