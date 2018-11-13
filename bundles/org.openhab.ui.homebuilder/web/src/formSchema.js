@@ -1,25 +1,25 @@
 import * as _ from 'lodash'
 import * as s from 'underscore.string'
-import { validators } from 'vue-form-generator'
-import { languages, floors, rooms, objects, OBJECTS_SUFFIX } from './definitions'
+import {validators} from 'vue-form-generator'
+import {floors, languages, objects, OBJECTS_SUFFIX, rooms} from './definitions'
 
 /**
  * Invoked when language select has changed its value.
- * 
+ *
  * @param {Object} model
  * @param {Object} newVal
  */
 function languageChanged(model, newVal) {
-    this.$parent.$parent.fetchTranslations(newVal);
+    this.$parent.$parent.$parent.fetchTranslations(newVal);
 }
 
 /**
  * Creates a custom room entry
- * 
- * @param {string} newTag 
- * @param {string} id 
- * @param {Object} options 
- * @param {string} value 
+ *
+ * @param {string} newTag
+ * @param {string} id
+ * @param {Object} options
+ * @param {string} value
  */
 function newRoomTag(newTag, id, options, value) {
     const tag = {
@@ -32,15 +32,17 @@ function newRoomTag(newTag, id, options, value) {
             .cleanDiacritics()
             .classify()
             .value()
-    }
+    };
     rooms.push(tag);
-    value.push(tag);
-};
+    if (value) {
+        value.push(tag);
+    }
+}
 
 /**
  * Returns a group function for a given
  * Item's type
- * @param {*} type 
+ * @param {*} type
  */
 function getGroupFunc(type) {
     let func = '';
@@ -67,11 +69,11 @@ function getGroupFunc(type) {
 
 /**
  * Creates a custom object entry
- * 
- * @param {string} newTag 
- * @param {string} id 
- * @param {Object} options 
- * @param {string} value 
+ *
+ * @param {string} newTag
+ * @param {string} id
+ * @param {Object} options
+ * @param {string} value
  */
 function newObjectTag(newTag, id, options, value) {
     let split = newTag.split(':');
@@ -91,65 +93,71 @@ function newObjectTag(newTag, id, options, value) {
             .cleanDiacritics()
             .classify()
             .value()
-    }
+    };
 
     objects.push(tag);
-    value.push(tag);
-};
+    if (value) {
+        value.push(tag);
+    }
+}
 
 /**
- * Is being executed when 
- * collection of rooms in floor multiselect field
+ * Creates a custom floor entry
+ *
+ * @param {string} newTag
+ * @param {string} id
+ * @param {Object} options
+ * @param {string} value
+ */
+function newFloorTag(newTag, id, options, value) {
+    const tag = {
+        abbr: s(newTag)
+            .trim()
+            .toUpperCase()
+            .cleanDiacritics()
+            .substr(0, 1)
+            .value(),
+        name: newTag,
+        icon: 'none',
+        custom: true,
+        value: s(newTag)
+            .trim()
+            .toLowerCase()
+            .cleanDiacritics()
+            .classify()
+            .value()
+    };
+    floors.push(tag);
+    if (value) {
+        value.push(tag);
+    }
+}
+
+/**
+ * Is being executed when
+ * collection of rooms in floor vueMultiSelect field
  * has changed.
- * 
+ *
  * If there's a new `room` in collection,
  * a new dynamic field is added to the floor object, e.g.
  * `"GroundFloor": [ { name: 'Bedroom', value: 'Bedroom', icon: 'bed' }]`
- * 
+ *
  * If an entry was removed from the collection,
  * a dynamic field is removed accordingly.
- * 
- * @param {Object} model 
+ *
+ * @param {Object} model
  * @param {Array} newVal
- * @param {Array} oldVal 
- * @param {Object} field 
+ * @param {Array} oldVal
+ * @param {Object} field
  */
 function roomsChanged(model, newVal, oldVal, field) {
-    let objectsFields = _.find(this.$options.parent.groups, { legend: 'Objects' }).fields;
-    let floor = field.model;
     let oldList = oldVal ? _.map(oldVal, 'value') : [];
     let newList = _.map(newVal, 'value');
     let lastRemoved = _.first(_.difference(oldList, newList));
-    let lastItem = _.last(newList);
-    let roomName = '';
-
-    if (lastItem && !lastRemoved) {
-        let room = _.find(rooms, { value: lastItem });
-        roomName = floor + '_' + room.value + OBJECTS_SUFFIX;
-        objectsFields.push({
-            type: 'multiselect',
-            label: (room.name || room.value) + ' (' + _.find(floors, { value: floor }).name + ')',
-            styleClasses: 'rooms-list',
-            model: roomName,
-            placeholder: 'Type to search object',
-            selectOptions: {
-                multiple: true,
-                hideSelected: true,
-                closeOnSelect: false,
-                selectLabel: '',
-                trackBy: 'value',
-                label: 'name',
-                searchable: true,
-                taggable: true,
-                onNewTag: newObjectTag
-            },
-            values: objects
-        });
-    }
+    let floor = field.model;
 
     if (lastRemoved) {
-        roomName = floor + '_' + lastRemoved + OBJECTS_SUFFIX;
-        _.remove(objectsFields, { model: roomName });
+        let roomName = floor + '_' + lastRemoved + OBJECTS_SUFFIX;
         delete model[roomName];
     }
 }
@@ -158,11 +166,12 @@ function roomsChanged(model, newVal, oldVal, field) {
  * Schema describing the basic form
  * generated by vue-form-generator
  */
-export var basicFields = [{
+export var basicFields = [
+    {
         type: 'select',
         model: 'language',
         label: 'Please select your language',
-        values: function() {
+        values: function () {
             return languages;
         },
         selectOptions: {
@@ -170,7 +179,6 @@ export var basicFields = [{
         },
         onChanged: languageChanged
     },
-
     {
         type: 'input',
         inputType: 'text',
@@ -184,36 +192,42 @@ export var basicFields = [{
 ];
 
 export var floorsFields = [{
-    type: 'radios',
-    model: 'floorsCount',
-    label: 'Number of floors',
-    styleClasses: 'floors-number',
-    values: [1, 2, 3, 4, 5],
-    onChanged: function(model, newVal, oldVal, field) {
-        let roomsFields = _.find(this.$options.parent.groups, { legend: 'Rooms' }).fields;
-        if (newVal <= 5 && newVal > oldVal) {
-            for (var i = oldVal; i < newVal; i++) {
-                let floor = floors[i];
-                let floorName = floor.value;
-                let fieldExists = _.find(roomsFields, (field) => field.model === floorName);
+    type: 'multiselect',
+    label: 'Floors',
+    styleClasses: 'rooms-list',
+    model: 'floors',
+    values: floors,
+    placeholder: 'Type to search or add floor',
+    selectOptions: {
+        multiple: true,
+        hideSelected: true,
+        closeOnSelect: false,
+        selectLabel: '',
+        trackBy: 'value',
+        label: 'name',
+        searchable: true,
+        taggable: true,
+        tagPlaceholder: 'Add this as a new floor',
+        onNewTag: newFloorTag
+    },
+    onChanged: function (model, newVal, oldVal, field) {
+        let oldList = oldVal ? _.map(oldVal, 'value') : [];
+        let newList = _.map(newVal, 'value');
+        let lastRemoved = _.first(_.difference(oldList, newList));
 
-                if (!fieldExists) {
-                    roomsFields.push(roomsSelect(floorName, floor.name || floor.value));
+        if (lastRemoved) {
+            delete model[lastRemoved];
+            for (let property in model) {
+                if (model.hasOwnProperty(property) && property.startsWith(lastRemoved + '_')) {
+                    delete model[property];
                 }
-            }
-        }
-
-        if (newVal < oldVal) {
-            for (var j = oldVal; j > newVal; j--) {
-                let floorName = floors[j - 1].value;
-                _.remove(roomsFields, { model: floorName });
-                delete model[floorName];
             }
         }
     }
 }];
 
-export var settingsFields = [{
+export var settingsFields = [
+    {
         type: 'checklist',
         model: 'filesGenerated',
         label: 'What would you like to generate?',
@@ -221,9 +235,9 @@ export var settingsFields = [{
         listBox: true,
         multiSelect: true,
         values: [
-            { name: 'Items', value: 'items' },
-            { name: 'Sitemap', value: 'sitemap' },
-            { name: 'Dashboard', value: 'habpanel' }
+            {name: 'Items', value: 'items'},
+            {name: 'Sitemap', value: 'sitemap'},
+            {name: 'Dashboard', value: 'habpanel'}
         ]
     },
 
@@ -235,8 +249,8 @@ export var settingsFields = [{
             return model && model.filesGenerated.includes('items');
         },
         values: [
-            { name: 'Textual Configuration Files', value: 'text' },
-            { name: 'Internal Database', value: 'rest' }
+            {name: 'Textual Configuration Files', value: 'text'},
+            {name: 'Internal Database', value: 'rest'}
         ]
     },
 
@@ -275,7 +289,7 @@ export var settingsFields = [{
         type: 'switch',
         label: 'Include tags',
         model: 'itemsTags',
-        default: false,
+        default: true,
         textOn: 'Yes',
         textOff: 'No',
         valueOn: true,
@@ -287,13 +301,12 @@ export var settingsFields = [{
 ];
 
 /**
- * Generates a multiselect input with
- * rooms for specific floor (model)
- * 
- * @param {string} model 
- * @param {string} label 
+ * Generates a vueMultiSelect input with rooms for specific floor (model)
+ *
+ * @param {string} model
+ * @param {string} label
  */
-function roomsSelect(model, label) {
+export function roomsSelect(model, label) {
     return {
         type: 'multiselect',
         label: label,
@@ -318,13 +331,30 @@ function roomsSelect(model, label) {
 }
 
 /**
- * Field group schema for the rooms
+ * Generates a vueMultiSelect input with objects for specific rooms (model)
+ *
+ * @param {string} model
+ * @param {string} label
  */
-export var roomsFields = [
-    roomsSelect('GroundFloor', 'Ground Floor')
-];
-
-/**
- * Field group schema for the objects
- */
-export var objectsFields = [];
+export function objectSelect(model, label) {
+    return {
+        type: 'multiselect',
+        label: label,
+        styleClasses: 'rooms-list',
+        model: model,
+        values: objects,
+        placeholder: 'Type to search or add object',
+        selectOptions: {
+            multiple: true,
+            hideSelected: true,
+            closeOnSelect: false,
+            selectLabel: '',
+            trackBy: 'value',
+            label: 'name',
+            searchable: true,
+            taggable: true,
+            tagPlaceholder: 'Add this as a new object',
+            onNewTag: newObjectTag
+        }
+    };
+}

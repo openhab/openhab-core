@@ -1,22 +1,18 @@
 import * as _ from 'lodash'
-import { floors, objects, OBJECTS_SUFFIX } from './definitions'
+import {floors, objects, OBJECTS_SUFFIX} from './definitions'
 
 export const GROUP_PREFIX = 'g';
 
 export function addFloors(floor, model) {
-    let items = [];
-    if (model.floorsCount > 1) {
-        items.push({
-            type: 'Group',
-            name: floor.abbr,
-            label: floor.name || floor.value,
-            category: model.itemsIcons ? floor.icon : '',
-            groupNames: ['Home'],
-            entryType: 'floor'
-        });
-    }
-
-    return items;
+    return [{
+        type: 'Group',
+        name: floor.abbr,
+        label: floor.name || floor.value,
+        category: model.itemsIcons ? floor.icon : '',
+        groupNames: ['Home'],
+        entryType: 'floor',
+        tags: getTags(model, floor)
+    }];
 }
 
 export function addRooms(floor, model) {
@@ -25,7 +21,7 @@ export function addRooms(floor, model) {
     if (floor && floor.value && !_.isUndefined(model[floor.value])) {
         model[floor.value].forEach((room) => {
             let roomObjects = floor.value + '_' + room.value + OBJECTS_SUFFIX;
-            let floorPrefix = model.floorsCount > 1 ? floor.abbr + '_' : '';
+            let floorPrefix = model.floors.length > 1 ? floor.abbr + '_' : '';
 
             items.push({
                 type: 'Group',
@@ -34,9 +30,10 @@ export function addRooms(floor, model) {
                 category: model.itemsIcons ? room.icon : '',
                 groupNames: _.compact([
                     'Home',
-                    model.floorsCount > 1 ? floor.abbr : ''
+                    model.floors.length > 1 ? floor.abbr : ''
                 ]),
-                entryType: 'room'
+                entryType: 'room',
+                tags: getTags(model, room)
             });
 
             items = [
@@ -65,23 +62,23 @@ export function addObjects(room, model, floorPrefix, roomObjects) {
             floorPrefix + room.value,
             GROUP_PREFIX + object.value
         ],
-        tags: addTags(object, model),
+        tags: getTags(model, object),
         entryType: 'object'
     }));
 }
 
 /**
  * Generates a list of object groups
- * 
- * @param {Object} model 
+ *
+ * @param {Object} model
  * @return {string}
  */
 export function addObjectGroups(model) {
     let items = [];
     let chosenObjects = getChosenObjects(model);
 
-    chosenObjects.forEach(function(dev) {
-        let object = _.find(objects, { value: dev });
+    chosenObjects.forEach(function (dev) {
+        let object = _.find(objects, {value: dev});
 
         if (object) {
             let type = object.type.split(':');
@@ -98,7 +95,8 @@ export function addObjectGroups(model) {
                 category: model.itemsIcons ? object.icon : '',
                 groupNames: ['Home'],
                 groupType: groupType,
-                entryType: 'objectGroup'
+                entryType: 'objectGroup',
+                tags: getTags(model, object)
             };
 
             if (groupFuncName) {
@@ -123,8 +121,8 @@ export function addObjectGroups(model) {
 /**
  * Gets list of objects chosen
  * from collection
- * 
- * @param {*} model 
+ *
+ * @param {*} model
  * @return {Array}
  */
 export function getChosenObjects(model) {
@@ -136,41 +134,8 @@ export function getChosenObjects(model) {
         .value() || [];
 }
 
-/**
- * For a given object it creates a HomeKit-compatible
- * set of tags.
- * 
- * @param {Object} object 
- * @param {Object} model 
- * @return {Array}
- */
-function addTags(object, model) {
-    var type = _.first(object.type.split(':'));
-    var tags = [];
-
-    switch (type) {
-        case 'Switch':
-        case 'Dimmer':
-        case 'Color':
-            tags.push('Switchable');
-            break;
-        default:
-            break;
-    }
-
-    switch (object.value) {
-        case 'Lamp':
-        case 'Light':
-            tags = ['Lighting'];
-            break;
-        case 'Motion':
-            tags = [];
-            break;
-        default:
-            break;
-    }
-
-    return model.itemsTags ? tags : [];
+function getTags(model, entry) {
+    return model.itemsTags  ? entry.tags || [] : [];
 }
 
 export function getItems(model) {
@@ -179,23 +144,23 @@ export function getItems(model) {
         name: 'Home',
         label: model.homeName,
         category: model.itemsIcons ? 'house' : '',
-        entryType: 'home'
+        entryType: 'home',
+        tags: model.itemsTags ? ['Building'] : []
     }];
 
-    for (var i = 0; i < model.floorsCount; i++) {
-        var floor = floors[i];
+    model.floors.forEach((floor) => {
 
         items = [
             ...items,
             ...addFloors(floor, model),
             ...addRooms(floor, model)
         ];
-    }
+    });
 
     items = [
         ...items,
         ...addObjectGroups(model)
-    ]
+    ];
 
     return items;
 }
@@ -204,8 +169,8 @@ export function getItems(model) {
  * Returns array of Items
  * without `entryType` which is not a valid parameter
  * for the request
- * 
- * @param {*} model 
+ *
+ * @param {*} model
  */
 export function generateItemsJson(model) {
     let items = getItems(model);

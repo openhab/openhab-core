@@ -62,10 +62,8 @@ function getWidgetType(type) {
 function makeWidgets(object, model) {
     let widgets = [];
 
-    for (var i = 0; i < model.floorsCount; i++) {
-        var floor = floors[i];
-
-        if (floor && floor.value && !_.isUndefined(model[floor.value])) {
+    model.floors.forEach((floor) => {
+        if (!_.isUndefined(model[floor.value])) {
             model[floor.value].forEach(function(room) {
                 let roomObjects = floor.value + '_' + room.value + OBJECTS_SUFFIX;
                 let objectCollection = model[roomObjects] || [];
@@ -73,7 +71,7 @@ function makeWidgets(object, model) {
 
                 if (obj) {
                     widgets.push(makeWidget({
-                        item: (model.floorsCount > 1 ? floor.abbr + '_' : '') + room.value + '_' + obj.value,
+                        item: (model.floors.length > 1 ? floor.abbr + '_' : '') + room.value + '_' + obj.value,
                         name: room.name,
                         type: getWidgetType(_.first(object.type.split(':'))),
                         row: _.chunk(widgets, 6).length - 1,
@@ -83,10 +81,11 @@ function makeWidgets(object, model) {
                 }
             });
         }
-    }
+
+    });
 
     return widgets;
-};
+}
 
 /**
  * Generates a full HABPanel dashboard set

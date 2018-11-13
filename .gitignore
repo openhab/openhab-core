@@ -4,5 +4,8 @@
 /*features*/*/src/main/history/
 maven-metadata-local.xml
 dependency-reduced-pom.xml
-**/node_modules/
 npm-debug.log
+
+bundles/org.openhab.ui.homebuilder/web/dist
+bundles/org.openhab.ui.homebuilder/npm_cache
+bundles/org.openhab.ui.homebuilder/web/node
