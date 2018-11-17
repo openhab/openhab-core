@@ -66,6 +66,7 @@
     <repo.version>2.4.x</repo.version>
     <karaf.version>4.2.1</karaf.version>
     <jetty.version>9.4.11.v20180605</jetty.version>
+    <jna.version>4.5.2</jna.version>
     <jackson.version>1.9.13</jackson.version>
     <sat.version>0.5.0</sat.version>
     <nrjavaserial.version>3.14.0.OH</nrjavaserial.version>

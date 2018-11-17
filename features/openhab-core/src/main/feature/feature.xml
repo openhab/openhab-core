@@ -54,6 +54,11 @@
         <bundle start-level="20">mvn:org.openhab.core/org.openhab.io.jetty.certificate/${project.version}</bundle>
     </feature>
 
+    <feature name="openhab-runtime-jna" description="Java Native Access (JNA)" version="${project.version}">
+        <bundle>mvn:net.java.dev.jna/jna/${jna.version}</bundle>
+        <bundle>mvn:net.java.dev.jna/jna-platform/${jna.version}</bundle>                        
+    </feature>
+
     <feature name="openhab-runtime-compat1x" description="Compatibility layer for openHAB 1 add-ons" version="${project.version}">
         <feature>openhab-runtime-base</feature>
         <feature>esh-model-item</feature>
