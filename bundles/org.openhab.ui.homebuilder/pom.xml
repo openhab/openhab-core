@@ -47,6 +47,7 @@
             <npm_config_cache>${project.basedir}/npm_cache</npm_config_cache>
             <npm_config_tmp>${project.basedir}/npm_tmp</npm_config_tmp>
           </environmentVariables>
+          <installDirectory>target</installDirectory>
           <workingDirectory>web</workingDirectory>
         </configuration>
 
