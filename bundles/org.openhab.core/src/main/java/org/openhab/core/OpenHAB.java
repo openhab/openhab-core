@@ -38,9 +38,12 @@ public class OpenHAB {
      */
     static public String getVersion() {
         String versionString = FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString();
-        // if the version string contains a qualifier, remove it!
+        // if the version string contains a "snapshot" qualifier, remove it!
         if (StringUtils.countMatches(versionString, ".") == 3) {
-            versionString = StringUtils.substringBeforeLast(versionString, ".");
+            String qualifier = StringUtils.substringAfterLast(versionString, ".");
+            if (StringUtils.isNumeric(qualifier) || qualifier.equals("qualifier")) {
+                versionString = StringUtils.substringBeforeLast(versionString, ".");
+            }
         }
         return versionString;
     }
