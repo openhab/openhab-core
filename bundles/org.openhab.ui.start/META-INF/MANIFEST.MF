@@ -5,7 +5,7 @@ Bundle-Name: openHAB Start UI
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.ui.start
 Bundle-Vendor: openHAB
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.4.0.M7
 Import-Package: 
  javax.servlet,
  javax.servlet.http,
