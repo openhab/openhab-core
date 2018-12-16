@@ -9,7 +9,7 @@ Bundle-Name: openHAB Sound Support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.io.sound
 Bundle-Vendor: openHAB
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.4.0
 Fragment-Host: org.eclipse.smarthome.io.javasound
 Import-Package: 
  org.apache.commons.collections,

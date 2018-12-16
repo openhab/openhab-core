@@ -11,7 +11,7 @@ Bundle-Name: openHAB 1.x Compatibility Layer
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.core.compat1x
 Bundle-Vendor: openHAB
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.4.0
 Export-Package: 
  org.codehaus.jackson,
  org.codehaus.jackson.annotate,

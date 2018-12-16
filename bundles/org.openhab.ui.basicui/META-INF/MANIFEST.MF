@@ -9,7 +9,7 @@ Bundle-Name: openHAB Basic UI Fragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.ui.basicui
 Bundle-Vendor: openHAB
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.4.0
 Fragment-Host: org.eclipse.smarthome.ui.basic
 Import-Package: 
  org.eclipse.jdt.annotation;resolution:=optional,

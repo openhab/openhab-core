@@ -3,7 +3,7 @@ Automatic-Module-Name: org.openhab.ui.homebuilder
 Bundle-ManifestVersion: 2
 Bundle-Name: HomeBuilder User Interface
 Bundle-SymbolicName: org.openhab.ui.homebuilder
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.4.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Import-Package: com.google.gson,

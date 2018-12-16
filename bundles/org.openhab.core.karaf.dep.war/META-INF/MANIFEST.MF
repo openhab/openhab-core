@@ -4,7 +4,7 @@ Bundle-Name: openHAB Karaf Integration Dependency WAR
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.core.karaf.dep.war;singleton:=true
 Bundle-Vendor: openHAB
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.4.0
 Provide-Capability: 
  osgi.service;objectClass:List<String>="org.osgi.service.cm.ConfigurationAdmin",
  osgi.service;objectClass:List<String>="org.osgi.service.url.URLStreamHandlerService";url.handler.protocol=mvn
