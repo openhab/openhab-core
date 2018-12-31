@@ -421,15 +421,31 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private synchronized void installFeatures(FeaturesService featuresService, Set<String> addons) {
         try {
+            logger.debug("Installing '{}'", StringUtils.join(addons, ", "));
             featuresService.installFeatures(addons,
                     EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoFailOnFeatureNotFound));
-            logger.debug("Installed '{}'", StringUtils.join(addons, ", "));
             try {
                 Feature[] features = featuresService.listInstalledFeatures();
+                Set<String> installed = new HashSet<>();
+                Set<String> failed = new HashSet<>();
+
                 for (String addon : addons) {
                     if (isInstalled(features, addon)) {
-                        postInstalledEvent(addon);
+                        installed.add(addon);
+                    } else {
+                        failed.add(addon);
                     }
+                }
+
+                if (installed.size() > 0) {
+                    logger.debug("Installed '{}'", StringUtils.join(installed, ", "));
+                }
+                if (failed.size() > 0) {
+                    logger.error("Failed installing '{}'", StringUtils.join(failed, ", "));
+                }
+
+                for (String addon : installed) {
+                    postInstalledEvent(addon);
                 }
             } catch (Exception e) {
                 logger.error("Failed retrieving features: {}", e.getMessage());
