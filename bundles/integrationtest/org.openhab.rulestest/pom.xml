@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>org.openhab.rulestest</artifactId>
-	<packaging>eclipse-test-plugin</packaging>
+	<packaging>eclipse-plugin</packaging>
 	<name>RulesTest bundle</name>
 
 	<dependencies>

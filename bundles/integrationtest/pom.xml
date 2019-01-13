@@ -17,5 +17,6 @@
 
   <modules>
     <module>org.openhab.rulestest</module>
+    <module>org.openhab.rulestest.test</module>
   </modules>
 </project>
