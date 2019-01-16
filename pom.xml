@@ -71,6 +71,7 @@
           <version>${sat.version}</version>
           <configuration>
             <checkstyleProperties>${basedirRoot}/tools/checkstyle.properties</checkstyleProperties>
+            <checkstyleFilter>${basedirRoot}/tools/suppressions.xml</checkstyleFilter>
           </configuration>
         </plugin>
       </plugins>
