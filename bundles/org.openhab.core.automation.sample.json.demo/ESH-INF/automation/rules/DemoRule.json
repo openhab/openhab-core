@@ -1,0 +1,29 @@
+[  
+   {  
+      "uid":"JsonDemoRule",
+      "name":"DemoRule",
+      "triggers":[  
+         {  
+            "id":"RuleTrigger",
+            "label":"Item State Change Trigger",
+            "description":"This triggers a rule if an items state changed",
+            "type":"ItemStateChangeTrigger",
+            "configuration":{  
+               "itemName":"DemoSwitch"
+            }
+         }
+      ],
+      "actions":[  
+         {  
+            "id":"RuleAction",
+            "label":"Post command to an item",
+            "description":"Posts commands on items",
+            "type":"ItemPostCommandAction",
+            "configuration":{  
+               "itemName":"DemoDimmer",
+               "command":"ON"
+            }
+         }
+      ]
+   }
+]

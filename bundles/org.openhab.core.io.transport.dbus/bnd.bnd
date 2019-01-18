@@ -1,0 +1,8 @@
+Bundle-SymbolicName: ${project.artifactId}
+Export-Package: \
+  cx.ath.matthew.unix.*;version="0.5",\
+  org.freedesktop.*;version="2.7"
+Import-Package: \
+  cx.ath.matthew.debug.*;resolution:=optional,\
+  cx.ath.matthew.utils.*;resolution:=optional,\
+  *

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="hue"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description-1.0.0.xsd">
+
+	<!-- HUE Bridge -->
+	<bridge-type id="bridge">
+		<label>HUE Bridge</label>
+		<description>The hue Bridge represents the Philips hue bridge.</description>
+
+		<config-description>
+			<parameter-group name="group1">
+				<label>Group Label 1</label>
+				<description>Group description 1</description>
+				<context>Group1-context</context>
+				<advanced>false</advanced>
+			</parameter-group>
+			<parameter-group name="group2">
+				<label>Group Label 2</label>
+				<description>Group description 2</description>
+				<context>Group2-context</context>
+				<advanced>true</advanced>
+			</parameter-group>
+			<parameter name="ip" type="text" groupName="group1">
+				<context>network-address</context>
+				<label>Network Address</label>
+				<description>Network address of the hue bridge.</description>
+				<required>true</required>
+			</parameter>
+			<parameter name="username" type="text" groupName="group1">
+				<context>password</context>
+				<label>Username</label>
+				<description>Name of a registered hue bridge user, that allows to
+					access the API.
+				</description>
+				<advanced>true</advanced>
+			</parameter>
+		</config-description>
+	</bridge-type>
+
+	<!-- HUE Lamp -->
+	<thing-type id="lamp">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge" />
+		</supported-bridge-type-refs>
+
+		<label>HUE Lamp</label>
+		<description>My own great HUE Lamp.</description>
+
+		<channels>
+			<channel id="color" typeId="color" />
+			<channel id="color_temperature" typeId="color_temperature" />
+		</channels>
+	</thing-type>
+	
+	
+	<!-- Dummy thing type -->
+	<thing-type id="dummy">
+		<label>Dummy thing</label>
+		
+        <channels>
+           <channel id="color" typeId="color" />
+        </channels>
+        
+		<config-description>
+			
+			<parameter name="unit" type="text">
+				<label>Unit</label>
+				<description>Specifies the unit of the data. Valid values are "us" or "metric".</description>
+				<default>metric</default>
+				
+				<options>
+					<option value="us">US</option>
+					<option value="metric">Metric</option>
+				</options>
+			</parameter>
+			
+			<parameter name="color-alarming-light" type="text" multiple="true">
+		        <context>item</context>
+		        <filter>
+		            <criteria name="tags">alarm, light</criteria>
+		            <criteria name="type">color</criteria>
+		            <criteria name="binding-id">hue</criteria>
+		        </filter>
+			</parameter>
+			
+		</config-description>
+		
+	</thing-type>
+
+	<!-- HUE Lamp Color Channel -->
+	<channel-type id="color">
+
+		<item-type>ColorItem</item-type>
+		<label>HUE Lamp Color</label>
+		<description>The color channel allows to control the color of the hue
+			lamp. It is also possible to dim values and switch the lamp on and
+			off.
+		</description>
+
+		<config-description>
+			<parameter name="lastDimValue" type="boolean" />
+		</config-description>
+	</channel-type>
+
+	<!-- HUE Lamp Color Temperature Channel -->
+	<channel-type id="color_temperature">
+		<item-type>DimmerItem</item-type>
+		<label>HUE Lamp Color Temperature</label>
+		<description>The color temperature channel allows to set the color
+			temperature from 0 (cold) to 100 (warm).</description>
+	</channel-type>
+
+</thing:thing-descriptions>

@@ -1,0 +1,2 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Activator: org.eclipse.smarthome.automation.internal.sample.json.internal.handler.Activator

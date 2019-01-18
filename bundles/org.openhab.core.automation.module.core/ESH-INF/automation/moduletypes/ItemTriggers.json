@@ -1,0 +1,236 @@
+{
+   "triggers":[
+      {
+         "uid":"core.ItemCommandTrigger",
+         "label":"an item receives a command",
+         "description":"This triggers the rule if an item receives a command.",
+         "configDescriptions":[
+            {
+               "name":"itemName",
+               "type":"TEXT",
+               "context":"item",
+               "label":"Item",
+               "description":"the name of the item",
+               "required":true
+            },
+            {
+               "name":"command",
+               "type":"TEXT",
+               "label":"Command",
+               "description":"the received command",
+               "required":false,
+               "limitToOptions":false,
+               "options":[
+               {
+                  "label": "ON",
+                  "value": "ON"
+               },
+               {
+                  "label": "OFF",
+                  "value": "OFF"
+               },
+               {
+                  "label": "OPEN",
+                  "value": "OPEN"
+               },
+               {
+                  "label": "CLOSED",
+                  "value": "CLOSED"
+               },
+               {
+                  "label": "UP",
+                  "value": "UP"
+               },
+               {
+                  "label": "DOWN",
+                  "value": "DOWN"
+               }
+               ]
+           }
+         ],
+         "outputs":[
+           {
+               "name":"command",
+               "type":"command",
+               "description":"the received command",
+               "label":"Command"
+           },
+           {
+               "name":"event",
+               "type":"org.eclipse.smarthome.core.events.Event",
+               "label":"Event",
+               "description":"The events which was sent.",
+               "reference":"event"
+            }
+         ]
+      },
+      {
+         "uid":"core.ItemStateUpdateTrigger",
+         "label":"an item state is updated",
+         "description":"This triggers the rule if an item state is updated (even if it does not change).",
+         "configDescriptions":[
+            {
+               "name":"itemName",
+               "type":"TEXT",
+               "context":"item",
+               "label":"Item",
+               "description":"the name of the item",
+               "required":true
+            },
+            {
+               "name":"state",
+               "type":"TEXT",
+               "label":"State",
+               "description":"the state of the item",
+               "required":false,
+               "limitToOptions":false,
+               "options":[
+               {
+                  "label": "ON",
+                  "value": "ON"
+               },
+               {
+                  "label": "OFF",
+                  "value": "OFF"
+               },
+               {
+                  "label": "OPEN",
+                  "value": "OPEN"
+               },
+               {
+                  "label": "CLOSED",
+                  "value": "CLOSED"
+               },
+               {
+                  "label": "UP",
+                  "value": "UP"
+               },
+               {
+                  "label": "DOWN",
+                  "value": "DOWN"
+               }
+               ]
+           }
+         ],
+         "outputs":[
+            {
+                "name":"state",
+                "type":"state",
+                "description":"the item state",
+                "label":"State"
+            },
+            {
+                "name":"event",
+                "type":"org.eclipse.smarthome.core.events.Event",
+                "label":"Event",
+                "description":"The events which was sent.",
+                "reference":"event"
+            }
+          ]
+      },
+      {
+         "uid":"core.ItemStateChangeTrigger",
+         "label":"an item state changes",
+         "description":"This triggers the rule if an item state has changed.",
+         "configDescriptions":[
+            {
+               "name":"itemName",
+               "type":"TEXT",
+               "context":"item",
+               "label":"Item",
+               "description":"the name of the item",
+               "required":true
+            },
+            {
+               "name":"previousState",
+               "type":"TEXT",
+               "label":"Previous State",
+               "description":"the required previous state of the item",
+               "required":false,
+               "limitToOptions":false,
+               "options":[
+               {
+                  "label": "ON",
+                  "value": "ON"
+               },
+               {
+                  "label": "OFF",
+                  "value": "OFF"
+               },
+               {
+                  "label": "OPEN",
+                  "value": "OPEN"
+               },
+               {
+                  "label": "CLOSED",
+                  "value": "CLOSED"
+               },
+               {
+                  "label": "UP",
+                  "value": "UP"
+               },
+               {
+                  "label": "DOWN",
+                  "value": "DOWN"
+               }
+               ]
+           },
+           {
+               "name":"state",
+               "type":"TEXT",
+               "label":"State",
+               "description":"the state of the item",
+               "required":false,
+               "limitToOptions":false,
+               "options":[
+               {
+                  "label": "ON",
+                  "value": "ON"
+               },
+               {
+                  "label": "OFF",
+                  "value": "OFF"
+               },
+               {
+                  "label": "OPEN",
+                  "value": "OPEN"
+               },
+               {
+                  "label": "CLOSED",
+                  "value": "CLOSED"
+               },
+               {
+                  "label": "UP",
+                  "value": "UP"
+               },
+               {
+                  "label": "DOWN",
+                  "value": "DOWN"
+               }
+               ]
+           }
+         ],
+         "outputs":[
+            {
+               "name":"newState",
+               "type":"state",
+               "description":"the new item state",
+               "label":"New State"
+            },
+            {
+               "name":"oldState",
+               "type":"state",
+               "description":"the old item state",
+               "label":"Old State"
+            },
+            {
+               "name":"event",
+               "type":"org.eclipse.smarthome.core.events.Event",
+               "label":"Event",
+               "description":"The events which was sent.",
+               "reference":"event"
+            }
+         ]
+      }
+   ]
+}

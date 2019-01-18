@@ -1,0 +1,37 @@
+{
+	"actions": [
+		{
+			"uid": "core.RuleEnablementAction",
+			"label": "enables or disable rules",
+			"description": "Enables or disables a rule or a group of rules specified by their UIDs.",
+			"configDescriptions": [
+				{
+					"name": "enable",
+					"type": "BOOLEAN",
+					"label": "Enable rules",
+					"description": "'true' enables all specified rules, 'false' disables them.",
+					"required": true,
+					"options": [
+						{
+							"label": "Enable",
+							"value": "true"
+						},
+						{
+							"label": "Disable",
+							"value": "false"
+						}
+					]
+				},
+				{
+					"name": "ruleUIDs",
+					"type": "TEXT",
+					"label": "Rules",
+					"description": "Specifies the rules that should be enabled or disabled.",
+					"required": true,
+					"multiple": true,
+					"context":"rule"
+				}
+			]
+		}
+	]
+}

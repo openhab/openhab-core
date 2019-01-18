@@ -1,0 +1,7 @@
+Bundle-SymbolicName: ${project.artifactId}
+Require-Bundle: org.openhab.core.model.sitemap
+Import-Package: \
+ org.eclipse.jdt.annotation;resolution:=optional,\
+ org.eclipse.smarthome.model.core,\
+ org.osgi.framework,\
+ org.slf4j

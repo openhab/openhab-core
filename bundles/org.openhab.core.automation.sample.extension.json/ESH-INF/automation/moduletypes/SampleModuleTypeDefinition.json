@@ -1,0 +1,124 @@
+{  
+   "triggers":[  
+      {  
+         "uid":"SampleTrigger",
+         "label":"SampleTrigger label",
+         "description":"Sample Trigger description.",
+         "outputs":[  
+            {  
+               "name":"triggerOutput",
+               "type":"java.lang.String",
+               "label":"TriggerOutput label",
+               "description":"Text from user input or default message.",
+               "reference":"consoleInput",
+               "defaultValue":"dtag"
+            }
+         ]
+      },
+      {  
+         "uid":"CompositeSampleTrigger",
+         "label":"CompositeTrigger label",
+         "description":"Composite Trigger description.",
+         "outputs":[  
+            {  
+               "name":"compositeTriggerOutput",
+               "type":"java.lang.String",
+               "label":"compositeTriggerOutput label",
+               "description":"Text from user input or default message.",
+               "reference":"compositeChildTrigger1.triggerOutput"
+            }
+         ],
+         "children":[  
+            {  
+               "id":"compositeChildTrigger1",
+               "type":"SampleTrigger"
+            }
+         ]
+      }
+   ],
+   "conditions":[  
+      {  
+         "uid":"SampleCondition",
+         "label":"SampleCondition label",
+         "description":"Sample Condition description",
+         "configDescriptions":[  
+            {  
+               "name":"operator",
+               "type":"TEXT",
+               "description":"Valid operators are =,>,<,!=",
+               "required":true
+            },
+            {  
+               "name":"constraint",
+               "type":"TEXT",
+               "description":"Right operand which is compared with the input.",
+               "required":true
+            }
+         ],
+         "inputs":[  
+            {  
+               "name":"conditionInput",
+               "type":"java.lang.String",
+               "label":"ConditionInput label",
+               "description":"Left operand which will be evaluated.",
+               "required":true
+            }
+         ]
+      }
+   ],
+   "actions":[  
+      {  
+         "uid":"SampleAction",
+         "label":"SampleAction label",
+         "description":"Sample Action description.",
+         "inputs":[  
+            {  
+               "name":"message",
+               "type":"java.lang.String",
+               "label":"message label",
+               "description":"Defines the message description."
+            }
+         ]
+      },
+      {  
+         "uid":"CompositeSampleAction",
+         "label":"CompositeAction label",
+         "description":"Composite Action description.",
+         "configDescriptions":[  
+            {  
+               "name":"compositeMessage",
+               "type":"TEXT",
+               "label":"custom message label",
+               "description":"Defines the custom message description.",
+               "required":false
+            }
+         ],
+         "inputs":[  
+            {  
+               "name":"compositeActionInput",
+               "type":"java.lang.String",
+               "label":"ActionInput label",
+               "description":"Text that will be printed.",
+               "defaultValue":">>> Default Composite Action Message",
+               "required":false
+            }
+         ],
+         "children":[  
+            {  
+               "id":"SampleAction2",
+               "type":"SampleAction",
+               "inputs":{
+                  "message":"${compositeMessage}"
+               }
+            },
+            {  
+               "id":"SampleAction1",
+               "type":"SampleAction",
+               "inputs":{  
+                  "message":"${compositeActionInput}"
+               }
+            }
+         ]
+      }
+   ]
+}

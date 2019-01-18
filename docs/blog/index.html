@@ -1,0 +1,41 @@
+---
+layout: blog
+---
+
+{% include base.html %}
+
+<!-- Hardware -->
+<section class="" id="blog">
+    <div class="parallax-container valign-wrapper">
+        <div class="parallax">
+            <img src="{{base}}/img/blog/blog-header.jpg" />
+        </div>
+        <div id="headline" class="center-align">
+            <h1>The Eclipse SmartHome Blog</h1>
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+	    <div class="row">
+          {% for post in site.posts %}
+	        <div class="col m12 l6">
+	            <div class="card grey darken-1">
+	                {% if post.image and post.image != '' %} 
+		            <div class="card-image">
+		              <img src="{{base}}/img/blog/{{post.image}}">
+		            </div>
+		            {% endif %}
+	                <div class="card-content white-text">
+	                  <span class="card-title">{{ post.title }}</span>
+	                  <p class="black-text"><small>{{ post.date | date: "%Y-%m-%d" }}</small></p>
+	                  {{ post.excerpt}}
+	                </div>
+	                <div class="card-action">
+	                  <a href="{{base}}{{ post.url }}">Read more</a>
+	                </div>
+	            </div>
+	        </div>
+          {% endfor %}
+	      </div>
+    </div>
+</section>

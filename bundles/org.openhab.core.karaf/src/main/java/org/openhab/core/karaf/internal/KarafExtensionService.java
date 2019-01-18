@@ -27,6 +27,8 @@ import org.apache.karaf.features.FeaturesService;
 import org.eclipse.smarthome.core.extension.Extension;
 import org.eclipse.smarthome.core.extension.ExtensionService;
 import org.eclipse.smarthome.core.extension.ExtensionType;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer
  *
  */
+@Component(name = "org.openhab.core.karafextension")
 public class KarafExtensionService implements ExtensionService {
 
     private final Logger logger = LoggerFactory.getLogger(KarafExtensionService.class);
@@ -45,6 +48,7 @@ public class KarafExtensionService implements ExtensionService {
     private FeaturesService featuresService;
     private FeatureInstaller featureInstaller;
 
+    @Reference
     protected void setFeatureInstaller(FeatureInstaller featureInstaller) {
         this.featureInstaller = featureInstaller;
     }
@@ -53,6 +57,7 @@ public class KarafExtensionService implements ExtensionService {
         this.featureInstaller = null;
     }
 
+    @Reference
     protected void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
     }

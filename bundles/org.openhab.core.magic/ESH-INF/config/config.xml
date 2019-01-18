@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
+	http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="test:magic">
+		<parameter-group name="group_normal">
+			<label>Group</label>
+			<description>A group of configuration parameters.</description>
+			<advanced>false</advanced>
+		</parameter-group>
+		<parameter-group name="group_advanced">
+			<label>Group (advanced)</label>
+			<description>A group of advanced configuration parameters.</description>
+			<advanced>true</advanced>
+		</parameter-group>
+
+		<parameter name="text" type="text" groupName="group_normal">
+			<label>Text</label>
+			<description>A grouped text parameter.</description>
+			<default>myText</default>
+		</parameter>
+		<parameter name="bool" type="boolean" groupName="group_normal">
+			<label>Switch</label>
+			<description>A grouped boolean parameter.</description>
+			<default>false</default>
+		</parameter>
+		<parameter name="decimal" type="decimal" groupName="group_normal">
+			<label>Decimal</label>
+			<description>A grouped decimal parameter.</description>
+			<default>3.141592</default>
+		</parameter>
+		<parameter name="integer" type="integer" groupName="group_normal">
+			<label>Integer</label>
+			<description>A grouped integer parameter.</description>
+			<default>42</default>
+		</parameter>
+
+		<parameter name="text_advanced" type="text" groupName="group_advanced">
+			<label>Text</label>
+			<description>A grouped text parameter.</description>
+			<default>myText</default>
+		</parameter>
+		<parameter name="boolean_advanced" type="boolean" groupName="group_advanced">
+			<label>Switch</label>
+			<description>A grouped boolean parameter.</description>
+			<default>false</default>
+		</parameter>
+		<parameter name="decimal_advanced" type="decimal" groupName="group_advanced">
+			<label>Decimal</label>
+			<description>A grouped decimal parameter.</description>
+			<default>3.141592</default>
+		</parameter>
+		<parameter name="integer_advanced" type="integer" groupName="group_advanced">
+			<label>Integer</label>
+			<description>A grouped integer parameter.</description>
+			<default>42</default>
+		</parameter>
+
+		<parameter name="requiredTextParameter" type="text" required="true">
+			<label>Required Text</label>
+			<description>A text parameter which is required.</description>
+		</parameter>
+		<parameter name="verifiedTextParameter" type="text" required="true">
+			<label>Verified Text</label>
+			<description>A text parameter which is required and must be verified by the user.</description>
+			<verify>true</verify>
+		</parameter>
+		<parameter name="select_limited" type="text" required="false">
+			<label>Select limited</label>
+			<description>A select text parameter which is restricted to the given options.</description>
+			<options>
+				<option value="value1">Value 1</option>
+				<option value="value2">Value 2</option>
+				<option value="value3">Value 3</option>
+			</options>
+			<limitToOptions>true</limitToOptions>
+			<default>value1</default>
+		</parameter>
+		<parameter name="select_variable" type="text" required="false">
+			<label>Select variable</label>
+			<description>A select text parameter without limit.</description>
+			<options>
+				<option value="value1">Value 1</option>
+				<option value="value2">Value 2</option>
+				<option value="value3">Value 3</option>
+			</options>
+			<limitToOptions>false</limitToOptions>
+		</parameter>
+		<parameter name="multiselect_integer_limit" type="integer" multiple="true">
+			<label>Multiselect Integer - limit</label>
+			<description>An integer parameter limited to </description>
+			<multipleLimit>3</multipleLimit>
+			<limitToOptions>true</limitToOptions>
+			<options>
+				<option value="1">One</option>
+				<option value="2">Two</option>
+				<option value="3">Three</option>
+				<option value="4">Four</option>
+				<option value="5">Five</option>
+				<option value="6">Six</option>
+				<option value="7">Seven</option>
+				<option value="8">Eight</option>
+				<option value="9">Nine</option>
+				<option value="0">Zero</option>
+			</options>
+		</parameter>
+		<parameter name="multiselect_text_limit" type="text" multiple="true">
+			<label>Multiselect Text - limit</label>
+			<description>An integer parameter limited to </description>
+			<multipleLimit>3</multipleLimit>
+			<limitToOptions>true</limitToOptions>
+			<options>
+				<option value="value1">One</option>
+				<option value="value2">Two</option>
+				<option value="value3">Three</option>
+				<option value="value4">Four</option>
+				<option value="value5">Five</option>
+				<option value="value6">Six</option>
+				<option value="value7">Seven</option>
+				<option value="value8">Eight</option>
+				<option value="value9">Nine</option>
+				<option value="value0">Zero</option>
+			</options>
+		</parameter>
+		<parameter name="select_decimal_limit" type="decimal">
+			<label>Select Decimal - options from backend</label>
+			<description>A decimal parameter with options provided by the backend.</description>
+			<limitToOptions>true</limitToOptions>
+			<!-- options are retrieved from org.eclipse.smarthome.binding.magic.internal.MagicServiceImpl. -->
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

@@ -1,0 +1,33 @@
+{% include header.html %}
+<div id="post" class="content-wrapper">
+	<div id="post" class="content-wrapper">
+		<div class="container">
+			<div class="row">
+				<div class="col s12">
+					<div class="card grey darken-1">
+						{% if page.image and page.image != '' %}
+						<div class="card-image">
+							<img src="{{base}}/img/blog/{{page.image}}">
+						</div>
+						{% endif %}
+						<div class="card-content white-text">
+							<span class="card-title">
+								<strong>{{ page.title }}</strong>
+							</span>
+							<p class="black-text">
+								<small>{{ page.date | date: "%Y-%m-%d" }}</small>
+							</p>
+							{% if page.content contains '<!--more-->' %}
+							    {{ page.content | split:'<!--more-->' | first }}
+							{% endif %}
+						</div>
+						<div class="card-content black-text grey lighten-3">
+						      {{ page.content | split:'<!--more-->' | last }}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% include footer.html %}

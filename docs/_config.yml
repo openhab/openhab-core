@@ -1,0 +1,23 @@
+# Site settings
+title: Eclipse SmartHome - A flexible Framework for the Smart Home
+baseurl: "/smarthome"
+url: "https://www.eclipse.org/smarthome"
+
+# Build settings
+markdown: kramdown
+
+kramdown:
+  input: GFM
+
+defaults:
+  -
+    scope:
+      type: pages
+    values:
+      permalink: /:path/:basename:output_ext
+  -
+    scope:
+      type: posts
+    values:
+      excerpt_separator: <!--more-->
+      permalink: /blog/:year/:month/:day/:title.html

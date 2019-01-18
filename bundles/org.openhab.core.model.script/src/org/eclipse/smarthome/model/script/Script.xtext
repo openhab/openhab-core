@@ -1,0 +1,48 @@
+grammar org.eclipse.smarthome.model.script.Script with org.eclipse.xtext.xbase.Xbase
+
+import "http://www.eclipse.org/xtext/xbase/Xbase"
+import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+generate script "http://www.eclipse.org/smarthome/model/Script"
+
+Script returns XBlockExpression: 
+	{Script}
+	(expressions+=XExpressionOrVarDeclaration ';'?)* 
+;
+
+@Override
+XLiteral returns XExpression:
+  XClosure |
+  XBooleanLiteral |
+  XNullLiteral |
+  XStringLiteral |
+  XNumberLiteral |
+  XTypeLiteral |
+  QuantityLiteral
+;
+
+QuantityLiteral returns XExpression:
+    {QuantityLiteral} 
+    value=Number '|' unit=AbstractUnit
+;
+
+AbstractUnit:
+    StringUnit | IDUnit | SpecificUnit
+;
+
+StringUnit:
+    value=STRING
+;
+
+IDUnit:
+    value=ID
+;
+
+SpecificUnit:
+    value=COMMON_UNIT_SYMBOLS
+;
+
+COMMON_UNIT_SYMBOLS:
+    '°C' | '°F' | 'Ω' | '℃' | '°' | '%' | 'm²' | 'm³'
+;

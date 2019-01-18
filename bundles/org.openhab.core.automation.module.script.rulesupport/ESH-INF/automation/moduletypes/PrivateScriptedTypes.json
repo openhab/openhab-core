@@ -1,0 +1,61 @@
+{  
+   "conditions":[  
+      {  
+         "uid":"jsr223.ScriptedCondition",
+         "label":"Scripted condition",
+         "description":"allows the definition of a condition by a script",
+         "visibility": "EXPERT",
+         "configDescriptions":[  
+            {  
+               "name":"privId",
+               "type":"TEXT",
+               "description":"the identifier of the private method",
+               "required":true
+            }
+         ]
+      }
+   ],
+   "actions":[  
+      {  
+         "uid":"jsr223.ScriptedAction",
+         "label":"Scripted action",
+         "description":"allows the execution of a method defined by a script",
+         "visibility": "EXPERT",
+         "configDescriptions":[  
+            {  
+               "name":"privId",
+               "type":"TEXT",
+               "description":"the identifier of the private method",
+               "required":true
+            }
+         ],
+         "outputs":[  
+            {  
+               "name":"result",
+               "type":"java.lang.Object",
+               "label":"result",
+               "description":"the script result.",
+               "reference":""
+            }
+         ]
+      }
+   ],
+   "triggers": [
+    {  
+         "uid":"jsr223.ScriptedTrigger",
+         "label":"Scripted trigger",
+         "description":"allows the execution of a method defined by a script",
+         "visibility": "EXPERT",
+         "outputs":[  
+            {  
+               "name":"triggerOutput",
+               "type":"java.lang.String",
+               "label":"TriggerOutput label",
+               "description":"Text from the trigger",
+               "reference":"consoleInput",
+               "defaultValue":"dtag"
+            }
+         ]
+      }
+   ]
+}

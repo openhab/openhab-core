@@ -1,0 +1,87 @@
+<html lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Eclipse SmartHome - Automation</title>
+<link rel="shortcut icon" href="https://www.eclipse.org/smarthome/img/favicon.png">
+<link rel="stylesheet" href="./rest.css">
+
+</head>
+<body>
+	<div class="rest-container top">
+		<div class="rest-left rest-blu" style="background-color: #add0fc; width: 223px; height: 70px">
+			<img id="logo" src="eclipse_logo.png" style="width: 220px; height: 60px">
+		</div>
+		<div class="rest-right toptext rest-wide">SmartHome Automation REST API DEMO</div>
+	</div>
+	<div class="rest-topnav rest-slim topnav" id="topnav" style="position: relative; top: 0px;">
+		<div style="overflow: auto;">
+			<div style="float: left; width: 100%; overflow: hidden; height: 30px"></div>
+		</div>
+	</div>
+	<div class="rest-row rest-light-grey" id="belowtopnav" style="padding-top: 0px;">
+		<div class="rest-col rest-slim" id="leftmenu" style="padding-top: 0px; display: none;">
+			<div id="leftmenuinner" style="padding-top: 112px;">
+				<div class="rest-light-grey" id="leftmenuinnerinner">
+					<h2 class="left">REST API DEMO</h2>
+					<a target="_top" href="index.html">HOME</a> <a target="_top" href="rules.html">RULES</a> <a target="_top"
+						href="module-types.html">MODULE TYPES</a> <a target="_top" href="templates.html" class="active">TEMPLATES</a>
+				</div>
+			</div>
+			&nbsp;
+		</div>
+		<div class="rest-rest">
+			<div class="rest-row rest-white">
+				<div class="rest-col l10 m12" id="main">
+					<h2>Automation Template Resource Usage</h2>
+					<br>
+					<div class="demointro">
+						<p class="intro">This page demonstrates the basic functionality of the Automation Template Resource provided
+							by the Automation RESTful web service conforming to the common behaviors and definitions for RESTful web
+							services.</p>
+						<p class="intro">This example also demonstrates some of the auxiliaries which ease the implementation of error
+							handling, resource pagination and resource representation customization.</p>
+					</div>
+					<div class="rest-example">
+						<div class="rest-example" id="list">
+							<form action="">
+								<h3>List All Automation Templates</h3>
+								<a target="_top" href="all_templates.html" type="button">GET All Templates »</a>
+							</form>
+						</div>
+						<div class="rest-example" id="get">
+							<h3>Get the contents of the specified Automation Template</h3>
+							<form action="">
+								Enter Template UID:<br> <input type="text" id="gottenTemplateUID" size="50"><br>
+								<pre id="gotten"></pre>
+								<hr>
+								<button type="button" onclick="loadTemplate(gottenTemplateUID.value)">GET Template »</button>
+								<script>
+									function loadTemplate(uid) {
+										if (uid == "") {
+											document.getElementById("gotten").innerHTML = "Please, specify the Template UID";
+										} else {
+											xmlhttp = new XMLHttpRequest();
+											xmlhttp.onreadystatechange = function(uid) {
+												if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+													document.getElementById("gotten").innerHTML = JSON.stringify(JSON
+															.parse(xmlhttp.responseText), null, 2);
+												} else {
+													document.getElementById("gotten").innerHTML = xmlhttp.responseText;
+												}
+											};
+											xmlhttp.open("GET", "/rest/templates/" + uid, true);
+											xmlhttp.setRequestHeader("Content-type", "application/json");
+											xmlhttp.send();
+										}
+									}
+								</script>
+							</form>
+						</div>
+						<hr>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

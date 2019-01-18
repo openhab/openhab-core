@@ -1,0 +1,32 @@
+{  
+   "actions":[  
+      {  
+         "uid":"CustomAction1",
+         "label":"CustomAction1",
+         "outputs":[  
+            {  
+               "name":"customActionOutput3",
+               "type":"outputType3",
+               "label":"CustomActionOutput1 label",
+               "description":"Custom action output.",
+               "defaultValue":"{\"command\":\"OFF\"}",
+               "required":false
+            }
+         ]
+      },
+      {  
+         "uid":"CustomAction2",
+         "label":"CustomAction2",
+         "inputs":[  
+            {  
+               "name":"customActionInput",
+               "type":"outputType4",
+               "label":"CustomActionOutput2 label",
+               "description":"Custom action output.",
+               "defaultValue":5,
+               "required":false
+            }
+         ]
+      }
+   ]
+}

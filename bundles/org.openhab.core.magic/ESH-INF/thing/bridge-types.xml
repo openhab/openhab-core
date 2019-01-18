@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="magic"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<bridge-type id="magic-bridge1">
+		<label>Magic Bridge 1</label>
+		<description>The 1st magic bridge</description>
+	</bridge-type>
+	<bridge-type id="magic-bridge2">
+		<label>Magic Bridge 2</label>
+		<description>The 2nd magic bridge</description>
+	</bridge-type>
+
+	<thing-type id="bridgedThing">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="magic-bridge1" />
+			<bridge-type-ref id="magic-bridge2" />
+		</supported-bridge-type-refs>
+		<label>Magic Bridged Thing</label>
+		<description>A magic bridged thing.</description>
+	</thing-type>
+
+</thing:thing-descriptions>

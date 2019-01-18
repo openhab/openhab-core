@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+    <groupId>org.openhab.core</groupId>
+    <artifactId>org.openhab.core.reactor</artifactId>
+    <version>2.5.0-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.openhab.core.docs</groupId>
+  <artifactId>org.openhab.core.docs</artifactId>
+
+  <name>openHAB Core :: SmartHome Website and Documentation</name>
+
+  <packaging>pom</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${basedir}/documentation/features/bindings/</directory>
+            </fileset>
+            <fileset>
+              <directory>${basedir}/documentation/features/ui/</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-binding-docs</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/documentation/features/bindings/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/../extensions/binding</directory>
+                  <includes>
+                    <include>**/*.md</include>
+                    <include>**/doc/**</include>
+                    <include>**/cfg/**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-iconset-docs</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/documentation/features/ui/iconset</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/../extensions/ui/iconset</directory>
+                  <includes>
+                    <include>**/README.md</include>
+                    <include>**/icons/**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-ui-docs</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/documentation/features/ui</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/../extensions/ui/</directory>
+                  <includes>
+                    <include>org.eclipse.smarthome.ui.*/README.md</include>
+                    <include>org.eclipse.smarthome.ui.*/doc/**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-javadoc</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/documentation/javadoc</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/../target/apidocs</directory>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.groovy.maven</groupId>
+        <artifactId>gmaven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>rename-binding-files</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <source>
+                def bindings = new File(project.basedir, 'documentation/features/bindings')
+                def bindingIDs = []
+
+                bindings.eachFile {
+                  def name = it.name
+                  if (name.contains('binding')) {
+                    def bindingId = it.name.replace('org.eclipse.smarthome.binding.', '')
+                    bindingIDs &lt;&lt; bindingId
+
+                    // rename folder to binding ID
+                    def simpleBindingNameDir = new File(bindings.path, bindingId)
+                    it.renameTo(simpleBindingNameDir)
+
+                    // rename all markdown to lowercase
+                    simpleBindingNameDir.eachFileMatch(~/.*\.md$/, { originalFile -> 
+                      def lowerFile = new File(simpleBindingNameDir.path, originalFile.name.toLowerCase())
+                      originalFile.renameTo(lowerFile)
+                    })
+
+                    // insert jekyll header and do-not-edit comment into README.md files
+                    def readme = new File(simpleBindingNameDir.path, 'README.md')
+                    if (readme.exists()) {
+                      println "Adjusting ${readme}"
+                      readme.write('---\nlayout: documentation\n---\n\n&lt;!-- Attention authors: Do not edit directly. Please add your changes to the appropriate source file --&gt;\n\n{% include base.html %}\n\n' + readme.text)
+                    }
+                  }
+                }
+
+                // join multi-bundle binding docu
+                bindings.eachFile {
+                  def name = it.name
+                  def children = bindingIDs.findAll { it.startsWith(name + '.') }
+                  if (!children.isEmpty()) {
+                    def readme = new File(it.path, 'readme.md')
+                    if (readme.exists()) {
+                      println "Processing placeholders in ${readme} with ${children.join(', ')}"
+
+                      // <!--list-subs-->
+                      readme.write(readme.text.replaceAll('&lt;!--list-subs--&gt;', children.findAll{
+                        new File(bindings.path, it + '/readme.md').exists()
+                      }.collect{
+                        def matcher = new File(bindings.path, it + '/readme.md').text =~/#+ (.*?)\n/
+                        def title = it
+                        if (matcher.find()) {
+                          title = matcher.group(1)
+                        }
+                        return '* [' + title + '](../' + it + '/readme.html)'
+                      }.join('\n')))
+                    }
+                  }
+                }
+              </source>
+            </configuration>
+          </execution>
+          <execution>
+            <id>rename-iconset-files</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <source>
+                def iconsets = new File(project.basedir, 'documentation/features/ui/iconset')
+
+                iconsets.eachFile {
+                  def name = it.name
+                  if (name.contains('iconset')) {
+                    def iconsetId =
+                    it.name.replace('org.eclipse.smarthome.ui.iconset.', '')
+                    def simpleIconsetNameDir = new File(iconsets.path, iconsetId)
+                    it.renameTo(simpleIconsetNameDir)
+                    def readme = new File(simpleIconsetNameDir.path, 'README.md')
+                    if (readme.exists()) {
+                      println readme
+                      readme.write('---\nlayout: documentation\n---\n\n&lt;!-- Attention authors: Do not edit directly. Please add your changes to the appropriate source file --&gt;\n\n{% include base.html %}\n\n' + readme.text)
+                      readme.renameTo(new File(simpleIconsetNameDir.path, 'readme.md'))
+                    }
+                  }
+                }
+              </source>
+            </configuration>
+          </execution>
+          <execution>
+            <id>rename-ui-files</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <source>
+                def uis = new File(project.basedir, 'documentation/features/ui')
+
+                uis.eachFile {
+                  def name = it.name
+                  if (!name.contains('iconset')) {
+                    def uiId = it.name.replace('org.eclipse.smarthome.ui.', '')
+                    def simpleUINameDir = new File(uis.path, uiId)
+                    it.renameTo(simpleUINameDir)
+                    def readme = new File(simpleUINameDir.path, 'README.md')
+                    if (readme.exists()) {
+                      println readme
+                      readme.write('---\nlayout: documentation\n---\n\n&lt;!-- Attention authors: Do not edit directly. Please add your changes to the appropriate source file --&gt;\n\n{% include base.html %}\n\n' + readme.text)
+                      readme.renameTo(new File(simpleUINameDir.path, 'readme.md'))
+                    }
+                  }
+                }
+              </source>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>compile</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>jekyll</executable>
+              <arguments>
+                <argument>build</argument>
+              </arguments>
+              <workingDirectory>${project.basedir}</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

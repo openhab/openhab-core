@@ -1,0 +1,62 @@
+[  
+  {  
+    "uid":"SampleRuleTemplate",
+    "description":"Sample Rule Template",
+    "tags":[  
+      "sample",
+      "rule",
+      "template"
+    ],
+    "configDescriptions":[  
+         {
+          "name":"condition_operator",              
+          "type": "TEXT",
+          "description": "Valid operators are =,>,<,!=",
+          "required": true
+        },
+         {
+          "name":"condition_constraint",              
+          "type": "TEXT",
+          "description": "Right operand which is compared with the input.",
+          "required": true
+        }
+    ],
+    "triggers": [  
+      {  
+        "id": "CompositeSampleTriggerTemplateID",
+        "type": "CompositeSampleTrigger",
+        "label": "Sample Trigger",
+        "description": "This is a sample composite trigger"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "SampleConditionTemplateID",
+        "type": "SampleCondition",
+        "label": "Sample Condition",
+        "description": "This is a sample condition",
+        "configuration": {
+          "operator": "${condition_operator}",
+          "constraint": "${condition_constraint}"
+        },
+        "inputs": {
+          "conditionInput": "CompositeSampleTriggerTemplateID.compositeTriggerOutput"
+        }
+      }
+    ],
+    "actions": [
+      {  
+        "id": "CompositeActionTemplateID",
+        "type": "CompositeSampleAction",
+        "label": "Sample Action",
+        "description": "This is a sample action",
+        "configuration": {
+          "compositeMessage": "Hello World!!!"
+        },
+        "inputs": {  
+          "compositeActionInput": "CompositeSampleTriggerTemplateID.compositeTriggerOutput"
+        }
+      }
+    ]
+  }
+]

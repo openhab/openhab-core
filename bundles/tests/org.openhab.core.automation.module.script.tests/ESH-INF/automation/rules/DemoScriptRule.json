@@ -1,0 +1,38 @@
+[  
+  {  
+    "uid": "javascript.rule1",
+    "name": "DemoScriptRule",
+    "description": "Sample rule based on scripts",
+    "triggers": [  
+      {  
+        "id": "trigger",
+        "type": "core.GenericEventTrigger",
+                    "configuration":{
+                        "eventSource":"MyTrigger",
+                        "eventTopic":"smarthome/items/MyTrigger/state",
+                        "eventTypes":"ItemStateEvent"
+                    }
+      }
+    ],
+    "conditions": [
+      {  
+        "id": "condition",
+        "type": "script.ScriptCondition",
+        "configuration": {  
+          "type": "application/javascript",
+          "script": "event.itemState==ON"
+        }
+      }
+    ],
+    "actions": [
+      {  
+        "id": "action",
+        "type": "script.ScriptAction",
+        "configuration": {  
+          "type": "application/javascript",
+          "script": "print(items.MyTrigger), print(things.getAll()), print(ctx.get('trigger.event')), events.sendCommand('ScriptItem', 'ON')"
+        }
+      }
+    ]
+  }
+]

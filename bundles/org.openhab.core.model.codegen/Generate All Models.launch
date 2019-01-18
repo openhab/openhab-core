@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.debug.core.groups.GroupLaunchConfigurationType">
+<stringAttribute key="bad_container_name" value="Generate All Models (Group)"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.0.action" value="WAIT_FOR_TERMINATION"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.0.adoptIfRunning" value="false"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.0.enabled" value="true"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.0.mode" value="inherit"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.0.name" value="1 Generate Items Model"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.1.action" value="WAIT_FOR_TERMINATION"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.1.adoptIfRunning" value="false"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.1.enabled" value="true"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.1.mode" value="inherit"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.1.name" value="2 Generate Sitemap Model"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.2.action" value="WAIT_FOR_TERMINATION"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.2.adoptIfRunning" value="false"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.2.enabled" value="true"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.2.mode" value="inherit"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.2.name" value="3 Generate Script Model"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.3.action" value="WAIT_FOR_TERMINATION"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.3.adoptIfRunning" value="false"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.3.enabled" value="true"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.3.mode" value="inherit"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.3.name" value="4 Generate Rule Model"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.4.action" value="WAIT_FOR_TERMINATION"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.4.adoptIfRunning" value="false"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.4.enabled" value="true"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.4.mode" value="inherit"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.4.name" value="5 Generate Persistence Model"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.5.action" value="WAIT_FOR_TERMINATION"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.5.adoptIfRunning" value="false"/>
+<booleanAttribute key="org.eclipse.debug.core.launchGroup.5.enabled" value="true"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.5.mode" value="inherit"/>
+<stringAttribute key="org.eclipse.debug.core.launchGroup.5.name" value="6 Generate Thing Model"/>
+</launchConfiguration>

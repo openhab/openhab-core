@@ -1,0 +1,17 @@
+{  
+   "actions":[  
+      {  
+         "uid":"ConsolePrintAction",
+         "label":"Demo Action",
+         "description":"Prints it's type UID and a value passed to it's input",
+         "inputs":[  
+            {  
+               "name":"inputValue",
+               "type":"java.lang.Integer",
+               "label":"inputValue",
+               "description":"Value that is passed from rule's trigger."
+            }
+         ]
+      }
+   ]
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<binding:binding xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:binding="http://eclipse.org/smarthome/schemas/binding/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/binding/v1.0.0 org.eclipse.smarthome.binding.xsd"
+	id="hue">
+
+	<name>hue Binding</name>
+	<description>The hue Binding integrates the Philips hue system. It
+		allows to control hue lights.</description>
+	<author>Deutsche Telekom AG</author>
+	
+</binding:binding>

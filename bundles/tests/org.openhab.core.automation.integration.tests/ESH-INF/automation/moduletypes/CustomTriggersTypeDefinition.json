@@ -1,0 +1,32 @@
+{  
+   "triggers":[  
+      {  
+         "uid":"CustomTrigger1",
+         "label":"Custom Event Trigger",
+         "outputs":[  
+            {  
+               "name":"customTriggerOutput1",
+               "type":"outputType1",
+               "label":"CustomTriggerOutput1 label",
+               "description":"Custom trigger output.",
+               "defaultValue":true,
+               "reference":"${event}"
+            }
+         ]
+      },
+      {  
+         "uid":"CustomTrigger2",
+         "label":"Custom Event Trigger",
+         "outputs":[  
+            {  
+               "name":"customTriggerOutput2",
+               "type":"outputType2",
+               "label":"CustomTriggerOutput2 label",
+               "description":"Custom trigger output.",
+               "defaultValue":"event",
+               "reference":"${event}"
+            }
+         ]
+      }
+   ]
+}

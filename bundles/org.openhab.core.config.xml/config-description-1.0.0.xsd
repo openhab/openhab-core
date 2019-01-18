@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	targetNamespace="http://eclipse.org/smarthome/schemas/config-description/v1.0.0">
+
+	<xs:element name="config-descriptions">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="config-description" type="config-description:configDescription"
+					minOccurs="1" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="config-description" type="config-description:configDescription" />
+
+	<xs:simpleType name="idRestrictionPattern">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Za-z0-9\-_]+" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="uriRestrictionPattern">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-Za-z0-9\-_]+(:[A-Za-z0-9\-_]+){1,2}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="configDescription">
+		<xs:sequence>
+			<xs:element name="parameter-group" type="config-description:parameterGroup"
+				minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="parameter" type="config-description:parameter"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="uri"
+			type="config-description:uriRestrictionPattern" use="optional" />
+	</xs:complexType>
+
+	<xs:complexType name="parameter">
+		<xs:all>
+			<xs:element name="context" type="xs:string" minOccurs="0" />
+			<!-- deprecated element "required" -->
+			<xs:element name="required" type="xs:boolean" default="false"
+				minOccurs="0" />
+			<xs:element name="default" type="xs:string" minOccurs="0" />
+			<xs:element name="label" type="xs:string" minOccurs="0" />
+			<xs:element name="description" type="xs:string" minOccurs="0" />
+			<xs:element name="options" type="config-description:optionsType"
+				minOccurs="0" />
+			<xs:element name="limitToOptions" type="xs:boolean"
+				minOccurs="0" />
+			<xs:element name="filter" type="config-description:filterType"
+				minOccurs="0" />
+            <xs:element name="advanced" type="xs:boolean" minOccurs="0" />
+            <xs:element name="verify" type="xs:boolean" minOccurs="0" />
+			<xs:element name="multipleLimit" type="xs:integer" minOccurs="0" />
+            <xs:element name="unitLabel" type="xs:string" minOccurs="0" />
+		</xs:all>
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="type" type="config-description:parameterType"
+			use="required" />
+		<xs:attribute name="groupName" type="xs:string" />
+		<xs:attribute name="min" type="xs:decimal" />
+		<xs:attribute name="max" type="xs:decimal" />
+		<xs:attribute name="step" type="xs:decimal" />
+		<xs:attribute name="pattern" type="xs:string" />
+		<xs:attribute name="required" type="xs:boolean" />
+		<xs:attribute name="readOnly" type="xs:boolean" />
+		<xs:attribute name="multiple" type="xs:boolean" />
+		<xs:attribute name="unit" type="config-description:unitType" />
+	</xs:complexType>
+
+	<xs:complexType name="parameterGroup">
+		<xs:all>
+			<xs:element name="label" type="xs:string" minOccurs="0" />
+			<xs:element name="description" type="xs:string" minOccurs="0" />
+			<xs:element name="context" type="xs:string" minOccurs="0" />
+			<xs:element name="advanced" type="xs:boolean" minOccurs="0" />
+		</xs:all>
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="optionsType">
+		<xs:sequence>
+			<xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="value" type="xs:string" use="required" />
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="filterType">
+		<xs:sequence>
+			<xs:element name="criteria" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="name" type="xs:string" use="required" />
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="parameterType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="text" />
+			<xs:enumeration value="integer" />
+			<xs:enumeration value="decimal" />
+			<xs:enumeration value="boolean" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+    <xs:simpleType name="unitType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="A"/>
+            <xs:enumeration value="cd"/>
+            <xs:enumeration value="K"/>
+            <xs:enumeration value="kg"/>
+            <xs:enumeration value="m"/>
+            <xs:enumeration value="mol"/>
+            <xs:enumeration value="s"/>
+            <xs:enumeration value="Bq"/>
+            <xs:enumeration value="C"/>
+            <xs:enumeration value="F"/>
+            <xs:enumeration value="Gy"/>
+            <xs:enumeration value="H"/>
+            <xs:enumeration value="Hz"/>
+            <xs:enumeration value="J"/>
+            <xs:enumeration value="kat"/>
+            <xs:enumeration value="lm"/>
+            <xs:enumeration value="lx"/>
+            <xs:enumeration value="N"/>
+            <xs:enumeration value="Pa"/>
+            <xs:enumeration value="rad"/>
+            <xs:enumeration value="S"/>
+            <xs:enumeration value="sr"/>
+            <xs:enumeration value="Sv"/>
+            <xs:enumeration value="T"/>
+            <xs:enumeration value="V"/>
+            <xs:enumeration value="W"/>
+            <xs:enumeration value="Wb"/>
+            <xs:enumeration value="Cel"/>
+            <xs:enumeration value="Ω"/>
+            <xs:enumeration value="g"/>
+            <xs:enumeration value="m/s2"/>
+            <xs:enumeration value="m2v"/>
+            <xs:enumeration value="m3"/>
+            <xs:enumeration value="kph"/>
+            <xs:enumeration value="%"/>
+            <xs:enumeration value="l"/>
+            <xs:enumeration value="ms"/>
+            <xs:enumeration value="min"/>
+            <xs:enumeration value="h"/>
+            <xs:enumeration value="d"/>
+            <xs:enumeration value="week"/>
+            <xs:enumeration value="y"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+	<xs:complexType name="configDescriptionRef">
+		<xs:attribute name="uri"
+			type="config-description:uriRestrictionPattern" use="required" />
+	</xs:complexType>
+
+</xs:schema>

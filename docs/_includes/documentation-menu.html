@@ -1,0 +1,93 @@
+{% include base.html %} {% assign docu = base | append: '/documentation' %}
+
+<ul class="nav">
+	<li><a href="{{docu}}/index.html">Overview</a></li>
+	<li><a href="{{docu}}/concepts/index.html">Concepts</a>
+		<ul>
+			<li><a href="{{docu}}/concepts/index.html">Overview</a></li>
+			<li><a href="{{docu}}/concepts/items.html">Items</a></li>
+			<li><a href="{{docu}}/concepts/things.html">Things</a></li>
+			<li><a href="{{docu}}/concepts/categories.html">Categories</a></li>
+			<li><a href="{{docu}}/concepts/discovery.html">Inbox &amp; Discovery</a></li>
+			<li><a href="{{docu}}/concepts/profiles.html">Profiles</a></li>
+			<li><a href="{{docu}}/concepts/audio.html">Audio &amp; Voice</a></li>
+			<li><a href="{{docu}}/concepts/units-of-measurement.html">Units of Measurement</a></li>
+		</ul></li>
+	<li><a href="{{docu}}/features/index.html">Features</a>
+		<ul>
+			<li><a href="{{docu}}/features/index.html">Overview</a></li>
+			<li><a href="{{docu}}/features/rest.html">REST API</a></li>
+			<li><a href="{{docu}}/features/dsl.html">Textual Configuration</a></li>
+			<li><a href="{{docu}}/features/internationalization.html">Internationalization</a></li>
+			<li><a href="{{docu}}/features/frameworkUtilities.html">Framework Utilities</a></li>
+			<li><a href="{{docu}}/features/rules.html">Rules</a></li>
+			<li><a href="{{docu}}/features/scenes.html">Scenes</a></li>
+			<li><a href="{{docu}}/features/bindings/astro/readme.html">Bindings</a>
+				<ul>
+					<li><a href="{{docu}}/features/bindings/astro/readme.html">Astro</a></li>
+					<li><a href="{{docu}}/features/bindings/wemo/readme.html">Belkin Wemo</a></li>
+					<li><a href="{{docu}}/features/bindings/bluetooth/readme.html">Bluetooth</a></li>
+					<li><a href="{{docu}}/features/bindings/bosesoundtouch/readme.html">Bose SoundTouch</a></li>
+					<li><a href="{{docu}}/features/bindings/digitalstrom/readme.html">digitalSTROM</a></li>
+					<li><a href="{{docu}}/features/bindings/dmx/readme.html">DMX</a></li>
+					<li><a href="{{docu}}/features/bindings/fsinternetradio/readme.html">FS Internet Radio</a></li>
+					<li><a href="{{docu}}/features/bindings/homematic/readme.html">Homematic</a></li>
+					<li><a href="{{docu}}/features/bindings/lifx/readme.html">LIFX</a></li>
+					<li><a href="{{docu}}/features/bindings/lirc/readme.html">LIRC</a></li>
+					<li><a href="{{docu}}/features/bindings/meteoblue/readme.html">meteoblue</a></li>
+					<li><a href="{{docu}}/features/bindings/mqttgeneric/readme.html">MQTT Generic</a></li>
+					<li><a href="{{docu}}/features/bindings/ntp/readme.html">NTP Time Server</a></li>
+					<li><a href="{{docu}}/features/bindings/onewire/readme.html">OneWire</a></li>
+					<li><a href="{{docu}}/features/bindings/openweathermap/readme.html">OpenWeatherMap</a></li>
+					<li><a href="{{docu}}/features/bindings/hue/readme.html">Philips Hue</a></li>
+					<li><a href="{{docu}}/features/bindings/serialbutton/readme.html">Serial Button</a></li>
+					<li><a href="{{docu}}/features/bindings/sonos/readme.html">Sonos</a></li>
+					<li><a href="{{docu}}/features/bindings/tradfri/readme.html">IKEA TRÅDFRI</a></li>
+					<li><a href="{{docu}}/features/bindings/weatherunderground/readme.html">Weather Underground</a></li>
+				</ul></li>
+			<li><a href="{{docu}}/features/ui/paper/readme.html">User Interfaces</a>
+				<ul>
+					<li><a href="{{docu}}/features/ui/paper/readme.html">Paper UI</a></li>
+					<li><a href="{{docu}}/features/ui/basic/readme.html">Basic UI</a></li>
+					<li><a href="{{docu}}/features/ui/classic/readme.html">Classic UI</a></li>
+				</ul></li>
+			<li><a href="{{docu}}/features/icons.html">Icon Support</a>
+				<ul>
+					<li><a href="{{docu}}/features/icons.html">Overview</a></li>
+					<li><a href="{{docu}}/features/ui/iconset/classic/readme.html">Classic Icon Set</a></li>
+				</ul></li>
+			<li><a href="{{docu}}/features/audio.html">Audio &amp; Voice</a></li>
+	</ul></li>
+	<li><a href="{{docu}}/development/ide.html">Development</a>
+		<ul>
+			<li><a href="{{docu}}/development/ide.html">IDE Setup</a></li>
+			<li><a href="{{docu}}/development/guidelines.html">Guidelines</a></li>
+			<li><a href="{{docu}}/development/conventions.html">Conventions</a></li>
+			<li><a href="{{docu}}/development/notes.html">Notes</a></li>
+			<li><a href="{{docu}}/development/bindings/how-to.html">Bindings</a>
+				<ul>
+					<li><a href="{{docu}}/development/bindings/how-to.html">Binding Tutorial</a></li>
+					<li><a href="{{docu}}/development/bindings/thing-definition.html">Thing Definition</a></li>
+					<li><a href="{{docu}}/development/bindings/thing-handler.html">Thing Handler</a></li>
+					<li><a href="{{docu}}/development/bindings/bridge-handler.html">Bridge Handler</a></li>
+					<li><a href="{{docu}}/development/bindings/xml-reference.html">XML Reference Guide</a></li>
+					<li><a href="{{docu}}/development/bindings/dependencies.html">Dependencies</a></li>
+					<li><a href="{{docu}}/development/bindings/discovery-services.html">Discovery</a></li>
+					<li><a href="{{docu}}/development/bindings/profiles.html">Profiles</a></li>
+					<li><a href="{{docu}}/development/bindings/docs.html">Documentation</a></li>
+					<li><a href="{{docu}}/development/bindings/faq.html">FAQ</a></li>
+				</ul></li>
+			<li><a href="{{docu}}/development/rules/sample.extension.java.html">Rules</a>
+				<ul>
+					<li><a href="{{docu}}/development/rules/sample.extension.java.html">Java API Demo</a></li>
+					<li><a href="{{docu}}/development/rules/rest-api.html">REST Demo</a></li>
+				</ul></li>
+			<li><a href="{{docu}}/development/testing.html">Testing</a></li>
+			<li><a href="{{docu}}/javadoc/index.html">API Reference</a></li>
+		</ul></li>
+	<li><a href="{{docu}}/community/contributing.html">Community</a>
+		<ul>
+			<li><a href="{{docu}}/community/contributing.html">Contributing</a></li>
+			<li><a href="{{docu}}/community/downloads.html">Downloads</a></li>
+		</ul></li>
+</ul>

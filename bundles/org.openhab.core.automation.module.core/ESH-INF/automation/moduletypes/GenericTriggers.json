@@ -1,0 +1,45 @@
+{
+   "triggers":[
+      {
+         "uid":"core.GenericEventTrigger",
+         "label":"Basic Event Trigger",
+         "description":"Triggers Rules on Events",
+         "visibility":"HIDDEN",
+         "configDescriptions":[
+            {
+               "name":"eventTopic",
+               "type":"TEXT",
+               "label":"Topic",
+               "description":"This is the topic, the trigger will listen to: >>smarthome/*<<",
+               "required":true,
+               "default":"smarthome/*"
+            },
+            {
+               "name":"eventSource",
+               "type":"TEXT",
+               "label":"Source",
+               "description":"This is the source of the event (eg. item name)",
+               "required":true,
+               "default":""
+            },
+            {
+               "name":"eventTypes",
+               "type":"TEXT",
+               "label":"Event Type",
+               "description":"the event type, the trigger should listen to. Multiple types can be specified comma-separated",
+               "required":true,
+               "default":""
+            }
+         ],
+         "outputs":[
+            {
+               "name":"event",
+               "type":"org.eclipse.smarthome.core.events.Event",
+               "label":"Event",
+               "description":"The events which was sent.",
+               "reference":"event"
+            }
+         ]
+      }
+   ]
+}

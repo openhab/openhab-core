@@ -1,0 +1,59 @@
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Eclipse SmartHome - Automation</title>
+<link rel="shortcut icon" href="https://www.eclipse.org/smarthome/img/favicon.png">
+<link rel="stylesheet" href="./rest.css">
+<script type="text/javascript">
+    function loadRules() {
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                document.getElementById("json").innerHTML = JSON.stringify(JSON.parse(xmlhttp.responseText), null, 2);
+            } else {
+                document.getElementById("json").value = xmlhttp.responseText;
+            }
+        }
+        window.onload = loadRules;
+        xmlhttp.open("GET", "/rest/templates/", true);
+        xmlhttp.setRequestHeader("Content-type", "application/json");
+        xmlhttp.send();
+    }
+</script>
+</head>
+<body onload="loadRules();">
+    <div class="rest-container top">
+        <div class="rest-left rest-blu" style="background-color: #add0fc; width: 223px; height: 70px">
+            <img id="logo" src="eclipse_logo.png" style="width: 220px; height: 60px">
+        </div>
+        <div class="rest-right toptext rest-wide">SmartHome Automation REST API DEMO</div>
+    </div>
+    <div class="rest-topnav rest-slim topnav" id="topnav" style="position: relative; top: 0px;">
+        <div style="overflow: auto;">
+            <div style="float: left; width: 100%; overflow: hidden; height: 30px"></div>
+        </div>
+    </div>
+    <div class="rest-row rest-light-grey" id="belowtopnav" style="padding-top: 0px;">
+        <div class="rest-col rest-slim" id="leftmenu" style="padding-top: 0px; display: none;">
+            <div id="leftmenuinner" style="padding-top: 112px;">
+                <div class="rest-light-grey" id="leftmenuinnerinner">
+                    <h2 class="left">REST API DEMO</h2>
+                    <a target="_top" href="index.html">HOME</a> <a target="_top" href="rules.html">RULES</a> <a
+                        target="_top" href="module-types.html">MODULE TYPES</a> <a target="_top" href="templates.html">TEMPLATES</a>
+                </div>
+            </div>
+            &nbsp;
+        </div>
+        <div class="rest-rest">
+            <div class="rest-row rest-white">
+                <div class="rest-col l10 m12" id="main">
+                    <h2>All Automation Templates</h2>
+                    <div class="rest-example" id="get">
+                        <br>
+                        <pre id="json" style="word-wrap: break-word"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

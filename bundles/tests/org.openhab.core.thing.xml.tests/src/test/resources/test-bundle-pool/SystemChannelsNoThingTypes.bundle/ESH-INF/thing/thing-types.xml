@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="SystemChannelsNoThingTypes"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+        xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+        
+    <!-- System Channel Type -->
+	<channel-type id="my-syschannel" system="true">
+		<item-type>Number</item-type>
+		<label>My System Channel</label>
+		<category>Other</category>
+		<tags>
+			<tag>
+				Test
+			</tag>
+		</tags>
+		<config-description>
+			<parameter name="range" type="integer" readOnly="true" min="0"
+				max="4" step="1" />
+		</config-description>
+	</channel-type>
+</thing:thing-descriptions>

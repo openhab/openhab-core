@@ -1,0 +1,32 @@
+name,description,icon
+Battery,"Batteries, Energy Storages",battery.png
+Blinds,"Roller shutters, window blinds, etc.",blinds.png
+Camera,"All kinds of cameras",camera.png
+Car,"Smart Cars",
+CleaningRobot,"Vacuum robots, mopping robots, etc.",
+Door,"Door",door.png
+EntryControl,"Entry control devices such as keypads, security control panels etc",
+FrontDoor,"Front Door",frontdoor.png
+GarageDoor,"Garage Door",garagedoor.png
+HVAC,"Air condition devices, Fans",
+Inverter,"Power inverter, such as solar inverters etc.",
+LawnMower,"Lawn mowing robots, etc.",lawnmower.png
+Lightbulb,"Devices that illuminate something, such as bulbs, etc.",lightbulb.png
+Lock,"Devices whose primary purpose is locking something",lock.png
+MotionDetector,"Motion sensors/detectors",
+NetworkAppliance,"Bridges/Gateway need to access other devices like used by Philips Hue for example, Routers, Switches",
+PowerOutlet,"Small devices to be plugged into a power socket in a wall which stick there",poweroutlet.png
+Projector,"Devices that project a picture somewhere",projector.png
+RadiatorControl,"Controls on radiators used to heat up rooms",
+Receiver,"Audio/Video receivers, i.e. radio receivers, satellite or cable receivers, recorders, etc.",receiver.png
+RemoteControl,"Any portable or hand-held device that controls the status of something, e.g. remote control, keyfob etc."
+Screen,"Devices that are able to show a picture",screen.png
+Sensor,"Device used to measure something",
+Siren,"Siren used by Alarm systems",siren.png
+SmokeDetector,"Smoke detectors",
+Speaker,"Devices that are able to play sounds",
+Valve,"Valves used to control water or gas. e.g. a flow stop valve.",
+WallSwitch,"Any device attached to the wall that controls the status of something, e.g. a light switch, dimmer",wallswitch.png
+WebService,"Account with credentials for a website",
+Window,"Window",window.png
+WhiteGood,"Devices that look like Waschingmachines, Dishwashers, Dryers, Fridges, Ovens, etc.",whitegood.png

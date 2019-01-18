@@ -1,0 +1,21 @@
+{  
+   "conditions":[  
+      {  
+         "uid":"timer.DayOfWeekCondition",
+         "label":"it is a certain day of the week",
+         "description":"checks for the current day of the week",
+         "visibility":"PUBLIC",
+         "configDescriptions":[  
+            {  
+               "name":"days",
+               "context":"dayOfWeek",
+               "type":"TEXT",
+               "label":"Days of the week",
+               "description":"the days of the week when the rule should be active",
+               "required":true,
+               "multiple":true
+            }
+         ]
+      }
+   ]
+}

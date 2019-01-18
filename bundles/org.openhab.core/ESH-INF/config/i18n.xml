@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
+	http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="system:i18n">
+		<parameter name="language" type="text">
+			<label>Language</label>
+			<description><![CDATA[
+				<p>The default language that should be used. If not specified, the system default locale is used.</p>
+				<p>The ISO 639 alpha-2 or alpha-3 language code (if there is no alpha-2 one).</p>
+				<p>Example: "en" (English), "de" (German), "ja" (Japanese), "kok" (Konkani)</p>
+			]]>
+			</description>
+		</parameter>
+		<parameter name="script" type="text" required="false">
+			<label>Script</label>
+			<description><![CDATA[
+				<p>The script that should be used.</p>
+				<p>ISO 15924 alpha-4 script code.</p>
+				<p>Example: "Latn" (Latin), "Cyrl" (Cyrillic)</p>
+			]]>
+			</description>
+			<advanced>true</advanced>
+		</parameter>
+		<parameter name="region" type="text" required="false">
+			<label>Country / Region</label>
+			<description><![CDATA[
+				<p>The region that should be used.</p>
+				<p>ISO 3166 alpha-2 country code or UN M.49 numeric-3 area code.</p>
+				<p>Example: "US" (United States), "DE" (Germany), "FR" (France), "029" (Caribbean)</p>
+			]]>
+			</description>
+		</parameter>
+		<parameter name="variant" type="text" required="false">
+			<label>Variant</label>
+			<description><![CDATA[
+				<p>A variation of the locale.</p>
+				<p>Any arbitrary value used to indicate a variation of a Locale.</p>
+				<p>Example: "polyton" (Polytonic Greek), "POSIX"</p>
+			]]>
+			</description>
+			<advanced>true</advanced>
+		</parameter>
+		<parameter name="timezone" type="text" required="false">
+			<label>Time Zone</label>
+			<description><![CDATA[
+				<p>A time zone can be set from the user interface.</p>
+				<p>The underlying system's time zone is the default.</p>
+				<p>Example: Asia/Tokyo, Europe/Berlin</p>
+			]]>
+			</description>
+		</parameter>
+		<parameter name="location" type="text" required="false">
+			<context>location</context>
+			<label>Location</label>
+			<description><![CDATA[
+				<p>The location of this installation.</p>
+				<p>Coordinates as &lt;latitude&gt;,&lt;longitude&gt;[&lt;altitude&gt;]</p>
+				<p>Example: "52.5200066,13.4049540" (Berlin)</p>
+			]]>
+			</description>
+		</parameter>
+
+		<parameter name="measurementSystem" type="text" required="false">
+			<label>Measurement System</label>
+			<description>The measurement system is used for unit conversion.</description>
+			<advanced>true</advanced>
+			<options>
+				<option value="SI">Metric</option>
+				<option value="US">Imperial (US)</option>
+			</options>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

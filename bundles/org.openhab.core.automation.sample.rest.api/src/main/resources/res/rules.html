@@ -1,0 +1,517 @@
+<html lang="en-US">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Eclipse SmartHome - Automation</title>
+<link rel="shortcut icon" href="https://www.eclipse.org/smarthome/img/favicon.png">
+<link rel="stylesheet" href="./rest.css">
+
+</head>
+<body>
+	<div class="rest-container top">
+		<div class="rest-left rest-blu" style="background-color: #add0fc; width: 223px; height: 70px">
+			<img id="logo" src="eclipse_logo.png" style="width: 220px; height: 60px">
+		</div>
+		<div class="rest-right toptext rest-wide">SmartHome Automation REST API DEMO</div>
+	</div>
+	<div class="rest-topnav rest-slim topnav" id="topnav" style="position: relative; top: 0px;">
+		<div style="overflow: auto;">
+			<div style="float: left; width: 100%; overflow: hidden; height: 30px"></div>
+		</div>
+	</div>
+	<div class="rest-row rest-light-grey" id="belowtopnav" style="padding-top: 0px;">
+		<div class="rest-col rest-slim" id="leftmenu" style="padding-top: 0px; display: none;">
+			<div id="leftmenuinner" style="padding-top: 112px;">
+				<div class="rest-light-grey" id="leftmenuinnerinner">
+					<h2 class="left">REST API DEMO</h2>
+					<a target="_top" href="index.html">HOME</a> <a target="_top" href="rules.html" class="active">RULES</a> <a
+						target="_top" href="module-types.html">MODULE TYPES</a> <a target="_top" href="templates.html">TEMPLATES</a>
+				</div>
+			</div>
+			&nbsp;
+		</div>
+		<div class="rest-rest">
+			<div class="rest-row rest-white">
+				<div class="rest-col l10 m12" id="main">
+					<h2>Automation Rule Resource Usage</h2>
+					<br>
+					<div class="demointro">
+						<p class="intro">This page demonstrates the basic functionality of the Automation Rule Resource, provided by
+							the Automation RESTful web service conforming to the common behaviors and definitions for RESTful web services.</p>
+						<p class="intro">This example also demonstrates some of the auxiliaries which ease the implementation of error
+							handling, resource pagination and resource representation customization.</p>
+					</div>
+					<div class="rest-example" id="list">
+						<form action="">
+							<h3>List All Automation Rules</h3>
+							<a target="_top" href="all_rules.html">GET All Rules »</a>
+						</form>
+					</div>
+					<div class="rest-example" id="create-update-get-delete">
+						<form action="">
+							<div class="rest-container rest-left" id="json">
+								<h3>Automation Rule</h3>
+								Enter Rule content:<br>
+								<textarea class="rest-code" id="ruleSample" spellcheck="false" style="width: 390px; height: 680px">{
+  "uid" : "AutomationRestAPIDemoSampleRule",
+  "name" : "SampleRule",
+  "tags" : [ "sample", "rule" ],
+  "description" : "Sample Rule definition.",
+  "triggers" : [
+    {
+      "id" : "SampleTriggerID",
+      "type" : "SampleTrigger"
+    } 
+  ],
+  "conditions" : [ 
+    {
+      "id" : "SampleConditionID",
+      "type" : "SampleCondition",
+      "configuration" : {
+        "operator" : "=",
+        "constraint" : "hello"
+      },
+      "inputs" : {
+        "conditionInput" : "SampleTriggerID.triggerOutput"
+      }
+    }
+  ],
+  "actions" : [
+    {
+      "id" : "SampleActionID",
+      "type" : "SampleAction",
+      "configuration" : {
+        "stringToPrint" : "»»» Hello World!!!"
+      }
+    }
+  ]
+}</textarea>
+							</div>
+							<div class="rest-container rest-right" id="examples">
+								<div class="rest-example" id="create">
+									<h4>Create a new Rule from JSON</h4>
+									<pre id="result" style="word-wrap: break-word"></pre>
+									<hr>
+									<button type="button" onclick="createRule(ruleSample.value)">POST Rule »</button>
+								</div>
+								<div class="rest-example" id="update">
+									<h4>Update an existing Rule from JSON</h4>
+									<pre id="resultUpdate"></pre>
+									<hr>
+									Enter Rule UID:<br> <input type="text" id="updatedRuleUID" size="40"><br>
+									<button type="button" onclick="updateRule(updatedRuleUID.value, ruleSample.value)">PUT Rule »</button>
+								</div>
+								<div class="rest-example" id="get">
+									<h4>Get the content of the specified Rule</h4>
+									<pre id="gotten"></pre>
+									<hr>
+									Enter Rule UID:<br> <input type="text" id="gottenRuleUID" size="40"><br>
+									<button type="button" onclick="loadRule(gottenRuleUID.value)">GET Rule »</button>
+								</div>
+								<div class="rest-example" id="delete">
+									<h4>Delete the specified Rule</h4>
+									<pre id="deleted"></pre>
+									<hr>
+									Enter Rule UID:<br> <input type="text" id="deletedRuleUID" size="40"><br>
+									<button type="button" onclick="deleteRule(deletedRuleUID.value)">DELETE Rule »</button>
+								</div>
+								<div class="rest-example" id="enable">
+									<h4>Enable/Disable the specified Rule</h4>
+									<pre id="enabled"></pre>
+									<hr>
+									Enter Rule UID:<br> <input type="text" id="enabledRuleUID" size="40"><br>
+									<button type="button" onclick="enableRule(enabledRuleUID.value)">Enable Rule »</button>
+									<button type="button" onclick="disableRule(enabledRuleUID.value)">Disable Rule »</button>
+								</div>
+                                <div class="rest-example" id="runnow">
+                                    <h4>Execute actions of specified Rule</h4>
+                                    <pre id="runnow_status"></pre>
+                                    <hr>
+                                    Enter Rule UID:<br> <input type="text" id="runnowRuleUID" size="40"><br>
+                                    <button type="button" onclick="runnow(runnowRuleUID.value)">RunNow»</button>
+                                </div>
+							</div>
+						</form>
+						<script>
+							function updateRule(uid, rule) {
+								if (uid == "") {
+									document.getElementById("resultUpdate").innerHTML = "Please, specify the Rule UID";
+								} else if (rule == "") {
+									document.getElementById("resultUpdate").innerHTML = "Please, specify the new content of the Rule";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+											document.getElementById("resultUpdate").innerHTML = "The given Rule is sucsesfully updated!";
+										} else {
+											document.getElementById("resultUpdate").innerHTML = xmlhttp.responseText;
+										}
+									};
+									xmlhttp.open("PUT", "/rest/rules/" + uid, true);
+									xmlhttp.setRequestHeader("Content-type", "application/json");
+									xmlhttp.send(rule);
+								}
+							}
+							function createRule(rule) {
+								xmlhttp = new XMLHttpRequest();
+								xmlhttp.onreadystatechange = function() {
+									if (xmlhttp.readyState == 4 && xmlhttp.status == 201) {
+										document.getElementById("result").innerHTML = "The given Rule is sucsesfully created!";
+									} else {
+										document.getElementById("result").innerHTML = xmlhttp.responseText;
+									}
+								};
+								xmlhttp.open("POST", "/rest/rules/", true);
+								xmlhttp.setRequestHeader("Content-type", "application/json");
+								xmlhttp.send(rule);
+							}
+							function loadRule(uid) {
+								if (uid == "") {
+									document.getElementById("gotten").innerHTML = "Please, specify the Rule UID";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState != 4 && xmlhttp.status != 200) {
+											document.getElementById("gotten").innerHTML = xmlhttp.responseText;
+										} else {
+											document.getElementById("ruleSample").value = JSON.stringify(JSON
+													.parse(xmlhttp.responseText), null, 2);
+										}
+									};
+									xmlhttp.open("GET", "/rest/rules/" + uid, true);
+									xmlhttp.setRequestHeader("Content-type", "application/json");
+									xmlhttp.send();
+								}
+							}
+							function deleteRule(uid) {
+								if (uid == "") {
+									document.getElementById("deleted").innerHTML = "Please, specify the Rule UID";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+											document.getElementById("deleted").innerHTML = "\"" + uid
+													+ "\" is sucsesfully deleted!";
+										} else {
+											document.getElementById("deleted").innerHTML = xmlhttp.responseText;
+										}
+									};
+									xmlhttp.open("DELETE", "/rest/rules/" + uid, true);
+									xmlhttp.send();
+								}
+							}
+							function enableRule(rule) {
+                                xmlhttp = new XMLHttpRequest();
+                                xmlhttp.onreadystatechange = function() {
+                                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                        document.getElementById("enabled").innerHTML = "The given Rule is sucsesfully enabled!";
+                                    } else {
+                                        document.getElementById("enabled").innerHTML = xmlhttp.responseText;
+                                    }
+                                };
+                                xmlhttp.open("POST", "/rest/rules/" + rule + "/enable", true);
+                                xmlhttp.setRequestHeader("Content-type", "text/plain");
+                                xmlhttp.send("true");
+                            }
+							function disableRule(rule) {
+                                xmlhttp = new XMLHttpRequest();
+                                xmlhttp.onreadystatechange = function() {
+                                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                        document.getElementById("enabled").innerHTML = "The given Rule is sucsesfully disabled!";
+                                    } else {
+                                        document.getElementById("enabled").innerHTML = xmlhttp.responseText;
+                                    }
+                                };
+                                xmlhttp.open("POST", "/rest/rules/" + rule + "/enable", true);
+                                xmlhttp.setRequestHeader("Content-type", "text/plain");
+                                xmlhttp.send("false");
+                            }
+	                         function runnow(rule) {
+	                                xmlhttp = new XMLHttpRequest();
+	                                xmlhttp.onreadystatechange = function() {
+	                                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+	                                        document.getElementById("runnow_status").innerHTML = "The actions of the Rule are executed!";
+	                                    } else {
+	                                        document.getElementById("runnow_status").innerHTML = xmlhttp.responseText;
+	                                    }
+	                                };
+	                                xmlhttp.open("POST", "/rest/rules/" + rule + "/runnow", true);
+	                                xmlhttp.setRequestHeader("Content-type", "text/plain");
+	                                xmlhttp.send();
+                            }
+						</script>
+					</div>
+					<div class="rest-example" id="get-update-ruleConfig">
+						<form action="">
+							<div class="rest-container rest-left" id="ruleConfig">
+								<h3>Automation Rule Configuration</h3>
+								Configuration:<br>
+								<textarea class="code_input" id="config" spellcheck="false" style="width: 390px; height: 290px"></textarea>
+							</div>
+							<div class="rest-container rest-right" id="get-update-config">
+								<div class="rest-example" id="get-ruleConfig">
+									<h4>Get Configuration</h4>
+									<pre id="missingUid"></pre>
+									<hr>
+									Enter Rule UID:<br> <input type="text" id="uid" size="40"><br>
+									<button type="button" onclick="loadRuleConfig(uid.value)">GET Rule Configuration »</button>
+								</div>
+								<div class="rest-example" id="update-ruleConfig">
+									<h4>Update Configuration</h4>
+									<pre id="missingData"></pre>
+									<hr>
+									Enter Rule UID:<br> <input type="text" id="updatedRuleUid" size="40"><br>
+									<button type="button" onclick="updateRuleConfig(updatedRuleUid.value, config.value)">PUT Rule
+										Configuration »</button>
+								</div>
+							</div>
+						</form>
+						<script>
+							function loadRuleConfig(uid) {
+								if (uid == "") {
+									document.getElementById("missingUid").innerHTML = "Please, specify the Rule UID";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState != 4 && xmlhttp.status != 200) {
+											document.getElementById("missingUid").innerHTML = xmlhttp.responseText;
+										} else {
+											document.getElementById("config").value = JSON.stringify(JSON
+													.parse(xmlhttp.responseText), null, 2);
+										}
+									};
+									xmlhttp.open("GET", "/rest/rules/" + uid + "/config", true);
+									xmlhttp.send();
+								}
+							}
+							function updateRuleConfig(uid, config) {
+								if (uid == "") {
+									document.getElementById("missingData").innerHTML = "Please, specify the Rule UID";
+								} else if (config == "") {
+									document.getElementById("missingData").innerHTML = "Please, specify the Rule Configuration";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+											document.getElementById("missingData").innerHTML = "SUCCESS";
+										} else {
+											document.getElementById("missingData").innerHTML = xmlhttp.responseText;
+										}
+									};
+									xmlhttp.open("PUT", "/rest/rules/" + uid + "/config", true);
+									xmlhttp.setRequestHeader("Content-type", "application/json");
+									xmlhttp.send(config);
+								}
+							}
+						</script>
+					</div>
+					<div class="rest-example" id="ruleModules">
+						<form action="">
+							<div class="rest-container rest-left" id="modulesInfo">
+								<h3>Automation Rule Modules</h3>
+								<pre id="infoType"></pre>
+								<textarea class="code_input" id="info" spellcheck="false" style="width: 390px; height: 290px"></textarea>
+							</div>
+							<div class="rest-container rest-right" id="modulesInfoExamples">
+								<div class="rest-example" id="ruleModulesInfo">
+									<h4>Get Modules</h4>
+									<pre id="modules"></pre>
+									<hr>
+									Chose Category: <select name="modulesCategory">
+										<option>actions</option>
+										<option>conditions</option>
+										<option>triggers</option>
+									</select><br> Rule UID:<br> <input type="text" id="modulesRuleUid" size="40"><br>
+									<button type="button" onclick="loadRuleModules(modulesRuleUid.value, modulesCategory.value)">GET
+										Modules »</button>
+								</div>
+								<div class="rest-example" id="ruleModuleInfo">
+									<h4>Get Module</h4>
+									<pre id="module"></pre>
+									<hr>
+									Chose Category: <select name="moduleCategory">
+										<option>actions</option>
+										<option>conditions</option>
+										<option>triggers</option>
+									</select><br> Rule UID:<br> <input type="text" id="moduleRuleUid" size="40"><br> Module ID:<br>
+									<input type="text" id="moduleId" size="40"><br>
+									<button type="button" onclick="loadRuleModule(moduleRuleUid.value, moduleCategory.value, moduleId.value)">GET
+										Module »</button>
+								</div>
+							</div>
+						</form>
+						<script>
+							function loadRuleModules(uid, category) {
+								document.getElementById("infoType").innerHTML = "Modules:";
+								if (uid == "") {
+									document.getElementById("modules").innerHTML = "Please, specify the Rule UID";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState != 4 && xmlhttp.status != 200) {
+											document.getElementById("modules").innerHTML = xmlhttp.responseText;
+										} else {
+											document.getElementById("info").value = JSON.stringify(JSON
+													.parse(xmlhttp.responseText), null, 2);
+										}
+									};
+									xmlhttp.open("GET", "/rest/rules/" + uid + "/" + category, true);
+									xmlhttp.send();
+								}
+							}
+							function loadRuleModule(uid, category, id) {
+								document.getElementById("infoType").innerHTML = "Module:";
+								if (uid == "") {
+									document.getElementById("module").innerHTML = "Please, specify the Rule UID";
+								} else if (id == "") {
+									document.getElementById("module").innerHTML = "Please, specify the Module ID";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState != 4 && xmlhttp.status != 200) {
+											document.getElementById("module").innerHTML = xmlhttp.responseText;
+										} else {
+											document.getElementById("info").value = JSON.stringify(JSON
+													.parse(xmlhttp.responseText), null, 2);
+										}
+									};
+									xmlhttp.open("GET", "/rest/rules/" + uid + "/" + category + "/" + id, true);
+									xmlhttp.send();
+								}
+							}
+						</script>
+					</div>
+					<div class="rest-example" id="ruleModuleConfiguration">
+						<form action="">
+							<div class="rest-container rest-left" id="configurationInfo">
+								<h3>Automation Rule Module Configuration</h3>
+								<pre id="configInfoType"></pre>
+								<textarea class="code_input" id="configInfo" spellcheck="false" style="width: 390px; height: 690px"></textarea>
+							</div>
+							<div class="rest-container rest-right" id="configurationParamsInfo">
+								<div class="rest-example" id="getModuleConfigInfo">
+									<h4>Get Configuration</h4>
+									<pre id="moduleConfig"></pre>
+									<hr>
+									Chose Category: <select name="moduleConfigCategory">
+										<option>actions</option>
+										<option>conditions</option>
+										<option>triggers</option>
+									</select><br> Rule UID:<br> <input type="text" id="moduleConfigRuleUid" size="40"><br> Module ID:<br>
+									<input type="text" id="moduleConfigId" size="40"><br>
+									<button type="button"
+										onclick="loadModuleConfig(moduleConfigRuleUid.value, moduleConfigCategory.value, moduleConfigId.value)">GET
+										Module Configuration »</button>
+								</div>
+								<div class="rest-example" id="getModuleConfigParamInfo">
+									<h4>Get Configuration Parameter</h4>
+									<pre id="moduleConfigParam"></pre>
+									<hr>
+									Chose Category: <select name="moduleConfigParamCategory">
+										<option>actions</option>
+										<option>conditions</option>
+										<option>triggers</option>
+									</select><br> Rule UID:<br> <input type="text" id="moduleConfigParamRuleUid" size="40"><br>
+									Module ID:<br> <input type="text" id="moduleConfigParamId" size="40"><br> Configuration
+									Parameter Name:<br> <input type="text" id="param" size="40"><br>
+									<button type="button"
+										onclick="loadModuleConfigParam(moduleConfigParamRuleUid.value, moduleConfigParamCategory.value, moduleConfigParamId.value, param.value)">GET
+										Module Configuration Parameter »</button>
+								</div>
+								<div class="rest-example" id="updateModuleConfigParamInfo">
+									<h4>Update Configuration Parameter</h4>
+									<pre id="updateConfigParam"></pre>
+									<hr>
+									Chose Category: <select name="updateConfigParamCategory">
+										<option>actions</option>
+										<option>conditions</option>
+										<option>triggers</option>
+									</select><br> Rule UID:<br> <input type="text" id="updateConfigParamRuleUid" size="40"><br>
+									Module ID:<br> <input type="text" id="updateConfigParamId" size="40"><br> Configuration
+									Parameter Name:<br> <input type="text" id="updateParam" size="40"><br>
+									<button type="button"
+										onclick="updateModuleConfigParam(updateConfigParamRuleUid.value, updateConfigParamCategory.value, updateConfigParamId.value, updateParam.value, configInfo.value)">PUT
+										Module Configuration Parameter »</button>
+								</div>
+							</div>
+						</form>
+						<script>
+							function loadModuleConfig(uid, category, id) {
+								document.getElementById("configInfoType").innerHTML = "Configuration:";
+								if (uid == "") {
+									document.getElementById("moduleConfig").innerHTML = "Please, specify the Rule UID";
+								} else if (category == "") {
+									document.getElementById("moduleConfig").innerHTML = "Please, specify the Module Category";
+								} else if (id == "") {
+									document.getElementById("moduleConfig").innerHTML = "Please, specify the Module ID";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState != 4 && xmlhttp.status != 200) {
+											document.getElementById("moduleConfig").innerHTML = xmlhttp.responseText;
+										} else {
+											document.getElementById("configInfo").value = JSON.stringify(JSON
+													.parse(xmlhttp.responseText), null, 2);
+										}
+									};
+									xmlhttp.open("GET", "/rest/rules/" + uid + "/" + category + "/" + id + "/config",
+											true);
+									xmlhttp.send();
+								}
+							}
+							function loadModuleConfigParam(uid, category, id, param) {
+								document.getElementById("configInfoType").innerHTML = "Configuration Parameter Value:";
+								if (uid == "") {
+									document.getElementById("moduleConfigParam").innerHTML = "Please, specify the Rule UID";
+								} else if (category == "") {
+									document.getElementById("moduleConfigParam").innerHTML = "Please, specify the Module Category";
+								} else if (id == "") {
+									document.getElementById("moduleConfigParam").innerHTML = "Please, specify the Module ID";
+								} else if (param == "") {
+									document.getElementById("moduleConfigParam").innerHTML = "Please, specify the Module Configuration Parameter Name";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState != 4 && xmlhttp.status != 200) {
+											document.getElementById("moduleConfigParam").innerHTML = xmlhttp.responseText;
+										} else {
+											document.getElementById("configInfo").value = xmlhttp.responseText;
+										}
+									};
+									xmlhttp.open("GET", "/rest/rules/" + uid + "/" + category + "/" + id + "/config/"
+											+ param, true);
+									xmlhttp.send();
+								}
+							}
+							function updateModuleConfigParam(uid, category, id, param, value) {
+								document.getElementById("configInfoType").innerHTML = "Configuration Parameter Value:";
+								if (uid == "") {
+									document.getElementById("updateConfigParam").innerHTML = "Please, specify the Rule UID";
+								} else if (category == "") {
+									document.getElementById("updateConfigParam").innerHTML = "Please, specify the Module Category";
+								} else if (id == "") {
+									document.getElementById("updateConfigParam").innerHTML = "Please, specify the Module ID";
+								} else if (param == "") {
+									document.getElementById("updateConfigParam").innerHTML = "Please, specify the Module Configuration Parameter Name";
+								} else {
+									xmlhttp = new XMLHttpRequest();
+									xmlhttp.onreadystatechange = function() {
+										if (xmlhttp.readyState != 4 && xmlhttp.status != 200) {
+											document.getElementById("updateConfigParam").innerHTML = xmlhttp.responseText;
+										} else {
+											document.getElementById("updateConfigParam").innerHTML = "SUCCESS";
+										}
+									};
+									xmlhttp.open("PUT", "/rest/rules/" + uid + "/" + category + "/" + id + "/config/"
+											+ param, true);
+									xmlhttp.setRequestHeader("Content-type", "text/plain");
+									xmlhttp.send(value);
+								}
+							}
+						</script>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

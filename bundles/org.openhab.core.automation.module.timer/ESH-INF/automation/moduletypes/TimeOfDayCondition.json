@@ -1,0 +1,27 @@
+{  
+   "conditions":[  
+    {  
+     "uid":"core.TimeOfDayCondition",
+     "label":"it is a certain time of day",
+     "description":"Evaluates if the current time is within a user-configured time span.",
+     "configDescriptions":[
+      {  
+         "name":"startTime",
+         "context":"time",
+         "type":"TEXT",
+         "label":"Start Time",
+         "description":"Start of the time span (in hh:mm)",
+         "required":true
+      },
+      {  
+         "name":"endTime",
+         "context":"time",
+         "type":"TEXT",
+         "label":"End Time",
+         "description":"End of the time span (in hh:mm)",
+         "required":true
+      }
+     ]
+    }
+   ]
+}

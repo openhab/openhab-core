@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+        xmlns:binding="http://eclipse.org/smarthome/schemas/binding/v1.0.0"
+        xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+        targetNamespace="http://eclipse.org/smarthome/schemas/binding/v1.0.0">
+
+    <xs:import namespace="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+            schemaLocation="http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd"/>
+
+    <xs:element name="binding">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="description" type="xs:string" minOccurs="0"/>
+                <xs:element name="author" type="xs:string" minOccurs="0"/>
+                <xs:element name="service-id" type="xs:string" minOccurs="0"/>
+                <xs:choice minOccurs="0">
+                    <xs:element name="config-description" type="config-description:configDescription"/>
+                    <xs:element name="config-description-ref" type="config-description:configDescriptionRef"/>
+                </xs:choice>
+            </xs:sequence>
+            <xs:attribute name="id" type="config-description:idRestrictionPattern" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

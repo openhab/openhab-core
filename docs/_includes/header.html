@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="twitter:dnt" content="on">
+ {% include base.html %}
+<link rel="shortcut icon" href="https://www.eclipse.org/smarthome/img/favicon.png"></link>
+<title>Eclipse SmartHome - A Flexible Framework for the Smart
+	Home</title>
+ 
+<!-- CSS -->
+<link href="https://www.eclipse.org/smarthome/css/materialize.css" type="text/css" rel="stylesheet"
+	media="screen,projection" />
+<link href="https://www.eclipse.org/smarthome/css/highlight.github.css" type="text/css" rel="stylesheet"
+    	media="screen,projection" />
+<link href="{{base}}/css/styles.css" rel="stylesheet" />
+
+<!-- Font -->
+<link href='https://fonts.googleapis.com/css?family=Lato:300,400,700'
+	rel='stylesheet' type='text/css' />
+	
+<!-- Cookie Consent -->
+<link rel="stylesheet" type="text/css" href="//www.eclipse.org/eclipse.org-common/themes/solstice/public/stylesheets/vendor/cookieconsent/cookieconsent.min.css" />
+<script src="//www.eclipse.org/eclipse.org-common/themes/solstice/public/javascript/vendor/cookieconsent/default.min.js"></script>  
+<script>
+	window.hasCookieConsent = function() {
+		var match = document.cookie.match(new RegExp('eclipse_cookieconsent_status=([^;]+)'));
+		return match && (match[1] === 'allow');
+	}
+</script>
+	
+</head>
+<body class="{{ include.bodyClass }}">
+	<div id="header" class="navbar-fixed">
+		<nav role="navigation">
+			<div class="container">
+				<div class="nav-wrapper">
+					<a href="{{base}}/index.html"><img id="logo" src="https://www.eclipse.org/smarthome/img/eclipse_logo.png" /></a>
+					<a href="#" data-activates="nav-mobile" class="button-collapse"><i
+						class="mdi-navigation-menu"></i></a>
+					<ul class="right hide-on-med-and-down">
+						<li><a href="{{base}}/getting-started.html">Getting Started</a></li>
+						<li><a href="{{base}}/documentation/index.html">Documentation</a></li>
+						<li><a href="{{base}}/blog">Blog</a></li>
+						<li><a href="https://github.com/eclipse/smarthome">GitHub</a></li>
+					</ul>
+					<ul id="nav-mobile" class="side-nav">
+                        <li><a href="{{base}}/index.html">Home</a></li>
+						<li><a href="{{base}}/getting-started.html">Getting Started</a></li>
+						<li><a href="{{base}}/documentation/index.html">Documentation</a></li>
+						<li><a href="{{base}}/blog">Blog</a></li>
+						<li><a href="https://github.com/eclipse/smarthome">GitHub</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</div>

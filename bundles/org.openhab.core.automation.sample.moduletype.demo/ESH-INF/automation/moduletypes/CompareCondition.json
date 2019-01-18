@@ -1,0 +1,32 @@
+{  
+   "conditions":[  
+      {  
+         "uid":"CompareCondition",
+         "label":"Demo Condition",
+         "description":"Comares a value from it's input wit a given constraint value, by given constraint operator.",
+         "configDescriptions":[  
+            {  
+               "name":"operator",
+               "type":"TEXT",
+               "description":"Valid operators are =,>,<,!=",
+               "required":true
+            },
+            {  
+               "name":"constraint",
+               "type":"INTEGER",
+               "description":"Right operand which is compared with the input.",
+               "required":true
+            }
+         ],
+         "inputs":[  
+            {  
+               "name":"inputValue",
+               "type":"java.lang.Integer",
+               "label":"inputValue",
+               "description":"Input value which will be evaluated.",
+               "required":true
+            }
+         ]
+      }
+   ]
+}

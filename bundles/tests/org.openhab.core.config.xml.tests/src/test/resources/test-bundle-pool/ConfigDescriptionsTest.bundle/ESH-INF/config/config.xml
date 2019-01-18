@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0 http://eclipse.org/smarthome/schemas/config-description/v1.0.0">
+
+	<!-- test dummy -->
+	<config-description uri="config:dummyConfig">
+		<parameter-group name="group1">
+			<context>Context-Group1</context>
+			<label>Group 1</label>
+			<description>Description Group 1</description>
+			<advanced>false</advanced>
+		</parameter-group>
+
+		<parameter-group name="group2">
+			<context>Context-Group2</context>
+			<label>Group 2</label>
+			<description>Description Group 2</description>
+			<advanced>true</advanced>
+		</parameter-group>
+			
+		<parameter name="ip" type="text" pattern="[0-9]{3}.[0-9]{3}.[0-9]{3}.[0-9]{3}" required="true" readOnly="true">
+	        <multipleLimit>4</multipleLimit>
+			<context>network-address</context>
+			<label>Network Address</label>
+			<description>Network address of the hue bridge.</description>
+			<required>true</required><!-- deprecated -->
+			<limitToOptions>true</limitToOptions>
+		</parameter>
+
+		<parameter name="username" type="text" groupName="user">
+			<context>password</context>
+			<label>Username</label>
+			<description>Name of a registered hue bridge user, that allows to access the API.
+			</description>
+		</parameter>
+
+		<!-- password with min 8, max 16 characters -->
+		<parameter name="user-pass" type="text" groupName="user" min="8" max="16" required="true">
+			<context>password</context>
+			<label>Password</label>
+			<required>true</required><!-- deprecated -->
+			<verify>true</verify>
+		</parameter>
+		
+		<!-- a static selection list allowing multiple selections with min 2 max 3 items -->
+	    <parameter name="list1" type="text" multiple="true" min="2" max="3">
+	        <options>
+	            <option value="key1">label1</option>
+	            <option value="key2">label2</option>
+	        </options>
+	    </parameter>
+
+	    <parameter name="list2" type="text" multiple="true" min="2" max="3">
+	        <options>
+	            <option value="key1">label1</option>
+	            <option value="key2">label2</option>
+	        </options>
+	        <advanced>true</advanced>
+	        <multipleLimit>4</multipleLimit>
+	        <limitToOptions>false</limitToOptions>
+	    </parameter>
+
+	    <!-- a selection list of color items that have the tags "alarm" and "light" -->
+	    <parameter name="color-alarming-light" type="text" multiple="true">
+	        <context>item</context>
+	        <filter>
+	            <criteria name="tags">alarm, light</criteria>
+	            <criteria name="type">color</criteria>
+	            <criteria name="binding-id">hue</criteria>
+	        </filter>
+		</parameter>
+		
+		<parameter name="unit" type="integer" unit="m" />
+
+        <parameter name="unit-label" type="decimal">
+            <unitLabel>Runs</unitLabel>
+        </parameter>
+        
+        <parameter name="unit-ohm" type="decimal" unit="Ω" />
+
+        <parameter name="unit-acceleration" type="decimal" unit="m/s2" />
+        
+        <parameter name="unit-celcius" type="decimal" unit="Cel" />
+        
+        <parameter name="unit-seconds" type="decimal" unit="s" />
+        
+        <parameter name="unit-kph" type="decimal" unit="kph" />
+        
+        <parameter name="unit-movements" type="decimal" >
+            <unitLabel>@text/thing-type.config.dummyConfig.unit-movement.unitLabel</unitLabel>
+        </parameter>
+
+	</config-description>
+
+</config-description:config-descriptions>

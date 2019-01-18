@@ -1,0 +1,14 @@
+    {% include header.html bodyClass="documentation"%}
+    
+    <section id="documentation" class="text content-wrapper">
+        <div class="container">
+            <div class="side-nav-wrapper">
+                {% include documentation-menu.html %}
+            </div>    
+            <div class="content">  
+	            {{ content }}
+            </div>
+        </div>
+    </section>
+    
+	{% include footer.html %}

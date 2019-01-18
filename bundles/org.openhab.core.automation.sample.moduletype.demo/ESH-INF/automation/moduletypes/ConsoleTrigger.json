@@ -1,0 +1,33 @@
+{  
+   "triggers":[  
+      {  
+         "uid":"ConsoleTrigger",
+         "label":"Demo Trigger",
+         "description":"Triggers the Rule on event from EventAdmin service",
+         "configDescriptions":[  
+            {  
+               "name":"eventTopic",
+               "type":"TEXT",
+               "label":"Topic",
+               "description":"This is the event topic that the trigger will listen for",
+               "required":true
+            },
+            {  
+               "name":"keyName",
+               "type":"TEXT",
+               "label":"Key name",
+               "description":"The key for entry that contains a value for the output of this trigger.",
+               "required":true
+            }
+         ],
+         "outputs":[  
+            {  
+               "name":"outputValue",
+               "type":"java.lang.Integer",
+               "label":"Output value",
+               "description":"Output value"
+            }
+         ]
+      }
+   ]
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="SystemChannelsInChannelGroups" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<!-- YahooWeather Binding -->
+	<thing-type id="wireless-router">
+		<label>Simple wireless router</label>
+		<description>Simple wireless router</description>
+
+		<channel-groups>
+			<channel-group typeId="channelGroup" id="group1" />
+			<channel-group typeId="channelGroup" id="group2" />
+		</channel-groups>
+
+	</thing-type>
+
+	<!-- System Channel Type -->
+	<channel-type id="my-channel" system="true">
+		<item-type>Number</item-type>
+		<label>My Channel</label>
+		<category>Other</category>
+		<tags>
+			<tag>
+				Test
+			</tag>
+		</tags>
+		<config-description>
+			<parameter name="range" type="integer" readOnly="true" min="0" max="4" step="1" />
+		</config-description>
+	</channel-type>
+
+	<!-- Channel Group -->
+	<channel-group-type id="channelGroup">
+		<label>Test Channel Group Label</label>
+		<description>Test Channel Group Description</description>
+		<channels>
+			<channel id="sigstr" typeId="system.signal-strength" />
+			<channel id="test" typeId="system.my-channel" />
+			<channel id="lowbat" typeId="system.low-battery" />
+		</channels>
+	</channel-group-type>
+
+</thing:thing-descriptions>

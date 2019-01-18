@@ -21,9 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -46,11 +47,13 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Maps;
 
 /**
  * This service reads addons.cfg and installs listed addons (= Karaf features) and the selected package.
@@ -59,6 +62,11 @@ import com.google.common.collect.Maps;
  *
  * @author Kai Kreuzer - Initial contribution and API
  */
+@Component(name = "org.openhab.addons", service = { FeatureInstaller.class, ConfigurationListener.class }, property = {
+        "service.config.description.uri:String=system:addons", //
+        "service.config.label:String=Add-on Management", //
+        "service.config.category:String=system" //
+})
 public class FeatureInstaller implements ConfigurationListener {
 
     public static final String MINIMAL_PACKAGE = "minimal";
@@ -92,6 +100,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private static String currentPackage = null;
 
+    @Reference
     protected void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
     }
@@ -100,6 +109,7 @@ public class FeatureInstaller implements ConfigurationListener {
         this.featuresService = null;
     }
 
+    @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
@@ -108,6 +118,7 @@ public class FeatureInstaller implements ConfigurationListener {
         this.configurationAdmin = null;
     }
 
+    @Reference
     protected void setEventPublisher(EventPublisher eventPublisher) {
         FeatureInstaller.eventPublisher = eventPublisher;
     }
@@ -116,6 +127,7 @@ public class FeatureInstaller implements ConfigurationListener {
         FeatureInstaller.eventPublisher = null;
     }
 
+    @Activate
     protected void activate(final Map<String, Object> config) {
         setOnlineRepoUrl();
         setLegacyRepoUrl();
@@ -125,8 +137,12 @@ public class FeatureInstaller implements ConfigurationListener {
             logger.debug("Running scheduled sync job");
             try {
                 Dictionary<String, Object> cfg = configurationAdmin.getConfiguration(ADDONS_PID).getProperties();
-                Iterator<String> keysIter = Iterators.forEnumeration(cfg.keys());
-                Map<String, Object> cfgMap = Maps.toMap(keysIter, cfg::get);
+                final Map<String, Object> cfgMap = new HashMap<>();
+                final Enumeration<String> enumeration = cfg.keys();
+                while (enumeration.hasMoreElements()) {
+                    final String key = enumeration.nextElement();
+                    cfgMap.put(key, cfg.get(key));
+                }
                 modified(cfgMap);
             } catch (IOException e) {
                 logger.debug("Failed to retrieve the addons configuration from configuration admin: {}",
@@ -135,6 +151,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }, 1, 1, TimeUnit.MINUTES);
     }
 
+    @Deactivate
     protected void deactivate() {
         if (scheduler != null) {
             scheduler.shutdownNow();
@@ -142,6 +159,7 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
+    @Modified
     protected void modified(final Map<String, Object> config) {
         boolean changed = false;
         boolean online = (config.get(CFG_REMOTE) == null && getOnlineStatus())

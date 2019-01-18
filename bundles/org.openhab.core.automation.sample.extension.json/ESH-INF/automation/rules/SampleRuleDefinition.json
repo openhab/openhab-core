@@ -1,0 +1,83 @@
+[
+    {
+        "uid":"sample.rule1",
+        "name":"SampleRule",
+        "tags":[
+            "sample",
+            "rule"
+        ],
+        "description":"Sample Rule definition.",
+        "triggers":[
+            {
+                "id":"SampleTriggerID",
+                "type":"SampleTrigger"
+            }
+        ],
+        "conditions":[
+            {
+                "id":"SampleConditionID",
+                "type":"SampleCondition",
+                "configuration":{
+                    "operator":"=",
+                    "constraint":"dtag"
+                },
+                "inputs":{
+                    "conditionInput":"SampleTriggerID.triggerOutput"
+                }
+            }
+        ],
+        "actions":[
+            {
+                "id":"SampleActionID",
+                "type":"SampleAction",
+                "inputs":{
+                    "message":"SampleTriggerID.triggerOutput"
+                }
+            }
+        ]
+    },
+    {
+        "uid":"sample.rule2",
+        "name":"SampleRule2",
+        "tags":[
+            "sample",
+            "rule"
+        ],
+        "description":"Sample Rule definition2 with modules label and description.",
+        "triggers":[
+            {
+                "id":"CompositeSampleTriggerID",
+                "type":"CompositeSampleTrigger",
+                "label":"CompositeSampleTrigger label",
+                "description":"CompositeSampleTrigger descr"
+            }
+        ],
+        "conditions":[
+            {
+                "id":"SampleConditionID2",
+                "type":"SampleCondition",
+                "label":"SampleCondition label",
+                "description":"SampleCondition descr",
+                "configuration":{
+                    "operator":"!=",
+                    "constraint":"dtag"
+                },
+                "inputs":{
+                    "conditionInput":"CompositeSampleTriggerID.compositeTriggerOutput"
+                }
+            }
+        ],
+        "actions":[
+            {
+                "id":"CompositeActionID",
+                "type":"CompositeSampleAction",
+                "configuration": {
+                    "compositeMessage": "Hello World!!!"
+                },
+                "inputs":{
+                    "compositeActionInput":"CompositeSampleTriggerID.compositeTriggerOutput"
+                }
+            }
+        ]
+    }
+]
