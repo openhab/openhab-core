@@ -22,7 +22,6 @@
     <module>org.openhab.core.karaf</module>
     <module>org.openhab.core.karaf.dep.war</module>
     <module>org.openhab.io.jetty.certificate</module>
-    <module>org.openhab.io.sound</module>
     <module>org.openhab.ui.dashboard</module>
     <module>org.openhab.ui.start</module>
   </modules>
