@@ -25,7 +25,3 @@ Import-Package:
  org.mockito.verification,
  org.osgi.service.device,
  org.osgi.service.http
-Require-Bundle: org.openhab.core,
- org.eclipse.smarthome.core.thing,
- org.eclipse.smarthome.core,
- org.eclipse.smarthome.model.core
