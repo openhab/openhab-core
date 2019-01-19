@@ -4,10 +4,13 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.smarthome.core.items.GroupItem;
 import org.eclipse.smarthome.core.items.Item;
@@ -30,8 +33,16 @@ import org.eclipse.smarthome.model.core.ModelRepository;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.hamcrest.Matcher;
 import org.junit.Before;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public abstract class RuleTest extends JavaOSGiTest {
+	private Logger logger = LoggerFactory.getLogger(RuleTest.class);
     private static final String startupRule = "rule \"Integration Test startup rule\"\n" + "when\n"
             + "    System started\n" + "then\n" + "    startupFinished.sendCommand(ON)\n" + "end";
     private static final String startupItem = "Switch startupFinished";
@@ -76,6 +87,34 @@ public abstract class RuleTest extends JavaOSGiTest {
         modelRepository.addOrRefreshModel("startup_finish_test.items",
                 new ByteArrayInputStream(startupItem.getBytes()));
     }
+    
+    protected void runTimerWhichRunsIn(long in, TemporalUnit unit) throws SchedulerException {
+    	Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+    	LocalDateTime executeIn = LocalDateTime.now().plus(in, unit).withNano(0);
+    	boolean jobExists = waitFor(() -> timedJob(executeIn, scheduler) != null);
+
+    	if (!jobExists) {
+    		logger.info("Could not find any job that starts in " + in + " " +
+    			unit + " therefore not executing any.");
+    		return;
+    	}
+    	scheduler.triggerJob(timedJob(executeIn, scheduler));
+	}
+
+	private JobKey timedJob(LocalDateTime executeIn, Scheduler scheduler) {
+		Set<JobKey> jobKeys;
+		try {
+			jobKeys = scheduler.getJobKeys(GroupMatcher.anyGroup());
+		} catch (SchedulerException e) {
+			return null;
+		}
+		for (JobKey jobKey : jobKeys) {
+    		if (jobKey.getName().startsWith(executeIn.toString())) {    				
+    			return jobKey;
+    		}
+    	}
+		return null;
+	}
 
     protected void assertThatItemState(Item item, Matcher<State> matcher) {
         waitForAssert(() -> assertThat(item.getState(), matcher), 1000, 50);

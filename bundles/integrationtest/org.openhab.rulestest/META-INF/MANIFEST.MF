@@ -28,4 +28,6 @@ Import-Package:
 Require-Bundle: org.openhab.core,
  org.eclipse.smarthome.core.thing,
  org.eclipse.smarthome.core,
- org.eclipse.smarthome.model.core
+ org.eclipse.smarthome.core.scheduler,
+ org.eclipse.smarthome.model.core,
+ org.slf4j.api
