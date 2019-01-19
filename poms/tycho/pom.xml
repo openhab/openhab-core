@@ -300,20 +300,14 @@
 
     <!-- Eclipse Smarthome dependencies - UI -->
     <dependency>
-      <groupId>org.eclipse.smarthome.extension.ui</groupId>
-      <artifactId>org.eclipse.smarthome.ui.paper</artifactId>
+      <groupId>org.eclipse.smarthome.ui</groupId>
+      <artifactId>org.eclipse.smarthome.ui</artifactId>
       <version>${esh.version}</version>
     </dependency>
 
-    <!-- Eclipse Smarthome dependencies - IoT Market -->
     <dependency>
-      <groupId>org.eclipse.smarthome.extensionservice</groupId>
-      <artifactId>org.eclipse.smarthome.extensionservice.marketplace</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.extensionservice</groupId>
-      <artifactId>org.eclipse.smarthome.extensionservice.marketplace.automation</artifactId>
+      <groupId>org.eclipse.smarthome.ui</groupId>
+      <artifactId>org.eclipse.smarthome.ui.icon</artifactId>
       <version>${esh.version}</version>
     </dependency>
 
