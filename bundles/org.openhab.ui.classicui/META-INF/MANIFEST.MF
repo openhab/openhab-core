@@ -9,7 +9,7 @@ Bundle-Name: openHAB Classic UI Fragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: org.openhab.ui.classicui
 Bundle-Vendor: openHAB
-Bundle-Version: 2.5.0.qualifier
+Bundle-Version: 2.5.0.M1
 Fragment-Host: org.eclipse.smarthome.ui.classic
 Import-Package: 
  org.eclipse.jdt.annotation;resolution:=optional,
