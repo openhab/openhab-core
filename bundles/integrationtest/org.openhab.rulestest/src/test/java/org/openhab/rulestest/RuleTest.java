@@ -98,7 +98,9 @@ public abstract class RuleTest extends JavaOSGiTest {
     			unit + " therefore not executing any.");
     		return;
     	}
-    	scheduler.triggerJob(timedJob(executeIn, scheduler));
+    	JobKey timeJob = timedJob(executeIn, scheduler);
+    	scheduler.triggerJob(timeJob);
+    	scheduler.deleteJob(timeJob);
 	}
 
 	private JobKey timedJob(LocalDateTime executeIn, Scheduler scheduler) {
