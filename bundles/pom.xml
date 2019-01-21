@@ -22,13 +22,7 @@
     <module>org.openhab.core.karaf</module>
     <module>org.openhab.core.karaf.dep.war</module>
     <module>org.openhab.io.jetty.certificate</module>
-    <module>org.openhab.io.rest.docs</module>
-    <module>org.openhab.io.sound</module>
     <module>org.openhab.ui.dashboard</module>
-    <module>org.openhab.ui.basicui</module>
-    <module>org.openhab.ui.classicui</module>
-    <module>org.openhab.ui.homebuilder</module>
-    <module>org.openhab.ui.paperui</module>
     <module>org.openhab.ui.start</module>
   </modules>
 

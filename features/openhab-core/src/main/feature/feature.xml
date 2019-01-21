@@ -42,11 +42,7 @@
         <bundle start-level="30">mvn:org.openhab.core/org.openhab.ui.start/${project.version}</bundle> -->
         <bundle start-level="90">mvn:org.openhab.core/org.openhab.core/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.core.karaf/${project.version}</bundle>
-        <bundle>mvn:org.openhab.core/org.openhab.io.sound/${project.version}</bundle>
         <bundle>mvn:org.openhab.core/org.openhab.ui.dashboard/${project.version}</bundle>
-        <bundle>mvn:org.eclipse.smarthome.extension.ui.iconset/org.eclipse.smarthome.ui.iconset.classic/${esh.version}</bundle>
-        <bundle>mvn:org.eclipse.smarthome.io/org.eclipse.smarthome.io.javasound/${esh.version}</bundle>
-        <bundle>mvn:org.eclipse.smarthome.io/org.eclipse.smarthome.io.webaudio/${esh.version}</bundle>
         <config name="org.eclipse.smarthome.audio">
             defaultSink = enhancedjavasound
         </config>
@@ -113,17 +109,6 @@
 
     <feature name="openhab-transport-upnp" description="UPnP Transport" version="${project.version}">
         <feature>esh-io-transport-upnp</feature>
-    </feature>
-
-    <feature name="openhab-misc-restdocs" description="REST Documentation" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <feature>esh.tp-swagger-jax-rs-provider</feature>
-        <bundle>mvn:org.openhab.core/org.openhab.io.rest.docs/${project.version}</bundle>
-    </feature>
-
-    <feature name="openhab-ui-homebuilder" description="Home Builder" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <bundle>mvn:org.openhab.core/org.openhab.ui.homebuilder/${project.version}</bundle>
     </feature>
 
 </features>
