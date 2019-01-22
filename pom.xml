@@ -142,13 +142,8 @@
         <directory>.</directory>
         <includes>
           <include>NOTICE</include> <!-- general -->
-          <include>about.html</include> <!-- general -->
           <include>*.xsd</include> <!-- only a very rare -->
         </includes>
-      </resource>
-      <resource>
-        <directory>ESH-INF</directory> <!-- general -->
-        <targetPath>ESH-INF</targetPath>
       </resource>
     </resources>
     <pluginManagement>
