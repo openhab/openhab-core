@@ -70,10 +70,6 @@ https://blog.sandra-parsick.de/2017/09/22/generate-p2-repository-from-maven-arti
 
 reintegrate SAT
 
-### License
-
-reintegrate license maven plugin
-
 ### archetype
 
 reintegrate archetype

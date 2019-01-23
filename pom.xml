@@ -431,6 +431,48 @@ Import-Package: \\
           <version>3.0.0</version>
         </plugin>
 
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>3.0</version>
+          <configuration>
+            <basedir>${basedir}</basedir>
+            <header>licenses/epl-2.0/header.txt</header>
+            <quiet>false</quiet>
+            <failIfMissing>true</failIfMissing>
+            <strictCheck>true</strictCheck>
+            <aggregate>true</aggregate>
+            <mapping>
+              <xml>xml-header-style</xml>
+            </mapping>
+            <headerDefinitions>
+              <headerDefinition>licenses/epl-2.0/xml-header-style.xml</headerDefinition>
+            </headerDefinitions>
+            <includes>
+              <include>**/org/openhab/**/*.java</include>
+              <include>**/feature.xml</include>
+              <include>**/OSGI-INF/*.xml</include>
+            </includes>
+            <excludes>
+              <exclude>target/**</exclude>
+              <exclude>**/pom.xml</exclude>
+              <exclude>_*.java</exclude>
+            </excludes>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <properties>
+              <year>2019</year>
+            </properties>
+            <encoding>UTF-8</encoding>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
         <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build
         itself. -->
         <plugin>
