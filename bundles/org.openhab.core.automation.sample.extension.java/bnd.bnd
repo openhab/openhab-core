@@ -1,2 +1,2 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.eclipse.smarthome.automation.sample.extension.java.internal.Activator
+Bundle-Activator: org.openhab.core.automation.sample.extension.java.internal.Activator
