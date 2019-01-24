@@ -179,94 +179,42 @@
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.oauth2client/${project.version}</bundle>
   </feature>
 
-  <feature name="openhab-core-automation-api" version="${project.version}">
+  <feature name="openhab-core-automation" version="${project.version}">
     <feature>openhab-core-base</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.api/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
     <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.automation.RuleRegistry
+      osgi.service;objectClass=org.openhab.core.automation.RuleRegistry
     </capability>
-  </feature>
-
-  <feature name="openhab-core-automation-commands" version="${project.version}">
-    <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <feature dependency="true">openhab-core-automation-core</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.commands/${project.version}</bundle>
-  </feature>
-
-  <feature name="openhab-core-automation-core" version="${project.version}">
-    <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.core/${project.version}</bundle>
-  </feature>
-
-  <feature name="openhab-core-automation-module-core" version="${project.version}">
-    <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.core/${project.version}</bundle>
-    <feature dependency="true">openhab-core-automation-providers</feature>
-    <feature dependency="true">openhab-core-automation-parser-gson</feature>
   </feature>
 
   <feature name="openhab-core-automation-module-script" version="${project.version}">
     <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
+    <feature dependency="true">openhab-core-automation</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script/${project.version}</bundle>
-  </feature>
-
-  <feature name="openhab-core-automation-module-script-defaultscope" version="${project.version}">
-    <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <feature dependency="true">openhab-core-automation-module-script</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script.defaultscope/${project.version}</bundle>
   </feature>
 
   <feature name="openhab-core-automation-module-script-rulesupport" version="${project.version}">
     <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <feature dependency="true">openhab-core-automation-core</feature>
+    <feature dependency="true">openhab-core-automation</feature>
     <feature dependency="true">openhab-core-automation-module-script</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script.rulesupport/${project.version}</bundle>
   </feature>
 
   <feature name="openhab-core-automation-module-media" version="${project.version}">
     <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
+    <feature dependency="true">openhab-core-automation</feature>
     <feature dependency="true">openhab-core-automation-module-script</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.media/${project.version}</bundle>
   </feature>
 
-  <feature name="openhab-core-automation-module-timer" version="${project.version}">
-    <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.timer/${project.version}</bundle>
-  </feature>
-
-  <feature name="openhab-core-automation-parser-gson" version="${project.version}">
-    <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <feature dependency="true">openhab-core-automation-core</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.parser.gson/${project.version}</bundle>
-  </feature>
-
-  <feature name="openhab-core-automation-providers" version="${project.version}">
-    <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <feature dependency="true">openhab-core-automation-core</feature>
-    <feature dependency="true">openhab-core-automation-module-core</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.providers/${project.version}</bundle>
-  </feature>
-
   <feature name="openhab-core-automation-rest" version="${project.version}">
     <feature>openhab-core-base</feature>
-    <feature dependency="true">openhab-core-automation-api</feature>
-    <feature dependency="true">openhab-core-automation-core</feature>
+    <feature dependency="true">openhab-core-automation</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.rest/${project.version}</bundle>
   </feature>
 
   <feature name="openhab-core-config-serial" version="${project.version}">
     <feature>openhab-core-base</feature>
-
     <feature>openhab-core-io-transport-serial</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
   </feature>
