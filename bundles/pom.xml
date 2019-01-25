@@ -18,26 +18,11 @@
   <modules>
     <module>org.openhab.core.auth.jaas</module>
     <module>org.openhab.core.auth.oauth2client</module>
-    <module>org.openhab.core.automation.api</module>
-    <module>org.openhab.core.automation.commands</module>
-    <module>org.openhab.core.automation.core</module>
-    <module>org.openhab.core.automation.module.core</module>
+    <module>org.openhab.core.automation</module>
     <module>org.openhab.core.automation.module.media</module>
     <module>org.openhab.core.automation.module.script</module>
-    <module>org.openhab.core.automation.module.script.defaultscope</module>
     <module>org.openhab.core.automation.module.script.rulesupport</module>
-    <module>org.openhab.core.automation.module.timer</module>
-    <module>org.openhab.core.automation.parser.gson</module>
-    <module>org.openhab.core.automation.providers</module>
-    <module>org.openhab.core.automation.provider.file</module>
     <module>org.openhab.core.automation.rest</module>
-    <module>org.openhab.core.automation.sample.extension.java</module>
-    <module>org.openhab.core.automation.sample.extension.json</module>
-    <module>org.openhab.core.automation.sample.moduletype.demo</module>
-    <module>org.openhab.core.automation.sample.rest.api</module>
-    <module>org.openhab.core.automation.sample.java.demo</module>
-    <module>org.openhab.core.automation.sample.json.demo</module>
-    <module>org.openhab.core.automation.thingsupport</module>
     <module>org.openhab.core.config.core</module>
     <module>org.openhab.core.config.discovery</module>
     <module>org.openhab.core.config.discovery.mdns</module>
