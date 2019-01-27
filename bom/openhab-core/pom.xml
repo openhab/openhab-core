@@ -318,25 +318,7 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.api</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.commands</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.core</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.module.core</artifactId>
+      <artifactId>org.openhab.core.automation</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -354,85 +336,13 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.module.script.defaultscope</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.automation.module.script.rulesupport</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.module.timer</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.parser.gson</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.providers</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.provider.file</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.automation.rest</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.sample.extension.java</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.sample.extension.json</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.sample.moduletype.demo</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.sample.rest.api</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.sample.java.demo</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.sample.json.demo</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.automation.thingsupport</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
