@@ -49,12 +49,12 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
 
     private final String name;
     private final DB db;
-    private final ClassLoader classLoader;
+    private final @Nullable ClassLoader classLoader;
     private Map<String, String> map;
 
     private transient Gson mapper;
 
-    public MapDbStorage(DB db, String name, ClassLoader classLoader) {
+    public MapDbStorage(DB db, String name, @Nullable ClassLoader classLoader) {
         this.name = name;
         this.db = db;
         this.classLoader = classLoader;
@@ -155,8 +155,10 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
         @Nullable
         T value = null;
         try {
+            final ClassLoader classLoader = this.classLoader;
+
             // load required class within the given bundle context
-            Class<T> loadedValueType = null;
+            final Class<T> loadedValueType;
             if (classLoader == null) {
                 loadedValueType = (Class<T>) Class.forName(valueTypeName);
             } else {
