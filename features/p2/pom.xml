@@ -4,20 +4,21 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.openhab.core</groupId>
-    <artifactId>org.openhab.core.reactor</artifactId>
+    <groupId>org.openhab.core.features</groupId>
+    <artifactId>org.openhab.core.reactor.features</artifactId>
     <version>2.5.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.openhab.core.features</groupId>
-  <artifactId>org.openhab.core.reactor.features</artifactId>
+  <groupId>org.openhab.core.features.p2</groupId>
+  <artifactId>org.openhab.core.reactor.features.p2</artifactId>
   <packaging>pom</packaging>
 
-  <name>openHAB Core :: Features</name>
+  <name>openHAB Core :: Features :: p2</name>
 
   <modules>
-    <module>karaf</module>
-    <module>p2</module>
+    <module>poms</module>
+    <module>poms/tycho</module>
+    <module>repo</module>
   </modules>
 
 </project>

@@ -1,2 +1,0 @@
-Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.eclipse.smarthome.automation.sample.rest.api.Activator

@@ -1,2 +1,0 @@
-Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.openhab.core.automation.internal.sample.json.internal.handler.Activator
