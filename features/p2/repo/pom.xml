@@ -6,6 +6,7 @@
     <groupId>org.openhab</groupId>
     <artifactId>pom</artifactId>
     <version>2.5.0-SNAPSHOT</version>
+    <relativePath>../poms/pom.xml</relativePath>
   </parent>
   
   <groupId>org.openhab.core.features.p2.repo</groupId>
