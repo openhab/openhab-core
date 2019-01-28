@@ -15,7 +15,7 @@
 -->
 <features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-  <feature name="openhab.tp-base" description="Eclipse SmartHome Target Platform Base" version="${project.version}">
+  <feature name="openhab.tp-base" description="openHAB Core Target Platform Base" version="${project.version}">
     <capability>openhab.tp;feature=base;version=1.0.0</capability>
 
     <feature>scr</feature>
@@ -214,7 +214,7 @@
 
   <feature name="openhab.tp-swagger-jax-rs-provider" description="JAX-RS provider for Swagger integration" version="${project.version}">
     <details>
-      This feature is currently only for external usage by products and not used by Eclipse SmartHome itself.
+      This feature is currently only for external usage by products and not used by openHAB Core itself.
     </details>
     <capability>openhab.tp;feature=jax-rs-provider-swagger;version=1.1.1</capability>
     <feature dependency="true">openhab.tp-jax-rs-min</feature>
@@ -250,7 +250,7 @@
     <bundle>mvn:de.maggu2810.thirdparty.modified.com.eclipsesource.jaxrs/provider-swagger/1.1.1.201605111122</bundle>
     <config name="com.eclipsesource.jaxrs.swagger.config">
       swagger.basePath=/rest
-      swagger.info.title=Eclipse SmartHome REST API
+      swagger.info.title=openHAB REST API
     </config>
   </feature>
 
