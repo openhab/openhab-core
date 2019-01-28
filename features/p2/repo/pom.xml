@@ -92,36 +92,6 @@
                   <source>true</source>
                 </artifact>
                 <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.automation.sample.extension.java:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.automation.sample.extension.json:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.automation.sample.java.demo:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.automation.sample.json.demo:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.automation.sample.moduletype.demo:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.automation.sample.rest.api:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
                   <id>org.openhab.core.bundles:org.openhab.core.binding.xml:${project.version}</id>
                   <transitive>false</transitive>
                   <source>true</source>
