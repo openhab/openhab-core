@@ -2423,7 +2423,7 @@
         xsi:type="launching:LaunchTask"
         id="launch.smarthome.all"
         excludedTriggers="STARTUP"
-        launcher="EclipseSmartHomeMavenBuild"/>
+        launcher="openHABCoreMavenBuild"/>
     <setupTask
         xsi:type="projects:ProjectsBuildTask"
         excludedTriggers="STARTUP"
