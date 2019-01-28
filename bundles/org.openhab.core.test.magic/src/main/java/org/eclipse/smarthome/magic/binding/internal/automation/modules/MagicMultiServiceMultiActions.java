@@ -15,11 +15,11 @@ package org.eclipse.smarthome.magic.binding.internal.automation.modules;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.automation.AnnotatedActions;
-import org.eclipse.smarthome.automation.annotation.ActionInput;
-import org.eclipse.smarthome.automation.annotation.ActionOutput;
-import org.eclipse.smarthome.automation.annotation.ActionScope;
-import org.eclipse.smarthome.automation.annotation.RuleAction;
+import org.openhab.core.automation.AnnotatedActions;
+import org.openhab.core.automation.annotation.ActionInput;
+import org.openhab.core.automation.annotation.ActionOutput;
+import org.openhab.core.automation.annotation.ActionScope;
+import org.openhab.core.automation.annotation.RuleAction;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;

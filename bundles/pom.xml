@@ -97,7 +97,7 @@
     <module>org.openhab.core.model.thing.runtime</module>
     <module>org.openhab.core.storage.json</module>
     <module>org.openhab.core.storage.mapdb</module>
-    <module>org.openhab.core.magic</module>
+    <module>org.openhab.core.test.magic</module>
     <module>org.openhab.core.test</module>
     <module>org.openhab.core.ui</module>
     <module>org.openhab.core.ui.icon</module>
