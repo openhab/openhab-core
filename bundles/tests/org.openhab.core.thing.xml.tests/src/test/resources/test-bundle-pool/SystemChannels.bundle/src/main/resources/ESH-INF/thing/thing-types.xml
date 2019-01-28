@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="SystemChannels"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<!-- YahooWeather Binding -->
+	<thing-type id="wireless-router">
+		<label>Simple wireless router</label>
+		<description>Simple wireless router</description>
+
+		<channels>
+			<channel id="sigstr" typeId="system.signal-strength">
+				<label>My special Signal Strength</label>
+				<description>My special description for Signal Strength</description>
+			</channel>
+			<channel id="test" typeId="system.my-channel" />
+			<channel id="lowbat" typeId="system.low-battery" />
+		</channels>
+
+	</thing-type>
+
+	<!-- System Channel Type -->
+	<channel-type id="my-channel" system="true">
+		<item-type>Number</item-type>
+		<label>My Channel</label>
+		<category>Other</category>
+		<tags>
+			<tag>
+				Test
+			</tag>
+		</tags>
+		<config-description>
+			<parameter name="range" type="integer" readOnly="true" min="0" max="4" step="1" />
+		</config-description>
+	</channel-type>
+
+</thing:thing-descriptions>

@@ -1,0 +1,224 @@
+/**
+ * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.eclipse.smarthome.io.transport.serial;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.TooManyListenersException;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
+/**
+ * Interface for a serial port.
+ *
+ * <p>
+ * This interface is similar to the serial port of the 'Java Communications API'.
+ *
+ * @author Markus Rathgeb - Initial contribution
+ * @author Kai Kreuzer - added further methods
+ */
+@NonNullByDefault
+public interface SerialPort extends Closeable {
+
+    final int DATABITS_5 = 5;
+    final int DATABITS_6 = 6;
+    final int DATABITS_7 = 7;
+    final int DATABITS_8 = 8;
+    final int PARITY_NONE = 0;
+    final int PARITY_ODD = 1;
+    final int PARITY_EVEN = 2;
+    final int PARITY_MARK = 3;
+    final int PARITY_SPACE = 4;
+    final int STOPBITS_1 = 1;
+    final int STOPBITS_2 = 2;
+    final int STOPBITS_1_5 = 3;
+    final int FLOWCONTROL_NONE = 0;
+    final int FLOWCONTROL_RTSCTS_IN = 1;
+    final int FLOWCONTROL_RTSCTS_OUT = 2;
+    final int FLOWCONTROL_XONXOFF_IN = 4;
+    final int FLOWCONTROL_XONXOFF_OUT = 8;
+
+    @Override
+    void close();
+
+    /**
+     * Sets serial port parameters.
+     *
+     * @param baudrate the baud rate
+     * @param dataBits the number of data bits
+     * @param stopBits the number of stop bits
+     * @param parity the parity
+     * @throws UnsupportedCommOperationException if the operation is not supported
+     */
+    void setSerialPortParams(int baudrate, int dataBits, int stopBits, int parity)
+            throws UnsupportedCommOperationException;
+
+    /**
+     * Returns an input stream.
+     *
+     * <p>
+     * This is the only way to receive data from the communications port.
+     * If the port is unidirectional and doesn't support receiving data, then getInputStream returns null.
+     *
+     * <p>
+     * The read behaviour of the input stream returned by getInputStream depends on combination of the threshold and
+     * timeout values. The possible behaviours are described in the table below:
+     *
+     * | Threshold .........| Timeout ........ | Read Buffer Size | Read Behaviour |
+     * | State ...| Value ..| State ...| Value |
+     * | disabled | - ......| disabled | - ....| n bytes .........| block until any data is available
+     * | enabled .| m bytes | disabled | - ....| n bytes .........| block until min(m,n) bytes are available
+     * | disabled | - ......| enabled .| x ms .| n bytes .........| block for x ms or until any data is available
+     * | enabled .| m bytes | enabled .| x ms .| n bytes .........| block for x ms or until min(m,n) bytes are available
+     *
+     * <p>
+     * Note, however, that framing errors may cause the Timeout and Threshold values to complete prematurely without
+     * raising an exception.
+     *
+     * <p>
+     * Enabling the Timeout OR Threshold with a value a zero is a special case. This causes the underlying driver to
+     * poll for incoming data instead being event driven. Otherwise, the behaviour is identical to having both the
+     * Timeout and Threshold disabled.
+     * *
+     *
+     * @return the input stream or null
+     * @throws IOException on I/O error
+     */
+    @Nullable
+    InputStream getInputStream() throws IOException;
+
+    /**
+     * Returns an output stream.
+     *
+     * <p>
+     * This is the only way to send data to the communications port.
+     * If the port is unidirectional and doesn't support sending data, then getOutputStream returns null.
+     *
+     * @return the output stream or null
+     * @throws IOException on I/O error
+     */
+    @Nullable
+    OutputStream getOutputStream() throws IOException;
+
+    /**
+     * Retrieves the name of the serial port.
+     *
+     * @return the name of the serial port
+     */
+    String getName();
+
+    /**
+     * Registers a {@link SerialPortEventListener} object to listen for {@link SerialEvents}.
+     *
+     * <p>
+     * Interest in specific events may be expressed using the notifyOnXXX calls.
+     * The serialEvent method of SerialPortEventListener will be called with a SerialEvent object describing the event.
+     *
+     * Only one listener per SerialPort is allowed.
+     * Once a listener is registered, subsequent call attempts to addEventListener will throw a
+     * TooManyListenersException without effecting the listener already registered.
+     *
+     * <p>
+     * All the events received by this listener are generated by one dedicated thread that belongs to the SerialPort
+     * object.
+     * After the port is closed, no more event will be generated.
+     *
+     * @param listener the listener
+     * @throws TooManyListenersException if too many listeners has been added
+     */
+    void addEventListener(SerialPortEventListener listener) throws TooManyListenersException;
+
+    /**
+     * Remove the event listener.
+     */
+    void removeEventListener();
+
+    /**
+     * Enable / disable the notification for 'data available'.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnDataAvailable(boolean enable);
+
+    /**
+     * Enable / disable the notification on break interrupt.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnBreakInterrupt(boolean enable);
+
+    /**
+     * Enable / disable the notification on framing error.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnFramingError(boolean enable);
+
+    /**
+     * Enable / disable the notification on overrun error.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnOverrunError(boolean enable);
+
+    /**
+     * Enable / disable the notification on parity error.
+     *
+     * @param enable true if the notification should be enabled
+     */
+    void notifyOnParityError(boolean enable);
+
+    /**
+     * Enables the receive timeout.
+     *
+     * <p>
+     * When the receive timeout condition becomes true, a read from the input stream for this port will return
+     * immediately.
+     *
+     * @param timeout the timeout (milliseconds), must be greater or equal to zero
+     * @throws UnsupportedCommOperationException if the operation is not supported
+     * @throws IllegalArgumentException on a negative timeout value
+     */
+    void enableReceiveTimeout(int timeout) throws UnsupportedCommOperationException, IllegalArgumentException;
+
+    /**
+     * Disable receive timeout.
+     */
+    void disableReceiveTimeout();
+
+    /**
+     * Sets the flow control mode value.
+     *
+     * @param flowcontrol The flowcontrol (<code>int</code>) parameter.
+     * @throws UnsupportedCommOperationException Unsupported Comm Operation Exception.
+     */
+    void setFlowControlMode(int flowcontrolRtsctsOut) throws UnsupportedCommOperationException;
+
+    /**
+     * Enable receive threshold with the specified thresh parameter.
+     *
+     * @param thresh The thresh (<code>int</code>) parameter.
+     * @throws UnsupportedCommOperationException Unsupported Comm Operation Exception.
+     */
+    void enableReceiveThreshold(int i) throws UnsupportedCommOperationException;
+
+    /**
+     * Sets or clears the RTS (Request To Send) bit in the UART, if supported by the underlying implementation.
+     *
+     * @param rts true rts is set, false if rts cleared
+     */
+    void setRTS(boolean rts);
+}

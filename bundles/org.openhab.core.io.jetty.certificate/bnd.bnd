@@ -1,0 +1,2 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Activator: org.openhab.io.jetty.certificate.internal.CertificateGenerator

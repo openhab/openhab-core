@@ -1,66 +1,24 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.openhab</groupId>
-    <artifactId>pom-tycho</artifactId>
+    <groupId>org.openhab.core.features</groupId>
+    <artifactId>org.openhab.core.reactor.features</artifactId>
     <version>2.5.0-SNAPSHOT</version>
-    <relativePath>../../poms/tycho/pom.xml</relativePath>
   </parent>
-  <artifactId>org.openhab.feature.p2</artifactId>
 
-  <packaging>eclipse-feature</packaging>
+  <groupId>org.openhab.core.features.p2</groupId>
+  <artifactId>org.openhab.core.reactor.features.p2</artifactId>
+  <packaging>pom</packaging>
 
-  <name>openHAB p2 Feature</name>
+  <name>openHAB Core :: Features :: p2</name>
 
-  <dependencies>
-    <!-- Eclipse Smarthome dependencies specifically for the core -->
-    <dependency>
-      <groupId>org.eclipse.smarthome.io</groupId>
-      <artifactId>org.eclipse.smarthome.io.javasound</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.io</groupId>
-      <artifactId>org.eclipse.smarthome.io.rest.sitemap</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.ui</groupId>
-      <artifactId>org.eclipse.smarthome.ui</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.extension.ui</groupId>
-      <artifactId>org.eclipse.smarthome.ui.basic</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.extension.ui</groupId>
-      <artifactId>org.eclipse.smarthome.ui.classic</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.extension.ui</groupId>
-      <artifactId>org.eclipse.smarthome.ui.paper</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.model</groupId>
-      <artifactId>org.eclipse.smarthome.model.rule</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.model</groupId>
-      <artifactId>org.eclipse.smarthome.model.rule.runtime</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.smarthome.model</groupId>
-      <artifactId>org.eclipse.smarthome.model.sitemap</artifactId>
-      <version>${esh.version}</version>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>poms</module>
+    <module>poms/tycho</module>
+    <module>repo</module>
+  </modules>
 
 </project>

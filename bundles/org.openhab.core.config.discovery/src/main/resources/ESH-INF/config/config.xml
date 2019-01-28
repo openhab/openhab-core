@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
+		http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="system:inbox">
+		<parameter name="autoIgnore" type="boolean">
+			<label>Auto Ignore</label>
+			<description><![CDATA[
+				<p>If enabled, an inbox result matching an existing thing is automatically ignored.</p>
+				<p>If set to false, the inbox may contain results although identical things already exist.</p>
+			]]>
+			</description>
+			<default>true</default>
+		</parameter>
+		<parameter name="autoApprove" type="boolean">
+			<label>Auto Approve</label>
+			<description>If enabled, inbox results are automatically approved, unless they were marked as ignored.</description>
+			<default>false</default>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

@@ -1,0 +1,38 @@
+{
+	"actions": [
+		{
+			"uid": "core.RunRuleAction",
+			"label": "run rules",
+			"description": "runs/executes a rule or a group of rules specified by their UIDs.",
+			"configDescriptions": [
+				{
+					"name": "ruleUIDs",
+					"type": "TEXT",
+					"label": "Rules",
+					"description": "Specifies the target rule(s) that should be executed.",
+					"required": true,
+					"multiple": true,
+					"context": "rule"
+				},
+				{
+					"name": "considerConditions",
+					"type": "BOOLEAN",
+					"label": "Consider Conditions",
+					"description": "Specifies whether the conditions of the target rule(s) to be executed should be considered or not.",
+					"required": true,
+					"default": true,
+					"options": [
+						{
+							"label": "Yes",
+							"value": "true"
+						},
+						{
+							"label": "No",
+							"value": "false"
+						}
+					]
+				}
+			]
+		}
+	]
+}

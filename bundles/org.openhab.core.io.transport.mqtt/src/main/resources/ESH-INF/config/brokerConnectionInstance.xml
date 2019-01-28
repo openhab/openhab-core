@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
+	http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="mqtt:systemBrokerConnectionInstance">
+
+		<parameter-group name="group_connection">
+			<label>Connection</label>
+			<description>A group of connection parameters.</description>
+			<advanced>false</advanced>
+		</parameter-group>
+		<parameter-group name="group_message_params">
+			<label>Message parameters</label>
+			<advanced>true</advanced>
+		</parameter-group>
+		<parameter-group name="group_lastwill_params">
+			<label>Last will</label>
+			<description>All last-will parameters</description>
+			<advanced>true</advanced>
+		</parameter-group>
+
+		<parameter name="name" type="text" required="false" groupName="group_connection">
+			<label>Connection name</label>
+			<description>A connection name helps to identify a broker connection. If nothing is set, an automatic name based on the host and port will be generated.</description>
+			<default />
+		</parameter>
+
+		<parameter name="host" type="text" required="true" groupName="group_connection">
+			<label>Broker host</label>
+			<description>Hostname or IP of the broker</description>
+			<default />
+		</parameter>
+		<parameter name="port" type="integer" required="false" groupName="group_connection">
+			<label>Broker port</label>
+			<description>A custom broker connection port. Leave empty to use the default Mqtt ports for secure or non-secure connections</description>
+			<default />
+			<advanced>true</advanced>
+		</parameter>
+		<parameter name="secure" type="boolean" required="true" groupName="group_connection">
+			<label>Secure connection?</label>
+			<description>A broker connection is either a non-secure tcp connection or a tls secure connection</description>
+			<default>false</default>
+		</parameter>
+
+		<parameter name="username" type="text" required="false" groupName="group_connection">
+			<label>Broker username</label>
+			<description>Broker username</description>
+			<default />
+		</parameter>
+		<parameter name="password" type="text" required="false" groupName="group_connection">
+			<label>Broker password</label>
+			<description>Broker password</description>
+			<default />
+			<context>password</context>
+		</parameter>
+		<parameter name="clientID" type="text" required="false" groupName="group_connection">
+			<label>Client ID</label>
+			<description>An optional client ID used for this connection</description>
+			<default />
+			<advanced>true</advanced>
+		</parameter>
+		<parameter name="keepAlive" type="integer" required="false" groupName="group_connection">
+			<label>Keep-alive (sec)</label>
+			<description>Keep-alive timer in seconds. A too frequent timer could conquest the network / spam the Mqtt server, a too low value might risk that a broken connection is detected very late.</description>
+			<default>60</default>
+			<advanced>true</advanced>
+		</parameter>
+
+		<parameter name="qos" type="integer" required="false" groupName="group_message_params">
+			<label>Quality of service</label>
+			<description>The Quality of Service (QoS) level is an agreement between sender and receiver of a message regarding the guarantees of delivering a message.</description>
+			<limitToOptions>true</limitToOptions>
+			<options>
+				<option value="0">At most once (best effort delivery "fire and forget")</option>
+				<option value="1">At least once (guaranteed that a message will be delivered at least once)</option>
+				<option value="2">Exactly once (guarantees that each message is received only once by the counterpart)</option>
+			</options>
+			<default>0</default>
+		</parameter>
+		<parameter name="retainMessages" type="boolean" required="false" groupName="group_message_params">
+			<label>Retain messages</label>
+			<description>Messages send by this connection are retained</description>
+			<default>false</default>
+		</parameter>
+
+
+		<parameter name="lwtTopic" type="text" required="false" groupName="group_lastwill_params">
+			<label>Last will topic</label>
+			<description>When the connection dies, the last will is performed by the Mqtt server. This is the last-will topic. It must be set to perform a last-will.</description>
+			<default />
+		</parameter>
+		<parameter name="lwtMessage" type="text" required="false" groupName="group_lastwill_params">
+			<label>Last will message</label>
+			<description>When the connection dies, the last will is performed by the Mqtt server. This is the last-will message. Can be empty.</description>
+			<default />
+		</parameter>
+		<parameter name="lwtQos" type="integer" required="false" groupName="group_lastwill_params">
+			<label>Last will quality of service</label>
+			<description>The Quality of Service (QoS) level is an agreement between sender and receiver of a message regarding the guarantees of delivering a message.</description>
+			<limitToOptions>true</limitToOptions>
+			<options>
+				<option value="0">At most once (best effort delivery "fire and forget")</option>
+				<option value="1">At least once (guaranteed that a message will be delivered at least once)</option>
+				<option value="2">Exactly once (guarantees that each message is received only once by the counterpart)</option>
+			</options>
+			<default>0</default>
+		</parameter>
+		<parameter name="lwtRetain" type="boolean" required="false" groupName="group_lastwill_params">
+			<label>Last will retain message</label>
+			<description>When the connection dies, the last will is performed by the Mqtt server. If retain message is checked, the message will be retained by the Mqtt server.</description>
+			<default>false</default>
+		</parameter>
+	</config-description>
+</config-description:config-descriptions>

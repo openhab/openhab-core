@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	Copyright (c) 2010-2019 Contributors to the openHAB project
+
+	See the NOTICE file(s) distributed with this work for additional
+	information.
+
+	This program and the accompanying materials are made available under the
+	terms of the Eclipse Public License 2.0 which is available at
+	http://www.eclipse.org/legal/epl-2.0
+
+	SPDX-License-Identifier: EPL-2.0
+
+-->
+<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0">
+
+  <repository>mvn:org.openhab.core.features.karaf/org.openhab.core.features.karaf.openhab-tp/${project.version}/xml/features</repository>
+
+  <feature name="openhab-core-base" description="openHAB Core" version="${project.version}">
+    <details>openHAB Core base bundles</details>
+
+    <requirement>openhab.tp;filter:="(feature=base)"</requirement>
+    <feature dependency="true">openhab.tp-base</feature>
+
+    <requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.14.0)(!(version&gt;=2.15.0)))"</requirement>
+    <feature dependency="true">openhab.tp-xtext</feature>
+
+    <requirement>openhab.tp;filter:="(feature=jax-rs)"</requirement>
+    <feature dependency="true">openhab.tp-jax-rs</feature>
+
+    <requirement>openhab.tp;filter:="(feature=httpclient)"</requirement>
+    <feature dependency="true">openhab.tp-httpclient</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.config.core.ConfigDescriptionRegistry
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.config.core.status.ConfigStatusService
+    </capability>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.config.discovery.inbox.Inbox
+    </capability>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
+    <bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.config.xml/${project.version}</bundle>
+
+
+
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.binding.BindingInfoRegistry
+    </capability>
+    <capability>
+      osgi.service;objectClass:List&lt;String&gt;=org.eclipse.smarthome.core.events.EventPublisher;event.topics:String=smarthome
+    </capability>
+    <capability>
+      <!-- org.eclipse.smarthome.core.internal.i18n.I18nProviderImpl -->
+      osgi.service;objectClass:List&lt;String&gt;="org.eclipse.smarthome.core.i18n.LocaleProvider,org.eclipse.smarthome.core.i18n.LocationProvider,org.eclipse.smarthome.core.i18n.TimeZoneProvider,org.eclipse.smarthome.core.i18n.TranslationProvider"
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.items.ItemFactory
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.items.ItemRegistry
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.items.ManagedItemProvider
+    </capability>
+
+    <feature dependency="true">openhab-core-storage-mapdb</feature>
+
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.binding.xml/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry
+    </capability>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.semantics.TagService
+    </capability>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.scheduler/${project.version}</bundle>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.ManagedThingProvider
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.ThingRegistry
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.firmware.FirmwareRegistry
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateService
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.i18n.ThingStatusInfoI18nLocalizationService
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.i18n.ThingTypeI18nLocalizationService
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.link.ManagedItemChannelLinkProvider
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.link.ThingLinkManager
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry
+    </capability>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.thing.type.ThingTypeRegistry
+    </capability>
+
+    <bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.thing.xml/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.core.audio.AudioHTTPServer
+    </capability>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.voice/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.monitor/${project.version}</bundle>
+
+
+
+
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.net/${project.version}</bundle>
+
+    <feature dependency="true">pax-http-whiteboard</feature>
+
+
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass:List&lt;String&gt;=org.eclipse.smarthome.io.rest.LocaleService
+    </capability>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.optimize/${project.version}</bundle>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.io.rest.core.config.ConfigurationService
+    </capability>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-auth-jaas" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.jaas/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-auth-oauth2client" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.oauth2client/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-automation" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.openhab.core.automation.RuleRegistry
+    </capability>
+  </feature>
+
+  <feature name="openhab-core-automation-module-script" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature dependency="true">openhab-core-automation</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-automation-module-script-rulesupport" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature dependency="true">openhab-core-automation</feature>
+    <feature dependency="true">openhab-core-automation-module-script</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script.rulesupport/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-automation-module-media" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature dependency="true">openhab-core-automation</feature>
+    <feature dependency="true">openhab-core-automation-module-script</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.media/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-automation-rest" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature dependency="true">openhab-core-automation</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.rest/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-config-serial" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-io-transport-serial</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-config-discovery-usbserial" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-console-karaf" description="Karaf Console support for SmartHome stuff" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>shell</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console.karaf/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-http-auth" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-http-auth-basic" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth.basic/${project.version}</bundle>
+
+    <feature>openhab-core-io-http-auth</feature>
+    <config name="org.eclipse.smarthome.auth">
+      enabled = true
+    </config>
+  </feature>
+
+  <feature name="openhab-core-io-rest-auth" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.auth/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-rest-log" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.log/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-rest-sitemap" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-ui</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sitemap/${project.version}</bundle>
+    <feature dependency="true">openhab-core-model-sitemap</feature>
+  </feature>
+
+  <feature name="openhab-core-io-rest-voice" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.voice/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-rest-mdns" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-io-transport-mdns</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.mdns/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-transport-coap" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <requirement>openhab.tp;filter:="(feature=coap)"</requirement>
+    <feature dependency="true">openhab.tp-coap</feature>
+  </feature>
+
+  <feature name="openhab-core-io-transport-dbus" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.dbus/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-transport-http" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <requirement>openhab.tp;filter:="(feature=httpclient)"</requirement>
+    <feature dependency="true">openhab.tp-httpclient</feature>
+  </feature>
+
+  <feature name="openhab-core-io-transport-mdns" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <requirement>openhab.tp;filter:="(feature=jmdns)"</requirement>
+    <feature dependency="true">openhab.tp-jmdns</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mdns/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.mdns/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.io.transport.mdns.MDNSService
+    </capability>
+  </feature>
+
+  <feature name="openhab-core-io-transport-mqtt" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <requirement>openhab.tp;filter:="(feature=paho)"</requirement>
+    <feature dependency="true">openhab.tp-paho</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mqtt/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass=org.eclipse.smarthome.io.transport.mqtt.MqttService
+    </capability>
+  </feature>
+
+  <feature name="openhab-core-io-transport-serial" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <requirement>osgi.service;filter:="(objectClass=org.eclipse.smarthome.io.transport.serial.SerialPortManager)"</requirement>
+    <requirement>osgi.service;filter:="(objectClass=org.eclipse.smarthome.io.transport.serial.SerialPortProvider)"</requirement>
+    <feature dependency="true">openhab-core-io-transport-serial-rxtx</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-transport-serial-javacomm" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=javacomm))"</requirement>
+    <feature dependency="true">openhab.tp-serial-javacomm</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.javacomm/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-transport-serial-rxtx" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
+    <feature dependency="true">openhab.tp-serial-rxtx</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-transport-serial-rfc2217" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
+    <feature dependency="true">openhab-core-io-transport-serial-rxtx</feature>
+
+
+    <requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
+    <feature dependency="true">openhab.tp-commons-net</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx.rfc2217/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-io-transport-upnp" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <requirement>openhab.tp;filter:="(feature=jupnp)"</requirement>
+    <feature dependency="true">openhab.tp-jupnp</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.upnp/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.upnp/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab.inc-model-core" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.core/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-item" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab.inc-model-core</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.item/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.item.runtime/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-item-ide" version="${project.version}">
+    <feature dependency="true">openhab-core-model-item</feature>
+
+    <requirement>openhab.tp;filter:="(feature=xtext-ide)"</requirement>
+    <feature dependency="true">openhab.tp-xtext-ide</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.item.ide/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-persistence" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-model-item</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.persistence/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.persistence.runtime/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-persistence-ide" version="${project.version}">
+    <feature dependency="true">openhab-core-model-persistence</feature>
+
+    <requirement>openhab.tp;filter:="(feature=xtext-ide)"</requirement>
+    <feature dependency="true">openhab.tp-xtext-ide</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.persistence.ide/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-rule" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-model-item</feature>
+    <feature>openhab-core-model-persistence</feature>
+    <feature>openhab-core-model-script</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.rule/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.rule.runtime/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-rule-ide" version="${project.version}">
+    <feature dependency="true">openhab-core-model-rule</feature>
+
+    <requirement>openhab.tp;filter:="(feature=xtext-ide)"</requirement>
+    <feature dependency="true">openhab.tp-xtext-ide</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.rule.ide/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-script" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-model-persistence</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script.runtime/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-script-ide" version="${project.version}">
+    <feature dependency="true">openhab-core-model-script</feature>
+
+    <requirement>openhab.tp;filter:="(feature=xtext-ide)"</requirement>
+    <feature dependency="true">openhab.tp-xtext-ide</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script.ide/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-sitemap" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab.inc-model-core</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.sitemap/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.sitemap.runtime/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-sitemap-ide" version="${project.version}">
+    <feature dependency="true">openhab-core-model-sitemap</feature>
+
+    <requirement>openhab.tp;filter:="(feature=xtext-ide)"</requirement>
+    <feature dependency="true">openhab.tp-xtext-ide</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.sitemap.ide/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-thing" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-model-item</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.thing/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.thing.runtime/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-thing-ide" version="${project.version}">
+    <feature dependency="true">openhab-core-model-thing</feature>
+
+    <requirement>openhab.tp;filter:="(feature=xtext-ide)"</requirement>
+    <feature dependency="true">openhab.tp-xtext-ide</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.thing.ide/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-model-lsp" version="${project.version}">
+
+    <requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.14.0)(!(version&gt;=2.15.0)))"</requirement>
+    <feature dependency="true">openhab.tp-xtext-ide</feature>
+
+    <requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.4.0)(!(version&gt;=0.5.0)))"</requirement>
+    <feature dependency="true">openhab.tp-lsp4j</feature>
+
+    <feature>openhab-core-model-item-ide</feature>
+    <feature>openhab-core-model-persistence-ide</feature>
+    <feature>openhab-core-model-rule-ide</feature>
+    <feature>openhab-core-model-script-ide</feature>
+    <feature>openhab-core-model-sitemap-ide</feature>
+    <feature>openhab-core-model-thing-ide</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.lsp/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-storage-mapdb" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.storage.mapdb/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass:List&lt;String&gt;="org.eclipse.smarthome.core.storage.StorageService,org.eclipse.smarthome.core.storage.DeletableStorageService";storage.format:String="mapdb"
+    </capability>
+
+    <requirement>openhab.tp;filter:="(feature=mapdb)"</requirement>
+    <feature dependency="true">openhab.tp-mapdb</feature>
+  </feature>
+
+  <feature name="openhab-core-storage-json" version="${project.version}">
+    <feature>openhab-core-base</feature>
+
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.storage.json/${project.version}</bundle>
+    <capability>
+      osgi.service;objectClass:List&lt;String&gt;="org.eclipse.smarthome.core.storage.StorageService";storage.format:String="json"
+    </capability>
+  </feature>
+
+  <feature name="openhab-core-ui" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-model-item</feature>
+    <feature>openhab-core-model-sitemap</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ui/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-core-ui-icon" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ui.icon/${project.version}</bundle>
+  </feature>
+
+
+  <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
+    <bundle>mvn:p2.osgi.bundle/com.google.gson/2.8.2.v20180104-1110</bundle>
+    <bundle>mvn:com.google.guava/guava/18.0</bundle>
+    <feature>openhab-core-base</feature>
+    <feature>openhab-core-io-console-karaf</feature>
+    <feature>openhab-core-io-rest-sitemap</feature>
+    <feature>openhab-core-io-rest-voice</feature>
+    <feature>openhab-core-io-rest-mdns</feature>
+    <feature>openhab-core-model-lsp</feature>
+    <feature>openhab-core-model-item-runtime</feature>
+    <feature>openhab-core-model-persistence-runtime</feature>
+    <feature>openhab-core-model-rule-runtime</feature>
+    <feature>openhab-core-model-script-runtime</feature>
+    <feature>openhab-core-model-sitemap-runtime</feature>
+    <feature>openhab-core-model-thing-runtime</feature>
+    <feature>openhab-core-ui-icon</feature>
+    <feature>openhab-core-storage-json</feature>
+    <feature>openhab-runtime-certificate</feature>
+    <feature>openhab-transport-mdns</feature>
+    <feature>openhab-transport-http</feature>
+    <feature prerequisite="true">shell</feature>
+    <feature prerequisite="true">wrapper</feature>
+    <!-- This bundle needs to be started early as it registers the 404 and startup pages on Jetty -->
+    <!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422
+    <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
+    <bundle start-level="90">mvn:org.openhab.core.bundles/org.openhab.core.boot/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.karaf/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.ui.dashboard/${project.version}</bundle>
+    <config name="org.eclipse.smarthome.audio">
+      defaultSink = enhancedjavasound
+    </config>
+    <config name="org.eclipse.smarthome.voice">
+      defaultHLI = rulehli
+    </config>
+  </feature>
+
+  <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
+    <bundle start-level="20">mvn:org.openhab.core.bundles/org.openhab.io.jetty.certificate/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-runtime-jna" description="Java Native Access (JNA)" version="${project.version}">
+    <bundle>mvn:net.java.dev.jna/jna/${jna.version}</bundle>
+    <bundle>mvn:net.java.dev.jna/jna-platform/${jna.version}</bundle>
+  </feature>
+
+  <feature name="openhab-runtime-compat1x" description="Compatibility layer for openHAB 1 add-ons" version="${project.version}">
+    <feature>openhab-runtime-base</feature>
+    <feature>openhab-core-model-item</feature>
+    <feature>openhab-core-model-persistence</feature>
+    <feature>openhab-core-model-script</feature>
+    <feature>openhab-core-model-sitemap</feature>
+    <feature>openhab-core-ui</feature>
+    <bundle dependency="true">mvn:commons-net/commons-net/3.3</bundle>
+    <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-httpclient/3.1_7</bundle>
+    <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.2.3</bundle>
+    <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.2.3</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.compat1x/${project.version}</bundle>
+  </feature>
+
+  <feature name="openhab-transport-coap" description="CoAP Transport" version="${project.version}">
+    <feature>openhab-core-io-transport-coap</feature>
+  </feature>
+
+  <feature name="openhab-transport-http" description="HTTP Transport" version="${project.version}">
+    <capability>openhab.tp;feature=httpclient;version=${jetty.version}</capability>
+    <feature>openhab-core-auth-oauth2client</feature>
+    <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-api/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
+  </feature>
+
+  <feature name="openhab-transport-mdns" description="mDNS Transport" version="${project.version}">
+    <feature>openhab-core-io-transport-mdns</feature>
+  </feature>
+
+  <feature name="openhab-transport-mqtt" description="MQTT Transport" version="${project.version}">
+    <feature>openhab-core-io-transport-mqtt</feature>
+  </feature>
+
+  <feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
+    <bundle>mvn:org.openhab/nrjavaserial/${nrjavaserial.version}</bundle>
+    <feature>openhab-core-io-transport-serial-rfc2217</feature>
+    <feature>openhab-core-config-serial</feature>
+    <feature>openhab-core-config-discovery-usbserial</feature>
+  </feature>
+
+  <feature name="openhab-transport-upnp" description="UPnP Transport" version="${project.version}">
+    <feature>openhab-core-io-transport-upnp</feature>
+  </feature>
+
+</features>

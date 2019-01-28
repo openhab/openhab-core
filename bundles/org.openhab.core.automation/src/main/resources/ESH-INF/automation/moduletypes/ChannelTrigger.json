@@ -1,0 +1,41 @@
+{
+   "triggers":[
+      {
+         "uid":"core.ChannelEventTrigger",
+         "label":"a trigger channel fires",
+         "description":"React on events from a trigger channel of a thing.",
+         "configDescriptions":[
+            {
+               "name":"channelUID",
+               "type":"TEXT",
+               "context":"channel",
+               "label":"Channel",
+               "description":"the id of the channel which should be observed for triggers",
+               "required":true,               
+               "filterCriteria":[
+                  {
+                     "value": "TRIGGER",
+                     "name": "kind"
+                  }
+               ]
+            },
+            {
+               "name":"event",
+               "type":"TEXT",
+               "label":"Event",
+               "description":"the event on the channel to react on",
+               "required":false
+            }            
+         ],
+         "outputs":[
+            {
+               "name":"event",
+               "type":"org.eclipse.smarthome.core.events.Event",
+               "description":"the event of the channel trigger",
+               "label":"Event",
+               "reference":"channelEventTriggerId.event"
+            }
+         ]
+      }
+   ]
+}

@@ -42,7 +42,7 @@ public class ItemUIRegistryDelegate
         implements ItemUIRegistry, RegistryChangeListener<org.eclipse.smarthome.core.items.Item> {
 
     private org.eclipse.smarthome.ui.items.ItemUIRegistry itemUIRegistry;
-    private Set<ItemRegistryChangeListener> listeners = new HashSet<>();
+    private final Set<ItemRegistryChangeListener> listeners = new HashSet<>();
 
     @Reference
     protected void setItemUIRegistry(org.eclipse.smarthome.ui.items.ItemUIRegistry itemUIRegistry) {

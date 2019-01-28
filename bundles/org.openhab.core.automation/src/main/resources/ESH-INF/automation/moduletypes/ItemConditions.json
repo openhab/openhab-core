@@ -1,0 +1,88 @@
+{  
+   "conditions":[  
+    {  
+     "uid":"core.ItemStateCondition",
+     "label":"an item has a given state",
+     "description":"Compares the item state with the given value",
+     "configDescriptions":[  
+      {  
+         "name":"itemName",
+         "type":"TEXT",
+         "label":"Item",
+         "context":"item",
+         "description":"the name of the item",
+         "required":true
+      },
+      {  
+         "name":"operator",
+         "type":"TEXT",
+         "label":"Operator",
+         "description":"the compare operator (one of =,<,>,!=,>=,<=)",
+         "required":false,
+         "limitToOptions":true,
+         "options":[
+            {
+            "label": "=",
+            "value": "="
+            },
+            {
+            "label": "!=",
+            "value": "!="
+            },
+            {
+            "label": ">",
+            "value": ">"
+            },
+            {
+            "label": ">=",
+            "value": ">="
+            },
+            {
+            "label": "<",
+            "value": "<"
+            },
+            {
+            "label": "<=",
+            "value": "<="
+            }
+          ],
+          "default":"="
+      },
+      {  
+         "name":"state",
+         "type":"TEXT",
+         "label":"State",
+         "description":"the state to be compared with",
+         "required":true,
+         "limitToOptions":false,
+         "options":[
+            {
+            "label": "ON",
+            "value": "ON"
+            },
+            {
+            "label": "OFF",
+            "value": "OFF"
+            },
+            {
+            "label": "OPEN",
+            "value": "OPEN"
+            },
+            {
+            "label": "CLOSED",
+            "value": "CLOSED"
+            },
+            {
+            "label": "UP",
+            "value": "UP"
+            },
+            {
+            "label": "DOWN",
+            "value": "DOWN"
+            }
+          ]
+      }
+     ]
+    }
+   ]
+}

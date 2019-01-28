@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
+	http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="system:network">
+		<parameter name="primaryAddress" type="text">
+			<label>Primary Address</label>
+			<description>A subnet (e.g. 192.168.1.0/24) <!-- or an IP address (e.g. 192.168.1.5) --></description>
+			<limitToOptions>true</limitToOptions>
+		</parameter>
+		<parameter name="broadcastAddress" type="text">
+			<label>Broadcast Address</label>
+			<description>A broadcast address (e.g. 192.168.1.255)</description>
+			<limitToOptions>true</limitToOptions>
+			<advanced>true</advanced>
+		</parameter>
+		<parameter name="useOnlyOneAddress" type="boolean">
+			<label>Single IP Address per Interface</label>
+			<description>Use only one IP address per interface and family</description>
+			<default>false</default>
+			<advanced>true</advanced>
+		</parameter>
+		<parameter name="useIPv6" type="boolean">
+			<label>Use IPv6</label>
+			<description>Use IPv6 Addresses if available</description>
+			<default>true</default>
+			<advanced>true</advanced>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0 ../../../../../../../../org.eclipse.smarthome.config.xml/org.eclipse.smarthome.config-description.xsd ">
+
+	<!-- test dummy -->
+	<config-description uri="config:Dummy">
+		<parameter-group name="group1">
+			<context>Context-Group1</context>
+			<label>Group 1</label>
+			<description>Description Group 1</description>
+			<advanced>false</advanced>
+		</parameter-group>
+
+		<parameter name="location" type="text" required="true">
+			<label>Location</label>
+			<description>Location for the weather information. Syntax is WOEID, see https://en.wikipedia.org/wiki/WOEID.</description>
+		</parameter>
+		<parameter name="unit" type="text">
+			<label>Unit</label>
+			<description>Specifies the unit of the data. Valid values are "us" or "metric".</description>
+			<default>metric</default>
+		</parameter>
+		<parameter name="refresh" type="integer">
+			<label>Refresh interval</label>
+			<description>Specifies the refresh interval in seconds.</description>
+			<default>60</default>
+		</parameter>
+		<parameter name="question" type="text" pattern="How is the weather in [\\w]*?">
+			<options>
+				<option value="676757">Munich</option>
+				<option value="667931">Cologne</option>
+			</options>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

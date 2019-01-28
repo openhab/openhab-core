@@ -1,0 +1,67 @@
+{  
+   "conditions":[  
+      {  
+         "uid":"script.ScriptCondition",
+         "label":"a given script evaluates to true",
+         "description":"Allows the definition of a condition through a script.",
+         "configDescriptions":[  
+            {  
+               "name":"type",
+               "type":"TEXT",
+               "description":"the scripting language used",
+               "required":true,
+               "options":[
+                    {
+                        "label": "Javascript",
+                        "value": "application/javascript"
+                    }
+                ]
+            },
+            {  
+               "name":"script",
+               "type":"TEXT",
+               "description":"the script to execute",
+               "required":true,
+               "context":"script"
+            }
+         ]
+      }
+   ],
+   "actions":[  
+      {  
+         "uid":"script.ScriptAction",
+         "label":"execute a given script",
+         "description":"Allows the execution of a user-defined script.",
+         "configDescriptions":[  
+            {  
+               "name":"type",
+               "type":"TEXT",
+               "description":"the scripting language used",
+               "required":true,
+               "options":[
+                    {
+                        "label": "Javascript",
+                        "value": "application/javascript"
+                    }
+                ],
+                "defaultValue":"application/javascript"
+            },
+            {  
+               "name":"script",
+               "type":"TEXT",
+               "description":"the script to execute",
+               "required":true,
+               "context":"script"
+            }
+         ],
+         "outputs":[  
+            {  
+               "name":"result",
+               "type":"java.lang.Object",
+               "label":"result",
+               "description":"the script result"
+            }
+         ]
+      }
+   ]
+}

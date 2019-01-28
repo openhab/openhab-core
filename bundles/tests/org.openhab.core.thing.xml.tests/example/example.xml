@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="hue"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+    xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+    <!-- Hue Lamp -->
+    <thing-type id="lamp">
+        <supported-bridge-type-refs>
+            <bridge-type-ref id="bridge" />
+        </supported-bridge-type-refs>
+
+        <label>HUE Lamp</label>
+        <description>My own great HUE Lamp.</description>
+
+        <channel-groups>
+            <channel-group id="alarm_system" typeId="alarm_system"/>
+        </channel-groups>
+    </thing-type>
+
+    <!-- Color Channel -->
+    <channel-type id="color">
+        <item-type>Color</item-type>
+        <label>Color</label>
+        <description>The color channel allows to control the color of a light.
+            It is also possible to dim values and switch the light on and off.
+        </description>
+        <tags>
+            <tag>Hue</tag>
+            <tag>ColorLamp</tag>
+        </tags>
+
+        <config-description>
+            <parameter name="lastDimValue" type="boolean" />
+        </config-description>
+    </channel-type>
+
+    <!-- Brightness Channel -->
+    <channel-type id="brightness">
+        <item-type>Dimmer</item-type>
+        <label>Brightness</label>
+        <description>The brightness channel allows to control the brightness of a light.
+            It is also possible to switch the light on and off.
+        </description>
+        <tags>
+            <tag>Hue</tag>
+            <tag>DimmableLamp</tag>
+        </tags>
+
+        <config-description>
+            <parameter name="lastDimValue" type="boolean" />
+        </config-description>
+    </channel-type>
+
+    <!-- Color Temperature Channel -->
+    <channel-type id="color_temperature">
+        <item-type>Dimmer</item-type>
+        <label>Color Temperature</label>
+        <description>The color temperature channel allows to set the color
+            temperature of a light from 0 (cold) to 100 (warm).</description>
+        <tags>
+            <tag>Hue</tag>
+            <tag>AmbientLamp</tag>
+        </tags>
+    </channel-type>
+
+    <!-- Alarm Channel -->
+    <channel-type id="alarm">
+        <item-type>Number</item-type>
+        <label>Alarm System</label>
+        <description>The light blinks if alarm is set.</description>
+        <category>ALARM</category>
+        <tags>
+            <tag>Hue</tag>
+            <tag>AlarmSystem</tag>
+        </tags>
+        <state min="0" max="100.0" step="10.0" pattern="%d Peek">
+            <options>
+                <option value="SOUND">My great sound.</option>
+                <option value="LIGHT"/>
+            </options>
+        </state>
+    </channel-type>
+
+    <!-- Motion Channel -->
+    <channel-type id="motion" advanced="true">
+        <item-type>Number</item-type>
+        <label>Motion Sensor</label>
+        <description>The sensor detecting motion.</description>
+        <category>MOTION</category>
+        <tags>
+            <tag>Hue</tag>
+            <tag>AlarmSystem</tag>
+        </tags>
+    </channel-type>
+
+    <!-- Alarm System Channel -->
+    <channel-group-type id="alarm_system" advanced="false">
+        <label>Alarm System</label>
+        <description>The alarm system.</description>
+        <channels>
+            <channel id="colorId" typeId="color" />
+            <channel id="color_temperatureId" typeId="color_temperature" />
+            <channel id="alarmId" typeId="alarm" />
+            <channel id="motionId" typeId="motion"/>
+        </channels>
+    </channel-group-type>
+
+</thing:thing-descriptions>

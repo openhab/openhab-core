@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="somebinding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0" xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description.xsd">
+
+	<thing-type id="something">
+
+		<label>Something</label>
+
+		<channels>
+			<channel id="channelPlain" typeId="string">
+				<label>Channel Plain Label</label>
+				<description>Channel Plain Description</description>
+			</channel>
+			<channel id="channelInplace" typeId="channel-with-i18n">
+				<label>@text/channelInplaceLabel</label>
+				<description>@text/channelInplaceDescription</description>
+			</channel>
+		</channels>
+	</thing-type>
+
+	<channel-type id="channel-with-i18n">
+		<item-type>Number</item-type>
+		<label>@text/channelLabel</label>
+		<description>@text/channelDescription</description>
+	</channel-type>
+
+	<channel-group-type id="channelgroup-with-i18n">
+		<label>@text/channelGroupLabel</label>
+		<description>@text/channelGroupDescription</description>
+		<channels>
+		</channels>
+	</channel-group-type>
+
+</thing:thing-descriptions>

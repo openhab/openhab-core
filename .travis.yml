@@ -3,10 +3,20 @@ dist: trusty
 
 language: java
 jdk: oraclejdk8
+
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.p2
+  - extensions/ui/org.eclipse.smarthome.ui.paper/npm_cache
+
 before_install: echo "MAVEN_OPTS='-Xms1g -Xmx2g -XX:PermSize=512m -XX:MaxPermSize=1g'" > ~/.mavenrc
 
+#$ mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+#$ mvn test -B
+
 install:
-  - echo 'mvn clean install -B -V 1> .build.stdout 2> .build.stderr' > .build.sh
+  - echo 'mvn clean verify -B -V -Dspotbugs.skip=true 1> .build.stdout 2> .build.stderr' > .build.sh
   - chmod 0755 .build.sh
 script:
   - travis_wait 60 ./.build.sh

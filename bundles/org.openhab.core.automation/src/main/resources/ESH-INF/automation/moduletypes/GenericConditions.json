@@ -1,0 +1,83 @@
+{  
+  "conditions":[
+      {  
+         "uid":"core.GenericEventCondition",
+         "label":"Event Condition",
+         "description":"Condition for events",
+         "visibility":"HIDDEN",
+         "configDescriptions":[  
+            {  
+               "name":"topic",
+               "type":"TEXT",
+               "description":"topic should match",
+               "required":false
+            },
+            {  
+               "name":"eventType",
+               "type":"TEXT",
+               "description":"eventType should match",
+               "required":false
+            },
+            {  
+               "name":"source",
+               "type":"TEXT",
+               "description":"source should match",
+               "required":false
+            },
+            {  
+               "name":"payload",
+               "type":"TEXT",
+               "description":"payload should match",
+               "required":false
+            }
+         ],
+         "inputs":[  
+            {  
+               "name":"event",
+               "type":"org.eclipse.smarthome.core.events.Event",
+               "label":"Event",
+               "description":"The events which was sent.",
+               "required":true
+            }
+         ]
+      },
+    {
+      "uid":"core.GenericCompareCondition",
+      "label":"CompareCondition",
+      "description":"configurable compare condition",
+      "visibility":"HIDDEN",
+      "configDescriptions":[
+        {
+          "name":"inputproperty",
+          "label":"Input property",
+          "type":"TEXT",
+          "description":"property of the input type to be compared",
+          "required":false
+        },
+        {
+          "name":"right",
+          "type":"TEXT",
+          "label":"compare with",
+          "description":"the value to be compared with the input",
+          "required":true
+        },
+        {
+          "name":"operator",
+          "type":"TEXT",
+          "description":"the compare operator, allowed are <,>,=,!=,>=,<= matches",
+          "required":true,
+          "default":"="
+        }
+      ],
+      "inputs": [
+      {
+        "name":"input",
+        "type": "java.lang.Object",
+        "label": "input which will be compared",
+        "description": "The input which will be compared.",
+        "required":true
+      }
+    ]
+    }
+  ]
+}

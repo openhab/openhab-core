@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openhab.core.bom</groupId>
+    <artifactId>org.openhab.core.reactor.bom</artifactId>
+    <version>2.5.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.openhab.core.bom.compile-model</artifactId>
+  <packaging>pom</packaging>
+
+  <name>openHAB Core :: BOM :: Compile Model</name>
+
+  <properties>
+    <emf.1.version>2.12.0</emf.1.version>
+    <emf.3.version>2.11.0</emf.3.version>
+    <emf.mwe.version>1.3.21.201705291010</emf.mwe.version>
+    <emf.mwe2.version>2.9.1.201705291010</emf.mwe2.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
+      <artifactId>org.eclipse.xtext.generator</artifactId>
+      <version>${xtext.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.platform</groupId>
+          <artifactId>org.eclipse.osgi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- EMF -->
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.common</artifactId>
+      <version>${emf.1.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore</artifactId>
+      <version>${emf.1.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore.change</artifactId>
+      <version>${emf.3.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+      <version>${emf.1.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.codegen</artifactId>
+      <version>${emf.3.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.codegen.ecore</artifactId>
+      <version>${emf.1.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- EMF MWE2 -->
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.mwe2.launch</artifactId>
+      <version>${emf.mwe2.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
+      <artifactId>org.eclipse.xtext.common.types</artifactId>
+      <version>${xtext.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.platform</groupId>
+          <artifactId>org.eclipse.osgi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!--Xbase -->
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
+      <artifactId>org.eclipse.xtext.xbase</artifactId>
+      <version>${xtext.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
+      <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+      <version>${xtext.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- for the model.*.ide bundles -->
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
+      <artifactId>org.eclipse.xtext.xbase.ide</artifactId>
+      <version>${xtext.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
+      <artifactId>org.eclipse.xtext.ide</artifactId>
+      <version>${xtext.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- TEST -->
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
+      <artifactId>org.eclipse.xtext</artifactId>
+      <version>${xtext.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+  </dependencies>
+
+</project>

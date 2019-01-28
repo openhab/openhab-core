@@ -1,11 +1,22 @@
-**/target/
+target/
+src-gen/
+xtend-gen/
+bin/
+.antlr*
 .metadata/
+*/plugin.xml_gen
+.DS_Store
+*.iml
+.idea/
 
-/*features*/*/src/main/history/
-maven-metadata-local.xml
 dependency-reduced-pom.xml
-npm-debug.log
+bundles/antlr-generator-3.2.0-patch.jar
+bundles/org.openhab.core.model.*/META-INF/
+features/karaf/*/src/main/history
 
-bundles/org.openhab.ui.homebuilder/web/dist
-bundles/org.openhab.ui.homebuilder/npm_cache
-bundles/org.openhab.ui.homebuilder/web/node
+Californium.properties
+
+*.orig
+
+generated/
+userdata/

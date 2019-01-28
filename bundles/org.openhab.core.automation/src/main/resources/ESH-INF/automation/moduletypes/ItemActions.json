@@ -1,0 +1,61 @@
+{  
+   "actions":[  
+    {  
+     "uid":"core.ItemCommandAction",
+     "label":"send a command",
+     "description":"Sends a command to a specified item.",
+     "configDescriptions":[  
+      {  
+         "name":"itemName",
+         "type":"TEXT",
+         "label":"Item",
+         "context":"item",
+         "description":"the name of the item",
+         "required":true
+      },
+      {  
+         "name":"command",
+         "type":"TEXT",
+         "label":"Command",
+         "description":"the default command to be sent if none is passed as an input value",
+         "required":true,
+         "limitToOptions":false,
+         "options":[
+            {
+            "label": "ON",
+            "value": "ON"
+            },
+            {
+            "label": "OFF",
+            "value": "OFF"
+            },
+            {
+            "label": "OPEN",
+            "value": "OPEN"
+            },
+            {
+            "label": "CLOSED",
+            "value": "CLOSED"
+            },
+            {
+            "label": "UP",
+            "value": "UP"
+            },
+            {
+            "label": "DOWN",
+            "value": "DOWN"
+            }
+          ]
+      }
+     ],
+     "inputs":[
+      {
+        "name":"command",
+        "type":"org.eclipse.smarthome.core.types.Command",
+        "label":"Command",
+        "description":"command that will be sent to the item."
+      }
+     ]
+    }
+   ]
+}

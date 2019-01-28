@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	Copyright (c) 2010-2019 Contributors to the openHAB project
+
+	See the NOTICE file(s) distributed with this work for additional
+	information.
+
+	This program and the accompanying materials are made available under the
+	terms of the Eclipse Public License 2.0 which is available at
+	http://www.eclipse.org/legal/epl-2.0
+
+	SPDX-License-Identifier: EPL-2.0
+
+-->
+<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+
+  <feature name="openhab.tp-base" description="Eclipse SmartHome Target Platform Base" version="${project.version}">
+    <capability>openhab.tp;feature=base;version=1.0.0</capability>
+
+    <feature>scr</feature>
+    <feature>eventadmin</feature>
+
+    <!-- Apache Commons -->
+    <bundle dependency="true">mvn:commons-codec/commons-codec/1.6</bundle>
+    <bundle dependency="true">mvn:commons-collections/commons-collections/3.2.1</bundle>
+    <!--<bundle dependency="true">mvn:org.apache.commons/commons-collections4/4.1</bundle>-->
+    <bundle dependency="true">mvn:org.apache.commons/commons-exec/1.1</bundle>
+    <bundle dependency="true">mvn:commons-io/commons-io/2.2</bundle>
+    <bundle dependency="true">mvn:commons-lang/commons-lang/2.6</bundle>
+    <!--<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>-->
+
+    <!-- Gson -->
+    <bundle dependency="true">mvn:com.google.code.gson/gson/2.3.1</bundle>
+
+    <!-- Measurement -->
+    <bundle dependency="true">mvn:javax.measure/unit-api/1.0</bundle>
+    <bundle dependency="true">mvn:tec.uom/uom-se/1.0.8</bundle>
+    <bundle dependency="true">mvn:tec.uom.lib/uom-lib-common/1.0.2</bundle>
+
+    <!-- TODO: Unbundled libraries -->
+    <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xstream/1.4.7_1</bundle>
+    <bundle dependency="true">mvn:joda-time/joda-time/2.9.2</bundle>
+  </feature>
+
+  <feature name="openhab.tp-coap" description="Californium CoAP library" version="${project.version}">
+    <capability>openhab.tp;feature=coap;version=1.0.6</capability>
+    <bundle>mvn:org.eclipse.californium/californium-osgi/1.0.6</bundle>
+    <bundle>mvn:org.eclipse.californium/element-connector/1.0.6</bundle>
+    <bundle>mvn:org.eclipse.californium/scandium/1.0.6</bundle>
+  </feature>
+
+  <feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
+    <capability>openhab.tp;feature=commons-net;version=3.3</capability>
+    <bundle dependency="true">mvn:commons-net/commons-net/3.3</bundle>
+  </feature>
+
+  <feature name="openhab.tp-httpclient" version="${project.version}">
+    <capability>openhab.tp;feature=httpclient;version=${jetty.version}</capability>
+    <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-api/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
+    <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
+  </feature>
+
+  <feature name="openhab.tp-jax-rs" version="${project.version}">
+    <capability>openhab.tp;feature=jax-rs;version=5.3.1</capability>
+    <feature>openhab.tp-jax-rs-min</feature>
+  </feature>
+
+  <feature name="openhab.tp-jax-rs-min" version="${project.version}">
+    <capability>openhab.tp;feature=jax-rs-min;version=5.3.1</capability>
+    <feature dependency="true">http</feature>
+    <feature dependency="true">openhab.tp-kat.cpy-jersey-min-2.22.2</feature>
+    <bundle>mvn:com.eclipsesource.jaxrs/publisher/5.3.1</bundle>
+    <config name="com.eclipsesource.jaxrs.connector">
+      root=/rest
+    </config>
+  </feature>
+
+  <feature name="openhab.tp-kat.cpy-jersey-min-2.22.2" version="${project.version}">
+    <feature>http</feature>
+    <bundle start-level="36">mvn:org.glassfish.jersey.containers/jersey-container-servlet/2.22.2</bundle>
+    <bundle start-level="36">mvn:org.glassfish.jersey.media/jersey-media-sse/2.22.2</bundle>
+    <bundle start-level="36">mvn:org.glassfish.jersey.media/jersey-media-multipart/2.22.2</bundle>
+    <bundle start-level="36" dependency="true">mvn:org.glassfish.jersey.containers/jersey-container-servlet-core/2.22.2</bundle>
+    <bundle start-level="36" dependency="true">mvn:org.glassfish.jersey.core/jersey-common/2.22.2</bundle>
+    <bundle start-level="36" dependency="true">mvn:org.glassfish.jersey.bundles.repackaged/jersey-guava/2.22.2</bundle>
+    <bundle start-level="36" dependency="true">mvn:org.glassfish.jersey.core/jersey-server/2.22.2</bundle>
+    <bundle start-level="36" dependency="true">mvn:org.glassfish.jersey.core/jersey-client/2.22.2</bundle>
+    <bundle start-level="36" dependency="true">mvn:org.glassfish.jersey.media/jersey-media-jaxb/2.22.2</bundle>
+    <bundle start-level="33" dependency="true">mvn:org.glassfish.hk2/hk2-api/2.4.0-b34</bundle>
+    <bundle start-level="33" dependency="true">mvn:org.glassfish.hk2/hk2-locator/2.4.0-b34</bundle>
+    <bundle start-level="33" dependency="true">mvn:org.glassfish.hk2/hk2-utils/2.4.0-b34</bundle>
+    <bundle start-level="33" dependency="true">mvn:org.glassfish.hk2/osgi-resource-locator/1.0.1</bundle>
+    <bundle start-level="33" dependency="true">mvn:org.glassfish.hk2.external/javax.inject/2.4.0-b34</bundle>
+    <bundle start-level="33" dependency="true">mvn:org.glassfish.hk2.external/aopalliance-repackaged/2.4.0-b34</bundle>
+    <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
+    <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
+    <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/2.0.1</bundle>
+    <bundle dependency="true">mvn:org.javassist/javassist/3.18.1-GA</bundle>
+    <bundle dependency="true">mvn:org.jvnet.mimepull/mimepull/1.9.6</bundle>
+  </feature>
+
+  <feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
+    <capability>openhab.tp;feature=jupnp;version=2.5.1</capability>
+    <feature dependency="true">http</feature>
+    <feature dependency="true">scr</feature>
+    <feature dependency="true">openhab.tp-httpclient</feature>
+    <bundle>mvn:org.jupnp/org.jupnp/2.5.1</bundle>
+    <capability>
+      osgi.service;objectClass:List&lt;String&gt;=org.jupnp.UpnpService
+    </capability>
+  </feature>
+
+  <feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
+    <capability>openhab.tp;feature=jmdns;version=3.5.5</capability>
+
+    <bundle>mvn:org.jmdns/jmdns/3.5.5</bundle>
+  </feature>
+
+  <feature name="openhab.tp-lsp4j" description="Eclipse LSP4J" version="${project.version}">
+    <capability>openhab.tp;feature=lsp4j;version=0.4.1</capability>
+    <bundle>mvn:org.eclipse.lsp4j/org.eclipse.lsp4j/0.4.1</bundle>
+    <bundle>mvn:org.eclipse.lsp4j/org.eclipse.lsp4j.jsonrpc/0.4.1</bundle>
+
+    <feature dependency="true">openhab.tp-xtext</feature>
+    <bundle dependency="true">mvn:org.eclipse.orbit.bundles/com.google.gson/2.7.0.v20170129-0911</bundle>
+  </feature>
+
+  <feature name="openhab.tp-mapdb" description="MapDB" version="${project.version}">
+    <capability>openhab.tp;feature=mapdb;version=1.0.9</capability>
+
+    <bundle dependency="true">mvn:org.mapdb/mapdb/1.0.9</bundle>
+  </feature>
+
+  <feature name="openhab.tp-paho" description="MQTT v3 Client" version="${project.version}">
+    <capability>openhab.tp;feature=paho;version=1.2.0</capability>
+
+    <bundle>mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.0</bundle>
+  </feature>
+
+  <feature name="openhab.tp-serial-javacomm" version="${project.version}">
+    <capability>openhab.tp;feature=serial;impl=javacomm</capability>
+    <bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm/1.2.201</bundle>
+    <bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.armv6hf/1.2.201</bundle>
+    <bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.aarch64/1.2.201</bundle>
+    <bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.x86_64/1.2.201</bundle>
+  </feature>
+
+  <feature name="openhab.tp-serial-rxtx" version="${project.version}">
+    <capability>openhab.tp;feature=serial;impl=rxtx</capability>
+    <bundle>mvn:com.neuronrobotics/nrjavaserial/3.14.0</bundle>
+  </feature>
+
+  <feature name="openhab.tp-xtext" description="Xtext - Language Engineering Made Easy" version="${project.version}">
+    <capability>openhab.tp;feature=xtext;version=2.14.0</capability>
+
+    <bundle>mvn:org.eclipse.xtext/org.eclipse.xtext/2.14.0</bundle>
+
+    <bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.common/2.12.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore/2.12.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore.change/2.11.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore.xmi/2.12.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.common.types/2.14.0</bundle>
+
+    <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
+
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.lib/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.smap/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.util/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib.macro/2.14.0</bundle>
+
+    <bundle dependency="true">mvn:com.google.guava/guava/15.0</bundle>
+    <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
+
+    <!--<bundle dependency="true">mvn:com.google.inject/guice/3.0</bundle>-->
+    <!--<bundle dependency="true">wrap:mvn:org.antlr/antlr-runtime/3.2</bundle>-->
+    <!--<bundle dependency="true">wrap:mvn:aopalliance/aopalliance/1.0</bundle>-->
+
+    <bundle dependency="true">mvn:de.maggu2810.p2redist/com.google.inject/3.0.0.v201312141243</bundle>
+    <bundle dependency="true">mvn:de.maggu2810.p2redist/org.antlr.runtime/3.2.0.v201101311130</bundle>
+
+    <bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.8.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.registry/3.6.100</bundle>
+    <bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.6.100</bundle>
+
+    <!-- Add ASM package -->
+    <!-- org.eclipse.xtext.common.types is using Require-Bundle -->
+    <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm/6.1.1</bundle>
+  </feature>
+
+  <feature name="openhab.tp-xtext-ide" description="Xtext - IDE Support" version="${project.version}">
+    <capability>openhab.tp;feature=xtext-ide;version=2.14.0</capability>
+    <feature dependency="true">openhab.tp-xtext</feature>
+
+    <!-- Support for the Language Server Protocol -->
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.ide/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.ide/2.14.0</bundle>
+  </feature>
+
+  <!--
+  <feature name="openhab.tp-swagger-annotations" description="Swagger Annotations" version="${project.version}">
+    <bundle dependency="true">mvn:io.swagger/swagger-annotations/1.5.5</bundle>
+  </feature>
+  -->
+
+  <feature name="openhab.tp-swagger-jax-rs-provider" description="JAX-RS provider for Swagger integration" version="${project.version}">
+    <details>
+      This feature is currently only for external usage by products and not used by Eclipse SmartHome itself.
+    </details>
+    <capability>openhab.tp;feature=jax-rs-provider-swagger;version=1.1.1</capability>
+    <feature dependency="true">openhab.tp-jax-rs-min</feature>
+
+    <!-- BEG: swagger-jersey2-1.5.8 -->
+    <feature dependency="true">openhab.tp-kat.cpy-jersey-min-2.22.2</feature>
+    <bundle>mvn:de.maggu2810.thirdparty.modified.io.swagger/swagger-jersey2-jaxrs/1.5.8.v20160511-1038</bundle>
+    <bundle dependency="true">mvn:io.swagger/swagger-annotations/1.5.8</bundle>
+    <bundle dependency="true">mvn:io.swagger/swagger-core/1.5.8</bundle>
+    <bundle dependency="true">mvn:io.swagger/swagger-jaxrs/1.5.8</bundle>
+    <bundle dependency="true">mvn:io.swagger/swagger-models/1.5.8</bundle>
+    <bundle dependency="true">mvn:de.maggu2810.thirdparty.modified.org.reflections/reflections/0.9.10.v20160429-1435</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-joda/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.4.5</bundle>
+    <bundle dependency="true">mvn:com.google.code.findbugs/annotations/2.0.1</bundle>
+    <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
+    <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
+    <bundle dependency="true">mvn:joda-time/joda-time/2.2</bundle>
+    <bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.2.1</bundle>
+    <bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/3.1.4</bundle>
+    <bundle dependency="true">mvn:org.javassist/javassist/3.19.0-GA</bundle>
+    <bundle dependency="true">mvn:org.slf4j/slf4j-api/1.7.7</bundle>
+    <bundle dependency="true">mvn:org.yaml/snakeyaml/1.12</bundle>
+    <!-- END: swagger-jersey2-1.5.8 -->
+
+    <bundle>mvn:de.maggu2810.thirdparty.modified.com.eclipsesource.jaxrs/provider-swagger/1.1.1.201605111122</bundle>
+    <config name="com.eclipsesource.jaxrs.swagger.config">
+      swagger.basePath=/rest
+      swagger.info.title=Eclipse SmartHome REST API
+    </config>
+  </feature>
+
+</features>

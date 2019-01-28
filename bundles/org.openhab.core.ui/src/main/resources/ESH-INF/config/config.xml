@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
+	http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="system:chart">
+		<parameter name="defaultHeight" type="integer" required="false">
+			<label>Default Height</label>
+			<description>Defines the default height in pixels for the chart to build.</description>
+			<default>240</default>
+		</parameter>
+		<parameter name="defaultWidth" type="integer" required="false">
+			<label>Default Width</label>
+			<description>Defines the default width in pixels for the chart to build.</description>
+			<default>480</default>
+		</parameter>
+		<parameter name="scale" type="decimal" required="false" min="0" step="0.1">
+			<label>Scale</label>
+			<description>Defines the scale to apply to the requested chart height (0.5 to divide by 2 for example).</description>
+			<default>1</default>
+			<advanced>true</advanced>
+		</parameter>
+		<parameter name="maxWidth" type="integer" required="false">
+			<label>Maximum Width</label>
+			<description>Defines the maximum width in pixels for the chart to build.</description>
+			<advanced>true</advanced>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

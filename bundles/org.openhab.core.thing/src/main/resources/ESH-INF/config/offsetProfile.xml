@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0
+	http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="profile:system:offset">
+		<parameter name="offset" type="text" required="true">
+			<label>Offset</label>
+			<description>Offset (plain number or number with unit) to be applied on the state towards the item. The negative offset will be applied in the reverse direction.</description>
+		</parameter>
+	</config-description>
+</config-description:config-descriptions>

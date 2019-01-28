@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="magic"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<channel-type id="switch">
+		<item-type>Switch</item-type>
+		<label>Switch</label>
+		<description>The on/off channel allows to toggle between on and off.</description>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+		<config-description>
+			<parameter name="invert" type="boolean">
+				<label>Invert operation</label>
+			</parameter>
+		</config-description>
+	</channel-type>
+
+	<channel-type id="brightness">
+		<item-type>Dimmer</item-type>
+		<label>Dimmer</label>
+		<description>The dimmer channel allows to control the brightness.</description>
+		<category>DimmableLight</category>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="color">
+		<item-type>Color</item-type>
+		<label>Color</label>
+		<description>The color channel allows to control the color of a light.
+			It is also possible to dim values and switch the light on and off.
+		</description>
+		<category>ColorLight</category>
+		<tags>
+			<tag>Lighting</tag>
+		</tags>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+		<config-description>
+			<parameter name="boostRed" type="decimal" min="0" max="100">
+				<label>Red boost</label>
+				<description>Boost the red color channel (in percent)</description>
+			</parameter>
+			<parameter name="boostGreen" type="decimal" min="0" max="100">
+				<label>Green boost</label>
+				<description>Boost the green color channel (in percent)</description>
+			</parameter>
+			<parameter name="boostBlue" type="decimal" min="0" max="100">
+				<label>Blue boost</label>
+				<description>Boost the blue color channel (in percent)</description>
+			</parameter>
+		</config-description>
+	</channel-type>
+
+	<channel-type id="alert" advanced="true">
+		<item-type>String</item-type>
+		<label>Alert</label>
+		<description>The alert channel allows a temporary change to the bulb’s state.</description>
+		<state>
+			<options>
+				<option value="NONE">None</option>
+				<option value="SELECT">Alert</option>
+				<option value="LSELECT">Long Alert</option>
+			</options>
+		</state>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="contact">
+		<item-type>Contact</item-type>
+		<label>Contact</label>
+		<state readOnly="true"></state>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="location">
+		<item-type>Location</item-type>
+		<label>Location</label>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="number">
+		<item-type>Number</item-type>
+		<label>Thing Online(&gt;0)/Offline(&lt;0) Delay</label>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="text">
+		<item-type>String</item-type>
+		<label>Text channel</label>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Current Temperature</label>
+		<state readOnly="true" pattern="%.1f %unit%" />
+	</channel-type>
+
+	<channel-type id="set-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Set Point</label>
+		<state readOnly="false" pattern="%.1f %unit%" min="12" max="38" step="0.5" />
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="choosy">
+		<item-type>Number</item-type>
+		<label>Choosy</label>
+		<state>
+			<options>
+				<option value="0">Zero</option>
+				<option value="1">One</option>
+				<option value="2">Two</option>
+			</options>
+		</state>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="rollershutter">
+		<item-type>Rollershutter</item-type>
+		<label>Rollershutter</label>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="player">
+		<item-type>Player</item-type>
+		<label>Player</label>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="image">
+		<item-type>Image</item-type>
+		<label>Image</label>
+	</channel-type>
+
+</thing:thing-descriptions>

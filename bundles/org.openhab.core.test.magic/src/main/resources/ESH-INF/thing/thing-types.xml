@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="magic"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<thing-type id="extensible-thing" extensible="brightness,color,alert,choosy,image">
+		<label>Magic Light - Extensible</label>
+		<description>A generic light thing with extension channels</description>
+		<config-description>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="onoff-light" extensible="alert">
+		<label>Magic Light - On/Off</label>
+		<description>A on/off light</description>
+
+		<channels>
+			<channel id="switch" typeId="switch" />
+		</channels>
+
+		<config-description>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="dimmable-light" extensible="alert,color">
+		<label>Magic Light - Dimmable</label>
+		<description>A dimmable light</description>
+
+		<channels>
+			<channel id="brightness" typeId="brightness" />
+		</channels>
+
+		<config-description>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="color-light">
+		<label>Magic Light - Color</label>
+		<description>A dimmable light with changeable colors.</description>
+
+		<channels>
+			<channel id="color" typeId="color" />
+			<channel id="alert" typeId="alert" />
+		</channels>
+
+		<config-description>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="contact-sensor">
+		<label>Magic Sensor - Door/Window Contact</label>
+		<description>A door/window sensor indicating an open/close status.</description>
+
+		<channels>
+			<channel id="contact" typeId="contact" />
+		</channels>
+	</thing-type>
+
+	<thing-type id="location-thing">
+		<label>Magic Location</label>
+		<description>A location thing providing a location channel.</description>
+
+		<channels>
+			<channel id="location" typeId="location" />
+		</channels>
+	</thing-type>
+
+	<thing-type id="configurable-thing">
+		<label>Magic Configurable Thing</label>
+		<description>A thing that can be configured.</description>
+		<channels>
+			<channel id="switch" typeId="switch" />
+		</channels>
+
+		<representation-property>serialNumber</representation-property>
+
+		<config-description uri="thing-type:magic:config">
+			<parameter name="interval" type="integer" min="1" max="100">
+				<label>Integer</label>
+				<description>Integer value between 1 and 100.</description>
+				<default>23</default>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="thermostat">
+		<label>Magic Thermostat</label>
+		<description>A thermostat for set point and current temperature.</description>
+
+		<channels>
+			<channel typeId="temperature" id="temperature"></channel>
+			<channel typeId="set-temperature" id="set-temperature"></channel>
+		</channels>
+	</thing-type>
+
+	<thing-type id="delayed-thing">
+		<label>Magic Delayed Online Thing</label>
+		<description>A thing that goes online after some time.</description>
+
+		<channels>
+			<channel id="number" typeId="number" />
+		</channels>
+	</thing-type>
+
+	<thing-type id="chatty-thing">
+		<label>Magic ChattyThing</label>
+		<description>A thing that periodically sends data.</description>
+
+		<channels>
+			<channel id="number" typeId="number">
+				<label>Number to show</label>
+			</channel>
+			<channel id="text" typeId="text">
+				<label>Text to show</label>
+			</channel>
+		</channels>
+
+		<config-description uri="thing-type:magic:chattyConfig">
+			<parameter name="interval" type="integer">
+				<label>Interval</label>
+				<description>Interval to send data in seconds. (Use 0 to disable data sending)</description>
+				<default>5</default>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="firmware-update">
+		<label>Magic Firmware Updatable Thing</label>
+		<description>A thing which allows updating its firmware</description>
+
+		<properties>
+			<property name="firmwareVersion">0.1.0</property>
+		</properties>
+
+		<config-description uri="thing-type:magic:update-config">
+			<parameter name="updateModel" type="text" required="true">
+				<required>true</required>
+				<options>
+					<option value="Alohomora">Alohomora</option>
+					<option value="Colloportus">Colloportus</option>
+					<option value="Lumos">Lumos</option>
+					<option value="Nox">Nox</option>
+				</options>
+				<label>Model ID</label>
+				<description>The model of the magic firmware update thing</description>
+				<default>Not specified</default>
+			</parameter>
+		</config-description>
+
+	</thing-type>
+
+	<thing-type id="rollershutter">
+		<label>Magic Rollershutter Thing</label>
+		<description>A rollershutter</description>
+		<channels>
+			<channel typeId="rollershutter" id="rollershutter"></channel>
+		</channels>
+	</thing-type>
+
+	<thing-type id="player">
+		<label>Magic Player Thing</label>
+		<description>A media player</description>
+		<channels>
+			<channel typeId="player" id="player"></channel>
+		</channels>
+	</thing-type>
+
+	<thing-type id="image">
+		<label>Magic Image</label>
+		<description>A thing providing an image</description>
+		<channels>
+			<channel typeId="image" id="image"></channel>
+		</channels>
+		<config-description>
+			<parameter name="source" type="text" required="true">
+				<label>Image URL</label>
+				<description>The URL the image will be loaded from</description>
+				<context>url</context>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="action-module">
+		<label>Magic ActionModule Thing</label>
+		<description>A Thing with an ActionModule</description>
+		<channels>
+			<channel typeId="switch" id="switch"></channel>
+		</channels>
+		<config-description>
+			<parameter name="textParam" type="text" required="true">
+				<label>Text Parameter</label>
+				<description>Just a text</description>
+			</parameter>
+		</config-description>
+		</thing-type>
+
+	<thing-type id="online-offline">
+		<label>Magic Online Offline</label>
+		<description>An online/offline toggle thing</description>
+		<config-description>
+			<parameter name="toggleTime" type="integer" required="true">
+				<label>Toggle Time</label>
+				<description>The time in seconds to toggle between ONLINE and OFFLINE status.</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+</thing:thing-descriptions>

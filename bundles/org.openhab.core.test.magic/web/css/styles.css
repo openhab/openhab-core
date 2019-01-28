@@ -1,0 +1,82 @@
+body {
+	padding-top: 60px;
+}
+
+.navbar-default .navbar-nav>li>a, .navbar-default .navbar-nav>li>a:focus,
+	.navbar-default .navbar-nav>li>a:hover {
+	color: white;
+}
+
+.navbar {
+	background-color: #01324D;
+	border: 0;
+}
+
+.center {
+	text-align: center;
+}
+
+#logo {
+	height: 60px;
+}
+
+/* Landing Page Targets */
+body.landing section {
+	overflow-x: hidden;
+}
+
+body.landing section#references {
+	background-color: #8098a6;
+	color: white;
+}
+
+body.landing section#references h1 {
+	color: white;
+}
+
+body.landing section#references .reference {
+	margin-bottom: 20px;
+	position: relative;
+}
+
+body.landing section#references .logo {
+	background-color: white;
+	overflow: hidden;
+	position: relative;
+}
+
+body.landing section#references .logo:before {
+	content: "";
+	display: block;
+	padding-top: 75%;
+}
+
+body.landing section#references .logo img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	width: 100%;
+	height: 100%;
+}
+
+body.landing section#references .text {
+	background: white;
+	padding: 0px 10px 20px 10px;
+	height: 120px;
+}
+
+body.landing section#references .text h3 {
+	margin: 0px;
+	font-weight: 300;
+	color: #222;
+	text-transform: none;
+	font-size: 20px !important;
+	line-height: 60px !important;
+}
+
+body.landing section#references .text p {
+	margin: 0px;
+	color: #222;
+}

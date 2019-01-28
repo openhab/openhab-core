@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<binding:binding xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:binding="http://eclipse.org/smarthome/schemas/binding/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/binding/v1.0.0 org.eclipse.smarthome.binding.xsd"
+	id="SystemChannels">
+
+	<name>SystemChannelsInChannelGroups Test Binding</name>
+	<description>Used to test System Wide Channels which are used within Channel Groups. Provides definitions of system channels.</description>
+	<author>Deutsche Telekom AG</author>
+	
+</binding:binding>

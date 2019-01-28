@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0 http://eclipse.org/smarthome/schemas/config-description/v1.0.0">
+
+	<!-- test dummy -->
+	<config-description uri="config:fragmentConfig">
+	    
+		<parameter name="testParam" type="text">
+			<label>Test</label>
+			<description>Test Parameter.</description>
+		</parameter>
+
+
+	</config-description>
+
+</config-description:config-descriptions>

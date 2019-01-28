@@ -1,0 +1,110 @@
+grammar org.eclipse.smarthome.model.thing.Thing 
+
+// disabled due to conflicts between the custom ID rule and the common INT rule
+// with org.eclipse.xtext.common.Terminals
+
+hidden(WS, ML_COMMENT, SL_COMMENT)
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+generate thing "http://www.eclipse.org/smarthome/model/Thing"
+
+ThingModel:
+	things+=(ModelThing|ModelBridge)*;
+
+// we add this rule in order to have a common superclass for types having properties
+ModelPropertyContainer:
+	ModelThing | ModelBridge | ModelChannel
+;
+
+ModelBridge returns ModelThing: 
+	{ModelBridge}
+	bridge?='Bridge' (id=UID | thingTypeId=UID_SEGMENT thingId=UID_SEGMENT)
+    (label=STRING)?
+    ('@' location=STRING)?
+	('['
+		properties+=ModelProperty? (',' properties+=ModelProperty)*
+	']')?
+	('{'
+		('Things:')?
+		things+=(ModelThing|ModelBridge)*
+		('Channels:')?			
+		channels+=ModelChannel*   
+		
+	'}')?
+;
+
+ModelThing:
+	('Thing')? (id=UID | thingTypeId=UID_SEGMENT thingId=UID_SEGMENT)
+	(label=STRING)?
+	('(' bridgeUID = UID ')')?
+	('@' location=STRING)?
+	('['
+		properties+=ModelProperty? (',' properties+=ModelProperty)*
+	']')?
+	('{'
+		('Channels:')?
+		channels+=ModelChannel*
+	'}')?
+;
+
+ModelChannel:
+	(((channelKind= ('State' | 'Trigger'))? type=ModelItemType) | 'Type' channelType=UID_SEGMENT) ':' id=CHANNEL_ID
+    (label=STRING)?
+	('['
+		properties+=ModelProperty? (',' properties+=ModelProperty)*
+	']')?
+;
+
+ModelItemType :
+	BaseModelItemType | 'Number:' ID
+;
+
+BaseModelItemType :
+	'Switch' | 'Rollershutter' | 'Number' | 'String' | 'Dimmer' | 'Contact' | 'DateTime' | 'Color' | 'Player' | 'Location' | 'Call' | 'Image'
+;
+
+ModelProperty:
+	key=ID '=' value+=ValueType (',' value+=ValueType)*
+;
+
+CHANNEL_ID:
+    UID_SEGMENT ('#' UID_SEGMENT)?
+;
+
+UID:
+	UID_SEGMENT ':' UID_SEGMENT ':' UID_SEGMENT (=> ':' UID_SEGMENT)*
+;
+
+UID_SEGMENT :
+	ID
+;
+
+
+ValueType returns ecore::EJavaObject:
+	STRING | NUMBER | BOOLEAN
+;
+
+BOOLEAN returns ecore::EBoolean: 
+	'true' | 'false'
+;
+
+NUMBER returns ecore::EBigDecimal:
+	ID ('.' ID )?
+;
+
+terminal ID  		: '^'?('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9') ('a'..'z'|'A'..'Z'|'_'|'-'|'0'..'9')*;
+
+// INT is disabled due to conflicts with the custom ID rule
+// terminal INT: '0'..'9';
+
+terminal STRING	: 
+			'"' ( '\\' ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') | !('\\'|'"') )* '"' |
+			"'" ( '\\' ('b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\') | !('\\'|"'") )* "'"
+		; 
+terminal ML_COMMENT	: '/*' -> '*/';
+terminal SL_COMMENT 	: '//' !('\n'|'\r')* ('\r'? '\n')?;
+
+terminal WS			: (' '|'\t'|'\r'|'\n')+;
+
+terminal ANY_OTHER: .;

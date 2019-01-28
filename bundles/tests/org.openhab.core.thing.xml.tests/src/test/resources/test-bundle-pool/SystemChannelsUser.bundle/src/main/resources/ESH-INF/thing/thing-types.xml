@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="SystemChannelsUser"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+        xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+    <thing-type id="wireless-router-v2">
+        <label>Simple wireless router</label>
+        <description>Simple wireless router</description>
+
+		<channels>
+			<channel id="sigstrv2" typeId="system.signal-strength" />
+			<channel id="test" typeId="system.my-channel" />
+			<channel id="lowbat" typeId="system.low-battery" />
+		</channels>
+
+    </thing-type> 
+</thing:thing-descriptions>

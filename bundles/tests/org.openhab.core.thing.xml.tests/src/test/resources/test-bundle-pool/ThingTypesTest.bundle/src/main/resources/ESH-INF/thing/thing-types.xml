@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="hue"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description.xsd">
+
+	<!-- HUE Bridge -->
+	<bridge-type id="bridge" listed="false">
+		<label>HUE Bridge</label>
+		<description>The hue Bridge represents the Philips hue bridge.
+		</description>
+
+		<category>NetworkAppliance</category>
+
+		<properties>
+			<property name="vendor">Philips</property>
+		</properties>
+		<representation-property>serialNumber</representation-property>
+
+		<config-description>
+			<parameter name="ip" type="text">
+				<context>network-address</context>
+				<label>Network Address</label>
+				<description>Network address of the hue bridge.</description>
+				<required>true</required>
+			</parameter>
+			<parameter name="username" type="text">
+				<context>password</context>
+				<label>Username</label>
+				<description>Name of a registered hue bridge user, that allows to
+					access the API.
+				</description>
+			</parameter>
+		</config-description>
+	</bridge-type>
+
+	<!-- HUE Lamp -->
+	<thing-type id="lamp" listed="false" extensible="alarm,brightness">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge" />
+		</supported-bridge-type-refs>
+
+		<label>HUE Lamp</label>
+		<description>My own great HUE Lamp.</description>
+
+		<category>Lightbulb</category>
+
+		<channels>
+			<channel id="color" typeId="color">
+				<properties>
+					<property name="chan.key1">value1</property>
+					<property name="chan.key2">value2</property>
+				</properties>
+			</channel>
+			<channel id="color_temperature" typeId="color_temperature" />
+			<channel id="alarm" typeId="alarm" />
+		</channels>
+
+		<properties>
+			<property name="key1">value1</property>
+			<property name="key2">value2</property>
+		</properties>
+		<representation-property>uniqueId</representation-property>
+	</thing-type>
+
+	<!-- HUE Lamp with Group -->
+	<thing-type id="lamp-with-group" extensible="brightness, alarm">
+
+		<label>HUE Lamp</label>
+		<description>My own great HUE Lamp.</description>
+
+		<channel-groups>
+			<channel-group id="lampgroup" typeId="lampgroup" />
+		</channel-groups>
+	</thing-type>
+
+
+	<!-- HUE Lamp Color Channel -->
+	<channel-type id="color">
+		<item-type>ColorItem</item-type>
+		<label>HUE Lamp Color</label>
+		<description>The color channel allows to control the color of the hue
+			lamp. It is also possible to dim values and switch the lamp on and
+			off.
+		</description>
+		<tags>
+			<tag>Hue</tag>
+			<tag>ColorLamp</tag>
+		</tags>
+
+		<config-description>
+			<parameter name="lastDimValue" type="boolean" />
+		</config-description>
+	</channel-type>
+
+	<!-- HUE Lamp Color Temperature Channel -->
+	<channel-type id="color_temperature">
+		<item-type>DimmerItem</item-type>
+		<label>HUE Lamp Color Temperature</label>
+		<description>The color temperature channel allows to set the color
+			temperature from 0 (cold) to 100 (warm).
+		</description>
+		<tags>
+			<tag>Hue</tag>
+			<tag>AmbientLamp</tag>
+		</tags>
+	</channel-type>
+
+	<!-- Alarm Channel -->
+	<channel-type id="alarm">
+		<item-type>Number</item-type>
+		<label>Alarm System</label>
+		<description>The light blinks if alarm is set.</description>
+		<category>ALARM</category>
+		<tags>
+			<tag>Hue</tag>
+			<tag>AlarmSystem</tag>
+		</tags>
+		<state min="0" max="100.0" step="10.0" pattern="%d Peek"
+			readOnly="true">
+			<options>
+				<option value="SOUND">My great sound.</option>
+				<option value="LIGHT" />
+			</options>
+		</state>
+	</channel-type>
+
+	<!-- Channel Group -->
+	<channel-group-type id="lampgroup" advanced="true">
+		<label>Alarm System</label>
+		<description>The alarm system.</description>
+		<channels>
+			<channel id="color" typeId="color" />
+			<channel id="color_temperature" typeId="color_temperature" />
+			<channel id="alarm" typeId="alarm" />
+		</channels>
+	</channel-group-type>
+
+</thing:thing-descriptions>

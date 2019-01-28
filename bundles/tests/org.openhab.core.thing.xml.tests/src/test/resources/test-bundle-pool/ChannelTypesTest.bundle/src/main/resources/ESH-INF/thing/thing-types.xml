@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="somebinding"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description.xsd">
+
+	<thing-type id="something">
+
+		<label>Something</label>
+
+		<channels>
+			<channel id="channel1" typeId="color">
+				<label>Channel without reference</label>
+				<description>Channel Description</description>
+				<properties>
+					<property name="property1">value</property>
+				</properties>
+				<autoUpdatePolicy>recommend</autoUpdatePolicy>
+			</channel>
+		</channels>
+	</thing-type>
+
+	<channel-type id="channel1">
+		<item-type>Number</item-type>
+		<label>Channel 1</label>
+	</channel-type>
+
+	<channel-type id="channel-without-reference">
+		<item-type>Number</item-type>
+		<label>Channel without reference</label>
+		<description>Channel Description</description>
+		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-group-type id="channelgroup">
+		<label>Channel group</label>
+		<category>Temperature</category>
+		<channels>
+			<channel id="channel1" typeId="channel1" />
+			<channel id="channel2" typeId="channel1" />
+		</channels>
+	</channel-group-type>
+
+</thing:thing-descriptions>

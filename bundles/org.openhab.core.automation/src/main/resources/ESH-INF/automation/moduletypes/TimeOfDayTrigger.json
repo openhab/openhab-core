@@ -1,0 +1,20 @@
+{  
+   "triggers":[  
+      {  
+         "uid":"timer.TimeOfDayTrigger",
+         "label":"it is a fixed time of day",
+         "description":"Triggers at a specified time",
+         "visibility":"PUBLIC",
+         "configDescriptions":[  
+            {  
+               "name":"time",
+               "context":"time",
+               "type":"TEXT",
+               "label":"Time",
+               "description":"the time (in hh:mm)",
+               "required":true
+            }
+        ]
+      }
+   ]
+}
