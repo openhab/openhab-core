@@ -164,7 +164,6 @@ Import-Package: \\
   io.swagger.annotations.*;resolution:=optional,\\
   javax.annotation.security.*;resolution:=optional,\\
   org.eclipse.jdt.annotation.*;resolution:=optional,\\
-  org.eclipse.jdt.annotation.*;resolution:=optional,\\
   org.openhab.core.automation.annotation.*;resolution:=optional,\\
   com.google.common.*;version="14.0",\\
   *
