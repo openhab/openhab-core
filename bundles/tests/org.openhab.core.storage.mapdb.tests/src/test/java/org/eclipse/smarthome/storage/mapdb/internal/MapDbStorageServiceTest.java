@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,10 +24,9 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.storage.DeletableStorage;
+import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.storage.Storage;
-import org.eclipse.smarthome.core.storage.StorageService;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,9 +36,10 @@ import org.junit.Test;
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Alex Tugarev - Added test for getStorage without classloader
  * @author Markus Rathgeb - Migrate Groovy tests to OSGi
+ * @author Markus Rathgeb - Migrate OSGi test to non-OSGi test
  */
 @NonNullByDefault
-public class StorageServiceOSGiTest extends JavaOSGiTest {
+public class MapDbStorageServiceTest {
 
     private static final String KEY_1 = "Key1";
     private static final String KEY_2 = "Key2";
@@ -79,28 +78,38 @@ public class StorageServiceOSGiTest extends JavaOSGiTest {
         }
     }
 
+    private @NonNullByDefault({}) Path tmpDir;
     private @NonNullByDefault({}) MapDbStorageService storageService;
     private @NonNullByDefault({}) MapDbStorage<Object> storage;
 
     @Before
-    public void setUp() {
-        storageService = getService(StorageService.class, MapDbStorageService.class);
-        final DeletableStorage<Object> storage = storageService.getStorage("TestStorage", getClass().getClassLoader());
-        Assert.assertTrue(storage instanceof MapDbStorage);
-        this.storage = (MapDbStorage<Object>) storage;
+    public void setup() throws IOException {
+        tmpDir = Files.createTempDirectory(null);
+        final Path userdata = tmpDir.resolve("userdata");
+        userdata.toFile().mkdir();
+        System.setProperty(ConfigConstants.USERDATA_DIR_PROG_ARGUMENT, userdata.toString());
+
+        storageService = new MapDbStorageService();
+        storageService.activate();
+        this.storage = (MapDbStorage<Object>) storageService.getStorage("TestStorage", getClass().getClassLoader());
     }
 
     @After
-    public void tearDown() throws IOException {
-        unregisterService(storageService);
+    public void teardown() throws IOException {
+        if (storage != null) {
+            storage.delete();
+            storage = null;
+        }
+        if (storageService != null) {
+            storageService.deactivate();
+            storageService = null;
+        }
 
         // clean up database files ...
-        removeDirRecursive("userdata");
-        removeDirRecursive("runtime");
+        removeDirRecursive(tmpDir);
     }
 
-    private static void removeDirRecursive(final String dir) throws IOException {
-        final Path path = Paths.get(dir);
+    private static void removeDirRecursive(final Path path) throws IOException {
         if (Files.exists(path)) {
             Files.walk(path).map(Path::toFile).sorted((o1, o2) -> -o1.compareTo(o2)).forEach(File::delete);
         }
@@ -111,15 +120,15 @@ public class StorageServiceOSGiTest extends JavaOSGiTest {
      */
     @Test
     public void serializationDeserialization() {
-        Assert.assertEquals(0, storage.getKeys().size());
+        Assert.assertThat(storage.getKeys().size(), Matchers.equalTo(0));
         storage.put(KEY_1, new PersistedItem("String", Arrays.asList("LIGHT", "GROUND_FLOOR")));
         storage.put(KEY_2, new PersistedItem("Number", Arrays.asList("TEMPERATURE", "OUTSIDE")));
-        Assert.assertEquals(2, storage.getKeys().size());
+        Assert.assertThat(storage.getKeys().size(), Matchers.equalTo(2));
         final Object persistedObject = storage.get(KEY_1);
-        Assert.assertTrue(persistedObject instanceof PersistedItem);
+        Assert.assertThat(persistedObject, Matchers.instanceOf(PersistedItem.class));
         storage.remove(KEY_1);
         storage.remove(KEY_2);
-        Assert.assertEquals(0, storage.getKeys().size());
+        Assert.assertThat(storage.getKeys().size(), Matchers.equalTo(0));
     }
 
     /**
