@@ -36,16 +36,16 @@ function main() {
   if [[ $response == *"ordinal"* ]]
   then
     echo "Version created: $response"
-  elif [[ $response == *"already exists"* ]]
+  elif [[ $response == *"Conflict Creating Version"* ]]
   then
-    echo "Version exists: $response"
+    echo "Version already exists - overwriting."
   else
     echo "Failed to create version: $response"
     exit 1;
   fi
 
   echo "Uploading archive $PACKAGE_ARCHIVE"
-  response=$(curl -s -X PUT --data-binary @$PACKAGE_ARCHIVE -u ${BINTRAY_USER}:${BINTRAY_API_KEY} "$BINTRAY_URL/content/$BINTRAY_SUBJECT/$BINTRAY_REPO/$PACKAGE_PATH/$PACKAGE_ARCHIVE;bt_package=$BINTRAY_PACKAGE;bt_version=$PACKAGE_VERSION;publish=1;explode=1;override=1" -H "Content-Type: application/gzip")
+  response=$(curl -s -X PUT --data-binary @$PACKAGE_ARCHIVE -u ${BINTRAY_USER}:${BINTRAY_API_KEY} "$BINTRAY_URL/content/$BINTRAY_SUBJECT/$BINTRAY_REPO/$PACKAGE_PATH/$PACKAGE_ARCHIVE;bt_package=$BINTRAY_PACKAGE;bt_version=$PACKAGE_VERSION;publish=1;explode=1;override=1" -H "Content-Type: application/x-gzip")
   if [[ $response == *"success"* ]]
   then
     echo "Archive uploaded: $response"
