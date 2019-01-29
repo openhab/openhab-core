@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openhab.core.itests</groupId>
+    <artifactId>org.openhab.core.reactor.itests</artifactId>
+    <version>2.5.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.openhab.core.compat1x.tests</artifactId>
+
+  <name>openHAB Core :: Integration Tests :: 1.x Compatibility Layer Tests</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.compat1x</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.model.item.runtime</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.model.script.runtime</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.scheduler</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.test</artifactId>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.compile</artifactId>
+      <type>pom</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.runtime-index</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.test-index</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bndfile>integration-test.bndrun</bndfile>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-indexer-maven-plugin</artifactId>
+        <configuration>
+          <includeJar>true</includeJar>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-testing-maven-plugin</artifactId>
+        <configuration>
+          <bndruns>
+            <bndrun>integration-test.bndrun</bndrun>
+          </bndruns>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-resolver-maven-plugin</artifactId>
+        <configuration>
+          <bndruns>
+            <bndrun>integration-test.bndrun</bndrun>
+          </bndruns>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openhab.core</groupId>
+    <artifactId>org.openhab.core.reactor</artifactId>
+    <version>2.5.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.openhab.core.itests</groupId>
+  <artifactId>org.openhab.core.reactor.itests</artifactId>
+  <packaging>pom</packaging>
+
+  <name>openHAB Core :: Integration Tests</name>
+
+  <modules>
+    <!-- <module>org.openhab.core.automation.core.tests</module> -->
+    <!-- <module>org.openhab.core.automation.module.core.tests</module> -->
+    <!-- <module>org.openhab.core.automation.module.timer.tests</module> -->
+    <!-- <module>org.openhab.core.automation.module.script.defaultscope.tests</module> -->
+    <!-- <module>org.openhab.core.automation.module.script.tests</module> -->
+    <!-- <module>org.openhab.core.automation.event.tests</module> -->
+    <!-- <module>org.openhab.core.automation.integration.tests</module> -->
+    <!-- <module>org.openhab.core.audio.tests</module> -->
+    <!-- <module>org.openhab.core.id.tests</module> -->
+    <!-- <module>org.openhab.core.thing.tests</module> -->
+    <!-- <module>org.openhab.core.semantics.tests</module> -->
+    <!-- <module>org.openhab.core.transform.tests</module> -->
+    <!-- <module>org.openhab.core.binding.xml.tests</module> -->
+    <!-- <module>org.openhab.core.thing.xml.tests</module> -->
+    <!-- <module>org.openhab.core.voice.tests</module> -->
+    <!-- <module>org.openhab.core.auth.oauth2client.tests</module> -->
+    <!-- <module>org.openhab.core.config.dispatch.tests</module> -->
+    <!-- <module>org.openhab.core.config.core.tests</module> -->
+    <!-- <module>org.openhab.core.config.discovery.mdns.tests</module> -->
+    <!-- <module>org.openhab.core.config.discovery.tests</module> -->
+    <!-- <module>org.openhab.core.config.discovery.usbserial.tests</module> -->
+    <!-- <module>org.openhab.core.config.xml.tests</module> -->
+    <module>org.openhab.core.tests</module>
+    <module>org.openhab.core.compat1x.tests</module>
+    <!-- <module>org.openhab.core.io.net.tests</module> -->
+    <!-- <module>org.openhab.core.io.http.tests</module> -->
+    <!-- <module>org.openhab.core.io.rest.tests</module> -->
+    <!-- <module>org.openhab.core.io.rest.core.tests</module> -->
+    <!-- <module>org.openhab.core.io.rest.sse.tests</module> -->
+    <!-- <module>org.openhab.core.io.rest.sitemap.tests</module> -->
+    <!-- <module>org.openhab.core.io.transport.mqtt.tests</module> -->
+    <!-- <module>org.openhab.core.io.transport.upnp.tests</module> -->
+    <!-- <module>org.openhab.core.model.core.tests</module> -->
+    <!-- <module>org.openhab.core.model.item.tests</module> -->
+    <!-- <module>org.openhab.core.model.lsp.tests</module> -->
+    <!-- <module>org.openhab.core.model.persistence.tests</module> -->
+    <!-- <module>org.openhab.core.model.rule.tests</module> -->
+    <!-- <module>org.openhab.core.model.script.tests</module> -->
+    <!-- <module>org.openhab.core.model.thing.tests</module> -->
+    <!-- <module>org.openhab.core.storage.json.tests</module> -->
+    <!-- <module>org.openhab.core.magic.tests</module> -->
+    <!-- <module>org.openhab.core.ui.tests</module> -->
+    <!-- <module>org.openhab.core.ui.icon.tests</module> -->
+  </modules>
+
+  <profiles>
+    <profile>
+      <activation>
+        <os>
+          <family>unix</family>
+        </os>
+      </activation>
+      <modules>
+        <!-- <module>org.openhab.core.config.discovery.usbserial.linuxsysfs.tests</module> -->
+      </modules>
+    </profile>
+  </profiles>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+            </archive>
+            <skipIfEmpty>true</skipIfEmpty>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.compile</artifactId>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+
+</project>

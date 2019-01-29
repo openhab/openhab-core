@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -139,6 +139,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <version>${jetty.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>websocket-client</artifactId>
       <version>${jetty.version}</version>
@@ -218,8 +224,8 @@
     </dependency>
 
     <!-- Serial Communication -->
-    <!-- <dependency> <groupId>org.eclipse.kura</groupId> <artifactId>org.eclipse.soda.dk.comm</artifactId> <version>1.2.201</version> 
-      <scope>compile</scope> </dependency> -->
+    <!-- <dependency> <groupId>org.eclipse.kura</groupId> <artifactId>org.eclipse.soda.dk.comm</artifactId> <version>1.2.201</version>
+    <scope>compile</scope> </dependency> -->
     <dependency>
       <groupId>org.vesalainen.comm</groupId>
       <artifactId>javaxcomm</artifactId>
