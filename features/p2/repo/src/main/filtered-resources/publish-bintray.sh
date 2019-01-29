@@ -7,7 +7,7 @@ BINTRAY_URL=https://api.bintray.com/
 BINTRAY_REPO=p2
 BINTRAY_PACKAGE=openhab-core
 PACKAGE_VERSION=${repo.version}
-PACKAGE_ARCHIVE=repo.zip
+PACKAGE_ARCHIVE=repo.tar.gz
 PACKAGE_PATH=openhab-core/$PACKAGE_VERSION
 
 if [ "x$1" != "x" ]; then
@@ -26,9 +26,9 @@ function main() {
 
   cd $DIRNAME
 
-  echo "Creating zipped repo ..."
+  echo "Creating archived repo ..."
   cd repository
-  zip -r -q ../repo.zip *
+  tar cfz repo.tar.gz *
   cd ..
 
   echo "Creating version $PACKAGE_VERSION ..."
@@ -45,7 +45,7 @@ function main() {
   fi
 
   echo "Uploading archive $PACKAGE_ARCHIVE"
-  response=$(curl -s -X PUT --data-binary @$PACKAGE_ARCHIVE -u ${BINTRAY_USER}:${BINTRAY_API_KEY} "$BINTRAY_URL/content/$BINTRAY_SUBJECT/$BINTRAY_REPO/$PACKAGE_PATH/$PACKAGE_ARCHIVE;bt_package=$BINTRAY_PACKAGE;bt_version=$PACKAGE_VERSION;publish=1;explode=1;override=1" -H "Content-Type: application/zip")
+  response=$(curl -s -X PUT --data-binary @$PACKAGE_ARCHIVE -u ${BINTRAY_USER}:${BINTRAY_API_KEY} "$BINTRAY_URL/content/$BINTRAY_SUBJECT/$BINTRAY_REPO/$PACKAGE_PATH/$PACKAGE_ARCHIVE;bt_package=$BINTRAY_PACKAGE;bt_version=$PACKAGE_VERSION;publish=1;explode=1;override=1" -H "Content-Type: application/gzip")
   if [[ $response == *"success"* ]]
   then
     echo "Archive uploaded: $response"
