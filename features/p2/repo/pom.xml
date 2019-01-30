@@ -172,11 +172,6 @@
                   <source>true</source>
                 </artifact>
                 <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.io.console.karaf:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
                   <id>org.openhab.core.bundles:org.openhab.core.io.console.rfc147:${project.version}</id>
                   <transitive>false</transitive>
                   <source>true</source>
@@ -193,11 +188,6 @@
                 </artifact>
                 <artifact>
                   <id>org.openhab.core.bundles:org.openhab.core.io.http.auth.basic:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.io.jetty.certificate:${project.version}</id>
                   <transitive>false</transitive>
                   <source>true</source>
                 </artifact>
@@ -297,11 +287,6 @@
                   <source>true</source>
                 </artifact>
                 <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.karaf:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
                   <id>org.openhab.core.bundles:org.openhab.core.model.core:${project.version}</id>
                   <transitive>false</transitive>
                   <source>true</source>
@@ -318,11 +303,6 @@
                 </artifact>
                 <artifact>
                   <id>org.openhab.core.bundles:org.openhab.core.model.item.runtime:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.model.lazygen:${project.version}</id>
                   <transitive>false</transitive>
                   <source>true</source>
                 </artifact>
