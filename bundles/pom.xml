@@ -97,25 +97,14 @@
     <module>org.openhab.core.model.thing.runtime</module>
     <module>org.openhab.core.storage.json</module>
     <module>org.openhab.core.storage.mapdb</module>
-    <module>org.openhab.core.test.magic</module>
     <module>org.openhab.core.test</module>
+    <module>org.openhab.core.test.magic</module>
     <module>org.openhab.core.ui</module>
     <module>org.openhab.core.ui.icon</module>
     <module>org.openhab.core.ui.dashboard</module>
   </modules>
 
   <profiles>
-    <profile>
-      <id>skip-test-bundles</id>
-      <activation>
-        <property>
-          <name>!skipTests</name>
-        </property>
-      </activation>
-      <modules>
-        <module>tests</module>
-      </modules>
-    </profile>
     <profile>
       <id>model-specific-profile</id>
       <activation>
@@ -265,9 +254,9 @@
       <type>pom</type>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.test</artifactId>
+      <type>pom</type>
       <scope>test</scope>
     </dependency>
   </dependencies>

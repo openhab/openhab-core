@@ -518,6 +518,20 @@ Import-Package: \\
 
   </build>
 
+  <profiles>
+    <profile>
+      <id>skip-itest</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <modules>
+        <module>itests</module>
+      </modules>
+    </profile>
+  </profiles>
+    
   <modules>
     <module>bom</module>
     <module>demo</module>

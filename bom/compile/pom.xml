@@ -139,6 +139,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <version>${jetty.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>websocket-client</artifactId>
       <version>${jetty.version}</version>
@@ -218,8 +224,8 @@
     </dependency>
 
     <!-- Serial Communication -->
-    <!-- <dependency> <groupId>org.eclipse.kura</groupId> <artifactId>org.eclipse.soda.dk.comm</artifactId> <version>1.2.201</version> 
-      <scope>compile</scope> </dependency> -->
+    <!-- <dependency> <groupId>org.eclipse.kura</groupId> <artifactId>org.eclipse.soda.dk.comm</artifactId> <version>1.2.201</version>
+    <scope>compile</scope> </dependency> -->
     <dependency>
       <groupId>org.vesalainen.comm</groupId>
       <artifactId>javaxcomm</artifactId>
