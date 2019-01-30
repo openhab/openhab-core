@@ -484,7 +484,6 @@ public class ThingManagerImpl
             }
         }
 
-        storage.remove(thing.getUID().getAsString());
         this.things.remove(thing);
     }
 
