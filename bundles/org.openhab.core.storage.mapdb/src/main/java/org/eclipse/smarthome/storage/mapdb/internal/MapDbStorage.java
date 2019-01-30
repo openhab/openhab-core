@@ -43,7 +43,7 @@ import com.google.gson.GsonBuilder;
 @NonNullByDefault
 public class MapDbStorage<T> implements DeletableStorage<T> {
 
-    private static final String TYPE_SEPARATOR = "@@@";
+    static final String TYPE_SEPARATOR = "@@@";
 
     private final Logger logger = LoggerFactory.getLogger(MapDbStorage.class);
 
@@ -148,7 +148,7 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
             return null;
         }
 
-        String[] concatValue = json.split(TYPE_SEPARATOR);
+        String[] concatValue = json.split(TYPE_SEPARATOR, 2);
         String valueTypeName = concatValue[0];
         String valueAsString = concatValue[1];
 

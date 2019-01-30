@@ -21,10 +21,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.eclipse.smarthome.core.storage.DeletableStorage;
 import org.eclipse.smarthome.core.storage.Storage;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -76,6 +78,57 @@ public class MapDbStorageServiceTest {
         public Object get(String key) {
             return configuration.get(key);
         }
+    }
+
+    public static class EntryTypeSeparatorTest {
+        public int num;
+        public @Nullable String str;
+        public boolean bool;
+
+        @Override
+        public String toString() {
+            return "Entry [num=" + num + ", str=" + str + ", bool=" + bool + "]";
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (bool ? 1231 : 1237);
+            result = prime * result + num;
+            final String str = this.str;
+            result = prime * result + ((str == null) ? 0 : str.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            EntryTypeSeparatorTest other = (EntryTypeSeparatorTest) obj;
+            if (bool != other.bool) {
+                return false;
+            }
+            if (num != other.num) {
+                return false;
+            }
+            if (str == null) {
+                if (other.str != null) {
+                    return false;
+                }
+            } else if (!Objects.equals(str, other.str)) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
     private @NonNullByDefault({}) Path tmpDir;
@@ -190,6 +243,25 @@ public class MapDbStorageServiceTest {
         final MockConfiguration persistedConfiguration = (MockConfiguration) persistedObject;
         final Object cfgValue = persistedConfiguration.get(KEY_1);
         Assert.assertTrue(cfgValue instanceof BigDecimal);
+    }
+
+    /**
+     * Checks that the usage of the type separator does not break the storage.
+     */
+    @Test
+    public void typeSeparator() {
+        final DeletableStorage<EntryTypeSeparatorTest> storage = storageService.getStorage("type_separator");
+        try {
+            final EntryTypeSeparatorTest entryOriginal = new EntryTypeSeparatorTest();
+            entryOriginal.num = 2810;
+            entryOriginal.str = MapDbStorage.TYPE_SEPARATOR;
+            entryOriginal.bool = true;
+            storage.put(KEY_1, entryOriginal);
+            final EntryTypeSeparatorTest entryStorage = storage.get(KEY_1);
+            Assert.assertThat(entryStorage, Matchers.equalTo(entryOriginal));
+        } finally {
+            storage.delete();
+        }
     }
 
 }
