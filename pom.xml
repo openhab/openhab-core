@@ -171,7 +171,7 @@ Import-Package: \\
 -exportcontents: \\
   !*.internal.*,\\
   !*.impl.*, \\
-  org.openhab.core.*,\\
+  org.openhab.*,\\
   org.eclipse.smarthome.*
 -sources: false
 -contract: *
