@@ -28,6 +28,7 @@
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.test</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bom</groupId>
