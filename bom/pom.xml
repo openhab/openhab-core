@@ -23,6 +23,7 @@
     <module>test</module>
     <module>test-index</module>
     <module>openhab-core</module>
+    <module>openhab-core-index</module>
   </modules>
 
 </project>

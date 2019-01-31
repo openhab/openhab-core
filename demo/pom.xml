@@ -17,7 +17,6 @@
 
   <modules>
     <module>app</module>
-    <module>index</module>
   </modules>
 
 </project>

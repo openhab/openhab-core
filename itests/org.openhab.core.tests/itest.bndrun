@@ -1,27 +1,14 @@
--standalone: \
-    ../../bom/runtime-index/target/index.xml;name="runtime",\
-    ../../bom/test-index/target/index.xml;name="test",\
-    target/index.xml;name="self"
-
--resolve.effective: active
-
-# Run all integration tests which are named xyzTest
-Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
-
-# A temporary inclusion until an R7 framework is available
-Import-Package: org.osgi.framework.*;version="[1.8,2)",*
+-include: ../itest-common.bndrun
 
 Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core
-Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse.smarthome.core.storage.StorageService"
-
-# Used by Objenesis/Mockito and not actually optional
--runsystempackages: sun.reflect
-
--runfw: org.eclipse.osgi
--runee: JavaSE-1.8
 
 -runrequires: bnd.identity;id='org.openhab.core.tests'
+
+# We would like to use the "volatile" storage only
+-runblacklist: \
+    bnd.identity;id='org.openhab.core.storage.json',\
+    bnd.identity;id='org.openhab.core.storage.mapdb'
 
 #
 # done
