@@ -22,8 +22,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.smarthome.config.discovery.DiscoveryListener;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
@@ -36,6 +38,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -135,16 +138,29 @@ public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
         // when only the first discovery participant supports a newly discovered device, the device is discovered
         UsbSerialDeviceInformation deviceInfoA = generateDeviceInfo();
         DiscoveryResult discoveryResultA = mock(DiscoveryResult.class);
+        when(discoveryResultA.getThingUID()).thenReturn(new ThingUID("mock:thing:uida"));
+        when(discoveryResultA.getTimeToLive()).thenReturn(10L);
         when(discoveryParticipantA.createResult(deviceInfoA)).thenReturn(discoveryResultA);
         usbSerialDiscoveryService.usbSerialDeviceDiscovered(deviceInfoA);
-        verify(discoveryListener, times(1)).thingDiscovered(usbSerialDiscoveryService, discoveryResultA);
-
+        ArgumentCaptor<DiscoveryResult> captor = ArgumentCaptor.forClass(DiscoveryResult.class);
+        verify(discoveryListener, times(1)).thingDiscovered(eq(usbSerialDiscoveryService), captor.capture());
+        DiscoveryResult actualDiscoveryResultA = captor.getValue();
+        assertThat(actualDiscoveryResultA.getProperties(),
+                is(createUsbPropertiesMap(discoveryResultA.getProperties(), deviceInfoA)));
+        reset(discoveryListener);
+        
+        
         // when only the second discovery participant supports a newly discovered device, the device is also discovered
         UsbSerialDeviceInformation deviceInfoB = generateDeviceInfo();
         DiscoveryResult discoveryResultB = mock(DiscoveryResult.class);
-        when(discoveryParticipantA.createResult(deviceInfoB)).thenReturn(discoveryResultB);
+        when(discoveryResultB.getThingUID()).thenReturn(new ThingUID("mock:thing:uidb"));
+        when(discoveryResultB.getTimeToLive()).thenReturn(10L);
+        when(discoveryParticipantB.createResult(deviceInfoB)).thenReturn(discoveryResultB);
         usbSerialDiscoveryService.usbSerialDeviceDiscovered(deviceInfoB);
-        verify(discoveryListener, times(1)).thingDiscovered(usbSerialDiscoveryService, discoveryResultB);
+        verify(discoveryListener, times(1)).thingDiscovered(eq(usbSerialDiscoveryService), captor.capture());
+        DiscoveryResult actualDiscoveryResultB = captor.getValue();
+        assertThat(actualDiscoveryResultB.getProperties(),
+                is(createUsbPropertiesMap(discoveryResultB.getProperties(), deviceInfoB)));
     }
 
     @Test
@@ -209,4 +225,11 @@ public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
         return usbSerialDeviceInformationGenerator.generate();
     }
 
+    private Map<String, Object> createUsbPropertiesMap(Map<String, Object> properties,
+            UsbSerialDeviceInformation usbSerialDeviceInformation) {
+        Map<String, Object> resultProperties = new HashMap<>(properties);
+        resultProperties.put("usb_vendor_id", usbSerialDeviceInformation.getVendorId());
+        resultProperties.put("usb_product_id", usbSerialDeviceInformation.getProductId());
+        return resultProperties;
+    }
 }

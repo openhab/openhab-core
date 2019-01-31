@@ -14,6 +14,7 @@ package org.eclipse.smarthome.config.discovery.usbserial.internal;
 
 import static java.util.stream.Collectors.toSet;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
+import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
 import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscovery;
@@ -65,6 +67,9 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
 
     private final Logger logger = LoggerFactory.getLogger(UsbSerialDiscoveryService.class);
 
+    private static final String THING_PROPERTY_USB_VENDOR_ID = "usb_vendor_id";
+    private static final String THING_PROPERTY_USB_PRODUCT_ID = "usb_product_id";
+
     private final Set<UsbSerialDiscoveryParticipant> discoveryParticipants = new CopyOnWriteArraySet<>();
 
     private final Set<UsbSerialDeviceInformation> previouslyDiscovered = new CopyOnWriteArraySet<>();
@@ -100,7 +105,7 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
         for (UsbSerialDeviceInformation usbSerialDeviceInformation : previouslyDiscovered) {
             DiscoveryResult result = participant.createResult(usbSerialDeviceInformation);
             if (result != null) {
-                thingDiscovered(result);
+                thingDiscovered(createDiscoveryResultWithUsbProperties(result, usbSerialDeviceInformation));
             }
         }
     }
@@ -162,7 +167,7 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
         for (UsbSerialDiscoveryParticipant participant : discoveryParticipants) {
             DiscoveryResult result = participant.createResult(usbSerialDeviceInformation);
             if (result != null) {
-                thingDiscovered(result);
+                thingDiscovered(createDiscoveryResultWithUsbProperties(result, usbSerialDeviceInformation));
             }
         }
     }
@@ -179,4 +184,15 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
         }
     }
 
+    private DiscoveryResult createDiscoveryResultWithUsbProperties(DiscoveryResult result,
+            UsbSerialDeviceInformation usbSerialDeviceInformation) {
+        Map<String, Object> resultProperties = new HashMap<>(result.getProperties());
+        resultProperties.put(THING_PROPERTY_USB_VENDOR_ID, usbSerialDeviceInformation.getVendorId());
+        resultProperties.put(THING_PROPERTY_USB_PRODUCT_ID, usbSerialDeviceInformation.getProductId());
+
+        return DiscoveryResultBuilder.create(result.getThingUID()).withProperties(resultProperties)
+                .withBridge(result.getBridgeUID()).withTTL(result.getTimeToLive()).withLabel(result.getLabel())
+                .withRepresentationProperty(result.getRepresentationProperty()).build();
+
+    }
 }
