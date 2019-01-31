@@ -237,11 +237,13 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     public Response getSitemapData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
             @PathParam("sitemapname") @ApiParam(value = "sitemap name") String sitemapname,
-            @QueryParam("type") String type, @QueryParam("jsoncallback") @DefaultValue("callback") String callback) {
+            @QueryParam("type") String type, @QueryParam("jsoncallback") @DefaultValue("callback") String callback,
+            @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets", required = false) boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}' for media type '{}'.", request.getRemoteAddr(),
                 uriInfo.getPath(), type);
-        Object responseObject = getSitemapBean(sitemapname, uriInfo.getBaseUriBuilder().build(), locale);
+        Object responseObject = getSitemapBean(sitemapname, uriInfo.getBaseUriBuilder().build(), locale,
+                includeHiddenWidgets);
         return Response.ok(responseObject).build();
     }
 
@@ -256,7 +258,8 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
             @PathParam("sitemapname") @ApiParam(value = "sitemap name") String sitemapname,
             @PathParam("pageid") @ApiParam(value = "page id") String pageId,
-            @QueryParam("subscriptionid") @ApiParam(value = "subscriptionid", required = false) String subscriptionId) {
+            @QueryParam("subscriptionid") @ApiParam(value = "subscriptionid", required = false) String subscriptionId,
+            @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets", required = false) boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
 
@@ -277,7 +280,8 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
             // we notice this information in the response object.
             timeout = blockUnlessChangeOccurs(sitemapname, pageId);
         }
-        PageDTO responseObject = getPageBean(sitemapname, pageId, uriInfo.getBaseUriBuilder().build(), locale, timeout);
+        PageDTO responseObject = getPageBean(sitemapname, pageId, uriInfo.getBaseUriBuilder().build(), locale, timeout,
+                includeHiddenWidgets);
         return Response.ok(responseObject).build();
     }
 
@@ -345,31 +349,33 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         return eventOutput;
     }
 
-    private PageDTO getPageBean(String sitemapName, String pageId, URI uri, Locale locale, boolean timeout) {
+    private PageDTO getPageBean(String sitemapName, String pageId, URI uri, Locale locale, boolean timeout,
+            boolean includeHidden) {
         Sitemap sitemap = getSitemap(sitemapName);
         if (sitemap != null) {
             if (pageId.equals(sitemap.getName())) {
                 EList<Widget> children = itemUIRegistry.getChildren(sitemap);
                 return createPageBean(sitemapName, sitemap.getLabel(), sitemap.getIcon(), sitemap.getName(), children,
-                        false, isLeaf(children), uri, locale, timeout);
+                        false, isLeaf(children), uri, locale, timeout, includeHidden);
             } else {
                 Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
                 if (pageWidget instanceof LinkableWidget) {
                     EList<Widget> children = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
                     PageDTO pageBean = createPageBean(sitemapName, itemUIRegistry.getLabel(pageWidget),
                             itemUIRegistry.getCategory(pageWidget), pageId, children, false, isLeaf(children), uri,
-                            locale, timeout);
+                            locale, timeout, includeHidden);
                     EObject parentPage = pageWidget.eContainer();
                     while (parentPage instanceof Frame) {
                         parentPage = parentPage.eContainer();
                     }
                     if (parentPage instanceof Widget) {
                         String parentId = itemUIRegistry.getWidgetId((Widget) parentPage);
-                        pageBean.parent = getPageBean(sitemapName, parentId, uri, locale, timeout);
+                        pageBean.parent = getPageBean(sitemapName, parentId, uri, locale, timeout, includeHidden);
                         pageBean.parent.widgets = null;
                         pageBean.parent.parent = null;
                     } else if (parentPage instanceof Sitemap) {
-                        pageBean.parent = getPageBean(sitemapName, sitemap.getName(), uri, locale, timeout);
+                        pageBean.parent = getPageBean(sitemapName, sitemap.getName(), uri, locale, timeout,
+                                includeHidden);
                         pageBean.parent.widgets = null;
                     }
                     return pageBean;
@@ -421,10 +427,10 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         return beans;
     }
 
-    public SitemapDTO getSitemapBean(String sitemapname, URI uri, Locale locale) {
+    private SitemapDTO getSitemapBean(String sitemapname, URI uri, Locale locale, boolean includeHiddenWidgets) {
         Sitemap sitemap = getSitemap(sitemapname);
         if (sitemap != null) {
-            return createSitemapBean(sitemapname, sitemap, uri, locale);
+            return createSitemapBean(sitemapname, sitemap, uri, locale, includeHiddenWidgets);
         } else {
             logger.info("Received HTTP GET request at '{}' for the unknown sitemap '{}'.", uriInfo.getPath(),
                     sitemapname);
@@ -432,7 +438,8 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         }
     }
 
-    private SitemapDTO createSitemapBean(String sitemapName, Sitemap sitemap, URI uri, Locale locale) {
+    private SitemapDTO createSitemapBean(String sitemapName, Sitemap sitemap, URI uri, Locale locale,
+            boolean includeHiddenWidgets) {
         SitemapDTO bean = new SitemapDTO();
 
         bean.name = sitemapName;
@@ -441,12 +448,12 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
 
         bean.link = UriBuilder.fromUri(uri).path(SitemapResource.PATH_SITEMAPS).path(bean.name).build().toASCIIString();
         bean.homepage = createPageBean(sitemap.getName(), sitemap.getLabel(), sitemap.getIcon(), sitemap.getName(),
-                itemUIRegistry.getChildren(sitemap), true, false, uri, locale, false);
+                itemUIRegistry.getChildren(sitemap), true, false, uri, locale, false, includeHiddenWidgets);
         return bean;
     }
 
     private PageDTO createPageBean(String sitemapName, String title, String icon, String pageId, EList<Widget> children,
-            boolean drillDown, boolean isLeaf, URI uri, Locale locale, boolean timeout) {
+            boolean drillDown, boolean isLeaf, URI uri, Locale locale, boolean timeout, boolean includeHiddenWidgets) {
         PageDTO bean = new PageDTO();
         bean.timeout = timeout;
         bean.id = pageId;
@@ -457,7 +464,8 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         if (children != null) {
             for (Widget widget : children) {
                 String widgetId = itemUIRegistry.getWidgetId(widget);
-                WidgetDTO subWidget = createWidgetBean(sitemapName, widget, drillDown, uri, widgetId, locale);
+                WidgetDTO subWidget = createWidgetBean(sitemapName, widget, drillDown, uri, widgetId, locale,
+                        includeHiddenWidgets);
                 if (subWidget != null) {
                     bean.widgets.add(subWidget);
                 }
@@ -469,9 +477,9 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     private WidgetDTO createWidgetBean(String sitemapName, Widget widget, boolean drillDown, URI uri, String widgetId,
-            Locale locale) {
+            Locale locale, boolean evenIfHidden) {
         // Test visibility
-        if (!itemUIRegistry.getVisiblity(widget)) {
+        if (!evenIfHidden && !itemUIRegistry.getVisiblity(widget)) {
             return null;
         }
 
@@ -500,13 +508,15 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         bean.valuecolor = itemUIRegistry.getValueColor(widget);
         bean.label = itemUIRegistry.getLabel(widget);
         bean.type = widget.eClass().getName();
+        bean.visibility = itemUIRegistry.getVisiblity(widget);
         if (widget instanceof LinkableWidget) {
             LinkableWidget linkableWidget = (LinkableWidget) widget;
             EList<Widget> children = itemUIRegistry.getChildren(linkableWidget);
             if (widget instanceof Frame) {
                 for (Widget child : children) {
                     String wID = itemUIRegistry.getWidgetId(child);
-                    WidgetDTO subWidget = createWidgetBean(sitemapName, child, drillDown, uri, wID, locale);
+                    WidgetDTO subWidget = createWidgetBean(sitemapName, child, drillDown, uri, wID, locale,
+                            evenIfHidden);
                     if (subWidget != null) {
                         bean.widgets.add(subWidget);
                     }
@@ -515,7 +525,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
                 String pageName = itemUIRegistry.getWidgetId(linkableWidget);
                 bean.linkedPage = createPageBean(sitemapName, itemUIRegistry.getLabel(widget),
                         itemUIRegistry.getCategory(widget), pageName, drillDown ? children : null, drillDown,
-                        isLeaf(children), uri, locale, false);
+                        isLeaf(children), uri, locale, false, evenIfHidden);
             }
         }
         if (widget instanceof Switch) {

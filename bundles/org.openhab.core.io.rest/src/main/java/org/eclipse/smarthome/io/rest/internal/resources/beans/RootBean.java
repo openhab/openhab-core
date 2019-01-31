@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class RootBean {
 
-    public final String version = "1";
+    public final String version = "2";
 
     public final List<Links> links = new ArrayList<Links>();
 

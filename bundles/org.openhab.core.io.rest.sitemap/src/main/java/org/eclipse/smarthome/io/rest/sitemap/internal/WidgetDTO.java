@@ -30,6 +30,7 @@ public class WidgetDTO {
     public String widgetId;
     public String type;
     public String name;
+    public boolean visibility;
 
     public String label;
     public String icon;
