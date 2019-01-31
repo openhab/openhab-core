@@ -17,7 +17,7 @@ If you know Maven already then there won't be any surprises for you.
 If you have not worked with Maven yet, just follow the instructions and everything will miraculously work ;-)
 
 What you need before you start:
-- Maven3 from http://maven.apache.org/download.html
+- Maven3 from https://maven.apache.org/download.html
 
 Make sure that the "mvn" command is available on your path
 
@@ -31,7 +31,7 @@ git clone https://github.com/openhab/openhab-core.git
 3\. Building with Maven
 =======================
 
-To build ths project from the sources, Maven takes care of everything:
+To build this project from the sources, Maven takes care of everything:
 - set MAVEN_OPTS to "-Xms512m -Xmx1024m"
 - change into the openhab-core directory ("cd openhab-core“)
 - run "mvn clean install" to compile and package all sources
