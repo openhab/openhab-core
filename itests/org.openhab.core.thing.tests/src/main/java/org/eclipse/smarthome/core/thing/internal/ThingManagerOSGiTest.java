@@ -175,7 +175,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         });
 
         Bundle bundle = mock(Bundle.class);
-        when(bundle.getSymbolicName()).thenReturn("org.eclipse.smarthome.core.thing");
+        when(bundle.getSymbolicName()).thenReturn("org.openhab.core.thing");
 
         BundleResolver bundleResolver = mock(BundleResolver.class);
         when(bundleResolver.resolveBundle(any())).thenReturn(bundle);
