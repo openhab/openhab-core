@@ -13,6 +13,7 @@
 package org.eclipse.smarthome.core.thing.firmware;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,6 +44,20 @@ public final class FirmwareUpdateProgressInfo {
     private final boolean pending;
 
     private final @Nullable Integer progress;
+
+    /**
+     * Package protected default constructor to allow reflective instantiation.
+     *
+     * !!! DO NOT REMOVE - Gson needs it !!!
+     */
+    FirmwareUpdateProgressInfo() {
+        thingUID = new ThingUID("internal:reflective:constructor");
+        firmwareVersion = "";
+        progressStep = ProgressStep.WAITING;
+        sequence = Collections.emptyList();
+        pending = false;
+        progress = null;
+    }
 
     private FirmwareUpdateProgressInfo(ThingUID thingUID, String firmwareVersion, ProgressStep progressStep,
             Collection<ProgressStep> sequence, boolean pending, int progress) {
