@@ -25,7 +25,6 @@
     <!-- <module>org.openhab.core.automation.event.tests</module> -->
     <!-- <module>org.openhab.core.automation.integration.tests</module> -->
     <!-- <module>org.openhab.core.audio.tests</module> -->
-    <!-- <module>org.openhab.core.id.tests</module> -->
     <!-- <module>org.openhab.core.semantics.tests</module> -->
     <!-- <module>org.openhab.core.transform.tests</module> -->
     <!-- <module>org.openhab.core.binding.xml.tests</module> -->
