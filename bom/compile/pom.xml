@@ -270,6 +270,14 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- jollyday -->
+    <dependency>
+      <groupId>de.jollyday</groupId>
+      <artifactId>jollyday</artifactId>
+      <version>0.5.7</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- <dependency> <groupId></groupId> <artifactId></artifactId> <version></version> <scope>compile</scope> </dependency> -->
   </dependencies>
 

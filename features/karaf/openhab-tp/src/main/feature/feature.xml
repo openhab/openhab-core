@@ -109,6 +109,12 @@
     <bundle dependency="true">mvn:org.jvnet.mimepull/mimepull/1.9.6</bundle>
   </feature>
 
+  <feature name="openhab.tp-jollyday" description="Jollyday library" version="${project.version}">
+    <capability>openhab.tp;feature=jollyday;version=0.5.7</capability>
+    <bundle>mvn:org.threeten/threeten-extra/1.4</bundle>
+    <bundle>mvn:de.jollyday/jollyday/0.5.7</bundle>
+  </feature>
+
   <feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
     <capability>openhab.tp;feature=jupnp;version=2.5.2</capability>
     <feature dependency="true">http</feature>
