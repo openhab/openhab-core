@@ -37,6 +37,17 @@ public final class FirmwareStatusInfo {
     @Nullable
     private final String firmwareVersion;
 
+    /**
+     * Package protected default constructor to allow reflective instantiation.
+     *
+     * !!! DO NOT REMOVE - Gson needs it !!!
+     */
+    FirmwareStatusInfo() {
+        thingUID = new ThingUID("internal:reflective:constructor");
+        firmwareStatus = FirmwareStatus.UNKNOWN;
+        firmwareVersion = null;
+    }
+
     private FirmwareStatusInfo(ThingUID thingUID, FirmwareStatus firmwareStatus, @Nullable String firmwareVersion) {
         Objects.requireNonNull(thingUID, "Thing UID must not be null.");
         this.thingUID = thingUID;

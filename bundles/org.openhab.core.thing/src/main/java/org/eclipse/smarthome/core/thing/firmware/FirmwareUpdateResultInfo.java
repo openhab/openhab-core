@@ -33,6 +33,17 @@ public final class FirmwareUpdateResultInfo {
 
     private final ThingUID thingUID;
 
+    /**
+     * Package protected default constructor to allow reflective instantiation.
+     *
+     * !!! DO NOT REMOVE - Gson needs it !!!
+     */
+    FirmwareUpdateResultInfo() {
+        thingUID = new ThingUID("internal:reflective:constructor");
+        result = FirmwareUpdateResult.ERROR;
+        errorMessage = null;
+    }
+
     private FirmwareUpdateResultInfo(ThingUID thingUID, FirmwareUpdateResult result, @Nullable String errorMessage) {
         Objects.requireNonNull(thingUID, "The thingUID must not be null.");
         this.thingUID = thingUID;
