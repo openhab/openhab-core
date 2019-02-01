@@ -13,12 +13,13 @@
 package org.eclipse.smarthome.config.core.internal.i18n;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import java.net.URI;
 import java.util.Locale;
 
 import org.eclipse.smarthome.config.core.ParameterOption;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,22 +47,22 @@ public class I18nConfigOptionsProviderTest {
 
     @Test
     public void testLanguage() throws Exception {
-        assertTrue(provider.getParameterOptions(uriI18N, "language", Locale.US).contains(expectedLangEN));
-        assertTrue(provider.getParameterOptions(uriI18N, "language", Locale.FRENCH).contains(expectedLangFR));
-        assertFalse(provider.getParameterOptions(uriI18N, "language", null).isEmpty());
+        assertThat(provider.getParameterOptions(uriI18N, "language", Locale.US), hasItem(expectedLangEN));
+        assertThat(provider.getParameterOptions(uriI18N, "language", Locale.FRENCH), hasItem(expectedLangFR));
+        assertThat(provider.getParameterOptions(uriI18N, "language", null), not(IsEmptyCollection.empty()));
     }
 
     @Test
     public void testRegion() throws Exception {
-        assertTrue(provider.getParameterOptions(uriI18N, "region", Locale.US).contains(expectedCntryEN));
+        assertThat(provider.getParameterOptions(uriI18N, "region", Locale.US), hasItem(expectedCntryEN));
         assertThat(provider.getParameterOptions(uriI18N, "region", Locale.FRENCH),
                 anyOf(hasItem(expectedCntryFRJava8), hasItem(expectedCntryFRJava9)));
-        assertFalse(provider.getParameterOptions(uriI18N, "region", null).isEmpty());
+        assertThat(provider.getParameterOptions(uriI18N, "region", null), not(IsEmptyCollection.empty()));
     }
 
     @Test
     public void testUnknownParameter() throws Exception {
-        assertNull(provider.getParameterOptions(uriI18N, "unknown", Locale.US));
+        assertThat(provider.getParameterOptions(uriI18N, "unknown", Locale.US), nullValue());
     }
 
 }
