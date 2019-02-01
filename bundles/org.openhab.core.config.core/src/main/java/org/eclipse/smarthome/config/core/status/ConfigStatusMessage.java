@@ -89,6 +89,15 @@ public final class ConfigStatusMessage {
     public final Integer statusCode;
 
     /**
+     * Package protected default constructor to allow reflective instantiation.
+     *
+     * !!! DO NOT REMOVE - Gson needs it !!!
+     */
+    ConfigStatusMessage() {
+        this(null, null, null, null, null, null);
+    }
+
+    /**
      * Creates a new {@link ConfigStatusMessage}.
      *
      * @param builder the configuration status message builder
