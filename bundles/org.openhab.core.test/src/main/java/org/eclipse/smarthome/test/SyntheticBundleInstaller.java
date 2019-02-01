@@ -248,8 +248,11 @@ public class SyntheticBundleInstaller {
 
     private static boolean isBundleAvailable(BundleContext context, String bsn) {
         for (Bundle bundle : context.getBundles()) {
-            if (bundle.getSymbolicName().equals(bsn) && bundle.getState() == Bundle.ACTIVE) {
-                return true;
+            final String bsnCurrentBundle = bundle.getSymbolicName();
+            if (bsnCurrentBundle != null) {
+                if (bsnCurrentBundle.equals(bsn) && bundle.getState() == Bundle.ACTIVE) {
+                    return true;
+                }
             }
         }
         return false;
@@ -288,14 +291,17 @@ public class SyntheticBundleInstaller {
         if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
             return;
         }
+        final String bsn = bundle.getSymbolicName();
+        if (bsn == null) {
+            return;
+        }
         long startTime = System.nanoTime();
         ServiceReference<?> readyServiceRef = context.getServiceReference(ReadyService.class.getName());
         ReadyService readyService = (ReadyService) context.getService(readyServiceRef);
-        ReadyMarker expected = new ReadyMarker(marker, bundle.getSymbolicName());
+        ReadyMarker expected = new ReadyMarker(marker, bsn);
         while (!readyService.isReady(expected)) {
             if (System.nanoTime() - startTime > TimeUnit.SECONDS.toNanos(WAIT_TIMOUT)) {
-                Assert.fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker,
-                        bundle.getSymbolicName()));
+                Assert.fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker, bsn));
             }
             try {
                 Thread.sleep(100);
