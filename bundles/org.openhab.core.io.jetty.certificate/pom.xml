@@ -16,6 +16,7 @@
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>1.52</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
