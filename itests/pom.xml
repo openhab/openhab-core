@@ -26,7 +26,6 @@
     <!-- <module>org.openhab.core.automation.integration.tests</module> -->
     <!-- <module>org.openhab.core.audio.tests</module> -->
     <!-- <module>org.openhab.core.id.tests</module> -->
-    <!-- <module>org.openhab.core.thing.tests</module> -->
     <!-- <module>org.openhab.core.semantics.tests</module> -->
     <!-- <module>org.openhab.core.transform.tests</module> -->
     <!-- <module>org.openhab.core.binding.xml.tests</module> -->
@@ -41,6 +40,7 @@
     <!-- <module>org.openhab.core.config.xml.tests</module> -->
     <module>org.openhab.core.tests</module>
     <module>org.openhab.core.compat1x.tests</module>
+    <module>org.openhab.core.thing.tests</module>
     <!-- <module>org.openhab.core.io.net.tests</module> -->
     <!-- <module>org.openhab.core.io.http.tests</module> -->
     <!-- <module>org.openhab.core.io.rest.tests</module> -->

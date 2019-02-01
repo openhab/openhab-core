@@ -116,7 +116,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
     }
 
     class SimpleThingHandlerFactory extends BaseThingHandlerFactory {
-        private Set<ThingHandler> handlers = new HashSet<>();
+        private final Set<ThingHandler> handlers = new HashSet<>();
 
         @Override
         public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -305,6 +305,8 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         ConfigStatusInfoEventSubscriber eventSubscriber = new ConfigStatusInfoEventSubscriber(thingUID);
         registerService(eventSubscriber, EventSubscriber.class.getName());
+
+        Thread.sleep(2000);
 
         thing.getHandler().handleConfigurationUpdate(singletonMap("param", "invalid"));
 

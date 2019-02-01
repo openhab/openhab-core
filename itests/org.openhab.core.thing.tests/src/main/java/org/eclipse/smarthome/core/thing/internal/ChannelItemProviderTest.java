@@ -12,7 +12,7 @@
  */
 package org.eclipse.smarthome.core.thing.internal;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
