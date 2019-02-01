@@ -54,9 +54,6 @@
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
     <bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.config.xml/${project.version}</bundle>
 
-
-
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
     <capability>
       osgi.service;objectClass=org.eclipse.smarthome.core.binding.BindingInfoRegistry
@@ -141,12 +138,9 @@
 
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.voice/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.json/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.json.gson/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.monitor/${project.version}</bundle>
-
-
-
-
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.net/${project.version}</bundle>
 
     <feature dependency="true">pax-http-whiteboard</feature>

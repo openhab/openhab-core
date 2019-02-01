@@ -192,6 +192,16 @@
                   <source>true</source>
                 </artifact>
                 <artifact>
+                  <id>org.openhab.core.bundles:org.openhab.core.io.json:${project.version}</id>
+                  <transitive>false</transitive>
+                  <source>true</source>
+                </artifact>
+                <artifact>
+                  <id>org.openhab.core.bundles:org.openhab.core.io.json.gson:${project.version}</id>
+                  <transitive>false</transitive>
+                  <source>true</source>
+                </artifact>
+                <artifact>
                   <id>org.openhab.core.bundles:org.openhab.core.io.monitor:${project.version}</id>
                   <transitive>false</transitive>
                   <source>true</source>
