@@ -118,7 +118,6 @@
     <feature>openhab-core-base</feature>
     <requirement>openhab.tp;filter:="(feature=jollyday)"</requirement>
     <feature dependency="true">openhab.tp-jollyday</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
     <config name="org.openhab.ephemeris">
         dayset-weekend=Saturday,Sunday
         dayset-school=Monday,Tuesday,Wednesday,Thursday,Friday
