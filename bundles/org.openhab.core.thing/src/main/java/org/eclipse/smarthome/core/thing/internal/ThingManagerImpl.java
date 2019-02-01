@@ -34,6 +34,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
@@ -1008,7 +1009,10 @@ public class ThingManagerImpl
     protected synchronized void activate(ComponentContext componentContext) {
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
         for (ThingHandlerFactory factory : thingHandlerFactories) {
-            handleThingHandlerFactoryAddition(getBundleName(factory));
+            final String bsn = getBundleName(factory);
+            if (bsn != null) {
+                handleThingHandlerFactoryAddition(bsn);
+            }
         }
         thingRegistry.addThingTracker(this);
         active = true;
@@ -1019,7 +1023,10 @@ public class ThingManagerImpl
         logger.debug("Thing handler factory '{}' added", thingHandlerFactory.getClass().getSimpleName());
         thingHandlerFactories.add(thingHandlerFactory);
         if (active) {
-            handleThingHandlerFactoryAddition(getBundleName(thingHandlerFactory));
+            final String bsn = getBundleName(thingHandlerFactory);
+            if (bsn != null) {
+                handleThingHandlerFactoryAddition(getBundleName(thingHandlerFactory));
+            }
         }
     }
 
@@ -1047,7 +1054,7 @@ public class ThingManagerImpl
 
     private void handleThingHandlerFactoryAddition(String bsn) {
         thingHandlerFactories.stream().filter(it -> {
-            return getBundleName(it).equals(bsn);
+            return bsn.equals(getBundleName(it));
         }).forEach(thingHandlerFactory -> {
             things.forEach(thing -> {
                 if (thingHandlerFactory.supportsThingType(thing.getThingTypeUID())) {
@@ -1061,20 +1068,22 @@ public class ThingManagerImpl
         });
     }
 
-    private String getBundleName(ThingHandlerFactory thingHandlerFactory) {
+    private @Nullable String getBundleName(ThingHandlerFactory thingHandlerFactory) {
         return bundleResolver.resolveBundle(thingHandlerFactory.getClass()).getSymbolicName();
     }
 
     private void registerAndInitializeHandler(final Thing thing, final ThingHandlerFactory thingHandlerFactory) {
         if (thingHandlerFactory != null) {
-            String bsn = getBundleName(thingHandlerFactory);
-            if (loadedXmlThingTypes.contains(bsn)) {
-                registerHandler(thing, thingHandlerFactory);
-                initializeHandler(thing);
-            } else {
-                logger.debug(
-                        "Not registering a handler at this point. The thing types of bundle {} are not fully loaded yet.",
-                        bsn);
+            final String bsn = getBundleName(thingHandlerFactory);
+            if (bsn != null) {
+                if (loadedXmlThingTypes.contains(bsn)) {
+                    registerHandler(thing, thingHandlerFactory);
+                    initializeHandler(thing);
+                } else {
+                    logger.debug(
+                            "Not registering a handler at this point. The thing types of bundle {} are not fully loaded yet.",
+                            bsn);
+                }
             }
         } else {
             logger.debug("Not registering a handler at this point. No handler factory for thing '{}' found.",
@@ -1266,7 +1275,8 @@ public class ThingManagerImpl
 
     private void persistThingEnableStatus(ThingUID thingUID, boolean enabled) {
         if (storage == null) {
-            logger.debug("Cannot persist enable status of thing with UID {}. Persistent storage unavailable.", thingUID);
+            logger.debug("Cannot persist enable status of thing with UID {}. Persistent storage unavailable.",
+                    thingUID);
             return;
         }
 

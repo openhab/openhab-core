@@ -422,19 +422,23 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     }
 
     private void registerReadyMarker(Bundle bundle) {
-        String bsn = bundle.getSymbolicName();
-        if (!bundleReadyMarkerRegistrations.containsKey(bsn)) {
-            ReadyMarker readyMarker = new ReadyMarker(readyMarkerKey, bsn);
-            readyService.markReady(readyMarker);
-            bundleReadyMarkerRegistrations.put(bsn, readyMarker);
+        final String bsn = bundle.getSymbolicName();
+        if (bsn != null) {
+            if (!bundleReadyMarkerRegistrations.containsKey(bsn)) {
+                ReadyMarker readyMarker = new ReadyMarker(readyMarkerKey, bsn);
+                readyService.markReady(readyMarker);
+                bundleReadyMarkerRegistrations.put(bsn, readyMarker);
+            }
         }
     }
 
     private void unregisterReadyMarker(Bundle bundle) {
-        String bsn = bundle.getSymbolicName();
-        ReadyMarker readyMarker = bundleReadyMarkerRegistrations.remove(bsn);
-        if (readyMarker != null) {
-            readyService.unmarkReady(readyMarker);
+        final String bsn = bundle.getSymbolicName();
+        if (bsn != null) {
+            ReadyMarker readyMarker = bundleReadyMarkerRegistrations.remove(bsn);
+            if (readyMarker != null) {
+                readyService.unmarkReady(readyMarker);
+            }
         }
     }
 
