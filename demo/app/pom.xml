@@ -15,8 +15,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.openhab.core.demo</groupId>
-      <artifactId>org.openhab.core.demo.index</artifactId>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.runtime-index</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.openhab-core-index</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
       <scope>provided</scope>

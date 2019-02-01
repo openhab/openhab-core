@@ -1,25 +1,7 @@
--standalone: \
-    ../../bom/runtime-index/target/index.xml;name="runtime",\
-    ../../bom/test-index/target/index.xml;name="test",\
-    target/index.xml;name="self"
-
--resolve.effective: active
-
-# Run all integration tests which are named xyzTest
-Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
-
-# A temporary inclusion until an R7 framework is available
-Import-Package: org.osgi.framework.*;version="[1.8,2)",*
+-include: ../itest-common.bndrun
 
 Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.compat1x
-Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse.smarthome.core.storage.StorageService"
-
-# Used by Objenesis/Mockito and not actually optional
--runsystempackages: sun.reflect
-
--runfw: org.eclipse.osgi
--runee: JavaSE-1.8
 
 -runrequires: bnd.identity;id='org.openhab.core.compat1x.tests'
 
@@ -97,7 +79,6 @@ Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse.smarthome
 	org.openhab.core.io.net;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.core;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.item;version='[2.5.0,2.5.1)',\
-	org.openhab.core.model.item.runtime;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.persistence;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.script;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.script.runtime;version='[2.5.0,2.5.1)',\
@@ -107,4 +88,8 @@ Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse.smarthome
 	org.openhab.core.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
 	org.openhab.core.ui;version='[2.5.0,2.5.1)',\
-	org.openhab.core.voice;version='[2.5.0,2.5.1)'
+	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
+	org.openhab.core.model.persistence.runtime;version='[2.5.0,2.5.1)',\
+	org.openhab.core.model.rule;version='[2.5.0,2.5.1)',\
+	org.openhab.core.model.thing;version='[2.5.0,2.5.1)',\
+	org.openhab.core.storage.json;version='[2.5.0,2.5.1)'
