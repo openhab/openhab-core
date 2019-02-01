@@ -19,6 +19,11 @@
       <artifactId>org.openhab.core.config.core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>de.jollyday</groupId>
+      <artifactId>jollyday</artifactId>
+      <version>0.5.7</version>
+    </dependency>
   </dependencies>
 
 </project>
