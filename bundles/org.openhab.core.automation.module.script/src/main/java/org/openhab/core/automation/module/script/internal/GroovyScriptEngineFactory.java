@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.automation.module.script.internal;
+package org.openhab.core.automation.module.script.internal;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.Map.Entry;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import org.eclipse.smarthome.automation.module.script.ScriptEngineFactory;
+import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
