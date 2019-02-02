@@ -12,8 +12,16 @@
                "required":true,
                "options":[
                     {
+                        "label": "Groovy",
+                        "value": "application/groovy"
+                    },
+                    {
                         "label": "Javascript",
                         "value": "application/javascript"
+                    },
+                    {
+                        "label": "Jython",
+                        "value": "application/jython"
                     }
                 ]
             },
@@ -40,8 +48,16 @@
                "required":true,
                "options":[
                     {
+                        "label": "Groovy",
+                        "value": "application/groovy"
+                    },
+                    {
                         "label": "Javascript",
                         "value": "application/javascript"
+                    },
+                    {
+                        "label": "Jython",
+                        "value": "application/jython"
                     }
                 ],
                 "defaultValue":"application/javascript"
