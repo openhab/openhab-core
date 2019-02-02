@@ -17,6 +17,7 @@ import java.util.HashMap;
 
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.ModuleHandler;
+import org.openhab.core.automation.handler.ModuleHandlerFactory;
 import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedHandler;
 import org.osgi.service.component.annotations.Component;
 
@@ -31,7 +32,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Simon Merschjohann
  *
  */
-@Component(immediate = true, service = ScriptedCustomModuleHandlerFactory.class)
+@Component(immediate = true, service = { ScriptedCustomModuleHandlerFactory.class, ModuleHandlerFactory.class })
 public class ScriptedCustomModuleHandlerFactory extends AbstractScriptedModuleHandlerFactory {
     private final HashMap<String, ScriptedHandler> typesHandlers = new HashMap<>();
 
