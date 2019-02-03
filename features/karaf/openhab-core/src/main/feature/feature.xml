@@ -115,9 +115,9 @@
   </feature>
 
   <feature name="openhab-core-ephemeris" version="${project.version}">
-    <feature>openhab-core-base</feature>
     <requirement>openhab.tp;filter:="(feature=jollyday)"</requirement>
     <feature dependency="true">openhab.tp-jollyday</feature>
+    <feature>openhab-core-base</feature>
     <config name="org.openhab.ephemeris">
         dayset-weekend=Saturday,Sunday
         dayset-school=Monday,Tuesday,Wednesday,Thursday,Friday
