@@ -103,6 +103,7 @@
     <module>org.openhab.core.ui</module>
     <module>org.openhab.core.ui.icon</module>
     <module>integrationtest</module>
+    <module>org.openhab.rulestest</module>
   </modules>
 
   <profiles>
