@@ -10,15 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.json.gson;
+package org.openhab.core.io.json.gson;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.io.json.gson.GsonBindingServiceTestBean.Active;
-import org.openhab.core.io.json.gson.GsonTypeAdapterProvider;
+import org.openhab.core.io.json.gson.GsonBindingServiceTestBean.Active;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -58,7 +57,7 @@ public class GsonTypeAdapterTestProvider implements GsonTypeAdapterProvider, Jso
         JsonObject obj = element.getAsJsonObject();
         Field textField;
         try {
-            textField = bean.getClass().getField("text");
+            textField = bean.getClass().getDeclaredField("text");
             textField.setAccessible(true);
             textField.set(bean, obj.get("text").getAsString());
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {

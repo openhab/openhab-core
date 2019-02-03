@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.json.gson;
+package org.openhab.core.io.json.gson;
 
 /**
  * Bean used for tests of the GsonBindingService.
@@ -18,6 +18,10 @@ package org.eclipse.smarthome.io.json.gson;
  * @author Flavio Costa - Initial implementation
  */
 public class GsonBindingServiceTestBean {
+
+    // required by Gson
+    public GsonBindingServiceTestBean() {
+    }
 
     /**
      * Enum used to test custom serialization.

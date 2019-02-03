@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.json.gson;
+package org.openhab.core.io.json.gson;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.StringContains.containsString;
@@ -20,11 +20,12 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.eclipse.smarthome.test.java.JavaTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.io.json.JsonBindingService;
+import org.openhab.core.io.json.gson.internal.InternalGsonBindingService;
 
 /**
  * Test class for the Gson implementation of {@link JsonBindingService}. It tests basic data binding and Gson type
@@ -32,18 +33,18 @@ import org.openhab.core.io.json.JsonBindingService;
  *
  * @author Flavio Costa - Initial implementation
  */
-public class GsonBindingServiceTest extends JavaOSGiTest {
+public class GsonBindingServiceTest extends JavaTest {
 
     /**
      * OSGi service being tested.
      */
-    private @Nullable JsonBindingService<GsonBindingServiceTestBean> bindingService;
+    private @Nullable InternalGsonBindingService<GsonBindingServiceTestBean> bindingService;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        registerVolatileStorageService();
-        bindingService = getService(JsonBindingService.class);
+        bindingService = new InternalGsonBindingService<GsonBindingServiceTestBean>();
+        bindingService.addTypeAdapterProvider(new GsonTypeAdapterTestProvider());
+        bindingService.activate(null);
     }
 
     @After
