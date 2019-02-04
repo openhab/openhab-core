@@ -15,10 +15,6 @@
 
   <name>openHAB Core :: BOM :: Test</name>
 
-  <properties>
-    <jetty.version>9.3.25.v20180904</jetty.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
