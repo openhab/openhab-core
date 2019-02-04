@@ -15,10 +15,6 @@
 
   <name>openHAB Core :: BOM :: Test</name>
 
-  <properties>
-    <jetty.version>9.3.25.v20180904</jetty.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -34,6 +30,11 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>2.13.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
     </dependency>
   </dependencies>
 
