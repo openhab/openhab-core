@@ -497,12 +497,4 @@
       </resource>
     </resources>
   </build>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>reficio</id>
-      <url>http://repo.reficio.org/maven/</url>
-    </pluginRepository>
-  </pluginRepositories>
-
 </project>
