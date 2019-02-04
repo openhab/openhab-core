@@ -38,7 +38,7 @@
     <groovy.eclipse.compiler.version>2.9.2-01</groovy.eclipse.compiler.version>
     <groovy.eclipse.batch.version>2.4.3-01</groovy.eclipse.batch.version>
 
-    <ohdr.version>1.0.38</ohdr.version>
+    <ohdr.version>1.0.39</ohdr.version>
     <repo.version>2.5.x</repo.version>
     <karaf.version>4.2.2</karaf.version>
     <jetty.version>9.4.12.v20180830</jetty.version>
