@@ -10,24 +10,7 @@
   </parent>
 
   <artifactId>org.openhab.core.io.net.tests</artifactId>
-  <packaging>eclipse-test-plugin</packaging>
 
   <name>openHAB Core :: Integration Tests :: Network I/O Tests</name>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>${tycho-groupid}</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <environments combine.self="override"></environments>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>${tycho-groupid}</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

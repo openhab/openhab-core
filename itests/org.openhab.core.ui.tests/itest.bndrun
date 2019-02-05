@@ -1,0 +1,10 @@
+-include: ../itest-common.bndrun
+
+Bundle-SymbolicName: ${project.artifactId}
+Fragment-Host: org.openhab.core.ui
+
+-runrequires: bnd.identity;id='org.openhab.core.ui.tests'
+
+#
+# done
+#
