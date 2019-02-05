@@ -18,7 +18,7 @@
 
   <modules>
     <module>org.openhab.core.tests</module>
-    <!-- <module>org.openhab.core.audio.tests</module> -->
+    <module>org.openhab.core.audio.tests</module>
     <module>org.openhab.core.auth.oauth2client.tests</module>
     <!-- <module>org.openhab.core.automation.core.tests</module> -->
     <!-- <module>org.openhab.core.automation.module.core.tests</module> -->
