@@ -1036,7 +1036,6 @@ public class ThingManagerImpl
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         String identifier = readyMarker.getIdentifier();
-        System.out.println("!!! loaded XML thing types: add: " + identifier);
         loadedXmlThingTypes.add(identifier);
         handleThingHandlerFactoryAddition(identifier);
     }
@@ -1044,7 +1043,6 @@ public class ThingManagerImpl
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
         String identifier = readyMarker.getIdentifier();
-        System.out.println("!!! loaded XML thing types: remove: " + identifier);
         loadedXmlThingTypes.remove(identifier);
     }
 
