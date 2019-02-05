@@ -30,8 +30,9 @@ import org.mockito.Mock;
  * Base class for tests for the <code>HttpRequestBuilder</code> and <code>HttpUtil</code> to validate their behavior
  *
  * @author Martin van Wingerden & Wouter Born - Initial contribution
+ * @author Markus Rathgeb - Base test classes without tests needs to be abstract
  */
-public class BaseHttpUtilTest {
+public abstract class BaseHttpUtilTest {
     static final String URL = "http://example.org/test";
 
     @Mock
