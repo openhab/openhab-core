@@ -9,8 +9,6 @@ import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.junit.Test;
 import org.junit.Ignore;
 
-import static org.junit.Assert.assertTrue;
-
 
 public class ExampleTest extends RuleTest {
     private static final List<String> requestedItems = Arrays.asList("Temperature_Setpoint");
