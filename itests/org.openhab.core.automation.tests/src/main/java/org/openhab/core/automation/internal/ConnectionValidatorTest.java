@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.automation.core.internal;
+package org.openhab.core.automation.internal;
 
 import java.util.regex.Pattern;
 

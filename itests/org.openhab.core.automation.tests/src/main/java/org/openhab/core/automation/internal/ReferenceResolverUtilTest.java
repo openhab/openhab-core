@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.automation.core.internal;
+package org.openhab.core.automation.internal;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -18,12 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.automation.Module;
-import org.eclipse.smarthome.automation.core.util.ModuleBuilder;
-import org.eclipse.smarthome.automation.core.util.ReferenceResolver;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openhab.core.automation.Module;
+import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.automation.util.ReferenceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

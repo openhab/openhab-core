@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.automation.core.internal;
+package org.openhab.core.automation.internal;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -24,14 +24,14 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.automation.type.ActionType;
-import org.eclipse.smarthome.automation.type.ConditionType;
-import org.eclipse.smarthome.automation.type.Input;
-import org.eclipse.smarthome.automation.type.ModuleType;
-import org.eclipse.smarthome.automation.type.ModuleTypeProvider;
-import org.eclipse.smarthome.automation.type.Output;
-import org.eclipse.smarthome.automation.type.TriggerType;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
+import org.openhab.core.automation.type.ActionType;
+import org.openhab.core.automation.type.ConditionType;
+import org.openhab.core.automation.type.Input;
+import org.openhab.core.automation.type.ModuleType;
+import org.openhab.core.automation.type.ModuleTypeProvider;
+import org.openhab.core.automation.type.Output;
+import org.openhab.core.automation.type.TriggerType;
 
 /**
  * ModuleTypeManagerMockup is a ModuleTypeManager which returns mockup module types for the following predefined module

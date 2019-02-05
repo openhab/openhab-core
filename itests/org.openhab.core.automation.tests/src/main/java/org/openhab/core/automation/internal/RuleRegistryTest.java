@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.automation.core.internal;
+package org.openhab.core.automation.internal;
 
-import static org.eclipse.smarthome.automation.RulePredicates.*;
+import static org.openhab.core.automation.RulePredicates.*;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,12 +20,12 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.automation.Rule;
-import org.eclipse.smarthome.automation.RuleRegistry;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.RuleRegistry;
 
 /**
  * Testing the {@link Predicate}s for {@link RuleImpl}s.

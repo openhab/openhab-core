@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.automation.core.internal;
+package org.openhab.core.automation.internal;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,15 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.automation.Action;
-import org.eclipse.smarthome.automation.Condition;
-import org.eclipse.smarthome.automation.Rule;
-import org.eclipse.smarthome.automation.RuleManager;
-import org.eclipse.smarthome.automation.RuleRegistry;
-import org.eclipse.smarthome.automation.Trigger;
-import org.eclipse.smarthome.automation.core.util.ModuleBuilder;
-import org.eclipse.smarthome.automation.core.util.RuleBuilder;
-import org.eclipse.smarthome.automation.type.ModuleTypeProvider;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
@@ -40,6 +31,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.RuleManager;
+import org.openhab.core.automation.RuleRegistry;
+import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.type.ModuleTypeProvider;
+import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.automation.util.RuleBuilder;
 
 /**
  * Test adding, retrieving and updating rules from the RuleEngineImpl

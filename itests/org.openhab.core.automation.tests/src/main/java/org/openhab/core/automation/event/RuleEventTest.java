@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.automation.event;
+package org.openhab.core.automation.event;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -28,18 +28,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.automation.Action;
-import org.eclipse.smarthome.automation.Rule;
-import org.eclipse.smarthome.automation.RuleManager;
-import org.eclipse.smarthome.automation.RuleRegistry;
-import org.eclipse.smarthome.automation.RuleStatus;
-import org.eclipse.smarthome.automation.Trigger;
-import org.eclipse.smarthome.automation.core.util.ModuleBuilder;
-import org.eclipse.smarthome.automation.core.util.RuleBuilder;
-import org.eclipse.smarthome.automation.events.RuleAddedEvent;
-import org.eclipse.smarthome.automation.events.RuleRemovedEvent;
-import org.eclipse.smarthome.automation.events.RuleStatusInfoEvent;
-import org.eclipse.smarthome.automation.events.RuleUpdatedEvent;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.events.Event;
@@ -58,6 +46,18 @@ import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.eclipse.smarthome.test.storage.VolatileStorageService;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.RuleManager;
+import org.openhab.core.automation.RuleRegistry;
+import org.openhab.core.automation.RuleStatus;
+import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.events.RuleAddedEvent;
+import org.openhab.core.automation.events.RuleRemovedEvent;
+import org.openhab.core.automation.events.RuleStatusInfoEvent;
+import org.openhab.core.automation.events.RuleUpdatedEvent;
+import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.automation.util.RuleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

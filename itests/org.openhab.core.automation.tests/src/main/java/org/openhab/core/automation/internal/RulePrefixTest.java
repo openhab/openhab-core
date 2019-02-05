@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.automation.core.internal;
+package org.openhab.core.automation.internal;
 
-import org.eclipse.smarthome.automation.RulePredicates;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openhab.core.automation.RulePredicates;
 
 /**
  * Testing the prefix functionality.
