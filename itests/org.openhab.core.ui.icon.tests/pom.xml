@@ -9,33 +9,7 @@
   </parent>
 
   <artifactId>org.openhab.core.ui.icon.tests</artifactId>
-  <packaging>eclipse-test-plugin</packaging>
 
   <name>openHAB Core :: Integration Tests :: UI Icon Tests</name>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>${tycho-groupid}</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <environments combine.self="override"></environments>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>${tycho-groupid}</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
-        <configuration>
-          <bundleStartLevel>
-            <bundle>
-              <id>org.eclipse.smarthome.ui.icon</id>
-              <level>3</level>
-              <autoStart>true</autoStart>
-            </bundle>
-          </bundleStartLevel>
-        </configuration>
-      </plugin>
-    </plugins>
-
-  </build>
 </project>

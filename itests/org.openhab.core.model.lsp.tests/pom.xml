@@ -10,7 +10,6 @@
   </parent>
 
   <artifactId>org.openhab.core.model.lsp.tests</artifactId>
-  <packaging>eclipse-test-plugin</packaging>
 
   <name>openHAB Core :: Integration Tests :: Language Server Tests</name>
 

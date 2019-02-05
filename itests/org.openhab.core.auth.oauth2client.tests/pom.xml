@@ -12,7 +12,5 @@
   <artifactId>org.openhab.core.auth.oauth2client.tests</artifactId>
 
   <name>openHAB Core :: Integration Tests :: OAuth2Client Tests</name>
-  <packaging>eclipse-test-plugin</packaging>
-
 
 </project>
