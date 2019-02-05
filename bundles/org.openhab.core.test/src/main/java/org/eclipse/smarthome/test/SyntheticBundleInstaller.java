@@ -36,6 +36,7 @@ import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.smarthome.core.service.ReadyMarker;
+import org.eclipse.smarthome.core.service.ReadyMarkerUtils;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.junit.Assert;
 import org.osgi.framework.Bundle;
@@ -291,17 +292,14 @@ public class SyntheticBundleInstaller {
         if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
             return;
         }
-        final String bsn = bundle.getSymbolicName();
-        if (bsn == null) {
-            return;
-        }
+        final String identifier = ReadyMarkerUtils.getIdentifier(bundle);
         long startTime = System.nanoTime();
         ServiceReference<?> readyServiceRef = context.getServiceReference(ReadyService.class.getName());
         ReadyService readyService = (ReadyService) context.getService(readyServiceRef);
-        ReadyMarker expected = new ReadyMarker(marker, bsn);
+        ReadyMarker expected = new ReadyMarker(marker, identifier);
         while (!readyService.isReady(expected)) {
             if (System.nanoTime() - startTime > TimeUnit.SECONDS.toNanos(WAIT_TIMOUT)) {
-                Assert.fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker, bsn));
+                Assert.fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker, identifier));
             }
             try {
                 Thread.sleep(100);

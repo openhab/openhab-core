@@ -51,6 +51,7 @@ import org.eclipse.smarthome.core.library.items.StringItem;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.service.ReadyMarker;
+import org.eclipse.smarthome.core.service.ReadyMarkerUtils;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -1523,10 +1524,10 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         registerService(thingHandlerFactory);
 
+        final ReadyMarker marker = new ReadyMarker(ThingManagerImpl.XML_THING_TYPE,
+                ReadyMarkerUtils.getIdentifier(FrameworkUtil.getBundle(this.getClass())));
         waitForAssert(() -> {
             // wait for the XML processing to be finished, then remove the ready marker again
-            ReadyMarker marker = new ReadyMarker(ThingManagerImpl.XML_THING_TYPE,
-                    FrameworkUtil.getBundle(this.getClass()).getSymbolicName());
             assertThat(readyService.isReady(marker), is(true));
             readyService.unmarkReady(marker);
         });
@@ -1542,8 +1543,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         verify(thingHandler, never()).initialize();
         assertThat(thing.getStatusInfo(), is(uninitializedNone));
 
-        readyService.markReady(new ReadyMarker(ThingManagerImpl.XML_THING_TYPE,
-                FrameworkUtil.getBundle(this.getClass()).getSymbolicName()));
+        readyService.markReady(marker);
 
         // ThingHandler.initialize() called, thing status is INITIALIZING.NONE
         ThingStatusInfo initializingNone = ThingStatusInfoBuilder

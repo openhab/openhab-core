@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import org.eclipse.smarthome.config.xml.util.XmlDocumentReader;
 import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.service.ReadyMarker;
+import org.eclipse.smarthome.core.service.ReadyMarkerUtils;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -422,23 +423,19 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     }
 
     private void registerReadyMarker(Bundle bundle) {
-        final String bsn = bundle.getSymbolicName();
-        if (bsn != null) {
-            if (!bundleReadyMarkerRegistrations.containsKey(bsn)) {
-                ReadyMarker readyMarker = new ReadyMarker(readyMarkerKey, bsn);
-                readyService.markReady(readyMarker);
-                bundleReadyMarkerRegistrations.put(bsn, readyMarker);
-            }
+        final String identifier = ReadyMarkerUtils.getIdentifier(bundle);
+        if (!bundleReadyMarkerRegistrations.containsKey(identifier)) {
+            ReadyMarker readyMarker = new ReadyMarker(readyMarkerKey, identifier);
+            readyService.markReady(readyMarker);
+            bundleReadyMarkerRegistrations.put(identifier, readyMarker);
         }
     }
 
     private void unregisterReadyMarker(Bundle bundle) {
-        final String bsn = bundle.getSymbolicName();
-        if (bsn != null) {
-            ReadyMarker readyMarker = bundleReadyMarkerRegistrations.remove(bsn);
-            if (readyMarker != null) {
-                readyService.unmarkReady(readyMarker);
-            }
+        final String identifier = ReadyMarkerUtils.getIdentifier(bundle);
+        ReadyMarker readyMarker = bundleReadyMarkerRegistrations.remove(identifier);
+        if (readyMarker != null) {
+            readyService.unmarkReady(readyMarker);
         }
     }
 
