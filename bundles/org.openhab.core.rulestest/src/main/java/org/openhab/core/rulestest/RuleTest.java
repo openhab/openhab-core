@@ -1,12 +1,13 @@
-package org.openhab.rulestest;
+package org.openhab.core.rulestest;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +51,7 @@ public abstract class RuleTest extends JavaOSGiTest {
 
     @Before
     public void setUp() {
+		assertConfigVariablesSet();
         itemRegistry = getService(ItemRegistry.class);
         assertNotNull(itemRegistry);
         injectTestModels();
@@ -64,6 +66,17 @@ public abstract class RuleTest extends JavaOSGiTest {
 
         disableItemChannelAutoupdate();
     }
+
+	private void assertConfigVariablesSet() {
+		Arrays.asList(
+			"openhab.conf",
+			"smarthome.configdir",
+			"org.quartz.properties",
+			"smarthome.servicecfg"
+		).forEach((config) -> {
+			assertThat(config + " should not be unset for these tests to run", System.getProperty(config), not(isEmptyString()));
+		});
+	}
 
 	private void disableItemChannelAutoupdate() {
 		ItemChannelLinkRegistry itemChannelLinkRegistry = getService(ItemChannelLinkRegistry.class);

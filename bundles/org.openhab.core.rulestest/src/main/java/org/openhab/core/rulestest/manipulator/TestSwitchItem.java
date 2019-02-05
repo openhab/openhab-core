@@ -1,4 +1,4 @@
-package org.openhab.rulestest.manipulator;
+package org.openhab.core.rulestest.manipulator;
 
 import org.eclipse.smarthome.core.library.items.SwitchItem;
 import org.eclipse.smarthome.core.library.types.OnOffType;

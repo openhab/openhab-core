@@ -62,6 +62,7 @@
     <module>org.openhab.core.ui.tests</module>
     <module>org.openhab.core.ui.icon.tests</module>
     <module>org.openhab.core.voice.tests</module>
+    <module>org.openhab.core.rulestest.tests</module>
   </modules>
 
   <profiles>

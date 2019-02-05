@@ -1,0 +1,5 @@
+-runproperties: \
+	smarthome.configdir='/path/to/openhab/conf',\
+	openhab.conf='/path/to/openhab/conf',\
+	org.quartz.properties='/path/to/quartz.properties',\
+	smarthome.servicecfg='/path/to/etc/services.cfg'
