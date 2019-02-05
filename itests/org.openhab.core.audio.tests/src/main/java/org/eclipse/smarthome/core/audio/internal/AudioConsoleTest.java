@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.audio.AudioException;
 import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioSource;
@@ -28,6 +27,7 @@ import org.eclipse.smarthome.core.audio.AudioStream;
 import org.eclipse.smarthome.core.audio.FileAudioStream;
 import org.eclipse.smarthome.core.audio.URLAudioStream;
 import org.eclipse.smarthome.core.audio.internal.fake.AudioSinkFake;
+import org.eclipse.smarthome.core.audio.internal.utils.BundledSoundFileHandler;
 import org.eclipse.smarthome.core.i18n.LocaleProvider;
 import org.eclipse.smarthome.io.console.Console;
 import org.junit.After;
@@ -43,6 +43,8 @@ import org.junit.Test;
  */
 public class AudioConsoleTest extends AbstractAudioServeltTest {
 
+    private BundledSoundFileHandler fileHandler;
+
     private AudioConsoleCommandExtension audioConsoleCommandExtension;
 
     private AudioManagerImpl audioManager;
@@ -50,14 +52,6 @@ public class AudioConsoleTest extends AbstractAudioServeltTest {
     private AudioSinkFake audioSink;
 
     private final byte[] testByteArray = new byte[] { 0, 1, 2 };
-
-    private static final String CONFIGURATION_DIRECTORY_NAME = "configuration";
-
-    protected static final String MP3_FILE_NAME = "mp3AudioFile.mp3";
-    protected static final String MP3_FILE_PATH = CONFIGURATION_DIRECTORY_NAME + "/sounds/" + MP3_FILE_NAME;
-
-    protected static final String WAV_FILE_NAME = "wavAudioFile.wav";
-    protected static final String WAV_FILE_PATH = CONFIGURATION_DIRECTORY_NAME + "/sounds/" + WAV_FILE_NAME;
 
     private String consoleOutput;
     private final Console consoleMock = new Console() {
@@ -80,7 +74,8 @@ public class AudioConsoleTest extends AbstractAudioServeltTest {
     private final int testTimeout = 1;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
+        fileHandler = new BundledSoundFileHandler();
         audioManager = new AudioManagerImpl();
         audioSink = new AudioSinkFake();
         audioManager.addAudioSink(audioSink);
@@ -91,13 +86,11 @@ public class AudioConsoleTest extends AbstractAudioServeltTest {
         LocaleProvider localeProvider = mock(LocaleProvider.class);
         when(localeProvider.getLocale()).thenReturn(Locale.getDefault());
         audioConsoleCommandExtension.setLocaleProvider(localeProvider);
-
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, CONFIGURATION_DIRECTORY_NAME);
     }
 
     @After
     public void tearDown() {
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, ConfigConstants.DEFAULT_CONFIG_FOLDER);
+        fileHandler.close();
     }
 
     @Test
@@ -108,9 +101,9 @@ public class AudioConsoleTest extends AbstractAudioServeltTest {
 
     @Test
     public void audioConsolePlaysFile() throws AudioException, IOException {
-        AudioStream audioStream = new FileAudioStream(new File(WAV_FILE_PATH));
+        AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, WAV_FILE_NAME };
+        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, fileHandler.wavFileName() };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         assertThat(audioSink.audioFormat.isCompatible(audioStream.getFormat()), is(true));
@@ -119,9 +112,10 @@ public class AudioConsoleTest extends AbstractAudioServeltTest {
 
     @Test
     public void audioConsolePlaysFileForASpecifiedSink() throws AudioException, IOException {
-        AudioStream audioStream = new FileAudioStream(new File(WAV_FILE_PATH));
+        AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(), WAV_FILE_NAME };
+        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(),
+                fileHandler.wavFileName() };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         assertThat(audioSink.audioFormat.isCompatible(audioStream.getFormat()), is(true));
@@ -130,10 +124,10 @@ public class AudioConsoleTest extends AbstractAudioServeltTest {
 
     @Test
     public void audioConsolePlaysFileForASpecifiedSinkWithASpecifiedVolume() throws AudioException, IOException {
-        AudioStream audioStream = new FileAudioStream(new File(WAV_FILE_PATH));
+        AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(), WAV_FILE_NAME,
-                "25" };
+        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(),
+                fileHandler.wavFileName(), "25" };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         assertThat(audioSink.audioFormat.isCompatible(audioStream.getFormat()), is(true));
@@ -142,8 +136,8 @@ public class AudioConsoleTest extends AbstractAudioServeltTest {
 
     @Test
     public void audioConsolePlaysFileForASpecifiedSinkWithAnInvalidVolume() {
-        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(), WAV_FILE_NAME,
-                "invalid" };
+        String[] args = new String[] { AudioConsoleCommandExtension.SUBCMD_PLAY, audioSink.getId(),
+                fileHandler.wavFileName(), "invalid" };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
         waitForAssert(() -> assertThat("The given volume was invalid", consoleOutput, nullValue()));

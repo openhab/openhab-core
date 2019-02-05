@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.function.BiFunction;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.config.core.ParameterOption;
 import org.eclipse.smarthome.core.audio.AudioException;
 import org.eclipse.smarthome.core.audio.AudioFormat;
@@ -35,6 +34,7 @@ import org.eclipse.smarthome.core.audio.ByteArrayAudioStream;
 import org.eclipse.smarthome.core.audio.FileAudioStream;
 import org.eclipse.smarthome.core.audio.UnsupportedAudioStreamException;
 import org.eclipse.smarthome.core.audio.internal.fake.AudioSinkFake;
+import org.eclipse.smarthome.core.audio.internal.utils.BundledSoundFileHandler;
 import org.eclipse.smarthome.core.library.types.PercentType;
 import org.junit.After;
 import org.junit.Before;
@@ -50,21 +50,16 @@ import org.junit.Test;
  */
 public class AudioManagerTest {
 
+    private BundledSoundFileHandler fileHandler;
+
     private AudioManagerImpl audioManager;
 
     private AudioSinkFake audioSink;
     private AudioSource audioSource;
 
-    private static final String CONFIGURATION_DIRECTORY_NAME = "configuration";
-
-    private static final String MP3_FILE_NAME = "mp3AudioFile.mp3";
-    private static final String MP3_FILE_PATH = CONFIGURATION_DIRECTORY_NAME + "/sounds/" + MP3_FILE_NAME;
-
-    private static final String WAV_FILE_NAME = "wavAudioFile.wav";
-    private static final String WAV_FILE_PATH = CONFIGURATION_DIRECTORY_NAME + "/sounds/" + WAV_FILE_NAME;
-
     @Before
-    public void setup() {
+    public void setup() throws IOException {
+        fileHandler = new BundledSoundFileHandler();
         audioManager = new AudioManagerImpl();
         audioSink = new AudioSinkFake();
 
@@ -72,12 +67,11 @@ public class AudioManagerTest {
         when(audioSource.getId()).thenReturn("audioSourceId");
         when(audioSource.getLabel(any(Locale.class))).thenReturn("audioSourceLabel");
 
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, CONFIGURATION_DIRECTORY_NAME);
     }
 
     @After
-    public void tearDown() {
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, ConfigConstants.DEFAULT_CONFIG_FOLDER);
+    public void tearDown() throws IOException {
+        fileHandler.close();
     }
 
     @Test
@@ -104,7 +98,7 @@ public class AudioManagerTest {
     @Test
     public void audioManagerPlaysStreamFromWavAudioFiles() throws AudioException {
         audioManager.addAudioSink(audioSink);
-        AudioStream audioStream = new FileAudioStream(new File(WAV_FILE_PATH));
+        AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
         audioManager.play(audioStream, audioSink.getId());
 
@@ -114,7 +108,7 @@ public class AudioManagerTest {
     @Test
     public void audioManagerPlaysStreamFromMp3AudioFiles() throws AudioException {
         audioManager.addAudioSink(audioSink);
-        AudioStream audioStream = new FileAudioStream(new File(MP3_FILE_PATH));
+        AudioStream audioStream = new FileAudioStream(new File(fileHandler.mp3FilePath()));
 
         audioManager.play(audioStream, audioSink.getId());
 
@@ -124,8 +118,8 @@ public class AudioManagerTest {
     @Test
     public void audioManagerPlaysWavAudioFiles() throws AudioException, IOException {
         audioManager.addAudioSink(audioSink);
-        AudioStream audioStream = new FileAudioStream(new File(WAV_FILE_PATH));
-        audioManager.playFile(WAV_FILE_NAME, audioSink.getId());
+        AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
+        audioManager.playFile(fileHandler.wavFileName(), audioSink.getId());
 
         assertThat(audioSink.audioFormat.isCompatible(audioStream.getFormat()), is(true));
         audioStream.close();
@@ -134,8 +128,8 @@ public class AudioManagerTest {
     @Test
     public void audioManagerPlaysMp3AudioFiles() throws AudioException, IOException {
         audioManager.addAudioSink(audioSink);
-        AudioStream audioStream = new FileAudioStream(new File(MP3_FILE_PATH));
-        audioManager.playFile(MP3_FILE_NAME, audioSink.getId());
+        AudioStream audioStream = new FileAudioStream(new File(fileHandler.mp3FilePath()));
+        audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
 
         assertThat(audioSink.audioFormat.isCompatible(audioStream.getFormat()), is(true));
         audioStream.close();
@@ -143,7 +137,7 @@ public class AudioManagerTest {
 
     @Test
     public void fileIsNotProcessedIfThereIsNoRegisteredSink() throws AudioException {
-        File file = new File(MP3_FILE_PATH);
+        File file = new File(fileHandler.mp3FilePath());
 
         audioManager.playFile(file.getName(), audioSink.getId());
 
@@ -155,7 +149,7 @@ public class AudioManagerTest {
         audioManager.addAudioSink(audioSink);
         audioSink.isUnsupportedAudioFormatExceptionExpected = true;
         try {
-            audioManager.playFile(MP3_FILE_NAME, audioSink.getId());
+            audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
         } catch (UnsupportedAudioStreamException e) {
             fail("An exception " + e + " was thrown, while trying to process a stream");
         }
@@ -166,7 +160,7 @@ public class AudioManagerTest {
         audioManager.addAudioSink(audioSink);
         audioSink.isUnsupportedAudioStreamExceptionExpected = true;
         try {
-            audioManager.playFile(MP3_FILE_NAME, audioSink.getId());
+            audioManager.playFile(fileHandler.mp3FileName(), audioSink.getId());
         } catch (UnsupportedAudioStreamException e) {
             fail("An exception " + e + " was thrown, while trying to process a stream");
         }

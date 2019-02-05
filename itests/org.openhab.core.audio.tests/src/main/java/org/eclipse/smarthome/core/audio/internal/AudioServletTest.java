@@ -20,12 +20,10 @@ import java.io.File;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioStream;
 import org.eclipse.smarthome.core.audio.FileAudioStream;
-import org.junit.After;
-import org.junit.Before;
+import org.eclipse.smarthome.core.audio.internal.utils.BundledSoundFileHandler;
 import org.junit.Test;
 
 /**
@@ -40,22 +38,7 @@ public class AudioServletTest extends AbstractAudioServeltTest {
     private final String MEDIA_TYPE_AUDIO_OGG = "audio/ogg";
     private final String MEDIA_TYPE_AUDIO_MPEG = "audio/mpeg";
 
-    private static final String CONFIGURATION_DIRECTORY_NAME = "configuration";
-
-    private static final String WAV_FILE_NAME = "wavAudioFile.wav";
-    private static final String WAV_FILE_PATH = CONFIGURATION_DIRECTORY_NAME + "/sounds/" + WAV_FILE_NAME;
-
     private final byte[] testByteArray = new byte[] { 0, 1, 2 };
-
-    @Before
-    public void setup() {
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, CONFIGURATION_DIRECTORY_NAME);
-    }
-
-    @After
-    public void tearDown() {
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, ConfigConstants.DEFAULT_CONFIG_FOLDER);
-    }
 
     @Test
     public void audioServletProcessesByteArrayStream() throws Exception {
@@ -72,12 +55,15 @@ public class AudioServletTest extends AbstractAudioServeltTest {
 
     @Test
     public void audioServletProcessesStreamFromWavFile() throws Exception {
-        AudioStream audioStream = new FileAudioStream(new File(WAV_FILE_PATH));
+        try (BundledSoundFileHandler fileHandler = new BundledSoundFileHandler()) {
+            AudioStream audioStream = new FileAudioStream(new File(fileHandler.wavFilePath()));
 
-        ContentResponse response = getHttpResponse(audioStream);
+            ContentResponse response = getHttpResponse(audioStream);
 
-        assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
-        assertThat("The response media type was not as expected", response.getMediaType(), is(MEDIA_TYPE_AUDIO_WAV));
+            assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
+            assertThat("The response media type was not as expected", response.getMediaType(),
+                    is(MEDIA_TYPE_AUDIO_WAV));
+        }
     }
 
     @Test
