@@ -18,9 +18,6 @@ Import-Package: org.osgi.framework.*;version="[1.8,2)",*
 -runfw: org.eclipse.osgi
 -runee: JavaSE-1.8
 
-# We can provide that capability programmatic by our test bundle
-Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse.smarthome.core.storage.StorageService"
-
 # The integration test itself does not export anything.
 Export-Package: 
 -exportcontents: 
