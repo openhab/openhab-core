@@ -85,7 +85,8 @@ public class EnrichedItemDTOMapper {
             enrichedItemDTO = new EnrichedGroupItemDTO(itemDTO, memberDTOs, link, state, transformedState,
                     stateDescription);
         } else {
-            enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, transformedState, stateDescription);
+            enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, transformedState, stateDescription,
+                    item.getCommandDescription(locale));
         }
 
         return enrichedItemDTO;

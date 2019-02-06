@@ -12,11 +12,16 @@
  */
 package org.eclipse.smarthome.core.items;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.i18n.UnitProvider;
 import org.eclipse.smarthome.core.items.events.ItemStateChangedEvent;
@@ -24,7 +29,13 @@ import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.library.types.RawType;
 import org.eclipse.smarthome.core.library.types.StringType;
+import org.eclipse.smarthome.core.service.CommandDescriptionService;
+import org.eclipse.smarthome.core.service.StateDescriptionService;
+import org.eclipse.smarthome.core.types.CommandDescription;
+import org.eclipse.smarthome.core.types.CommandOption;
 import org.eclipse.smarthome.core.types.State;
+import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
+import org.eclipse.smarthome.core.types.StateOption;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -34,6 +45,7 @@ import org.mockito.ArgumentCaptor;
  * @author Christoph Knauf - Initial contribution, event tests
  * @author Simon Kaufmann - migrated from Groovy to Java
  */
+@SuppressWarnings("null")
 public class GenericItemTest {
 
     @Test
@@ -128,6 +140,56 @@ public class GenericItemTest {
         // assertThat(item.stateDescriptionProviders, is(nullValue()));
         assertNull(item.unitProvider);
         assertEquals(0, item.listeners.size());
+    }
+
+    @Test
+    public void testCommandDescription() {
+        TestItem item = new TestItem("test");
+
+        CommandDescriptionService commandDescriptionService = mock(CommandDescriptionService.class);
+        when(commandDescriptionService.getCommandDescription("test", null)).thenReturn(new CommandDescription() {
+
+            @Override
+            public @NonNull List<@NonNull CommandOption> getCommandOptions() {
+                return Arrays.asList(new CommandOption("ALERT", "Alert"), new CommandOption("REBOOT", "Reboot"));
+            }
+        });
+        item.setCommandDescriptionService(commandDescriptionService);
+
+        assertThat(item.getCommandDescription().getCommandOptions(), hasSize(2));
+    }
+
+    @Test
+    public void testCommandDescriptionWithLocale() {
+        TestItem item = new TestItem("test");
+
+        CommandDescriptionService commandDescriptionService = mock(CommandDescriptionService.class);
+        when(commandDescriptionService.getCommandDescription(eq("test"), any(Locale.class)))
+                .thenReturn(new CommandDescription() {
+
+                    @Override
+                    public @NonNull List<@NonNull CommandOption> getCommandOptions() {
+                        return Arrays.asList(new CommandOption("C1", "Command 1"), new CommandOption("C2", "Command 2"),
+                                new CommandOption("C3", "Command 3"));
+                    }
+                });
+        item.setCommandDescriptionService(commandDescriptionService);
+
+        assertThat(item.getCommandDescription(Locale.getDefault()).getCommandOptions(), hasSize(3));
+    }
+
+    @Test
+    public void commandDescriptionShouldHaveStateOptionsAsCommands() {
+        TestItem item = new TestItem("test");
+
+        StateDescriptionService stateDescriptionService = mock(StateDescriptionService.class);
+        List<@NonNull StateOption> stateOptions = Arrays.asList(new StateOption("STATE1", "State 1"),
+                new StateOption("STATE2", "State 2"));
+        when(stateDescriptionService.getStateDescription("test", null)).thenReturn(
+                StateDescriptionFragmentBuilder.create().withOptions(stateOptions).build().toStateDescription());
+        item.setStateDescriptionService(stateDescriptionService);
+
+        assertThat(item.getCommandDescription().getCommandOptions(), hasSize(2));
     }
 
     /**

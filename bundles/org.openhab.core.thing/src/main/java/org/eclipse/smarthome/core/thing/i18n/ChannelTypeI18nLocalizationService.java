@@ -24,6 +24,9 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.eclipse.smarthome.core.thing.type.StateChannelTypeBuilder;
 import org.eclipse.smarthome.core.thing.type.TriggerChannelTypeBuilder;
+import org.eclipse.smarthome.core.types.CommandDescription;
+import org.eclipse.smarthome.core.types.CommandDescriptionBuilder;
+import org.eclipse.smarthome.core.types.CommandOption;
 import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.StateOption;
 import org.osgi.framework.Bundle;
@@ -74,6 +77,24 @@ public class ChannelTypeI18nLocalizationService {
                 state.isReadOnly(), localizedOptions);
     }
 
+    private @Nullable CommandDescription createLocalizedCommandDescription(final Bundle bundle,
+            final @Nullable CommandDescription command, final ChannelTypeUID channelTypeUID,
+            final @Nullable Locale locale) {
+        if (command == null) {
+            return null;
+        }
+
+        CommandDescriptionBuilder commandDescriptionBuilder = CommandDescriptionBuilder.create();
+        for (final CommandOption options : command.getCommandOptions()) {
+            String optionLabel = thingTypeI18nUtil.getChannelCommandOption(bundle, channelTypeUID, options.getCommand(),
+                    options.getLabel(), locale);
+            optionLabel = optionLabel == null ? "" : optionLabel;
+            commandDescriptionBuilder.withCommandOption(new CommandOption(options.getCommand(), optionLabel));
+        }
+
+        return commandDescriptionBuilder.build();
+    }
+
     public ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
         ChannelTypeUID channelTypeUID = channelType.getUID();
         String defaultLabel = channelType.getLabel();
@@ -85,12 +106,15 @@ public class ChannelTypeI18nLocalizationService {
             case STATE:
                 StateDescription state = createLocalizedStateDescription(bundle, channelType.getState(), channelTypeUID,
                         locale);
+                CommandDescription command = createLocalizedCommandDescription(bundle,
+                        channelType.getCommandDescription(), channelTypeUID, locale);
 
                 StateChannelTypeBuilder stateBuilder = ChannelTypeBuilder
                         .state(channelTypeUID, label == null ? defaultLabel : label, channelType.getItemType())
                         .isAdvanced(channelType.isAdvanced()).withCategory(channelType.getCategory())
                         .withConfigDescriptionURI(channelType.getConfigDescriptionURI()).withTags(channelType.getTags())
-                        .withStateDescription(state).withAutoUpdatePolicy(channelType.getAutoUpdatePolicy());
+                        .withStateDescription(state).withAutoUpdatePolicy(channelType.getAutoUpdatePolicy())
+                        .withCommandDescription(command);
                 if (description != null) {
                     stateBuilder.withDescription(description);
                 }

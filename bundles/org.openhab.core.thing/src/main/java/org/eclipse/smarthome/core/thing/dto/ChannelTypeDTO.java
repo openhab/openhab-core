@@ -14,9 +14,11 @@ package org.eclipse.smarthome.core.thing.dto;
 
 import java.util.List;
 import java.util.Set;
+
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
 import org.eclipse.smarthome.core.thing.type.ChannelKind;
+import org.eclipse.smarthome.core.types.CommandDescription;
 import org.eclipse.smarthome.core.types.StateDescription;
 
 /**
@@ -38,6 +40,7 @@ public class ChannelTypeDTO {
     public Set<String> tags;
     public String UID;
     public boolean advanced;
+    public CommandDescription commandDescription;
 
     public ChannelTypeDTO() {
     }
@@ -45,7 +48,7 @@ public class ChannelTypeDTO {
     public ChannelTypeDTO(String UID, String label, String description, String category, String itemType,
             ChannelKind kind, List<ConfigDescriptionParameterDTO> parameters,
             List<ConfigDescriptionParameterGroupDTO> parameterGroups, StateDescription stateDescription,
-            Set<String> tags, boolean advanced) {
+            Set<String> tags, boolean advanced, CommandDescription commandDescription) {
         this.UID = UID;
         this.label = label;
         this.description = description;
@@ -57,5 +60,6 @@ public class ChannelTypeDTO {
         this.kind = kind.toString();
         this.itemType = itemType;
         this.advanced = advanced;
+        this.commandDescription = commandDescription;
     }
 }

@@ -116,6 +116,13 @@ public class ThingTypeI18nUtil {
         return i18nProvider.getText(bundle, key, defaultOptionLabel, locale);
     }
 
+    public @Nullable String getChannelCommandOption(Bundle bundle, ChannelTypeUID channelTypeUID, String optionValue,
+            String defaultOptionLabel, @Nullable Locale locale) {
+        String key = I18nUtil.stripConstantOr(defaultOptionLabel,
+                () -> inferChannelKey(channelTypeUID, "command.option." + optionValue));
+        return i18nProvider.getText(bundle, key, defaultOptionLabel, locale);
+    }
+
     public @Nullable String getChannelStatePattern(Bundle bundle, ChannelTypeUID channelTypeUID, String defaultPattern,
             @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultPattern, () -> inferChannelKey(channelTypeUID, "state.pattern"));

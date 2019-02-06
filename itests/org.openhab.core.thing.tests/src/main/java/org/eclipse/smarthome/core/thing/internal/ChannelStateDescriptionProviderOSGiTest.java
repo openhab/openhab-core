@@ -109,13 +109,13 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         final ChannelType channelType2 = new ChannelType(new ChannelTypeUID("hue:num"), false, "Number", " ", "", null,
                 null, state2, null);
         final ChannelType channelType3 = new ChannelType(new ChannelTypeUID("hue:info"), true, "String", " ", "", null,
-                null, null, null);
+                null, (StateDescription) null, null);
         final ChannelType channelType4 = new ChannelType(new ChannelTypeUID("hue:color"), false, "Color", "Color", "",
-                "ColorLight", null, null, null);
+                "ColorLight", null, (StateDescription) null, null);
         final ChannelType channelType5 = new ChannelType(new ChannelTypeUID("hue:brightness"), false, "Dimmer",
-                "Brightness", "", "DimmableLight", null, null, null);
+                "Brightness", "", "DimmableLight", null, (StateDescription) null, null);
         final ChannelType channelType6 = new ChannelType(new ChannelTypeUID("hue:switch"), false, "Switch", "Switch",
-                "", "Light", null, null, null);
+                "", "Light", null, (StateDescription) null, null);
         final ChannelType channelType7 = new ChannelType(new ChannelTypeUID("hue:num-dynamic"), false, "Number", " ",
                 "", "Light", null, state, null);
 

@@ -20,6 +20,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.core.thing.Channel;
+import org.eclipse.smarthome.core.types.CommandDescription;
 import org.eclipse.smarthome.core.types.EventDescription;
 import org.eclipse.smarthome.core.types.StateDescription;
 
@@ -31,6 +32,7 @@ import org.eclipse.smarthome.core.types.StateDescription;
  * <b>Hint:</b> This class is immutable.
  *
  * @author Michael Grammling - Initial Contribution
+ * @author Henning Treu - add command options
  */
 public class ChannelType extends AbstractDescriptionType {
 
@@ -40,6 +42,7 @@ public class ChannelType extends AbstractDescriptionType {
     private final Set<String> tags;
     private final String category;
     private final StateDescription state;
+    private final CommandDescription commandDescription;
     private final EventDescription event;
     private final URI configDescriptionURI;
     private final AutoUpdatePolicy autoUpdatePolicy;
@@ -66,6 +69,35 @@ public class ChannelType extends AbstractDescriptionType {
     }
 
     /**
+     * Creates a new instance of a "write-only" {@link ChannelType} with command options. The purpose of this
+     * {@link ChannelType} is to send command to a device without updating the state of the corresponding channel.
+     * E.g. activate a special device mode which is not represented as a definitive state.
+     *
+     * @param uid the unique identifier which identifies this Channel type within
+     *            the overall system (must neither be null, nor empty)
+     * @param advanced true if this channel type contains advanced features, otherwise false
+     * @param itemType the item type of this Channel type, e.g. {@code ColorItem} (must neither be null nor empty)
+     * @param label the human readable label for the according type
+     *            (must neither be null nor empty)
+     * @param description the human readable description for the according type
+     *            (could be null or empty)
+     * @param category the category of this Channel type, e.g. {@code TEMPERATURE} (could be null or empty)
+     * @param tags all tags of this {@link ChannelType}, e.g. {@code Alarm} (could be null or empty)
+     * @param commandDescription a {@link CommandDescription} which should be rendered as push-buttons. The command
+     *            values will be send to the channel from this {@link ChannelType}.
+     * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
+     * @param autoUpdatePolicy the {@link AutoUpdatePolicy} to use.
+     * @throws IllegalArgumentException if the UID or the item type is null or empty,
+     *             or the meta information is null
+     */
+    public ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, String label, String description,
+            String category, Set<String> tags, CommandDescription commandDescription, URI configDescriptionURI,
+            AutoUpdatePolicy autoUpdatePolicy) {
+        this(uid, advanced, itemType, ChannelKind.STATE, label, description, category, tags, null, commandDescription,
+                null, configDescriptionURI, autoUpdatePolicy);
+    }
+
+    /**
      * Creates a new instance of this class with the specified parameters.
      *
      * @param uid the unique identifier which identifies this Channel type within
@@ -84,11 +116,19 @@ public class ChannelType extends AbstractDescriptionType {
      * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
      * @param autoUpdatePolicy the {@link AutoUpdatePolicy} to use.
      * @throws IllegalArgumentException if the UID or the item type is null or empty,
-     *             or the the meta information is null
+     *             or the meta information is null
      */
     public ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, ChannelKind kind, String label,
             String description, String category, Set<String> tags, StateDescription state, EventDescription event,
             URI configDescriptionURI, AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
+        this(uid, advanced, itemType, kind, label, description, category, tags, state, null, event,
+                configDescriptionURI, autoUpdatePolicy);
+    }
+
+    private ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, ChannelKind kind, String label,
+            String description, String category, Set<String> tags, StateDescription state,
+            CommandDescription commandDescription, EventDescription event, URI configDescriptionURI,
+            AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
         super(uid, label, description);
 
         if (kind == null) {
@@ -115,6 +155,7 @@ public class ChannelType extends AbstractDescriptionType {
         this.advanced = advanced;
         this.category = category;
         this.state = state;
+        this.commandDescription = commandDescription;
         this.event = event;
         this.autoUpdatePolicy = autoUpdatePolicy;
     }
@@ -213,6 +254,10 @@ public class ChannelType extends AbstractDescriptionType {
      */
     public AutoUpdatePolicy getAutoUpdatePolicy() {
         return autoUpdatePolicy;
+    }
+
+    public CommandDescription getCommandDescription() {
+        return commandDescription;
     }
 
 }
