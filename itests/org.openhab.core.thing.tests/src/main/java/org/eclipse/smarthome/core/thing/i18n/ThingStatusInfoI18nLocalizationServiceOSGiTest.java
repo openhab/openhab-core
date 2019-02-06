@@ -250,7 +250,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
 
     @After
     public void tearDown() throws IOException, BundleException {
-        SyntheticBundleInstaller.uninstall(bundleContext, TEST_BUNDLE_NAME);
+        testBundle.uninstall();
         managedThingProvider.remove(thing.getUID());
         new DefaultLocaleSetter(getService(ConfigurationAdmin.class)).setDefaultLocale(defaultLocale);
         waitForAssert(() -> assertThat(getService(LocaleProvider.class).getLocale(), is(defaultLocale)));
