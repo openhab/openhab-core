@@ -34,7 +34,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
@@ -48,6 +47,7 @@ import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.service.ReadyMarker;
 import org.eclipse.smarthome.core.service.ReadyMarkerFilter;
+import org.eclipse.smarthome.core.service.ReadyMarkerUtils;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.eclipse.smarthome.core.storage.Storage;
 import org.eclipse.smarthome.core.storage.StorageService;
@@ -1009,10 +1009,7 @@ public class ThingManagerImpl
     protected synchronized void activate(ComponentContext componentContext) {
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
         for (ThingHandlerFactory factory : thingHandlerFactories) {
-            final String bsn = getBundleName(factory);
-            if (bsn != null) {
-                handleThingHandlerFactoryAddition(bsn);
-            }
+            handleThingHandlerFactoryAddition(getBundleIdentifier(factory));
         }
         thingRegistry.addThingTracker(this);
         active = true;
@@ -1023,10 +1020,7 @@ public class ThingManagerImpl
         logger.debug("Thing handler factory '{}' added", thingHandlerFactory.getClass().getSimpleName());
         thingHandlerFactories.add(thingHandlerFactory);
         if (active) {
-            final String bsn = getBundleName(thingHandlerFactory);
-            if (bsn != null) {
-                handleThingHandlerFactoryAddition(getBundleName(thingHandlerFactory));
-            }
+            handleThingHandlerFactoryAddition(getBundleIdentifier(thingHandlerFactory));
         }
     }
 
@@ -1041,20 +1035,20 @@ public class ThingManagerImpl
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        String bsn = readyMarker.getIdentifier();
-        loadedXmlThingTypes.add(bsn);
-        handleThingHandlerFactoryAddition(bsn);
+        String identifier = readyMarker.getIdentifier();
+        loadedXmlThingTypes.add(identifier);
+        handleThingHandlerFactoryAddition(identifier);
     }
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-        String bsn = readyMarker.getIdentifier();
-        loadedXmlThingTypes.remove(bsn);
+        String identifier = readyMarker.getIdentifier();
+        loadedXmlThingTypes.remove(identifier);
     }
 
-    private void handleThingHandlerFactoryAddition(String bsn) {
+    private void handleThingHandlerFactoryAddition(String bundleIdentifier) {
         thingHandlerFactories.stream().filter(it -> {
-            return bsn.equals(getBundleName(it));
+            return bundleIdentifier.equals(getBundleIdentifier(it));
         }).forEach(thingHandlerFactory -> {
             things.forEach(thing -> {
                 if (thingHandlerFactory.supportsThingType(thing.getThingTypeUID())) {
@@ -1068,22 +1062,20 @@ public class ThingManagerImpl
         });
     }
 
-    private @Nullable String getBundleName(ThingHandlerFactory thingHandlerFactory) {
-        return bundleResolver.resolveBundle(thingHandlerFactory.getClass()).getSymbolicName();
+    private String getBundleIdentifier(ThingHandlerFactory thingHandlerFactory) {
+        return ReadyMarkerUtils.getIdentifier(bundleResolver.resolveBundle(thingHandlerFactory.getClass()));
     }
 
     private void registerAndInitializeHandler(final Thing thing, final ThingHandlerFactory thingHandlerFactory) {
         if (thingHandlerFactory != null) {
-            final String bsn = getBundleName(thingHandlerFactory);
-            if (bsn != null) {
-                if (loadedXmlThingTypes.contains(bsn)) {
-                    registerHandler(thing, thingHandlerFactory);
-                    initializeHandler(thing);
-                } else {
-                    logger.debug(
-                            "Not registering a handler at this point. The thing types of bundle {} are not fully loaded yet.",
-                            bsn);
-                }
+            final String identifier = getBundleIdentifier(thingHandlerFactory);
+            if (loadedXmlThingTypes.contains(identifier)) {
+                registerHandler(thing, thingHandlerFactory);
+                initializeHandler(thing);
+            } else {
+                logger.debug(
+                        "Not registering a handler at this point. The thing types of bundle {} are not fully loaded yet.",
+                        identifier);
             }
         } else {
             logger.debug("Not registering a handler at this point. No handler factory for thing '{}' found.",

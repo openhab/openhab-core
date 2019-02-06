@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import org.eclipse.smarthome.config.xml.util.XmlDocumentReader;
 import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.service.ReadyMarker;
+import org.eclipse.smarthome.core.service.ReadyMarkerUtils;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -223,7 +224,8 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
         XmlDocumentProvider<T> xmlDocumentProvider = bundleDocumentProviderMap.get(bundle);
         if (xmlDocumentProvider == null) {
             xmlDocumentProvider = xmlDocumentProviderFactory.createDocumentProvider(bundle);
-            logger.trace("Create an empty XmlDocumentProvider for the module '{}'.", bundle.getSymbolicName());
+            logger.trace("Create an empty XmlDocumentProvider for the module '{}'.",
+                    ReadyMarkerUtils.getIdentifier(bundle));
             bundleDocumentProviderMap.put(bundle, xmlDocumentProvider);
         }
         return xmlDocumentProvider;
@@ -238,10 +240,11 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
             return;
         }
         try {
-            logger.debug("Releasing the XmlDocumentProvider for module '{}'.", bundle.getSymbolicName());
+            logger.debug("Releasing the XmlDocumentProvider for module '{}'.", ReadyMarkerUtils.getIdentifier(bundle));
             xmlDocumentProvider.release();
         } catch (Exception e) {
-            logger.error("Could not release the XmlDocumentProvider for '{}'!", bundle.getSymbolicName(), e);
+            logger.error("Could not release the XmlDocumentProvider for '{}'!", ReadyMarkerUtils.getIdentifier(bundle),
+                    e);
         }
         bundleDocumentProviderMap.remove(bundle);
     }
@@ -261,7 +264,8 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
         try {
             xmlDocumentProvider.addingFinished();
         } catch (Exception ex) {
-            logger.error("Could not send adding finished event for the module '{}'!", bundle.getSymbolicName(), ex);
+            logger.error("Could not send adding finished event for the module '{}'!",
+                    ReadyMarkerUtils.getIdentifier(bundle), ex);
         }
     }
 
@@ -273,7 +277,7 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
 
     @Override
     public final synchronized void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
-        logger.trace("Removing the XML related objects from module '{}'...", bundle.getSymbolicName());
+        logger.trace("Removing the XML related objects from module '{}'...", ReadyMarkerUtils.getIdentifier(bundle));
         finishedBundles.remove(bundle);
         Future<?> future = queue.remove(bundle);
         if (future != null) {
@@ -400,7 +404,7 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     private void parseDocuments(Bundle bundle, Collection<URL> filteredPaths) {
         int numberOfParsedXmlDocuments = 0;
         for (URL xmlDocumentURL : filteredPaths) {
-            String moduleName = bundle.getSymbolicName();
+            String moduleName = ReadyMarkerUtils.getIdentifier(bundle);
             String xmlDocumentFile = xmlDocumentURL.getFile();
             logger.debug("Reading the XML document '{}' in module '{}'...", xmlDocumentFile, moduleName);
             try {
@@ -422,23 +426,19 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     }
 
     private void registerReadyMarker(Bundle bundle) {
-        final String bsn = bundle.getSymbolicName();
-        if (bsn != null) {
-            if (!bundleReadyMarkerRegistrations.containsKey(bsn)) {
-                ReadyMarker readyMarker = new ReadyMarker(readyMarkerKey, bsn);
-                readyService.markReady(readyMarker);
-                bundleReadyMarkerRegistrations.put(bsn, readyMarker);
-            }
+        final String identifier = ReadyMarkerUtils.getIdentifier(bundle);
+        if (!bundleReadyMarkerRegistrations.containsKey(identifier)) {
+            ReadyMarker readyMarker = new ReadyMarker(readyMarkerKey, identifier);
+            readyService.markReady(readyMarker);
+            bundleReadyMarkerRegistrations.put(identifier, readyMarker);
         }
     }
 
     private void unregisterReadyMarker(Bundle bundle) {
-        final String bsn = bundle.getSymbolicName();
-        if (bsn != null) {
-            ReadyMarker readyMarker = bundleReadyMarkerRegistrations.remove(bsn);
-            if (readyMarker != null) {
-                readyService.unmarkReady(readyMarker);
-            }
+        final String identifier = ReadyMarkerUtils.getIdentifier(bundle);
+        ReadyMarker readyMarker = bundleReadyMarkerRegistrations.remove(identifier);
+        if (readyMarker != null) {
+            readyService.unmarkReady(readyMarker);
         }
     }
 
