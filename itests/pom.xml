@@ -37,7 +37,7 @@
     <!-- <module>org.openhab.core.io.http.tests</module> -->
     <module>org.openhab.core.io.net.tests</module>
     <!-- <module>org.openhab.core.io.rest.tests</module> -->
-    <!-- <module>org.openhab.core.io.rest.core.tests</module> -->
+    <module>org.openhab.core.io.rest.core.tests</module>
     <!-- <module>org.openhab.core.io.rest.sse.tests</module> -->
     <!-- <module>org.openhab.core.io.rest.sitemap.tests</module> -->
     <!-- <module>org.openhab.core.io.transport.mqtt.tests</module> -->
