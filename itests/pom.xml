@@ -53,7 +53,7 @@
     <!-- <module>org.openhab.core.semantics.tests</module> -->
     <!-- <module>org.openhab.core.storage.json.tests</module> -->
     <module>org.openhab.core.thing.tests</module>
-    <!-- <module>org.openhab.core.thing.xml.tests</module> -->
+    <module>org.openhab.core.thing.xml.tests</module>
     <module>org.openhab.core.transform.tests</module>
     <module>org.openhab.core.ui.tests</module>
     <module>org.openhab.core.ui.icon.tests</module>

@@ -13,9 +13,10 @@
 package org.eclipse.smarthome.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
@@ -24,12 +25,12 @@ import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ThingType;
+import org.eclipse.smarthome.test.BundleCloseable;
 import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 
 /***
  *
@@ -60,50 +61,57 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
         assertThat(thingTypeProvider, is(notNullValue()));
     }
 
-    @After
-    public void tearDown() throws Exception {
-        SyntheticBundleInstaller.uninstall(bundleContext, TEST_BUNDLE_NAME);
-    }
-
     @Test
     public void channelTypesShouldTranslateCorrectly() throws Exception {
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
+            assertThat(bundle, is(notNullValue()));
 
-        Collection<ChannelType> channelTypes = channelTypeProvider.getChannelTypes(null);
-        ChannelType channelType1 = channelTypes.stream()
-                .filter(c -> c.getUID().toString().equals("somebinding:channel-with-i18n")).findFirst().get();
-        assertThat(channelType1, is(not(nullValue())));
-        assertThat(channelType1.getLabel(), is(equalTo("Channel Label")));
-        assertThat(channelType1.getDescription(), is(equalTo("Channel Description")));
+            ChannelType channelType1 = waitForAssert(() -> {
+                final Optional<ChannelType> opt = channelTypeProvider.getChannelTypes(null).stream()
+                        .filter(c -> c.getUID().toString().equals("somebinding:channel-with-i18n")).findFirst();
+                assertTrue(opt.isPresent());
+                return opt.get();
+            });
+            assertThat(channelType1, is(not(nullValue())));
+            assertThat(channelType1.getLabel(), is(equalTo("Channel Label")));
+            assertThat(channelType1.getDescription(), is(equalTo("Channel Description")));
 
-        Collection<ChannelGroupType> channelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null);
-        ChannelGroupType channelGroupType = channelGroupTypes.stream()
-                .filter(c -> c.getUID().toString().equals("somebinding:channelgroup-with-i18n")).findFirst().get();
-        assertThat(channelGroupType, is(not(nullValue())));
-        assertThat(channelGroupType.getLabel(), is(equalTo("Channel Group Label")));
-        assertThat(channelGroupType.getDescription(), is(equalTo("Channel Group Description")));
+            Collection<ChannelGroupType> channelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null);
+            ChannelGroupType channelGroupType = channelGroupTypes.stream()
+                    .filter(c -> c.getUID().toString().equals("somebinding:channelgroup-with-i18n")).findFirst().get();
+            assertThat(channelGroupType, is(not(nullValue())));
+            assertThat(channelGroupType.getLabel(), is(equalTo("Channel Group Label")));
+            assertThat(channelGroupType.getDescription(), is(equalTo("Channel Group Description")));
+        }
     }
 
     @Test
     public void channelDefinitionsShouldBeTranslatedCorrectly() throws Exception {
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
+            assertThat(bundle, is(notNullValue()));
 
-        ThingType thingType = thingTypeProvider.getThingTypes(null).stream()
-                .filter(it -> it.getUID().toString().equals("somebinding:something")).findFirst().get();
-        assertThat(thingType, is(notNullValue()));
-        assertThat(thingType.getChannelDefinitions().size(), is(2));
+            ThingType thingType = waitForAssert(() -> {
+                Optional<ThingType> thingTypeOpt = thingTypeProvider.getThingTypes(null).stream()
+                        .filter(it -> it.getUID().toString().equals("somebinding:something")).findFirst();
+                Assert.assertTrue(thingTypeOpt.isPresent());
+                final ThingType thingTypeTmp = thingTypeOpt.get();
+                // assertThat(thingTypeTmp, is(notNullValue()));
+                assertThat(thingTypeTmp.getChannelDefinitions().size(), is(2));
+                return thingTypeTmp;
+            });
 
-        ChannelDefinition channelDefinition1 = thingType.getChannelDefinitions().stream()
-                .filter(it -> it.getId().equals("channelPlain")).findFirst().get();
-        assertThat(channelDefinition1.getLabel(), is(equalTo("Channel Plain Label")));
-        assertThat(channelDefinition1.getDescription(), is(equalTo("Channel Plain Description")));
+            ChannelDefinition channelDefinition1 = thingType.getChannelDefinitions().stream()
+                    .filter(it -> it.getId().equals("channelPlain")).findFirst().get();
+            assertThat(channelDefinition1.getLabel(), is(equalTo("Channel Plain Label")));
+            assertThat(channelDefinition1.getDescription(), is(equalTo("Channel Plain Description")));
 
-        ChannelDefinition channelDefinition2 = thingType.getChannelDefinitions().stream()
-                .filter(it -> it.getId().equals("channelInplace")).findFirst().get();
-        assertThat(channelDefinition2.getLabel(), is(equalTo("Channel Inplace Label")));
-        assertThat(channelDefinition2.getDescription(), is(equalTo("Channel Inplace Description")));
+            ChannelDefinition channelDefinition2 = thingType.getChannelDefinitions().stream()
+                    .filter(it -> it.getId().equals("channelInplace")).findFirst().get();
+            assertThat(channelDefinition2.getLabel(), is(equalTo("Channel Inplace Label")));
+            assertThat(channelDefinition2.getDescription(), is(equalTo("Channel Inplace Description")));
+        }
     }
 
 }
