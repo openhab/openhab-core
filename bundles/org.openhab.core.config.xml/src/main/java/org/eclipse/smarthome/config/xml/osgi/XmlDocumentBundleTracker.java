@@ -401,7 +401,7 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     private void parseDocuments(Bundle bundle, Collection<URL> filteredPaths) {
         int numberOfParsedXmlDocuments = 0;
         for (URL xmlDocumentURL : filteredPaths) {
-            String moduleName = bundle.getSymbolicName();
+            String moduleName = ReadyMarkerUtils.getIdentifier(bundle);
             String xmlDocumentFile = xmlDocumentURL.getFile();
             logger.debug("Reading the XML document '{}' in module '{}'...", xmlDocumentFile, moduleName);
             try {
