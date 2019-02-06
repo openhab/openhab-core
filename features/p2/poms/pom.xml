@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.openhab.core.bom</groupId>
-    <artifactId>org.openhab.core.bom.openhab-core</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
-    <relativePath>../../../bom/openhab-core/pom.xml</relativePath>
-  </parent>
-
   <groupId>org.openhab</groupId>
   <artifactId>pom</artifactId>
   <version>2.5.0-SNAPSHOT</version>
@@ -26,6 +19,17 @@
       <url>http://www.eclipse.org/legal/epl-v20.html</url>
     </license>
   </licenses>
+
+  <distributionManagement>
+    <repository>
+      <id>bintray</id>
+      <url>https://api.bintray.com/maven/openhab/mvn/openhab-core/;publish=1</url>
+    </repository>
+    <snapshotRepository>
+      <id>jfrog</id>
+      <url>https://openhab.jfrog.io/openhab/libs-snapshot-local</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -82,20 +86,6 @@
       <id>openhab-artifactory-release</id>
       <name>JFrog Artifactory Repository</name>
       <url>https://openhab.jfrog.io/openhab/libs-release</url>
-    </repository>
-
-    <!-- snapshots -->
-    <repository>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-      <id>openhab-artifactory-snapshot</id>
-      <name>JFrog Artifactory Repository</name>
-      <url>https://openhab.jfrog.io/openhab/libs-snapshot</url>
     </repository>
 
   </repositories>
@@ -368,5 +358,14 @@
       </build>
     </profile>
   </profiles>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.openhab-core</artifactId>
+      <version>2.5.0-SNAPSHOT</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
 
 </project>
