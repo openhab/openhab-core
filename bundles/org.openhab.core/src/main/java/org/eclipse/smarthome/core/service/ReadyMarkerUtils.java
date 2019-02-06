@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.service;
 
+import java.util.Arrays;
+
 import org.osgi.framework.Bundle;
 
 /**
@@ -34,6 +36,21 @@ public class ReadyMarkerUtils {
         } else {
             return String.format("@bundleId@0x%x", bundle.getBundleId());
         }
+    }
+
+    /**
+     * Provides a string to debug bundle information.
+     *
+     * @param bundle the bundle
+     * @return a debug string
+     */
+    public static String debugString(final Bundle bundle) {
+        return "Bundle [getState()=" + bundle.getState() + ", getHeaders()=" + bundle.getHeaders() + ", getBundleId()="
+                + bundle.getBundleId() + ", getLocation()=" + bundle.getLocation() + ", getRegisteredServices()="
+                + Arrays.toString(bundle.getRegisteredServices()) + ", getServicesInUse()="
+                + Arrays.toString(bundle.getServicesInUse()) + ", getSymbolicName()=" + bundle.getSymbolicName()
+                + ", getLastModified()=" + bundle.getLastModified() + ", getBundleContext()="
+                + bundle.getBundleContext() + ", getVersion()=" + bundle.getVersion() + "]";
     }
 
 }
