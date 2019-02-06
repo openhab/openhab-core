@@ -26,12 +26,10 @@ import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
 import org.eclipse.smarthome.core.thing.type.ThingType;
-import org.eclipse.smarthome.test.SyntheticBundleInstaller;
+import org.eclipse.smarthome.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 
 /**
  * @author Ivan Iliev - Initial contribution
@@ -39,11 +37,20 @@ import org.osgi.framework.Bundle;
  */
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
-    private static final String SYSTEM_CHANNELS_BUNDLE_NAME = "SystemChannels.bundle";
+    private LoadedTestBundle loadedSystemChannelsBundle() throws Exception {
+        return new LoadedTestBundle("SystemChannels.bundle", bundleContext, this::getService,
+                new StuffAddition().thingTypes(1).channelTypes(1));
+    }
 
-    private static final String SYSTEM_CHANNELS_USER_BUNDLE_NAME = "SystemChannelsUser.bundle";
+    private LoadedTestBundle loadedSystemChannelsUserBundle() throws Exception {
+        return new LoadedTestBundle("SystemChannelsUser.bundle", bundleContext, this::getService,
+                new StuffAddition().thingTypes(1).channelTypes(0));
+    }
 
-    private static final String SYSTEM_CHANNELS_WITHOUT_THING_TYPES_BUNDLE_NAME = "SystemChannelsNoThingTypes.bundle";
+    private LoadedTestBundle loadedSystemChannelsWithoutThingTypesBundle() throws Exception {
+        return new LoadedTestBundle("SystemChannelsNoThingTypes.bundle", bundleContext, this::getService,
+                new StuffAddition().thingTypes(0).channelTypes(1));
+    }
 
     private ThingTypeProvider thingTypeProvider;
     private ChannelTypeRegistry channelTypeRegistry;
@@ -62,157 +69,94 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         systemChannelTypeProvider = provider;
     }
 
-    @After
-    public void tearDown() throws Exception {
-        SyntheticBundleInstaller.uninstall(bundleContext, SYSTEM_CHANNELS_BUNDLE_NAME);
-        SyntheticBundleInstaller.uninstall(bundleContext, SYSTEM_CHANNELS_USER_BUNDLE_NAME);
-        SyntheticBundleInstaller.uninstall(bundleContext, SYSTEM_CHANNELS_WITHOUT_THING_TYPES_BUNDLE_NAME);
-    }
-
     @Test
     public void systemChannelsShouldLoadAndUnload() throws Exception {
-        int initialNumberOfThingTypes = thingTypeProvider.getThingTypes(null).size();
-
-        int initialNumberOfChannelTypes = getChannelTypes().size();
-
-        // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, SYSTEM_CHANNELS_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
-
-        Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(null);
-        assertThat(thingTypes.size(), is(initialNumberOfThingTypes + 1));
-
-        assertThat(getChannelTypes().size(), is(initialNumberOfChannelTypes + 1));
-
-        // uninstall test bundle
-        bundle.uninstall();
-        assertThat(bundle.getState(), is(Bundle.UNINSTALLED));
-
-        thingTypes = thingTypeProvider.getThingTypes(null);
-        assertThat(thingTypes.size(), is(initialNumberOfThingTypes));
-
-        assertThat(getChannelTypes().size(), is(initialNumberOfChannelTypes));
+        try (final AutoCloseable unused = loadedSystemChannelsBundle()) {
+        }
     }
 
     @Test
     public void systemChannelsShouldBeusedByOtherBinding() throws Exception {
-        int initialNumberOfThingTypes = thingTypeProvider.getThingTypes(null).size();
-        int initialNumberOfChannelTypes = getChannelTypes().size();
-
-        // install test bundle
-        Bundle sysBundle = SyntheticBundleInstaller.install(bundleContext, SYSTEM_CHANNELS_BUNDLE_NAME);
-        assertThat(sysBundle, is(notNullValue()));
-
-        Bundle sysUserBundle = SyntheticBundleInstaller.install(bundleContext, SYSTEM_CHANNELS_USER_BUNDLE_NAME);
-        assertThat(sysUserBundle, is(notNullValue()));
-
-        Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(null);
-        assertThat(thingTypes.size(), is(initialNumberOfThingTypes + 2));
-
-        assertThat(getChannelTypes().size(), is(initialNumberOfChannelTypes + 1));
+        try (final AutoCloseable unused1 = loadedSystemChannelsBundle()) {
+            try (final AutoCloseable unused2 = loadedSystemChannelsUserBundle()) {
+            }
+        }
     }
 
     @Test
     public void thingTyoesShouldHaveProperChannelDefinitions() throws Exception {
-        // install test bundle
-        Bundle sysBundle = SyntheticBundleInstaller.install(bundleContext, SYSTEM_CHANNELS_BUNDLE_NAME);
-        assertThat(sysBundle, is(notNullValue()));
+        try (final AutoCloseable unused = loadedSystemChannelsBundle()) {
+            ThingType wirelessRouterType = thingTypeProvider.getThingTypes(null).stream()
+                    .filter(it -> it.getUID().getAsString().equals("SystemChannels:wireless-router")).findFirst().get();
+            assertThat(wirelessRouterType, is(notNullValue()));
 
-        ThingType wirelessRouterType = thingTypeProvider.getThingTypes(null).stream()
-                .filter(it -> it.getUID().getAsString().equals("SystemChannels:wireless-router")).findFirst().get();
-        assertThat(wirelessRouterType, is(notNullValue()));
+            Collection<ChannelDefinition> channelDefs = wirelessRouterType.getChannelDefinitions();
+            assertThat(channelDefs.size(), is(3));
 
-        Collection<ChannelDefinition> channelDefs = wirelessRouterType.getChannelDefinitions();
-        assertThat(channelDefs.size(), is(3));
+            ChannelDefinition myChannel = channelDefs.stream().filter(
+                    it -> it.getId().equals("test") && it.getChannelTypeUID().getAsString().equals("system:my-channel"))
+                    .findFirst().get();
+            assertThat(myChannel, is(notNullValue()));
 
-        ChannelDefinition myChannel = channelDefs.stream().filter(
-                it -> it.getId().equals("test") && it.getChannelTypeUID().getAsString().equals("system:my-channel"))
-                .findFirst().get();
-        assertThat(myChannel, is(notNullValue()));
+            ChannelDefinition sigStr = channelDefs.stream().filter(it -> it.getId().equals("sigstr")
+                    && it.getChannelTypeUID().getAsString().equals("system:signal-strength")).findFirst().get();
+            assertThat(sigStr, is(notNullValue()));
 
-        ChannelDefinition sigStr = channelDefs.stream().filter(it -> it.getId().equals("sigstr")
-                && it.getChannelTypeUID().getAsString().equals("system:signal-strength")).findFirst().get();
-        assertThat(sigStr, is(notNullValue()));
-
-        ChannelDefinition lowBat = channelDefs.stream().filter(
-                it -> it.getId().equals("lowbat") && it.getChannelTypeUID().getAsString().equals("system:low-battery"))
-                .findFirst().get();
-        assertThat(lowBat, is(notNullValue()));
+            ChannelDefinition lowBat = channelDefs.stream().filter(it -> it.getId().equals("lowbat")
+                    && it.getChannelTypeUID().getAsString().equals("system:low-battery")).findFirst().get();
+            assertThat(lowBat, is(notNullValue()));
+        }
     }
 
     @Test
     public void systemChannelsShouldBeAddedWithoutThingTypes() throws Exception {
-        int initialNumberOfThingTypes = thingTypeProvider.getThingTypes(null).size();
-        int initialNumberOfChannelTypes = getChannelTypes().size();
-
-        // install test bundle
-        Bundle sysBundle = SyntheticBundleInstaller.install(bundleContext,
-                SYSTEM_CHANNELS_WITHOUT_THING_TYPES_BUNDLE_NAME);
-        assertThat(sysBundle, is(notNullValue()));
-
-        Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(null);
-        assertThat(thingTypes.size(), is(initialNumberOfThingTypes));
-
-        assertThat(getChannelTypes().size(), is(initialNumberOfChannelTypes + 1));
-
-        // uninstall test bundle
-        sysBundle.uninstall();
-        assertThat(sysBundle.getState(), is(Bundle.UNINSTALLED));
-
-        assertThat(getChannelTypes().size(), is(initialNumberOfChannelTypes));
+        try (final AutoCloseable unused = loadedSystemChannelsWithoutThingTypesBundle()) {
+        }
     }
 
     @Test
     public void systemChannelsShouldTranslateProperly() throws Exception {
-        int initialNumberOfThingTypes = thingTypeProvider.getThingTypes(null).size();
+        try (final AutoCloseable unused = loadedSystemChannelsBundle()) {
+            Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
-        // install test bundle
-        Bundle sysBundle = SyntheticBundleInstaller.install(bundleContext, SYSTEM_CHANNELS_BUNDLE_NAME);
-        assertNotNull(sysBundle);
+            ThingType wirelessRouterType = thingTypes.stream()
+                    .filter(it -> it.getUID().getAsString().equals("SystemChannels:wireless-router")).findFirst().get();
+            assertNotNull(wirelessRouterType);
 
-        Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
-        assertEquals(initialNumberOfThingTypes + 1, thingTypes.size());
+            List<ChannelDefinition> channelDefs = wirelessRouterType.getChannelDefinitions();
+            assertEquals(3, channelDefs.size());
 
-        ThingType wirelessRouterType = thingTypes.stream()
-                .filter(it -> it.getUID().getAsString().equals("SystemChannels:wireless-router")).findFirst().get();
-        assertNotNull(wirelessRouterType);
+            ChannelDefinition myChannel = channelDefs.stream().filter(
+                    it -> it.getId().equals("test") && it.getChannelTypeUID().getAsString().equals("system:my-channel"))
+                    .findFirst().get();
+            assertNotNull(myChannel);
 
-        List<ChannelDefinition> channelDefs = wirelessRouterType.getChannelDefinitions();
-        assertEquals(3, channelDefs.size());
+            ChannelDefinition sigStr = channelDefs.stream().filter(it -> it.getId().equals("sigstr")
+                    && it.getChannelTypeUID().getAsString().equals("system:signal-strength")).findFirst().get();
+            assertNotNull(sigStr);
 
-        ChannelDefinition myChannel = channelDefs.stream().filter(
-                it -> it.getId().equals("test") && it.getChannelTypeUID().getAsString().equals("system:my-channel"))
-                .findFirst().get();
-        assertNotNull(myChannel);
+            ChannelDefinition lowBat = channelDefs.stream().filter(it -> it.getId().equals("lowbat")
+                    && it.getChannelTypeUID().getAsString().equals("system:low-battery")).findFirst().get();
+            assertNotNull(lowBat);
 
-        ChannelDefinition sigStr = channelDefs.stream().filter(it -> it.getId().equals("sigstr")
-                && it.getChannelTypeUID().getAsString().equals("system:signal-strength")).findFirst().get();
-        assertNotNull(sigStr);
+            ChannelType lowBatType = systemChannelTypeProvider.getChannelType(lowBat.getChannelTypeUID(),
+                    Locale.GERMAN);
 
-        ChannelDefinition lowBat = channelDefs.stream().filter(
-                it -> it.getId().equals("lowbat") && it.getChannelTypeUID().getAsString().equals("system:low-battery"))
-                .findFirst().get();
-        assertNotNull(lowBat);
+            ChannelType myChannelChannelType = channelTypeRegistry.getChannelType(myChannel.getChannelTypeUID(),
+                    Locale.GERMAN);
+            assertNotNull(myChannelChannelType);
+            assertEquals("Mein String My Channel", myChannelChannelType.getLabel());
+            assertEquals("Wetterinformation mit My Channel Type Beschreibung", myChannelChannelType.getDescription());
 
-        ChannelType lowBatType = systemChannelTypeProvider.getChannelType(lowBat.getChannelTypeUID(), Locale.GERMAN);
+            assertEquals("Mein String My Channel", myChannel.getLabel());
+            assertEquals("Wetterinformation mit My Channel Type Beschreibung", myChannel.getDescription());
 
-        ChannelType myChannelChannelType = channelTypeRegistry.getChannelType(myChannel.getChannelTypeUID(),
-                Locale.GERMAN);
-        assertNotNull(myChannelChannelType);
-        assertEquals("Mein String My Channel", myChannelChannelType.getLabel());
-        assertEquals("Wetterinformation mit My Channel Type Beschreibung", myChannelChannelType.getDescription());
+            assertEquals("Meine spezial Signalstärke", sigStr.getLabel());
+            assertEquals("Meine spezial Beschreibung für Signalstärke", sigStr.getDescription());
 
-        assertEquals("Mein String My Channel", myChannel.getLabel());
-        assertEquals("Wetterinformation mit My Channel Type Beschreibung", myChannel.getDescription());
-
-        assertEquals("Meine spezial Signalstärke", sigStr.getLabel());
-        assertEquals("Meine spezial Beschreibung für Signalstärke", sigStr.getDescription());
-
-        assertEquals("Niedriger Batteriestatus", lowBatType.getLabel());
-        assertNull(lowBatType.getDescription());
+            assertEquals("Niedriger Batteriestatus", lowBatType.getLabel());
+            assertNull(lowBatType.getDescription());
+        }
     }
 
-    private List<ChannelType> getChannelTypes() {
-        return getService(ChannelTypeRegistry.class).getChannelTypes();
-    }
 }

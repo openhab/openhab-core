@@ -21,12 +21,11 @@ import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
+import org.eclipse.smarthome.test.BundleCloseable;
 import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 
 /***
  *
@@ -52,42 +51,43 @@ public class ChannelTypesTest extends JavaOSGiTest {
         assertThat(channelGroupTypeProvider, is(notNullValue()));
     }
 
-    @After
-    public void tearDown() throws Exception {
-        SyntheticBundleInstaller.uninstall(bundleContext, TEST_BUNDLE_NAME);
-    }
-
     @Test
     public void ChannelTypesShouldBeLoaded() throws Exception {
         int initialNumberOfChannelTypes = channelTypeProvider.getChannelTypes(null).size();
         int initialNumberOfChannelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null).size();
 
         // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
+            assertThat(bundle, is(notNullValue()));
 
-        Collection<ChannelType> channelTypes = channelTypeProvider.getChannelTypes(null);
-        assertThat(channelTypes.size(), is(initialNumberOfChannelTypes + 2));
+            Collection<ChannelType> channelTypes = waitForAssert(() -> {
+                Collection<ChannelType> channelTypesTmp = channelTypeProvider.getChannelTypes(null);
+                assertThat(channelTypesTmp.size(), is(initialNumberOfChannelTypes + 2));
+                return channelTypesTmp;
+            });
 
-        ChannelType channelType1 = channelTypes.stream()
-                .filter(it -> it.getUID().toString().equals("somebinding:channel1")).findFirst().get();
-        assertThat(channelType1, is(not(nullValue())));
+            ChannelType channelType1 = channelTypes.stream()
+                    .filter(it -> it.getUID().toString().equals("somebinding:channel1")).findFirst().get();
+            assertThat(channelType1, is(not(nullValue())));
 
-        ChannelType channelType2 = channelTypes.stream()
-                .filter(it -> it.getUID().toString().equals("somebinding:channel-without-reference")).findFirst().get();
-        assertThat(channelType2, is(not(nullValue())));
+            ChannelType channelType2 = channelTypes.stream()
+                    .filter(it -> it.getUID().toString().equals("somebinding:channel-without-reference")).findFirst()
+                    .get();
+            assertThat(channelType2, is(not(nullValue())));
 
-        Collection<ChannelGroupType> channelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null);
-        assertThat(channelGroupTypes.size(), is(initialNumberOfChannelGroupTypes + 1));
+            Collection<ChannelGroupType> channelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null);
+            assertThat(channelGroupTypes.size(), is(initialNumberOfChannelGroupTypes + 1));
 
-        ChannelGroupType channelGroupType = channelGroupTypes.stream()
-                .filter(it -> it.getUID().toString().equals("somebinding:channelgroup")).findFirst().get();
-        assertThat(channelGroupType, is(not(nullValue())));
-        assertThat(channelGroupType.getCategory(), is("Temperature"));
+            ChannelGroupType channelGroupType = channelGroupTypes.stream()
+                    .filter(it -> it.getUID().toString().equals("somebinding:channelgroup")).findFirst().get();
+            assertThat(channelGroupType, is(not(nullValue())));
+            assertThat(channelGroupType.getCategory(), is("Temperature"));
+        }
 
-        SyntheticBundleInstaller.uninstall(bundleContext, TEST_BUNDLE_NAME);
-
-        assertThat(channelTypeProvider.getChannelTypes(null).size(), is(initialNumberOfChannelTypes));
-        assertThat(channelGroupTypeProvider.getChannelGroupTypes(null).size(), is(initialNumberOfChannelGroupTypes));
+        waitForAssert(
+                () -> assertThat(channelTypeProvider.getChannelTypes(null).size(), is(initialNumberOfChannelTypes)));
+        waitForAssert(() -> assertThat(channelGroupTypeProvider.getChannelGroupTypes(null).size(),
+                is(initialNumberOfChannelGroupTypes)));
     }
 }

@@ -27,18 +27,18 @@ import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
 import org.eclipse.smarthome.core.thing.type.ThingType;
+import org.eclipse.smarthome.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 public class ThingTypesTest extends JavaOSGiTest {
 
-    private static final String TEST_BUNDLE_NAME = "ThingTypesTest.bundle";
+    private LoadedTestBundle loadedTestBundle() throws Exception {
+        return new LoadedTestBundle("ThingTypesTest.bundle", bundleContext, this::getService,
+                new StuffAddition().thingTypes(3));
+    }
 
     private ThingTypeProvider thingTypeProvider;
     private ChannelTypeRegistry channelTypeRegistry;
@@ -52,152 +52,125 @@ public class ThingTypesTest extends JavaOSGiTest {
         assertThat(channelTypeRegistry, is(notNullValue()));
     }
 
-    @After
-    public void tearDown() throws BundleException {
-        SyntheticBundleInstaller.uninstall(bundleContext, TEST_BUNDLE_NAME);
-    }
-
     @Test
     public void thingTypesShouldLoad() throws Exception {
-        int initialNumberOfThingTypes = thingTypeProvider.getThingTypes(null).size();
+        try (final AutoCloseable unused = loadedTestBundle()) {
+            Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(null);
 
-        // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
+            BridgeType bridgeType = (BridgeType) thingTypes.stream().filter(it -> it.toString().equals("hue:bridge"))
+                    .findFirst().get();
+            assertThat(bridgeType, is(notNullValue()));
+            assertThat(bridgeType.getCategory(), is("NetworkAppliance"));
+            assertThat(bridgeType.isListed(), is(false));
+            assertThat(bridgeType.getLabel(), is("HUE Bridge"));
+            assertThat(bridgeType.getDescription(), is("The hue Bridge represents the Philips hue bridge."));
+            assertThat(bridgeType.getProperties().size(), is(1));
+            assertThat(bridgeType.getProperties().get("vendor"), is("Philips"));
+            assertThat(bridgeType.getRepresentationProperty(), is("serialNumber"));
 
-        Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(null);
-        assertThat(thingTypes.size(), is(initialNumberOfThingTypes + 3));
+            ThingType thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp")).findFirst().get();
 
-        BridgeType bridgeType = (BridgeType) thingTypes.stream().filter(it -> it.toString().equals("hue:bridge"))
-                .findFirst().get();
-        assertThat(bridgeType, is(notNullValue()));
-        assertThat(bridgeType.getCategory(), is("NetworkAppliance"));
-        assertThat(bridgeType.isListed(), is(false));
-        assertThat(bridgeType.getLabel(), is("HUE Bridge"));
-        assertThat(bridgeType.getDescription(), is("The hue Bridge represents the Philips hue bridge."));
-        assertThat(bridgeType.getProperties().size(), is(1));
-        assertThat(bridgeType.getProperties().get("vendor"), is("Philips"));
-        assertThat(bridgeType.getRepresentationProperty(), is("serialNumber"));
+            assertThat(thingType, is(notNullValue()));
+            assertThat(thingType.getCategory(), is("Lightbulb"));
+            assertThat(thingType.isListed(), is(false));
+            assertThat(thingType.getLabel(), is("HUE Lamp"));
+            assertThat(thingType.getDescription(), is("My own great HUE Lamp."));
+            assertThat(thingType.getSupportedBridgeTypeUIDs().size(), is(1));
+            assertThat(thingType.getSupportedBridgeTypeUIDs().get(0), is("hue:bridge"));
+            assertThat(thingType.getExtensibleChannelTypeIds(), containsInAnyOrder("alarm", "brightness"));
+            assertThat(thingType.getProperties().size(), is(2));
+            assertThat(thingType.getProperties().get("key1"), is("value1"));
+            assertThat(thingType.getProperties().get("key2"), is("value2"));
+            assertThat(thingType.getRepresentationProperty(), is("uniqueId"));
 
-        ThingType thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp")).findFirst().get();
+            List<ChannelDefinition> channelDefinitions = thingType.getChannelDefinitions();
 
-        assertThat(thingType, is(notNullValue()));
-        assertThat(thingType.getCategory(), is("Lightbulb"));
-        assertThat(thingType.isListed(), is(false));
-        assertThat(thingType.getLabel(), is("HUE Lamp"));
-        assertThat(thingType.getDescription(), is("My own great HUE Lamp."));
-        assertThat(thingType.getSupportedBridgeTypeUIDs().size(), is(1));
-        assertThat(thingType.getSupportedBridgeTypeUIDs().get(0), is("hue:bridge"));
-        assertThat(thingType.getExtensibleChannelTypeIds(), containsInAnyOrder("alarm", "brightness"));
-        assertThat(thingType.getProperties().size(), is(2));
-        assertThat(thingType.getProperties().get("key1"), is("value1"));
-        assertThat(thingType.getProperties().get("key2"), is("value2"));
-        assertThat(thingType.getRepresentationProperty(), is("uniqueId"));
+            assertThat(channelDefinitions.size(), is(3));
+            ChannelDefinition colorChannel = channelDefinitions.stream().filter(it -> it.getId().equals("color"))
+                    .findFirst().get();
+            assertThat(colorChannel, is(notNullValue()));
 
-        List<ChannelDefinition> channelDefinitions = thingType.getChannelDefinitions();
+            assertThat(colorChannel.getProperties().size(), is(2));
+            assertThat(colorChannel.getProperties().get("chan.key1"), is("value1"));
+            assertThat(colorChannel.getProperties().get("chan.key2"), is("value2"));
 
-        assertThat(channelDefinitions.size(), is(3));
-        ChannelDefinition colorChannel = channelDefinitions.stream().filter(it -> it.getId().equals("color"))
-                .findFirst().get();
-        assertThat(colorChannel, is(notNullValue()));
+            ChannelType colorChannelType = channelTypeRegistry.getChannelType(colorChannel.getChannelTypeUID());
+            assertThat(colorChannelType, is(notNullValue()));
+            assertThat(colorChannelType.toString(), is("hue:color"));
+            assertThat(colorChannelType.getItemType(), is("ColorItem"));
+            assertThat(colorChannelType.getLabel(), is("HUE Lamp Color"));
+            assertThat(colorChannelType.getDescription(), is(
+                    "The color channel allows to control the color of the hue lamp. It is also possible to dim values and switch the lamp on and off."));
 
-        assertThat(colorChannel.getProperties().size(), is(2));
-        assertThat(colorChannel.getProperties().get("chan.key1"), is("value1"));
-        assertThat(colorChannel.getProperties().get("chan.key2"), is("value2"));
+            Set<String> tags = colorChannelType.getTags();
+            assertThat(tags, is(notNullValue()));
+            assertThat(tags.contains("Hue"), is(true));
+            assertThat(tags.contains("ColorLamp"), is(true));
+            assertThat(tags.contains("AmbientLamp"), is(false));
+            assertThat(tags.contains("AlarmSystem"), is(false));
 
-        ChannelType colorChannelType = channelTypeRegistry.getChannelType(colorChannel.getChannelTypeUID());
-        assertThat(colorChannelType, is(notNullValue()));
-        assertThat(colorChannelType.toString(), is("hue:color"));
-        assertThat(colorChannelType.getItemType(), is("ColorItem"));
-        assertThat(colorChannelType.getLabel(), is("HUE Lamp Color"));
-        assertThat(colorChannelType.getDescription(), is(
-                "The color channel allows to control the color of the hue lamp. It is also possible to dim values and switch the lamp on and off."));
+            ChannelDefinition colorTemperatureChannel = channelDefinitions.stream()
+                    .filter(it -> it.getId().equals("color_temperature")).findFirst().get();
 
-        Set<String> tags = colorChannelType.getTags();
-        assertThat(tags, is(notNullValue()));
-        assertThat(tags.contains("Hue"), is(true));
-        assertThat(tags.contains("ColorLamp"), is(true));
-        assertThat(tags.contains("AmbientLamp"), is(false));
-        assertThat(tags.contains("AlarmSystem"), is(false));
+            assertThat(colorTemperatureChannel, is(notNullValue()));
+            assertThat(colorTemperatureChannel.getProperties().size(), is(0));
+            ChannelType colorTemperatureChannelType = channelTypeRegistry
+                    .getChannelType(colorTemperatureChannel.getChannelTypeUID());
+            assertThat(colorTemperatureChannelType, is(notNullValue()));
 
-        ChannelDefinition colorTemperatureChannel = channelDefinitions.stream()
-                .filter(it -> it.getId().equals("color_temperature")).findFirst().get();
+            assertThat(colorTemperatureChannelType.toString(), is("hue:color_temperature"));
+            assertThat(colorTemperatureChannelType.getItemType(), is("DimmerItem"));
+            assertThat(colorTemperatureChannelType.getLabel(), is("HUE Lamp Color Temperature"));
+            assertThat(colorTemperatureChannelType.getDescription(), is(
+                    "The color temperature channel allows to set the color temperature from 0 (cold) to 100 (warm)."));
 
-        assertThat(colorTemperatureChannel, is(notNullValue()));
-        assertThat(colorTemperatureChannel.getProperties().size(), is(0));
-        ChannelType colorTemperatureChannelType = channelTypeRegistry
-                .getChannelType(colorTemperatureChannel.getChannelTypeUID());
-        assertThat(colorTemperatureChannelType, is(notNullValue()));
+            tags = colorTemperatureChannelType.getTags();
+            assertThat(tags, is(notNullValue()));
+            assertThat(tags.contains("Hue"), is(true));
+            assertThat(tags.contains("AmbientLamp"), is(true));
+            assertThat(tags.contains("ColorLamp"), is(false));
+            assertThat(tags.contains("AlarmSystem"), is(false));
 
-        assertThat(colorTemperatureChannelType.toString(), is("hue:color_temperature"));
-        assertThat(colorTemperatureChannelType.getItemType(), is("DimmerItem"));
-        assertThat(colorTemperatureChannelType.getLabel(), is("HUE Lamp Color Temperature"));
-        assertThat(colorTemperatureChannelType.getDescription(),
-                is("The color temperature channel allows to set the color temperature from 0 (cold) to 100 (warm)."));
+            ChannelDefinition alarmChannel = channelDefinitions.stream().filter(it -> it.getId().equals("alarm"))
+                    .findFirst().get();
+            assertThat(alarmChannel, is(notNullValue()));
+            ChannelType alarmChannelType = channelTypeRegistry.getChannelType(alarmChannel.getChannelTypeUID());
+            assertThat(alarmChannelType, is(notNullValue()));
 
-        tags = colorTemperatureChannelType.getTags();
-        assertThat(tags, is(notNullValue()));
-        assertThat(tags.contains("Hue"), is(true));
-        assertThat(tags.contains("AmbientLamp"), is(true));
-        assertThat(tags.contains("ColorLamp"), is(false));
-        assertThat(tags.contains("AlarmSystem"), is(false));
+            assertThat(alarmChannelType.toString(), is("hue:alarm"));
+            assertThat(alarmChannelType.getItemType(), is("Number"));
+            assertThat(alarmChannelType.getLabel(), is("Alarm System"));
+            assertThat(alarmChannelType.getDescription(), is("The light blinks if alarm is set."));
 
-        ChannelDefinition alarmChannel = channelDefinitions.stream().filter(it -> it.getId().equals("alarm"))
-                .findFirst().get();
-        assertThat(alarmChannel, is(notNullValue()));
-        ChannelType alarmChannelType = channelTypeRegistry.getChannelType(alarmChannel.getChannelTypeUID());
-        assertThat(alarmChannelType, is(notNullValue()));
+            tags = alarmChannelType.getTags();
+            assertThat(tags, is(notNullValue()));
+            assertThat(tags.contains("Hue"), is(true));
+            assertThat(tags.contains("AlarmSystem"), is(true));
+            assertThat(tags.contains("AmbientLamp"), is(false));
+            assertThat(tags.contains("ColorLamp"), is(false));
+            assertThat(alarmChannelType.getCategory(), is(equalTo("ALARM")));
 
-        assertThat(alarmChannelType.toString(), is("hue:alarm"));
-        assertThat(alarmChannelType.getItemType(), is("Number"));
-        assertThat(alarmChannelType.getLabel(), is("Alarm System"));
-        assertThat(alarmChannelType.getDescription(), is("The light blinks if alarm is set."));
+            StateDescription state = alarmChannelType.getState();
+            assertThat(state.getMinimum(), is(BigDecimal.ZERO));
+            assertThat(state.getMaximum(), is(BigDecimal.valueOf(100.0)));
+            assertThat(state.getStep(), is(BigDecimal.valueOf(10.0)));
+            assertThat(state.getPattern(), is(equalTo("%d Peek")));
+            assertThat(state.isReadOnly(), is(true));
+            assertThat(state.getOptions().size(), is(2));
+            assertThat(state.getOptions().get(0).getValue(), is(equalTo("SOUND")));
+            assertThat(state.getOptions().get(0).getLabel(), is(equalTo("My great sound.")));
 
-        tags = alarmChannelType.getTags();
-        assertThat(tags, is(notNullValue()));
-        assertThat(tags.contains("Hue"), is(true));
-        assertThat(tags.contains("AlarmSystem"), is(true));
-        assertThat(tags.contains("AmbientLamp"), is(false));
-        assertThat(tags.contains("ColorLamp"), is(false));
-        assertThat(alarmChannelType.getCategory(), is(equalTo("ALARM")));
-
-        StateDescription state = alarmChannelType.getState();
-        assertThat(state.getMinimum(), is(BigDecimal.ZERO));
-        assertThat(state.getMaximum(), is(BigDecimal.valueOf(100.0)));
-        assertThat(state.getStep(), is(BigDecimal.valueOf(10.0)));
-        assertThat(state.getPattern(), is(equalTo("%d Peek")));
-        assertThat(state.isReadOnly(), is(true));
-        assertThat(state.getOptions().size(), is(2));
-        assertThat(state.getOptions().get(0).getValue(), is(equalTo("SOUND")));
-        assertThat(state.getOptions().get(0).getLabel(), is(equalTo("My great sound.")));
-
-        thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp-with-group")).findFirst().get();
-        assertThat(thingType.getProperties().size(), is(0));
-        assertThat(thingType.getCategory(), is(nullValue()));
-        assertThat(thingType.isListed(), is(true));
-        assertThat(thingType.getExtensibleChannelTypeIds(), containsInAnyOrder("brightness", "alarm"));
-
-        // uninstall test bundle
-        bundle.uninstall();
-        assertThat(bundle.getState(), is(Bundle.UNINSTALLED));
+            thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp-with-group")).findFirst().get();
+            assertThat(thingType.getProperties().size(), is(0));
+            assertThat(thingType.getCategory(), is(nullValue()));
+            assertThat(thingType.isListed(), is(true));
+            assertThat(thingType.getExtensibleChannelTypeIds(), containsInAnyOrder("brightness", "alarm"));
+        }
     }
 
     @Test
     public void thingTypesShouldBeRemoved_whenBundleIsUninstalled() throws Exception {
-        int initialNumberOfThingTypes = thingTypeProvider.getThingTypes(null).size();
-
-        // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
-
-        Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(null);
-        assertThat(thingTypes.size(), is(initialNumberOfThingTypes + 3));
-
-        // uninstall test bundle
-        bundle.uninstall();
-        assertThat(bundle.getState(), is(Bundle.UNINSTALLED));
-
-        thingTypes = thingTypeProvider.getThingTypes(null);
-        assertThat(thingTypes.size(), is(initialNumberOfThingTypes));
+        try (final AutoCloseable unused = loadedTestBundle()) {
+        }
     }
 }

@@ -3,7 +3,9 @@
 Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.thing.xml
 
--runrequires: bnd.identity;id='org.openhab.core.thing.xml.tests'
+-runrequires: \
+	bnd.identity;id='org.openhab.core.thing.xml.tests',\
+	bnd.identity;id='org.openhab.core.binding.xml'
 
 #
 # done
@@ -39,4 +41,5 @@ Fragment-Host: org.openhab.core.thing.xml
 	osgi.enroute.junit.wrapper;version='[4.12.0,4.12.1)',\
 	slf4j.api;version='[1.7.21,1.7.22)',\
 	tec.uom.lib.uom-lib-common;version='[1.0.2,1.0.3)',\
-	tec.uom.se;version='[1.0.8,1.0.9)'
+	tec.uom.se;version='[1.0.8,1.0.9)',\
+	org.openhab.core.binding.xml;version='[2.5.0,2.5.1)'
