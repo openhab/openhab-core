@@ -785,7 +785,7 @@
       <setupTask
           xsi:type="setup:PreferenceTask"
           key="/instance/org.eclipse.ui.ide/WORKSPACE_NAME"
-          value="SmartHome"/>
+          value="openHAB Core"/>
     </setupTask>
     <setupTask
         xsi:type="setup:CompoundTask"
@@ -2356,10 +2356,10 @@
             pattern=".*/bundles/.*"/>
       </workingSet>
       <workingSet
-          name="Addons">
+          name="BOM">
         <predicate
             xsi:type="predicates:LocationPredicate"
-            pattern=".*/extensions/.*"/>
+            pattern=".*/bom/.*"/>
       </workingSet>
       <workingSet
           name="Features">
@@ -2368,16 +2368,16 @@
             pattern=".*/features/.*"/>
       </workingSet>
       <workingSet
-          name="Other">
-        <predicate
-            xsi:type="predicates:LocationPredicate"
-            pattern=".*/targetplatform/.*;.*/docs/.*;.*/distribution/.*"/>
-      </workingSet>
-      <workingSet
           name="Tests">
         <predicate
-            xsi:type="predicates:NamePredicate"
-            pattern="org.eclipse.smarthome..*.test"/>
+            xsi:type="predicates:LocationPredicate"
+            pattern=".*/itests/.*"/>
+      </workingSet>
+      <workingSet
+          name="Demo">
+        <predicate
+            xsi:type="predicates:LocationPredicate"
+            pattern=".*/demo/.*"/>
       </workingSet>
     </setupTask>
     <setupTask
@@ -2412,12 +2412,6 @@
       <sourceLocator
           rootFolder="${git.clone.openhabcore.location}"
           locateNestedProjects="true"/>
-    </setupTask>
-    <setupTask
-        xsi:type="pde:TargetPlatformTask"
-        id="smarthome.target"
-        name="SmartHome">
-      <description>Manually maintained target platform</description>
     </setupTask>
     <setupTask
         xsi:type="launching:LaunchTask"
