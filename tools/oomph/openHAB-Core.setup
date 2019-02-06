@@ -2368,7 +2368,7 @@
             pattern=".*/features/.*"/>
       </workingSet>
       <workingSet
-          name="Tests">
+          name="Integration Tests">
         <predicate
             xsi:type="predicates:LocationPredicate"
             pattern=".*/itests/.*"/>
