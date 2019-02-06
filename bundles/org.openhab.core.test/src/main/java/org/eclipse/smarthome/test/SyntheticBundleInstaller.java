@@ -315,6 +315,10 @@ public class SyntheticBundleInstaller {
     /**
      * Uninstalls the synthetic bundle (or bundle fragment), denoted by its name, from the test runtime.
      *
+     * <p>
+     * This method should only be used if the bundle itself provides a symbolic name.
+     * If possible you should use the uninstall method of the bundle itself.
+     *
      * @param bundleContext the bundle context of the test runtime
      * @param testBundleName the name of the test bundle to be uninstalled
      * @throws BundleException if error is met during the bundle uninstall

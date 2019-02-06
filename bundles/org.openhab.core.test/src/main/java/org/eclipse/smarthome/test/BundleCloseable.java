@@ -1,0 +1,42 @@
+/**
+ * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.eclipse.smarthome.test;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+
+/**
+ * A wrapper that uninstalls a bundle on close.
+ *
+ * <p>
+ * This wrapper allows the usage in try-with-resources blocks.
+ *
+ * @author Markus Rathgeb - Initial contribution and API
+ */
+public class BundleCloseable implements AutoCloseable {
+
+    private final Bundle bundle;
+
+    public BundleCloseable(final Bundle bundle) {
+        this.bundle = bundle;
+    }
+
+    @Override
+    public void close() throws BundleException {
+        bundle.uninstall();
+    }
+
+    public Bundle bundle() {
+        return bundle;
+    }
+}
