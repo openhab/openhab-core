@@ -12,12 +12,10 @@
  */
 package org.eclipse.smarthome.core.types;
 
-import java.nio.channels.Channel;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Represents a command option for "write only" command {@link Channel}s. CommandOptions will be rendered as
+ * Represents a command option for "write only" command channels. CommandOptions will be rendered as
  * push-buttons in the UI and will not represent a state.
  *
  * @author Henning Treu - Initial contribution
