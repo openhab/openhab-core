@@ -25,13 +25,11 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.core.binding.BindingInfo;
 import org.eclipse.smarthome.core.binding.BindingInfoRegistry;
+import org.eclipse.smarthome.test.BundleCloseable;
 import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 
 /**
  * @author Alex Tugarev - Initial contribution
@@ -53,32 +51,25 @@ public class BindingInfoTest extends JavaOSGiTest {
         assertThat(configDescriptionRegistry, is(notNullValue()));
     }
 
-    @After
-    public void tearDown() throws BundleException {
-        SyntheticBundleInstaller.uninstall(bundleContext, TEST_BUNDLE_NAME);
-    }
-
     @Test
     public void assertThatBindingInfoIsReadProperly() throws Exception {
         int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
 
         // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
+            assertThat(bundle, is(notNullValue()));
 
-        Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
-        assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
-        BindingInfo bindingInfo = bindingInfos.iterator().next();
-        assertThat(bindingInfo.getUID(), is("hue"));
-        assertThat(bindingInfo.getConfigDescriptionURI(), is(URI.create("binding:hue")));
-        assertThat(bindingInfo.getDescription(),
-                is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
-        assertThat(bindingInfo.getName(), is("hue Binding"));
-        assertThat(bindingInfo.getAuthor(), is("Deutsche Telekom AG"));
-
-        // uninstall test bundle
-        bundle.uninstall();
-        assertThat(bundle.getState(), is(Bundle.UNINSTALLED));
+            Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
+            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
+            BindingInfo bindingInfo = bindingInfos.iterator().next();
+            assertThat(bindingInfo.getUID(), is("hue"));
+            assertThat(bindingInfo.getConfigDescriptionURI(), is(URI.create("binding:hue")));
+            assertThat(bindingInfo.getDescription(),
+                    is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
+            assertThat(bindingInfo.getName(), is("hue Binding"));
+            assertThat(bindingInfo.getAuthor(), is("Deutsche Telekom AG"));
+        }
     }
 
     @Test
@@ -86,39 +77,38 @@ public class BindingInfoTest extends JavaOSGiTest {
         int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
 
         // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME2);
-        assertThat(bundle, is(notNullValue()));
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME2))) {
+            assertThat(bundle, is(notNullValue()));
 
-        Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
-        assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
-        BindingInfo bindingInfo = bindingInfos.iterator().next();
-        assertThat(bindingInfo.getUID(), is("hue"));
-        assertThat(bindingInfo.getConfigDescriptionURI(), is(URI.create("binding:hue")));
-        assertThat(bindingInfo.getDescription(),
-                is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
-        assertThat(bindingInfo.getName(), is("hue Binding"));
-        assertThat(bindingInfo.getAuthor(), is((String) null));
-
-        // uninstall test bundle
-        bundle.uninstall();
-        assertThat(bundle.getState(), is(Bundle.UNINSTALLED));
+            Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
+            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
+            BindingInfo bindingInfo = bindingInfos.iterator().next();
+            assertThat(bindingInfo.getUID(), is("hue"));
+            assertThat(bindingInfo.getConfigDescriptionURI(), is(URI.create("binding:hue")));
+            assertThat(bindingInfo.getDescription(),
+                    is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
+            assertThat(bindingInfo.getName(), is("hue Binding"));
+            assertThat(bindingInfo.getAuthor(), is((String) null));
+        }
     }
 
     @Test
     public void assertThatBindingInfoIsRemovedAfterTheBundleWasUninstalled() throws Exception {
         int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
 
+        Set<BindingInfo> bindingInfos;
+        BindingInfo bindingInfo;
+
         // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
+            assertThat(bundle, is(notNullValue()));
 
-        Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
-        assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
-        BindingInfo bindingInfo = bindingInfos.iterator().next();
-
-        // uninstall test bundle
-        bundle.uninstall();
-        assertThat(bundle.getState(), is(Bundle.UNINSTALLED));
+            bindingInfos = bindingInfoRegistry.getBindingInfos();
+            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
+            bindingInfo = bindingInfos.iterator().next();
+        }
 
         bindingInfos = bindingInfoRegistry.getBindingInfos();
         assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos));
@@ -135,28 +125,32 @@ public class BindingInfoTest extends JavaOSGiTest {
         int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
 
         // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
+            assertThat(bundle, is(notNullValue()));
 
-        Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
-        assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
-        BindingInfo bindingInfo = bindingInfos.iterator().next();
+            Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
+            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
+            BindingInfo bindingInfo = bindingInfos.iterator().next();
 
-        URI configDescriptionURI = bindingInfo.getConfigDescriptionURI();
-        ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
-        List<ConfigDescriptionParameter> parameters = configDescription.getParameters();
-        assertThat(parameters.size(), is(2));
+            URI configDescriptionURI = bindingInfo.getConfigDescriptionURI();
+            ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
+            List<ConfigDescriptionParameter> parameters = configDescription.getParameters();
+            assertThat(parameters.size(), is(2));
 
-        ConfigDescriptionParameter listParameter = parameters.stream().filter(p -> p.getName().equals("list"))
-                .findFirst().get();
-        assertThat(listParameter, is(notNullValue()));
-        assertThat(listParameter.getOptions().stream().map(p -> p.toString()).collect(Collectors.joining(", ")), is(
-                "ParameterOption [value=\"key1\", label=\"label1\"], ParameterOption [value=\"key2\", label=\"label2\"]"));
+            ConfigDescriptionParameter listParameter = parameters.stream().filter(p -> p.getName().equals("list"))
+                    .findFirst().get();
+            assertThat(listParameter, is(notNullValue()));
+            assertThat(listParameter.getOptions().stream().map(p -> p.toString()).collect(Collectors.joining(", ")), is(
+                    "ParameterOption [value=\"key1\", label=\"label1\"], ParameterOption [value=\"key2\", label=\"label2\"]"));
 
-        ConfigDescriptionParameter lightParameter = parameters.stream()
-                .filter(p -> p.getName().equals("color-alarming-light")).findFirst().get();
-        assertThat(lightParameter, is(notNullValue()));
-        assertThat(lightParameter.getFilterCriteria().stream().map(p -> p.toString()).collect(Collectors.joining(", ")),
-                is("FilterCriteria [name=\"tags\", value=\"alarm, light\"], FilterCriteria [name=\"type\", value=\"color\"], FilterCriteria [name=\"binding-id\", value=\"hue\"]"));
+            ConfigDescriptionParameter lightParameter = parameters.stream()
+                    .filter(p -> p.getName().equals("color-alarming-light")).findFirst().get();
+            assertThat(lightParameter, is(notNullValue()));
+            assertThat(
+                    lightParameter.getFilterCriteria().stream().map(p -> p.toString())
+                            .collect(Collectors.joining(", ")),
+                    is("FilterCriteria [name=\"tags\", value=\"alarm, light\"], FilterCriteria [name=\"type\", value=\"color\"], FilterCriteria [name=\"binding-id\", value=\"hue\"]"));
+        }
     }
 }

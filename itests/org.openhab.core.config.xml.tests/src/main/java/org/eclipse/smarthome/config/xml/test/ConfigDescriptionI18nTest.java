@@ -24,12 +24,11 @@ import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterGroup;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
+import org.eclipse.smarthome.test.BundleCloseable;
 import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 
 /**
  * The ConfigDescriptionsTest is a test for loading of configuration description from XML documents.
@@ -49,39 +48,36 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
         assertThat(configDescriptionRegistry, is(notNullValue()));
     }
 
-    @After
-    public void tearDown() throws Exception {
-        SyntheticBundleInstaller.uninstall(bundleContext, TEST_BUNDLE_NAME);
-    }
-
     @Test
     public void assertConfigDescriptionsAreLocalized() throws Exception {
         int initialNumberOfConfigDescriptions = configDescriptionRegistry.getConfigDescriptions().size();
 
         // install test bundle
-        Bundle bundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
-        assertThat(bundle, is(notNullValue()));
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
+            assertThat(bundle, is(notNullValue()));
 
-        Collection<ConfigDescription> configDescriptions = configDescriptionRegistry
-                .getConfigDescriptions(Locale.GERMAN);
-        assertThat(configDescriptions.size(), is(initialNumberOfConfigDescriptions + 1));
+            Collection<ConfigDescription> configDescriptions = configDescriptionRegistry
+                    .getConfigDescriptions(Locale.GERMAN);
+            assertThat(configDescriptions.size(), is(initialNumberOfConfigDescriptions + 1));
 
-        ConfigDescription config = new LinkedList<>(configDescriptions).getFirst();
+            ConfigDescription config = new LinkedList<>(configDescriptions).getFirst();
 
-        assertThat(config, is(notNullValue()));
+            assertThat(config, is(notNullValue()));
 
-        String expected = "location.label = Ort\n" + //
-                "location.description = Ort der Wetterinformation.\n" + //
-                "unit.label = Einheit\n" + //
-                "unit.description = Spezifiziert die Einheit der Daten. Valide Werte sind 'us' und 'metric'\n" + //
-                "refresh.label = Aktualisierungsintervall\n" + //
-                "refresh.description = Spezifiziert das Aktualisierungsintervall in Sekunden\n" + //
-                "question.pattern = Wie ist das Wetter in [\\w]*?\n" + //
-                "question.options = München, Köln\n" + //
-                "group.label = Group 1 German Label\n" + //
-                "group.description = Group 1 German Description";
+            String expected = "location.label = Ort\n" + //
+                    "location.description = Ort der Wetterinformation.\n" + //
+                    "unit.label = Einheit\n" + //
+                    "unit.description = Spezifiziert die Einheit der Daten. Valide Werte sind 'us' und 'metric'\n" + //
+                    "refresh.label = Aktualisierungsintervall\n" + //
+                    "refresh.description = Spezifiziert das Aktualisierungsintervall in Sekunden\n" + //
+                    "question.pattern = Wie ist das Wetter in [\\w]*?\n" + //
+                    "question.options = München, Köln\n" + //
+                    "group.label = Group 1 German Label\n" + //
+                    "group.description = Group 1 German Description";
 
-        assertEquals(expected, asString(config));
+            assertEquals(expected, asString(config));
+        }
     }
 
     private static String asString(ConfigDescription description) {
