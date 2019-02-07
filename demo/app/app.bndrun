@@ -15,7 +15,7 @@ feature.debug: \
     osgi.identity;filter:='(osgi.identity=org.apache.felix.gogo.runtime)',\
     osgi.identity;filter:='(osgi.identity=org.apache.felix.gogo.command)'
 
-feature.esh-base: \
+feature.openhab-base: \
     bnd.identity;id='org.openhab.core.config.core',\
     bnd.identity;id='org.openhab.core.config.discovery',\
     bnd.identity;id='org.openhab.core.config.dispatch',\
@@ -40,7 +40,7 @@ feature.esh-base: \
     bnd.identity;id='org.openhab.core.io.rest.core',\
     bnd.identity;id='org.openhab.core.io.rest.sse'
 
-feature.esh-model-runtime-all: \
+feature.openhab-model-runtime-all: \
     bnd.identity;id='org.openhab.core.model.item.runtime',\
     bnd.identity;id='org.openhab.core.model.persistence.runtime',\
     bnd.identity;id='org.openhab.core.model.rule.runtime',\
@@ -52,8 +52,8 @@ feature.esh-model-runtime-all: \
 	bnd.identity;id='org.eclipse.equinox.metatype',\
 	${feature.logging},\
 	${feature.debug},\
-	${feature.esh-base},\
-	${feature.esh-model-runtime-all},\
+	${feature.openhab-base},\
+	${feature.openhab-model-runtime-all},\
 	bnd.identity;id='org.openhab.core.io.console.rfc147'
 
 -runfw: org.eclipse.osgi
