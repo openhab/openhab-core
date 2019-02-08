@@ -60,9 +60,6 @@
     <sat.version>0.5.0</sat.version>
     <slf4j.version>1.7.21</slf4j.version>
     <xtext.version>2.14.0</xtext.version>
-    <jetty.version>9.4.12.v20180830</jetty.version>
-    <jna.version>4.5.2</jna.version>
-    <nrjavaserial.version>3.15.0.OH2</nrjavaserial.version>
   </properties>
 
   <repositories>
