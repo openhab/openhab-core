@@ -119,7 +119,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
 
         Boolean advanced = valueMap.getBoolean("advanced", false);
         Boolean verify = valueMap.getBoolean("verify", false);
-        Boolean limitToOptions = valueMap.getBoolean("limitToOptions", true);
+        Boolean limitToOptions = valueMap.getBoolean("limitToOptions", false);
         Integer multipleLimit = valueMap.getInteger("multipleLimit");
         String unitLabel = null;
         if (unit == null) {
