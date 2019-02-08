@@ -96,7 +96,7 @@ public class ConfigDescriptionParameter {
     private List<ParameterOption> options = new ArrayList<ParameterOption>();
     private List<FilterCriteria> filterCriteria = new ArrayList<FilterCriteria>();
 
-    private boolean limitToOptions = true;
+    private boolean limitToOptions = false;
     private boolean advanced = false;
     private boolean verify = false;
 
