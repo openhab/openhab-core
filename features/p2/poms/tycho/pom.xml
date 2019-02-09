@@ -238,28 +238,6 @@
         </plugins>
       </build>
     </profile>
-
-    <profile>
-      <id>prepare-next-snapshot</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>tycho-versions-plugin</artifactId>
-            <version>${tycho-version}</version>
-            <executions>
-              <execution>
-                <id>update-version</id>
-                <goals>
-                  <goal>set-version</goal>
-                </goals>
-                <phase>initialize</phase>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
 
 </project>
