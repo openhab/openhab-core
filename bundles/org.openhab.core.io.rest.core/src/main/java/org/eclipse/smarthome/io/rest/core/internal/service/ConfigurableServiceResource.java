@@ -310,10 +310,16 @@ public class ConfigurableServiceResource implements RESTResource {
     private String getServiceId(ServiceReference<?> serviceReference) {
         Object pid = serviceReference.getProperty(Constants.SERVICE_PID);
         if (pid != null) {
-            return (String) pid;
-        } else {
-            return (String) serviceReference.getProperty(ComponentConstants.COMPONENT_NAME);
+            if (pid instanceof String) {
+                return (String) pid;
+            } else {
+                String[] pidArray = (String[]) pid;
+                if (pidArray.length > 0) {
+                    return pidArray[0];
+                }
+            }
         }
+        return (String) serviceReference.getProperty(ComponentConstants.COMPONENT_NAME);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
