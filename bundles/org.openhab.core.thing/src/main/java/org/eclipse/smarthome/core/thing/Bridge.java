@@ -21,10 +21,20 @@ import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
 /**
  * A {@link Bridge} is a {@link Thing} that connects other {@link Thing}s.
  *
- * @author Dennis Nobel - Initial contribution and API
+ * @author Dennis Nobel - Initial contribution
+ * @author Christoph Weitkamp - Added method `getThing(ThingUID)`
  */
 @NonNullByDefault
 public interface Bridge extends Thing {
+
+    /**
+     * Gets the thing for the given UID or null if no thing with the UID exists.
+     *
+     * @param thingUID thing UID
+     * @return the thing for the given UID or null if no thing with the UID exists
+     */
+    @Nullable
+    Thing getThing(ThingUID thingUID);
 
     /**
      * Returns the children of the bridge.
