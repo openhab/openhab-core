@@ -51,13 +51,13 @@
          "outputs":[
            {
                "name":"command",
-               "type":"command",
+               "type":"org.openhab.core.types.Command",
                "description":"the received command",
                "label":"Command"
            },
            {
                "name":"event",
-               "type":"org.eclipse.smarthome.core.events.Event",
+               "type":"org.openhab.core.events.Event",
                "label":"Event",
                "description":"The events which was sent.",
                "reference":"event"
@@ -115,13 +115,13 @@
          "outputs":[
             {
                 "name":"state",
-                "type":"state",
+                "type":"org.openhab.core.types.State",
                 "description":"the item state",
                 "label":"State"
             },
             {
                 "name":"event",
-                "type":"org.eclipse.smarthome.core.events.Event",
+                "type":"org.openhab.core.events.Event",
                 "label":"Event",
                 "description":"The events which was sent.",
                 "reference":"event"
@@ -213,19 +213,19 @@
          "outputs":[
             {
                "name":"newState",
-               "type":"state",
+               "type":"org.openhab.core.types.State",
                "description":"the new item state",
                "label":"New State"
             },
             {
                "name":"oldState",
-               "type":"state",
+               "type":"org.openhab.core.types.State",
                "description":"the old item state",
                "label":"Old State"
             },
             {
                "name":"event",
-               "type":"org.eclipse.smarthome.core.events.Event",
+               "type":"org.openhab.core.events.Event",
                "label":"Event",
                "description":"The events which was sent.",
                "reference":"event"
