@@ -12,6 +12,9 @@
  */
 package org.eclipse.smarthome.model.script.actions;
 
+import java.util.Map;
+
+import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.binding.ThingActions;
 import org.eclipse.smarthome.model.script.internal.engine.action.ThingActionService;
@@ -22,7 +25,7 @@ import org.eclipse.smarthome.model.script.internal.engine.action.ThingActionServ
  *
  * @author Maoliang Huang - Initial contribution
  * @author Kai Kreuzer - Extended for general thing access
- *
+ * @author Christoph Weitkamp - Added methods to retrieve and update thing configurations
  */
 public class Things {
 
@@ -34,6 +37,28 @@ public class Things {
      */
     public static ThingStatusInfo getThingStatusInfo(String thingUid) {
         return ThingActionService.getThingStatusInfo(thingUid);
+    }
+
+    /**
+     * Retrieves the configuration of a Thing
+     *
+     * @param thingUid The uid of the thing
+     * @return a map of configuration parameters
+     */
+    public static Map<String, Object> getThingConfiguration(String thingUid) {
+        return ThingActionService.getThingConfiguration(thingUid);
+    }
+
+    /**
+     * Updates the configuration of a Thing
+     *
+     * @param thingUid The uid of the thing
+     * @param configurationParameters map of changed configuration parameters
+     * @throws ConfigValidationException if one or more of the given configuration parameters do not match their
+     *             declarations in the configuration description
+     */
+    public static void updateThingConfiguration(String thingUid, Map<String, Object> configurationParameters) {
+        ThingActionService.updateThingConfiguration(thingUid, configurationParameters);
     }
 
     /**

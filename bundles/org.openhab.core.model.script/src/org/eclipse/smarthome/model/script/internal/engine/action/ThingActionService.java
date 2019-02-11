@@ -34,7 +34,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Maoliang Huang - Initial contribution
  * @author Kai Kreuzer - Extended for general thing access
- *
+ * @author Christoph Weitkamp - Added methods to retrieve and update thing configurations
  */
 @Component(immediate = true)
 public class ThingActionService implements ActionService {
@@ -69,6 +69,25 @@ public class ThingActionService implements ActionService {
             return thing.getStatusInfo();
         } else {
             return null;
+        }
+    }
+
+    public static Map<String, Object> getThingConfiguration(String thingUid) {
+        Thing thing = thingRegistry.get(new ThingUID(thingUid));
+        Map<String, Object> propertiesMap = new HashMap<>();
+        if (thing != null) {
+            propertiesMap.putAll(thing.getConfiguration().getProperties());
+        }
+        return propertiesMap;
+    }
+
+    public static void updateThingConfiguration(String thingUid, Map<String, Object> configurationParameters) {
+        Thing thing = thingRegistry.get(new ThingUID(thingUid));
+        if (thing != null) {
+            ThingHandler handler = thing.getHandler();
+            if (handler != null) {
+                handler.handleConfigurationUpdate(configurationParameters);
+            }
         }
     }
 
