@@ -312,10 +312,11 @@ public class ConfigurableServiceResource implements RESTResource {
         if (pid != null) {
             if (pid instanceof String) {
                 return (String) pid;
-            } else {
-                String[] pidArray = (String[]) pid;
-                if (pidArray.length > 0) {
-                    return pidArray[0];
+            } else if (pid instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<String> pidList = (List<String>) pid;
+                if (!pidList.isEmpty()) {
+                    return pidList.get(0);
                 }
             }
         }
