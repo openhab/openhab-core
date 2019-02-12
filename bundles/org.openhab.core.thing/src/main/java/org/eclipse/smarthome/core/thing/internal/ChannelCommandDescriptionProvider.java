@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @NonNullByDefault
-@Component(immediate = true)
+@Component
 public class ChannelCommandDescriptionProvider implements CommandDescriptionProvider {
 
     private final Logger logger = LoggerFactory.getLogger(ChannelCommandDescriptionProvider.class);
