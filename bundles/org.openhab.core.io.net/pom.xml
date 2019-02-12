@@ -13,30 +13,6 @@
 
   <name>openHAB Core :: Bundles :: Network I/O</name>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${basedir}/OSGI-INF</directory>
-              <includes>
-                <include>**</include>
-              </includes>
-              <excludes>
-                <exclude>.gitignore</exclude>
-                <exclude>metatype/**</exclude>
-              </excludes>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
