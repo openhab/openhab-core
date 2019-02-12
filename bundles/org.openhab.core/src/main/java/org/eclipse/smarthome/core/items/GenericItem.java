@@ -31,8 +31,12 @@ import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.i18n.UnitProvider;
 import org.eclipse.smarthome.core.items.events.ItemEventFactory;
+import org.eclipse.smarthome.core.service.CommandDescriptionService;
 import org.eclipse.smarthome.core.service.StateDescriptionService;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.CommandDescription;
+import org.eclipse.smarthome.core.types.CommandDescriptionBuilder;
+import org.eclipse.smarthome.core.types.CommandOption;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.StateDescription;
@@ -77,6 +81,8 @@ public abstract class GenericItem implements ActiveItem {
     protected @Nullable String category;
 
     private @Nullable StateDescriptionService stateDescriptionService;
+
+    private @Nullable CommandDescriptionService commandDescriptionService;
 
     protected @Nullable UnitProvider unitProvider;
 
@@ -170,6 +176,7 @@ public abstract class GenericItem implements ActiveItem {
         this.listeners.clear();
         this.eventPublisher = null;
         this.stateDescriptionService = null;
+        this.commandDescriptionService = null;
         this.unitProvider = null;
         this.itemStateConverter = null;
     }
@@ -180,6 +187,10 @@ public abstract class GenericItem implements ActiveItem {
 
     public void setStateDescriptionService(@Nullable StateDescriptionService stateDescriptionService) {
         this.stateDescriptionService = stateDescriptionService;
+    }
+
+    public void setCommandDescriptionService(@Nullable CommandDescriptionService commandDescriptionService) {
+        this.commandDescriptionService = commandDescriptionService;
     }
 
     public void setUnitProvider(@Nullable UnitProvider unitProvider) {
@@ -401,6 +412,23 @@ public abstract class GenericItem implements ActiveItem {
         return null;
     }
 
+    @Override
+    public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
+        if (commandDescriptionService != null) {
+            CommandDescription commandDescription = commandDescriptionService.getCommandDescription(this.name, locale);
+            if (commandDescription != null) {
+                return commandDescription;
+            }
+        }
+
+        StateDescription stateDescription = getStateDescription(locale);
+        if (stateDescription != null && !stateDescription.getOptions().isEmpty()) {
+            return stateOptions2CommandOptions(stateDescription);
+        }
+
+        return null;
+    }
+
     /**
      * Tests if state is within acceptedDataTypes list or a subclass of one of them
      *
@@ -416,6 +444,14 @@ public abstract class GenericItem implements ActiveItem {
     protected void logSetTypeError(State state) {
         logger.error("Tried to set invalid state {} ({}) on item {} of type {}, ignoring it", state,
                 state.getClass().getSimpleName(), getName(), getClass().getSimpleName());
+    }
+
+    private @Nullable CommandDescription stateOptions2CommandOptions(StateDescription stateDescription) {
+        CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
+        stateDescription.getOptions()
+                .forEach(so -> builder.withCommandOption(new CommandOption(so.getValue(), so.getLabel())));
+
+        return builder.build();
     }
 
 }

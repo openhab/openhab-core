@@ -36,6 +36,7 @@ import org.eclipse.smarthome.core.items.ManagedItemProvider;
 import org.eclipse.smarthome.core.items.MetadataRegistry;
 import org.eclipse.smarthome.core.items.RegistryHook;
 import org.eclipse.smarthome.core.items.events.ItemEventFactory;
+import org.eclipse.smarthome.core.service.CommandDescriptionService;
 import org.eclipse.smarthome.core.service.StateDescriptionService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -63,6 +64,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     private final List<RegistryHook<Item>> registryHooks = new CopyOnWriteArrayList<>();
     private StateDescriptionService stateDescriptionService;
+    private CommandDescriptionService commandDescriptionService;
     private MetadataRegistry metadataRegistry;
 
     private UnitProvider unitProvider;
@@ -192,6 +194,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             GenericItem genericItem = (GenericItem) item;
             genericItem.setEventPublisher(getEventPublisher());
             genericItem.setStateDescriptionService(stateDescriptionService);
+            genericItem.setCommandDescriptionService(commandDescriptionService);
             genericItem.setUnitProvider(unitProvider);
             genericItem.setItemStateConverter(itemStateConverter);
         }
@@ -448,6 +451,23 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
         for (Item item : getItems()) {
             ((GenericItem) item).setStateDescriptionService(null);
+        }
+    }
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    public void setCommandDescriptionService(CommandDescriptionService commandDescriptionService) {
+        this.commandDescriptionService = commandDescriptionService;
+
+        for (Item item : getItems()) {
+            ((GenericItem) item).setCommandDescriptionService(commandDescriptionService);
+        }
+    }
+
+    public void unsetCommandDescriptionService(CommandDescriptionService commandDescriptionService) {
+        this.commandDescriptionService = null;
+
+        for (Item item : getItems()) {
+            ((GenericItem) item).setCommandDescriptionService(null);
         }
     }
 

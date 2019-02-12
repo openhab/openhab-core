@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="somebinding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0" xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description.xsd">
+<thing:thing-descriptions bindingId="somebinding"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description.xsd">
 
 	<thing-type id="something">
 
@@ -22,6 +24,12 @@
 		<item-type>Number</item-type>
 		<label>@text/channelLabel</label>
 		<description>@text/channelDescription</description>
+		<command>
+			<options>
+				<option value="ALARM">Alarm</option>
+				<option value="LONG_ALARM" />
+			</options>
+		</command>
 	</channel-type>
 
 	<channel-group-type id="channelgroup-with-i18n">

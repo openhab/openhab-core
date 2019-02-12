@@ -70,6 +70,7 @@
             <xs:element name="category" type="xs:string" minOccurs="0"/>
             <xs:element name="tags" type="thing-description:tags" minOccurs="0"/>
             <xs:element name="state" type="thing-description:state" minOccurs="0"/>
+            <xs:element name="command" type="thing-description:command" minOccurs="0"/>
             <xs:element name="event" type="thing-description:event" minOccurs="0"/>
             <xs:element name="autoUpdatePolicy" type="thing-description:auto-update-policy" minOccurs="0"/>
             <xs:choice minOccurs="0">
@@ -167,6 +168,12 @@
     <xs:complexType name="options">
         <xs:sequence>
             <xs:element name="option" type="thing-description:option" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="command">
+        <xs:sequence>
+            <xs:element name="options" type="thing-description:options" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
 

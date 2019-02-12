@@ -15,6 +15,7 @@ package org.eclipse.smarthome.io.rest.core.item;
 import java.util.Map;
 
 import org.eclipse.smarthome.core.items.dto.ItemDTO;
+import org.eclipse.smarthome.core.types.CommandDescription;
 import org.eclipse.smarthome.core.types.StateDescription;
 
 /**
@@ -31,11 +32,12 @@ public class EnrichedItemDTO extends ItemDTO {
     public String state;
     public String transformedState;
     public StateDescription stateDescription;
+    public CommandDescription commandDescription;
     public Map<String, Object> metadata;
     public boolean editable;
 
     public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String transformedState,
-            StateDescription stateDescription) {
+            StateDescription stateDescription, CommandDescription commandDescription) {
         this.type = itemDTO.type;
         this.name = itemDTO.name;
         this.label = itemDTO.label;
@@ -46,6 +48,7 @@ public class EnrichedItemDTO extends ItemDTO {
         this.state = state;
         this.transformedState = transformedState;
         this.stateDescription = stateDescription;
+        this.commandDescription = commandDescription;
     }
 
 }
