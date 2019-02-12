@@ -31,9 +31,10 @@
 
 ### Start a demo runtime
 
-* Open the project "org.eclispe.smarthome.demo.app"
+* Open the project "org.openhab.core.demo.app"
 * Open the file "app.bndrun"
 * Press "resolve" to resolve the "run requirements" and ensure that all requirements are able to satisfied.
+* Make sure, that the Compiler Compliance Level in Eclipse matches the installed JDK: set it to 8, if there is Java 8 installed
 * Press "Debug OSGi"
 * The Gogo shell should be working, test by executing e.g. "smarthome:items list" or "scr:list"
 * The Classic UI should be accessible by entering the following URL into a browser: http://127.0.0.1:8080/classicui/app
@@ -74,7 +75,7 @@ reintegrate SAT
 
 reintegrate archetype
 
-### Metedata
+### Metadata
 
 recreate "./bundles/io/org.eclipse.smarthome.io.net/OSGI-INF/metatype/org.eclipse.smarthome.io.net.http.internal.WebClientFactoryImpl.xml" using annotations
 
