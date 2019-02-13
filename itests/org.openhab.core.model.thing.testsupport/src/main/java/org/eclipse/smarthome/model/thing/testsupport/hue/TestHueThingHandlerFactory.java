@@ -10,9 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.test.hue;
+package org.eclipse.smarthome.model.thing.testsupport.hue;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -30,8 +32,6 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.core.types.Command;
 import org.osgi.service.component.annotations.Component;
-
-import com.google.common.collect.Sets;
 
 /**
  * @author Benedikt Niehues - Fix ESH Bug 450236
@@ -52,10 +52,13 @@ public class TestHueThingHandlerFactory extends BaseThingHandlerFactory {
     public final static ThingTypeUID THING_TYPE_LONG_NAME = new ThingTypeUID(BINDING_ID,
             "1-thing-id-with-5-dashes_and_3_underscores");
 
-    public final static Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Sets.newHashSet(THING_TYPE_BRIDGE);
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = Sets.newHashSet(THING_TYPE_LCT001, THING_TYPE_SENSOR,
-            THING_TYPE_TEST, THING_TYPE_LONG_NAME, THING_TYPE_GROUPED);
-    public final static Set<ThingTypeUID> SUPPORTED_TYPES = Sets.union(SUPPORTED_BRIDGE_TYPES, SUPPORTED_THING_TYPES);
+    public final static Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Stream.of(THING_TYPE_BRIDGE)
+            .collect(Collectors.toSet());
+    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = Stream
+            .of(THING_TYPE_LCT001, THING_TYPE_SENSOR, THING_TYPE_TEST, THING_TYPE_LONG_NAME, THING_TYPE_GROUPED)
+            .collect(Collectors.toSet());
+    public final static Set<ThingTypeUID> SUPPORTED_TYPES = Stream
+            .concat(SUPPORTED_BRIDGE_TYPES.stream(), SUPPORTED_THING_TYPES.stream()).collect(Collectors.toSet());
 
     // List all channels
     public static final String CHANNEL_COLORTEMPERATURE = "color_temperature";

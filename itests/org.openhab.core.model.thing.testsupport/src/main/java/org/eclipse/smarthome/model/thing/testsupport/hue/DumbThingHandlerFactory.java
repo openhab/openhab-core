@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.test.hue;
+package org.eclipse.smarthome.model.thing.testsupport.hue;
 
 import java.util.Collections;
 import java.util.Set;
