@@ -28,7 +28,7 @@
 
   <build>
     <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>notestsources</testSourceDirectory>
+    <testSourceDirectory>src.moved/test/java</testSourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

@@ -50,6 +50,7 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.eclipse.smarthome.model.core.ModelRepository;
+import org.eclipse.smarthome.model.thing.testsupport.hue.DumbThingHandlerFactory;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;

@@ -173,13 +173,14 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
                 + "LCT001 bulb4 [ lightId = \"3\" ]" //
                 + "}";
         modelRepository.addOrRefreshModel(THINGS_TESTMODEL_NAME, new ByteArrayInputStream(thingsModel.getBytes()));
+        waitForAssert(() -> {
+            assertThat(thingRegistry.getAll().size(), is(3));
+        });
 
         String itemsModel = "Color Light3Color \"Light3 Color\" { channel=\"hue:LCT001:huebridge:bulb3:color\" [ foo=\"bar\", answer=42, always=true ] }"
                 + "Group:Switch:MAX TestSwitches";
         modelRepository.addOrRefreshModel(ITEMS_TESTMODEL_NAME, new ByteArrayInputStream(itemsModel.getBytes()));
-
         waitForAssert(() -> {
-            assertThat(thingRegistry.getAll().size(), is(3));
             assertThat(itemRegistry.getItems().size(), is(2));
             assertThat(itemChannelLinkRegistry.getAll().size(), is(1));
         });

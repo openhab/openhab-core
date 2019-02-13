@@ -13,7 +13,7 @@
 /**
  *
  */
-package org.eclipse.smarthome.model.thing.test.hue;
+package org.eclipse.smarthome.model.thing.testsupport.hue;
 
 import java.net.URI;
 import java.util.Arrays;

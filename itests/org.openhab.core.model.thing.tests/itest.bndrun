@@ -3,7 +3,11 @@
 Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.model.thing
 
--runrequires: bnd.identity;id='org.openhab.core.model.thing.tests'
+-runrequires: \
+	bnd.identity;id='org.openhab.core.model.thing.tests',\
+	bnd.identity;id='org.openhab.core.model.thing.runtime',\
+	bnd.identity;id='org.openhab.core.model.item.runtime',\
+	bnd.identity;id='org.openhab.core.thing.xml'
 
 #
 # done
@@ -25,8 +29,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.apache.felix.configadmin;version='[1.9.8,1.9.9)',\
 	org.apache.felix.http.servlet-api;version='[1.1.2,1.1.3)',\
 	org.apache.felix.scr;version='[2.1.10,2.1.11)',\
-	org.apache.servicemix.bundles.commons-codec;version='[1.3.0,1.3.1)',\
-	org.apache.servicemix.bundles.commons-httpclient;version='[3.1.0,3.1.1)',\
 	org.apache.xbean.bundleutils;version='[4.6.0,4.6.1)',\
 	org.apache.xbean.finder;version='[4.6.0,4.6.1)',\
 	org.eclipse.emf.common;version='[2.12.0,2.12.1)',\
@@ -37,7 +39,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.eclipse.jetty.client;version='[9.4.11,9.4.12)',\
 	org.eclipse.jetty.http;version='[9.4.11,9.4.12)',\
 	org.eclipse.jetty.io;version='[9.4.11,9.4.12)',\
-	org.eclipse.jetty.proxy;version='[9.4.11,9.4.12)',\
 	org.eclipse.jetty.security;version='[9.4.11,9.4.12)',\
 	org.eclipse.jetty.server;version='[9.4.11,9.4.12)',\
 	org.eclipse.jetty.servlet;version='[9.4.11,9.4.12)',\
@@ -58,7 +59,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.objectweb.asm;version='[6.1.1,6.1.2)',\
 	org.objectweb.asm.commons;version='[6.1.1,6.1.2)',\
 	org.objectweb.asm.tree;version='[6.1.1,6.1.2)',\
-	org.openhab.core.compat1x;version='[2.5.0,2.5.1)',\
 	org.ops4j.pax.swissbox.optional.jcl;version='[1.8.2,1.8.3)',\
 	org.ops4j.pax.web.pax-web-api;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-jetty;version='[7.2.3,7.2.4)',\
@@ -72,7 +72,6 @@ Fragment-Host: org.openhab.core.model.thing
 	osgi.enroute.junit.wrapper;version='[4.12.0,4.12.1)',\
 	org.openhab.core;version='[2.5.0,2.5.1)',\
 	org.openhab.core.audio;version='[2.5.0,2.5.1)',\
-	org.openhab.core.compat1x.tests;version='[2.5.0,2.5.1)',\
 	org.openhab.core.config.core;version='[2.5.0,2.5.1)',\
 	org.openhab.core.io.console;version='[2.5.0,2.5.1)',\
 	org.openhab.core.io.http;version='[2.5.0,2.5.1)',\
@@ -87,9 +86,19 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.scheduler;version='[2.5.0,2.5.1)',\
 	org.openhab.core.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
-	org.openhab.core.ui;version='[2.5.0,2.5.1)',\
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
-	org.openhab.core.model.persistence.runtime;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.rule;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.thing;version='[2.5.0,2.5.1)',\
-	org.openhab.core.storage.json;version='[2.5.0,2.5.1)'
+	net.bytebuddy.byte-buddy;version='[1.7.9,1.7.10)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.7.9,1.7.10)',\
+	org.mockito.mockito-core;version='[2.13.0,2.13.1)',\
+	org.objenesis;version='[2.6.0,2.6.1)',\
+	org.openhab.core.model.thing.tests;version='[2.5.0,2.5.1)',\
+	org.openhab.core.test;version='[2.5.0,2.5.1)',\
+	org.openhab.core.model.thing.runtime;version='[2.5.0,2.5.1)',\
+	org.openhab.core.model.item.runtime;version='[2.5.0,2.5.1)',\
+	org.openhab.core.storage.json;version='[2.5.0,2.5.1)',\
+	org.apache.servicemix.bundles.xstream;version='[1.4.7,1.4.8)',\
+	org.openhab.core.config.xml;version='[2.5.0,2.5.1)',\
+	org.openhab.core.thing.xml;version='[2.5.0,2.5.1)',\
+	org.openhab.core.model.thing.testsupport;version='[2.5.0,2.5.1)'

@@ -48,7 +48,8 @@
     <!-- <module>org.openhab.core.model.persistence.tests</module> -->
     <!-- <module>org.openhab.core.model.rule.tests</module> -->
     <!-- <module>org.openhab.core.model.script.tests</module> -->
-    <!-- <module>org.openhab.core.model.thing.tests</module> -->
+    <module>org.openhab.core.model.thing.testsupport</module>
+    <module>org.openhab.core.model.thing.tests</module>
     <!-- <module>org.openhab.core.semantics.tests</module> -->
     <!-- <module>org.openhab.core.storage.json.tests</module> -->
     <module>org.openhab.core.thing.tests</module>
@@ -84,19 +85,6 @@
         <dependency>
           <groupId>org.openhab.core.bom</groupId>
           <artifactId>org.openhab.core.bom.test</artifactId>
-          <type>pom</type>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.openhab.core.bom</groupId>
-          <artifactId>org.openhab.core.bom.openhab-core</artifactId>
-          <version>${project.version}</version>
-          <type>pom</type>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.openhab.core.bom</groupId>
-          <artifactId>org.openhab.core.bom.compile</artifactId>
           <type>pom</type>
           <scope>provided</scope>
         </dependency>
@@ -190,8 +178,16 @@
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.openhab-core</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
       <artifactId>org.openhab.core.bom.compile</artifactId>
       <type>pom</type>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 

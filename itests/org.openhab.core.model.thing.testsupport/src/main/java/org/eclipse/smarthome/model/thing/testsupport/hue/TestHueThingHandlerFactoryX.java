@@ -10,9 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.test.hue;
+package org.eclipse.smarthome.model.thing.testsupport.hue;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.thing.Thing;
@@ -22,8 +24,6 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.ComponentContext;
-
-import com.google.common.collect.Sets;
 
 /**
  * @author Benedikt Niehues - Fix ESH Bug 450236
@@ -38,9 +38,12 @@ public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory impleme
     public final static ThingTypeUID THING_TYPE_LCT001 = new ThingTypeUID(BINDING_ID, "XLCT001");
     public final static ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "XTEST");
 
-    public final static Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Sets.newHashSet(THING_TYPE_BRIDGE);
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = Sets.newHashSet(THING_TYPE_LCT001, THING_TYPE_TEST);
-    public final static Set<ThingTypeUID> SUPPORTED_TYPES = Sets.union(SUPPORTED_BRIDGE_TYPES, SUPPORTED_THING_TYPES);
+    public final static Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Stream.of(THING_TYPE_BRIDGE)
+            .collect(Collectors.toSet());
+    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = Stream.of(THING_TYPE_LCT001, THING_TYPE_TEST)
+            .collect(Collectors.toSet());
+    public final static Set<ThingTypeUID> SUPPORTED_TYPES = Stream
+            .concat(SUPPORTED_BRIDGE_TYPES.stream(), SUPPORTED_THING_TYPES.stream()).collect(Collectors.toSet());
 
     // List all channels
     public static final String CHANNEL_COLORTEMPERATURE = "Xcolor_temperature";
