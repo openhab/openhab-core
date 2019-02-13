@@ -16,9 +16,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -308,19 +311,56 @@ public class ConfigurableServiceResource implements RESTResource {
     }
 
     private String getServiceId(ServiceReference<?> serviceReference) {
+        final String cn = (String) serviceReference.getProperty(ComponentConstants.COMPONENT_NAME);
         Object pid = serviceReference.getProperty(Constants.SERVICE_PID);
-        if (pid != null) {
-            if (pid instanceof String) {
-                return (String) pid;
-            } else if (pid instanceof List) {
-                @SuppressWarnings("unchecked")
-                List<String> pidList = (List<String>) pid;
-                if (!pidList.isEmpty()) {
-                    return pidList.get(0);
-                }
-            }
+        if (pid == null) {
+            return cn;
         }
-        return (String) serviceReference.getProperty(ComponentConstants.COMPONENT_NAME);
+
+        final String serviceId;
+        if (pid instanceof String) {
+            serviceId = (String) pid;
+        } else if (pid instanceof String[]) {
+            final String[] pids = (String[]) pid;
+            serviceId = getServicePID(cn, Arrays.asList(pids));
+        } else if (pid instanceof Collection) {
+            Collection<?> pids = (Collection<?>) pid;
+            serviceId = getServicePID(cn, pids.stream().map(entry -> entry.toString()).collect(Collectors.toList()));
+        } else {
+            logger.warn("The component \"{}\" is using an unhandled service PID type ({}). Use component name.", cn,
+                    pid.getClass());
+            serviceId = cn;
+        }
+        if (serviceId.isEmpty()) {
+            logger.debug("Missing service PID for component \"{}\", use component name.", cn);
+            return cn;
+        } else {
+            return serviceId;
+        }
+    }
+
+    private String getServicePID(final String cn, final List<String> pids) {
+        switch (pids.size()) {
+            case 0:
+                return "";
+            case 1:
+                return pids.get(0);
+            default: // multiple entries
+                final String first = pids.get(0);
+                boolean differences = false;
+                for (int i = 1; i < pids.size(); ++i) {
+                    if (!first.equals(pids.get(i))) {
+                        differences = true;
+                        break;
+                    }
+                }
+                if (differences) {
+                    logger.warn(
+                            "The component \"{}\" is using different service PIDs ({}). Different service PIDs are not supported, the first one ({}) is used.",
+                            cn, pids, first);
+                }
+                return first;
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
