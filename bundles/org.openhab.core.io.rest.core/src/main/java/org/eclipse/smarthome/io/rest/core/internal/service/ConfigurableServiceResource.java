@@ -356,7 +356,7 @@ public class ConfigurableServiceResource implements RESTResource {
                 }
                 if (differences) {
                     logger.warn(
-                            "The component \"{}\" is using different service PIDs ({}). Different service PIDs are not support, the first one ({}) is used.",
+                            "The component \"{}\" is using different service PIDs ({}). Different service PIDs are not supported, the first one ({}) is used.",
                             cn, pids, first);
                 }
                 return first;
