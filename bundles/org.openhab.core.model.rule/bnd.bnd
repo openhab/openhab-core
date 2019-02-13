@@ -34,7 +34,8 @@ Import-Package: \
  org.apache.*,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.eclipse.xtext.xbase.lib,\
- org.joda.*,\
+ org.joda.time,\
+ org.joda.time.base,\
  org.osgi.*,\
  org.quartz.*,\
  org.slf4j.*
