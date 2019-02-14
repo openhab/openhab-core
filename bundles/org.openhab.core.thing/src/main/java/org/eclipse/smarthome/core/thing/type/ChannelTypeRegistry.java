@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  */
 @NonNullByDefault
-@Component(service = ChannelTypeRegistry.class)
+@Component(service = ChannelTypeRegistry.class, immediate = true)
 public class ChannelTypeRegistry {
 
     private final List<ChannelTypeProvider> channelTypeProviders = new CopyOnWriteArrayList<>();
