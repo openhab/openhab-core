@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * This class provides a general mechanism to create thread pools. In general, no code of Eclipse SmartHome
+ * This class provides a general mechanism to create thread pools. In general, no code of openHAB
  * should deal with its own pools, but rather use this class.
  * The created thread pools have named threads, so that it is easy to find them in the debugger. Additionally, it is
  * possible to configure the pool sizes through the configuration admin service, so that solutions have the chance to

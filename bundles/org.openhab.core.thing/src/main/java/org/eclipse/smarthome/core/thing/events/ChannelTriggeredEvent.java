@@ -16,7 +16,7 @@ import org.eclipse.smarthome.core.events.AbstractEvent;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 
 /**
- * {@link ChannelTriggeredEvent}s can be used to deliver triggers through the Eclipse SmartHome event bus.
+ * {@link ChannelTriggeredEvent}s can be used to deliver triggers through the openHAB event bus.
  * Trigger events must be created with the {@link ThingEventFactory}.
  *
  * @author Moritz Kammerer - Initial contribution

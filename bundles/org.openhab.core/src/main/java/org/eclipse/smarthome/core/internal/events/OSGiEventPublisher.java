@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * The {@link OSGiEventPublisher} provides an OSGi based default implementation of the Eclipse SmartHome event
+ * The {@link OSGiEventPublisher} provides an OSGi based default implementation of the openHAB event
  * publisher.
  *
  * Events are send in an asynchronous way via OSGi Event Admin mechanism.

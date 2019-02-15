@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Bundle activator for Eclipse SmartHome SSE bundle.
+ * Bundle activator for openHAB SSE bundle.
  *
  * @author Ivan Iliev - Initial Contribution and API
  *

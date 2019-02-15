@@ -61,7 +61,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 
 /**
- * This class is the core of the Eclipse SmartHome rule engine.
+ * This class is the core of the openHAB rule engine.
  * It listens to changes to the rules folder, evaluates the trigger conditions of the rules and
  * schedules them for execution dependent on their triggering conditions.
  *

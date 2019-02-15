@@ -31,7 +31,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
 
 /**
  * <p>
- * This interface defines the core features of an Eclipse SmartHome item.
+ * This interface defines the core features of an openHAB item.
  *
  * <p>
  * Item instances are used for all stateful services and are especially important for the {@link ItemRegistry}.

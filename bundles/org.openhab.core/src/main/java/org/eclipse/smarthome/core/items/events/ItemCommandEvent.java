@@ -16,7 +16,7 @@ import org.eclipse.smarthome.core.events.AbstractEvent;
 import org.eclipse.smarthome.core.types.Command;
 
 /**
- * {@link ItemCommandEvent}s can be used to deliver commands through the Eclipse SmartHome event bus.
+ * {@link ItemCommandEvent}s can be used to deliver commands through the openHAB event bus.
  * Command events must be created with the {@link ItemEventFactory}.
  * 
  * @author Stefan Bußweiler - Initial contribution

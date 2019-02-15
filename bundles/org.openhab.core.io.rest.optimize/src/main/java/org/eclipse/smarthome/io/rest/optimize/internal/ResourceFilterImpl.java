@@ -65,7 +65,7 @@ public class ResourceFilterImpl implements ResourceFilter {
     private static final String[] WHITELIST = new String[] {
             // JAX-RS
             "javax.ws.rs.ext.MessageBodyReader", "javax.ws.rs.ext.MessageBodyWriter",
-            // Eclipse SmartHome
+            // openHAB
             "org.eclipse.smarthome.io.rest.internal.filter.ProxyFilter",
             "org.eclipse.smarthome.io.rest.internal.resources.RootResource",
             "org.eclipse.smarthome.io.rest.JSONResponse$ExceptionMapper", "org.eclipse.smarthome.io.rest.RESTResource",

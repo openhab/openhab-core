@@ -13,7 +13,7 @@
 package org.eclipse.smarthome.core.events;
 
 /**
- * The {@link EventPublisher} posts {@link Event}s through the Eclipse SmartHome event bus in an asynchronous way.
+ * The {@link EventPublisher} posts {@link Event}s through the openHAB event bus in an asynchronous way.
  * Posted events can be received by implementing the {@link EventSubscriber} callback interface.
  *
  * @author Stefan Bußweiler - Initial contribution

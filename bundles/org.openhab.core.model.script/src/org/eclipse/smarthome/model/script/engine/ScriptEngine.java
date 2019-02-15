@@ -15,7 +15,7 @@ package org.eclipse.smarthome.model.script.engine;
 import org.eclipse.xtext.xbase.XExpression;
 
 /**
- * The script engine is the main entrypoint for Eclipse SmartHome script use. It can build {@link Script} instances from
+ * The script engine is the main entrypoint for openHAB script use. It can build {@link Script} instances from
  * simple strings. These scripts can then be executed by the caller.
  *
  * @author Kai Kreuzer - Initial contribution and API

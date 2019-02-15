@@ -1,6 +1,6 @@
 FORMAT: 1A
 
-# Eclipse SmartHome UI Logging Bundle
+# openHAB UI Logging Bundle
 
 This Bundle provides a resource at the REST API to enable a consumer to fetch the set log levels.
 It also receives log messages which will be logged to the server's log.

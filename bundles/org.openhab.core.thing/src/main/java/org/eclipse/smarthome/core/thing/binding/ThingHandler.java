@@ -28,7 +28,7 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 
 /**
- * A {@link ThingHandler} handles the communication between the Eclipse SmartHome framework and an entity from the real
+ * A {@link ThingHandler} handles the communication between the openHAB framework and an entity from the real
  * world, e.g. a physical device, a web service, etc. represented by a {@link Thing}.
  * <p>
  * The communication is bidirectional. The framework informs a thing handler about commands, state and configuration

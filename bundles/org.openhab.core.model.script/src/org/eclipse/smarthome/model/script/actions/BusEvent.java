@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The static methods of this class are made available as functions in the scripts.
- * This gives direct write access to the Eclipse SmartHome event bus from within scripts.
+ * This gives direct write access to the openHAB event bus from within scripts.
  * Items should not be updated directly (setting the state property), but updates should
  * be sent to the bus, so that all interested bundles are notified.
  *

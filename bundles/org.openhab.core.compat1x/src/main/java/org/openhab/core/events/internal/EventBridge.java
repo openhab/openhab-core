@@ -37,7 +37,7 @@ import org.osgi.service.event.EventHandler;
 
 /**
  * This class acts as a bridge between events from openHAB 1.x (using "openhab" as a topic prefix) and
- * Eclipse SmartHome (using "smarthome" as a topic prefix).
+ * openHAB (using "smarthome" as a topic prefix).
  * It simply duplicates events with an updated topic prefix and works both ways.
  *
  * @author Kai Kreuzer - Initial contribution and API

@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handle Eclipse SmartHome events encapsulated by OSGi events.
+ * Handle openHAB events encapsulated by OSGi events.
  *
  * @author Markus Rathgeb - Initial contribution
  */

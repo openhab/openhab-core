@@ -17,7 +17,7 @@ import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 
 /**
- * A {@link BridgeHandler} handles the communication between the Eclipse SmartHome framework and
+ * A {@link BridgeHandler} handles the communication between the openHAB framework and
  * a <i>bridge</i> (a device that acts as a gateway to enable the communication with other devices)
  * represented by a {@link Bridge} instance.
  * <p>

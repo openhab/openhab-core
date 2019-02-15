@@ -576,7 +576,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     /**
-     * This method can be used in order to post events through the Eclipse SmartHome events bus. A common
+     * This method can be used in order to post events through the openHAB events bus. A common
      * use case is to notify event subscribers about the {@link Rule}'s status change.
      *
      * @param ruleUID the UID of the {@link Rule}, whose status is changed.

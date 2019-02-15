@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handle Eclipse SmartHome events encapsulated by OSGi events in a separate thread.
+ * Handle openHAB events encapsulated by OSGi events in a separate thread.
  *
  * @author Markus Rathgeb - Initial contribution
  */
