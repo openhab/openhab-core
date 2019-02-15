@@ -13,7 +13,7 @@
 package org.eclipse.smarthome.core.events;
 
 /**
- * The {@link TopicEventFilter} is a default Eclipse SmartHome {@link EventFilter} implementation that ensures filtering
+ * The {@link TopicEventFilter} is a default openHAB {@link EventFilter} implementation that ensures filtering
  * of events based on an event topic.
  * 
  * @author Stefan Bußweiler - Initial contribution

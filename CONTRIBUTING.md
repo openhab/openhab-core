@@ -2,13 +2,10 @@
 
 Warning: Note that this is most likely not the project you are looking for.
 
-openHAB mainly consist out of the core components from Eclipse SmartHome (https://github.com/eclipse/smarthome),
-extensions that are openHAB1-compatible from https://github.com/openhab/openhab and extensions that are 
-openHAB2-compatible from https://github.com/openhab/openhab2. All is then packaged into a distribution in
+openHAB mainly consist out of the core components, extensions that are openHAB1-compatible from
+https://github.com/openhab/openhab1-addons and extensions that are openHAB2-compatible from
+https://github.com/openhab/openhab2-addons. All is then packaged into a distribution in
 https://github.com/openhab/openhab-distro.
-
-This project here only contains a few bundles of the core runtime that are openHAB specific and thus not contained
-in the Eclipse SmartHome project.
 
 ## Contribution guidelines
 

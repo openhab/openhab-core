@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.event.EventHandler;
 
 /**
- * The {@link OSGiEventManager} provides an OSGi based default implementation of the Eclipse SmartHome event bus.
+ * The {@link OSGiEventManager} provides an OSGi based default implementation of the openHAB event bus.
  *
  * The OSGiEventHandler tracks {@link EventSubscriber}s and {@link EventFactory}s, receives OSGi events (by
  * implementing the OSGi {@link EventHandler} interface) and dispatches the received OSGi events as ESH {@link Event}s

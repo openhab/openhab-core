@@ -17,7 +17,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.ThingUID;
 
 /**
- * {@link ThingStatusInfoEvent}s will be delivered through the Eclipse SmartHome event bus if the status of a thing has
+ * {@link ThingStatusInfoEvent}s will be delivered through the openHAB event bus if the status of a thing has
  * been updated. Thing status info objects must be created with the {@link ThingEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution

@@ -16,7 +16,7 @@ import org.eclipse.smarthome.core.events.AbstractEvent;
 import org.eclipse.smarthome.core.types.State;
 
 /**
- * {@link ItemStateChangedEvent}s can be used to deliver item state changes through the Eclipse SmartHome event bus. In
+ * {@link ItemStateChangedEvent}s can be used to deliver item state changes through the openHAB event bus. In
  * contrast to the {@link ItemStateEvent} the {@link ItemStateChangedEvent} is only sent if the state changed.
  * State events must be created with the {@link ItemEventFactory}.
  *

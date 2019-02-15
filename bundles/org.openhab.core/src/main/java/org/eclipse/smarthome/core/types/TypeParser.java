@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * This is a helper class that helps parsing a string into an Eclipse SmartHome type (state or command).
+ * This is a helper class that helps parsing a string into an openHAB type (state or command).
  *
  * @author Kai Kreuzer - Initial contribution and API
  *

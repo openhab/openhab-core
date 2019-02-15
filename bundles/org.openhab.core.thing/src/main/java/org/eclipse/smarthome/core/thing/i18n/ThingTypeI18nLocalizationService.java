@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This OSGi service could be used to localize a {@link ThingType} using the I18N mechanism of the Eclipse SmartHome
+ * This OSGi service could be used to localize a {@link ThingType} using the I18N mechanism of the openHAB
  * framework.
  *
  * @author Markus Rathgeb - Move code from XML thing type provider to separate service

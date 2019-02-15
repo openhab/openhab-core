@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * This discovery service is intended to be used by bindings that support USB devices, but do not directly talk to the
  * USB devices but rather use a serial port for the communication, where the serial port is provided by an operating
- * system driver outside the scope of Eclipse SmartHome. Examples for such USB devices are USB dongles that provide
+ * system driver outside the scope of openHAB. Examples for such USB devices are USB dongles that provide
  * access to wireless networks, like, e.g., Zigbeee or Zwave dongles.
  * <p/>
  * This discovery service provides functionality for discovering added and removed USB devices and the corresponding

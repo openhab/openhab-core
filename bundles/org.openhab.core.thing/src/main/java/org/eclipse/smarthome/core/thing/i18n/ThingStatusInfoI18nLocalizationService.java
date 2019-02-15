@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * <p>
  * The {@link ThingStatusInfoI18nLocalizationService} can be used to localize the {@link ThingStatusInfo} of a thing
- * using the I18N mechanism of the Eclipse SmartHome framework. Currently the description of the {@link ThingStatusInfo}
+ * using the I18N mechanism of the openHAB framework. Currently the description of the {@link ThingStatusInfo}
  * is the single attribute which can be localized.
  *
  * <p>

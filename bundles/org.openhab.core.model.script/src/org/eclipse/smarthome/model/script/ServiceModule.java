@@ -27,7 +27,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 
 /**
- * Guice module that binds Eclipse SmartHome services
+ * Guice module that binds openHAB services
  *
  * @author Simon Kaufmann - initial contribution and API.
  *

@@ -23,7 +23,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * The {@link SseEventSubscriber} is responsible for broadcasting Eclipse SmartHome events
+ * The {@link SseEventSubscriber} is responsible for broadcasting openHAB events
  * to currently listening SSE clients.
  *
  * @author Stefan Bußweiler - Initial contribution

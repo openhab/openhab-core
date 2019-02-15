@@ -625,7 +625,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
     }
 
     /**
-     * This method can be used in a subclass in order to post events through the Eclipse SmartHome events bus. A common
+     * This method can be used in a subclass in order to post events through the openHAB events bus. A common
      * use case is to notify event subscribers about an element which has been added/removed/updated to the registry.
      *
      * @param event the event

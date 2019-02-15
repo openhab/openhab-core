@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link EventSubscriber} defines the callback interface for receiving events from
- * the Eclipse SmartHome event bus.
+ * the openHAB event bus.
  *
  * @author Stefan Bußweiler - Initial contribution
  */
@@ -49,7 +49,7 @@ public interface EventSubscriber {
     EventFilter getEventFilter();
 
     /**
-     * Callback method for receiving {@link Event}s from the Eclipse SmartHome event bus. This method is called for
+     * Callback method for receiving {@link Event}s from the openHAB event bus. This method is called for
      * every event where the event subscriber is subscribed to and the event filter applies.
      *
      * @param event the received event (not null)

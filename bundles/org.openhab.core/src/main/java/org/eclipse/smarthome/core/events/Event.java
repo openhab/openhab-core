@@ -13,7 +13,7 @@
 package org.eclipse.smarthome.core.events;
 
 /**
- * {@link Event} objects are delivered by the {@link EventPublisher} through the Eclipse SmartHome event bus.
+ * {@link Event} objects are delivered by the {@link EventPublisher} through the openHAB event bus.
  * The callback interface {@link EventSubscriber} can be implemented in order to receive such events.
  * 
  * @author Stefan Bußweiler - Initial contribution

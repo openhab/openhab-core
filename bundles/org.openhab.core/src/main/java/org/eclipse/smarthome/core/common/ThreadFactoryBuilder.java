@@ -98,7 +98,7 @@ public class ThreadFactoryBuilder {
      * incremented with each new thread, initialized to 1. If set to null, threads are named 'name-i'.
      * <p>
      * Defaults to the name prefix 'ESH'. Setting a name prefix different than the default one is intended to be used by
-     * solutions integrating Eclipse SmartHome.
+     * solutions integrating openHAB.
      *
      * @param namePrefix The name prefix (can be null)
      * @return this {@link ThreadFactoryBuilder} instance

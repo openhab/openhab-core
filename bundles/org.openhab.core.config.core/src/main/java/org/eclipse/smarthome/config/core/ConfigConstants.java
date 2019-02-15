@@ -13,7 +13,7 @@
 package org.eclipse.smarthome.config.core;
 
 /**
- * This class provides constants relevant for the configuration of Eclipse SmartHome
+ * This class provides constants relevant for the configuration of openHAB
  *
  * @author Kai Kreuzer - Initial contribution and API
  *
