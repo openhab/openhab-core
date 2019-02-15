@@ -1,0 +1,51 @@
+<archetype-descriptor xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd"
+	name="openHAB Binding Archetype" partial="false">
+
+	<requiredProperties>
+		<requiredProperty key="vendorName">
+			<defaultValue>openHAB</defaultValue>
+		</requiredProperty>
+		<requiredProperty key="namespace">
+			<defaultValue>org.openhab</defaultValue>
+		</requiredProperty>
+		<requiredProperty key="author">
+		</requiredProperty>
+        <requiredProperty key="githubUser">
+        </requiredProperty>
+		<requiredProperty key="bindingId">
+		</requiredProperty>
+		<requiredProperty key="bindingIdCamelCase">
+		</requiredProperty>
+		<requiredProperty key="startYear">
+			<defaultValue>2010</defaultValue>
+		</requiredProperty>
+	</requiredProperties>
+
+	<fileSets>
+		<fileSet filtered="true" packaged="false" encoding="UTF-8">
+			<directory></directory>
+			<includes>
+				<include>NOTICE</include>
+				<include>pom.xml</include>
+				<include>.project</include>
+				<include>.classpath</include>
+				<include>README.md</include>
+			</includes>
+		</fileSet>
+		<fileSet filtered="true" packaged="false" encoding="UTF-8">
+			<directory>src/main/resources/ESH-INF</directory>
+			<includes>
+				<include>**/*.*</include>
+			</includes>
+		</fileSet>
+		<!-- Java files -->
+		<fileSet filtered="true" packaged="true" encoding="UTF-8">
+			<directory>src/main/java</directory>
+			<includes>
+				<include>**/*.java</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</archetype-descriptor>

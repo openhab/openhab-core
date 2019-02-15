@@ -774,7 +774,7 @@ Import-Package: \\
     <module>demo</module>
     <module>bundles</module>
     <module>features</module>
-    <!--<module>tools</module> -->
+    <module>tools</module>
   </modules>
 
 </project>
