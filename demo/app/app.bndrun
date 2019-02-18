@@ -1,6 +1,6 @@
 -standalone: \
     ../../bom/runtime-index/target/index.xml;name="org.openhab.core.bom.runtime-index",\
-    ../../bom/openhab-core-index/target/index.xml;name="org.openhab.core.bom.openhab-core-index"
+    ../../bom/openhab-core-index/target/local-index.xml;name="org.openhab.core.bom.openhab-core-index"
 
 -resolve.effective: active
 
