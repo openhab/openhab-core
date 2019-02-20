@@ -98,8 +98,10 @@ public class FolderObserver extends AbstractWatchService {
     protected void removeModelParser(ModelParser modelParser) {
         parsers.remove(modelParser.getExtension());
 
-        Set<String> removed = modelRepo.removeAllModelsOfType(modelParser.getExtension());
-        ignoredFiles.addAll(removed.stream().map(name -> nameFileMap.get(name)).collect(Collectors.toSet()));
+        if (modelRepo != null) {
+            Set<String> removed = modelRepo.removeAllModelsOfType(modelParser.getExtension());
+            ignoredFiles.addAll(removed.stream().map(name -> nameFileMap.get(name)).collect(Collectors.toSet()));
+        }
     }
 
     @Activate
