@@ -95,7 +95,10 @@ public class SmartHomeUnits extends AbstractSystemOfUnits {
             new AlternateUnit<Intensity>(Units.WATT.divide(Units.SQUARE_METRE), "W/m2"));
     public static final Unit<Intensity> MICROWATT_PER_SQUARE_CENTIMETRE = addUnit(
             new TransformedUnit<>(IRRADIANCE, new RationalConverter(BigInteger.valueOf(100), BigInteger.valueOf(1))));
-
+    public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(
+            new TransformedUnit<>("mm/h", Units.KILOMETRE_PER_HOUR, new RationalConverter(1l, 1000000l)));
+    public static final Unit<Speed> INCHES_PER_HOUR = addUnit(
+            new TransformedUnit<>("in/h", ImperialUnits.MILES_PER_HOUR, new RationalConverter(1l, 63360l)));
     public static final Unit<Dimensionless> ONE = addUnit(AbstractUnit.ONE);
 
     public static final Unit<ElectricCurrent> AMPERE = addUnit(Units.AMPERE);
@@ -145,6 +148,7 @@ public class SmartHomeUnits extends AbstractSystemOfUnits {
     public static final Unit<Energy> WATT_SECOND = addUnit(new ProductUnit<Energy>(Units.WATT.multiply(Units.SECOND)));
     public static final Unit<Energy> WATT_HOUR = addUnit(new ProductUnit<Energy>(Units.WATT.multiply(Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
+    public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
     public static final Unit<Pressure> MILLIMETRE_OF_MERCURY = addUnit(new TransformedUnit<>("mmHg", Units.PASCAL,
             new RationalConverter(BigInteger.valueOf(133322368), BigInteger.valueOf(1000000))));
     public static final Unit<Pressure> BAR = addUnit(new TransformedUnit<>("bar", Units.PASCAL,
@@ -178,6 +182,7 @@ public class SmartHomeUnits extends AbstractSystemOfUnits {
         SimpleUnitFormat.getInstance().label(WATT_SECOND, "Ws");
         SimpleUnitFormat.getInstance().label(WATT_HOUR, "Wh");
         SimpleUnitFormat.getInstance().label(KILOWATT_HOUR, "kWh");
+        SimpleUnitFormat.getInstance().label(MEGAWATT_HOUR, "MWh");
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
         SimpleUnitFormat.getInstance().label(BAR, BAR.getSymbol());
         SimpleUnitFormat.getInstance().label(MILLIBAR, "mbar");

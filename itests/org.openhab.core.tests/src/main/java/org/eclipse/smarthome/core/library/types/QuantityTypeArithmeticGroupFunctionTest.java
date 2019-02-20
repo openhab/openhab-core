@@ -20,6 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.measure.Quantity;
+import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Power;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
@@ -190,6 +191,21 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<Temperature>("100 °C"), state);
+    }
+
+    @Test
+    public void testMaxFunctionQuantityTypeOnDimensionless() {
+        items.add(createNumberItem("TestItem1", Dimensionless.class, new QuantityType<Temperature>("48 %")));
+        items.add(createNumberItem("TestItem2", Dimensionless.class, new QuantityType<Temperature>("36 %")));
+        items.add(createNumberItem("TestItem3", Dimensionless.class, new QuantityType<Temperature>("0 %")));
+        items.add(createNumberItem("TestItem4", Dimensionless.class, new QuantityType<Temperature>("48 %")));
+        items.add(createNumberItem("TestItem5", Dimensionless.class, new QuantityType<Temperature>("0 %")));
+        items.add(createNumberItem("TestItem6", Dimensionless.class, new QuantityType<Temperature>("0 %")));
+
+        function = new QuantityTypeArithmeticGroupFunction.Max(Dimensionless.class);
+        State state = function.calculate(items);
+
+        assertEquals(new QuantityType<Dimensionless>("48 %"), state);
     }
 
     @Test
