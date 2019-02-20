@@ -437,11 +437,6 @@
                   <source>true</source>
                 </artifact>
                 <artifact>
-                  <id>org.openhab.core.bundles:org.openhab.core.ui.dashboard:${project.version}</id>
-                  <transitive>false</transitive>
-                  <source>true</source>
-                </artifact>
-                <artifact>
                   <id>org.openhab.core.bundles:org.openhab.core.ui.icon:${project.version}</id>
                   <transitive>false</transitive>
                   <source>true</source>
