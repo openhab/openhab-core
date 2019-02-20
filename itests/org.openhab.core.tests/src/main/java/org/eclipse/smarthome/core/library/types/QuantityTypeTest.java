@@ -22,6 +22,7 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Pressure;
+import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.smarthome.core.library.dimension.Density;
@@ -279,5 +280,17 @@ public class QuantityTypeTest {
         QuantityType<Pressure> pressure = new QuantityType<>("1013 mbar");
         assertEquals("1.013 bar", pressure.toUnit("bar").toString());
         assertEquals("101300 Pa", pressure.toUnit("Pa").toString());
+    }
+
+    @Test
+    public void testMWh() {
+        QuantityType<Energy> energy = new QuantityType<>("1 MWh");
+        assertEquals("1000000 Wh", energy.toUnit("Wh").toString());
+    }
+
+    @Test
+    public void testRainfallRate() {
+        QuantityType<Speed> rate = new QuantityType<>("3 mm/h");
+        assertEquals("0.1181102362204724409448818897637795 in/h", rate.toUnit("in/h").toString());
     }
 }
