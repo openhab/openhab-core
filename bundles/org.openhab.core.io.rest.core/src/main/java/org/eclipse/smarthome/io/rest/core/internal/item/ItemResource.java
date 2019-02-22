@@ -267,7 +267,7 @@ public class ItemResource implements RESTResource {
             dto.editable = isEditable(dto.name);
             return JSONResponse.createResponse(Status.OK, dto, null);
         } else {
-            logger.info("Received HTTP GET request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP GET request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             return getItemNotFoundResponse(itemname);
         }
     }
@@ -301,7 +301,7 @@ public class ItemResource implements RESTResource {
             // return JSONResponse.createResponse(Status.OK, item.getState().toString(), null);
             return Response.ok(item.getState().toFullString()).build();
         } else {
-            logger.info("Received HTTP GET request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP GET request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             return getItemNotFoundResponse(itemname);
         }
     }
@@ -341,7 +341,7 @@ public class ItemResource implements RESTResource {
             }
         } else {
             // Item does not exist
-            logger.info("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             return getItemNotFoundResponse(itemname);
         }
     }
@@ -388,7 +388,7 @@ public class ItemResource implements RESTResource {
                 return Response.status(Status.BAD_REQUEST).build();
             }
         } else {
-            logger.info("Received HTTP POST request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP POST request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             throw new WebApplicationException(404);
         }
     }
@@ -477,7 +477,7 @@ public class ItemResource implements RESTResource {
             @ApiResponse(code = 404, message = "Item not found or item is not editable.") })
     public Response removeItem(@PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname) {
         if (managedItemProvider.remove(itemname) == null) {
-            logger.info("Received HTTP DELETE request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP DELETE request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             return Response.status(Status.NOT_FOUND).build();
         }
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
@@ -495,7 +495,7 @@ public class ItemResource implements RESTResource {
         Item item = getItem(itemname);
 
         if (item == null) {
-            logger.info("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             return Response.status(Status.NOT_FOUND).build();
         }
 
@@ -521,7 +521,7 @@ public class ItemResource implements RESTResource {
         Item item = getItem(itemname);
 
         if (item == null) {
-            logger.info("Received HTTP DELETE request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP DELETE request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             return Response.status(Status.NOT_FOUND).build();
         }
 
@@ -553,7 +553,7 @@ public class ItemResource implements RESTResource {
         Item item = getItem(itemname);
 
         if (item == null) {
-            logger.info("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             return Response.status(Status.NOT_FOUND).build();
         }
 
@@ -590,7 +590,7 @@ public class ItemResource implements RESTResource {
         Item item = getItem(itemname);
 
         if (item == null) {
-            logger.info("Received HTTP DELETE request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
+            logger.warn("Received HTTP DELETE request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
             return Response.status(Status.NOT_FOUND).build();
         }
 
