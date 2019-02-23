@@ -600,6 +600,17 @@ Import-Package: \\
       </modules>
     </profile>
     <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>release</name>
+        </property>
+      </activation>
+      <modules>
+        <module>itests</module>
+      </modules>
+    </profile>
+    <profile>
       <id>with-bnd-resolver-resolve</id>
       <activation>
         <property>
