@@ -30,6 +30,9 @@
     <bundle dependency="true">mvn:commons-lang/commons-lang/2.6</bundle>
     <!--<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>-->
 
+    <!-- JBBP -->
+    <bundle dependency="true">mvn:com.igormaznitsa/jbbp/1.4.1</bundle>
+
     <!-- Measurement -->
     <bundle dependency="true">mvn:javax.measure/unit-api/1.0</bundle>
     <bundle dependency="true">mvn:tec.uom/uom-se/1.0.8</bundle>
