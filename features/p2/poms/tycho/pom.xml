@@ -41,8 +41,8 @@
 
     <!-- Eclipse p2 repository -->
     <repository>
-      <id>eclipse-oxygen</id>
-      <url>http://download.eclipse.org/releases/oxygen/201709271000</url>
+      <id>eclipse-photon</id>
+      <url>http://download.eclipse.org/releases/photon</url>
       <layout>p2</layout>
     </repository>
   </repositories>
