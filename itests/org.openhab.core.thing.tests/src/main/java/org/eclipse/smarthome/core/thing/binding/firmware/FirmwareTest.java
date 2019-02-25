@@ -78,6 +78,9 @@ public class FirmwareTest extends JavaOSGiTest {
     private static final Firmware v2dot0dot0 = FirmwareBuilder.create(thingTypeUID, "2.0.0")
             .withPrerequisiteVersion(v1dot11_2dasha.getVersion()).build();
 
+    private static final Firmware hex1 = FirmwareBuilder.create(thingTypeUID, "0xA1.0xB2.0xC3").build();
+    private static final Firmware hex2 = FirmwareBuilder.create(thingTypeUID, "0Xa1.0Xb3.0Xc3").build();
+
     private static final Firmware combined1 = FirmwareBuilder.create(thingTypeUID, "1.2.3-2.3.4").build();
     private static final Firmware combined2 = FirmwareBuilder.create(thingTypeUID, "1.2.3-2.4.1").build();
     private static final Firmware combined3 = FirmwareBuilder.create(thingTypeUID, "1.3.1-2.3.4").build();
@@ -164,6 +167,9 @@ public class FirmwareTest extends JavaOSGiTest {
 
         assertThat(combined4.isSuccessorVersion(combined3.getVersion()), is(true));
         assertThat(combined3.isSuccessorVersion(combined4.getVersion()), is(false));
+
+        assertThat(hex2.isSuccessorVersion(hex1.getVersion()), is(true));
+        assertThat(hex1.isSuccessorVersion(hex2.getVersion()), is(false));
 
         assertThat(combined3.isSuccessorVersion(combined2.getVersion()), is(true));
         assertThat(combined2.isSuccessorVersion(combined3.getVersion()), is(false));

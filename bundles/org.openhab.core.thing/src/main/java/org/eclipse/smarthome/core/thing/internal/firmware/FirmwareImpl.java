@@ -284,8 +284,8 @@ public final class FirmwareImpl implements Firmware {
                 String partA = i < parts.length ? parts[i] : null;
                 String partB = i < theVersion.parts.length ? theVersion.parts[i] : null;
 
-                Integer intA = partA != null && isInt(partA) ? Integer.parseInt(partA) : NO_INT;
-                Integer intB = partB != null && isInt(partB) ? Integer.parseInt(partB) : NO_INT;
+                Integer intA = parsePartString(partA);
+                Integer intB = parsePartString(partB);
 
                 if (intA != NO_INT && intB != NO_INT) {
                     if (intA < intB) {
@@ -312,8 +312,30 @@ public final class FirmwareImpl implements Firmware {
             return 0;
         }
 
-        private boolean isInt(String s) {
+        private Integer parsePartString(String partAsString) {
+            Integer part;
+            if (partAsString == null) {
+                part = NO_INT;
+            } else if (isDecimalInt(partAsString)) {
+                part = Integer.parseInt(partAsString);
+            } else if (isHexInt(partAsString)) {
+                part = Integer.parseInt(removeHexPrefix(partAsString), 16);
+            } else {
+                part = NO_INT;
+            }
+            return part;
+        }
+
+        private boolean isDecimalInt(String s) {
             return s.matches("^-?\\d+$");
+        }
+
+        private boolean isHexInt(String s) {
+            return s.matches("^0[xX][0-9a-fA-F]+$");
+        }
+
+        private String removeHexPrefix(String part) {
+            return part.substring(2);
         }
 
         @Override
