@@ -64,6 +64,8 @@ feature.openhab-model-runtime-all: \
 	osgi.console.enable.builtin=false,\
 	logback.configurationFile=file:${.}/logback.xml
 
+-runblacklist: bnd.identity;id='org.apache.aries.javax.jax.rs-api'
+
 #
 # done
 #
