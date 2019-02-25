@@ -21,47 +21,303 @@
   </properties>
 
   <dependencies>
+    <!-- BEG: Slightly modified EnRoute implementation index artifacts -->
+
+    <!-- The OSGi framework RI is Equinox -->
     <dependency>
-      <groupId>org.osgi.enroute</groupId>
-      <artifactId>impl-index</artifactId>
-      <version>7.0.0</version>
-      <type>pom</type>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+      <version>3.13.100</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Declarative Services -->
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+      <version>2.1.10</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.apache.felix.http.jetty</artifactId>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>animal-sniffer-annotations</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
 
+    <!-- Configuration Admin -->
     <dependency>
-      <groupId>org.osgi.enroute</groupId>
-      <artifactId>debug-bundles</artifactId>
-      <version>7.0.0</version>
-      <type>pom</type>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configadmin</artifactId>
+      <version>1.9.8</version>
       <scope>compile</scope>
     </dependency>
 
-    <!-- BEG: logging -->
+    <!-- Metatype -->
+    <dependency>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.equinox.metatype</artifactId>
+      <version>1.4.500</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.metatype</artifactId>
+      <version>1.4.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Event Admin -->
+    <dependency>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.equinox.event</artifactId>
+      <version>1.4.300</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.event</artifactId>
+      <version>1.4.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Log Stream Service -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.log</artifactId>
+      <version>1.4.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.equinox.log.stream</artifactId>
+      <version>1.0.100</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Http Servlet 3.1 API with contract -->
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.http.servlet-api</artifactId>
+      <version>1.1.2</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.tomcat</groupId>
+          <artifactId>tomcat-servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- JAX-RS Whiteboard -->
+    <dependency>
+      <groupId>org.apache.aries.jax.rs</groupId>
+      <artifactId>org.apache.aries.jax.rs.whiteboard</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- JAX-RS 2.1 API with contract -->
+    <dependency>
+      <groupId>org.apache.aries.spec</groupId>
+      <artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- JAX-B 2.2 API -->
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxb-api-2.2</artifactId>
+      <version>2.9.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Java-Activation 1.1 API -->
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
+      <version>2.9.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Stax 1.2 API -->
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.stax-api-1.2</artifactId>
+      <version>2.9.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- JAX-WS 2.2 API -->
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxws-api-2.2</artifactId>
+      <version>2.9.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- SAAJ 1.3 API -->
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.saaj-api-1.3</artifactId>
+      <version>2.9.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- OSGi Function -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.util.function</artifactId>
+      <version>1.1.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- OSGi Promise -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.util.promise</artifactId>
+      <version>1.1.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- OSGi PushStream -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.util.pushstream</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- OSGi Converter -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.util.converter</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- OSGi Transaction Control -->
+    <dependency>
+      <groupId>org.apache.aries.tx-control</groupId>
+      <artifactId>tx-control-service-xa</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.aries.tx-control</groupId>
+      <artifactId>tx-control-provider-jdbc-xa</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.aries.tx-control</groupId>
+      <artifactId>tx-control-provider-jpa-xa</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- OSGi Configurator -->
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configurator</artifactId>
+      <version>1.0.6</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- OSGi JPA Service -->
+    <dependency>
+      <groupId>org.apache.aries.jpa</groupId>
+      <artifactId>org.apache.aries.jpa.container</artifactId>
+      <version>2.7.0</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.aries.jpa.javax.persistence</groupId>
+          <artifactId>javax.persistence_2.0</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- Used heavily in conjunction with JDBC -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.jdbc</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Several implementations need to log using SLF4J -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
+      <version>1.7.25</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.3</version>
       <scope>compile</scope>
     </dependency>
+
+    <!-- END: Slightly modified EnRoute implementation index artifacts -->
+
+
+    <!-- BEG: Slightly modified EnRoute debug tools index artifacts -->
+
+    <!-- The Web Console -->
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole</artifactId>
+      <version>4.3.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.webconsole.plugins.ds</artifactId>
+      <version>2.0.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.inventory</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+
+    <!-- The Gogo Shell -->
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.shell</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>1.0.10</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.command</artifactId>
+      <version>1.0.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.osgi</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.osgi</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- END: Slightly modified EnRoute debug tools index artifacts -->
+
+    <!-- BEG: logging -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.log</artifactId>

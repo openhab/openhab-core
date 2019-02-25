@@ -71,8 +71,6 @@ feature.openhab-model-runtime-all: \
 #
 
 -runbundles: \
-	ch.qos.logback.classic;version='[1.2.0,1.2.1)',\
-	ch.qos.logback.core;version='[1.2.0,1.2.1)',\
 	com.eclipsesource.jaxrs.jersey-all;version='[2.22.2,2.22.3)',\
 	com.eclipsesource.jaxrs.publisher;version='[5.3.1,5.3.2)',\
 	com.google.guava;version='[15.0.0,15.0.1)',\
@@ -138,7 +136,6 @@ feature.openhab-model-runtime-all: \
 	org.ops4j.pax.web.pax-web-spi;version='[7.2.3,7.2.4)',\
 	org.osgi.service.event;version='[1.4.0,1.4.1)',\
 	org.osgi.service.metatype;version='[1.4.0,1.4.1)',\
-	slf4j.api;version='[1.7.21,1.7.22)',\
 	tec.uom.lib.uom-lib-common;version='[1.0.2,1.0.3)',\
 	tec.uom.se;version='[1.0.8,1.0.9)',\
 	com.google.gson;version='[2.7.0,2.7.1)',\
@@ -179,4 +176,7 @@ feature.openhab-model-runtime-all: \
 	org.openhab.core.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.thing.xml;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
-	org.openhab.core.voice;version='[2.5.0,2.5.1)'
+	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
+	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
+	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
+	slf4j.api;version='[1.7.25,1.7.26)'
