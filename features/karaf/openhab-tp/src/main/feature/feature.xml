@@ -108,14 +108,11 @@
   </feature>
 
   <feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
-    <capability>openhab.tp;feature=jupnp;version=2.5.1</capability>
+    <capability>openhab.tp;feature=jupnp;version=2.5.2</capability>
     <feature dependency="true">http</feature>
     <feature dependency="true">scr</feature>
     <feature dependency="true">openhab.tp-httpclient</feature>
-    <bundle>mvn:org.jupnp/org.jupnp/2.5.1</bundle>
-    <capability>
-      osgi.service;objectClass:List&lt;String&gt;=org.jupnp.UpnpService
-    </capability>
+    <bundle>mvn:org.jupnp/org.jupnp/2.5.2</bundle>
   </feature>
 
   <feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
