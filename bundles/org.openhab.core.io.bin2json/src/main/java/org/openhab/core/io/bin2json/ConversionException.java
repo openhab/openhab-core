@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.io.bin2json;
+package org.openhab.core.io.bin2json;
 
 /**
  * {@link ConversionException} generic exception for errors which occurs during conversion.

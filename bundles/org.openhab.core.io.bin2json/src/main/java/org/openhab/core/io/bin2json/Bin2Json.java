@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.io.bin2json;
+package org.openhab.core.io.bin2json;
 
 import java.io.IOException;
 import java.io.InputStream;
