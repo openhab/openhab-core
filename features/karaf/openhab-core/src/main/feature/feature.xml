@@ -460,6 +460,10 @@
     </config>
   </feature>
 
+  <feature name="openhab-bin2json" description="Binary to JSON converter" version="${project.version}">
+    <feature>openhab-core-io-bin2json</feature>
+  </feature>
+  
   <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
     <bundle start-level="20">mvn:org.openhab.core.bundles/org.openhab.core.io.jetty.certificate/${project.version}</bundle>
   </feature>
