@@ -425,7 +425,10 @@
     <requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
     <feature dependency="true">openhab.tp-commons-net</feature>
     <feature>openhab-core-base</feature>
+<<<<<<< Upstream, based on origin/master
     <feature>openhab-core-ephemeris</feature>
+=======
+>>>>>>> fb4604f Removed bin2json from runtime-base
     <feature>openhab-core-io-console-karaf</feature>
     <feature>openhab-core-io-rest-sitemap</feature>
     <feature>openhab-core-io-rest-voice</feature>
