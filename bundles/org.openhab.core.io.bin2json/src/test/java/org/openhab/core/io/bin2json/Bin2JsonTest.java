@@ -23,7 +23,7 @@ import org.junit.Test;
 import com.google.gson.JsonObject;
 
 /**
- * Integration tests for {@link Bin2Json}.
+ * Unit tests for {@link Bin2Json}.
  *
  * @author Pauli Anttila - Initial contribution
  */

@@ -73,12 +73,13 @@ public class Bin2Json {
 
     private final Logger logger = LoggerFactory.getLogger(Bin2Json.class);
 
-    private JBBPParser parser;
+    private final JBBPParser parser;
 
     /**
+     * Constructor.
      *
-     * @param parserRule Binary data parser rule
-     * @throws ConversionException
+     * @param parserRule Binary data parser rule.
+     * @throws ConversionException if parse rule parsing fails.
      */
     public Bin2Json(String parserRule) throws ConversionException {
         try {
@@ -91,9 +92,9 @@ public class Bin2Json {
     /**
      * Convert {@link String} in hexadecimal string format to JSON object.
      *
-     * @param hexString Data in hexadecimal string format. Example data: 03FAFF
-     * @return Gson {@link JsonObject}
-     * @throws ConversionException
+     * @param hexString Data in hexadecimal string format. Example data: 03FAFF.
+     * @return Gson {@link JsonObject}.
+     * @throws ConversionException if an error occurs during conversion.
      */
     public JsonObject convert(String hexString) throws ConversionException {
         try {
@@ -107,8 +108,8 @@ public class Bin2Json {
      * Convert byte array to JSON object.
      *
      * @param data Data in byte array format.
-     * @return Gson {@link JsonObject}
-     * @throws ConversionException
+     * @return Gson {@link JsonObject}.
+     * @throws ConversionException if an error occurs during conversion.
      */
     public JsonObject convert(byte[] data) throws ConversionException {
         try {
@@ -123,9 +124,9 @@ public class Bin2Json {
     /**
      * Convert data from {@link InputStream} to JSON object.
      *
-     * @param inputStream
-     * @return Gson {@link JsonObject}
-     * @throws ConversionException
+     * @param inputStream input stream where converted data is read.
+     * @return Gson {@link JsonObject}.
+     * @throws ConversionException if an error occurs during conversion.
      */
     public JsonObject convert(InputStream inputStream) throws ConversionException {
         try {
@@ -143,7 +144,7 @@ public class Bin2Json {
             final JsonObject json = convertToJSon(data);
             if (logger.isTraceEnabled()) {
                 Duration duration = Duration.between(start, LocalDateTime.now());
-                logger.trace("Conversion time={}, json={}", duration, json.toString());
+                logger.trace("Conversion time={}, json={}", duration, json);
             }
             return json;
         } catch (JBBPException e) {
