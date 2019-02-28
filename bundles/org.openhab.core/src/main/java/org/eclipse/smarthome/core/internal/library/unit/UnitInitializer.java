@@ -14,6 +14,7 @@ package org.eclipse.smarthome.core.internal.library.unit;
 
 import org.eclipse.smarthome.core.library.unit.ImperialUnits;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
+import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 
 /**
  * Make sure static blocks from {@link SIUnits} & {@link ImperialUnits} are executed to initialize the unit parser.
@@ -24,6 +25,7 @@ import org.eclipse.smarthome.core.library.unit.SIUnits;
 public class UnitInitializer {
 
     static {
+        SmartHomeUnits.getInstance();
         SIUnits.getInstance();
         ImperialUnits.getInstance();
     }

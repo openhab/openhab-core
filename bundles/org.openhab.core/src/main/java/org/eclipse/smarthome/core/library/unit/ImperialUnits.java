@@ -23,6 +23,7 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import tec.uom.se.AbstractSystemOfUnits;
 import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.function.AddConverter;
 import tec.uom.se.function.MultiplyConverter;
@@ -38,27 +39,9 @@ import tec.uom.se.unit.Units;
  *
  */
 @NonNullByDefault
-public class ImperialUnits extends SmartHomeUnits {
+public final class ImperialUnits extends AbstractSystemOfUnits {
 
     private static final ImperialUnits INSTANCE = new ImperialUnits();
-
-    private ImperialUnits() {
-        // avoid external instantiation
-    }
-
-    @Override
-    public String getName() {
-        return ImperialUnits.class.getSimpleName();
-    }
-
-    /**
-     * Returns the unique instance of this class.
-     *
-     * @return the Units instance.
-     */
-    public static SystemOfUnits getInstance() {
-        return INSTANCE;
-    }
 
     /** Additionally defined units to be used in ESH **/
 
@@ -77,25 +60,24 @@ public class ImperialUnits extends SmartHomeUnits {
 
     public static final Unit<Length> FOOT = addUnit(
             new TransformedUnit<>("ft", ImperialUnits.INCH, new MultiplyConverter(12.0)));
-    
+
     public static final Unit<Length> YARD = addUnit(
             new TransformedUnit<>("yd", ImperialUnits.FOOT, new MultiplyConverter(3.0)));
-    
+
     public static final Unit<Length> CHAIN = addUnit(
             new TransformedUnit<>("ch", ImperialUnits.YARD, new MultiplyConverter(22.0)));
-    
+
     public static final Unit<Length> FURLONG = addUnit(
             new TransformedUnit<>("fur", ImperialUnits.CHAIN, new MultiplyConverter(10.0)));
 
     public static final Unit<Length> MILE = addUnit(
             new TransformedUnit<>("mi", ImperialUnits.FURLONG, new MultiplyConverter(8.0)));
-    
+
     public static final Unit<Length> LEAGUE = addUnit(
             new TransformedUnit<>("lea", ImperialUnits.MILE, new MultiplyConverter(3.0)));
-    
+
     public static final Unit<Length> SQUARE_FOOT = addUnit(new ProductUnit<>(FOOT.multiply(FOOT)));
     public static final Unit<Length> CUBIC_FOOT = addUnit(new ProductUnit<>(SQUARE_FOOT.multiply(FOOT)));
-    
 
     /**
      * Add unit symbols for imperial units.
@@ -111,6 +93,24 @@ public class ImperialUnits extends SmartHomeUnits {
         SimpleUnitFormat.getInstance().label(FURLONG, FURLONG.getSymbol());
         SimpleUnitFormat.getInstance().label(MILE, MILE.getSymbol());
         SimpleUnitFormat.getInstance().label(LEAGUE, LEAGUE.getSymbol());
+    }
+
+    private ImperialUnits() {
+        // avoid external instantiation
+    }
+
+    @Override
+    public String getName() {
+        return ImperialUnits.class.getSimpleName();
+    }
+
+    /**
+     * Returns the unique instance of this class.
+     *
+     * @return the Units instance.
+     */
+    public static SystemOfUnits getInstance() {
+        return INSTANCE;
     }
 
     /**

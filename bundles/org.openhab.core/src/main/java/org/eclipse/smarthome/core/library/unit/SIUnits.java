@@ -24,6 +24,7 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import tec.uom.se.AbstractSystemOfUnits;
 import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.unit.Units;
 
@@ -35,9 +36,18 @@ import tec.uom.se.unit.Units;
  *
  */
 @NonNullByDefault
-public class SIUnits extends SmartHomeUnits {
+public final class SIUnits extends AbstractSystemOfUnits {
 
     private static final SIUnits INSTANCE = new SIUnits();
+
+    public static final Unit<Temperature> CELSIUS = addUnit(Units.CELSIUS);
+    public static final Unit<Speed> KILOMETRE_PER_HOUR = addUnit(Units.KILOMETRE_PER_HOUR);
+    public static final Unit<Length> METRE = addUnit(Units.METRE);
+    public static final Unit<Mass> KILOGRAM = addUnit(Units.KILOGRAM);
+    public static final Unit<Mass> GRAM = addUnit(Units.GRAM);
+    public static final Unit<Area> SQUARE_METRE = addUnit(Units.SQUARE_METRE);
+    public static final Unit<Volume> CUBIC_METRE = addUnit(Units.CUBIC_METRE);
+    public static final Unit<Pressure> PASCAL = addUnit(Units.PASCAL);
 
     private SIUnits() {
         // avoid external instantiation
@@ -56,15 +66,6 @@ public class SIUnits extends SmartHomeUnits {
     public static SystemOfUnits getInstance() {
         return INSTANCE;
     }
-
-    public static final Unit<Temperature> CELSIUS = addUnit(Units.CELSIUS);
-    public static final Unit<Speed> KILOMETRE_PER_HOUR = addUnit(Units.KILOMETRE_PER_HOUR);
-    public static final Unit<Length> METRE = addUnit(Units.METRE);
-    public static final Unit<Mass> KILOGRAM = addUnit(Units.KILOGRAM);
-    public static final Unit<Mass> GRAM = addUnit(Units.GRAM);
-    public static final Unit<Area> SQUARE_METRE = addUnit(Units.SQUARE_METRE);
-    public static final Unit<Volume> CUBIC_METRE = addUnit(Units.CUBIC_METRE);
-    public static final Unit<Pressure> PASCAL = addUnit(Units.PASCAL);
 
     /**
      * Adds a new unit not mapped to any specified quantity type.
