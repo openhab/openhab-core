@@ -115,6 +115,7 @@
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
   </feature>
 
+<<<<<<< Upstream, based on origin/master
   <feature name="openhab-core-ephemeris" version="${project.version}">
     <requirement>openhab.tp;filter:="(feature=jollyday)"</requirement>
     <feature dependency="true">openhab.tp-jollyday</feature>
@@ -127,6 +128,9 @@
   </feature>
 
   <feature name="openhab-core-io-bin2json" version="${project.version}">
+=======
+  <feature name="openhab-core-io-bin2json" description="Binary to JSON converter" version="${project.version}">
+>>>>>>> 004719c Fixed features again
     <feature>openhab-core-base</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.bin2json/${project.version}</bundle>
     <requirement>openhab.tp;filter:="(feature=jbbp)"</requirement>
@@ -426,9 +430,13 @@
     <feature dependency="true">openhab.tp-commons-net</feature>
     <feature>openhab-core-base</feature>
 <<<<<<< Upstream, based on origin/master
+<<<<<<< Upstream, based on origin/master
     <feature>openhab-core-ephemeris</feature>
 =======
 >>>>>>> fb4604f Removed bin2json from runtime-base
+=======
+    <feature>openhab-core-io-bin2json</feature>
+>>>>>>> 004719c Fixed features again
     <feature>openhab-core-io-console-karaf</feature>
     <feature>openhab-core-io-rest-sitemap</feature>
     <feature>openhab-core-io-rest-voice</feature>
@@ -460,10 +468,6 @@
     </config>
   </feature>
 
-  <feature name="openhab-bin2json" description="Binary to JSON converter" version="${project.version}">
-    <feature>openhab-core-io-bin2json</feature>
-  </feature>
-  
   <feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
     <bundle start-level="20">mvn:org.openhab.core.bundles/org.openhab.core.io.jetty.certificate/${project.version}</bundle>
   </feature>
