@@ -56,7 +56,9 @@ import org.eclipse.smarthome.core.library.dimension.VolumetricFlowRate;
 import tec.uom.se.AbstractSystemOfUnits;
 import tec.uom.se.AbstractUnit;
 import tec.uom.se.format.SimpleUnitFormat;
+import tec.uom.se.function.ExpConverter;
 import tec.uom.se.function.LogConverter;
+import tec.uom.se.function.MultiplyConverter;
 import tec.uom.se.function.PiMultiplierConverter;
 import tec.uom.se.function.RationalConverter;
 import tec.uom.se.unit.AlternateUnit;
@@ -79,6 +81,8 @@ public final class SmartHomeUnits extends AbstractSystemOfUnits {
 
     // Alphabetical ordered by Unit.
     public static final Unit<Acceleration> METRE_PER_SQUARE_SECOND = addUnit(Units.METRE_PER_SQUARE_SECOND);
+    public static final Unit<Acceleration> STANDARD_GRAVITY = new TransformedUnit<>("gₙ",
+            SmartHomeUnits.METRE_PER_SQUARE_SECOND, new MultiplyConverter(9.80665));
     public static final Unit<AmountOfSubstance> MOLE = addUnit(Units.MOLE);
     public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(new TransformedUnit<AmountOfSubstance>("°dH",
             (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE),
@@ -123,6 +127,8 @@ public final class SmartHomeUnits extends AbstractSystemOfUnits {
     public static final Unit<MagneticFlux> WEBER = addUnit(Units.WEBER);
     public static final Unit<MagneticFluxDensity> TESLA = addUnit(Units.TESLA);
     public static final Unit<Power> WATT = addUnit(Units.WATT);
+    public static final Unit<Power> DECIBEL_MILLIWATTS = new TransformedUnit<>("dBm",
+            MetricPrefix.MILLI(SmartHomeUnits.WATT), new ExpConverter(10.0).concatenate(new MultiplyConverter(0.1)));
     public static final Unit<Pressure> MILLIMETRE_OF_MERCURY = addUnit(new TransformedUnit<>("mmHg", Units.PASCAL,
             new RationalConverter(BigInteger.valueOf(133322368), BigInteger.valueOf(1000000))));
     public static final Unit<Pressure> BAR = addUnit(new TransformedUnit<>("bar", Units.PASCAL,
@@ -169,6 +175,7 @@ public final class SmartHomeUnits extends AbstractSystemOfUnits {
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_MINUTE, "m³/min");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_SECOND, "m³/s");
         SimpleUnitFormat.getInstance().label(DECIBEL, "dB");
+        SimpleUnitFormat.getInstance().label(DECIBEL_MILLIWATTS, "dBm");
         SimpleUnitFormat.getInstance().label(DEGREE_ANGLE, "°");
         SimpleUnitFormat.getInstance().label(DEUTSCHE_HAERTE, "°dH");
         SimpleUnitFormat.getInstance().label(DOBSON_UNIT, "DU");
@@ -182,6 +189,7 @@ public final class SmartHomeUnits extends AbstractSystemOfUnits {
         SimpleUnitFormat.getInstance().label(MILLIBAR, "mbar");
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
         SimpleUnitFormat.getInstance().label(PARTS_PER_MILLION, "ppm");
+        SimpleUnitFormat.getInstance().label(STANDARD_GRAVITY, "gₙ");
         SimpleUnitFormat.getInstance().label(WATT_HOUR, "Wh");
         SimpleUnitFormat.getInstance().label(WATT_SECOND, "Ws");
     }

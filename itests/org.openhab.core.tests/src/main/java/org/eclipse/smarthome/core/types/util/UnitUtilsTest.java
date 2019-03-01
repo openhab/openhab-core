@@ -14,6 +14,7 @@ package org.eclipse.smarthome.core.types.util;
 
 import static org.eclipse.smarthome.core.library.unit.MetricPrefix.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
 
 import javax.measure.Quantity;
@@ -60,6 +61,12 @@ public class UnitUtilsTest {
 
         Class<? extends Quantity<?>> intensity = UnitUtils.parseDimension("Intensity");
         assertTrue(Intensity.class.isAssignableFrom(intensity));
+    }
+
+    @Test
+    public void testConversionOfUnit() {
+        assertThat(SmartHomeUnits.DECIBEL_MILLIWATTS.getConverterTo(SmartHomeUnits.WATT).convert(50), closeTo(100, 3));
+        assertThat(SmartHomeUnits.WATT.getConverterTo(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1), closeTo(20, 3));
     }
 
     @Test
