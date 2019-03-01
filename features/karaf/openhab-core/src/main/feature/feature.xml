@@ -518,7 +518,7 @@
     <bundle>mvn:p2.osgi.bundle/com.google.gson/2.8.2.v20180104-1110</bundle>
     <bundle>mvn:com.google.guava/guava/18.0</bundle>
     <requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
-    <feature dependency="true">openhab.tp-commons-net</feature>    
+    <feature dependency="true">openhab.tp-commons-net</feature>
     <feature>openhab-core-base</feature>
     <feature>openhab-core-io-console-karaf</feature>
     <feature>openhab-core-io-rest-sitemap</feature>
@@ -539,8 +539,8 @@
     <feature prerequisite="true">shell</feature>
     <feature prerequisite="true">wrapper</feature>
     <!-- This bundle needs to be started early as it registers the 404 and startup pages on Jetty -->
-    <!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422
-    <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
+    <!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422 -->
+    <!-- <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
     <bundle start-level="90">mvn:org.openhab.core.bundles/org.openhab.core.boot/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.karaf/${project.version}</bundle>
     <config name="org.eclipse.smarthome.audio">
@@ -567,10 +567,17 @@
     <feature>openhab-core-model-script</feature>
     <feature>openhab-core-model-sitemap</feature>
     <feature>openhab-core-ui</feature>
+
+    <!-- Allow to add external dependencies here instead in the target platform. -->
+    <!-- The compat1x feature is a special one to get old OH1 running. -->
+    <!-- We do not want to pollute the normal target platform with such legacy dependencies. -->
     <bundle dependency="true">mvn:commons-net/commons-net/3.3</bundle>
     <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-httpclient/3.1_7</bundle>
     <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.2.3</bundle>
     <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.2.3</bundle>
+    <bundle>mvn:org.codehaus.jackson/jackson-core-asl/1.9.2</bundle>
+    <bundle>mvn:org.codehaus.jackson/jackson-mapper-asl/1.9.2</bundle>
+
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.compat1x/${project.version}</bundle>
   </feature>
 
