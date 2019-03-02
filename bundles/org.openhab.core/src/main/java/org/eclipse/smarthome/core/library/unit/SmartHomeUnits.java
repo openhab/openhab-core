@@ -53,7 +53,6 @@ import org.eclipse.smarthome.core.library.dimension.Density;
 import org.eclipse.smarthome.core.library.dimension.Intensity;
 import org.eclipse.smarthome.core.library.dimension.VolumetricFlowRate;
 
-import tec.uom.se.AbstractSystemOfUnits;
 import tec.uom.se.AbstractUnit;
 import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.function.ExpConverter;
@@ -75,7 +74,7 @@ import tec.uom.se.unit.Units;
  *
  */
 @NonNullByDefault
-public final class SmartHomeUnits extends AbstractSystemOfUnits {
+public final class SmartHomeUnits extends CustomUnits {
 
     private static final SmartHomeUnits INSTANCE = new SmartHomeUnits();
 
@@ -196,11 +195,6 @@ public final class SmartHomeUnits extends AbstractSystemOfUnits {
 
     private SmartHomeUnits() {
         // avoid external instantiation
-    }
-
-    @Override
-    public String getName() {
-        return SmartHomeUnits.class.getSimpleName();
     }
 
     /**
