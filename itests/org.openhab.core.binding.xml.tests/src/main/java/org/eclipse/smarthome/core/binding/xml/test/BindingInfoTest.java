@@ -25,8 +25,6 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.core.binding.BindingInfo;
 import org.eclipse.smarthome.core.binding.BindingInfoRegistry;
-import org.eclipse.smarthome.test.BundleCloseable;
-import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +40,7 @@ public class BindingInfoTest extends JavaOSGiTest {
 
     private BindingInfoRegistry bindingInfoRegistry;
     private ConfigDescriptionRegistry configDescriptionRegistry;
+    private BindingInstaller bindingInstaller;
 
     @Before
     public void setUp() {
@@ -49,19 +48,13 @@ public class BindingInfoTest extends JavaOSGiTest {
         assertThat(bindingInfoRegistry, is(notNullValue()));
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
         assertThat(configDescriptionRegistry, is(notNullValue()));
+        bindingInstaller = new BindingInstaller(this::waitForAssert, bindingInfoRegistry, bundleContext);
     }
 
     @Test
     public void assertThatBindingInfoIsReadProperly() throws Exception {
-        int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
-            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
             BindingInfo bindingInfo = bindingInfos.iterator().next();
             assertThat(bindingInfo.getUID(), is("hue"));
             assertThat(bindingInfo.getConfigDescriptionURI(), is(URI.create("binding:hue")));
@@ -69,20 +62,13 @@ public class BindingInfoTest extends JavaOSGiTest {
                     is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
             assertThat(bindingInfo.getName(), is("hue Binding"));
             assertThat(bindingInfo.getAuthor(), is("Deutsche Telekom AG"));
-        }
+        });
     }
 
     @Test
     public void assertThatBindingInfoWithoutAuthorIsReadProperly() throws Exception {
-        int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME2))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME2, () -> {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
-            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
             BindingInfo bindingInfo = bindingInfos.iterator().next();
             assertThat(bindingInfo.getUID(), is("hue"));
             assertThat(bindingInfo.getConfigDescriptionURI(), is(URI.create("binding:hue")));
@@ -90,47 +76,13 @@ public class BindingInfoTest extends JavaOSGiTest {
                     is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
             assertThat(bindingInfo.getName(), is("hue Binding"));
             assertThat(bindingInfo.getAuthor(), is((String) null));
-        }
-    }
-
-    @Test
-    public void assertThatBindingInfoIsRemovedAfterTheBundleWasUninstalled() throws Exception {
-        int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
-
-        Set<BindingInfo> bindingInfos;
-        BindingInfo bindingInfo;
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
-            bindingInfos = bindingInfoRegistry.getBindingInfos();
-            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
-            bindingInfo = bindingInfos.iterator().next();
-        }
-
-        bindingInfos = bindingInfoRegistry.getBindingInfos();
-        assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos));
-
-        if (initialNumberOfBindingInfos > 0) {
-            for (BindingInfo bindingInfo_ : bindingInfos) {
-                assertThat(bindingInfo_.getUID(), is(not(bindingInfo.getUID())));
-            }
-        }
+        });
     }
 
     @Test
     public void assertThatConfigWithOptionsAndFilterAreProperlyRead() throws Exception {
-        int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos();
-            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
             URI configDescriptionURI = bindingInfo.getConfigDescriptionURI();
@@ -151,6 +103,6 @@ public class BindingInfoTest extends JavaOSGiTest {
                     lightParameter.getFilterCriteria().stream().map(p -> p.toString())
                             .collect(Collectors.joining(", ")),
                     is("FilterCriteria [name=\"tags\", value=\"alarm, light\"], FilterCriteria [name=\"type\", value=\"color\"], FilterCriteria [name=\"binding-id\", value=\"hue\"]"));
-        }
+        });
     }
 }
