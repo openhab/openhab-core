@@ -23,7 +23,6 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import tec.uom.se.AbstractSystemOfUnits;
 import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.function.AddConverter;
 import tec.uom.se.function.MultiplyConverter;
@@ -39,7 +38,7 @@ import tec.uom.se.unit.Units;
  *
  */
 @NonNullByDefault
-public final class ImperialUnits extends AbstractSystemOfUnits {
+public final class ImperialUnits extends CustomUnits {
 
     private static final ImperialUnits INSTANCE = new ImperialUnits();
 
@@ -97,11 +96,6 @@ public final class ImperialUnits extends AbstractSystemOfUnits {
 
     private ImperialUnits() {
         // avoid external instantiation
-    }
-
-    @Override
-    public String getName() {
-        return ImperialUnits.class.getSimpleName();
     }
 
     /**

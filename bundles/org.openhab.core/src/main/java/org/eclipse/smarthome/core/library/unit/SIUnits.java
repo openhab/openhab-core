@@ -24,7 +24,6 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import tec.uom.se.AbstractSystemOfUnits;
 import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.unit.Units;
 
@@ -36,7 +35,7 @@ import tec.uom.se.unit.Units;
  *
  */
 @NonNullByDefault
-public final class SIUnits extends AbstractSystemOfUnits {
+public final class SIUnits extends CustomUnits {
 
     private static final SIUnits INSTANCE = new SIUnits();
 
@@ -49,13 +48,13 @@ public final class SIUnits extends AbstractSystemOfUnits {
     public static final Unit<Volume> CUBIC_METRE = addUnit(Units.CUBIC_METRE);
     public static final Unit<Pressure> PASCAL = addUnit(Units.PASCAL);
 
-    private SIUnits() {
-        // avoid external instantiation
+    static {
+        // Override the default unit symbol ℃ to better support TTS and UIs:
+        SimpleUnitFormat.getInstance().label(CELSIUS, "°C");
     }
 
-    @Override
-    public String getName() {
-        return this.getClass().getSimpleName();
+    private SIUnits() {
+        // avoid external instantiation
     }
 
     /**
@@ -76,10 +75,5 @@ public final class SIUnits extends AbstractSystemOfUnits {
     private static <U extends Unit<?>> U addUnit(U unit) {
         INSTANCE.units.add(unit);
         return unit;
-    }
-
-    static {
-        // Override the default unit symbol ℃ to better support TTS and UIs:
-        SimpleUnitFormat.getInstance().label(CELSIUS, "°C");
     }
 }
