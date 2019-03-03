@@ -29,7 +29,7 @@ Import-Package: \
  org.eclipse.smarthome.model.persistence.extensions,\
  org.eclipse.smarthome.model.script,\
  org.eclipse.smarthome.model.script.engine.action,\
- com.google.common.base,\
+ com.google.common.base;version="14",\
  javax.measure,\
  org.apache.commons.io,\
  org.apache.commons.lang,\
