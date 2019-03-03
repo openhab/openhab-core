@@ -29,15 +29,17 @@ Import-Package: \
  org.eclipse.smarthome.model.persistence.extensions,\
  org.eclipse.smarthome.model.script,\
  org.eclipse.smarthome.model.script.engine.action,\
- com.google.common.*;version="14",\
- javax.measure.*,\
- org.apache.*,\
+ com.google.common.base,\
+ javax.measure,\
+ org.apache.commons.io,\
+ org.apache.commons.lang,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.eclipse.xtext.xbase.lib,\
  org.joda.time,\
  org.joda.time.base,\
  org.osgi.*,\
- org.quartz.*,\
+ org.quartz,\
+ org.quartz.impl,\
  org.slf4j.*
 Require-Bundle: org.antlr.runtime,\
  org.eclipse.emf.common,\
