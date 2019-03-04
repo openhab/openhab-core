@@ -332,6 +332,7 @@ public class ConfigDescriptionParameter {
      * - week: A week [0-52] 
      * - tel: A tel no
      * - url: A web address
+     * - location: A lat,long,alt GPS location. A user-interface would probably render a world map for selection.
      * - tag: One tag or multiple tags separated by comma.
      * - item: A valid item "name". A user-interface would probably show an item selection widget.
      * - thing: A valid thing UID. A user-interface would probably show a thing selection widget.
