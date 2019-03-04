@@ -23,8 +23,6 @@ import java.util.Set;
 import org.eclipse.smarthome.core.binding.BindingInfo;
 import org.eclipse.smarthome.core.binding.BindingInfoRegistry;
 import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.test.BundleCloseable;
-import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,71 +34,52 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
     private static final String TEST_BUNDLE_NAME = "yahooweather.bundle";
 
     private BindingInfoRegistry bindingInfoRegistry;
+    private BindingInstaller bindingInstaller;
 
     @Before
     public void setUp() {
         bindingInfoRegistry = getService(BindingInfoRegistry.class);
         assertThat(bindingInfoRegistry, is(notNullValue()));
+        bindingInstaller = new BindingInstaller(this::waitForAssert, bindingInfoRegistry, bundleContext);
     }
 
     @Test
     public void assertBindingInfosWereLocalizedInGerman() throws Exception {
-        int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(Locale.GERMAN);
-            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));
             assertThat(bindingInfo.getName(), is("Yahoo Wetter Binding"));
             assertThat(bindingInfo.getDescription(), is(
                     "Das Yahoo Wetter Binding stellt verschiedene Wetterdaten wie die Temperatur, die Luftfeuchtigkeit und den Luftdruck für konfigurierbare Orte vom yahoo Wetterdienst bereit"));
-        }
+        });
     }
 
     @Test
     public void assertBindingInfosWereLocalizedInDutch() throws Exception {
-        int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(new Locale("nl"));
-            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));
             assertThat(bindingInfo.getName(), is("Yahoo Weer Binding"));
             assertThat(bindingInfo.getDescription(), is(
                     "De Yahoo Weer Binding biedt verschillende meteorologische gegevens zoals temperatuur, vochtigheid en luchtdruk voor configureerbare locaties uit yahoo weerdienst klaar"));
-        }
+        });
     }
 
     @Test
     public void assertUsingOriginalBindingInfosIfProvidedLocaleIsNotSupported() throws Exception {
-        int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(Locale.FRENCH);
-            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));
             assertThat(bindingInfo.getName(), is("YahooWeather Binding"));
             assertThat(bindingInfo.getDescription(), is(
                     "The Yahoo Weather Binding requests the Yahoo Weather Service to show the current temperature, humidity and pressure."));
-        }
+        });
     }
 
     @Test
@@ -117,22 +96,15 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
         LocaleProvider localeProvider = getService(LocaleProvider.class);
         waitForAssert(() -> assertThat(localeProvider.getLocale().toString(), is("de")));
 
-        int initialNumberOfBindingInfos = bindingInfoRegistry.getBindingInfos().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
             Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(/* use default locale */ null);
-            assertThat(bindingInfos.size(), is(initialNumberOfBindingInfos + 1));
             BindingInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));
             assertThat(bindingInfo.getName(), is("Yahoo Wetter Binding"));
             assertThat(bindingInfo.getDescription(), is(
                     "Das Yahoo Wetter Binding stellt verschiedene Wetterdaten wie die Temperatur, die Luftfeuchtigkeit und den Luftdruck für konfigurierbare Orte vom yahoo Wetterdienst bereit"));
-        }
+        });
     }
 
 }
