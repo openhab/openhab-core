@@ -21,13 +21,16 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.storage.Storage;
 import org.eclipse.smarthome.core.storage.StorageService;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,15 +47,19 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     @Before
     public void setUp() {
         storageService = getService(StorageService.class);
-        storage = storageService.getStorage("TestStorage", this.getClass().getClassLoader());
+        storage = storageService.getStorage(UUID.randomUUID().toString(), this.getClass().getClassLoader());
     }
 
     @After
     public void tearDown() throws IOException {
         unregisterService(storageService);
+    }
 
+    @AfterClass
+    public static void afterClass() throws IOException {
         // clean up database files ...
-        FileUtils.deleteDirectory(new File("./runtime"));
+        FileUtils.deleteDirectory(new File(ConfigConstants.getUserDataFolder()));
+        FileUtils.deleteDirectory(new File(ConfigConstants.getConfigFolder()));
     }
 
     @Test
@@ -98,7 +105,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
         assertThat(pItem, is(nullValue()));
 
         pItem = storage.get("Key1");
-        Assert.assertNotNull(pItem);
+        assertThat(pItem, is(notNullValue()));
         assertThat(pItem.itemType, is("String"));
 
         pItem = storage.put("Key1", new PersistedItem("Number", Arrays.asList("TEMPERATURE")));
@@ -141,6 +148,14 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
         public String itemType;
         public List<String> groupNames;
         public String baseItemType;
+
+        /**
+         * Package protected default constructor to allow reflective instantiation.
+         *
+         * !!! DO NOT REMOVE - Gson needs it !!!
+         */
+        PersistedItem() {
+        }
 
         public PersistedItem(String itemType, List<String> groupNames) {
             this(itemType, groupNames, null);
