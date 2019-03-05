@@ -28,6 +28,10 @@ import com.google.gson.annotations.SerializedName;
  * concrete configuration parameter. Such parameter descriptions are collected
  * within the {@link ConfigDescription} and can be retrieved from the {@link ConfigDescriptionRegistry}.
  *
+ * This class defines available configuration parameter types in {@link ConfigDescriptionParameter#Type},
+ * it defines available unit types in {@link ConfigDescriptionParameter#UNITS} and available
+ * contexts (see {@link ConfigDescriptionParameter#getContext()}).
+ *
  * @author Michael Grammling - Initial Contribution
  * @author Alex Tugarev - Added options, filter criteria, and more parameter
  *         attributes
@@ -316,17 +320,32 @@ public class ConfigDescriptionParameter {
 
     /**
      * Returns the context of the configuration parameter.
-     * <p>
-     * The context defines an enumeration of some specific context a configuration parameter can take. A context is
-     * usually used for specific input validation or user interfaces.
-     * <p>
-     * <b>Valid values:</b>
-     *
-     * <pre>
-     * network-address, password, password-create,
-     * color, date, datetime, email, month, week, time, tel, url,
-     * item, thing, group, tag, service
-     * </pre>
+     * <p>A context is a hint for user interfaces and input validators.<p>
+     * <p>Any string can be used, but the following have a special meaning:</p>
+     * 
+     * - network-address: The configuration value represents an IPv4 or IPv6 address.
+     * - password: A password value (a user-interface might obscure the visible value)
+     * - password-create: A passwort generator widget might be shown
+     * - color: This value represents an RGB color value like #ffffff or 12,12,12.
+     * - date: A date string
+     * - time: A time string
+     * - cronexpression: A cron expression like "* * * * *". A user interface would probably show a cron expression generator.
+     * - datetime: A date and time string
+     * - email: The configuration value represents an email address
+     * - month: A number [1-12]
+     * - week: A week [0-52] 
+     * - tel: A tel no
+     * - url: A web address
+     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably render a multi line editor.
+     * - location: A lat,long,alt GPS location. A user-interface would probably render a world map for selection.
+     * - tag: One tag or multiple tags separated by comma.
+     * - item: A valid item "name". A user-interface would probably show an item selection widget.
+     * - thing: A valid thing UID. A user-interface would probably show a thing selection widget.
+     * - channel: A valid channel UID.
+     * - channeltype: A valid channel type UID. A user-interface would probably show a channel type selection widget.
+     * - group: A valid group item "name". A user-interface would probably show an item selection widget.
+     * - service: A valid service ID. A user-interface would probably show a service selection widget.
+     * - rule: A valid rule uid. A user-interface would probably show a rule selection widget.
      *
      * @return the context of the configuration parameter (could be null or
      *         empty)
