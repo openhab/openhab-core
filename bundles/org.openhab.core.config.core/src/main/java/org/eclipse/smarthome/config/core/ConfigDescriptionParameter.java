@@ -28,6 +28,10 @@ import com.google.gson.annotations.SerializedName;
  * concrete configuration parameter. Such parameter descriptions are collected
  * within the {@link ConfigDescription} and can be retrieved from the {@link ConfigDescriptionRegistry}.
  *
+ * This class defines available configuration parameter types in {@link ConfigDescriptionParameter#Type},
+ * it defines available unit types in {@link ConfigDescriptionParameter#UNITS} and available
+ * contexts (see {@link ConfigDescriptionParameter#getContext()}).
+ *
  * @author Michael Grammling - Initial Contribution
  * @author Alex Tugarev - Added options, filter criteria, and more parameter
  *         attributes
@@ -332,6 +336,7 @@ public class ConfigDescriptionParameter {
      * - week: A week [0-52] 
      * - tel: A tel no
      * - url: A web address
+     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably render a multi line editor.
      * - location: A lat,long,alt GPS location. A user-interface would probably render a world map for selection.
      * - tag: One tag or multiple tags separated by comma.
      * - item: A valid item "name". A user-interface would probably show an item selection widget.
