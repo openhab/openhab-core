@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Chris Jackson - Initial Contribution
  */
-@Component(name = "org.eclipse.smarthome.storage.json", immediate = true, property = { //
+@Component(name = "org.eclipse.smarthome.storage.json", property = { //
         "service.pid=org.eclipse.smarthome.storage.json", //
         "service.config.description.uri=system:json_storage", //
         "service.config.label=Json Storage", //
