@@ -44,6 +44,7 @@ import org.eclipse.smarthome.core.events.EventSubscriber;
 import org.eclipse.smarthome.core.events.TopicEventFilter;
 import org.eclipse.smarthome.core.i18n.LocaleProvider;
 import org.eclipse.smarthome.core.items.Item;
+import org.eclipse.smarthome.core.items.ItemProvider;
 import org.eclipse.smarthome.core.items.ItemRegistry;
 import org.eclipse.smarthome.core.items.events.ItemEventFactory;
 import org.eclipse.smarthome.core.items.events.ItemStateEvent;
@@ -51,7 +52,6 @@ import org.eclipse.smarthome.core.library.items.StringItem;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.service.ReadyMarker;
-import org.eclipse.smarthome.core.service.ReadyMarkerUtils;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -103,6 +103,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link ThingManagerOSGiTest} tests the {@link ThingManager}.
@@ -127,8 +129,10 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     private Thing thing;
     private ThingLinkManager thingLinkManager;
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @SuppressWarnings("restriction")
     @Before
-    @SuppressWarnings("null")
     public void setUp() {
         thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder.create(CHANNEL_UID, "Switch")
                 .withKind(ChannelKind.STATE).withType(CHANNEL_TYPE_UID).build()).build();
@@ -157,32 +161,22 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         waitForAssert(() -> {
             try {
-                assertThat(
-                        bundleContext
-                                .getServiceReferences(ReadyMarker.class,
-                                        "(" + ThingManagerImpl.XML_THING_TYPE + "="
-                                                + bundleContext.getBundle().getSymbolicName() + ")"),
-                        is(notNullValue()));
-            } catch (InvalidSyntaxException e) {
-                fail("Failed to get service reference: " + e.getMessage());
-            }
-        });
-        waitForAssert(() -> {
-            try {
-                assertThat(bundleContext.getServiceReferences(ChannelItemProvider.class, null), is(notNullValue()));
+                assertThat(bundleContext.getServiceReferences(ItemProvider.class.getName(), null), is(notNullValue()));
             } catch (InvalidSyntaxException e) {
                 fail("Failed to get service reference: " + e.getMessage());
             }
         });
 
         Bundle bundle = mock(Bundle.class);
-        when(bundle.getSymbolicName()).thenReturn("org.openhab.core.thing");
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.smarthome.core.thing");
 
         BundleResolver bundleResolver = mock(BundleResolver.class);
         when(bundleResolver.resolveBundle(any())).thenReturn(bundle);
 
         ThingManagerImpl thingManager = (ThingManagerImpl) getService(ThingTypeMigrationService.class);
         thingManager.setBundleResolver(bundleResolver);
+
+        managedThingProvider.setBundleResolver(bundleResolver);
     }
 
     @After
@@ -192,7 +186,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    @SuppressWarnings("null")
     public void thingManagerChangesTheThingType() {
         registerThingTypeProvider();
 
@@ -266,7 +259,9 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandler.getThing()).thenReturn(thing);
 
         ThingHandlerFactory thingHandlerFactory = mock(ThingHandlerFactory.class);
-        when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
+        when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(false);
+        when(thingHandlerFactory.supportsThingType(THING_TYPE_UID)).thenReturn(true);
+        when(thingHandlerFactory.supportsThingType(newThingTypeUID)).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
         registerService(thingHandlerFactory);
@@ -281,7 +276,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test(expected = RuntimeException.class)
-    @SuppressWarnings("null")
     public void thingManagerDoesNotChangeTheThingTypeWhenNewThingTypeIsNotRegistered() {
         ThingHandler thingHandler = mock(ThingHandler.class);
         when(thingHandler.getThing()).thenReturn(thing);
@@ -419,11 +413,20 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             }
         }).when(thingHandler).initialize();
 
+        // the ManagedThingProvider may update the thing!
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                thing = invocation.getArgument(0);
+                return null;
+            }
+        }).when(thingHandler).thingUpdated(any(Thing.class));
         when(thingHandler.getThing()).thenReturn(thing);
 
         ThingHandlerFactory thingHandlerFactory = mock(ThingHandlerFactory.class);
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
+        when(thingHandlerFactory.createThing(any(), any(), any(), any())).thenReturn(thing);
 
         registerService(thingHandlerFactory);
 
@@ -523,7 +526,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    @SuppressWarnings("null")
     public void thingManagerHandlesBridgeThingHandlerLifeCycleCorrectly() {
         initCalledCounter = 0;
         disposedCalledCounter = 0;
@@ -780,6 +782,14 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             }
         }).when(thingHandler).handleCommand(any(ChannelUID.class), any(Command.class));
 
+        // the ManagedThingProvider may update the thing!
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                thing = invocation.getArgument(0);
+                return null;
+            }
+        }).when(thingHandler).thingUpdated(any(Thing.class));
         when(thingHandler.getThing()).thenReturn(thing);
 
         ThingHandlerFactory thingHandlerFactory = mock(ThingHandlerFactory.class);
@@ -1033,7 +1043,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings("unchecked")
     public void thingManagerHandlesThingUpdatesCorrectly() {
         String itemName = "name";
 
@@ -1076,7 +1086,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings("unchecked")
     public void thingManagerAllowsChangesToUnmanagedThings() throws Exception {
         ThingManager thingManager = (ThingManager) getService(ThingTypeMigrationService.class);
         assertThat(thingManager, is(notNullValue()));
@@ -1276,7 +1286,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    @SuppressWarnings("null")
     public void thingManagerPostsLocalizedThingStatusInfoAndThingStatusInfoChangedEvents() throws Exception {
         registerThingTypeProvider();
 
@@ -1441,6 +1450,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
+    @SuppressWarnings("restriction")
     public void thingManagerCallsInitializeForAddedThingCorrectly() {
         // register ThingTypeProvider & ConfigurationDescriptionProvider with 'required' parameter
         registerThingTypeProvider();
@@ -1497,10 +1507,13 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         });
     }
 
+    @SuppressWarnings("restriction")
     @Test
-    @SuppressWarnings("null")
     public void thingManagerWaitsWithInitializeUntilBundleProcessingIsFinished() throws Exception {
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).build();
+        // we need a final variable, that could be changed. Therefore a final array is used, there the single element
+        // could be modified.
+        final Thing things[] = new Thing[1];
+        things[0] = ThingBuilder.create(THING_TYPE_UID, THING_UID).build();
 
         class ThingHandlerState {
             @SuppressWarnings("unused")
@@ -1516,7 +1529,19 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                 return null;
             }
         }).when(thingHandler).setCallback(any(ThingHandlerCallback.class));
-        when(thingHandler.getThing()).thenReturn(thing);
+
+        // the ManagedThingProvider may update the thing!
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                logger.info("*** MOCK: thingUpdated: {} --> {}",
+                        Integer.toHexString(System.identityHashCode(things[0])),
+                        Integer.toHexString(System.identityHashCode(invocation.getArgument(0))));
+                things[0] = invocation.getArgument(0);
+                return null;
+            }
+        }).when(thingHandler).thingUpdated(any(Thing.class));
+        when(thingHandler.getThing()).thenReturn(things[0]);
 
         ThingHandlerFactory thingHandlerFactory = mock(ThingHandlerFactory.class);
         when(thingHandlerFactory.supportsThingType(any(ThingTypeUID.class))).thenReturn(true);
@@ -1524,38 +1549,41 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         registerService(thingHandlerFactory);
 
-        final ReadyMarker marker = new ReadyMarker(ThingManagerImpl.XML_THING_TYPE,
-                ReadyMarkerUtils.getIdentifier(FrameworkUtil.getBundle(this.getClass())));
         waitForAssert(() -> {
             // wait for the XML processing to be finished, then remove the ready marker again
+            ReadyMarker marker = new ReadyMarker(ThingManagerImpl.XML_THING_TYPE,
+                    FrameworkUtil.getBundle(this.getClass()).getSymbolicName());
             assertThat(readyService.isReady(marker), is(true));
             readyService.unmarkReady(marker);
         });
 
         ThingStatusInfo uninitializedNone = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
-        assertThat(thing.getStatusInfo(), is(uninitializedNone));
+        assertThat(things[0].getStatusInfo(), is(uninitializedNone));
 
-        managedThingProvider.add(thing);
+        managedThingProvider.add(things[0]);
 
         // just wait a little to make sure really nothing happens
         Thread.sleep(1000);
         verify(thingHandler, never()).initialize();
-        assertThat(thing.getStatusInfo(), is(uninitializedNone));
+        assertThat(things[0].getStatusInfo(), is(uninitializedNone));
 
-        readyService.markReady(marker);
+        readyService.markReady(new ReadyMarker(ThingManagerImpl.XML_THING_TYPE,
+                FrameworkUtil.getBundle(this.getClass()).getSymbolicName()));
+
+        // just wait a little to make sure really nothing happens
+        Thread.sleep(1000);
 
         // ThingHandler.initialize() called, thing status is INITIALIZING.NONE
         ThingStatusInfo initializingNone = ThingStatusInfoBuilder
                 .create(ThingStatus.INITIALIZING, ThingStatusDetail.NONE).build();
         waitForAssert(() -> {
             verify(thingHandler, times(1)).initialize();
-            assertThat(thing.getStatusInfo(), is(initializingNone));
+            assertThat(things[0].getStatusInfo(), is(initializingNone));
         });
     }
 
     @Test
-    @SuppressWarnings("null")
     public void thingManagerCallsBridgeStatusChangedOnThingHandlerCorrectly() {
         class BridgeHandlerState {
             ThingHandlerCallback callback;
@@ -1944,6 +1972,14 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             }
         }).when(thingHandler).handleCommand(any(ChannelUID.class), any(Command.class));
 
+        // the ManagedThingProvider may update the thing!
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                thing = invocation.getArgument(0);
+                return null;
+            }
+        }).when(thingHandler).thingUpdated(any(Thing.class));
         when(thingHandler.getThing()).thenReturn(thing);
 
         ThingHandlerFactory thingHandlerFactory = mock(ThingHandlerFactory.class);
@@ -2005,5 +2041,4 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                 .thenReturn(configDescription);
         registerService(configDescriptionProvider);
     }
-
 }
