@@ -10,6 +10,7 @@
                "type":"TEXT",
                "description":"the scripting language used",
                "required":true,
+               "context":"scriptlanguage",
                "options":[
                     {
                         "label": "Javascript",
@@ -38,6 +39,7 @@
                "type":"TEXT",
                "description":"the scripting language used",
                "required":true,
+               "context":"scriptlanguage",
                "options":[
                     {
                         "label": "Javascript",
