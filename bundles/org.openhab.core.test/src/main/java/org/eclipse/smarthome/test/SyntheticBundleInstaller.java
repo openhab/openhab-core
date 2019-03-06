@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -358,7 +357,7 @@ public class SyntheticBundleInstaller {
 
     private static void addFileToArchive(Bundle bundle, String bundlePath, String fileInBundle,
             JarOutputStream jarOutputStream) throws IOException {
-        String filePath = Paths.get(bundlePath, fileInBundle).toString();
+        String filePath = bundlePath + fileInBundle;
         URL resource = bundle.getResource(filePath);
         if (resource == null) {
             return;
@@ -410,7 +409,7 @@ public class SyntheticBundleInstaller {
     }
 
     private static Manifest getManifest(Bundle bundle, String bundlePath) throws IOException {
-        String filePath = Paths.get(bundlePath, "META-INF/MANIFEST.MF").toString();
+        String filePath = bundlePath + "META-INF/MANIFEST.MF";
         URL resource = bundle.getResource(filePath);
         if (resource == null) {
             return null;
