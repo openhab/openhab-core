@@ -162,7 +162,7 @@
           <version>3.0</version>
           <configuration>
             <basedir>${basedir}</basedir>
-            <header>src/etc/header.txt</header>
+            <header>licenses/epl-2.0/xml-header-style.xml</header>
             <quiet>false</quiet>
             <failIfMissing>true</failIfMissing>
             <strictCheck>true</strictCheck>
@@ -171,7 +171,7 @@
               <xml>xml-header-style</xml>
             </mapping>
             <headerDefinitions>
-              <headerDefinition>src/etc/xml-header-style.xml</headerDefinition>
+              <headerDefinition>licenses/epl-2.0/xml-header-style.xml</headerDefinition>
             </headerDefinitions>
             <includes>
               <include>**/org/openhab/**/*.java</include>
