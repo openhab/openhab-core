@@ -477,13 +477,20 @@ Import-Package: \\
             <strictCheck>true</strictCheck>
             <aggregate>true</aggregate>
             <mapping>
+              <groovy>JAVADOC_STYLE</groovy>
+              <mwe2>JAVADOC_STYLE</mwe2>
+              <xtend>JAVADOC_STYLE</xtend>
               <xml>xml-header-style</xml>
             </mapping>
             <headerDefinitions>
               <headerDefinition>licenses/epl-2.0/xml-header-style.xml</headerDefinition>
             </headerDefinitions>
             <includes>
+              <include>**/org/eclipse/smarthome/**/*.java</include>
+              <include>**/org/eclipse/smarthome/**/*.mwe2</include>
+              <include>**/org/eclipse/smarthome/**/*.xtend</include>
               <include>**/org/openhab/**/*.java</include>
+              <include>**/org.openhab.core.semantics/**/*.groovy</include>
               <include>**/feature.xml</include>
               <include>**/OSGI-INF/*.xml</include>
             </includes>
