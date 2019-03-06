@@ -51,6 +51,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+/**
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class ItemUIRegistryImplTest {
 
     static private ItemUIRegistryImpl uiRegistry;

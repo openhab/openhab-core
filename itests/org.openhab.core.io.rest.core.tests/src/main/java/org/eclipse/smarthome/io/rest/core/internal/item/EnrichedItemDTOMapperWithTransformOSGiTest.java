@@ -32,6 +32,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class EnrichedItemDTOMapperWithTransformOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "Item1";

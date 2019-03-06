@@ -29,6 +29,9 @@ import org.eclipse.smarthome.core.types.UnDefType;
 import org.junit.Test;
 import org.openhab.core.items.Item;
 
+/**
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class ItemMapperTest {
 
     @Test

@@ -28,6 +28,9 @@ import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.internal.ThingImpl;
 import org.junit.Test;
 
+/**
+ * @author Alex Tugarev - Initial contribution
+ */
 public class ThingHelperTest {
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");

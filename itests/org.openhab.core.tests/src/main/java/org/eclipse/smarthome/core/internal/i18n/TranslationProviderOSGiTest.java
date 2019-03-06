@@ -26,6 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
+/**
+ * @author Stefan Triller - Initial contribution
+ */
 public class TranslationProviderOSGiTest extends JavaOSGiTest {
 
     private static final String KEY_HELLO = "HELLO";

@@ -40,6 +40,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class EnrichedThingDTOMapperTest {
 
     private static final String ITEM_TYPE = "itemType";

@@ -22,6 +22,9 @@ import org.junit.Test;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.library.tel.types.CallType;
 
+/**
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class TypeMapperTest {
 
     @Test

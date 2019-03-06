@@ -17,6 +17,9 @@ import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * @author Ana Dimova - Initial contribution
+ */
 public class ConnectionValidatorTest {
 
     @Test

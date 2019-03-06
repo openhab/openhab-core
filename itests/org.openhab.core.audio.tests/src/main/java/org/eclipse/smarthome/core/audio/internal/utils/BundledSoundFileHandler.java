@@ -24,6 +24,8 @@ import java.util.Comparator;
 
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.audio.internal.AudioManagerTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class to handle bundled resources.
@@ -31,9 +33,9 @@ import org.eclipse.smarthome.core.audio.internal.AudioManagerTest;
  * @author Markus Rathgeb - Initial contribution
  */
 public class BundledSoundFileHandler implements Closeable {
-
     private static final String MP3_FILE_NAME = "mp3AudioFile.mp3";
     private static final String WAV_FILE_NAME = "wavAudioFile.wav";
+    private final Logger logger = LoggerFactory.getLogger(BundledSoundFileHandler.class);
 
     private static void copy(final String resourcePath, final String filePath) throws IOException {
         try (InputStream is = AudioManagerTest.class.getResourceAsStream(resourcePath)) {
@@ -71,7 +73,7 @@ public class BundledSoundFileHandler implements Closeable {
             try {
                 Files.walk(tmpdir).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                logger.error("Exception while deleting files", ex);
             }
         }
     }

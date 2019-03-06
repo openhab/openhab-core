@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 
 import org.junit.Test;
 
+/**
+ * @author Gary Tse - Initial contribution
+ */
 public class AccessTokenResponseTest {
 
     @Test

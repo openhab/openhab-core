@@ -45,6 +45,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class GenericThingProviderTest extends JavaOSGiTest {
 
     private final static String TESTMODEL_NAME = "testModel.things";

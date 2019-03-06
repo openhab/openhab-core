@@ -29,6 +29,9 @@ import org.junit.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
+/**
+ * @author Dennis Nobel - Initial contribution
+ */
 public class BindingInfoI18nTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "yahooweather.bundle";

@@ -28,6 +28,9 @@ import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class ConfigDescriptionsTest extends JavaOSGiTest {
 
     private LoadedTestBundle loadedTestBundle() throws Exception {

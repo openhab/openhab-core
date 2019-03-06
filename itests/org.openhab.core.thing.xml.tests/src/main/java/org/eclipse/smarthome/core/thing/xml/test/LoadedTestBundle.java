@@ -26,6 +26,9 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
+/**
+ * @author Markus Rathgeb - Initial contribution
+ */
 public class LoadedTestBundle extends JavaTest implements AutoCloseable {
 
     @FunctionalInterface

@@ -46,6 +46,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 
+/**
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class WebClientFactoryTest {
 
     private WebClientFactoryImpl webClientFactory;

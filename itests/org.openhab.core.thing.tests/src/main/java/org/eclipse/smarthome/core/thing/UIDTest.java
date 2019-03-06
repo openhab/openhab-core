@@ -14,6 +14,9 @@ package org.eclipse.smarthome.core.thing;
 
 import org.junit.Test;
 
+/**
+ * @author Alex Tugarev - Initial contribution
+ */
 public class UIDTest {
 
     @Test(expected = IllegalArgumentException.class)

@@ -47,8 +47,6 @@ import org.eclipse.smarthome.config.discovery.inbox.InboxListener;
 import org.eclipse.smarthome.config.discovery.inbox.events.InboxAddedEvent;
 import org.eclipse.smarthome.config.discovery.inbox.events.InboxRemovedEvent;
 import org.eclipse.smarthome.config.discovery.inbox.events.InboxUpdatedEvent;
-import org.eclipse.smarthome.config.discovery.internal.DiscoveryResultImpl;
-import org.eclipse.smarthome.config.discovery.internal.PersistentInbox;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFilter;
 import org.eclipse.smarthome.core.events.EventSubscriber;
@@ -71,6 +69,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
+/**
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class InboxOSGITest extends JavaOSGiTest {
 
     class DiscoveryService1 extends AbstractDiscoveryService {

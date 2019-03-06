@@ -18,6 +18,9 @@ import org.eclipse.smarthome.config.discovery.internal.DiscoveryResultImpl;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 
+/**
+ * @author Andre Fuechsel - Initial contribution
+ */
 public class DiscoveryServiceMockOfBridge extends DiscoveryServiceMock {
 
     ThingUID bridge;

@@ -29,6 +29,9 @@ import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Christoph Knauf - Initial contribution
+ */
 public class InboxResourceOSGITest extends JavaOSGiTest {
 
     private InboxResource resource;
