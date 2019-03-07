@@ -20,21 +20,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.Configuration;
+import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.common.registry.DefaultAbstractManagedProvider;
 import org.eclipse.smarthome.core.service.ReadyMarker;
 import org.eclipse.smarthome.core.service.ReadyMarkerFilter;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.eclipse.smarthome.core.storage.StorageService;
+import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.eclipse.smarthome.core.util.BundleResolver;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -62,8 +68,38 @@ public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, 
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<ThingHandlerFactory>();
 
     private BundleResolver bundleResolver;
-
     private final Map<ThingUID, Thing> things = new HashMap<>();
+
+    private ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool("ManagedThingProvider-QueueWorker");
+    private Future<?> queueWorker = null;
+
+    public class CachedElement {
+        private final Thing thing;
+        private final ThingHandlerFactory thingHandlerFactory;
+
+        public CachedElement(Thing thing, ThingHandlerFactory thingHandlerFactory) {
+            this.thing = thing;
+            this.thingHandlerFactory = thingHandlerFactory;
+        }
+
+        public Thing getThing() {
+            return thing;
+        }
+
+        public ThingHandlerFactory getThingHandlerFactory() {
+            return thingHandlerFactory;
+        }
+    }
+
+    private List<CachedElement> queue = new CopyOnWriteArrayList<>();
+
+    @Deactivate
+    public void deactivate() {
+        if (queueWorker != null && !queueWorker.isDone()) {
+            queueWorker.cancel(true);
+            queueWorker = null;
+        }
+    }
 
     @Override
     protected String getStorageName() {
@@ -93,7 +129,8 @@ public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, 
         logger.debug("thingHandlerFactoryAdded({})", thingHandlerFactory.getClass().getName());
         Collection<Thing> storageList = super.getAll();
         logger.debug("storageList.size(): {}", storageList.size());
-        storageList.stream().forEach(thing -> createThingFromStorageForThingHandlerFactory(thing, thingHandlerFactory));
+        storageList.stream().filter(thing -> queueForLaterProcessingIfNoHandler(thing, thingHandlerFactory))
+                .forEach(thing -> createThingFromStorageForThingHandlerFactory(thing, thingHandlerFactory));
     }
 
     private boolean compareChannels(Channel a, Channel b) {
@@ -126,13 +163,9 @@ public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, 
     }
 
     private void createThingFromStorageForThingHandlerFactory(Thing storedThing, ThingHandlerFactory factory) {
-        logger.debug("createThingFromStorageForThingHandlerFactory({}, {}", storedThing.getUID(),
-                factory.getClass().getName());
         if (!loadedXmlThingTypes.contains(getBundleName(factory))) {
             return;
         }
-
-        logger.info("*** thing.getHandler() = {}", storedThing.getHandler());
 
         if (factory.supportsThingType(storedThing.getThingTypeUID())) {
             Configuration storedConfiguration = storedThing.getConfiguration();
@@ -187,6 +220,34 @@ public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, 
         }
     }
 
+    /**
+     * If the given {@link Thing} does not yet have a {@link ThingHandler} assigned, put it into a queue
+     * for later processing.
+     *
+     * @param thing   stored {@link Thing} to be processed
+     * @param factory {@link ThingHandlerFactory} to be used in processing
+     * @return {@code true} if given {@link Thing} has a {@link ThingHandler} assigned, {@code false} otherwise
+     */
+    private boolean queueForLaterProcessingIfNoHandler(Thing thing, ThingHandlerFactory factory) {
+        if (thing.getHandler() == null) {
+            logger.debug("No thing handler for thing {} - queuing for later processing", thing.getUID());
+            queue.add(new CachedElement(thing, factory));
+            if (queueWorker == null) {
+                queueWorker = scheduler.scheduleWithFixedDelay(() -> checkQueue(), 0, 500, TimeUnit.MILLISECONDS);
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    private void checkQueue() {
+        queue.stream().filter(e -> e.getThing().getHandler() != null).forEach(e -> {
+            createThingFromStorageForThingHandlerFactory(e.getThing(), e.getThingHandlerFactory());
+            queue.remove(e);
+        });
+    }
+
     @Nullable
     private String getBundleName(ThingHandlerFactory thingHandlerFactory) {
         logger.debug("getBundleName({})", thingHandlerFactory.getClass().getName());
@@ -208,12 +269,16 @@ public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, 
 
     @Override
     public Collection<Thing> getAll() {
-        return new HashSet<>(things.values());
+        Set<Thing> storedThings = super.getAll().stream().filter(t -> !things.containsKey(t.getUID()))
+                .collect(Collectors.toSet());
+        Set<Thing> allThings = new HashSet<>(things.values());
+        allThings.addAll(storedThings);
+        return allThings;
     }
 
     @Override
     public Thing get(ThingUID key) {
-        return things.get(key);
+        return things.get(key) != null ? things.get(key) : super.get(key);
     }
 
     @Override

@@ -1289,7 +1289,8 @@ public class ThingManagerImpl
             return thing.isEnabled();
         }
 
-        logger.debug("Thing with UID {} is unknown. Will try to get the enabled status from the persistent storage.");
+        logger.debug("Thing with UID {} is unknown. Will try to get the enabled status from the persistent storage.",
+                thingUID);
         return !isDisabledByStorage(thingUID);
     }
 
