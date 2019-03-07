@@ -19,6 +19,9 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ThingType;
 
+/**
+ * @author Markus Rathgeb - Initial contribution
+ */
 public class SimpleThingTypeProvider implements ThingTypeProvider {
     private final Collection<ThingType> thingTypes;
 

@@ -26,6 +26,9 @@ import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 @SuppressWarnings("null")
 public class CoreItemFactoryTest {
 

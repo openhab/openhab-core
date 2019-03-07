@@ -26,6 +26,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class HttpServiceUtilTest {
 
     private static final String ORG_OSGI_SERVICE_HTTP_SERVICE = "org.osgi.service.http.HttpService";

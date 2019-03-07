@@ -17,6 +17,9 @@ import static org.junit.Assert.assertEquals;
 import org.eclipse.smarthome.core.transform.TransformationException;
 import org.junit.Test;
 
+/**
+ * @author Stefan Triller - Initial contribution
+ */
 public class TransformationTest {
 
     @Test

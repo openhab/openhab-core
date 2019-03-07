@@ -24,6 +24,9 @@ import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
 import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareBuilder;
 
+/**
+ * @author Thomas Höfer - Initial contribution
+ */
 public class Constants {
 
     public static final String UNKNOWN = "unknown";

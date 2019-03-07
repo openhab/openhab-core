@@ -28,6 +28,9 @@ import java.util.Collections;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
+/**
+ * @author Simon Kaufmann - Initial contribution
+ */
 public class ResourceBundleClassLoaderTest {
 
     static URL createTmpTestPropetiesFile(Path root, String relativeFile) throws Exception {

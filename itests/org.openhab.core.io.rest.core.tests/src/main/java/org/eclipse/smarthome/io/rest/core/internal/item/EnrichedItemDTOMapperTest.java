@@ -26,6 +26,9 @@ import org.eclipse.smarthome.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Kai Kreuzer - Initial contribution
+ */
 public class EnrichedItemDTOMapperTest extends JavaTest {
 
     private CoreItemFactory itemFactory;

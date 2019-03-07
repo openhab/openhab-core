@@ -65,6 +65,9 @@ import org.mockito.Mock;
 
 import tec.uom.se.unit.Units;
 
+/**
+ * @author Stefan Triller - Initial contribution
+ */
 public class GroupItemTest extends JavaOSGiTest {
 
     /** Time to sleep when a file is created/modified/deleted, so the event can be handled */
@@ -690,14 +693,14 @@ public class GroupItemTest extends JavaOSGiTest {
         NumberItem kelvin = createNumberItem("K", Temperature.class, new QuantityType<Temperature>("23 K"));
         groupItem.addMember(kelvin);
 
-        QuantityType<?> state = (QuantityType<?>) groupItem.getStateAs(QuantityType.class);
+        QuantityType<?> state = groupItem.getStateAs(QuantityType.class);
 
         assertThat(state.getUnit(), is(Units.CELSIUS));
         assertThat(state.doubleValue(), is(-232.15d));
 
         celsius.setState(new QuantityType<Temperature>("265 °C"));
 
-        state = (QuantityType<?>) groupItem.getStateAs(QuantityType.class);
+        state = groupItem.getStateAs(QuantityType.class);
 
         assertThat(state.getUnit(), is(Units.CELSIUS));
         assertThat(state.doubleValue(), is(9.85d));
@@ -721,7 +724,7 @@ public class GroupItemTest extends JavaOSGiTest {
         NumberItem percent = createNumberItem("K", Dimensionless.class, new QuantityType<Dimensionless>("110 %"));
         groupItem.addMember(percent);
 
-        QuantityType<?> state = (QuantityType<?>) groupItem.getStateAs(QuantityType.class);
+        QuantityType<?> state = groupItem.getStateAs(QuantityType.class);
 
         assertThat(state, is(new QuantityType<Temperature>("23 °C")));
 

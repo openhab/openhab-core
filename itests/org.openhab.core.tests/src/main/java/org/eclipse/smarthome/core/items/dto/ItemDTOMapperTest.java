@@ -24,6 +24,9 @@ import org.eclipse.smarthome.core.library.types.ArithmeticGroupFunction;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.junit.Test;
 
+/**
+ * @author Stefan Triller - Initial contribution
+ */
 public class ItemDTOMapperTest {
 
     @Test

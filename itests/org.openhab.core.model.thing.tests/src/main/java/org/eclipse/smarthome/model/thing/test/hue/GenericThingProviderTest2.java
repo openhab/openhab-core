@@ -30,6 +30,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class GenericThingProviderTest2 extends JavaOSGiTest {
 
     private final static String TESTMODEL_NAME = "testModelX.things";

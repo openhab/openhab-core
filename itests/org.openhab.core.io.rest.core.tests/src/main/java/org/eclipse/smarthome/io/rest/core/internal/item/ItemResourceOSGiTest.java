@@ -51,6 +51,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.jayway.jsonpath.JsonPath;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class ItemResourceOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME1 = "Item1";

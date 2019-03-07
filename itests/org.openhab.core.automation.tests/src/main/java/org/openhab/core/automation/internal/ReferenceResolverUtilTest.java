@@ -27,6 +27,9 @@ import org.openhab.core.automation.util.ReferenceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Vasil Ilchev - Initial contribution
+ */
 public class ReferenceResolverUtilTest {
     private static final String CONTEXT_PROPERTY1 = "contextProperty1";
     private static final String CONTEXT_PROPERTY2 = "contextProperty2";

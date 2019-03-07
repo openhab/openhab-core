@@ -31,6 +31,9 @@ import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.junit.Test;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class UnitUtilsTest {
 
     @Test
