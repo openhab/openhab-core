@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information.
+ * information regarding copyright ownership.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,14 +12,14 @@
  */
 package org.eclipse.smarthome.config.core;
 
+import static java.util.Collections.*;
+import static org.eclipse.smarthome.config.core.ConfigUtil.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -65,19 +65,15 @@ public class Configuration {
     /**
      * Create a new configuration.
      *
-     * @param properties the properties to initialize (may be null)
+     * @param properties        the properties to initialize (may be null)
      * @param alreadyNormalized flag if the properties are already normalized
      */
     private Configuration(final @Nullable Map<String, Object> properties, final boolean alreadyNormalized) {
         if (properties == null) {
             this.properties = new HashMap<>();
-        } else {
-            if (alreadyNormalized) {
-                this.properties = new HashMap<>(properties);
-            } else {
-                this.properties = ConfigUtil.normalizeTypes(properties);
-            }
+            return;
         }
+        this.properties = alreadyNormalized ? new HashMap<>(properties) : normalizeTypes(properties);
     }
 
     public <T> T as(Class<T> configurationClass) {
@@ -114,7 +110,7 @@ public class Configuration {
 
     public Object put(String key, Object value) {
         synchronized (this) {
-            return properties.put(key, ConfigUtil.normalizeType(value, null));
+            return properties.put(key, normalizeType(value, null));
         }
     }
 
@@ -134,31 +130,28 @@ public class Configuration {
 
     public Set<String> keySet() {
         synchronized (this) {
-            return Collections.unmodifiableSet(new HashSet<>(properties.keySet()));
+            return unmodifiableSet(new HashSet<>(properties.keySet()));
         }
     }
 
     public Collection<Object> values() {
         synchronized (this) {
-            return Collections.unmodifiableCollection(new ArrayList<>(properties.values()));
+            return unmodifiableCollection(new ArrayList<>(properties.values()));
         }
     }
 
     public Map<String, Object> getProperties() {
         synchronized (this) {
-            return Collections.unmodifiableMap(new HashMap<>(properties));
+            return unmodifiableMap(new HashMap<>(properties));
         }
     }
 
     public void setProperties(Map<String, Object> properties) {
-        for (Entry<String, Object> entrySet : properties.entrySet()) {
-            this.put(entrySet.getKey(), entrySet.getValue());
-        }
-        for (Iterator<String> it = this.properties.keySet().iterator(); it.hasNext();) {
-            String entry = it.next();
-            if (!properties.containsKey(entry)) {
-                it.remove();
-            }
+        synchronized (this) {
+            this.properties.clear();
+            properties.entrySet().forEach(e -> {
+                this.properties.put(e.getKey(), normalizeType(e.getValue(), null));
+            });
         }
     }
 
@@ -182,21 +175,26 @@ public class Configuration {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Configuration[");
-        boolean first = true;
-        for (final Map.Entry<String, Object> prop : properties.entrySet()) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append(", ");
+        synchronized (this) {
+            if (properties.isEmpty()) {
+                return "Configuration[]";
             }
-            Object value = prop.getValue();
-            sb.append(String.format("{key=%s; type=%s; value=%s}", prop.getKey(),
-                    value != null ? value.getClass().getSimpleName() : "?", value));
+
+            final StringBuilder sb = new StringBuilder();
+
+            properties.entrySet().forEach(entry -> {
+                sb.append(sb.length() == 0 ? "Configuration[" : ", ");
+
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                Object type = value != null ? value.getClass().getSimpleName() : "?";
+
+                sb.append(String.format("{key=%s; type=%s; value=%s}", key, type, value));
+            });
+
+            sb.append("]");
+            return sb.toString();
         }
-        sb.append("]");
-        return sb.toString();
     }
 
 }
