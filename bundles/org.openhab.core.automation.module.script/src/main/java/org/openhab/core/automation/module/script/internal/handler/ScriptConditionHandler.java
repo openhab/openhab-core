@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ScriptConditionHandler extends AbstractScriptModuleHandler<Condition> implements ConditionHandler {
 
-    public final Logger logger = LoggerFactory.getLogger(ScriptConditionHandler.class);
+    public static final String TYPE_ID = "script.ScriptCondition";
 
-    public static final String SCRIPT_CONDITION = "script.ScriptCondition";
+    private final Logger logger = LoggerFactory.getLogger(ScriptConditionHandler.class);
 
     public ScriptConditionHandler(Condition module, String ruleUID, ScriptEngineManager scriptEngineManager) {
         super(module, ruleUID, scriptEngineManager);

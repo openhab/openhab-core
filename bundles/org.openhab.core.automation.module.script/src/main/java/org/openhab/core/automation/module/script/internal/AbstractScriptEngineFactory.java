@@ -14,62 +14,56 @@ package org.openhab.core.automation.module.script.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
-import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * An implementation of {@link ScriptEngineFactory} with customizations for Nashorn ScriptEngines.
+ * This is an abstract class for implementing {@link ScriptEngineFactory}s.
  *
- * @author Simon Merschjohann - Initial contribution
- * @author Scott Rushworth - removed default methods provided by ScriptEngineFactory
+ * @author Scott Rushworth - initial contribution
  */
 @NonNullByDefault
-@Component(service = ScriptEngineFactory.class)
-public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
+public abstract class AbstractScriptEngineFactory implements ScriptEngineFactory {
 
-    private static final String SCRIPT_TYPE = "js";
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public List<String> getScriptTypes() {
         List<String> scriptTypes = new ArrayList<>();
 
         for (javax.script.ScriptEngineFactory f : engineManager.getEngineFactories()) {
-            List<String> extensions = f.getExtensions();
-
-            if (extensions.contains(SCRIPT_TYPE)) {
-                scriptTypes.addAll(extensions);
-                scriptTypes.addAll(f.getMimeTypes());
-            }
+            scriptTypes.addAll(f.getExtensions());
+            scriptTypes.addAll(f.getMimeTypes());
         }
         return Collections.unmodifiableList(scriptTypes);
     }
 
     @Override
     public void scopeValues(ScriptEngine scriptEngine, Map<String, Object> scopeValues) {
-        Set<String> expressions = new HashSet<>();
-
         for (Entry<String, Object> entry : scopeValues.entrySet()) {
             scriptEngine.put(entry.getKey(), entry.getValue());
-            if (entry.getValue() instanceof Class) {
-                expressions.add(String.format("%s = %<s.static;", entry.getKey()));
-            }
         }
-        String scriptToEval = String.join("\n", expressions);
-        try {
-            scriptEngine.eval(scriptToEval);
-        } catch (ScriptException ex) {
-            logger.error("ScriptException while importing scope: {}", ex.getMessage());
+    }
+
+    @Override
+    public @Nullable ScriptEngine createScriptEngine(String scriptType) {
+        ScriptEngine scriptEngine = engineManager.getEngineByExtension(scriptType);
+        if (scriptEngine == null) {
+            scriptEngine = engineManager.getEngineByMimeType(scriptType);
         }
+        if (scriptEngine == null) {
+            scriptEngine = engineManager.getEngineByName(scriptType);
+        }
+        return scriptEngine;
     }
 
 }
