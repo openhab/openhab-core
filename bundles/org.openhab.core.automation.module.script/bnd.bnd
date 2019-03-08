@@ -1,0 +1,10 @@
+Bundle-SymbolicName: ${project.artifactId}
+Import-Package: \
+	org.eclipse.smarthome.core.transform;resolution:=optional,\
+	org.eclipse.smarthome.model.persistence.extensions;resolution:=optional,\
+	org.eclipse.smarthome.model.script.actions;resolution:=optional,\
+	org.eclipse.smarthome.model.script.engine.action;resolution:=optional,\
+	org.openhab.core.library.types;resolution:=optional,\
+	org.openhab.core.scriptengine.action;resolution:=optional,\
+	org.joda.time;resolution:=optional,\
+	*
