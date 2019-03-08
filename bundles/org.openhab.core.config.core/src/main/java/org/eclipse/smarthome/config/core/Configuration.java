@@ -12,14 +12,15 @@
  */
 package org.eclipse.smarthome.config.core;
 
+import static java.util.Collections.*;
+import static org.eclipse.smarthome.config.core.ConfigUtil.normalizeTypes;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -33,12 +34,14 @@ import org.eclipse.smarthome.config.core.internal.ConfigMapper;
  * @author Gerhard Riegler - added converting BigDecimal values to the type of the configuration class field
  * @author Chris Jackson - fix concurrent modification exception when removing properties
  * @author Markus Rathgeb - add copy constructor
+ * @author Michael Riess - fix concurrent modification exception when setting properties
+ * @author Michael Riess - fix equals() implementation
  */
 public class Configuration {
     private final Map<String, Object> properties;
 
     public Configuration() {
-        this(null, true);
+        this(emptyMap(), true);
     }
 
     /**
@@ -50,7 +53,7 @@ public class Configuration {
      * @param configuration the configuration that should be cloned (may be null)
      */
     public Configuration(final @Nullable Configuration configuration) {
-        this(configuration != null ? configuration.properties : null, true);
+        this(configuration == null ? emptyMap() : configuration.properties, true);
     }
 
     /**
@@ -59,7 +62,7 @@ public class Configuration {
      * @param properties the properties the configuration should be filled. If null, an empty configuration is created.
      */
     public Configuration(Map<String, Object> properties) {
-        this(properties, false);
+        this(properties == null ? emptyMap() : properties, false);
     }
 
     /**
@@ -68,20 +71,12 @@ public class Configuration {
      * @param properties the properties to initialize (may be null)
      * @param alreadyNormalized flag if the properties are already normalized
      */
-    private Configuration(final @Nullable Map<String, Object> properties, final boolean alreadyNormalized) {
-        if (properties == null) {
-            this.properties = new HashMap<>();
-        } else {
-            if (alreadyNormalized) {
-                this.properties = new HashMap<>(properties);
-            } else {
-                this.properties = ConfigUtil.normalizeTypes(properties);
-            }
-        }
+    private Configuration(final Map<String, Object> properties, final boolean alreadyNormalized) {
+        this.properties = synchronizedMap(alreadyNormalized ? new HashMap<>(properties) : normalizeTypes(properties));
     }
 
     public <T> T as(Class<T> configurationClass) {
-        synchronized (this) {
+        synchronized (properties) {
             return ConfigMapper.as(properties, configurationClass);
         }
     }
@@ -93,9 +88,7 @@ public class Configuration {
      * @return true if the key is part of the configuration, false if not
      */
     public boolean containsKey(String key) {
-        synchronized (this) {
-            return properties.containsKey(key);
-        }
+        return properties.containsKey(key);
     }
 
     /**
@@ -107,15 +100,11 @@ public class Configuration {
     }
 
     public Object get(String key) {
-        synchronized (this) {
-            return properties.get(key);
-        }
+        return properties.get(key);
     }
 
     public Object put(String key, Object value) {
-        synchronized (this) {
-            return properties.put(key, ConfigUtil.normalizeType(value, null));
-        }
+        return properties.put(key, ConfigUtil.normalizeType(value, null));
     }
 
     /**
@@ -127,74 +116,63 @@ public class Configuration {
     }
 
     public Object remove(String key) {
-        synchronized (this) {
-            return properties.remove(key);
-        }
+        return properties.remove(key);
     }
 
     public Set<String> keySet() {
-        synchronized (this) {
+        synchronized (properties) {
             return Collections.unmodifiableSet(new HashSet<>(properties.keySet()));
         }
     }
 
     public Collection<Object> values() {
-        synchronized (this) {
+        synchronized (properties) {
             return Collections.unmodifiableCollection(new ArrayList<>(properties.values()));
         }
     }
 
     public Map<String, Object> getProperties() {
-        synchronized (this) {
+        synchronized (properties) {
             return Collections.unmodifiableMap(new HashMap<>(properties));
         }
     }
 
-    public void setProperties(Map<String, Object> properties) {
-        for (Entry<String, Object> entrySet : properties.entrySet()) {
-            this.put(entrySet.getKey(), entrySet.getValue());
-        }
-        for (Iterator<String> it = this.properties.keySet().iterator(); it.hasNext();) {
-            String entry = it.next();
-            if (!properties.containsKey(entry)) {
-                it.remove();
-            }
+    public void setProperties(Map<String, Object> newProperties) {
+        synchronized (properties) {
+            this.properties.clear();
+            newProperties.entrySet().forEach(e -> put(e.getKey(), e.getValue()));
         }
     }
 
     @Override
     public int hashCode() {
-        synchronized (this) {
-            return properties.hashCode();
-        }
+        return properties.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Configuration)) {
-            return false;
-        }
-        return this.hashCode() == obj.hashCode();
+        return (obj instanceof Configuration) && this.properties.equals(((Configuration) obj).properties);
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Configuration[");
-        boolean first = true;
-        for (final Map.Entry<String, Object> prop : properties.entrySet()) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append(", ");
+
+        synchronized (properties) {
+            boolean first = true;
+            for (final Map.Entry<String, Object> prop : properties.entrySet()) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+                Object value = prop.getValue();
+                sb.append(String.format("{key=%s; type=%s; value=%s}", prop.getKey(),
+                        value != null ? value.getClass().getSimpleName() : "?", value));
             }
-            Object value = prop.getValue();
-            sb.append(String.format("{key=%s; type=%s; value=%s}", prop.getKey(),
-                    value != null ? value.getClass().getSimpleName() : "?", value));
         }
+
         sb.append("]");
         return sb.toString();
     }
