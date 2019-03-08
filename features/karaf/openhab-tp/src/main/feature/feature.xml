@@ -31,7 +31,7 @@
     <!--<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>-->
 
     <!-- Gson -->
-    <bundle dependency="true">mvn:com.google.code.gson/gson/2.3.1</bundle>
+    <bundle dependency="true">mvn:com.google.code.gson/gson/2.4</bundle>
 
     <!-- Measurement -->
     <bundle dependency="true">mvn:javax.measure/unit-api/1.0</bundle>
