@@ -86,9 +86,7 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.rule;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.thing;version='[2.5.0,2.5.1)',\
-	net.bytebuddy.byte-buddy;version='[1.7.9,1.7.10)',\
-	net.bytebuddy.byte-buddy-agent;version='[1.7.9,1.7.10)',\
-	org.mockito.mockito-core;version='[2.13.0,2.13.1)',\
+	org.mockito.mockito-core;version='[2.25.0,2.25.1)',\
 	org.objenesis;version='[2.6.0,2.6.1)',\
 	org.openhab.core.model.thing.tests;version='[2.5.0,2.5.1)',\
 	org.openhab.core.test;version='[2.5.0,2.5.1)',\
@@ -100,5 +98,8 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.model.thing.testsupport;version='[2.5.0,2.5.1)',\
 	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
 	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
-	org.openhab.core.model.rule.runtime;version='[2.5.0,2.5.1)',\
-	slf4j.api;version='[1.7.25,1.7.26)'
+	slf4j.api;version='[1.7.25,1.7.26)',\
+	net.bytebuddy.byte-buddy;version='[1.9.7,1.9.8)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.9.7,1.9.8)',\
+	org.openhab.core.model.persistence.runtime;version='[2.5.0,2.5.1)',\
+	org.openhab.core.storage.json;version='[2.5.0,2.5.1)'

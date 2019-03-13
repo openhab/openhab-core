@@ -18,7 +18,7 @@ Fragment-Host: org.openhab.core.semantics
 	org.apache.commons.lang;version='[2.6.0,2.6.1)',\
 	org.apache.felix.scr;version='[2.1.10,2.1.11)',\
 	org.eclipse.equinox.event;version='[1.4.300,1.4.301)',\
-	org.mockito.mockito-core;version='[2.13.0,2.13.1)',\
+	org.mockito.mockito-core;version='[2.25.0,2.25.1)',\
 	org.objenesis;version='[2.6.0,2.6.1)',\
 	org.openhab.core;version='[2.5.0,2.5.1)',\
 	org.openhab.core.config.core;version='[2.5.0,2.5.1)',\
