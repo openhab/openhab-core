@@ -23,6 +23,8 @@
     <requirement>openhab.tp;filter:="(feature=base)"</requirement>
     <feature dependency="true">openhab.tp-base</feature>
 
+    <feature dependency="true">openhab.tp-gson</feature>
+
     <requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.14.0)(!(version&gt;=2.15.0)))"</requirement>
     <feature dependency="true">openhab.tp-xtext</feature>
 
@@ -515,7 +517,6 @@
   </feature>
 
   <feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
-    <bundle>mvn:p2.osgi.bundle/com.google.gson/2.8.2.v20180104-1110</bundle>
     <bundle>mvn:com.google.guava/guava/18.0</bundle>
     <requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
     <feature dependency="true">openhab.tp-commons-net</feature>
