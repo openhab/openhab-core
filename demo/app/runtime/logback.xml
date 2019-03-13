@@ -1,4 +1,4 @@
-<configuration>
+<configuration scan="true" scanPeriod="30 seconds">
 
   <!-- defined a console append -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -37,5 +37,6 @@
   </root>
 
   <logger name="org.eclipse.smarthome" level="INFO" />
+  <logger name="org.openhab.core" level="INFO" />
 
 </configuration>
