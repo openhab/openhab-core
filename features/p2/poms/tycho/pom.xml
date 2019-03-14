@@ -42,7 +42,7 @@
     <!-- Eclipse p2 repository -->
     <repository>
       <id>eclipse-photon</id>
-      <url>http://download.eclipse.org/releases/photon</url>
+      <url>http://download.eclipse.org/releases/2019-03</url>
       <layout>p2</layout>
     </repository>
   </repositories>
