@@ -1,20 +1,14 @@
-version: 2
+version: 3
 
-requirements:
-  signed_off_by:
-    required: true
-
-always_pending:
-  title_regex: 'WIP'
-  explanation: 'Work in progress...'
-
-# Group settings to apply to all groups by default, optionally being overridden later
-group_defaults:
-  reset_on_push:
-    enabled: true
+pullapprove_conditions:
+- condition: "'WIP' not in title"
+  unmet_status: pending
+  explanation: "Work in progress"
 
 groups:
   code-review:
-    required: 1
-    teams:
-    - core-maintainers
+    reviews:
+      required: 1
+    reviewers:
+      teams:
+      - core-maintainers
