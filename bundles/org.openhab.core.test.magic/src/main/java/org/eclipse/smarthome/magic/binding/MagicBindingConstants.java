@@ -42,6 +42,8 @@ public class MagicBindingConstants {
     public static final ThingTypeUID THING_TYPE_PLAYER = new ThingTypeUID(BINDING_ID, "player");
     public static final ThingTypeUID THING_TYPE_IMAGE = new ThingTypeUID(BINDING_ID, "image");
     public static final ThingTypeUID THING_TYPE_ACTION_MODULE = new ThingTypeUID(BINDING_ID, "action-module");
+    public static final ThingTypeUID THING_TYPE_DYNAMIC_STATE_DESCRIPTION = new ThingTypeUID(BINDING_ID,
+            "dynamic-state-description");
     public static final ThingTypeUID THING_TYPE_ONLINE_OFFLINE = new ThingTypeUID(BINDING_ID, "online-offline");
 
     // bridged things
@@ -57,6 +59,8 @@ public class MagicBindingConstants {
     public static final String CHANNEL_LOCATION = "location";
     public static final String CHANNEL_TEMPERATURE = "temperature";
     public static final String CHANNEL_SET_TEMPERATURE = "set-temperature";
+    public static final String CHANNEL_SYSTEM_COMMAND = "systemcommand";
+    public static final String CHANNEL_SIGNAL_STRENGTH = "signal-strength";
 
     // Firmware update needed models
     public static final String UPDATE_MODEL_PROPERTY = "updateModel";

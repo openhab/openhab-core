@@ -450,7 +450,6 @@ public abstract class GenericItem implements ActiveItem {
         CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
         stateDescription.getOptions()
                 .forEach(so -> builder.withCommandOption(new CommandOption(so.getValue(), so.getLabel())));
-
         return builder.build();
     }
 

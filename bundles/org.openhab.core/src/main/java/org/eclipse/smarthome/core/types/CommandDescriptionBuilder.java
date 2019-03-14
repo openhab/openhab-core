@@ -21,7 +21,6 @@ import org.eclipse.smarthome.core.internal.types.CommandDescriptionImpl;
  * Used to build instances of {@link CommandDescription}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public class CommandDescriptionBuilder {
 
@@ -35,8 +34,9 @@ public class CommandDescriptionBuilder {
         return new CommandDescriptionBuilder();
     }
 
-    public void withCommandOption(CommandOption commandOption) {
+    public CommandDescriptionBuilder withCommandOption(CommandOption commandOption) {
         this.commandOptions.add(commandOption);
+        return this;
     }
 
     public CommandDescription build() {
@@ -45,5 +45,4 @@ public class CommandDescriptionBuilder {
 
         return commandDescription;
     }
-
 }

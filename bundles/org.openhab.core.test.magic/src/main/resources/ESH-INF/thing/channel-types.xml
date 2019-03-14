@@ -28,7 +28,8 @@
 		<item-type>Color</item-type>
 		<label>Color</label>
 		<description>The color channel allows to control the color of a light.
-			It is also possible to dim values and switch the light on and off.
+			It is also possible to dim values and switch the
+			light on and off.
 		</description>
 		<category>ColorLight</category>
 		<tags>
@@ -89,6 +90,11 @@
 		<item-type>String</item-type>
 		<label>Text channel</label>
 		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="systemcommand">
+		<label>Send system command</label>
+		<description>Sends a system command to Kodi. This allows to shutdown/suspend/hibernate/reboot/quit Kodi.</description>
 	</channel-type>
 
 	<channel-type id="temperature">

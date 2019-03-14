@@ -22,8 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * A {@link StateDescriptionFragment} will deliver only the parts of a {@link StateDescription} it knows of.
  * All other methods should return {@code null} to indicate an unknown value.
  *
- * @author Henning Treu - initial contribution and API.
- *
+ * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
 public interface StateDescriptionFragment {
@@ -85,5 +84,4 @@ public interface StateDescriptionFragment {
      */
     @Nullable
     StateDescription toStateDescription();
-
 }

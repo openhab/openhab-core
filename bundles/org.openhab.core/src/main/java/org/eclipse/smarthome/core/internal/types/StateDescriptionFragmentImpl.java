@@ -24,8 +24,7 @@ import org.eclipse.smarthome.core.types.StateOption;
 /**
  * Data holder for StateDescriptionFragment creation.
  *
- * @author Henning Treu - initial contribution
- *
+ * @author Henning Treu - Initial contribution
  */
 public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
@@ -167,5 +166,4 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
         return this;
     }
-
 }

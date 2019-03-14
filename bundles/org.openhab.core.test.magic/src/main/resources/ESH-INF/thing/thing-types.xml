@@ -193,7 +193,22 @@
 				<description>Just a text</description>
 			</parameter>
 		</config-description>
-		</thing-type>
+	</thing-type>
+
+	<thing-type id="dynamic-state-description">
+		<label>Magic DynamicStateDescription Thing</label>
+		<description>A Thing with a DynamicStateDescription</description>
+		<channels>
+			<channel typeId="systemcommand" id="systemcommand" />
+			<channel typeId="system.signal-strength" id="signal-strength" />
+		</channels>
+		<config-description>
+			<parameter name="textParam" type="text" required="true">
+				<label>Text Parameter</label>
+				<description>Just a text</description>
+			</parameter>
+		</config-description>
+	</thing-type>
 
 	<thing-type id="online-offline">
 		<label>Magic Online Offline</label>

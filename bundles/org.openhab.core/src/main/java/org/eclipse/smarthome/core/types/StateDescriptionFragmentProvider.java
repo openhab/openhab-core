@@ -21,8 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * Provide a {@link StateDescriptionFragment} for the current {@link StateDescription}. Use the
  * {@link StateDescriptionFragmentBuilder} to create a {@link StateDescriptionFragment} with only the parts known.
  *
- * @author Henning Treu - initial contribution and API
- *
+ * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
 public interface StateDescriptionFragmentProvider {

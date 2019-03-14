@@ -21,8 +21,7 @@ import org.eclipse.smarthome.core.internal.types.StateDescriptionFragmentImpl;
 /**
  * Builds a {@link StateDescriptionFragment} with the relevant parts only.
  *
- * @author Henning Treu - initial contribution and API.
- *
+ * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
 public class StateDescriptionFragmentBuilder {
@@ -131,5 +130,4 @@ public class StateDescriptionFragmentBuilder {
         fragment.setOptions(options);
         return this;
     }
-
 }
