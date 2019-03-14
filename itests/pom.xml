@@ -16,6 +16,10 @@
 
   <name>openHAB Core :: Integration Tests</name>
 
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
   <modules>
     <module>org.openhab.core.tests</module>
     <module>org.openhab.core.audio.tests</module>
