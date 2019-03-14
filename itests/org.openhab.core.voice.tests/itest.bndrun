@@ -46,7 +46,6 @@ Fragment-Host: org.openhab.core.voice
 	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\
 	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
-	org.openhab.core.storage.json;version='[2.5.0,2.5.1)',\
 	org.apache.xbean.bundleutils;version='[4.12.0,4.12.1)',\
 	org.apache.xbean.finder;version='[4.12.0,4.12.1)',\
 	org.objectweb.asm;version='[7.0.0,7.0.1)',\
