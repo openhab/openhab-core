@@ -73,25 +73,24 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
-        Event event = null;
         if (eventType.equals(ItemCommandEvent.TYPE)) {
-            event = createCommandEvent(topic, payload, source);
+            return createCommandEvent(topic, payload, source);
         } else if (eventType.equals(ItemStateEvent.TYPE)) {
-            event = createStateEvent(topic, payload, source);
+            return createStateEvent(topic, payload, source);
         } else if (eventType.equals(ItemStatePredictedEvent.TYPE)) {
-            event = createStatePredictedEvent(topic, payload, source);
+            return createStatePredictedEvent(topic, payload, source);
         } else if (eventType.equals(ItemStateChangedEvent.TYPE)) {
-            event = createStateChangedEvent(topic, payload);
+            return createStateChangedEvent(topic, payload);
         } else if (eventType.equals(ItemAddedEvent.TYPE)) {
-            event = createAddedEvent(topic, payload);
+            return createAddedEvent(topic, payload);
         } else if (eventType.equals(ItemUpdatedEvent.TYPE)) {
-            event = createUpdatedEvent(topic, payload);
+            return createUpdatedEvent(topic, payload);
         } else if (eventType.equals(ItemRemovedEvent.TYPE)) {
-            event = createRemovedEvent(topic, payload);
+            return createRemovedEvent(topic, payload);
         } else if (eventType.equals(GroupItemStateChangedEvent.TYPE)) {
-            event = createGroupStateChangedEvent(topic, payload);
+            return createGroupStateChangedEvent(topic, payload);
         }
-        return event;
+        throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
     }
 
     private Event createGroupStateChangedEvent(String topic, String payload) {

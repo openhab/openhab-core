@@ -58,7 +58,7 @@ public final class FirmwareEventFactory extends AbstractEventFactory {
         } else if (FirmwareUpdateResultInfoEvent.TYPE.equals(eventType)) {
             return createFirmwareUpdateResultInfoEvent(topic, payload);
         }
-        return null;
+        throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
     }
 
     /**

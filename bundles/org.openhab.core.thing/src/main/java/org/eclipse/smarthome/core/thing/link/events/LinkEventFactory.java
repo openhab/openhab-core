@@ -48,13 +48,12 @@ public class LinkEventFactory extends AbstractEventFactory {
 
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
-        Event event = null;
         if (eventType.equals(ItemChannelLinkAddedEvent.TYPE)) {
-            event = createItemChannelLinkAddedEvent(topic, payload);
+            return createItemChannelLinkAddedEvent(topic, payload);
         } else if (eventType.equals(ItemChannelLinkRemovedEvent.TYPE)) {
-            event = createItemChannelLinkRemovedEvent(topic, payload);
+            return createItemChannelLinkRemovedEvent(topic, payload);
         }
-        return event;
+        throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
     }
 
     private Event createItemChannelLinkAddedEvent(String topic, String payload) throws Exception {

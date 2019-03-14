@@ -14,19 +14,23 @@ package org.eclipse.smarthome.core.events;
 
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * An {@link EventFactory} is responsible for creating {@link Event} instances of specific event types. The Eclipse
  * SmartHome framework uses Event Factories in order to create new Events (
  * {@link #createEvent(String, String, String, String)}) based on the event type, the topic, the payload and the source
  * if an event type is supported ( {@link #getSupportedEventTypes()}).
- * 
+ *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public interface EventFactory {
 
     /**
      * Create a new event instance of a specific event type.
-     * 
+     *
      * @param eventType the event type
      * @param topic the topic
      * @param payload the payload
@@ -36,11 +40,11 @@ public interface EventFactory {
      * @throws IllegalArgumentException if the eventType is not supported
      * @throws Exception if the creation of the event has failed
      */
-    Event createEvent(String eventType, String topic, String payload, String source) throws Exception;
+    Event createEvent(String eventType, String topic, String payload, @Nullable String source) throws Exception;
 
     /**
      * Returns a list of all supported event types of this factory.
-     * 
+     *
      * @return the supported event types (not null)
      */
     Set<String> getSupportedEventTypes();

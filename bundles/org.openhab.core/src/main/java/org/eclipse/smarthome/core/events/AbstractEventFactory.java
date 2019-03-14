@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.gson.Gson;
 
 /**
@@ -26,6 +29,7 @@ import com.google.gson.Gson;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractEventFactory implements EventFactory {
 
     private final Set<String> supportedEventTypes;
@@ -42,7 +46,7 @@ public abstract class AbstractEventFactory implements EventFactory {
     }
 
     @Override
-    public Event createEvent(String eventType, String topic, String payload, String source) throws Exception {
+    public Event createEvent(String eventType, String topic, String payload, @Nullable String source) throws Exception {
         assertValidArguments(eventType, topic, payload);
 
         if (!getSupportedEventTypes().contains(eventType)) {
@@ -73,7 +77,7 @@ public abstract class AbstractEventFactory implements EventFactory {
      * @return the created event instance
      * @throws Exception if the creation of the event fails
      */
-    protected abstract Event createEventByType(String eventType, String topic, String payload, String source)
+    protected abstract Event createEventByType(String eventType, String topic, String payload, @Nullable String source)
             throws Exception;
 
     /**
@@ -108,13 +112,13 @@ public abstract class AbstractEventFactory implements EventFactory {
         return topic.split("/");
     }
 
-    protected static void checkNotNull(Object object, String argumentName) {
+    protected static void checkNotNull(@Nullable Object object, String argumentName) {
         if (object == null) {
             throw new IllegalArgumentException("The argument '" + argumentName + "' must not be null.");
         }
     }
 
-    protected static void checkNotNullOrEmpty(String string, String argumentName) {
+    protected static void checkNotNullOrEmpty(@Nullable String string, String argumentName) {
         if (string == null || string.isEmpty()) {
             throw new IllegalArgumentException("The argument '" + argumentName + "' must not be null or empty.");
         }
