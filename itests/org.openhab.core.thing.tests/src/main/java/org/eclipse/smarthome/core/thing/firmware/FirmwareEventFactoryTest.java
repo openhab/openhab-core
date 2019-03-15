@@ -53,10 +53,9 @@ public class FirmwareEventFactoryTest extends JavaTest {
 
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateEventForUnknownType() throws Exception {
-        Event event = eventFactory.createEventByType("unknownType", "topic", "somePayload", "Source");
-        assertThat(event, is(nullValue()));
+        eventFactory.createEventByType("unknownType", "topic", "somePayload", "Source");
     }
 
     @Test(expected = IllegalArgumentException.class)

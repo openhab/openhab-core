@@ -67,9 +67,6 @@ public class RuleEventFactory extends AbstractEventFactory {
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
         logger.trace("creating ruleEvent of type: {}", eventType);
-        if (eventType == null) {
-            return null;
-        }
         if (eventType.equals(RuleAddedEvent.TYPE)) {
             return createRuleAddedEvent(topic, payload, source);
         } else if (eventType.equals(RuleRemovedEvent.TYPE)) {
@@ -79,7 +76,7 @@ public class RuleEventFactory extends AbstractEventFactory {
         } else if (eventType.equals(RuleUpdatedEvent.TYPE)) {
             return createRuleUpdatedEvent(topic, payload, source);
         }
-        return null;
+        throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
     }
 
     private Event createRuleUpdatedEvent(String topic, String payload, String source) {
@@ -116,9 +113,9 @@ public class RuleEventFactory extends AbstractEventFactory {
     /**
      * Creates a rule updated event.
      *
-     * @param rule    the new rule.
+     * @param rule the new rule.
      * @param oldRule the rule that has been updated.
-     * @param source  the source of the event.
+     * @param source the source of the event.
      * @return {@link RuleUpdatedEvent} instance.
      */
     public static RuleUpdatedEvent createRuleUpdatedEvent(Rule rule, Rule oldRule, String source) {
@@ -136,8 +133,8 @@ public class RuleEventFactory extends AbstractEventFactory {
      * Creates a rule status info event.
      *
      * @param statusInfo the status info of the event.
-     * @param ruleUID    the UID of the rule for which the event is created.
-     * @param source     the source of the event.
+     * @param ruleUID the UID of the rule for which the event is created.
+     * @param source the source of the event.
      * @return {@link RuleStatusInfoEvent} instance.
      */
     public static RuleStatusInfoEvent createRuleStatusInfoEvent(RuleStatusInfo statusInfo, String ruleUID,
@@ -150,7 +147,7 @@ public class RuleEventFactory extends AbstractEventFactory {
     /**
      * Creates a rule removed event.
      *
-     * @param rule   the rule for which this event is created.
+     * @param rule the rule for which this event is created.
      * @param source the source of the event.
      * @return {@link RuleRemovedEvent} instance.
      */
@@ -164,7 +161,7 @@ public class RuleEventFactory extends AbstractEventFactory {
     /**
      * Creates a rule added event.
      *
-     * @param rule   the rule for which this event is created.
+     * @param rule the rule for which this event is created.
      * @param source the source of the event.
      * @return {@link RuleAddedEvent} instance.
      */
