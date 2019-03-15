@@ -1,4 +1,0 @@
-files:
-  - source: /bundles/org.openhab.core.ui.dashboard/src/main/resources/ESH-INF/i18n/dashboard.properties
-    translation: >-
-      /bundles/org.openhab.core.ui.dashboard/src/main/resources/ESH-INF/i18n/dashboard_%two_letters_code%.properties
