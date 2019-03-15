@@ -59,7 +59,7 @@
     <karaf.version>4.2.1</karaf.version>
     <sat.version>0.6.1</sat.version>
     <slf4j.version>1.7.21</slf4j.version>
-    <xtext.version>2.14.0</xtext.version>
+    <xtext.version>2.17.0</xtext.version>
   </properties>
 
   <repositories>
