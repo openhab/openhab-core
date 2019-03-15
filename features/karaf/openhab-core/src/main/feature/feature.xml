@@ -508,7 +508,8 @@
     <feature>openhab-core-base</feature>
     <feature>openhab-core-model-item</feature>
     <feature>openhab-core-model-sitemap</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ui/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ui.chart/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ui.sitemap/${project.version}</bundle>
   </feature>
 
   <feature name="openhab-core-ui-icon" version="${project.version}">

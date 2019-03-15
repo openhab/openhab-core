@@ -21,7 +21,7 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.ui</artifactId>
+      <artifactId>org.openhab.core.ui.sitemap</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
