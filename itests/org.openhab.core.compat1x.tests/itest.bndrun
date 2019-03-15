@@ -69,11 +69,12 @@ Fragment-Host: org.openhab.core.compat1x
 	org.openhab.core.scheduler;version='[2.5.0,2.5.1)',\
 	org.openhab.core.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
-	org.openhab.core.ui;version='[2.5.0,2.5.1)',\
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.rule;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.storage.json;version='[2.5.0,2.5.1)',\
+	org.openhab.core.ui.chart;version='[2.5.0,2.5.1)',\
+	org.openhab.core.ui.sitemap;version='[2.5.0,2.5.1)',\
 	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
 	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\

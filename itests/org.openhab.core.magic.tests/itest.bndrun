@@ -87,7 +87,6 @@ Fragment-Host: org.openhab.core.magic
 	org.openhab.core.scheduler;version='[2.5.0,2.5.1)',\
 	org.openhab.core.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
-	org.openhab.core.ui;version='[2.5.0,2.5.1)',\
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.persistence.runtime;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.rule;version='[2.5.0,2.5.1)',\
