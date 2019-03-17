@@ -144,7 +144,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 try {
                     volume = PercentType.valueOf(args[2]);
                 } catch (Exception e) {
-                    console.println(e.getMessage());
+                    console.println("Specify volume as percentage between 0 and 100");
                     break;
                 }
                 playOnSinks(args[0], args[1], volume, console);

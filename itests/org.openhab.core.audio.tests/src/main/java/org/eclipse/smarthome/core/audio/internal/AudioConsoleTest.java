@@ -140,7 +140,8 @@ public class AudioConsoleTest extends AbstractAudioServeltTest {
                 fileHandler.wavFileName(), "invalid" };
         audioConsoleCommandExtension.execute(args, consoleMock);
 
-        waitForAssert(() -> assertThat("The given volume was invalid", consoleOutput, nullValue()));
+        waitForAssert(() -> assertThat("The given volume was invalid", consoleOutput,
+                is("Specify volume as percentage between 0 and 100")));
     }
 
     @Test
