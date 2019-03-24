@@ -25,6 +25,13 @@
 
     <feature dependency="true">openhab.tp-gson</feature>
 
+    <!-- Allow to wrap non OSGi compatible maven dependencies.
+    Example: "<bundle dependency="true">wrap:mvn:com.github.calimero/calimero-core/2.4</bundle>"
+    Note: The symbolic name should to be set to avoid long auto-generated data
+    Example: wrap:mvn:com.github.calimero/calimero-core/2.4$Bundle-Name=Calimero%20Core&amp;Bundle-SymbolicName=com.github.calimero.calimero-core&amp;Bundle-Version=2.4
+    -->
+    <feature prerequisite="true">wrap</feature>
+  
     <requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.17.0)(!(version&gt;=2.18.0)))"</requirement>
     <feature dependency="true">openhab.tp-xtext</feature>
 
