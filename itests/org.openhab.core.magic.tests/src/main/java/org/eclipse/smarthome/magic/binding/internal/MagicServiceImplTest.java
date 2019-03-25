@@ -23,6 +23,11 @@ import org.eclipse.smarthome.magic.binding.MagicService;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests cases for {@link MagicService}.
+ *
+ * @author Henning Treu - Initial contribution
+ */
 public class MagicServiceImplTest {
 
     private static final String PARAMETER_NAME = "select_decimal_limit";
