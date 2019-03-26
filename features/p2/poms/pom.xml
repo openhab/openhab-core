@@ -48,7 +48,7 @@
     <jetty.version>9.4.12.v20180830</jetty.version>
     <jna.version>4.5.2</jna.version>
     <jackson.version>1.9.13</jackson.version>
-    <sat.version>0.5.0</sat.version>
+    <sat.version>0.6.1</sat.version>
     <nrjavaserial.version>3.15.0.OH2</nrjavaserial.version>
     <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
     <build.helper.maven.plugin.version>1.9.1</build.helper.maven.plugin.version>
