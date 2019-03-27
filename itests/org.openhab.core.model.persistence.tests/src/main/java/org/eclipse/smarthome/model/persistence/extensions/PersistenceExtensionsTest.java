@@ -20,9 +20,6 @@ import java.util.Set;
 
 import org.eclipse.smarthome.core.items.GenericItem;
 import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceService;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.model.persistence.tests.TestPersistenceService;
@@ -31,6 +28,9 @@ import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
 
 /**
  * @author Kai Kreuzer - Initial contribution and API

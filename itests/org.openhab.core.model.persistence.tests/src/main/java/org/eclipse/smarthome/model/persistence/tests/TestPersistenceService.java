@@ -20,12 +20,12 @@ import java.util.Set;
 
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.persistence.FilterCriteria;
-import org.eclipse.smarthome.core.persistence.FilterCriteria.Ordering;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceItemInfo;
-import org.eclipse.smarthome.core.persistence.QueryablePersistenceService;
 import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.persistence.FilterCriteria;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceItemInfo;
+import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.FilterCriteria.Ordering;
 
 /**
  * A simple persistence service used for unit tests

@@ -22,14 +22,14 @@ import java.util.TimeZone;
 
 import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
 import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
-import org.eclipse.smarthome.core.persistence.QueryablePersistenceService;
-import org.eclipse.smarthome.core.persistence.dto.ItemHistoryDTO;
-import org.eclipse.smarthome.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
 import org.eclipse.smarthome.core.types.State;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.dto.ItemHistoryDTO;
+import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
 
 /**
  * Tests for PersistenceItem Restresource
