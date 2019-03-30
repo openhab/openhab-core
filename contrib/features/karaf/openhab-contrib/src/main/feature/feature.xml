@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	Copyright (c) 2010-2019 Contributors to the openHAB project
+
+	See the NOTICE file(s) distributed with this work for additional
+	information.
+
+	This program and the accompanying materials are made available under the
+	terms of the Eclipse Public License 2.0 which is available at
+	http://www.eclipse.org/legal/epl-2.0
+
+	SPDX-License-Identifier: EPL-2.0
+
+-->
+<features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+
+    <!-- Features for Java EE bundles -->
+
+    <feature name="openhab-jaxb" description="JAXB bundles" version="1.0.0">
+        <feature prerequisite="true">wrap</feature>
+        <bundle dependency="true">mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
+        <bundle dependency="true">mvn:com.sun.xml.bind/jaxb-impl/2.3.2</bundle>
+        <bundle dependency="true">mvn:com.sun.xml.bind/jaxb-core/2.3.0</bundle>
+    </feature>
+
+    <feature name="openhab-jaxws" description="JAX-WS (SOAP) bundles" version="1.0.0">
+        <feature prerequisite="true">wrap</feature>
+        <bundle dependency="true">mvn:javax.xml.soap/javax.xml.soap-api/1.4.0</bundle>
+        <bundle dependency="true">wrap:mvn:com.sun.xml.ws/jaxws-rt/2.3.2$Bundle-Name=JAX%20WS%20RI%20Runtime%20Bundle&amp;Bundle-SymbolicName=com.sun.xml.ws.jaxws-rt&amp;Bundle-Version=2.3.2</bundle>
+        <bundle dependency="true">mvn:com.sun.xml.messaging.saaj/saaj-impl/1.5.1</bundle>
+    </feature>
+
+</features>
