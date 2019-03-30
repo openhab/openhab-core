@@ -1,0 +1,2 @@
+Bundle-SymbolicName: ${project.artifactId}
+DynamicImport-Package: *
