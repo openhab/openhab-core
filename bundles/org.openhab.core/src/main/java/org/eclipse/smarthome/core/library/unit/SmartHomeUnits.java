@@ -49,6 +49,8 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.dimension.ArealDensity;
+import org.eclipse.smarthome.core.library.dimension.DataAmount;
+import org.eclipse.smarthome.core.library.dimension.DataTransferRate;
 import org.eclipse.smarthome.core.library.dimension.Density;
 import org.eclipse.smarthome.core.library.dimension.Intensity;
 import org.eclipse.smarthome.core.library.dimension.VolumetricFlowRate;
@@ -162,6 +164,24 @@ public final class SmartHomeUnits extends CustomUnits {
             new ProductUnit<VolumetricFlowRate>(Units.CUBIC_METRE.divide(Units.HOUR)));
     public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_DAY = addUnit(
             new ProductUnit<VolumetricFlowRate>(Units.CUBIC_METRE.divide(Units.DAY)));
+    public static final Unit<DataAmount> BIT = addUnit(new AlternateUnit<DataAmount>(ONE, "bit"));
+    public static final Unit<DataAmount> MEGABIT = addUnit(MetricPrefix.MEGA(BIT));
+    public static final Unit<DataAmount> KILOBIT = addUnit(MetricPrefix.KILO(BIT));
+    public static final Unit<DataAmount> GIGABIT = addUnit(MetricPrefix.GIGA(BIT));
+    public static final Unit<DataAmount> TERABIT = addUnit(MetricPrefix.TERA(BIT));
+
+    public static final Unit<DataAmount> BYTE = addUnit(BIT.multiply(8));
+    public static final Unit<DataAmount> OCTET = BYTE;
+    public static final Unit<DataAmount> KIBIOCTET = addUnit(BinaryPrefix.KIBI(OCTET));
+    public static final Unit<DataAmount> MEBIOCTET = addUnit(BinaryPrefix.MEBI(OCTET));
+    public static final Unit<DataAmount> GIBIOCTET = addUnit(BinaryPrefix.GIBI(OCTET));
+
+    public static final Unit<DataTransferRate> BIT_PER_SECOND = addUnit(
+            new ProductUnit<DataTransferRate>(BIT.divide(Units.SECOND)));
+    public static final Unit<DataTransferRate> KILOBIT_PER_SECOND = addUnit(MetricPrefix.KILO(BIT_PER_SECOND));
+    public static final Unit<DataTransferRate> MEGABIT_PER_SECOND = addUnit(MetricPrefix.MEGA(BIT_PER_SECOND));
+    public static final Unit<DataTransferRate> GIGABIT_PER_SECOND = addUnit(MetricPrefix.GIGA(BIT_PER_SECOND));
+    public static final Unit<DataTransferRate> TERABIT_PER_SECOND = addUnit(MetricPrefix.TERA(BIT_PER_SECOND));
 
     /**
      * Add unit symbols for custom openHAB units.
@@ -169,6 +189,9 @@ public final class SmartHomeUnits extends CustomUnits {
     static {
         // Ordered alphabetical by name
         SimpleUnitFormat.getInstance().label(BAR, BAR.getSymbol());
+        SimpleUnitFormat.getInstance().label(BIT, BIT.getSymbol());
+        SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, "bit/s");
+        SimpleUnitFormat.getInstance().label(BYTE, "o");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_DAY, "m³/d");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_HOUR, "m³/h");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_MINUTE, "m³/min");
@@ -178,10 +201,19 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(DEGREE_ANGLE, "°");
         SimpleUnitFormat.getInstance().label(DEUTSCHE_HAERTE, "°dH");
         SimpleUnitFormat.getInstance().label(DOBSON_UNIT, "DU");
+        SimpleUnitFormat.getInstance().label(GIBIOCTET, "Gio");
+        SimpleUnitFormat.getInstance().label(GIGABIT, "Gbit");
+        SimpleUnitFormat.getInstance().label(GIGABIT_PER_SECOND, "Gbit/s");
         SimpleUnitFormat.getInstance().label(IRRADIANCE, "W/m²");
+        SimpleUnitFormat.getInstance().label(KIBIOCTET, "Kio");
+        SimpleUnitFormat.getInstance().label(KILOBIT, "kbit");
+        SimpleUnitFormat.getInstance().label(KILOBIT_PER_SECOND, "kbit/s");
         SimpleUnitFormat.getInstance().label(KILOWATT_HOUR, "kWh");
         SimpleUnitFormat.getInstance().label(KNOT, KNOT.getSymbol());
         SimpleUnitFormat.getInstance().label(LITRE_PER_MINUTE, "l/min");
+        SimpleUnitFormat.getInstance().label(MEBIOCTET, "Mio");
+        SimpleUnitFormat.getInstance().label(MEGABIT, "Mbit");
+        SimpleUnitFormat.getInstance().label(MEGABIT_PER_SECOND, "Mbit/s");
         SimpleUnitFormat.getInstance().label(MEGAWATT_HOUR, "MWh");
         SimpleUnitFormat.getInstance().label(MICROGRAM_PER_CUBICMETRE, "µg/m³");
         SimpleUnitFormat.getInstance().label(MICROWATT_PER_SQUARE_CENTIMETRE, "µW/cm²");
@@ -189,6 +221,8 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
         SimpleUnitFormat.getInstance().label(PARTS_PER_MILLION, "ppm");
         SimpleUnitFormat.getInstance().label(STANDARD_GRAVITY, "gₙ");
+        SimpleUnitFormat.getInstance().label(TERABIT, "Tbit");
+        SimpleUnitFormat.getInstance().label(TERABIT_PER_SECOND, "Tbit/s");
         SimpleUnitFormat.getInstance().label(WATT_HOUR, "Wh");
         SimpleUnitFormat.getInstance().label(WATT_SECOND, "Ws");
     }

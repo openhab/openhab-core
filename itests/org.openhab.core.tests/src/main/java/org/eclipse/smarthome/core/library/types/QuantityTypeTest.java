@@ -25,6 +25,8 @@ import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.smarthome.core.library.dimension.DataAmount;
+import org.eclipse.smarthome.core.library.dimension.DataTransferRate;
 import org.eclipse.smarthome.core.library.dimension.Density;
 import org.eclipse.smarthome.core.library.dimension.Intensity;
 import org.eclipse.smarthome.core.library.unit.MetricPrefix;
@@ -33,6 +35,7 @@ import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.junit.Test;
 
 import tec.uom.se.quantity.QuantityDimension;
+import tec.uom.se.unit.Units;
 
 /**
  * @author Gaël L'hopital - initial contribution
@@ -292,5 +295,29 @@ public class QuantityTypeTest {
     public void testRainfallRate() {
         QuantityType<Speed> rate = new QuantityType<>("3 mm/h");
         assertEquals("0.1181102362204724409448818897637795 in/h", rate.toUnit("in/h").toString());
+    }
+
+    @Test
+    public void testDataAmount() {
+        QuantityType<DataAmount> amount = new QuantityType<>("8 bit");
+        QuantityType<DataAmount> octet = amount.toUnit(SmartHomeUnits.BYTE);
+        assertEquals(1, octet.byteValue());
+        QuantityType<DataAmount> bigAmount = new QuantityType<>("1 Kio");
+        QuantityType<DataAmount> octets = bigAmount.toUnit(SmartHomeUnits.OCTET);
+        assertEquals(1024, octets.intValue());
+        QuantityType<DataAmount> hugeAmount = new QuantityType<>("1024Gio");
+        QuantityType<DataAmount> lotOfOctets = hugeAmount.toUnit(SmartHomeUnits.OCTET);
+        assertEquals("1099511627776 o", lotOfOctets.toString());
+    }
+
+    @Test
+    public void testDataTransferRate() {
+        QuantityType<DataTransferRate> speed = new QuantityType<>("1024 bit/s");
+        QuantityType<DataTransferRate> octet = speed.toUnit(SmartHomeUnits.OCTET.divide(Units.SECOND));
+        assertEquals(128, octet.intValue());
+        QuantityType<DataTransferRate> gsm2G = new QuantityType<>("115 Mbit/s");
+        QuantityType<DataTransferRate> octets = gsm2G
+                .toUnit(MetricPrefix.KILO(SmartHomeUnits.OCTET).divide(Units.SECOND));
+        assertEquals(14375, octets.intValue());
     }
 }
