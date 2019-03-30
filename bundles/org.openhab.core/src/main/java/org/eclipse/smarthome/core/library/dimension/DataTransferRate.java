@@ -14,12 +14,14 @@ package org.eclipse.smarthome.core.library.dimension;
 
 import javax.measure.Quantity;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Represents a measure of data or data blocks per unit time passing through a communication link
  *
- * @author Gaël L'hopital - initial contribution
+ * @author Gaël L'hopital - Initial contribution
  *
  */
+@NonNullByDefault
 public interface DataTransferRate extends Quantity<DataTransferRate> {
-
 }

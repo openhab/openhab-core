@@ -190,7 +190,7 @@ public final class SmartHomeUnits extends CustomUnits {
         // Ordered alphabetical by name
         SimpleUnitFormat.getInstance().label(BAR, BAR.getSymbol());
         SimpleUnitFormat.getInstance().label(BIT, BIT.getSymbol());
-        SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, BIT.getSymbol() + "/" + Units.SECOND.getSymbol());
+        SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, "bit/s");
         SimpleUnitFormat.getInstance().label(BYTE, "o");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_DAY, "m³/d");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_HOUR, "m³/h");

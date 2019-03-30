@@ -27,7 +27,7 @@ import tec.uom.se.function.RationalConverter;
 /**
  * The binary prefixes used to derive units by specific powers of 2.
  *
- * @author Gaël L'hopital - initial contribution and API
+ * @author Gaël L'hopital - Initial contribution
  *
  */
 @NonNullByDefault
@@ -44,7 +44,6 @@ public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {
     /**
      * The symbol of this prefix, as returned by {@link #getSymbol}.
      *
-     * @serial
      * @see #getSymbol()
      */
     private final String symbol;
@@ -52,7 +51,6 @@ public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {
     /**
      * The <code>UnitConverter</code> of this prefix, as returned by {@link #getConverter}.
      *
-     * @serial
      * @see #getConverter()
      * @see {@link UnitConverter}
      */
@@ -61,10 +59,8 @@ public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {
     /**
      * Creates a new prefix.
      *
-     * @param symbol
-     *                      the symbol of this prefix.
-     * @param converter
-     *                      the associated unit converter.
+     * @param symbol the symbol of this prefix.
+     * @param converter the associated unit converter.
      */
     BinaryPrefix(String symbol, RationalConverter converter) {
         this.symbol = symbol;
@@ -92,104 +88,88 @@ public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {
     }
 
     /**
-     * Returns the specified unit multiplied by the factor <code>10<sup>24</sup></code>
+     * Returns the specified unit multiplied by the factor <code>2<sup>80</sup></code>
      *
-     * @param      <Q>
-     *                 The type of the quantity measured by the unit.
-     * @param unit
-     *                 any unit.
-     * @return <code>unit.times(1e24)</code>.
+     * @param <Q> The type of the quantity measured by the unit.
+     * @param unit any unit.
+     * @return <code>unit.times(2e80)</code>.
      */
     public static <Q extends Quantity<Q>> Unit<Q> YOBI(Unit<Q> unit) {
         return unit.transform(YOBI.getConverter());
     }
 
     /**
-     * Returns the specified unit multiplied by the factor <code>10<sup>21</sup></code>
+     * Returns the specified unit multiplied by the factor <code>2<sup>70</sup></code>
      *
-     * @param      <Q>
-     *                 The type of the quantity measured by the unit.
-     * @param unit
-     *                 any unit.
-     * @return <code>unit.times(1e21)</code>.
+     * @param <Q> The type of the quantity measured by the unit.
+     * @param unit any unit.
+     * @return <code>unit.times(2e70)</code>.
      */
     public static <Q extends Quantity<Q>> Unit<Q> ZEBI(Unit<Q> unit) {
         return unit.transform(ZEBI.getConverter());
     }
 
     /**
-     * Returns the specified unit multiplied by the factor <code>10<sup>18</sup></code>
+     * Returns the specified unit multiplied by the factor <code>2<sup>60</sup></code>
      *
-     * @param      <Q>
-     *                 The type of the quantity measured by the unit.
-     * @param unit
-     *                 any unit.
-     * @return <code>unit.times(1e18)</code>.
+     * @param <Q> The type of the quantity measured by the unit.
+     * @param unit any unit.
+     * @return <code>unit.times(2e60)</code>.
      */
     public static <Q extends Quantity<Q>> Unit<Q> EXBI(Unit<Q> unit) {
         return unit.transform(EXBI.getConverter());
     }
 
     /**
-     * Returns the specified unit multiplied by the factor <code>10<sup>15</sup></code>
+     * Returns the specified unit multiplied by the factor <code>2<sup>50</sup></code>
      *
-     * @param      <Q>
-     *                 The type of the quantity measured by the unit.
-     * @param unit
-     *                 any unit.
-     * @return <code>unit.times(1e15)</code>.
+     * @param <Q> The type of the quantity measured by the unit.
+     * @param unit any unit.
+     * @return <code>unit.times(2e50)</code>.
      */
     public static <Q extends Quantity<Q>> Unit<Q> PEBI(Unit<Q> unit) {
         return unit.transform(PEBI.getConverter());
     }
 
     /**
-     * Returns the specified unit multiplied by the factor <code>10<sup>12</sup></code>
+     * Returns the specified unit multiplied by the factor <code>2<sup>40</sup></code>
      *
-     * @param      <Q>
-     *                 The type of the quantity measured by the unit.
-     * @param unit
-     *                 any unit.
-     * @return <code>unit.times(1e12)</code>.
+     * @param <Q> The type of the quantity measured by the unit.
+     * @param unit any unit.
+     * @return <code>unit.times(2e40)</code>.
      */
     public static <Q extends Quantity<Q>> Unit<Q> TEBI(Unit<Q> unit) {
         return unit.transform(TEBI.getConverter());
     }
 
     /**
-     * Returns the specified unit multiplied by the factor <code>10<sup>9</sup></code>
+     * Returns the specified unit multiplied by the factor <code>2<sup>30</sup></code>
      *
-     * @param      <Q>
-     *                 The type of the quantity measured by the unit.
-     * @param unit
-     *                 any unit.
-     * @return <code>unit.times(1e9)</code>.
+     * @param <Q> The type of the quantity measured by the unit.
+     * @param unit any unit.
+     * @return <code>unit.times(2e30)</code>.
      */
     public static <Q extends Quantity<Q>> Unit<Q> GIBI(Unit<Q> unit) {
         return unit.transform(GIBI.getConverter());
     }
 
     /**
-     * Returns the specified unit multiplied by the factor <code>10<sup>6</sup></code>
+     * Returns the specified unit multiplied by the factor <code>2<sup>20</sup></code>
      *
-     * @param      <Q>
-     *                 The type of the quantity measured by the unit.
-     * @param unit
-     *                 any unit.
-     * @return <code>unit.times(1e6)</code>.
+     * @param <Q> The type of the quantity measured by the unit.
+     * @param unit any unit.
+     * @return <code>unit.times(2e20)</code>.
      */
     public static <Q extends Quantity<Q>> Unit<Q> MEBI(Unit<Q> unit) {
         return unit.transform(MEBI.getConverter());
     }
 
     /**
-     * Returns the specified unit multiplied by the factor <code>10<sup>3</sup></code>
+     * Returns the specified unit multiplied by the factor <code>2<sup>10</sup></code>
      *
-     * @param      <Q>
-     *                 The type of the quantity measured by the unit.
-     * @param unit
-     *                 any unit.
-     * @return <code>unit.times(1e3)</code>.
+     * @param <Q> The type of the quantity measured by the unit.
+     * @param unit any unit.
+     * @return <code>unit.times(2e10)</code>.
      */
     public static <Q extends Quantity<Q>> Unit<Q> KIBI(Unit<Q> unit) {
         return unit.transform(KIBI.getConverter());

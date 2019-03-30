@@ -14,13 +14,15 @@ package org.eclipse.smarthome.core.library.dimension;
 
 import javax.measure.Quantity;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Represents a measure of data amount.
  * The metric system unit for this quantity is "bit".
  *
- * @author Gaël L'hopital - initial contribution
+ * @author Gaël L'hopital - Initial contribution
  *
  */
+@NonNullByDefault
 public interface DataAmount extends Quantity<DataAmount> {
-
 }
