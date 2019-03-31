@@ -15,6 +15,7 @@ package org.eclipse.smarthome.io.net.http;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -96,7 +97,8 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
     private String getContentFromProvider(ContentProvider value) {
         ByteBuffer element = value.iterator().next();
         byte[] data = new byte[element.limit()];
-        ((ByteBuffer) element.duplicate().clear()).get(data);
+        // Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+        ((ByteBuffer) ((Buffer) element.duplicate()).clear()).get(data);
         return new String(data, StandardCharsets.UTF_8);
     }
 
