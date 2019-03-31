@@ -18,6 +18,7 @@
   <modules>
     <module>openhab-tp</module>
     <module>openhab-core</module>
+    <module>openhab-contrib</module>
   </modules>
 
   <dependencies>

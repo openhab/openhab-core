@@ -24,6 +24,7 @@
     <module>test-index</module>
     <module>openhab-core</module>
     <module>openhab-core-index</module>
+    <module>contrib</module>
   </modules>
 
 </project>
