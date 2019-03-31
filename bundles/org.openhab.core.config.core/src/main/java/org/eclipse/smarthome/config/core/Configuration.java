@@ -27,7 +27,11 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.internal.ConfigMapper;
 
 /**
- * This class is a wrapper for configuration settings of {@link Thing}s.
+ * {@link Configuration} wraps String->Object associations and allows to map
+ * such an associations to java classes via the {@link Configuration#as} method.
+ * <p>
+ * Use {@link Configuration} for {@link Thing} settings as well as OSGi service
+ * configurations.
  *
  * @author Dennis Nobel - Initial API and contribution, Changed Logging
  * @author Kai Kreuzer - added constructors and normalization
