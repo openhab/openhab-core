@@ -71,9 +71,9 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
-      <version>3.1_7</version>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.12</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
