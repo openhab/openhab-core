@@ -68,8 +68,13 @@ public class UnitUtilsTest {
 
     @Test
     public void testConversionOfUnit() {
-        assertThat(SmartHomeUnits.DECIBEL_MILLIWATTS.getConverterTo(SmartHomeUnits.WATT).convert(50), closeTo(100, 3));
-        assertThat(SmartHomeUnits.WATT.getConverterTo(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1), closeTo(20, 3));
+        assertThat(SmartHomeUnits.DECIBEL_MILLIWATTS.getConverterTo(SmartHomeUnits.WATT).convert(50),
+                closeTo(100, 0.001));
+        assertThat(SmartHomeUnits.WATT.getConverterTo(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1),
+                closeTo(20, 0.0001));
+        assertThat(
+                SmartHomeUnits.METRE_PER_SQUARE_SECOND.getConverterTo(SmartHomeUnits.STANDARD_GRAVITY).convert(9.8065),
+                closeTo(1.0, 0.0001));
     }
 
     @Test
@@ -79,6 +84,7 @@ public class UnitUtilsTest {
         assertThat(UnitUtils.parseUnit("myLabel km"), is(KILO(SIUnits.METRE)));
         assertThat(UnitUtils.parseUnit("%.2f %%"), is(SmartHomeUnits.PERCENT));
         assertThat(UnitUtils.parseUnit("myLabel %unit%"), is(nullValue()));
+        assertThat(UnitUtils.parseUnit("%.2f kvarh"), is(SmartHomeUnits.KILOVAR_HOUR));
     }
 
     @Test
