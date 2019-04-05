@@ -54,7 +54,7 @@
     <!-- <module>org.openhab.core.model.script.tests</module> -->
     <module>org.openhab.core.model.thing.testsupport</module>
     <module>org.openhab.core.model.thing.tests</module>
-    <!-- <module>org.openhab.core.semantics.tests</module> -->
+    <module>org.openhab.core.semantics.tests</module>
     <module>org.openhab.core.storage.json.tests</module>
     <module>org.openhab.core.thing.tests</module>
     <module>org.openhab.core.thing.xml.tests</module>
