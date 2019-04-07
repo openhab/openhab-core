@@ -14,6 +14,7 @@ package org.eclipse.smarthome.core.library.unit;
 
 import java.math.BigInteger;
 
+import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Acceleration;
 import javax.measure.quantity.AmountOfSubstance;
@@ -63,6 +64,7 @@ import tec.uom.se.function.MultiplyConverter;
 import tec.uom.se.function.PiMultiplierConverter;
 import tec.uom.se.function.RationalConverter;
 import tec.uom.se.unit.AlternateUnit;
+import tec.uom.se.unit.BaseUnit;
 import tec.uom.se.unit.ProductUnit;
 import tec.uom.se.unit.TransformedUnit;
 import tec.uom.se.unit.Units;
@@ -82,8 +84,8 @@ public final class SmartHomeUnits extends CustomUnits {
 
     // Alphabetical ordered by Unit.
     public static final Unit<Acceleration> METRE_PER_SQUARE_SECOND = addUnit(Units.METRE_PER_SQUARE_SECOND);
-    public static final Unit<Acceleration> STANDARD_GRAVITY = new TransformedUnit<>("gₙ",
-            SmartHomeUnits.METRE_PER_SQUARE_SECOND, new MultiplyConverter(9.80665));
+    public static final Unit<Acceleration> STANDARD_GRAVITY = addUnit(
+            SmartHomeUnits.METRE_PER_SQUARE_SECOND.multiply((9.80665)));
     public static final Unit<AmountOfSubstance> MOLE = addUnit(Units.MOLE);
     public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(new TransformedUnit<AmountOfSubstance>("°dH",
             (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE),
@@ -116,6 +118,9 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<Energy> WATT_HOUR = addUnit(new ProductUnit<Energy>(Units.WATT.multiply(Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
+    public static final Unit<Power> KILOVAR = addUnit(MetricPrefix.KILO(new BaseUnit<Power>("var")));
+    public static final Unit<Energy> KILOVAR_HOUR = addUnit(new ProductUnit<>(KILOVAR.divide(Units.HOUR)),
+            Energy.class);
     public static final Unit<Force> NEWTON = addUnit(Units.NEWTON);
     public static final Unit<Frequency> HERTZ = addUnit(Units.HERTZ);
     public static final Unit<Intensity> IRRADIANCE = addUnit(
@@ -208,6 +213,8 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(KIBIOCTET, "Kio");
         SimpleUnitFormat.getInstance().label(KILOBIT, "kbit");
         SimpleUnitFormat.getInstance().label(KILOBIT_PER_SECOND, "kbit/s");
+        SimpleUnitFormat.getInstance().label(KILOVAR, "kvar");
+        SimpleUnitFormat.getInstance().label(KILOVAR_HOUR, "kvarh");
         SimpleUnitFormat.getInstance().label(KILOWATT_HOUR, "kWh");
         SimpleUnitFormat.getInstance().label(KNOT, KNOT.getSymbol());
         SimpleUnitFormat.getInstance().label(LITRE_PER_MINUTE, "l/min");
@@ -250,4 +257,18 @@ public final class SmartHomeUnits extends CustomUnits {
         INSTANCE.units.add(unit);
         return unit;
     }
+
+    /**
+     * Adds a new unit and maps it to the specified quantity type.
+     *
+     * @param unit the unit being added.
+     * @param type the quantity type.
+     * @return <code>unit</code>.
+     */
+    private static <U extends AbstractUnit<?>> U addUnit(U unit, Class<? extends Quantity<?>> type) {
+        INSTANCE.units.add(unit);
+        INSTANCE.quantityToUnit.put(type, unit);
+        return unit;
+    }
+
 }
