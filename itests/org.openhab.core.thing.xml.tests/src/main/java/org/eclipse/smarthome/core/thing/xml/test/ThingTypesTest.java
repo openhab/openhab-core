@@ -24,6 +24,9 @@ import java.util.Set;
 import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
 import org.eclipse.smarthome.core.thing.type.BridgeType;
 import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
+import org.eclipse.smarthome.core.thing.type.ChannelGroupDefinition;
+import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
+import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeRegistry;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
 import org.eclipse.smarthome.core.thing.type.ThingType;
@@ -40,11 +43,12 @@ public class ThingTypesTest extends JavaOSGiTest {
 
     private LoadedTestBundle loadedTestBundle() throws Exception {
         return new LoadedTestBundle("ThingTypesTest.bundle", bundleContext, this::getService,
-                new StuffAddition().thingTypes(3));
+                new StuffAddition().thingTypes(4));
     }
 
     private ThingTypeProvider thingTypeProvider;
     private ChannelTypeRegistry channelTypeRegistry;
+    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
 
     @Before
     public void setUp() {
@@ -53,6 +57,9 @@ public class ThingTypesTest extends JavaOSGiTest {
 
         channelTypeRegistry = getService(ChannelTypeRegistry.class);
         assertThat(channelTypeRegistry, is(notNullValue()));
+
+        channelGroupTypeRegistry = getService(ChannelGroupTypeRegistry.class);
+        assertThat(channelGroupTypeRegistry, is(notNullValue()));
     }
 
     @Test
@@ -60,6 +67,7 @@ public class ThingTypesTest extends JavaOSGiTest {
         try (final AutoCloseable unused = loadedTestBundle()) {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(null);
 
+            // HUE Bridge
             BridgeType bridgeType = (BridgeType) thingTypes.stream().filter(it -> it.toString().equals("hue:bridge"))
                     .findFirst().get();
             assertThat(bridgeType, is(notNullValue()));
@@ -71,6 +79,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(bridgeType.getProperties().get("vendor"), is("Philips"));
             assertThat(bridgeType.getRepresentationProperty(), is("serialNumber"));
 
+            // HUE Lamp
             ThingType thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp")).findFirst().get();
 
             assertThat(thingType, is(notNullValue()));
@@ -163,11 +172,42 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(state.getOptions().get(0).getValue(), is(equalTo("SOUND")));
             assertThat(state.getOptions().get(0).getLabel(), is(equalTo("My great sound.")));
 
+            // HUE Lamp with group
             thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp-with-group")).findFirst().get();
+            assertThat(thingType, is(notNullValue()));
             assertThat(thingType.getProperties().size(), is(0));
             assertThat(thingType.getCategory(), is(nullValue()));
             assertThat(thingType.isListed(), is(true));
             assertThat(thingType.getExtensibleChannelTypeIds(), containsInAnyOrder("brightness", "alarm"));
+
+            List<ChannelGroupDefinition> channelGroupDefinitions = thingType.getChannelGroupDefinitions();
+            assertThat(channelGroupDefinitions.size(), is(2));
+
+            // Channel Group
+            ChannelGroupDefinition channelGroupDefinition = channelGroupDefinitions.stream()
+                    .filter(it -> it.getId().equals("lampgroup")).findFirst().get();
+            assertThat(channelGroupDefinition, is(notNullValue()));
+            ChannelGroupType channelGroupType = channelGroupTypeRegistry
+                    .getChannelGroupType(channelGroupDefinition.getTypeUID());
+            assertThat(channelGroupType, is(notNullValue()));
+            channelDefinitions = channelGroupType.getChannelDefinitions();
+            assertThat(channelDefinitions.size(), is(3));
+
+            // Channel Group without channels
+            channelGroupDefinition = channelGroupDefinitions.stream()
+                    .filter(it -> it.getId().equals("lampgroup-without-channels")).findFirst().get();
+            assertThat(channelGroupDefinition, is(notNullValue()));
+            channelGroupType = channelGroupTypeRegistry.getChannelGroupType(channelGroupDefinition.getTypeUID());
+            assertThat(channelGroupType, is(notNullValue()));
+            channelDefinitions = channelGroupType.getChannelDefinitions();
+            assertThat(channelDefinitions.size(), is(0));
+
+            // HUE Lamp without channels
+            thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp-without-channels")).findFirst()
+                    .get();
+            assertThat(thingType, is(notNullValue()));
+            channelDefinitions = thingType.getChannelDefinitions();
+            assertThat(channelDefinitions.size(), is(0));
         }
     }
 
