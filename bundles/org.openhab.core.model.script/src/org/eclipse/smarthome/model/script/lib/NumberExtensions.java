@@ -26,8 +26,7 @@ import org.eclipse.smarthome.core.types.Type;
  * This class contains all kinds of extensions to be used by scripts and not
  * provided by Xbase. These include things like number handling and comparisons.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class NumberExtensions {
 
@@ -89,7 +88,13 @@ public class NumberExtensions {
     public static BigDecimal operator_divide(Number x, Number y) {
         BigDecimal xValue = numberToBigDecimal(x);
         BigDecimal yValue = numberToBigDecimal(y);
-        return xValue.divide(yValue, 8, RoundingMode.HALF_UP);
+        if (xValue == null) {
+            return NULL_DEFINITION;
+        } else if (yValue == null) {
+            return NULL_DEFINITION;
+        } else {
+            return xValue.divide(yValue, 8, RoundingMode.HALF_UP);
+        }
     }
 
     // Comparison operations between numbers
