@@ -434,6 +434,14 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- Paho MQTT -->
+    <dependency>
+      <groupId>org.eclipse.paho</groupId>
+      <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+      <version>1.2.0</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- XStream -->
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
