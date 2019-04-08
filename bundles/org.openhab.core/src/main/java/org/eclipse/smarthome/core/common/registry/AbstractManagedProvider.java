@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> extends AbstractProvider<E>
         implements ManagedProvider<E, K> {
 
-    private StorageService storageService;
+    protected StorageService storageService;
     private volatile Storage<PE> storage;
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractManagedProvider.class);
