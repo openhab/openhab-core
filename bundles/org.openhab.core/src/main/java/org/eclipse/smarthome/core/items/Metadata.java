@@ -25,7 +25,7 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  * This is a data class for storing meta-data for a given item and namespace.
  * It is the entity used for within the {@link MetadataRegistry}.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault
@@ -34,6 +34,9 @@ public final class Metadata implements Identifiable<MetadataKey> {
     private final MetadataKey key;
     private final String value;
     private final Map<String, Object> configuration;
+
+    Metadata() { // For (de)serialization
+    }
 
     public Metadata(MetadataKey key, String value, @Nullable Map<String, Object> configuration) {
         this.key = key;
