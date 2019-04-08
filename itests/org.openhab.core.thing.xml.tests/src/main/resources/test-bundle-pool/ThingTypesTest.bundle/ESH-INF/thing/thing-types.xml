@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="hue"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<thing:thing-descriptions bindingId="hue" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description.xsd">
 
@@ -63,7 +62,7 @@
 		<representation-property>uniqueId</representation-property>
 	</thing-type>
 
-	<!-- HUE Lamp with Group -->
+	<!-- HUE Lamp with group -->
 	<thing-type id="lamp-with-group" extensible="brightness, alarm">
 
 		<label>HUE Lamp</label>
@@ -71,17 +70,34 @@
 
 		<channel-groups>
 			<channel-group id="lampgroup" typeId="lampgroup" />
+			<channel-group id="lampgroup-without-channels" typeId="lampgroup-without-channels" />
 		</channel-groups>
 	</thing-type>
 
+	<!-- HUE Lamp without channels -->
+	<thing-type id="lamp-without-channels" listed="false" extensible="alarm,brightness">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge" />
+		</supported-bridge-type-refs>
+
+		<label>HUE Lamp</label>
+		<description>My own great HUE Lamp without channels.</description>
+
+		<category>Lightbulb</category>
+
+		<properties>
+			<property name="key1">value1</property>
+			<property name="key2">value2</property>
+		</properties>
+		<representation-property>uniqueId</representation-property>
+	</thing-type>
 
 	<!-- HUE Lamp Color Channel -->
 	<channel-type id="color">
 		<item-type>ColorItem</item-type>
 		<label>HUE Lamp Color</label>
-		<description>The color channel allows to control the color of the hue
-			lamp. It is also possible to dim values and switch the lamp on and
-			off.
+		<description>The color channel allows to control the color of the hue lamp. It is also possible to dim values and
+			switch the lamp on and off.
 		</description>
 		<tags>
 			<tag>Hue</tag>
@@ -116,8 +132,7 @@
 			<tag>Hue</tag>
 			<tag>AlarmSystem</tag>
 		</tags>
-		<state min="0" max="100.0" step="10.0" pattern="%d Peek"
-			readOnly="true">
+		<state min="0" max="100.0" step="10.0" pattern="%d Peek" readOnly="true">
 			<options>
 				<option value="SOUND">My great sound.</option>
 				<option value="LIGHT" />
@@ -134,6 +149,12 @@
 			<channel id="color_temperature" typeId="color_temperature" />
 			<channel id="alarm" typeId="alarm" />
 		</channels>
+	</channel-group-type>
+
+	<!-- Channel Group without channels -->
+	<channel-group-type id="lampgroup-without-channels" advanced="true">
+		<label>Alarm System</label>
+		<description>The alarm system without channels.</description>
 	</channel-group-type>
 
 </thing:thing-descriptions>
