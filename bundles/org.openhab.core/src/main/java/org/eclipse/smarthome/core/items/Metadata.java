@@ -35,7 +35,15 @@ public final class Metadata implements Identifiable<MetadataKey> {
     private final String value;
     private final Map<String, Object> configuration;
 
-    Metadata() { // For (de)serialization
+    /**
+     * Package protected default constructor to allow reflective instantiation.
+     *
+     * !!! DO NOT REMOVE - Gson needs it !!!
+     */
+    Metadata() {
+        key = new MetadataKey("", "");
+        value = "";
+        configuration = Collections.emptyMap();
     }
 
     public Metadata(MetadataKey key, String value, @Nullable Map<String, Object> configuration) {
