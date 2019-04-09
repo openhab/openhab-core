@@ -69,7 +69,7 @@ public class MapDbStorageServiceTest {
     }
 
     private static class MockConfiguration {
-        private final Map<String, Object> configuration = new HashMap<String, Object>();
+        private final Map<String, Object> configuration = new HashMap<>();
 
         public void put(String key, Object value) {
             configuration.put(key, value);
