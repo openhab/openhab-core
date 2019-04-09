@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * The MapDbStorage is concrete implementation of the {@link Storage} interface.
@@ -54,7 +55,14 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
 
     private transient Gson mapper;
 
-    public MapDbStorage(DB db, String name, @Nullable ClassLoader classLoader) {
+    /**
+     * Constructor.
+     *
+     * @param db the database
+     * @param name the name
+     * @param classLoader the classloader used for deserialization
+     */
+    public MapDbStorage(final DB db, final String name, final @Nullable ClassLoader classLoader) {
         this.name = name;
         this.db = db;
         this.classLoader = classLoader;
@@ -111,10 +119,11 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
     }
 
     /**
-     * Transforms the given {@code value} into its JSON representation using {@code Gson}. Since we do not know the type
-     * of {@code value} while
-     * deserializing it afterwards we prepend its qualified type name to the
-     * JSON String.
+     * Transforms the given {@code value} into its JSON representation using {@code Gson}.
+     *
+     * <p>
+     * Since we do not know the type of {@code value} while deserializing it afterwards we prepend its qualified type
+     * name to the JSON String.
      *
      * @param value the {@code value} to store
      * @return the JSON document prepended with the qualified type name of {@code value}
@@ -133,13 +142,14 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
     }
 
     /**
-     * Deserializes and instantiates an object of type {@code T} out of the
-     * given JSON String. A special classloader (other than the one of the
-     * MapDB bundle) is used in order to load the classes in the context of
-     * the calling bundle.
+     * Deserializes and instantiates an object of type {@code T} out of the given JSON String.
      *
-     * @param json
-     * @return
+     * <p>
+     * A special classloader (other than the one of the MapDB bundle) is used in order to load the classes in the
+     * context of the calling bundle.
+     *
+     * @param json the JSON String
+     * @return the deserialized object
      */
     @SuppressWarnings("unchecked")
     public @Nullable T deserialize(@Nullable String json) {
@@ -167,8 +177,8 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
 
             value = mapper.fromJson(valueAsString, loadedValueType);
             logger.trace("deserialized value '{}' from MapDB", value);
-        } catch (Exception e) {
-            logger.warn("Couldn't deserialize value '{}'. Root cause is: {}", json, e.getMessage());
+        } catch (final JsonSyntaxException | ClassNotFoundException ex) {
+            logger.warn("Couldn't deserialize value '{}'. Root cause is: {}", json, ex.getMessage());
         }
 
         return value;

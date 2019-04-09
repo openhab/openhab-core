@@ -40,13 +40,13 @@ public class MapDbStorageService implements DeletableStorageService {
 
     private final Logger logger = LoggerFactory.getLogger(MapDbStorageService.class);
 
-    /** the name of the mapdb database ({@code storage.mapdb}) */
+    /* the name of the mapdb database ({@code storage.mapdb}) */
     private static final String DB_FILE_NAME = "storage.mapdb";
 
-    /** holds the local instance of the MapDB database */
+    /* holds the local instance of the MapDB database */
     private DB db;
 
-    /** the folder name to store mapdb databases ({@code mapdb} by default) */
+    /* the folder name to store mapdb databases ({@code mapdb} by default) */
     private String dbFolderName = "mapdb";
 
     @Activate
@@ -71,7 +71,7 @@ public class MapDbStorageService implements DeletableStorageService {
 
     @Override
     public <T> DeletableStorage<T> getStorage(String name, ClassLoader classLoader) {
-        return new MapDbStorage<T>(db, name, classLoader);
+        return new MapDbStorage<>(db, name, classLoader);
     }
 
     @Override

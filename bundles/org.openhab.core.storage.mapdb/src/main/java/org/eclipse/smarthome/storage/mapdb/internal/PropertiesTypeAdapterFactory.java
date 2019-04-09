@@ -14,6 +14,8 @@ package org.eclipse.smarthome.storage.mapdb.internal;
 
 import java.lang.reflect.Type;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
@@ -21,8 +23,7 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * TypeAdapterFactory responsible for returning a new instance of {@link PropertiesTypeAdapter} if the given type
- * matches Map<String, Object>
- * or null otherwise.
+ * matches Map&lt;String, Object&gt; or null otherwise.
  *
  * @author Ivan Iliev
  *
@@ -31,7 +32,7 @@ public class PropertiesTypeAdapterFactory implements TypeAdapterFactory {
 
     @SuppressWarnings({ "unused", "unchecked" })
     @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+    public <T> @Nullable TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
         Type type = typeToken.getType();
 
         Class<? super T> rawType = typeToken.getRawType();
