@@ -26,7 +26,7 @@ import org.osgi.service.http.HttpContext;
 
 /**
  *
- * @author @author Łukasz Dywicki - Initial contribution
+ * @author Łukasz Dywicki - Initial contribution
  */
 public class HttpContextFactoryServiceImplTest {
 
