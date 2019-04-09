@@ -9,21 +9,29 @@
     <version>2.5.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core</artifactId>
+  <artifactId>org.openhab.core.persistence.rest</artifactId>
 
-  <name>openHAB Core :: Bundles :: Core</name>
+  <name>openHAB Core :: Bundles :: Persistence :: REST</name>
 
   <dependencies>
-    <!-- temporary until OH3. Usually core should not reference subsystems but other way round -->
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.storage</artifactId>
+      <artifactId>org.openhab.core.persistence</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.authentication</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.rest</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
+
 </project>

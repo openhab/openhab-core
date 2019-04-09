@@ -9,16 +9,7 @@
     <version>2.5.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.scheduler</artifactId>
+  <artifactId>org.openhab.core.authentication</artifactId>
 
-  <name>openHAB Core :: Bundles :: Scheduler Service</name>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
+  <name>openHAB Core :: Bundles :: Authentication</name>
 </project>
