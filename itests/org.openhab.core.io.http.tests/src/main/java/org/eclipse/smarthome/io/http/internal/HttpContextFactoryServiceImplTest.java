@@ -24,6 +24,10 @@ import org.mockito.Mock;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 
+/**
+ *
+ * @author Łukasz Dywicki - Initial contribution
+ */
 public class HttpContextFactoryServiceImplTest {
 
     private static final String RESOURCE = "resource";
