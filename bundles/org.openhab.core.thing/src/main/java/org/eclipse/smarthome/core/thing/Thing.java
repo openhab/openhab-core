@@ -29,11 +29,12 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandler;
  * A {@link Thing} might be connected through a {@link Bridge}.
  * <p>
  *
- * @author Dennis Nobel - Initial contribution and API
+ * @author Dennis Nobel - Initial contribution
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Simon Kaufmann - Added label, location
  * @author Kai Kreuzer - Removed linked items from Thing
  * @author Yordan Zhelev - Added method for getting the enabled status
+ * @author Christoph Weitkamp - Added method `getChannel(ChannelUID)`
  */
 @NonNullByDefault
 public interface Thing extends Identifiable<ThingUID> {
@@ -87,14 +88,22 @@ public interface Thing extends Identifiable<ThingUID> {
     List<Channel> getChannelsOfGroup(String channelGroupId);
 
     /**
-     * Gets the channel for the given id or null if no channel with the id
-     * exists.
+     * Gets the channel for the given id or null if no channel with the id exists.
      *
      * @param channelId channel ID
      * @return the channel for the given id or null if no channel with the id exists
      */
     @Nullable
     Channel getChannel(String channelId);
+
+    /**
+     * Gets the channel for the given UID or null if no channel with the UID exists.
+     *
+     * @param channelUID channel UID
+     * @return the channel for the given UID or null if no channel with the UID exists
+     */
+    @Nullable
+    Channel getChannel(ChannelUID channelUID);
 
     /**
      * Gets the status of a thing.
@@ -217,7 +226,7 @@ public interface Thing extends Identifiable<ThingUID> {
 
     /**
      * Returns information whether the {@link Thing} is enabled or not.
-     * 
+     *
      * @return Returns {@code true} if the thing is enabled. Return {@code false} otherwise.
      */
     boolean isEnabled();

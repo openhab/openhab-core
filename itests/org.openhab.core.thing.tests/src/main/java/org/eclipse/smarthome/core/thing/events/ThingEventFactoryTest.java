@@ -22,11 +22,12 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
+import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.eclipse.smarthome.core.thing.dto.ThingDTOMapper;
 import org.eclipse.smarthome.core.thing.events.ThingEventFactory.TriggerEventPayloadBean;
-import org.eclipse.smarthome.core.thing.internal.ThingImpl;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Test;
 
@@ -44,8 +45,9 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
 
     private final ThingEventFactory factory = new ThingEventFactory();
 
-    private final ThingUID THING_UID = new ThingUID("binding:type:id");
-    private final Thing THING = new ThingImpl(THING_UID);
+    private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");
+    private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "id");
+    private static final Thing THING = ThingBuilder.create(THING_TYPE_UID, THING_UID).build();
 
     private final String THING_STATUS_EVENT_TOPIC = ThingEventFactory.THING_STATUS_INFO_EVENT_TOPIC
             .replace("{thingUID}", THING_UID.getAsString());

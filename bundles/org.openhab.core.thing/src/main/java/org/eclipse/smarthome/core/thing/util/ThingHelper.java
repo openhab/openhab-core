@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.iterators.ArrayIterator;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Channel;
@@ -47,6 +48,7 @@ import org.eclipse.smarthome.core.thing.internal.ThingImpl;
  * @author Dennis Nobel - Removed createAndBindItems method
  * @author Kai Kreuzer - Added merge method
  */
+@NonNullByDefault
 public class ThingHelper {
 
     /**
@@ -98,9 +100,11 @@ public class ThingHelper {
     }
 
     public static void addChannelsToThing(Thing thing, Collection<Channel> channels) {
-        List<Channel> mutableChannels = ((ThingImpl) thing).getChannelsMutable();
+        Collection<Channel> mutableChannels = thing.getChannels();
         ensureUniqueChannels(mutableChannels, channels);
-        mutableChannels.addAll(channels);
+        for (Channel channel : channels) {
+            ((ThingImpl) thing).addChannel(channel);
+        }
     }
 
     public static void ensureUnique(Collection<Channel> channels) {

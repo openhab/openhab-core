@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.thing.Bridge;
+import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
@@ -273,13 +275,12 @@ public class ThingFactoryTest extends JavaOSGiTest {
 
         Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"), configuration);
 
+        List<String> channelUIDs = Arrays.asList("bindingId:thingType:thingId:group1#ch1",
+                "bindingId:thingType:thingId:group1#ch2", "bindingId:thingType:thingId:group2#ch1");
         assertThat(thing.getChannels().size(), is(3));
-        assertThat(thing.getChannels().get(0).getUID().toString(),
-                is(equalTo("bindingId:thingType:thingId:group1#ch1")));
-        assertThat(thing.getChannels().get(1).getUID().toString(),
-                is(equalTo("bindingId:thingType:thingId:group1#ch2")));
-        assertThat(thing.getChannels().get(2).getUID().toString(),
-                is(equalTo("bindingId:thingType:thingId:group2#ch1")));
+        for (Channel channel : thing.getChannels()) {
+            assertThat(channelUIDs.contains(channel.getUID().toString()), is(true));
+        }
     }
 
     @Test

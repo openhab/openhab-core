@@ -15,8 +15,11 @@ package org.eclipse.smarthome.core.thing.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -29,11 +32,14 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Denis Nobel - Initial contribution
+ * @author Christoph Weitkamp - Changed internal handling of things and added method `getThing(ThingUID)`
  */
+@NonNullByDefault
 public class BridgeImpl extends ThingImpl implements Bridge {
 
-    private transient List<Thing> things = new CopyOnWriteArrayList<>();
-    private transient Logger logger = LoggerFactory.getLogger(BridgeImpl.class);
+    private final transient Logger logger = LoggerFactory.getLogger(BridgeImpl.class);
+
+    private final transient Map<ThingUID, Thing> things = new ConcurrentHashMap<>();
 
     /**
      * Package protected default constructor to allow reflective instantiation.
@@ -67,20 +73,25 @@ public class BridgeImpl extends ThingImpl implements Bridge {
     }
 
     public void addThing(Thing thing) {
-        things.add(thing);
+        things.put(thing.getUID(), thing);
     }
 
     public void removeThing(Thing thing) {
-        things.remove(thing);
+        things.remove(thing.getUID(), thing);
+    }
+
+    @Override
+    public @Nullable Thing getThing(ThingUID thingUID) {
+        return things.get(thingUID);
     }
 
     @Override
     public List<Thing> getThings() {
-        return Collections.unmodifiableList(new ArrayList<>(things));
+        return Collections.unmodifiableList(new ArrayList<>(things.values()));
     }
 
     @Override
-    public BridgeHandler getHandler() {
+    public @Nullable BridgeHandler getHandler() {
         BridgeHandler bridgeHandler = null;
         ThingHandler thingHandler = super.getHandler();
         if (thingHandler instanceof BridgeHandler) {

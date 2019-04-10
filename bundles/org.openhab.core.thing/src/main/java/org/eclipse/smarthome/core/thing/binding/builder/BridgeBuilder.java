@@ -29,10 +29,9 @@ import org.eclipse.smarthome.core.thing.internal.BridgeImpl;
 /**
  * This class allows the easy construction of a {@link Bridge} instance using the builder pattern.
  *
- * @author Dennis Nobel - Initial contribution and API
+ * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Refactoring to make BridgeBuilder a subclass of ThingBuilder
  * @author Markus Rathgeb - Override methods to return BridgeBuidler instead of ThingBuidler
- *
  */
 @NonNullByDefault
 public class BridgeBuilder extends ThingBuilder {
