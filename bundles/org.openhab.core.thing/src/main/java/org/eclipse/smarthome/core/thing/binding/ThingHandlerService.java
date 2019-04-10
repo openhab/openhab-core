@@ -13,11 +13,25 @@
 package org.eclipse.smarthome.core.thing.binding;
 
 /**
+ * The {@link ThingHandler#getServices()} function allows you to return a list of classes,
+ * implementing this interface, that will be started as OSGi services. 
+ * <p>
+ * Use this for example to start thing specific discovery services (extending {@link AbstractDiscoveryService}).
+ * Example:
+ * <pre>
+ * @NonNullByDefault
+ * public class MyThingDiscovery extends AbstractDiscoveryService implements ThingHandlerService {
+ *     private @Nullable ThingHandler thingHandler; // A reference to your thing handler
  *
- * Interface for a service that provides access to a {@link ThingHandler}
+ *     public void activate() {
+ *         super(Collections.emptyMap()); // start AbstractDiscoveryService
+ *     }
+ *     public void setThingHandler(ThingHandler handler) { this.thingHandler = handler; }
+ *     public ThingHandler getThingHandler() { return this.thingHandler; }
+ * }
+ * </pre>
  *
  * @author Stefan Triller - initial contribution
- *
  */
 public interface ThingHandlerService {
 
