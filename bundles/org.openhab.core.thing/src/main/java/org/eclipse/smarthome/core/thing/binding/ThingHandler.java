@@ -188,9 +188,13 @@ public interface ThingHandler {
     void handleRemoval();
 
     /**
-     * This method provides a list of classes which should be registered as services by the framework
+     * This method provides a list of classes which should be registered as services by the framework.
+     * <p>
+     * Use this method for example to return your thing specific discoveries (extending {@link AbstractDiscoveryService}).
+     * For more details have a look at the {@link ThingHandlerService} documentation.
      *
-     * @return - list of classes that will be registered as OSGi services
+     * @return - list of classes that will be registered as OSGi services,
+     *           for example "Collections.singletonList(MyThingDiscovery.class);"
      */
     default Collection<Class<? extends ThingHandlerService>> getServices() {
         return Collections.emptyList();
