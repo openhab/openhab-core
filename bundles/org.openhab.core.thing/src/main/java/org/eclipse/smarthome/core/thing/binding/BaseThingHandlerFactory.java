@@ -188,7 +188,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                         } else {
                             serviceRegs.add(serviceReg);
                         }
-                        ths.activate();
+                        serviceInstance.activate();
                     }
                 }
             } catch (InstantiationException | IllegalAccessException e) {
