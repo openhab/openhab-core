@@ -14,13 +14,13 @@ package org.openhab.core.automation.module.script.internal;
 
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
@@ -34,22 +34,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The ScriptManager allows to load and unloading of script files using a script engines script type
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
+ * @author Scott Rushworth - replaced GenericScriptEngineFactory with a service and cleaned up logging
  */
 @NonNullByDefault
 @Component(service = ScriptEngineManager.class)
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    private Set<ScriptEngineFactory> scriptEngineFactories = new HashSet<>();
     private HashMap<String, @Nullable ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private HashMap<String, @Nullable ScriptEngineFactory> supportedLanguages = new HashMap<>();
-    private GenericScriptEngineFactory genericScriptEngineFactory = new GenericScriptEngineFactory();
-
+    private HashMap<String, @Nullable ScriptEngineFactory> customSupport = new HashMap<>();
+    private HashMap<String, @Nullable ScriptEngineFactory> genericSupport = new HashMap<>();
     private @NonNullByDefault({}) ScriptExtensionManager scriptExtensionManager;
 
     @Reference
@@ -62,63 +58,89 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addScriptEngineFactory(ScriptEngineFactory provider) {
-        this.scriptEngineFactories.add(provider);
+    public void addScriptEngineFactory(ScriptEngineFactory engineFactory) {
+        List<String> scriptTypes = engineFactory.getScriptTypes();
 
-        for (String language : provider.getLanguages()) {
-            this.supportedLanguages.put(language, provider);
-        }
-    }
-
-    public void removeScriptEngineFactory(ScriptEngineFactory provider) {
-        this.scriptEngineFactories.remove(provider);
-
-        for (String language : provider.getLanguages()) {
-            this.supportedLanguages.remove(language, provider);
-        }
-    }
-
-    @Override
-    public boolean isSupported(String fileExtension) {
-        return findEngineFactory(fileExtension) != null;
-    }
-
-    @Override
-    public @Nullable ScriptEngineContainer createScriptEngine(String fileExtension, String scriptIdentifier) {
-        ScriptEngineContainer result = null;
-        ScriptEngineFactory engineProvider = findEngineFactory(fileExtension);
-
-        if (engineProvider == null) {
-            logger.error("loadScript(): scriptengine for language '{}' could not be found for identifier: {}",
-                    fileExtension, scriptIdentifier);
-        } else {
-            try {
-                ScriptEngine engine = engineProvider.createScriptEngine(fileExtension);
-                HashMap<String, Object> scriptExManager = new HashMap<>();
-                result = new ScriptEngineContainer(engine, engineProvider, scriptIdentifier);
-                ScriptExtensionManagerWrapper wrapper = new ScriptExtensionManagerWrapper(scriptExtensionManager,
-                        result);
-                scriptExManager.put("scriptExtension", wrapper);
-                scriptExManager.put("se", wrapper);
-                engineProvider.scopeValues(engine, scriptExManager);
-                scriptExtensionManager.importDefaultPresets(engineProvider, engine, scriptIdentifier);
-
-                loadedScriptEngineInstances.put(scriptIdentifier, result);
-            } catch (Exception ex) {
-                logger.error("Error while creating ScriptEngine", ex);
-                removeScriptExtensions(scriptIdentifier);
+        logger.trace("{}.getScriptTypes(): {}", engineFactory.getClass().getSimpleName(), scriptTypes);
+        for (String scriptType : scriptTypes) {
+            if (isCustomFactory(engineFactory)) {
+                this.customSupport.put(scriptType, engineFactory);
+            } else {
+                this.genericSupport.put(scriptType, engineFactory);
             }
         }
+        logger.debug("Added {}", engineFactory.getClass().getSimpleName());
+        for (javax.script.ScriptEngineFactory f : ScriptEngineFactory.engineManager.getEngineFactories()) {
+            logger.debug(
+                    "ScriptEngineFactory details for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
+                    f.getEngineName(), f.getEngineVersion(), f.getLanguageName(), f.getLanguageVersion(),
+                    f.getExtensions(), f.getNames(), f.getMimeTypes());
+        }
+    }
 
+    public void removeScriptEngineFactory(ScriptEngineFactory engineFactory) {
+        List<String> scriptTypes = engineFactory.getScriptTypes();
+
+        logger.trace("{}.getScriptTypes(): {}", engineFactory.getClass().getSimpleName(), scriptTypes);
+        for (String scriptType : scriptTypes) {
+            if (isCustomFactory(engineFactory)) {
+                this.customSupport.remove(scriptType, engineFactory);
+            } else {
+                this.genericSupport.remove(scriptType, engineFactory);
+            }
+        }
+        logger.debug("Removed {}", engineFactory.getClass().getSimpleName());
+    }
+
+    /**
+     * This method is used to determine if a given {@link ScriptEngineFactory} is generic or customized.
+     *
+     * @param engineFactory {@link ScriptEngineFactory}
+     * @return true, if the {@link ScriptEngineFactory} is custom, otherwise false
+     */
+    private boolean isCustomFactory(ScriptEngineFactory engineFactory) {
+        return !(engineFactory instanceof GenericScriptEngineFactory);
+    }
+
+    @Override
+    public @Nullable ScriptEngineContainer createScriptEngine(String scriptType, @NonNull String engineIdentifier) {
+        ScriptEngineContainer result = null;
+        ScriptEngineFactory engineFactory = findEngineFactory(scriptType);
+        if (engineFactory == null) {
+            logger.error("ScriptEngine for language '{}' could not be found for identifier: {}", scriptType,
+                    engineIdentifier);
+        } else {
+            try {
+                ScriptEngine engine = engineFactory.createScriptEngine(scriptType);
+                if (engine != null) {
+                    HashMap<String, Object> scriptExManager = new HashMap<>();
+                    result = new ScriptEngineContainer(engine, engineFactory, engineIdentifier);
+                    ScriptExtensionManagerWrapper wrapper = new ScriptExtensionManagerWrapper(scriptExtensionManager,
+                            result);
+                    scriptExManager.put("scriptExtension", wrapper);
+                    scriptExManager.put("se", wrapper);
+                    engineFactory.scopeValues(engine, scriptExManager);
+                    scriptExtensionManager.importDefaultPresets(engineFactory, engine, engineIdentifier);
+                    loadedScriptEngineInstances.put(engineIdentifier, result);
+                    logger.debug("Added ScriptEngine for language '{}' with identifier: {}", scriptType,
+                            engineIdentifier);
+                } else {
+                    logger.error("ScriptEngine for language '{}' could not be found for identifier: {}", scriptType,
+                            engineIdentifier);
+                }
+            } catch (Exception ex) {
+                logger.error("Error while creating ScriptEngine", ex);
+                removeScriptExtensions(engineIdentifier);
+            }
+        }
         return result;
     }
 
     @Override
-    public void loadScript(String scriptIdentifier, InputStreamReader scriptData) {
-        ScriptEngineContainer container = loadedScriptEngineInstances.get(scriptIdentifier);
-
+    public void loadScript(String engineIdentifier, InputStreamReader scriptData) {
+        ScriptEngineContainer container = loadedScriptEngineInstances.get(engineIdentifier);
         if (container == null) {
-            logger.error("could not load script as no engine is created");
+            logger.error("Could not load script, as no ScriptEngine has been created");
         } else {
             ScriptEngine engine = container.getScriptEngine();
             try {
@@ -127,38 +149,36 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 if (engine instanceof Invocable) {
                     Invocable inv = (Invocable) engine;
                     try {
-                        inv.invokeFunction("scriptLoaded", scriptIdentifier);
+                        inv.invokeFunction("scriptLoaded", engineIdentifier);
                     } catch (NoSuchMethodException e) {
-                        logger.trace("scriptLoaded() not defined in script: {}", scriptIdentifier);
+                        logger.trace("scriptLoaded() is not defined in the script: {}", engineIdentifier);
                     }
                 } else {
-                    logger.trace("engine does not support Invocable interface");
+                    logger.trace("ScriptEngine does not support Invocable interface");
                 }
             } catch (Exception ex) {
-                logger.error("Error during evaluation of script '{}': {}", scriptIdentifier, ex.getMessage());
+                logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
             }
         }
     }
 
     @Override
-    public void removeEngine(String scriptIdentifier) {
-        ScriptEngineContainer container = loadedScriptEngineInstances.get(scriptIdentifier);
-
+    public void removeEngine(String engineIdentifier) {
+        ScriptEngineContainer container = loadedScriptEngineInstances.get(engineIdentifier);
         if (container != null) {
             if (container.getScriptEngine() instanceof Invocable) {
                 Invocable inv = (Invocable) container.getScriptEngine();
                 try {
                     inv.invokeFunction("scriptUnloaded");
                 } catch (NoSuchMethodException e) {
-                    logger.trace("scriptUnloaded() not defined in script");
-                } catch (ScriptException e) {
-                    logger.error("Error while executing script", e);
+                    logger.trace("scriptUnloaded() is not defined in the script");
+                } catch (ScriptException ex) {
+                    logger.error("Error while executing script", ex);
                 }
             } else {
-                logger.trace("engine does not support Invocable interface");
+                logger.trace("ScriptEngine does not support Invocable interface");
             }
-
-            removeScriptExtensions(scriptIdentifier);
+            removeScriptExtensions(engineIdentifier);
         }
     }
 
@@ -166,28 +186,32 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         try {
             scriptExtensionManager.dispose(pathIdentifier);
         } catch (Exception ex) {
-            logger.error("error removing engine", ex);
+            logger.error("Error removing ScriptEngine", ex);
         }
     }
 
-    private @Nullable ScriptEngineFactory findEngineFactory(String fileExtension) {
-        ScriptEngineFactory engineProvider = supportedLanguages.get(fileExtension);
-
-        if (engineProvider != null) {
-            return engineProvider;
+    /**
+     * This method will find and return a {@link ScriptEngineFactory} capable of executing a script of the given type,
+     * if one exists.
+     *
+     * @param scriptType a file extension (script) or MimeType (ScriptAction or ScriptCondition)
+     * @return {@link ScriptEngineFactory} or null
+     */
+    private @Nullable ScriptEngineFactory findEngineFactory(String scriptType) {
+        ScriptEngineFactory customFactory = customSupport.get(scriptType);
+        if (customFactory != null) {
+            return customFactory;
         }
-
-        for (ScriptEngineFactory provider : supportedLanguages.values()) {
-            if (provider != null && provider.isSupported(fileExtension)) {
-                return provider;
-            }
+        ScriptEngineFactory genericFactory = genericSupport.get(scriptType);
+        if (genericFactory != null) {
+            return genericFactory;
         }
-
-        if (genericScriptEngineFactory.isSupported(fileExtension)) {
-            return genericScriptEngineFactory;
-        }
-
         return null;
+    }
+
+    @Override
+    public boolean isSupported(String scriptType) {
+        return findEngineFactory(scriptType) != null;
     }
 
 }

@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
 /**
  * This handler can execute script actions.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann
  *
  */
 public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> implements ActionHandler {
 
-    public static final String SCRIPT_ACTION_ID = "script.ScriptAction";
+    public static final String TYPE_ID = "script.ScriptAction";
 
     private final Logger logger = LoggerFactory.getLogger(ScriptActionHandler.class);
 

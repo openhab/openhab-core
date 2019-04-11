@@ -16,24 +16,34 @@ import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.module.script.internal.provider.ScriptModuleTypeProvider;
 
 /**
- * This class is used by the ScriptManager to load ScriptEngines.
- * This is meant as a way to allow other OSGi bundles to provide custom Script-Languages with special needs (like
- * Nashorn, Groovy, etc.)
+ * This class is used by the ScriptEngineManager to load ScriptEngines. This is meant as a way to allow other OSGi
+ * bundles to provide custom script-languages with special needs, e.g. Nashorn, Jython, Groovy, etc.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
+ * @author Scott Rushworth - added/changed methods and parameters when implementing {@link ScriptModuleTypeProvider}
  */
+@NonNullByDefault
 public interface ScriptEngineFactory {
 
-    /**
-     * @return the list of supported language endings e.g. py, jy
-     */
-    List<String> getLanguages();
+    final static ScriptEngineManager engineManager = new ScriptEngineManager();
 
     /**
-     * "scopes" new values into the given ScriptEngine
+     * This method returns a list of file extensions and MimeTypes that are supported by the ScriptEngine, e.g. py,
+     * application/python, js, application/javascript, etc.
+     *
+     * @return List of supported script types
+     */
+    List<String> getScriptTypes();
+
+    /**
+     * This method "scopes" new values into the given ScriptEngine.
      *
      * @param scriptEngine
      * @param scopeValues
@@ -41,19 +51,12 @@ public interface ScriptEngineFactory {
     void scopeValues(ScriptEngine scriptEngine, Map<String, Object> scopeValues);
 
     /**
-     * created a new ScriptEngine
+     * This method creates a new ScriptEngine based on the supplied file extension or MimeType.
      *
-     * @param fileExtension
-     * @return
+     * @param scriptType a file extension (script) or MimeType (ScriptAction or ScriptCondition)
+     * @return ScriptEngine or null
      */
-    ScriptEngine createScriptEngine(String fileExtension);
-
-    /**
-     * checks if the script is supported. Does not necessarily be equal to getLanguages()
-     *
-     * @param fileExtension
-     * @return
-     */
-    boolean isSupported(String fileExtension);
+    @Nullable
+    ScriptEngine createScriptEngine(String scriptType);
 
 }
