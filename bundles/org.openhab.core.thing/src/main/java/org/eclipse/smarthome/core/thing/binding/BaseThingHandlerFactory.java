@@ -143,57 +143,16 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
 
     @SuppressWarnings("rawtypes")
     private void registerServices(Thing thing, ThingHandler thingHandler) {
-        ThingUID thingUID = thing.getUID();
         for (Class c : thingHandler.getServices()) {
-            Object serviceInstance;
-            try {
-                serviceInstance = c.newInstance();
+            ServiceReference<?> serviceReference = bundleContext.getServiceReference(c);
+            ServiceObjects<?> serviceObjects = bundleContext.getServiceObjects(serviceReference);
+            ThingHandlerService ths = (ThingHandlerService) serviceObjects.getService();
+            ths.setThingHandler(thingHandler);
 
-                ThingHandlerService ths = null;
-                if (serviceInstance instanceof ThingHandlerService) {
-                    ths = (ThingHandlerService) serviceInstance;
-                    ths.setThingHandler(thingHandler);
-                } else {
-                    logger.warn(
-                            "Should register service={} for thingUID={}, but it does not implement the interface ThingHandlerService.",
-                            c.getCanonicalName(), thingUID);
-                    continue;
-                }
-
-                Class[] interfaces = c.getInterfaces();
-                LinkedList<String> serviceNames = new LinkedList<>();
-                if (interfaces != null) {
-                    for (Class i : interfaces) {
-                        String className = i.getCanonicalName();
-                        // we only add specific ThingHandlerServices, i.e. those that derive from the
-                        // ThingHandlerService interface, NOT the ThingHandlerService itself. We do this to register
-                        // them as specific OSGi services later, rather than as a generic ThingHandlerService.
-                        if (!ThingHandlerService.class.getCanonicalName().equals(className)) {
-                            serviceNames.add(className);
-                        }
-                    }
-                }
-                if (serviceNames.size() > 0) {
-                    String[] serviceNamesArray = serviceNames.toArray(new String[serviceNames.size()]);
-
-                    ServiceRegistration<?> serviceReg = this.bundleContext.registerService(serviceNamesArray,
-                            serviceInstance, null);
-
-                    if (serviceReg != null) {
-                        Set<ServiceRegistration<?>> serviceRegs = this.thingHandlerServices.get(thingUID);
-                        if (serviceRegs == null) {
-                            HashSet<ServiceRegistration<?>> set = new HashSet<>();
-                            set.add(serviceReg);
-                            this.thingHandlerServices.put(thingUID, set);
-                        } else {
-                            serviceRegs.add(serviceReg);
-                        }
-                        ths.activate();
-                    }
-                }
-            } catch (InstantiationException | IllegalAccessException e) {
-                logger.warn("Could not register service for class={}", c, e);
-            }
+            ThingUID thingUID = thing.getUID();
+            // TODO add to this.thingHandlerServices somehow
+            // serviceObjects.ungetService(ths);
+            // serviceRegs.add(serviceReference);
         }
     }
 
