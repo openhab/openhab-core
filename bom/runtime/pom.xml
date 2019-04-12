@@ -442,6 +442,14 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- All serial transports -->
+    <dependency>
+      <groupId>com.neuronrobotics</groupId>
+      <artifactId>nrjavaserial</artifactId>
+      <version>3.14.0</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- XStream -->
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
