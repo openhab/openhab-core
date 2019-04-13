@@ -535,10 +535,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             validateModuleIDs(rule);
             autoMapConnections(rule);
             ConnectionValidator.validateConnections(mtRegistry, rule.unwrap());
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ex) {
             // change status to UNINITIALIZED
             setStatus(rUID, new RuleStatusInfo(RuleStatus.UNINITIALIZED, RuleStatusDetail.INVALID_RULE,
-                    "Validation of rule " + rUID + " has failed! " + e.getLocalizedMessage()));
+                    "Validation of rule " + rUID + " has failed: " + ex.getLocalizedMessage()));
             return;
         }
         final String errMsgs = setModuleHandlers(rUID, rule.getModules());
@@ -589,7 +589,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             try {
                 ep.post(event);
             } catch (Exception ex) {
-                logger.error("Could not post event of type '{}'.", event.getType(), ex);
+                logger.error("Event of type '{}' could not be posted: ", event.getType(), ex);
             }
         }
     }
@@ -621,16 +621,15 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     }
                     String message = "Missing handler '" + m.getTypeUID() + "' for module '" + m.getId() + "'";
                     sb.append(message).append("\n");
-                    logger.trace(message);
+                    logger.error(message);
                 }
             } catch (Throwable t) {
                 if (sb == null) {
                     sb = new StringBuilder();
                 }
-                String message = "Getting handler '" + m.getTypeUID() + "' for module '" + m.getId() + "' failed: "
-                        + t.getMessage();
-                sb.append(message).append("\n");
-                logger.trace(message);
+                String message = "Getting handler '" + m.getTypeUID() + "' for module '" + m.getId() + "' has failed: ";
+                logger.error(message, t);
+                sb.append(message).append(t.getMessage()).append("\n");
             }
         }
         return sb != null ? sb.toString() : null;
@@ -723,9 +722,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     /**
-     * This method unregister a {@link Rule} and it stops working. It is called when the {@link Rule} is
-     * removed, updated or disabled. Also it is called when some {@link ModuleHandlerFactory} is disposed or some
-     * {@link ModuleType} is updated.
+     * This method stops and unregisters a {@link Rule}. It is called when the {@link Rule} is removed, updated or
+     * disabled. It is also called when a {@link ModuleHandlerFactory} is disposed or a {@link ModuleType} is updated.
      *
      * @param r rule that should be unregistered.
      */
@@ -1002,13 +1000,12 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             boolean isSatisfied = calculateConditions(rule);
             if (isSatisfied) {
                 executeActions(rule, true);
-                logger.debug("The rule '{}' is executed.", ruleUID);
+                logger.debug("The rule '{}' has been executed.", ruleUID);
             } else {
-                logger.debug("The rule '{}' is NOT executed, since it has unsatisfied conditions.", ruleUID);
+                logger.debug("The rule '{}' has NOT been executed, since it has unsatisfied conditions.", ruleUID);
             }
         } catch (Throwable t) {
-            logger.error("Failed to execute rule '{}': {}", ruleUID, t.getMessage());
-            logger.debug("", t);
+            logger.error("Failed to execute rule '{}':", ruleUID, t);
         }
         // change state to IDLE only if the rule has not been DISABLED.
         synchronized (this) {
@@ -1046,9 +1043,9 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             } else {
                 executeActions(rule, false);
             }
-            logger.debug("The rule '{}' is executed.", ruleUID);
+            logger.debug("The rule '{}' has been executed.", ruleUID);
         } catch (Throwable t) {
-            logger.error("Failed to execute rule '{}': ", ruleUID, t);
+            logger.error("Failed to execute rule '{}':", ruleUID, t);
         }
         // change state to IDLE only if the rule has not been DISABLED.
         synchronized (this) {
@@ -1202,7 +1199,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                         updateContext(ruleUID, action.getId(), outputs);
                     }
                 } catch (Throwable t) {
-                    String errMessage = "Fail to execute action: " + action.getId();
+                    String errMessage = "Failed to execute action: " + action.getId();
                     if (stopOnFirstFail) {
                         RuntimeException re = new RuntimeException(errMessage, t);
                         throw re;

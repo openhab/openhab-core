@@ -150,14 +150,15 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     Invocable inv = (Invocable) engine;
                     try {
                         inv.invokeFunction("scriptLoaded", engineIdentifier);
-                    } catch (NoSuchMethodException e) {
-                        logger.trace("scriptLoaded() is not defined in the script: {}", engineIdentifier);
+                    } catch (NoSuchMethodException ex) {
+                        logger.trace("The function 'scriptLoaded()' is not defined in the script: {}.",
+                                engineIdentifier);
                     }
                 } else {
                     logger.trace("ScriptEngine does not support Invocable interface");
                 }
             } catch (Exception ex) {
-                logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
+                logger.error("Error during evaluation of script '{}'", engineIdentifier, ex);
             }
         }
     }
@@ -170,10 +171,10 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 Invocable inv = (Invocable) container.getScriptEngine();
                 try {
                     inv.invokeFunction("scriptUnloaded");
-                } catch (NoSuchMethodException e) {
-                    logger.trace("scriptUnloaded() is not defined in the script");
+                } catch (NoSuchMethodException ex) {
+                    logger.trace("The function scriptUnloaded() is not defined in the script.");
                 } catch (ScriptException ex) {
-                    logger.error("Error while executing script", ex);
+                    logger.error("Error while executing script '{}':", engineIdentifier, ex);
                 }
             } else {
                 logger.trace("ScriptEngine does not support Invocable interface");
@@ -182,11 +183,11 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         }
     }
 
-    private void removeScriptExtensions(String pathIdentifier) {
+    private void removeScriptExtensions(String engineIdentifier) {
         try {
-            scriptExtensionManager.dispose(pathIdentifier);
+            scriptExtensionManager.dispose(engineIdentifier);
         } catch (Exception ex) {
-            logger.error("Error removing ScriptEngine", ex);
+            logger.error("Error while removing ScriptExtensions for '{}':", engineIdentifier, ex);
         }
     }
 
