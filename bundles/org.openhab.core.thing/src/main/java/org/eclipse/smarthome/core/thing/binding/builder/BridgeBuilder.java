@@ -46,12 +46,6 @@ public class BridgeBuilder extends ThingBuilder {
         return new BridgeBuilder(bridge);
     }
 
-    @Deprecated
-    public static BridgeBuilder create(ThingUID thingUID) {
-        BridgeImpl bridge = new BridgeImpl(thingUID);
-        return new BridgeBuilder(bridge);
-    }
-
     public static BridgeBuilder create(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         BridgeImpl bridge = new BridgeImpl(thingTypeUID, thingUID);
         return new BridgeBuilder(bridge);
