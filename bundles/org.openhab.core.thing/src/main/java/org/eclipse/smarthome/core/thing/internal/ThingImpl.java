@@ -45,16 +45,20 @@ import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
  *         ThingType Description
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Simon Kaufmann - Added label
- * @author Christoph Weitkamp - Changed internal handling of things and added method `getChannel(ChannelUID)`
+ * @author Christoph Weitkamp - Added method `getChannel(ChannelUID)`
  */
 @NonNullByDefault
 public class ThingImpl implements Thing {
 
+    /*
+     * !!! DO NOT CHANGE - We are not allowed to change the members of the ThingImpl implementation as the storage for
+     * things uses this implementation itself to store and restore the data.
+     */
     private @Nullable String label;
 
     private @Nullable ThingUID bridgeUID;
 
-    private final Map<ChannelUID, Channel> channels = new HashMap<>();
+    private List<Channel> channels = new ArrayList<>();
 
     private Configuration configuration = new Configuration();
 
@@ -133,13 +137,13 @@ public class ThingImpl implements Thing {
 
     @Override
     public List<Channel> getChannels() {
-        return Collections.unmodifiableList(new ArrayList<>(this.channels.values()));
+        return Collections.unmodifiableList(new ArrayList<>(this.channels));
     }
 
     @Override
     public List<Channel> getChannelsOfGroup(String channelGroupId) {
         List<Channel> channels = new ArrayList<>();
-        for (Channel channel : this.channels.values()) {
+        for (Channel channel : this.channels) {
             if (channelGroupId.equals(channel.getUID().getGroupId())) {
                 channels.add(channel);
             }
@@ -149,13 +153,17 @@ public class ThingImpl implements Thing {
 
     @Override
     public @Nullable Channel getChannel(String channelId) {
-        ChannelUID channelUID = new ChannelUID(uid, channelId);
-        return getChannel(channelUID);
+        for (Channel channel : this.channels) {
+            if (channel.getUID().getId().equals(channelId)) {
+                return channel;
+            }
+        }
+        return null;
     }
 
     @Override
     public @Nullable Channel getChannel(ChannelUID channelUID) {
-        return this.channels.get(channelUID);
+        return getChannel(channelUID.getId());
     }
 
     @Override
@@ -189,7 +197,7 @@ public class ThingImpl implements Thing {
     }
 
     public void addChannel(Channel channel) {
-        this.channels.put(channel.getUID(), channel);
+        this.channels.add(channel);
     }
 
     public void setChannels(List<Channel> channels) {

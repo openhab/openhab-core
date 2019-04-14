@@ -15,8 +15,7 @@ package org.eclipse.smarthome.core.thing.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -32,14 +31,18 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Denis Nobel - Initial contribution
- * @author Christoph Weitkamp - Changed internal handling of things and added method `getThing(ThingUID)`
+ * @author Christoph Weitkamp - Added method `getThing(ThingUID)`
  */
 @NonNullByDefault
 public class BridgeImpl extends ThingImpl implements Bridge {
 
     private final transient Logger logger = LoggerFactory.getLogger(BridgeImpl.class);
 
-    private final transient Map<ThingUID, Thing> things = new ConcurrentHashMap<>();
+    /*
+     * !!! DO NOT CHANGE - We are not allowed to change the members of the BridgeImpl implementation as the storage for
+     * things uses this implementation itself to store and restore the data.
+     */
+    private transient List<Thing> things = new CopyOnWriteArrayList<>();
 
     /**
      * Package protected default constructor to allow reflective instantiation.
@@ -73,21 +76,26 @@ public class BridgeImpl extends ThingImpl implements Bridge {
     }
 
     public void addThing(Thing thing) {
-        things.put(thing.getUID(), thing);
+        things.add(thing);
     }
 
     public void removeThing(Thing thing) {
-        things.remove(thing.getUID(), thing);
+        things.remove(thing);
     }
 
     @Override
     public @Nullable Thing getThing(ThingUID thingUID) {
-        return things.get(thingUID);
+        for (Thing thing : things) {
+            if (thing.getUID().equals(thingUID)) {
+                return thing;
+            }
+        }
+        return null;
     }
 
     @Override
     public List<Thing> getThings() {
-        return Collections.unmodifiableList(new ArrayList<>(things.values()));
+        return Collections.unmodifiableList(new ArrayList<>(things));
     }
 
     @Override
