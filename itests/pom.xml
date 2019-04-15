@@ -48,7 +48,7 @@
     <!-- <module>org.openhab.core.magic.tests</module> -->
     <module>org.openhab.core.model.core.tests</module>
     <!-- <module>org.openhab.core.model.item.tests</module> -->
-    <!-- <module>org.openhab.core.model.lsp.tests</module> -->
+    <module>org.openhab.core.model.lsp.tests</module>
     <module>org.openhab.core.model.persistence.tests</module>
     <!-- <module>org.openhab.core.model.rule.tests</module> -->
     <!-- <module>org.openhab.core.model.script.tests</module> -->
