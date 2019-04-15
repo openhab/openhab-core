@@ -11,7 +11,7 @@
 
   <artifactId>org.openhab.core.model.lsp.tests</artifactId>
 
-  <name>openHAB Core :: Integration Tests :: Language Server Tests</name>
+  <name>openHAB Core :: Integration Tests :: Model Language Server Protocol Tests</name>
 
   <dependencies>
     <dependency>
