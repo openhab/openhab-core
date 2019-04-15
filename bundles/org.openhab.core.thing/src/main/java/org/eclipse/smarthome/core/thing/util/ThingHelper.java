@@ -107,6 +107,10 @@ public class ThingHelper {
         }
     }
 
+    /**
+     * @deprecated Use {@link ThingHelper#ensureUniqueChannels(Collection)} instead.
+     */
+    @Deprecated
     public static void ensureUnique(Collection<Channel> channels) {
         HashSet<UID> ids = new HashSet<>();
         for (Channel channel : channels) {
