@@ -44,7 +44,7 @@
 
     <ohdr.version>1.0.42</ohdr.version>
     <repo.version>2.5.x</repo.version>
-    <karaf.version>4.2.2</karaf.version>
+    <karaf.version>4.2.4</karaf.version>
     <jetty.version>9.4.12.v20180830</jetty.version>
     <jna.version>4.5.2</jna.version>
     <jackson.version>1.9.13</jackson.version>
