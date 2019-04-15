@@ -24,6 +24,14 @@ import org.eclipse.smarthome.core.common.AbstractUID;
  */
 @NonNullByDefault
 public final class MetadataKey extends AbstractUID {
+    /**
+     * Package protected default constructor to allow reflective instantiation.
+     *
+     * !!! DO NOT REMOVE - Gson needs it !!!
+     */
+    MetadataKey() {
+        super("", "");
+    }
 
     /**
      * Creates a new instance.
