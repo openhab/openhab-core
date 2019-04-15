@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.util.Comparator;
@@ -252,9 +253,17 @@ public class ScriptFileWatcher extends AbstractWatchService {
         SortedSet<URL> reimportUrls = new TreeSet<URL>(new Comparator<URL>() {
             @Override
             public int compare(URL o1, URL o2) {
-                String f1 = o1.getPath();
-                String f2 = o2.getPath();
-                return String.CASE_INSENSITIVE_ORDER.compare(f1, f2);
+                Path path1 = Paths.get(o1.getPath());
+                Path path2 = Paths.get(o2.getPath());
+                String name1 = path1.getFileName().toString();
+                String name2 = path2.getFileName().toString();
+                int nameCompare = name1.compareToIgnoreCase(name2);
+                if (nameCompare != 0) {
+                    return nameCompare;
+                } else {
+                    int pathCompare = path1.getParent().toString().compareToIgnoreCase(path2.getParent().toString());
+                    return pathCompare;
+                }
             }
         });
 
