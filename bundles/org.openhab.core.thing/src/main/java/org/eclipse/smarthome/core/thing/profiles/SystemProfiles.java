@@ -61,9 +61,9 @@ public interface SystemProfiles {
             .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWROCKER.getUID()).build();
 
     StateProfileType TIMESTAMP_UPDATE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_UPDATE, "Timestamp on update")
-            .build();
+            .withSupportedItemTypesOfChannel(CoreItemFactory.DATETIME).build();
 
     StateProfileType TIMESTAMP_CHANGE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_CHANGE, "Timestamp on change")
-            .build();
+            .withSupportedItemTypesOfChannel(CoreItemFactory.DATETIME).build();
 
 }

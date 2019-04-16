@@ -12,7 +12,6 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
@@ -35,12 +34,12 @@ public class TimestampUpdateProfile implements StateProfile {
     }
 
     @Override
-    public @NonNull ProfileTypeUID getProfileTypeUID() {
+    public ProfileTypeUID getProfileTypeUID() {
         return SystemProfiles.TIMESTAMP_UPDATE;
     }
 
     @Override
-    public void onStateUpdateFromItem(@NonNull State state) {
+    public void onStateUpdateFromItem(State state) {
         logger.debug("Received state update from Item, sending timestamp to callback");
         callback.sendUpdate(new DateTimeType());
     }

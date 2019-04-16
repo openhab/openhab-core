@@ -12,7 +12,6 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
@@ -34,7 +33,7 @@ public class TimestampChangeProfile implements StateProfile {
     }
 
     @Override
-    public @NonNull ProfileTypeUID getProfileTypeUID() {
+    public ProfileTypeUID getProfileTypeUID() {
         return SystemProfiles.TIMESTAMP_CHANGE;
     }
 
