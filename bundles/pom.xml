@@ -96,6 +96,8 @@
     <module>org.openhab.core.model.thing</module>
     <module>org.openhab.core.model.thing.ide</module>
     <module>org.openhab.core.model.thing.runtime</module>
+    <module>org.openhab.nlp</module>
+    <module>org.openhab.nlp.rest</module>
     <module>org.openhab.core.storage.json</module>
     <module>org.openhab.core.storage.mapdb</module>
     <module>org.openhab.core.test</module>
