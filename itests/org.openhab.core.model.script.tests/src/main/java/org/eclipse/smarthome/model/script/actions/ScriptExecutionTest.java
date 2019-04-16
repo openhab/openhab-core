@@ -29,7 +29,6 @@ import org.quartz.impl.StdSchedulerFactory;
  * Tests for {@link ScriptExecution}
  *
  * @author Jon Evans - Initial contribution
- *
  */
 public class ScriptExecutionTest {
     private static MockScheduler scheduler;

@@ -43,6 +43,10 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
+/**
+ *
+ * @author Henning Treu - Initial contribution
+ */
 public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "Switch1";
