@@ -17,7 +17,7 @@
     <dependency>
       <groupId>org.apache.karaf.shell</groupId>
       <artifactId>org.apache.karaf.shell.core</artifactId>
-      <version>${karaf.version}</version>
+      <version>${karaf.compile.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
