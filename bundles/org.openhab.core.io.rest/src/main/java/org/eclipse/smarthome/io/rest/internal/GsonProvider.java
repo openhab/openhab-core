@@ -10,17 +10,24 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal;
+package org.eclipse.smarthome.io.rest.internal;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -29,28 +36,31 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
+import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.stream.JsonWriter;
 
 /**
- * JSON reader/writer for Jersey using GSON.
+ * JSON reader/writer using GSON.
  *
  * @author Simon Kaufmann - initial contribution and API
- *
- * @param <T>
  */
 @Provider
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Component(immediate = true)
+@JaxrsExtension
 public class GsonProvider<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
 
     private final Gson gson;
 
     public GsonProvider() {
-        gson = new GsonBuilder().create();
+        gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).create();
     }
 
     @Override
@@ -63,11 +73,32 @@ public class GsonProvider<T> implements MessageBodyReader<T>, MessageBodyWriter<
         return true;
     }
 
+    void writeFromIterator(Iterator<?> data, OutputStream entityStream) {
+        try (JsonWriter jsonWriter = new JsonWriter(new BufferedWriter(new OutputStreamWriter(entityStream)))) {
+            jsonWriter.beginArray();
+            while (data.hasNext()) {
+                try {
+                    Object entity = data.next();
+                    gson.toJson(entity, entity.getClass(), jsonWriter);
+                    jsonWriter.flush();
+                } catch (NoSuchElementException ignored) {
+                }
+            }
+            jsonWriter.endArray();
+        } catch (IOException | JsonIOException e) {
+            throw new InternalServerErrorException(e);
+        }
+    }
+
     @Override
     public void writeTo(T object, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {
-        try (OutputStream stream = entityStream) {
+        if (object instanceof Collection<?>) {
+            writeFromIterator(((Collection<?>) object).iterator(), entityStream);
+        } else if (object instanceof Stream<?>) {
+            writeFromIterator(((Stream<?>) object).iterator(), entityStream);
+        } else {
             entityStream.write(gson.toJson(object).getBytes(StandardCharsets.UTF_8));
             entityStream.flush();
         }

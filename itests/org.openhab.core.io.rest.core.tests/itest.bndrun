@@ -4,8 +4,7 @@ Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.io.rest.core
 
 -runrequires: \
-	bnd.identity;id='org.openhab.core.io.rest.core.tests',\
-	bnd.identity;id='com.eclipsesource.jaxrs.jersey-all'
+	bnd.identity;id='org.openhab.core.io.rest.core.tests'
 
 # If we would like to use a storage at all, we will use the "volatile" storage.
 -runblacklist: \
@@ -16,7 +15,6 @@ Fragment-Host: org.openhab.core.io.rest.core
 # done
 #
 -runbundles: \
-	com.eclipsesource.jaxrs.jersey-all;version='[2.22.2,2.22.3)',\
 	com.jayway.jsonpath.json-path;version='[2.4.0,2.4.1)',\
 	javax.measure.unit-api;version='[1.0.0,1.0.1)',\
 	net.minidev.accessors-smart;version='[1.2.0,1.2.1)',\

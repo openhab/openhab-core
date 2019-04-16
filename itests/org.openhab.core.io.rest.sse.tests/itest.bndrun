@@ -33,7 +33,6 @@ Fragment-Host: org.openhab.core.io.rest.sse
 	osgi.enroute.junit.wrapper;version='[4.12.0,4.12.1)',\
 	org.openhab.core;version='[2.5.0,2.5.1)',\
 	org.openhab.core.config.core;version='[2.5.0,2.5.1)',\
-	com.eclipsesource.jaxrs.jersey-all;version='[2.22.2,2.22.3)',\
 	org.apache.aries.javax.jax.rs-api;version='[1.0.0,1.0.1)',\
 	org.glassfish.hk2.utils;version='[2.4.0,2.4.1)',\
 	org.openhab.core.io.rest.sse;version='[2.5.0,2.5.1)',\

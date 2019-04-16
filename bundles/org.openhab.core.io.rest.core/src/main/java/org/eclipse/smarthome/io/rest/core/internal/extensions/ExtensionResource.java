@@ -19,41 +19,33 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.extension.Extension;
-import org.eclipse.smarthome.core.extension.ExtensionEventFactory;
 import org.eclipse.smarthome.core.extension.ExtensionService;
 import org.eclipse.smarthome.core.extension.ExtensionType;
-import org.eclipse.smarthome.io.rest.JSONResponse;
 import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,59 +62,30 @@ import io.swagger.annotations.ApiResponses;
 @Path(ExtensionResource.PATH_EXTENSIONS)
 @RolesAllowed({ Role.ADMIN })
 @Api(value = ExtensionResource.PATH_EXTENSIONS)
-@Component
-public class ExtensionResource implements RESTResource {
-
-    private static final String THREAD_POOL_NAME = "extensionService";
-
+@Produces(MediaType.APPLICATION_JSON)
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class ExtensionResource {
     public static final String PATH_EXTENSIONS = "extensions";
 
-    private final Logger logger = LoggerFactory.getLogger(ExtensionResource.class);
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private final @NonNullByDefault({}) Set<ExtensionService> extensionServices = new TreeSet<>();
 
-    private final Set<ExtensionService> extensionServices = new CopyOnWriteArraySet<>();
+    @Reference
+    private @NonNullByDefault({}) EventPublisher eventPublisher;
 
-    private EventPublisher eventPublisher;
-
-    private LocaleService localeService;
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addExtensionService(ExtensionService featureService) {
-        this.extensionServices.add(featureService);
-    }
-
-    protected void removeExtensionService(ExtensionService featureService) {
-        this.extensionServices.remove(featureService);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
-
-    @Context
-    UriInfo uriInfo;
+    @Reference
+    private @NonNullByDefault({}) LocaleService localeService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all extensions.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
-    public Response getExtensions(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language) {
-        logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
+    public Stream<?> getExtensions(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language) {
         Locale locale = localeService.getLocale(language);
-        return Response.ok(new Stream2JSONInputStream(getAllExtensions(locale))).build();
+        return extensionServices.stream().map(s -> s.getExtensions(locale)).flatMap(l -> l.stream());
     }
 
     @GET
@@ -130,11 +93,19 @@ public class ExtensionResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all extension types.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
-    public Response getTypes(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language) {
-        logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
+    public Stream<?> getTypes(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language) {
         Locale locale = localeService.getLocale(language);
-        Stream<ExtensionType> extensionTypeStream = getAllExtensionTypes(locale).stream().distinct();
-        return Response.ok(new Stream2JSONInputStream(extensionTypeStream)).build();
+
+        final Collator coll = Collator.getInstance(locale);
+        coll.setStrength(Collator.PRIMARY);
+        Comparator<ExtensionType> comparator = new Comparator<ExtensionType>() {
+            @Override
+            public int compare(ExtensionType o1, ExtensionType o2) {
+                return coll.compare(o1.getLabel(), o2.getLabel());
+            }
+        };
+        return extensionServices.stream().flatMap(extensionService -> extensionService.getTypes(locale).stream())
+                .distinct().sorted(comparator);
     }
 
     @GET
@@ -143,35 +114,23 @@ public class ExtensionResource implements RESTResource {
     @ApiOperation(value = "Get extension with given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Not found") })
-    public Response getById(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
+    public Extension getById(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
             @PathParam("extensionId") @ApiParam(value = "extension ID", required = true) String extensionId) {
-        logger.debug("Received HTTP GET request at '{}'.", uriInfo.getPath());
-        Locale locale = localeService.getLocale(language);
-        ExtensionService extensionService = getExtensionService(extensionId);
-        Extension responseObject = extensionService.getExtension(extensionId, locale);
-        if (responseObject != null) {
-            return Response.ok(responseObject).build();
+        Extension responseObject = getExtensionService(extensionId).getExtension(extensionId,
+                localeService.getLocale(language));
+        if (responseObject == null) {
+            throw new NotFoundException();
         }
-
-        return Response.status(404).build();
+        return responseObject;
     }
 
     @POST
     @Path("/{extensionId: [a-zA-Z_0-9-:]*}/install")
     @ApiOperation(value = "Installs the extension with the given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response installExtension(
+    public void installExtension(
             final @PathParam("extensionId") @ApiParam(value = "extension ID", required = true) String extensionId) {
-        ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
-            try {
-                ExtensionService extensionService = getExtensionService(extensionId);
-                extensionService.install(extensionId);
-            } catch (Exception e) {
-                logger.error("Exception while installing extension: {}", e.getMessage());
-                postFailureEvent(extensionId, e.getMessage());
-            }
-        });
-        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        getExtensionService(extensionId).install(extensionId);
     }
 
     @POST
@@ -179,66 +138,24 @@ public class ExtensionResource implements RESTResource {
     @ApiOperation(value = "Installs the extension from the given URL.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "The given URL is malformed or not valid.") })
-    public Response installExtensionByURL(
+    public void installExtensionByURL(
             final @PathParam("url") @ApiParam(value = "extension install URL", required = true) String url) {
+        final URI extensionURI;
         try {
-            URI extensionURI = new URI(url);
-            String extensionId = getExtensionId(extensionURI);
-            installExtension(extensionId);
-        } catch (URISyntaxException | IllegalArgumentException e) {
-            logger.error("Exception while parsing the extension URL '{}': {}", url, e.getMessage());
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "The given URL is malformed or not valid.");
+            extensionURI = new URI(url);
+        } catch (URISyntaxException e) {
+            throw new BadRequestException("The given URL is malformed or not valid.", e);
         }
-
-        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        String extensionId = getExtensionId(extensionURI);
+        installExtension(extensionId);
     }
 
     @POST
     @Path("/{extensionId: [a-zA-Z_0-9-:]*}/uninstall")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response uninstallExtension(
+    public void uninstallExtension(
             final @PathParam("extensionId") @ApiParam(value = "extension ID", required = true) String extensionId) {
-        ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
-            try {
-                ExtensionService extensionService = getExtensionService(extensionId);
-                extensionService.uninstall(extensionId);
-            } catch (Exception e) {
-                logger.error("Exception while uninstalling extension: {}", e.getMessage());
-                postFailureEvent(extensionId, e.getMessage());
-            }
-        });
-        return Response.ok(null, MediaType.TEXT_PLAIN).build();
-    }
-
-    private void postFailureEvent(String extensionId, String msg) {
-        if (eventPublisher != null) {
-            Event event = ExtensionEventFactory.createExtensionFailureEvent(extensionId, msg);
-            eventPublisher.post(event);
-        }
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return !extensionServices.isEmpty() && localeService != null;
-    }
-
-    private Stream<Extension> getAllExtensions(Locale locale) {
-        return extensionServices.stream().map(s -> s.getExtensions(locale)).flatMap(l -> l.stream());
-    }
-
-    private Set<ExtensionType> getAllExtensionTypes(Locale locale) {
-        final Collator coll = Collator.getInstance(locale);
-        coll.setStrength(Collator.PRIMARY);
-        Set<ExtensionType> ret = new TreeSet<>(new Comparator<ExtensionType>() {
-            @Override
-            public int compare(ExtensionType o1, ExtensionType o2) {
-                return coll.compare(o1.getLabel(), o2.getLabel());
-            }
-        });
-        for (ExtensionService extensionService : extensionServices) {
-            ret.addAll(extensionService.getTypes(locale));
-        }
-        return ret;
+        getExtensionService(extensionId).uninstall(extensionId);
     }
 
     private ExtensionService getExtensionService(final String extensionId) {
@@ -249,7 +166,7 @@ public class ExtensionResource implements RESTResource {
                 }
             }
         }
-        throw new IllegalArgumentException("No extension service registered for " + extensionId);
+        throw new NotFoundException("No extension service registered for " + extensionId);
     }
 
     private String getExtensionId(URI extensionURI) {
@@ -260,7 +177,6 @@ public class ExtensionResource implements RESTResource {
             }
         }
 
-        throw new IllegalArgumentException("No extension service registered for URI " + extensionURI);
+        throw new NotFoundException("No extension service registered for URI " + extensionURI);
     }
-
 }

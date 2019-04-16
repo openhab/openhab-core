@@ -15,7 +15,6 @@ package org.eclipse.smarthome.io.rest.internal.filter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -25,7 +24,10 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,19 +40,19 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @PreMatching
-@Component(configurationPid = "org.eclipse.smarthome.io.rest.proxyfilter", immediate = true, service = ProxyFilter.class)
+@Component(configurationPid = "smarthome.proxy", immediate = true, service = ProxyFilter.class)
 public class ProxyFilter implements ContainerRequestFilter {
 
     static final String PROTO_PROXY_HEADER = "x-forwarded-proto";
-
     static final String HOST_PROXY_HEADER = "x-forwarded-host";
 
     private final transient Logger logger = LoggerFactory.getLogger(ProxyFilter.class);
 
     @Override
     public void filter(ContainerRequestContext ctx) throws IOException {
-        String host = getValue(ctx.getHeaders(), HOST_PROXY_HEADER);
-        String scheme = getValue(ctx.getHeaders(), PROTO_PROXY_HEADER);
+        MultivaluedMap<String, String> headers = ctx.getHeaders();
+        String host = headers.getFirst(HOST_PROXY_HEADER);
+        String scheme = headers.getFirst(PROTO_PROXY_HEADER);
 
         // if our request does not have neither headers end right here
         if (scheme == null && host == null) {
@@ -110,13 +112,17 @@ public class ProxyFilter implements ContainerRequestFilter {
         ctx.setRequestUri(baseBuilder.build(), requestBuilder.build());
     }
 
-    private String getValue(MultivaluedMap<String, String> headers, String header) {
-        List<String> values = headers.get(header);
-        if (values == null || values.isEmpty()) {
-            return null;
-        }
-
-        return values.get(0);
+    @ObjectClassDefinition(description = "%proxy_description", name = "%proxy_name")
+    @interface Config {
+        boolean enabled() default true;
     }
 
+    @Activate
+    protected void activate(ComponentContext context, Config config) {
+        if (config.enabled()) {
+            logger.info("enabled PROXY support for REST API.");
+        } else {
+            context.disableComponent(this.getClass().getName());
+        }
+    }
 }

@@ -20,13 +20,16 @@ import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
@@ -50,12 +53,11 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
 import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
 import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,77 +81,36 @@ import io.swagger.annotations.ApiResponses;
  */
 @Path(ThingTypeResource.PATH_THINGS_TYPES)
 @Api(value = ThingTypeResource.PATH_THINGS_TYPES)
-@Component
-public class ThingTypeResource implements RESTResource {
-
-    /** The URI path to this resource */
+@Produces(MediaType.APPLICATION_JSON)
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class ThingTypeResource {
     public static final String PATH_THINGS_TYPES = "thing-types";
 
     private final Logger logger = LoggerFactory.getLogger(ThingTypeResource.class);
 
-    private ThingTypeRegistry thingTypeRegistry;
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private ChannelTypeRegistry channelTypeRegistry;
-    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
-
-    private LocaleService localeService;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = thingTypeRegistry;
-    }
-
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = channelGroupTypeRegistry;
-    }
-
-    protected void unsetChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
+    @Reference
+    private @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistry;
+    @Reference
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    @Reference
+    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    @Reference
+    private @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    @Reference
+    private @NonNullByDefault({}) LocaleService localeService;
 
     @GET
     @RolesAllowed({ Role.USER })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gets all available thing types without config description, channels and properties.", response = StrippedThingTypeDTO.class, responseContainer = "Set")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = StrippedThingTypeDTO.class, responseContainer = "Set"))
-    public Response getAll(
+    public Stream<?> getAll(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language) {
         Locale locale = localeService.getLocale(language);
-        Stream<StrippedThingTypeDTO> typeStream = thingTypeRegistry.getThingTypes(locale).stream()
-                .map(t -> convertToStrippedThingTypeDTO(t, locale));
-        return Response.ok(new Stream2JSONInputStream(typeStream)).build();
+        return thingTypeRegistry.getThingTypes(locale).stream().map(t -> convertToStrippedThingTypeDTO(t, locale));
     }
 
     @GET
@@ -160,15 +121,14 @@ public class ThingTypeResource implements RESTResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Thing type with provided thingTypeUID does not exist.", response = ThingTypeDTO.class),
             @ApiResponse(code = 404, message = "No content") })
-    public Response getByUID(@PathParam("thingTypeUID") @ApiParam(value = "thingTypeUID") String thingTypeUID,
+    public ThingTypeDTO getByUID(@PathParam("thingTypeUID") @ApiParam(value = "thingTypeUID") String thingTypeUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language) {
         Locale locale = localeService.getLocale(language);
         ThingType thingType = thingTypeRegistry.getThingType(new ThingTypeUID(thingTypeUID), locale);
-        if (thingType != null) {
-            return Response.ok(convertToThingTypeDTO(thingType, locale)).build();
-        } else {
-            return Response.noContent().build();
+        if (thingType == null) {
+            throw new NotFoundException();
         }
+        return convertToThingTypeDTO(thingType, locale);
     }
 
     private ThingTypeDTO convertToThingTypeDTO(ThingType thingType, Locale locale) {
@@ -194,9 +154,6 @@ public class ThingTypeResource implements RESTResource {
 
         final List<ChannelDefinitionDTO> channelDefinitions = convertToChannelDefinitionDTOs(
                 thingType.getChannelDefinitions(), locale);
-        if (channelDefinitions == null) {
-            return null;
-        }
 
         return new ThingTypeDTO(thingType.getUID().toString(), thingType.getLabel(), thingType.getDescription(),
                 thingType.getCategory(), thingType.isListed(), parameters, channelDefinitions,
@@ -243,8 +200,8 @@ public class ThingTypeResource implements RESTResource {
         for (ChannelDefinition channelDefinition : channelDefinitions) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID(), locale);
             if (channelType == null) {
-                logger.warn("Cannot find channel type: {}", channelDefinition.getChannelTypeUID());
-                return null;
+                throw new InternalServerErrorException(
+                        "Cannot find channel type: " + channelDefinition.getChannelTypeUID());
             }
 
             // Default to the channelDefinition label to override the
@@ -270,7 +227,7 @@ public class ThingTypeResource implements RESTResource {
         return channelDefinitionDTOs;
     }
 
-    private StrippedThingTypeDTO convertToStrippedThingTypeDTO(ThingType thingType, Locale locale) {
+    private @Nullable StrippedThingTypeDTO convertToStrippedThingTypeDTO(ThingType thingType, Locale locale) {
         final StrippedThingTypeDTO strippedThingTypeDTO = StrippedThingTypeDTOMapper.map(thingType, locale);
         if (strippedThingTypeDTO != null) {
             return strippedThingTypeDTO;
@@ -279,11 +236,5 @@ public class ThingTypeResource implements RESTResource {
         }
 
         return null;
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return thingTypeRegistry != null && configDescriptionRegistry != null && channelTypeRegistry != null
-                && channelGroupTypeRegistry != null && localeService != null;
     }
 }

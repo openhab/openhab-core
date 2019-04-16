@@ -12,7 +12,13 @@
  */
 package org.eclipse.smarthome.io.rest;
 
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for mapping/transforming DTOs.
@@ -20,8 +26,25 @@ import java.util.stream.Stream;
  * @author Simon Kaufmann - initial contribution and API.
  *
  */
-public interface DTOMapper {
+public class DTOMapper {
+    static final Logger logger = LoggerFactory.getLogger(DTOMapper.class);
 
-    <T> Stream<T> limitToFields(Stream<T> itemStream, String fields);
-
+    public static <T> Stream<T> limitToFields(Stream<T> itemStream, String fields) {
+        if (fields == null || fields.trim().isEmpty()) {
+            return itemStream;
+        }
+        List<String> fieldList = Stream.of(fields.split(",")).map(field -> field.trim()).collect(Collectors.toList());
+        return itemStream.map(dto -> {
+            for (Field field : dto.getClass().getFields()) {
+                if (!fieldList.contains(field.getName())) {
+                    try {
+                        field.set(dto, null);
+                    } catch (IllegalArgumentException | IllegalAccessException e) {
+                        logger.warn("Field '{}' could not be eliminated: {}", field.getName(), e.getMessage());
+                    }
+                }
+            }
+            return dto;
+        });
+    }
 }

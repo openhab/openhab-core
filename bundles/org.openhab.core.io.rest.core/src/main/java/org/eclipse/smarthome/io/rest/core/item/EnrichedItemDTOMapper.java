@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.function.Predicate;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.items.GroupItem;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.dto.ItemDTO;
@@ -25,9 +26,8 @@ import org.eclipse.smarthome.core.items.dto.ItemDTOMapper;
 import org.eclipse.smarthome.core.transform.TransformationException;
 import org.eclipse.smarthome.core.transform.TransformationHelper;
 import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
-import org.eclipse.smarthome.io.rest.core.internal.RESTCoreActivator;
 import org.eclipse.smarthome.io.rest.core.internal.item.ItemResource;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,41 +93,50 @@ public class EnrichedItemDTOMapper {
         return enrichedItemDTO;
     }
 
-    private static StateDescription considerTransformation(StateDescription stateDescription) {
-        if (stateDescription != null) {
-            String pattern = stateDescription.getPattern();
-            if (pattern != null) {
-                try {
-                    return TransformationHelper.isTransform(pattern)
-                            ? StateDescriptionFragmentBuilder.create(stateDescription).withPattern(pattern).build()
-                                    .toStateDescription()
-                            : stateDescription;
-                } catch (NoClassDefFoundError ex) {
-                    // TransformationHelper is optional dependency, so ignore if class not found
-                    // return state description as it is without transformation
-                }
+    private static StateDescription considerTransformation(@Nullable StateDescription desc) {
+        if (desc == null) {
+            return null;
+        }
+        String pattern = desc.getPattern();
+        if (pattern == null) {
+            return desc;
+        } else {
+            try {
+                return TransformationHelper.isTransform(pattern)
+                        ? new StateDescription(desc.getMinimum(), desc.getMaximum(), desc.getStep(), "",
+                                desc.isReadOnly(), desc.getOptions())
+                        : desc;
+            } catch (NoClassDefFoundError ex) {
+                // TransformationHelper is optional dependency, so ignore if class not found
+                // return state description as it is without transformation
+                return desc;
             }
         }
-        return stateDescription;
     }
 
-    private static String considerTransformation(String state, Item item, Locale locale) {
+    private static @Nullable String considerTransformation(@Nullable String state, Item item, Locale locale) {
         StateDescription stateDescription = item.getStateDescription(locale);
-        if (stateDescription != null && state != null) {
-            String pattern = stateDescription.getPattern();
-            if (pattern != null) {
-                try {
-                    return TransformationHelper.transform(RESTCoreActivator.getBundleContext(), pattern,
-                            state.toString());
-                } catch (NoClassDefFoundError ex) {
-                    // TransformationHelper is optional dependency, so ignore if class not found
-                    // return state as it is without transformation
-                } catch (TransformationException e) {
-                    LOGGER.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
-                            item.getName(), pattern, e.getMessage());
-                }
-            }
+        if (stateDescription == null) {
+            return state;
         }
-        return state;
+        String pattern = stateDescription.getPattern();
+        if (pattern == null) {
+            return state;
+        }
+        if (state == null) {
+            return null;
+        }
+        try {
+            return TransformationHelper.transform(
+                    FrameworkUtil.getBundle(EnrichedItemDTOMapper.class).getBundleContext(), pattern, state.toString());
+        } catch (NoClassDefFoundError ex) {
+            // TransformationHelper is optional dependency, so ignore if class not found
+            // return state as it is without transformation
+            return state;
+        } catch (TransformationException e) {
+            LOGGER.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state, item.getName(),
+                    stateDescription.getPattern(), e.getMessage());
+            return state;
+        }
     }
 }

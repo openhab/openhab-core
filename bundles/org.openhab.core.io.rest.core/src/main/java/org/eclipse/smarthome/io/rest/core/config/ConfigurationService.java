@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.osgi.framework.Constants;
@@ -40,9 +42,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(service = ConfigurationService.class)
+@NonNullByDefault
 public class ConfigurationService {
 
-    private ConfigurationAdmin configurationAdmin;
+    @Reference
+    private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
 
     private final Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
 
@@ -71,7 +75,7 @@ public class ConfigurationService {
         return update(configId, newConfiguration, false);
     }
 
-    public String getProperty(String servicePID, String key) {
+    public @Nullable String getProperty(String servicePID, String key) {
         try {
             org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration(servicePID, null);
             if (configuration != null && configuration.getProperties() != null) {
@@ -133,7 +137,7 @@ public class ConfigurationService {
         return oldConfiguration;
     }
 
-    private org.osgi.service.cm.Configuration getConfigurationWithContext(String serviceId)
+    private org.osgi.service.cm.@Nullable Configuration getConfigurationWithContext(String serviceId)
             throws IOException, InvalidSyntaxException {
         org.osgi.service.cm.Configuration[] configs = configurationAdmin
                 .listConfigurations("(&(" + Constants.SERVICE_PID + "=" + serviceId + "))");
@@ -180,14 +184,5 @@ public class ConfigurationService {
     private Dictionary<String, Object> getProperties(org.osgi.service.cm.Configuration configuration) {
         Dictionary<String, Object> properties = configuration.getProperties();
         return properties != null ? properties : new Hashtable<String, Object>();
-    }
-
-    @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
     }
 }

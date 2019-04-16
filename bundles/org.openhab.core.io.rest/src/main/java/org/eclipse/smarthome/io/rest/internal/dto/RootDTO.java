@@ -10,10 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.internal.resources.beans;
+package org.eclipse.smarthome.io.rest.internal.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * This is a java bean that is used to define the root entry
@@ -22,7 +24,8 @@ import java.util.List;
  * @author Kai Kreuzer - Initial contribution and API
  *
  */
-public class RootBean {
+@NonNullByDefault
+public class RootDTO {
 
     public final String version = "2";
 
@@ -34,7 +37,7 @@ public class RootBean {
             this.url = url;
         }
 
-        public String type;
-        public String url;
+        public final String type;
+        public final String url;
     }
 }

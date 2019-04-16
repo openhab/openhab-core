@@ -88,14 +88,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- EclipseSource JAX RS -->
-    <dependency>
-      <groupId>com.eclipsesource.jaxrs</groupId>
-      <artifactId>publisher</artifactId>
-      <version>5.3.1</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- Gson -->
     <dependency>
       <groupId>org.eclipse.orbit.bundles</groupId>

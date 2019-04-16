@@ -79,10 +79,6 @@
     <capability>openhab.tp;feature=jax-rs-min;version=5.3.1</capability>
     <feature dependency="true">http</feature>
     <feature dependency="true">openhab.tp-kat.cpy-jersey-min-2.22.2</feature>
-    <bundle>mvn:com.eclipsesource.jaxrs/publisher/5.3.1</bundle>
-    <config name="com.eclipsesource.jaxrs.connector">
-      root=/rest
-    </config>
   </feature>
 
   <feature name="openhab.tp-kat.cpy-jersey-min-2.22.2" version="${project.version}">
@@ -250,12 +246,6 @@
     <bundle dependency="true">mvn:org.slf4j/slf4j-api/1.7.7</bundle>
     <bundle dependency="true">mvn:org.yaml/snakeyaml/1.12</bundle>
     <!-- END: swagger-jersey2-1.5.8 -->
-
-    <bundle>mvn:de.maggu2810.thirdparty.modified.com.eclipsesource.jaxrs/provider-swagger/1.1.1.201605111122</bundle>
-    <config name="com.eclipsesource.jaxrs.swagger.config">
-      swagger.basePath=/rest
-      swagger.info.title=openHAB REST API
-    </config>
   </feature>
 
 </features>

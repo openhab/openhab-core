@@ -23,11 +23,15 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotAllowedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -39,7 +43,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
@@ -69,21 +72,17 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.TypeParser;
 import org.eclipse.smarthome.io.rest.DTOMapper;
-import org.eclipse.smarthome.io.rest.JSONResponse;
 import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.eclipse.smarthome.io.rest.core.item.EnrichedGroupItemDTO;
 import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTO;
 import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTOMapper;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.JsonObject;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -112,11 +111,14 @@ import io.swagger.annotations.ApiResponses;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Stefan Triller - Added bulk item add method
  */
-@NonNullByDefault
 @Path(ItemResource.PATH_ITEMS)
 @Api(value = ItemResource.PATH_ITEMS)
-@Component
-public class ItemResource implements RESTResource {
+@Produces(MediaType.APPLICATION_JSON)
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class ItemResource {
 
     private final Logger logger = LoggerFactory.getLogger(ItemResource.class);
 
@@ -127,95 +129,29 @@ public class ItemResource implements RESTResource {
     @Context
     UriInfo uriInfo;
 
-    @NonNullByDefault({})
-    private ItemRegistry itemRegistry;
-    @NonNullByDefault({})
-    private MetadataRegistry metadataRegistry;
-    @NonNullByDefault({})
-    private EventPublisher eventPublisher;
-    @NonNullByDefault({})
-    private ManagedItemProvider managedItemProvider;
-    @NonNullByDefault({})
-    private DTOMapper dtoMapper;
-    @NonNullByDefault({})
-    private MetadataSelectorMatcher metadataSelectorMatcher;
-    @NonNullByDefault({})
-    private ItemBuilderFactory itemBuilderFactory;
+    @Reference
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
 
-    @NonNullByDefault({})
-    private LocaleService localeService;
+    @Reference
+    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
+    @Reference
+    private @NonNullByDefault({}) EventPublisher eventPublisher;
 
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
+    @Reference
+    private @NonNullByDefault({}) ManagedItemProvider managedItemProvider;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = metadataRegistry;
-    }
+    @Reference
+    private @NonNullByDefault({}) DTOMapper dtoMapper;
 
-    protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
-    }
+    @Reference
+    private @NonNullByDefault({}) MetadataSelectorMatcher metadataSelectorMatcher;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
+    @Reference
+    private @NonNullByDefault({}) ItemBuilderFactory itemBuilderFactory;
 
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedItemProvider(ManagedItemProvider managedItemProvider) {
-        this.managedItemProvider = managedItemProvider;
-    }
-
-    protected void unsetManagedItemProvider(ManagedItemProvider managedItemProvider) {
-        this.managedItemProvider = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setDTOMapper(DTOMapper dtoMapper) {
-        this.dtoMapper = dtoMapper;
-    }
-
-    protected void unsetDTOMapper(DTOMapper dtoMapper) {
-        this.dtoMapper = dtoMapper;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setMetadataSelectorMatcher(MetadataSelectorMatcher metadataSelectorMatcher) {
-        this.metadataSelectorMatcher = metadataSelectorMatcher;
-    }
-
-    protected void unsetMetadataSelectorMatcher(MetadataSelectorMatcher metadataSelectorMatcher) {
-        this.metadataSelectorMatcher = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setItemBuilderFactory(ItemBuilderFactory itemBuilderFactory) {
-        this.itemBuilderFactory = itemBuilderFactory;
-    }
-
-    public void unsetItemBuilderFactory(ItemBuilderFactory itemBuilderFactory) {
-        this.itemBuilderFactory = null;
-    }
+    @Reference
+    private @NonNullByDefault({}) LocaleService localeService;
 
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
@@ -223,7 +159,7 @@ public class ItemResource implements RESTResource {
     @ApiOperation(value = "Get all available items.", response = EnrichedItemDTO.class, responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = EnrichedItemDTO.class, responseContainer = "List") })
-    public Response getItems(
+    public Stream<EnrichedItemDTO> getItems(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @QueryParam("type") @ApiParam(value = "item type filter", required = false) @Nullable String type,
             @QueryParam("tags") @ApiParam(value = "item tag filter", required = false) @Nullable String tags,
@@ -231,15 +167,32 @@ public class ItemResource implements RESTResource {
             @DefaultValue("false") @QueryParam("recursive") @ApiParam(value = "get member items recursively", required = false) boolean recursive,
             @QueryParam("fields") @ApiParam(value = "limit output to the given fields (comma separated)", required = false) @Nullable String fields) {
         final Locale locale = localeService.getLocale(language);
-        final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
-        logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
+        final Set<String> namespaces = metadataSelectorMatcher.filterNamespaces(namespaceSelector, locale);
 
-        Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
+        Collection<Item> items;
+        if (tags == null) {
+            if (type == null) {
+                items = itemRegistry.getItems();
+            } else {
+                items = itemRegistry.getItemsOfType(type);
+            }
+        } else {
+            String[] tagList = tags.split(",");
+            if (type == null) {
+                items = itemRegistry.getItemsByTag(tagList);
+            } else {
+                items = itemRegistry.getItemsByTagAndType(type, tagList);
+            }
+        }
+
+        Stream<EnrichedItemDTO> itemStream = items.stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriInfo.getBaseUri(), locale)) //
                 .peek(dto -> addMetadata(dto, namespaces, null)) //
-                .peek(dto -> dto.editable = isEditable(dto.name));
-        itemStream = dtoMapper.limitToFields(itemStream, fields);
-        return Response.ok(new Stream2JSONInputStream(itemStream)).build();
+                .peek(dto -> dto.editable = managedItemProvider.get(dto.name) != null);
+        if (fields == null || fields.isEmpty()) {
+            return itemStream;
+        }
+        return DTOMapper.limitToFields(itemStream, fields);
     }
 
     @GET
@@ -249,38 +202,24 @@ public class ItemResource implements RESTResource {
     @ApiOperation(value = "Gets a single item.", response = EnrichedItemDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = EnrichedItemDTO.class),
             @ApiResponse(code = 404, message = "Item not found") })
-    public Response getItemData(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public EnrichedItemDTO getItemData(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
             @QueryParam("metadata") @ApiParam(value = "metadata selector", required = false) @Nullable String namespaceSelector,
             @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname) {
         final Locale locale = localeService.getLocale(language);
-        final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
-        logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
+        final Set<String> namespaces = metadataSelectorMatcher.filterNamespaces(namespaceSelector, locale);
 
-        // get item
-        Item item = getItem(itemname);
-
-        // if it exists
-        if (item != null) {
-            logger.debug("Received HTTP GET request at '{}'.", uriInfo.getPath());
-            EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, true, null, uriInfo.getBaseUri(), locale);
-            addMetadata(dto, namespaces, null);
-            dto.editable = isEditable(dto.name);
-            return JSONResponse.createResponse(Status.OK, dto, null);
-        } else {
-            logger.info("Received HTTP GET request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
-            return getItemNotFoundResponse(itemname);
+        Item item = itemRegistry.get(itemname);
+        if (item == null) {
+            throw new NotFoundException();
         }
+
+        EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, true, null, uriInfo.getBaseUri(), locale);
+        addMetadata(dto, namespaces, null);
+        dto.editable = managedItemProvider.get(dto.name) != null;
+        return dto;
     }
 
-    private Set<String> splitAndFilterNamespaces(@Nullable String namespaceSelector, Locale locale) {
-        return metadataSelectorMatcher.filterNamespaces(namespaceSelector, locale);
-    }
-
-    /**
-     *
-     * @param itemname
-     * @return
-     */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]*}/state")
@@ -288,22 +227,13 @@ public class ItemResource implements RESTResource {
     @ApiOperation(value = "Gets the state of an item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Item not found") })
-    public Response getPlainItemState(
+    public String getPlainItemState(
             @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname) {
-        // get item
-        Item item = getItem(itemname);
-
-        // if it exists
-        if (item != null) {
-            logger.debug("Received HTTP GET request at '{}'.", uriInfo.getPath());
-
-            // we cannot use JSONResponse.createResponse() bc. MediaType.TEXT_PLAIN
-            // return JSONResponse.createResponse(Status.OK, item.getState().toString(), null);
-            return Response.ok(item.getState().toFullString()).build();
-        } else {
-            logger.info("Received HTTP GET request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
-            return getItemNotFoundResponse(itemname);
+        Item item = itemRegistry.get(itemname);
+        if (item == null) {
+            throw new NotFoundException();
         }
+        return item.getState().toFullString();
     }
 
     @PUT
@@ -311,39 +241,23 @@ public class ItemResource implements RESTResource {
     @Path("/{itemname: [a-zA-Z_0-9]*}/state")
     @Consumes(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Updates the state of an item.")
-    @ApiResponses(value = { @ApiResponse(code = 202, message = "Accepted"),
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found"),
             @ApiResponse(code = 400, message = "Item state null") })
-    public Response putItemState(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
-            @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
+    public void putItemState(@PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
             @ApiParam(value = "valid item state (e.g. ON, OFF)", required = true) String value) {
-        final Locale locale = localeService.getLocale(language);
 
-        // get Item
-        Item item = getItem(itemname);
-
-        // if Item exists
-        if (item != null) {
-            // try to parse a State from the input
-            State state = TypeParser.parseState(item.getAcceptedDataTypes(), value);
-
-            if (state != null) {
-                // set State and report OK
-                logger.debug("Received HTTP PUT request at '{}' with value '{}'.", uriInfo.getPath(), value);
-                eventPublisher.post(ItemEventFactory.createStateEvent(itemname, state));
-                return getItemResponse(Status.ACCEPTED, null, locale, null);
-            } else {
-                // State could not be parsed
-                logger.warn("Received HTTP PUT request at '{}' with an invalid status value '{}'.", uriInfo.getPath(),
-                        value);
-                return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "State could not be parsed: " + value);
-            }
-        } else {
-            // Item does not exist
-            logger.info("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
-            return getItemNotFoundResponse(itemname);
+        Item item = itemRegistry.get(itemname);
+        if (item == null) {
+            throw new NotFoundException();
         }
+
+        State state = TypeParser.parseState(item.getAcceptedDataTypes(), value);
+        if (state == null) {
+            throw new BadRequestException("State could not be parsed: " + value);
+        }
+
+        eventPublisher.post(ItemEventFactory.createStateEvent(itemname, state));
     }
 
     @POST
@@ -354,43 +268,34 @@ public class ItemResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found"),
             @ApiResponse(code = 400, message = "Item command null") })
-    public Response postItemCommand(
-            @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
+    public void postItemCommand(@PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
             @ApiParam(value = "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)", required = true) String value) {
-        Item item = getItem(itemname);
+        Item item = itemRegistry.get(itemname);
         Command command = null;
-        if (item != null) {
-            if ("toggle".equalsIgnoreCase(value) && (item instanceof SwitchItem || item instanceof RollershutterItem)) {
-                if (OnOffType.ON.equals(item.getStateAs(OnOffType.class))) {
-                    command = OnOffType.OFF;
-                }
-                if (OnOffType.OFF.equals(item.getStateAs(OnOffType.class))) {
-                    command = OnOffType.ON;
-                }
-                if (UpDownType.UP.equals(item.getStateAs(UpDownType.class))) {
-                    command = UpDownType.DOWN;
-                }
-                if (UpDownType.DOWN.equals(item.getStateAs(UpDownType.class))) {
-                    command = UpDownType.UP;
-                }
-            } else {
-                command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), value);
+        if (item == null) {
+            throw new NotFoundException();
+        }
+        if ("toggle".equalsIgnoreCase(value) && (item instanceof SwitchItem || item instanceof RollershutterItem)) {
+            if (OnOffType.ON.equals(item.getStateAs(OnOffType.class))) {
+                command = OnOffType.OFF;
             }
-            if (command != null) {
-                logger.debug("Received HTTP POST request at '{}' with value '{}'.", uriInfo.getPath(), value);
-                eventPublisher.post(ItemEventFactory.createCommandEvent(itemname, command));
-                ResponseBuilder resbuilder = Response.ok();
-                resbuilder.type(MediaType.TEXT_PLAIN);
-                return resbuilder.build();
-            } else {
-                logger.warn("Received HTTP POST request at '{}' with an invalid status value '{}'.", uriInfo.getPath(),
-                        value);
-                return Response.status(Status.BAD_REQUEST).build();
+            if (OnOffType.OFF.equals(item.getStateAs(OnOffType.class))) {
+                command = OnOffType.ON;
+            }
+            if (UpDownType.UP.equals(item.getStateAs(UpDownType.class))) {
+                command = UpDownType.DOWN;
+            }
+            if (UpDownType.DOWN.equals(item.getStateAs(UpDownType.class))) {
+                command = UpDownType.UP;
             }
         } else {
-            logger.info("Received HTTP POST request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
-            throw new WebApplicationException(404);
+            command = TypeParser.parseCommand(item.getAcceptedCommandTypes(), value);
         }
+        if (command == null) {
+            throw new BadRequestException();
+        }
+
+        eventPublisher.post(ItemEventFactory.createCommandEvent(itemname, command));
     }
 
     @PUT
@@ -492,7 +397,7 @@ public class ItemResource implements RESTResource {
             @ApiResponse(code = 405, message = "Item not editable.") })
     public Response addTag(@PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
             @PathParam("tag") @ApiParam(value = "tag", required = true) String tag) {
-        Item item = getItem(itemname);
+        Item item = itemRegistry.get(itemname);
 
         if (item == null) {
             logger.info("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
@@ -518,7 +423,7 @@ public class ItemResource implements RESTResource {
             @ApiResponse(code = 405, message = "Item not editable.") })
     public Response removeTag(@PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
             @PathParam("tag") @ApiParam(value = "tag", required = true) String tag) {
-        Item item = getItem(itemname);
+        Item item = itemRegistry.get(itemname);
 
         if (item == null) {
             logger.info("Received HTTP DELETE request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
@@ -550,7 +455,7 @@ public class ItemResource implements RESTResource {
             @PathParam("namespace") @ApiParam(value = "namespace", required = true) String namespace,
             @ApiParam(value = "metadata", required = true) MetadataDTO metadata) {
 
-        Item item = getItem(itemname);
+        Item item = itemRegistry.get(itemname);
 
         if (item == null) {
             logger.info("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
@@ -583,40 +488,25 @@ public class ItemResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found."),
             @ApiResponse(code = 405, message = "Meta data not editable.") })
-    public Response removeMetadata(
-            @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
+    public void removeMetadata(@PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
             @PathParam("namespace") @ApiParam(value = "namespace", required = true) String namespace) {
 
-        Item item = getItem(itemname);
+        Item item = itemRegistry.get(itemname);
 
         if (item == null) {
-            logger.info("Received HTTP DELETE request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
-            return Response.status(Status.NOT_FOUND).build();
+            throw new NotFoundException();
         }
 
         MetadataKey key = new MetadataKey(namespace, itemname);
         if (metadataRegistry.get(key) != null) {
             if (metadataRegistry.remove(key) == null) {
-                logger.info("Received HTTP DELETE request at '{}' for unmanaged item meta-data '{}'.",
-                        uriInfo.getPath(), key);
-                return Response.status(Status.CONFLICT).build();
+                throw new WebApplicationException(409);
             }
         } else {
-            logger.info("Received HTTP DELETE request at '{}' for unknown item meta-data '{}'.", uriInfo.getPath(),
-                    key);
-            return Response.status(Status.NOT_FOUND).build();
+            throw new NotFoundException();
         }
-
-        return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
-    /**
-     * Create or Update an item by supplying an item bean.
-     *
-     * @param itemname
-     * @param item the item bean.
-     * @return
-     */
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]*}")
@@ -626,38 +516,28 @@ public class ItemResource implements RESTResource {
             @ApiResponse(code = 201, message = "Item created."), @ApiResponse(code = 400, message = "Item null."),
             @ApiResponse(code = 404, message = "Item not found."),
             @ApiResponse(code = 405, message = "Item not editable.") })
-    public Response createOrUpdateItem(
+    public EnrichedItemDTO createOrUpdateItem(@Context HttpServletResponse response,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
             @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
-            @ApiParam(value = "item data", required = true) @Nullable GroupItemDTO item) {
+            @ApiParam(value = "item data", required = true) GroupItemDTO item) {
         final Locale locale = localeService.getLocale(language);
-
-        // If we didn't get an item bean, then return!
-        if (item == null) {
-            return Response.status(Status.BAD_REQUEST).build();
-        }
 
         Item newItem = ItemDTOMapper.map(item, itemBuilderFactory);
         if (newItem == null) {
-            logger.warn("Received HTTP PUT request at '{}' with an invalid item type '{}'.", uriInfo.getPath(),
-                    item.type);
-            return Response.status(Status.BAD_REQUEST).build();
+            throw new BadRequestException();
         }
 
-        // Save the item
-        if (getItem(itemname) == null) {
-            // item does not yet exist, create it
-            managedItemProvider.add(newItem);
-            return getItemResponse(Status.CREATED, itemRegistry.get(itemname), locale, null);
-        } else if (managedItemProvider.get(itemname) != null) {
+        if (managedItemProvider.get(itemname) != null) {
             // item already exists as a managed item, update it
             managedItemProvider.update(newItem);
-            return getItemResponse(Status.OK, itemRegistry.get(itemname), locale, null);
+            return EnrichedItemDTOMapper.map(itemRegistry.get(itemname), true, null, uriInfo.getBaseUri(), locale);
+        } else if (itemRegistry.get(itemname) == null) {
+            // item does not yet exist, create it
+            managedItemProvider.add(newItem);
+            response.setStatus(Response.Status.CREATED.getStatusCode());
+            return EnrichedItemDTOMapper.map(itemRegistry.get(itemname), true, null, uriInfo.getBaseUri(), locale);
         } else {
-            // Item exists but cannot be updated
-            logger.warn("Cannot update existing item '{}', because is not managed.", itemname);
-            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
-                    "Cannot update non-managed Item " + itemname);
+            throw new NotAllowedException("Cannot update non-managed Item " + itemname);
         }
     }
 
@@ -673,11 +553,11 @@ public class ItemResource implements RESTResource {
     @ApiOperation(value = "Adds a list of items to the registry or updates the existing items.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 400, message = "Item list is null.") })
-    public Response createOrUpdateItems(
+    public Collection<?> createOrUpdateItems(
             @ApiParam(value = "array of item data", required = true) GroupItemDTO @Nullable [] items) {
         // If we didn't get an item list bean, then return!
         if (items == null) {
-            return Response.status(Status.BAD_REQUEST).build();
+            throw new BadRequestException();
         }
 
         List<GroupItemDTO> wrongTypes = new ArrayList<>();
@@ -700,7 +580,7 @@ public class ItemResource implements RESTResource {
 
         for (Item activeItem : activeItems) {
             String itemName = activeItem.getName();
-            if (getItem(itemName) == null) {
+            if (itemRegistry.get(itemName) == null) {
                 // item does not yet exist, create it
                 managedItemProvider.add(activeItem);
                 createdItems.add(activeItem);
@@ -716,86 +596,36 @@ public class ItemResource implements RESTResource {
         }
 
         // build response
-        List<JsonObject> responseList = new ArrayList<>();
+        List<StatusObjectDTO> responseList = new ArrayList<>();
 
         for (GroupItemDTO item : wrongTypes) {
-            responseList.add(buildStatusObject(item.name, "error", "Received HTTP PUT request at '" + uriInfo.getPath()
-                    + "' with an invalid item type '" + item.type + "'."));
+            responseList.add(new StatusObjectDTO(item.name, "error", "Received HTTP PUT request at '"
+                    + uriInfo.getPath() + "' with an invalid item type '" + item.type + "'."));
         }
         for (Item item : failedItems) {
-            responseList.add(buildStatusObject(item.getName(), "error", "Cannot update non-managed item"));
+            responseList.add(new StatusObjectDTO(item.getName(), "error", "Cannot update non-managed item"));
         }
         for (Item item : createdItems) {
-            responseList.add(buildStatusObject(item.getName(), "created", null));
+            responseList.add(new StatusObjectDTO(item.getName(), "created", null));
         }
         for (Item item : updatedItems) {
-            responseList.add(buildStatusObject(item.getName(), "updated", null));
+            responseList.add(new StatusObjectDTO(item.getName(), "updated", null));
         }
 
-        return JSONResponse.createResponse(Status.OK, responseList, null);
+        return responseList;
     }
 
-    private JsonObject buildStatusObject(String itemName, String status, @Nullable String message) {
-        JsonObject jo = new JsonObject();
-        jo.addProperty("name", itemName);
-        jo.addProperty("status", status);
-        jo.addProperty("message", message);
-        return jo;
-    }
+    @SuppressWarnings("unused")
+    private static class StatusObjectDTO {
+        public final String name;
+        public final String status;
+        public final @Nullable String message;
 
-    /**
-     * helper: Response to be sent to client if a Thing cannot be found
-     *
-     * @param thingUID
-     * @return Response configured for 'item not found'
-     */
-    private static Response getItemNotFoundResponse(String itemname) {
-        String message = "Item " + itemname + " does not exist!";
-        return JSONResponse.createResponse(Status.NOT_FOUND, null, message);
-    }
-
-    /**
-     * Prepare a response representing the Item depending in the status.
-     *
-     * @param status
-     * @param item can be null
-     * @param locale the locale
-     * @param errormessage optional message in case of error
-     * @return Response configured to represent the Item in depending on the status
-     */
-    private Response getItemResponse(Status status, @Nullable Item item, Locale locale, @Nullable String errormessage) {
-        Object entity = null != item ? EnrichedItemDTOMapper.map(item, true, null, uriInfo.getBaseUri(), locale) : null;
-        return JSONResponse.createResponse(status, entity, errormessage);
-    }
-
-    /**
-     * convenience shortcut
-     *
-     * @param itemname
-     * @return Item addressed by itemname
-     */
-    private @Nullable Item getItem(String itemname) {
-        return itemRegistry.get(itemname);
-    }
-
-    private Collection<Item> getItems(@Nullable String type, @Nullable String tags) {
-        Collection<Item> items;
-        if (tags == null) {
-            if (type == null) {
-                items = itemRegistry.getItems();
-            } else {
-                items = itemRegistry.getItemsOfType(type);
-            }
-        } else {
-            String[] tagList = tags.split(",");
-            if (type == null) {
-                items = itemRegistry.getItemsByTag(tagList);
-            } else {
-                items = itemRegistry.getItemsByTagAndType(type, tagList);
-            }
+        public StatusObjectDTO(String name, String status, @Nullable String message) {
+            this.name = name;
+            this.status = status;
+            this.message = message;
         }
-
-        return items;
     }
 
     private void addMetadata(EnrichedItemDTO dto, Set<String> namespaces, @Nullable Predicate<Metadata> filter) {
@@ -819,16 +649,5 @@ public class ItemResource implements RESTResource {
             // we only set it in the dto if there is really data available
             dto.metadata = metadata;
         }
-    }
-
-    private boolean isEditable(String itemName) {
-        return managedItemProvider.get(itemName) != null;
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return itemRegistry != null && managedItemProvider != null && eventPublisher != null
-                && itemBuilderFactory != null && dtoMapper != null && metadataRegistry != null
-                && metadataSelectorMatcher != null && localeService != null;
     }
 }

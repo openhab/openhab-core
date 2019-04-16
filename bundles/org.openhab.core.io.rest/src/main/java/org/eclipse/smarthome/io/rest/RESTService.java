@@ -10,20 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sse.beans;
+package org.eclipse.smarthome.io.rest;
 
 /**
- * Event bean for broadcasted events.
+ * Allows to query and control the service that publishes the REST servlet.
  *
- * @author Ivan Iliev - Initial Contribution and API
- * @author Dennis Nobel - Added event type and renamed object to payload
+ * @author David Graeff - Initial contribution
  */
-public class EventBean {
+public interface RESTService {
+    public static final String REST_APP_NAME = "openhabREST";
 
-    public String topic;
-
-    public String payload;
-    
-    public String type;
-
+    String getRESTroot();
 }

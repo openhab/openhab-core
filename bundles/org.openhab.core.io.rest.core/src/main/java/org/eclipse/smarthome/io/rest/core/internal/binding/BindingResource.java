@@ -17,12 +17,14 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -30,10 +32,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.ConfigUtil;
@@ -43,13 +45,12 @@ import org.eclipse.smarthome.core.binding.BindingInfo;
 import org.eclipse.smarthome.core.binding.BindingInfoRegistry;
 import org.eclipse.smarthome.core.binding.dto.BindingInfoDTO;
 import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.eclipse.smarthome.io.rest.core.config.ConfigurationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +61,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * This class acts as a REST resource for bindings and is registered with the
- * Jersey servlet.
+ * This class acts as a REST resource for bindings
  *
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - refactored for using the OSGi JAX-RS connector
@@ -71,54 +71,43 @@ import io.swagger.annotations.ApiResponses;
 @Path(BindingResource.PATH_BINDINGS)
 @RolesAllowed({ Role.ADMIN })
 @Api(value = BindingResource.PATH_BINDINGS)
-@Component
-public class BindingResource implements RESTResource {
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class BindingResource {
 
     /** The URI path to this resource */
     public static final String PATH_BINDINGS = "bindings";
 
     private final Logger logger = LoggerFactory.getLogger(BindingResource.class);
 
-    private ConfigurationService configurationService;
-    private ConfigDescriptionRegistry configDescRegistry;
+    @Reference
+    private @NonNullByDefault({}) ConfigurationService configurationService;
 
-    private BindingInfoRegistry bindingInfoRegistry;
+    @Reference
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescRegistry;
 
-    private LocaleService localeService;
+    @Reference
+    private @NonNullByDefault({}) BindingInfoRegistry bindingInfoRegistry;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setBindingInfoRegistry(BindingInfoRegistry bindingInfoRegistry) {
-        this.bindingInfoRegistry = bindingInfoRegistry;
-    }
-
-    protected void unsetBindingInfoRegistry(BindingInfoRegistry bindingInfoRegistry) {
-        this.bindingInfoRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
+    @Reference
+    private @NonNullByDefault({}) LocaleService localeService;
 
     @Context
-    UriInfo uriInfo;
+    private @NonNullByDefault({}) UriInfo uriInfo;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all bindings.", response = BindingInfoDTO.class, responseContainer = "Set")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BindingInfoDTO.class, responseContainer = "Set") })
-    public Response getAll(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language) {
+    public Stream<?> getAll(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language) {
         final Locale locale = localeService.getLocale(language);
-        Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(locale);
-
-        return Response.ok(new Stream2JSONInputStream(bindingInfos.stream().map(b -> map(b, locale)))).build();
+        return bindingInfoRegistry.getBindingInfos(locale).stream().map(b -> map(b));
     }
 
+    @SuppressWarnings("null")
     @GET
     @Path("/{bindingId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
@@ -126,24 +115,21 @@ public class BindingResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Binding does not exist"),
             @ApiResponse(code = 500, message = "Configuration can not be read due to internal error") })
-    public Response getConfiguration(
+    public Map<String, Object> getConfiguration(
             @PathParam("bindingId") @ApiParam(value = "service ID", required = true) String bindingId) {
         try {
             String configId = getConfigId(bindingId);
             if (configId == null) {
-                logger.warn("Cannot get config id for binding id '{}', probably because binding does not exist.",
-                        bindingId);
-                return Response.status(404).build();
+                throw new NotFoundException();
             }
             Configuration configuration = configurationService.get(configId);
-            return configuration != null ? Response.ok(configuration.getProperties()).build()
-                    : Response.ok(Collections.emptyMap()).build();
+            return configuration != null ? configuration.getProperties() : Collections.emptyMap();
         } catch (IOException ex) {
-            logger.error("Cannot get configuration for service {}: {}", bindingId, ex.getMessage(), ex);
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            throw new InternalServerErrorException(ex);
         }
     }
 
+    @SuppressWarnings("null")
     @PUT
     @Path("/{bindingId}/config")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -153,7 +139,7 @@ public class BindingResource implements RESTResource {
             @ApiResponse(code = 204, message = "No old configuration"),
             @ApiResponse(code = 404, message = "Binding does not exist"),
             @ApiResponse(code = 500, message = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(
+    public Map<String, Object> updateConfiguration(
             @PathParam("bindingId") @ApiParam(value = "service ID", required = true) String bindingId,
             Map<String, Object> configuration) {
         try {
@@ -161,19 +147,18 @@ public class BindingResource implements RESTResource {
             if (configId == null) {
                 logger.warn("Cannot get config id for binding id '{}', probably because binding does not exist.",
                         bindingId);
-                return Response.status(404).build();
+                throw new NotFoundException();
             }
             Configuration oldConfiguration = configurationService.get(configId);
             configurationService.update(configId, new Configuration(normalizeConfiguration(configuration, bindingId)));
-            return oldConfiguration != null ? Response.ok(oldConfiguration.getProperties()).build()
-                    : Response.noContent().build();
+            return oldConfiguration != null ? oldConfiguration.getProperties() : Collections.emptyMap();
         } catch (IOException ex) {
-            logger.error("Cannot update configuration for service {}: {}", bindingId, ex.getMessage(), ex);
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            throw new InternalServerErrorException(ex);
         }
     }
 
-    private Map<String, Object> normalizeConfiguration(Map<String, Object> properties, String bindingId) {
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            String bindingId) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -191,7 +176,7 @@ public class BindingResource implements RESTResource {
         return ConfigUtil.normalizeTypes(properties, Collections.singletonList(configDesc));
     }
 
-    private String getConfigId(String bindingId) {
+    private @Nullable String getConfigId(String bindingId) {
         BindingInfo bindingInfo = this.bindingInfoRegistry.getBindingInfo(bindingId);
         if (bindingInfo != null) {
             return bindingInfo.getServiceId();
@@ -200,34 +185,9 @@ public class BindingResource implements RESTResource {
         }
     }
 
-    private BindingInfoDTO map(BindingInfo bindingInfo, Locale locale) {
+    private BindingInfoDTO map(BindingInfo bindingInfo) {
         URI configDescriptionURI = bindingInfo.getConfigDescriptionURI();
         return new BindingInfoDTO(bindingInfo.getUID(), bindingInfo.getName(), bindingInfo.getAuthor(),
                 bindingInfo.getDescription(), configDescriptionURI != null ? configDescriptionURI.toString() : null);
     }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    protected void unsetConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = null;
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return configurationService != null && configDescRegistry != null && bindingInfoRegistry != null
-                && localeService != null;
-    }
-
 }
