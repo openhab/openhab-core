@@ -23,6 +23,14 @@ import org.eclipse.smarthome.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is the default implementation for a state update timestamp profile.
+ * The timestamp updates to now each time the channel or item state is updated.
+ *
+ * @author Gaël L'hopital - initial contribution
+ *
+ */
+
 @NonNullByDefault
 public class TimestampUpdateProfile implements StateProfile {
 

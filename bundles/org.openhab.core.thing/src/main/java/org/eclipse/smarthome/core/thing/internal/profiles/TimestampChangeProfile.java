@@ -22,6 +22,13 @@ import org.eclipse.smarthome.core.thing.profiles.SystemProfiles;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 
+/**
+ * This is the default implementation for a change timestamp profile.
+ * The timestamp updates to now each time the channel or item state changes.
+ *
+ * @author Gaël L'hopital - initial contribution
+ *
+ */
 @NonNullByDefault
 public class TimestampChangeProfile implements StateProfile {
     private final ProfileCallback callback;
