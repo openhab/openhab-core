@@ -543,6 +543,7 @@
     <!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422 -->
     <!-- <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
     <bundle start-level="90">mvn:org.openhab.core.bundles/org.openhab.core.boot/${project.version}</bundle>
+    <bundle start-level="90">mvn:org.openhab.core.bundles/org.openhab.core.boot.rest/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.karaf/${project.version}</bundle>
     <config name="org.eclipse.smarthome.audio">
       defaultSink = enhancedjavasound
