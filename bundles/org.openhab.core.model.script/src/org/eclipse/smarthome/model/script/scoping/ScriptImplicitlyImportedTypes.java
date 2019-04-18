@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.smarthome.core.library.unit.ImperialUnits;
 import org.eclipse.smarthome.core.library.unit.MetricPrefix;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
+import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.eclipse.smarthome.core.thing.binding.ThingActions;
 import org.eclipse.smarthome.model.persistence.extensions.PersistenceExtensions;
 import org.eclipse.smarthome.model.script.actions.Audio;
@@ -48,11 +49,9 @@ import com.google.inject.Singleton;
  * extensions for specific jvm types, which should only be available in rules,
  * but not in scripts
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Xtext 2.5.0 migration
- *
  */
-
 @SuppressWarnings("restriction")
 @Singleton
 public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
@@ -104,8 +103,9 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Things.class);
 
         result.add(ImperialUnits.class);
-        result.add(SIUnits.class);
         result.add(MetricPrefix.class);
+        result.add(SIUnits.class);
+        result.add(SmartHomeUnits.class);
 
         // jodatime static functions
         result.add(DateTime.class);
