@@ -55,15 +55,17 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     @NonNullByDefault({})
     private ChannelTypeRegistry channelTypeRegistry;
 
-    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream.of(SystemProfiles.DEFAULT_TYPE,
-            SystemProfiles.FOLLOW_TYPE, SystemProfiles.RAWBUTTON_TOGGLE_SWITCH_TYPE,
-            SystemProfiles.RAWROCKER_ON_OFF_TYPE, SystemProfiles.RAWROCKER_DIMMER_TYPE, SystemProfiles.OFFSET_TYPE, SystemProfiles.RAWROCKER_PLAY_PAUSE_TYPE)
+    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream
+            .of(SystemProfiles.DEFAULT_TYPE, SystemProfiles.FOLLOW_TYPE, SystemProfiles.RAWBUTTON_TOGGLE_SWITCH_TYPE,
+                    SystemProfiles.RAWROCKER_ON_OFF_TYPE, SystemProfiles.RAWROCKER_DIMMER_TYPE,
+                    SystemProfiles.OFFSET_TYPE, SystemProfiles.RAWROCKER_PLAY_PAUSE_TYPE,
+                    SystemProfiles.TIMESTAMP_UPDATE_TYPE, SystemProfiles.TIMESTAMP_CHANGE_TYPE)
             .collect(Collectors.toSet());
 
-    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream
-            .of(SystemProfiles.DEFAULT, SystemProfiles.FOLLOW, SystemProfiles.RAWBUTTON_TOGGLE_SWITCH,
-                    SystemProfiles.RAWROCKER_ON_OFF, SystemProfiles.RAWROCKER_DIMMER, SystemProfiles.OFFSET, SystemProfiles.RAWROCKER_PLAY_PAUSE)
-            .collect(Collectors.toSet());
+    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream.of(SystemProfiles.DEFAULT,
+            SystemProfiles.FOLLOW, SystemProfiles.RAWBUTTON_TOGGLE_SWITCH, SystemProfiles.RAWROCKER_ON_OFF,
+            SystemProfiles.RAWROCKER_DIMMER, SystemProfiles.OFFSET, SystemProfiles.RAWROCKER_PLAY_PAUSE,
+            SystemProfiles.TIMESTAMP_UPDATE, SystemProfiles.TIMESTAMP_CHANGE).collect(Collectors.toSet());
 
     @Nullable
     @Override
@@ -82,6 +84,10 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new RawRockerPlayPauseProfile(callback);
         } else if (SystemProfiles.OFFSET.equals(profileTypeUID)) {
             return new SystemOffsetProfile(callback, context);
+        } else if (SystemProfiles.TIMESTAMP_UPDATE.equals(profileTypeUID)) {
+            return new TimestampUpdateProfile(callback);
+        } else if (SystemProfiles.TIMESTAMP_CHANGE.equals(profileTypeUID)) {
+            return new TimestampChangeProfile(callback);
         } else {
             return null;
         }

@@ -32,6 +32,8 @@ public interface SystemProfiles {
     ProfileTypeUID RAWROCKER_ON_OFF = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "rawrocker-to-on-off");
     ProfileTypeUID RAWROCKER_DIMMER = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "rawrocker-to-dimmer");
     ProfileTypeUID RAWROCKER_PLAY_PAUSE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "rawrocker-to-play-pause");
+    ProfileTypeUID TIMESTAMP_UPDATE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "timestamp-update");
+    ProfileTypeUID TIMESTAMP_CHANGE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "timestamp-change");
 
     StateProfileType DEFAULT_TYPE = ProfileTypeBuilder.newState(DEFAULT, "Default").build();
 
@@ -53,8 +55,15 @@ public interface SystemProfiles {
     TriggerProfileType RAWROCKER_DIMMER_TYPE = ProfileTypeBuilder.newTrigger(RAWROCKER_DIMMER, "Raw Rocker To Dimmer")
             .withSupportedItemTypes(CoreItemFactory.DIMMER)
             .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWROCKER.getUID()).build();
-    
-    TriggerProfileType RAWROCKER_PLAY_PAUSE_TYPE = ProfileTypeBuilder.newTrigger(RAWROCKER_PLAY_PAUSE, "Raw Rocker To Play/Pause")
-            .withSupportedItemTypes(CoreItemFactory.PLAYER)
+
+    TriggerProfileType RAWROCKER_PLAY_PAUSE_TYPE = ProfileTypeBuilder
+            .newTrigger(RAWROCKER_PLAY_PAUSE, "Raw Rocker To Play/Pause").withSupportedItemTypes(CoreItemFactory.PLAYER)
             .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWROCKER.getUID()).build();
+
+    StateProfileType TIMESTAMP_UPDATE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_UPDATE, "Timestamp on update")
+            .withSupportedItemTypesOfChannel(CoreItemFactory.DATETIME).build();
+
+    StateProfileType TIMESTAMP_CHANGE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_CHANGE, "Timestamp on change")
+            .withSupportedItemTypesOfChannel(CoreItemFactory.DATETIME).build();
+
 }
