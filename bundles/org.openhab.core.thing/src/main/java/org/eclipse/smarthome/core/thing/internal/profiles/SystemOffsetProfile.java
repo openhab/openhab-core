@@ -165,7 +165,6 @@ public class SystemOffsetProfile implements StateProfile {
 
     private @Nullable QuantityType<Temperature> handleTemperature(QuantityType<Temperature> qtState,
             QuantityType<Temperature> offset) {
-
         QuantityType<Temperature> finalOffset;
 
         // do the math in kelvin and afterwards convert it back to the unit of the state

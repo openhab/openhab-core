@@ -12,11 +12,13 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
+import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.RAWROCKER_ON_OFF;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
 import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.SystemProfiles;
 import org.eclipse.smarthome.core.thing.profiles.TriggerProfile;
 import org.eclipse.smarthome.core.types.State;
 
@@ -25,6 +27,7 @@ import org.eclipse.smarthome.core.types.State;
  *
  * @author Jan Kemmler - Initial contribution
  */
+@NonNullByDefault
 public class RawRockerOnOffProfile implements TriggerProfile {
 
     private final ProfileCallback callback;
@@ -35,14 +38,9 @@ public class RawRockerOnOffProfile implements TriggerProfile {
 
     @Override
     public ProfileTypeUID getProfileTypeUID() {
-        return SystemProfiles.RAWROCKER_ON_OFF;
+        return RAWROCKER_ON_OFF;
     }
 
-    /**
-     * Will be called if an item has changed its state and this information should be forwarded to the binding.
-     *
-     * @param state
-     */
     @Override
     public void onStateUpdateFromItem(State state) {
     }
