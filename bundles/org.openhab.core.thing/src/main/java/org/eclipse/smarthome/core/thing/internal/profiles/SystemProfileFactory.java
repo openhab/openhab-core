@@ -58,12 +58,13 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream.of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE,
             RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE,
             RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE,
-            RAWROCKER_REWIND_FASTFORWARD_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE)
+            RAWROCKER_REWIND_FASTFORWARD_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE, EXPIRE_TYPE)
             .collect(Collectors.toSet());
 
-    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream.of(DEFAULT, FOLLOW, OFFSET,
-            RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER, RAWROCKER_NEXT_PREVIOUS,
-            RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE)
+    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream
+            .of(DEFAULT, FOLLOW, OFFSET, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER,
+                    RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD,
+                    TIMESTAMP_CHANGE, TIMESTAMP_UPDATE, EXPIRE)
             .collect(Collectors.toSet());
 
     @Nullable
@@ -93,6 +94,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new TimestampChangeProfile(callback);
         } else if (TIMESTAMP_UPDATE.equals(profileTypeUID)) {
             return new TimestampUpdateProfile(callback);
+        } else if (EXPIRE.equals(profileTypeUID)) {
+            return new ExpireProfile(callback, context);
         } else {
             return null;
         }

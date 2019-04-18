@@ -38,6 +38,7 @@ public interface SystemProfiles {
             "rawrocker-to-rewind-fastforward");
     ProfileTypeUID TIMESTAMP_CHANGE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "timestamp-change");
     ProfileTypeUID TIMESTAMP_UPDATE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "timestamp-update");
+    ProfileTypeUID EXPIRE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "expire");
 
     StateProfileType DEFAULT_TYPE = ProfileTypeBuilder.newState(DEFAULT, "Default").build();
 
@@ -84,5 +85,7 @@ public interface SystemProfiles {
 
     StateProfileType TIMESTAMP_UPDATE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_UPDATE, "Timestamp on update")
             .withSupportedItemTypes(CoreItemFactory.DATETIME).build();
+
+    StateProfileType EXPIRE_TYPE = ProfileTypeBuilder.newState(EXPIRE, "Expire").build();
 
 }
