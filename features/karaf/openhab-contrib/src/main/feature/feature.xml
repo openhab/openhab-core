@@ -18,9 +18,8 @@
     <!-- Features for Java EE bundles -->
 
     <feature name="openhab-jaxb" description="openHAB JAXB bundles" version="${project.version}">
-        <feature prerequisite="true">wrap</feature>
-        <bundle dependency="true">org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/2.9.0</bundle>
-        <bundle dependency="true">mvn:javax.xml.bind/jaxb-api/2.2.12</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/2.9.0</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxb-api-2.2/2.9.0</bundle>
         <bundle dependency="true">mvn:com.sun.xml.bind/jaxb-impl/2.2.11</bundle>
         <bundle dependency="true">mvn:com.sun.xml.bind/jaxb-core/2.2.11</bundle>
     </feature>
