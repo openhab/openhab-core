@@ -111,12 +111,11 @@ public class SseResource {
         // This allows you to not disable proxy buffering in nginx and still have working sse
         response.addHeader(X_ACCEL_BUFFERING_HEADER, "no");
 
-        if (!SseUtil.SERVLET3_SUPPORT) {
-            // if we don't have sevlet 3.0 async support, we want to make sure
-            // that the response is not compressed and buffered so that the
-            // client receives server sent events at the moment of sending them
-            response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
+        // We want to make sure that the response is not compressed and buffered so that the client receives server sent
+        // events at the moment of sending them.
+        response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
 
+        if (!SseUtil.SERVLET3_SUPPORT) {
             // Response headers are written now, since the thread will be
             // blocked later on.
             response.setStatus(HttpServletResponse.SC_OK);
