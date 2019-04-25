@@ -141,7 +141,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
         try {
             final Collection<E> providerElements = providerToElements.get(provider);
             if (providerElements == null) {
-                logger.warn("Cannot add \"{}\" with key \"{}\". Provider \"{}\" unknown.",
+                logger.debug("Cannot add \"{}\" with key \"{}\". Provider \"{}\" unknown.",
                         element.getClass().getSimpleName(), element.getUID(), provider.getClass().getSimpleName());
                 return;
             }
@@ -168,7 +168,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
     private boolean added(Provider<E> provider, E element, Collection<E> providerElements) {
         final K uid = element.getUID();
         if (identifierToElement.containsKey(uid)) {
-            logger.warn(
+            logger.debug(
                     "Cannot add \"{}\" with key \"{}\". It exists already from provider \"{}\"! Failed to add a second with the same UID from provider \"{}\"!",
                     element.getClass().getSimpleName(), uid,
                     elementToProvider.get(identifierToElement.get(uid)).getClass().getSimpleName(),
@@ -250,7 +250,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
         final K uidOld = oldElement.getUID();
         final K uid = element.getUID();
         if (!uidOld.equals(uid)) {
-            logger.warn("Received update event for elements that UID differ (old: \"{}\", new: \"{}\"). Ignore event.",
+            logger.debug("Received update event for elements that UID differ (old: \"{}\", new: \"{}\"). Ignore event.",
                     uidOld, uid);
             return;
         }
@@ -469,7 +469,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
      * You should also not call third party code that could e.g. access the registry itself again. This could lead to a
      * dead lock and hard finding bugs.
      * The {@link #getAll()} and {@link #stream()} method will operate on a copy and so no lock is hold.
-     * 
+     *
      * @param consumer function to call with element
      */
     protected void forEach(Consumer<E> consumer) {
@@ -492,7 +492,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
      * You should also not call third party code that could e.g. access the registry itself again. This could lead to a
      * dead lock and hard finding bugs.
      * The {@link #getAll()} and {@link #stream()} method will operate on a copy and so no lock is hold.
-     * 
+     *
      * @param consumer function to call with the provider and element
      */
     protected void forEach(BiConsumer<Provider<E>, E> consumer) {
