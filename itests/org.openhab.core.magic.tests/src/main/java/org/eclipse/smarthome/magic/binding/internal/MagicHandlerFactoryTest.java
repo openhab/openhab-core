@@ -22,10 +22,14 @@ import org.eclipse.smarthome.magic.binding.MagicBindingConstants;
 import org.eclipse.smarthome.magic.binding.handler.MagicColorLightHandler;
 import org.eclipse.smarthome.magic.binding.handler.MagicDimmableLightHandler;
 import org.eclipse.smarthome.magic.binding.handler.MagicOnOffLightHandler;
-import org.eclipse.smarthome.magic.binding.internal.MagicHandlerFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests cases for {@link MagicHandlerFactory}.
+ *
+ * @author Henning Treu - Initial contribution
+ */
 public class MagicHandlerFactoryTest {
 
     private MagicHandlerFactory factory;
