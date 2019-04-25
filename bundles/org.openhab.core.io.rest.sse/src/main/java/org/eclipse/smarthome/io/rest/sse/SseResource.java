@@ -115,17 +115,6 @@ public class SseResource {
         // events at the moment of sending them.
         response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
 
-        if (!SseUtil.SERVLET3_SUPPORT) {
-            // Response headers are written now, since the thread will be
-            // blocked later on.
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType(SseFeature.SERVER_SENT_EVENTS);
-            response.flushBuffer();
-
-            // enable blocking for this thread
-            SseUtil.enableBlockingSse();
-        }
-
         return eventOutput;
     }
 

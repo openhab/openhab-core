@@ -12,8 +12,6 @@
  */
 package org.eclipse.smarthome.io.rest.sse.internal;
 
-import org.eclipse.smarthome.io.rest.sse.internal.async.BlockingAsyncFeature;
-import org.eclipse.smarthome.io.rest.sse.internal.util.SseUtil;
 import org.glassfish.jersey.media.sse.SseFeature;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -51,12 +49,6 @@ public class SseActivator implements BundleActivator {
             logger.debug("SSE API - SseFeature registered.");
         }
 
-        if (!SseUtil.SERVLET3_SUPPORT) {
-            blockingAsyncFeatureRegistration = bc.registerService(BlockingAsyncFeature.class.getName(),
-                    new BlockingAsyncFeature(), null);
-
-            logger.debug("SSE API - SSE BlockingAsyncFeature registered.");
-        }
         logger.debug("SSE API has been started.");
     }
 
