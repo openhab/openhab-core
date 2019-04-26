@@ -55,16 +55,17 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     @NonNullByDefault({})
     private ChannelTypeRegistry channelTypeRegistry;
 
-    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream.of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE,
-            RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE,
-            RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE,
-            RAWROCKER_REWIND_FASTFORWARD_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE)
+    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream
+            .of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
+                    RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE, RAWROCKER_NEXT_PREVIOUS_TYPE,
+                    RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE, RAWROCKER_REWIND_FASTFORWARD_TYPE,
+                    RAWROCKER_STOP_MOVE_TYPE, RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE)
             .collect(Collectors.toSet());
 
     private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream.of(DEFAULT, FOLLOW, OFFSET,
-            RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER, RAWROCKER_NEXT_PREVIOUS,
-            RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE)
-            .collect(Collectors.toSet());
+            RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER,
+            RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD,
+            RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE).collect(Collectors.toSet());
 
     @Nullable
     @Override
@@ -78,6 +79,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         } else if (RAWBUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
             return new RawButtonToggleSwitchProfile(callback);
         } else if (RAWBUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
+            return new RawButtonToggleRollershutterProfile(callback);
+        } else if (RAWBUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
             return new RawButtonTogglePlayerProfile(callback);
         } else if (RAWROCKER_DIMMER.equals(profileTypeUID)) {
             return new RawRockerDimmerProfile(callback, context);
@@ -89,6 +92,10 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new RawRockerPlayPauseProfile(callback);
         } else if (RAWROCKER_REWIND_FASTFORWARD.equals(profileTypeUID)) {
             return new RawRockerRewindFastforwardProfile(callback);
+        } else if (RAWROCKER_STOP_MOVE.equals(profileTypeUID)) {
+            return new RawRockerStopMoveProfile(callback);
+        } else if (RAWROCKER_UP_DOWN.equals(profileTypeUID)) {
+            return new RawRockerUpDownProfile(callback);
         } else if (TIMESTAMP_CHANGE.equals(profileTypeUID)) {
             return new TimestampChangeProfile(callback);
         } else if (TIMESTAMP_UPDATE.equals(profileTypeUID)) {
@@ -111,6 +118,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
                 if (DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON.getUID().equals(channelType.getUID())) {
                     if (CoreItemFactory.PLAYER.equalsIgnoreCase(itemType)) {
                         return RAWBUTTON_TOGGLE_PLAYER;
+                    } else if (CoreItemFactory.ROLLERSHUTTER.equalsIgnoreCase(itemType)) {
+                        return RAWBUTTON_TOGGLE_ROLLERSHUTTER;
                     } else if (CoreItemFactory.SWITCH.equalsIgnoreCase(itemType)) {
                         return RAWBUTTON_TOGGLE_SWITCH;
                     }
@@ -119,6 +128,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
                         return RAWROCKER_DIMMER;
                     } else if (CoreItemFactory.PLAYER.equalsIgnoreCase(itemType)) {
                         return RAWROCKER_PLAY_PAUSE;
+                    } else if (CoreItemFactory.ROLLERSHUTTER.equalsIgnoreCase(itemType)) {
+                        return RAWROCKER_UP_DOWN;
                     } else if (CoreItemFactory.SWITCH.equalsIgnoreCase(itemType)) {
                         return RAWROCKER_ON_OFF;
                     }
