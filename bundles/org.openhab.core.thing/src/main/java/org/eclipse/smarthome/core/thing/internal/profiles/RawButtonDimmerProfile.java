@@ -77,7 +77,7 @@ public class RawButtonDimmerProfile implements TriggerProfile {
                     IncreaseDecreaseType.INCREASE;
             buttonPressed(command);
         } else if (CommonTriggerEvents.RELEASED.equals(event)) {
-            OnOffType newState = previousState.equals(PercentType.HUNDRED) ? OnOffType.OFF : OnOffType.ON;
+            OnOffType newState = previousState.equals(PercentType.ZERO) ? OnOffType.ON : OnOffType.OFF;
             buttonReleased(newState);
         }
     }
