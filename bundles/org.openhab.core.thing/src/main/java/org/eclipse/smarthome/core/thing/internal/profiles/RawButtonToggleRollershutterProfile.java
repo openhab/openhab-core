@@ -36,8 +36,7 @@ public class RawButtonToggleRollershutterProfile implements TriggerProfile {
 
     private final ProfileCallback callback;
 
-    @Nullable
-    private State previousState;
+    private @Nullable State previousState;
 
     public RawButtonToggleRollershutterProfile(ProfileCallback callback) {
         this.callback = callback;

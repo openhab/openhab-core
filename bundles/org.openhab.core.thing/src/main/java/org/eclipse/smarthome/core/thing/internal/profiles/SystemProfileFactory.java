@@ -52,8 +52,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = { SystemProfileFactory.class, ProfileTypeProvider.class })
 public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, ProfileTypeProvider {
 
-    @NonNullByDefault({})
-    private ChannelTypeRegistry channelTypeRegistry;
+    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
 
     private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream
             .of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
@@ -67,9 +66,9 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD,
             RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE).collect(Collectors.toSet());
 
-    @Nullable
     @Override
-    public Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback, ProfileContext context) {
+    public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
+            ProfileContext context) {
         if (DEFAULT.equals(profileTypeUID)) {
             return new SystemDefaultProfile(callback);
         } else if (FOLLOW.equals(profileTypeUID)) {
@@ -105,9 +104,9 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         }
     }
 
-    @Nullable
     @Override
-    public ProfileTypeUID getSuggestedProfileTypeUID(@Nullable ChannelType channelType, @Nullable String itemType) {
+    public @Nullable ProfileTypeUID getSuggestedProfileTypeUID(@Nullable ChannelType channelType,
+            @Nullable String itemType) {
         if (channelType == null) {
             return null;
         }
@@ -141,9 +140,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         return null;
     }
 
-    @Nullable
     @Override
-    public ProfileTypeUID getSuggestedProfileTypeUID(Channel channel, @Nullable String itemType) {
+    public @Nullable ProfileTypeUID getSuggestedProfileTypeUID(Channel channel, @Nullable String itemType) {
         ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID());
         if (channelType == null) {
             switch (channel.getKind()) {
