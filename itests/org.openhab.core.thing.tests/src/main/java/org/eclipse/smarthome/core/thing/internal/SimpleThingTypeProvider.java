@@ -25,7 +25,7 @@ import org.eclipse.smarthome.core.thing.type.ThingType;
 public class SimpleThingTypeProvider implements ThingTypeProvider {
     private final Collection<ThingType> thingTypes;
 
-    SimpleThingTypeProvider(final Collection<ThingType> thingTypes) {
+    public SimpleThingTypeProvider(final Collection<ThingType> thingTypes) {
         this.thingTypes = thingTypes;
     }
 

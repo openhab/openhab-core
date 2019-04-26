@@ -28,6 +28,7 @@ import org.eclipse.smarthome.core.types.CommandDescription;
 import org.eclipse.smarthome.core.types.CommandDescriptionBuilder;
 import org.eclipse.smarthome.core.types.CommandOption;
 import org.eclipse.smarthome.core.types.StateDescription;
+import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.eclipse.smarthome.core.types.StateOption;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
@@ -46,8 +47,7 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ChannelTypeI18nLocalizationService {
 
-    @NonNullByDefault({})
-    private ThingTypeI18nUtil thingTypeI18nUtil;
+    private @NonNullByDefault({}) ThingTypeI18nUtil thingTypeI18nUtil;
 
     @Reference
     protected void setTranslationProvider(TranslationProvider i18nProvider) {
@@ -58,26 +58,47 @@ public class ChannelTypeI18nLocalizationService {
         this.thingTypeI18nUtil = null;
     }
 
-    private @Nullable StateDescription createLocalizedStateDescription(final Bundle bundle,
+    public @Nullable String createLocalizedStatePattern(final Bundle bundle, String pattern,
+            final ChannelTypeUID channelTypeUID, final @Nullable Locale locale) {
+        return thingTypeI18nUtil.getChannelStatePattern(bundle, channelTypeUID, pattern, locale);
+    }
+
+    public List<StateOption> createLocalizedStateOptions(final Bundle bundle, List<StateOption> stateOptions,
+            final ChannelTypeUID channelTypeUID, final @Nullable Locale locale) {
+        List<StateOption> localizedOptions = new ArrayList<>();
+        for (final StateOption stateOption : stateOptions) {
+            String optionLabel = stateOption.getLabel();
+            if (optionLabel != null) {
+                optionLabel = thingTypeI18nUtil.getChannelStateOption(bundle, channelTypeUID, stateOption.getValue(),
+                        optionLabel, locale);
+            }
+            localizedOptions.add(new StateOption(stateOption.getValue(), optionLabel));
+        }
+        return localizedOptions;
+    }
+
+    public @Nullable StateDescription createLocalizedStateDescription(final Bundle bundle,
             final @Nullable StateDescription state, final ChannelTypeUID channelTypeUID,
             final @Nullable Locale locale) {
         if (state == null) {
             return null;
         }
-        String pattern = thingTypeI18nUtil.getChannelStatePattern(bundle, channelTypeUID, state.getPattern(), locale);
 
-        List<StateOption> localizedOptions = new ArrayList<>();
-        for (final StateOption options : state.getOptions()) {
-            String optionLabel = thingTypeI18nUtil.getChannelStateOption(bundle, channelTypeUID, options.getValue(),
-                    options.getLabel(), locale);
-            localizedOptions.add(new StateOption(options.getValue(), optionLabel));
+        String localizedPattern = state.getPattern();
+        if (localizedPattern != null) {
+            localizedPattern = createLocalizedStatePattern(bundle, localizedPattern, channelTypeUID, locale);
         }
+        List<StateOption> localizedOptions = createLocalizedStateOptions(bundle, state.getOptions(), channelTypeUID,
+                locale);
 
-        return new StateDescription(state.getMinimum(), state.getMaximum(), state.getStep(), pattern,
-                state.isReadOnly(), localizedOptions);
+        StateDescriptionFragmentBuilder builder = StateDescriptionFragmentBuilder.create(state);
+        if (localizedPattern != null) {
+            builder.withPattern(localizedPattern);
+        }
+        return builder.withOptions(localizedOptions).build().toStateDescription();
     }
 
-    private @Nullable CommandDescription createLocalizedCommandDescription(final Bundle bundle,
+    public @Nullable CommandDescription createLocalizedCommandDescription(final Bundle bundle,
             final @Nullable CommandDescription command, final ChannelTypeUID channelTypeUID,
             final @Nullable Locale locale) {
         if (command == null) {
@@ -86,9 +107,11 @@ public class ChannelTypeI18nLocalizationService {
 
         CommandDescriptionBuilder commandDescriptionBuilder = CommandDescriptionBuilder.create();
         for (final CommandOption options : command.getCommandOptions()) {
-            String optionLabel = thingTypeI18nUtil.getChannelCommandOption(bundle, channelTypeUID, options.getCommand(),
-                    options.getLabel(), locale);
-            optionLabel = optionLabel == null ? "" : optionLabel;
+            String optionLabel = options.getLabel();
+            if (optionLabel != null) {
+                optionLabel = thingTypeI18nUtil.getChannelCommandOption(bundle, channelTypeUID, options.getCommand(),
+                        optionLabel, locale);
+            }
             commandDescriptionBuilder.withCommandOption(new CommandOption(options.getCommand(), optionLabel));
         }
 

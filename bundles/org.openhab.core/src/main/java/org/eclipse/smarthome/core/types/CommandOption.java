@@ -13,13 +13,13 @@
 package org.eclipse.smarthome.core.types;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Represents a command option for "write only" command channels. CommandOptions will be rendered as
- * push-buttons in the UI and will not represent a state.
+ * Represents a command option for "write only" command channels. CommandOptions will be rendered as push-buttons in the
+ * UI and will not represent a state.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public class CommandOption {
@@ -32,9 +32,9 @@ public class CommandOption {
     /**
      * The name of the command which will be displayed in the UI.
      */
-    private final String label;
+    private @Nullable String label;
 
-    public CommandOption(String command, String label) {
+    public CommandOption(String command, @Nullable String label) {
         this.command = command;
         this.label = label;
     }
@@ -43,8 +43,12 @@ public class CommandOption {
         return command;
     }
 
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
+    @Override
+    public String toString() {
+        return "CommandOption [command=" + command + ", label=" + label + "]";
+    }
 }

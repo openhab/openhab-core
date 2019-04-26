@@ -23,8 +23,7 @@ import org.eclipse.smarthome.core.types.CommandOption;
 /**
  * The {@link CommandDescriptionImpl} groups state command properties.
  *
- * @author Henning Treu - initial contribution
- *
+ * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
 public class CommandDescriptionImpl implements CommandDescription {

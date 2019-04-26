@@ -204,9 +204,12 @@ public class NumberItem extends GenericItem {
     private @Nullable Unit<? extends Quantity<?>> getUnit(@Nullable Class<? extends Quantity<?>> dimension) {
         StateDescription stateDescription = getStateDescription();
         if (stateDescription != null) {
-            Unit<?> stateDescriptionUnit = UnitUtils.parseUnit(stateDescription.getPattern());
-            if (stateDescriptionUnit != null) {
-                return stateDescriptionUnit;
+            String pattern = stateDescription.getPattern();
+            if (pattern != null) {
+                Unit<?> stateDescriptionUnit = UnitUtils.parseUnit(pattern);
+                if (stateDescriptionUnit != null) {
+                    return stateDescriptionUnit;
+                }
             }
         }
 

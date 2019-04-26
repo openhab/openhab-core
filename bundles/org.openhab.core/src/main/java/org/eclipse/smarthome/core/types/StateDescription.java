@@ -13,24 +13,27 @@
 package org.eclipse.smarthome.core.types;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
- * Describes restrictions of an item state and gives information how to interpret
+ * The {@link StateDescription} describes restrictions of an item state and gives information how to interpret
  * it.
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public class StateDescription {
 
-    private final BigDecimal minimum;
-    private final BigDecimal maximum;
-    private final BigDecimal step;
-    private final String pattern;
-    private final boolean readOnly;
-    private final List<StateOption> options;
+    protected @Nullable final BigDecimal minimum;
+    protected @Nullable final BigDecimal maximum;
+    protected @Nullable final BigDecimal step;
+    protected @Nullable final String pattern;
+    protected final boolean readOnly;
+    protected final List<StateOption> options;
 
     /**
      * Creates a state description object.
@@ -41,19 +44,17 @@ public class StateDescription {
      * @param pattern pattern to render the state
      * @param readOnly if the state can be changed by the system
      * @param options predefined list of options
+     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
      */
-    public StateDescription(BigDecimal minimum, BigDecimal maximum, BigDecimal step, String pattern, boolean readOnly,
-            List<StateOption> options) {
+    @Deprecated
+    public StateDescription(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
+            @Nullable String pattern, boolean readOnly, @Nullable List<StateOption> options) {
         this.minimum = minimum;
         this.maximum = maximum;
         this.step = step;
         this.pattern = pattern;
         this.readOnly = readOnly;
-        if (options != null) {
-            this.options = Collections.unmodifiableList(new ArrayList<StateOption>(options));
-        } else {
-            this.options = Collections.emptyList();
-        }
+        this.options = options == null ? Collections.emptyList() : Collections.unmodifiableList(options);
     }
 
     /**
@@ -61,7 +62,7 @@ public class StateDescription {
      *
      * @return minimum value of an item state
      */
-    public BigDecimal getMinimum() {
+    public @Nullable BigDecimal getMinimum() {
         return minimum;
     }
 
@@ -70,7 +71,7 @@ public class StateDescription {
      *
      * @return maximum value of an item state
      */
-    public BigDecimal getMaximum() {
+    public @Nullable BigDecimal getMaximum() {
         return maximum;
     }
 
@@ -79,7 +80,7 @@ public class StateDescription {
      *
      * @return step size
      */
-    public BigDecimal getStep() {
+    public @Nullable BigDecimal getStep() {
         return step;
     }
 
@@ -88,7 +89,7 @@ public class StateDescription {
      *
      * @return pattern
      */
-    public String getPattern() {
+    public @Nullable String getPattern() {
         return pattern;
     }
 
@@ -118,5 +119,4 @@ public class StateDescription {
         return "StateDescription [minimum=" + minimum + ", maximum=" + maximum + ", step=" + step + ", pattern="
                 + pattern + ", readOnly=" + readOnly + ", channelStateOptions=" + options + "]";
     }
-
 }

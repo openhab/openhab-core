@@ -19,8 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * The {@link CommandDescription} groups state command properties.
  *
- * @author Henning Treu - initial contribution
- *
+ * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
 public interface CommandDescription {

@@ -10,8 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal;
+package org.eclipse.smarthome.core.thing.type;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -44,28 +45,31 @@ import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.smarthome.core.thing.binding.BaseDynamicStateDescriptionProvider;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
+import org.eclipse.smarthome.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
+import org.eclipse.smarthome.core.thing.internal.ChannelStateDescriptionProvider;
+import org.eclipse.smarthome.core.thing.internal.SimpleThingTypeProvider;
 import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
 import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinitionBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.thing.type.DynamicStateDescriptionProvider;
-import org.eclipse.smarthome.core.thing.type.ThingTypeBuilder;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.StateDescription;
+import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.eclipse.smarthome.core.types.StateOption;
+import org.eclipse.smarthome.core.util.BundleResolver;
+import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -77,14 +81,20 @@ import org.osgi.service.component.ComponentContext;
  */
 public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
+    private static final String TEST_BUNDLE_NAME = "thingStatusInfoI18nTest.bundle";
+    private static final ChannelTypeUID CHANNEL_TYPE_7_UID = new ChannelTypeUID("hue:num-dynamic");
+
+    private ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
     private ItemRegistry itemRegistry;
     private ItemChannelLinkRegistry linkRegistry;
 
     @Mock
     private ComponentContext componentContext;
 
+    private Bundle testBundle;
+
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         initMocks(this);
 
         Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
@@ -116,8 +126,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
                 "Brightness", "", "DimmableLight", null, (StateDescription) null, null);
         final ChannelType channelType6 = new ChannelType(new ChannelTypeUID("hue:switch"), false, "Switch", "Switch",
                 "", "Light", null, (StateDescription) null, null);
-        final ChannelType channelType7 = new ChannelType(new ChannelTypeUID("hue:num-dynamic"), false, "Number", " ",
-                "", "Light", null, state, null);
+        final ChannelType channelType7 = new ChannelType(CHANNEL_TYPE_7_UID, false, "Number", " ", "", "Light", null,
+                state, null);
 
         List<ChannelType> channelTypes = new ArrayList<>();
         channelTypes.add(channelType);
@@ -145,28 +155,15 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
             }
         });
 
-        registerService(new DynamicStateDescriptionProvider() {
-            final StateDescription newState = new StateDescription(BigDecimal.valueOf(10), BigDecimal.valueOf(100),
-                    BigDecimal.valueOf(5), "VALUE %d", false,
-                    Arrays.asList(new StateOption("value0", "label0"), new StateOption("value1", "label1")));
+        testBundle = SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME);
+        assertThat(testBundle, is(notNullValue()));
 
-            @Override
-            public @Nullable StateDescription getStateDescription(@NonNull Channel channel,
-                    @Nullable StateDescription original, @Nullable Locale locale) {
-                String id = channel.getUID().getIdWithoutGroup();
-                if ("7_1".equals(id)) {
-                    assertEquals(channel.getChannelTypeUID(), channelType7.getUID());
-                    return newState;
-                } else if ("7_2".equals(id)) {
-                    assertEquals(channel.getChannelTypeUID(), channelType7.getUID());
-                    StateDescription newState2 = new StateDescription(original.getMinimum().add(BigDecimal.ONE),
-                            original.getMaximum().add(BigDecimal.ONE), original.getStep().add(BigDecimal.TEN),
-                            "NEW " + original.getPattern(), true, original.getOptions());
-                    return newState2;
-                }
-                return null;
-            }
-        });
+        thingStatusInfoI18nLocalizationService = getService(ThingStatusInfoI18nLocalizationService.class);
+        assertThat(thingStatusInfoI18nLocalizationService, is(notNullValue()));
+
+        thingStatusInfoI18nLocalizationService.setBundleResolver(new BundleResolverImpl());
+
+        registerService(new TestDynamicStateDescriptionProvider(), DynamicStateDescriptionProvider.class.getName());
 
         List<ChannelDefinition> channelDefinitions = new ArrayList<>();
         channelDefinitions.add(new ChannelDefinitionBuilder("1", channelType.getUID()).build());
@@ -196,7 +193,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     }
 
     @After
-    public void teardown() {
+    public void teardown() throws BundleException {
+        testBundle.uninstall();
         ManagedThingProvider managedThingProvider = getService(ManagedThingProvider.class);
         managedThingProvider.getAll().forEach(thing -> {
             managedThingProvider.remove(thing.getUID());
@@ -359,6 +357,33 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
      * Helper
      */
 
+    class TestDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
+        final StateDescription newState = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.valueOf(10))
+                .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.valueOf(5)).withPattern("VALUE %d")
+                .withReadOnly(false)
+                .withOptions(Arrays.asList(new StateOption("value0", "label0"), new StateOption("value1", "label1")))
+                .build().toStateDescription();
+
+        @Override
+        public @Nullable StateDescription getStateDescription(@NonNull Channel channel,
+                @Nullable StateDescription original, @Nullable Locale locale) {
+            String id = channel.getUID().getIdWithoutGroup();
+            if ("7_1".equals(id)) {
+                assertEquals(channel.getChannelTypeUID(), CHANNEL_TYPE_7_UID);
+                return newState;
+            } else if ("7_2".equals(id)) {
+                assertEquals(channel.getChannelTypeUID(), CHANNEL_TYPE_7_UID);
+                StateDescriptionFragmentBuilder builder = (original == null) ? StateDescriptionFragmentBuilder.create()
+                        : StateDescriptionFragmentBuilder.create(original);
+                return builder.withMinimum(original.getMinimum().add(BigDecimal.ONE))
+                        .withMaximum(original.getMaximum().add(BigDecimal.ONE))
+                        .withStep(original.getStep().add(BigDecimal.TEN)).withPattern("NEW " + original.getPattern())
+                        .withReadOnly(true).build().toStateDescription();
+            }
+            return null;
+        }
+    }
+
     class TestThingHandlerFactory extends BaseThingHandlerFactory {
 
         @Override
@@ -373,9 +398,10 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         @Override
         protected ThingHandler createHandler(Thing thing) {
-            return new BaseThingHandler(thing) {
+            return new AbstractThingHandler(thing) {
                 @Override
                 public void handleCommand(ChannelUID channelUID, Command command) {
+                    // do nothing
                 }
 
                 @Override
@@ -404,6 +430,27 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         @Override
         public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
+        }
+    }
+
+    private abstract class AbstractThingHandler extends BaseThingHandler {
+        public AbstractThingHandler(Thing thing) {
+            super(thing);
+        }
+    }
+
+    /**
+     * Use this for simulating that the {@link AbstractThingHandler} class does come from another bundle than this test
+     * bundle.
+     */
+    private class BundleResolverImpl implements BundleResolver {
+        @Override
+        public Bundle resolveBundle(Class<?> clazz) {
+            if (clazz != null && clazz.equals(AbstractThingHandler.class)) {
+                return testBundle;
+            } else {
+                return FrameworkUtil.getBundle(clazz);
+            }
         }
     }
 }

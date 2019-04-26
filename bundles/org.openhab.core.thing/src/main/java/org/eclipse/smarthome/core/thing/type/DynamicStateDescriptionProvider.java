@@ -21,10 +21,9 @@ import org.eclipse.smarthome.core.types.StateDescription;
 
 /**
  * The {@link DynamicStateDescriptionProvider} is responsible for providing {@link StateDescription} for a channel
- * dynamically in the runtime.
+ * dynamically in the runtime. Therefore the provider must be registered as OSGi service.
  *
- * @author Pawel Pieczul - initial contribution
- *
+ * @author Pawel Pieczul - Initial contribution
  */
 @NonNullByDefault
 public interface DynamicStateDescriptionProvider {
