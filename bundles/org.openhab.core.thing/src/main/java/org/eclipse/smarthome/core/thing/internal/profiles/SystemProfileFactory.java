@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
+import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.*;
+
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
@@ -31,7 +33,6 @@ import org.eclipse.smarthome.core.thing.profiles.ProfileFactory;
 import org.eclipse.smarthome.core.thing.profiles.ProfileType;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.SystemProfiles;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
 import org.osgi.service.component.annotations.Component;
@@ -45,8 +46,7 @@ import org.osgi.service.component.annotations.Reference;
  * The same applies to the creation of profile instances: This factory will be used of no other factory supported the
  * required profile type.
  *
- * @author Simon Kaufmann - initial contribution and API.
- *
+ * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
 @Component(service = { SystemProfileFactory.class, ProfileTypeProvider.class })
@@ -55,39 +55,44 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     @NonNullByDefault({})
     private ChannelTypeRegistry channelTypeRegistry;
 
-    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream
-            .of(SystemProfiles.DEFAULT_TYPE, SystemProfiles.FOLLOW_TYPE, SystemProfiles.RAWBUTTON_TOGGLE_SWITCH_TYPE,
-                    SystemProfiles.RAWROCKER_ON_OFF_TYPE, SystemProfiles.RAWROCKER_DIMMER_TYPE,
-                    SystemProfiles.OFFSET_TYPE, SystemProfiles.RAWROCKER_PLAY_PAUSE_TYPE,
-                    SystemProfiles.TIMESTAMP_UPDATE_TYPE, SystemProfiles.TIMESTAMP_CHANGE_TYPE)
+    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream.of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE,
+            RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE,
+            RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE,
+            RAWROCKER_REWIND_FASTFORWARD_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE)
             .collect(Collectors.toSet());
 
-    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream.of(SystemProfiles.DEFAULT,
-            SystemProfiles.FOLLOW, SystemProfiles.RAWBUTTON_TOGGLE_SWITCH, SystemProfiles.RAWROCKER_ON_OFF,
-            SystemProfiles.RAWROCKER_DIMMER, SystemProfiles.OFFSET, SystemProfiles.RAWROCKER_PLAY_PAUSE,
-            SystemProfiles.TIMESTAMP_UPDATE, SystemProfiles.TIMESTAMP_CHANGE).collect(Collectors.toSet());
+    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream.of(DEFAULT, FOLLOW, OFFSET,
+            RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER, RAWROCKER_NEXT_PREVIOUS,
+            RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE)
+            .collect(Collectors.toSet());
 
     @Nullable
     @Override
     public Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback, ProfileContext context) {
-        if (SystemProfiles.DEFAULT.equals(profileTypeUID)) {
+        if (DEFAULT.equals(profileTypeUID)) {
             return new SystemDefaultProfile(callback);
-        } else if (SystemProfiles.FOLLOW.equals(profileTypeUID)) {
+        } else if (FOLLOW.equals(profileTypeUID)) {
             return new SystemFollowProfile(callback);
-        } else if (SystemProfiles.RAWBUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
-            return new RawButtonToggleSwitchProfile(callback);
-        } else if (SystemProfiles.RAWROCKER_ON_OFF.equals(profileTypeUID)) {
-            return new RawRockerOnOffProfile(callback);
-        } else if (SystemProfiles.RAWROCKER_DIMMER.equals(profileTypeUID)) {
-            return new RawRockerDimmerProfile(callback, context);
-        } else if (SystemProfiles.RAWROCKER_PLAY_PAUSE.equals(profileTypeUID)) {
-            return new RawRockerPlayPauseProfile(callback);
-        } else if (SystemProfiles.OFFSET.equals(profileTypeUID)) {
+        } else if (OFFSET.equals(profileTypeUID)) {
             return new SystemOffsetProfile(callback, context);
-        } else if (SystemProfiles.TIMESTAMP_UPDATE.equals(profileTypeUID)) {
-            return new TimestampUpdateProfile(callback);
-        } else if (SystemProfiles.TIMESTAMP_CHANGE.equals(profileTypeUID)) {
+        } else if (RAWBUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
+            return new RawButtonToggleSwitchProfile(callback);
+        } else if (RAWBUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
+            return new RawButtonTogglePlayerProfile(callback);
+        } else if (RAWROCKER_DIMMER.equals(profileTypeUID)) {
+            return new RawRockerDimmerProfile(callback, context);
+        } else if (RAWROCKER_NEXT_PREVIOUS.equals(profileTypeUID)) {
+            return new RawRockerNextPreviousProfile(callback);
+        } else if (RAWROCKER_ON_OFF.equals(profileTypeUID)) {
+            return new RawRockerOnOffProfile(callback);
+        } else if (RAWROCKER_PLAY_PAUSE.equals(profileTypeUID)) {
+            return new RawRockerPlayPauseProfile(callback);
+        } else if (RAWROCKER_REWIND_FASTFORWARD.equals(profileTypeUID)) {
+            return new RawRockerRewindFastforwardProfile(callback);
+        } else if (TIMESTAMP_CHANGE.equals(profileTypeUID)) {
             return new TimestampChangeProfile(callback);
+        } else if (TIMESTAMP_UPDATE.equals(profileTypeUID)) {
+            return new TimestampUpdateProfile(callback);
         } else {
             return null;
         }
@@ -101,19 +106,21 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         }
         switch (channelType.getKind()) {
             case STATE:
-                return SystemProfiles.DEFAULT;
+                return DEFAULT;
             case TRIGGER:
                 if (DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON.getUID().equals(channelType.getUID())) {
-                    if (CoreItemFactory.SWITCH.equalsIgnoreCase(itemType)) {
-                        return SystemProfiles.RAWBUTTON_TOGGLE_SWITCH;
+                    if (CoreItemFactory.PLAYER.equalsIgnoreCase(itemType)) {
+                        return RAWBUTTON_TOGGLE_PLAYER;
+                    } else if (CoreItemFactory.SWITCH.equalsIgnoreCase(itemType)) {
+                        return RAWBUTTON_TOGGLE_SWITCH;
                     }
                 } else if (DefaultSystemChannelTypeProvider.SYSTEM_RAWROCKER.getUID().equals(channelType.getUID())) {
-                    if (CoreItemFactory.SWITCH.equalsIgnoreCase(itemType)) {
-                        return SystemProfiles.RAWROCKER_ON_OFF;
-                    } else if (CoreItemFactory.DIMMER.equalsIgnoreCase(itemType)) {
-                        return SystemProfiles.RAWROCKER_DIMMER;
+                    if (CoreItemFactory.DIMMER.equalsIgnoreCase(itemType)) {
+                        return RAWROCKER_DIMMER;
                     } else if (CoreItemFactory.PLAYER.equalsIgnoreCase(itemType)) {
-                        return SystemProfiles.RAWROCKER_PLAY_PAUSE;
+                        return RAWROCKER_PLAY_PAUSE;
+                    } else if (CoreItemFactory.SWITCH.equalsIgnoreCase(itemType)) {
+                        return RAWROCKER_ON_OFF;
                     }
                 }
                 break;
@@ -130,7 +137,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         if (channelType == null) {
             switch (channel.getKind()) {
                 case STATE:
-                    return SystemProfiles.DEFAULT;
+                    return DEFAULT;
                 case TRIGGER:
                     return null;
                 default:

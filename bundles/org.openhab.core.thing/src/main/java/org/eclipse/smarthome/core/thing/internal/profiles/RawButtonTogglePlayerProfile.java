@@ -12,10 +12,10 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
-import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.RAWROCKER_PLAY_PAUSE;
+import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.RAWBUTTON_TOGGLE_PLAYER;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.items.PlayerItem;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.PlayPauseType;
 import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
 import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
@@ -24,36 +24,43 @@ import org.eclipse.smarthome.core.thing.profiles.TriggerProfile;
 import org.eclipse.smarthome.core.types.State;
 
 /**
- * The {@link RawRockerPlayPauseProfile} transforms rocker switch channel events into PLAY and PAUSE commands. Can be
- * used on a {@link PlayerItem}.
+ * This profile allows a channel of the "system:rawbutton" type to be bound to an item.
  *
- * @author Daniel Weber - Initial contribution
+ * It reads the triggered events and uses the item's current state and toggles it once it detects that the
+ * button was pressed.
+ *
+ * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class RawRockerPlayPauseProfile implements TriggerProfile {
+public class RawButtonTogglePlayerProfile implements TriggerProfile {
 
     private final ProfileCallback callback;
 
-    RawRockerPlayPauseProfile(ProfileCallback callback) {
+    @Nullable
+    private State previousState;
+
+    public RawButtonTogglePlayerProfile(ProfileCallback callback) {
         this.callback = callback;
     }
 
     @Override
     public ProfileTypeUID getProfileTypeUID() {
-        return RAWROCKER_PLAY_PAUSE;
-    }
-
-    @Override
-    public void onStateUpdateFromItem(State state) {
+        return RAWBUTTON_TOGGLE_PLAYER;
     }
 
     @Override
     public void onTriggerFromHandler(String event) {
-        if (CommonTriggerEvents.DIR1_PRESSED.equals(event)) {
-            callback.sendCommand(PlayPauseType.PLAY);
-        } else if (CommonTriggerEvents.DIR2_PRESSED.equals(event)) {
-            callback.sendCommand(PlayPauseType.PAUSE);
+        if (CommonTriggerEvents.PRESSED.equals(event)) {
+            PlayPauseType newState = PlayPauseType.PLAY.equals(previousState) ? PlayPauseType.PAUSE
+                    : PlayPauseType.PLAY;
+            callback.sendCommand(newState);
+            previousState = newState;
         }
+    }
+
+    @Override
+    public void onStateUpdateFromItem(State state) {
+        previousState = state.as(PlayPauseType.class);
     }
 
 }

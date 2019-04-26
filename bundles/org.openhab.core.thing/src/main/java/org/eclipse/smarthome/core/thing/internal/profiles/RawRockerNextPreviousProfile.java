@@ -12,11 +12,11 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
-import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.RAWROCKER_PLAY_PAUSE;
+import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.RAWROCKER_NEXT_PREVIOUS;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.items.PlayerItem;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
+import org.eclipse.smarthome.core.library.types.NextPreviousType;
 import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
 import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
@@ -24,23 +24,23 @@ import org.eclipse.smarthome.core.thing.profiles.TriggerProfile;
 import org.eclipse.smarthome.core.types.State;
 
 /**
- * The {@link RawRockerPlayPauseProfile} transforms rocker switch channel events into PLAY and PAUSE commands. Can be
- * used on a {@link PlayerItem}.
+ * The {@link RawRockerNextPreviousProfile} transforms rocker switch channel events into NEXT and PREVIOUS commands. Can
+ * be used on a {@link PlayerItem}.
  *
- * @author Daniel Weber - Initial contribution
+ * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class RawRockerPlayPauseProfile implements TriggerProfile {
+public class RawRockerNextPreviousProfile implements TriggerProfile {
 
     private final ProfileCallback callback;
 
-    RawRockerPlayPauseProfile(ProfileCallback callback) {
+    RawRockerNextPreviousProfile(ProfileCallback callback) {
         this.callback = callback;
     }
 
     @Override
     public ProfileTypeUID getProfileTypeUID() {
-        return RAWROCKER_PLAY_PAUSE;
+        return RAWROCKER_NEXT_PREVIOUS;
     }
 
     @Override
@@ -50,9 +50,9 @@ public class RawRockerPlayPauseProfile implements TriggerProfile {
     @Override
     public void onTriggerFromHandler(String event) {
         if (CommonTriggerEvents.DIR1_PRESSED.equals(event)) {
-            callback.sendCommand(PlayPauseType.PLAY);
+            callback.sendCommand(NextPreviousType.NEXT);
         } else if (CommonTriggerEvents.DIR2_PRESSED.equals(event)) {
-            callback.sendCommand(PlayPauseType.PAUSE);
+            callback.sendCommand(NextPreviousType.PREVIOUS);
         }
     }
 
