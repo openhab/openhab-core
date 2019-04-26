@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.thing.profiles;
 
+import static org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID.SYSTEM_SCOPE;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.thing.DefaultSystemChannelTypeProvider;
@@ -24,20 +26,21 @@ import org.eclipse.smarthome.core.thing.DefaultSystemChannelTypeProvider;
 @NonNullByDefault
 public interface SystemProfiles {
 
-    ProfileTypeUID DEFAULT = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "default");
-    ProfileTypeUID FOLLOW = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "follow");
-    ProfileTypeUID OFFSET = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "offset");
-    ProfileTypeUID RAWBUTTON_TOGGLE_PLAYER = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "rawbutton-toggle-player");
-    ProfileTypeUID RAWBUTTON_TOGGLE_SWITCH = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "rawbutton-toggle-switch");
-    ProfileTypeUID RAWROCKER_DIMMER = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "rawrocker-to-dimmer");
-    ProfileTypeUID RAWROCKER_NEXT_PREVIOUS = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE,
-            "rawrocker-to-next-previous");
-    ProfileTypeUID RAWROCKER_ON_OFF = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "rawrocker-to-on-off");
-    ProfileTypeUID RAWROCKER_PLAY_PAUSE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "rawrocker-to-play-pause");
-    ProfileTypeUID RAWROCKER_REWIND_FASTFORWARD = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE,
-            "rawrocker-to-rewind-fastforward");
-    ProfileTypeUID TIMESTAMP_CHANGE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "timestamp-change");
-    ProfileTypeUID TIMESTAMP_UPDATE = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "timestamp-update");
+    ProfileTypeUID DEFAULT = new ProfileTypeUID(SYSTEM_SCOPE, "default");
+    ProfileTypeUID FOLLOW = new ProfileTypeUID(SYSTEM_SCOPE, "follow");
+    ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
+    ProfileTypeUID RAWBUTTON_TOGGLE_PLAYER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-player");
+    ProfileTypeUID RAWBUTTON_TOGGLE_ROLLERSHUTTER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-rollershutter");
+    ProfileTypeUID RAWBUTTON_TOGGLE_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-switch");
+    ProfileTypeUID RAWROCKER_DIMMER = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-dimmer");
+    ProfileTypeUID RAWROCKER_NEXT_PREVIOUS = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-next-previous");
+    ProfileTypeUID RAWROCKER_ON_OFF = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-on-off");
+    ProfileTypeUID RAWROCKER_PLAY_PAUSE = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-play-pause");
+    ProfileTypeUID RAWROCKER_REWIND_FASTFORWARD = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-rewind-fastforward");
+    ProfileTypeUID RAWROCKER_STOP_MOVE = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-stop-move");
+    ProfileTypeUID RAWROCKER_UP_DOWN = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-up-down");
+    ProfileTypeUID TIMESTAMP_CHANGE = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-change");
+    ProfileTypeUID TIMESTAMP_UPDATE = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-update");
 
     StateProfileType DEFAULT_TYPE = ProfileTypeBuilder.newState(DEFAULT, "Default").build();
 
@@ -50,6 +53,11 @@ public interface SystemProfiles {
     TriggerProfileType RAWBUTTON_TOGGLE_PLAYER_TYPE = ProfileTypeBuilder
             .newTrigger(RAWBUTTON_TOGGLE_PLAYER, "Raw Button Toggle Player")
             .withSupportedItemTypes(CoreItemFactory.PLAYER)
+            .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON.getUID()).build();
+
+    TriggerProfileType RAWBUTTON_TOGGLE_ROLLERSHUTTER_TYPE = ProfileTypeBuilder
+            .newTrigger(RAWBUTTON_TOGGLE_ROLLERSHUTTER, "Raw Button Toggle Rollershutter")
+            .withSupportedItemTypes(CoreItemFactory.ROLLERSHUTTER)
             .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON.getUID()).build();
 
     TriggerProfileType RAWBUTTON_TOGGLE_SWITCH_TYPE = ProfileTypeBuilder
@@ -77,6 +85,16 @@ public interface SystemProfiles {
     TriggerProfileType RAWROCKER_REWIND_FASTFORWARD_TYPE = ProfileTypeBuilder
             .newTrigger(RAWROCKER_REWIND_FASTFORWARD, "Raw Rocker To Rewind/Fastforward")
             .withSupportedItemTypes(CoreItemFactory.PLAYER)
+            .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWROCKER.getUID()).build();
+
+    TriggerProfileType RAWROCKER_STOP_MOVE_TYPE = ProfileTypeBuilder
+            .newTrigger(RAWROCKER_STOP_MOVE, "Raw Rocker To Stop/Move")
+            .withSupportedItemTypes(CoreItemFactory.ROLLERSHUTTER)
+            .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWROCKER.getUID()).build();
+
+    TriggerProfileType RAWROCKER_UP_DOWN_TYPE = ProfileTypeBuilder
+            .newTrigger(RAWROCKER_UP_DOWN, "Raw Rocker To Up/Down")
+            .withSupportedItemTypes(CoreItemFactory.ROLLERSHUTTER)
             .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWROCKER.getUID()).build();
 
     StateProfileType TIMESTAMP_CHANGE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_CHANGE, "Timestamp on change")
