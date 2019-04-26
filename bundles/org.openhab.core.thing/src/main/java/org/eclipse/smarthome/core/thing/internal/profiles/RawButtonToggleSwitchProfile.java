@@ -36,8 +36,7 @@ public class RawButtonToggleSwitchProfile implements TriggerProfile {
 
     private final ProfileCallback callback;
 
-    @Nullable
-    private State previousState;
+    private @Nullable State previousState;
 
     public RawButtonToggleSwitchProfile(ProfileCallback callback) {
         this.callback = callback;

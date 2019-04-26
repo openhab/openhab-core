@@ -36,8 +36,7 @@ public class RawButtonTogglePlayerProfile implements TriggerProfile {
 
     private final ProfileCallback callback;
 
-    @Nullable
-    private State previousState;
+    private @Nullable State previousState;
 
     public RawButtonTogglePlayerProfile(ProfileCallback callback) {
         this.callback = callback;
