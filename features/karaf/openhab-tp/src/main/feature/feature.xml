@@ -154,7 +154,7 @@
 
   <feature name="openhab.tp-serial-rxtx" version="${project.version}">
     <capability>openhab.tp;feature=serial;impl=rxtx</capability>
-    <bundle>mvn:com.neuronrobotics/nrjavaserial/3.14.0</bundle>
+    <bundle>mvn:com.neuronrobotics/nrjavaserial/3.15.0</bundle>
   </feature>
 
   <feature name="openhab.tp-xtext" description="Xtext - Language Engineering Made Easy" version="${project.version}">
