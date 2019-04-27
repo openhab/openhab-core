@@ -609,6 +609,7 @@
   </feature>
 
   <feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
+    <feature>openhab.tp-serial-rxtx-noliblockdev</feature>
     <feature>openhab-core-io-transport-serial-rfc2217</feature>
     <feature>openhab-core-config-serial</feature>
     <feature>openhab-core-config-discovery-usbserial</feature>

@@ -157,6 +157,11 @@
     <bundle>mvn:com.neuronrobotics/nrjavaserial/3.15.0</bundle>
   </feature>
 
+  <feature name="openhab.tp-serial-rxtx-noliblockdev" version="${project.version}">
+    <capability>openhab.tp;feature=serial;impl=rxtx</capability>
+    <bundle>mvn:org.openhab/nrjavaserial/3.15.0.OH2</bundle>
+  </feature>
+
   <feature name="openhab.tp-xtext" description="Xtext - Language Engineering Made Easy" version="${project.version}">
     <capability>openhab.tp;feature=xtext;version=2.17.0</capability>
 
