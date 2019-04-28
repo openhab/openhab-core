@@ -15,6 +15,7 @@ package org.eclipse.smarthome.core.thing.internal.profiles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -110,6 +111,7 @@ public class ExpireProfile implements StateProfile {
     private final ProfileCallback callback;
     private final ProfileContext context;
     private @NonNullByDefault({}) ScheduledExecutorService executor;
+    private @Nullable ScheduledFuture<?> expireFuture;
 
     /**
      * Human readable textual representation of duration (e.g. "13h 42m 12s")
@@ -191,13 +193,15 @@ public class ExpireProfile implements StateProfile {
 
     private void applyExpire(Type state) {
         logger.trace("Received '{}'", state);
-        executor.shutdownNow();
+        if (expireFuture != null) {
+            expireFuture.cancel(false);
+        }
         if (state.equals(expireCommand) || state.equals(expireState)) {
             logger.debug("Received '{}'; stopping any future expiration.", state);
         } else {
             logger.debug("Will expire (with '{}' {}) in {} ms", expireCommand == null ? expireState : expireCommand,
                     expireCommand == null ? "state" : "command", duration);
-            executor.schedule(() -> {
+            expireFuture = executor.schedule(() -> {
                 if (expireCommand != null) {
                     callback.sendCommand(expireCommand);
                     logger.debug("No command or update received for {} - sending command '{}'", durationString,
