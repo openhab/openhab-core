@@ -2,10 +2,10 @@
 #set( $year = $dt.getYear() + 1900 )
 #set( $copyright = "Contributors to the ${vendorName} project" )
 /**
- * Copyright (c) ${startYear},${year} ${copyright}
+ * Copyright (c) ${startYear}-${year} ${copyright}
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
