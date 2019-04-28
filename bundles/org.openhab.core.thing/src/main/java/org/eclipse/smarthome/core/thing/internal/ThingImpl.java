@@ -96,21 +96,6 @@ public class ThingImpl implements Thing {
     }
 
     /**
-     * @param thingUID
-     * @throws IllegalArgumentException
-     * @deprecated use {@link #ThingImpl(ThingTypeUID, ThingUID)} instead.
-     */
-    @Deprecated
-    public ThingImpl(ThingUID thingUID) throws IllegalArgumentException {
-        if ("".equals(thingUID.getThingTypeId())) {
-            throw new IllegalArgumentException(
-                    "The given ThingUID does not specify a ThingType. You might want to use ThingImpl(ThingTypeUID, ThingUID) instead.");
-        }
-        this.uid = thingUID;
-        this.thingTypeUID = new ThingTypeUID(thingUID.getBindingId(), thingUID.getThingTypeId());
-    }
-
-    /**
      * @param thingTypeUID thing type UID
      * @param thingUID
      * @throws IllegalArgumentException

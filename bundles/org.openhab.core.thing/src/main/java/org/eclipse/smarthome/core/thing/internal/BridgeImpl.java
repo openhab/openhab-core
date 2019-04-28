@@ -57,16 +57,6 @@ public class BridgeImpl extends ThingImpl implements Bridge {
     }
 
     /**
-     * @param thingUID
-     * @throws IllegalArgumentException
-     * @deprecated use {@link #BridgeImpl(ThingTypeUID, ThingUID)} instead.
-     */
-    @Deprecated
-    public BridgeImpl(ThingUID thingUID) throws IllegalArgumentException {
-        super(thingUID);
-    }
-
-    /**
      * @param thingTypeUID
      * @param thingUID
      * @throws IllegalArgumentException
