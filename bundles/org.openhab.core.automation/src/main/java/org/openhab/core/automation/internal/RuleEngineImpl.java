@@ -463,10 +463,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param moduleHandlerFactory a {@link ModuleHandlerFactory} service.
      */
     protected void removeModuleHandlerFactory(ModuleHandlerFactory moduleHandlerFactory) {
-        if (moduleHandlerFactory instanceof CompositeModuleHandlerFactory) {
-            compositeFactory.deactivate();
-            compositeFactory = null;
-        }
         allModuleHandlerFactories.remove(moduleHandlerFactory);
         Collection<String> moduleTypes = moduleHandlerFactory.getTypes();
         removeMissingModuleTypes(moduleTypes);
