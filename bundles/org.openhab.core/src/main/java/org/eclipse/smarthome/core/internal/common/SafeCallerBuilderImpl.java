@@ -16,7 +16,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -65,7 +67,10 @@ public class SafeCallerBuilderImpl<T> implements SafeCallerBuilder<T> {
                 handler = new InvocationHandlerSync<T>(manager, target, identifier, timeout, exceptionHandler,
                         timeoutHandler);
             }
-            return (T) Proxy.newProxyInstance(target.getClass().getClassLoader(), interfaceTypes, handler);
+            return (T) Proxy.newProxyInstance(
+                    CombinedClassLoader.fromClasses(getClass().getClassLoader(),
+                            Stream.concat(Stream.of(target.getClass()), Arrays.stream(interfaceTypes))),
+                    interfaceTypes, handler);
         });
     }
 
