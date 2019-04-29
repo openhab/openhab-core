@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
-	targetNamespace="http://eclipse.org/smarthome/schemas/config-description/v1.0.0">
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	targetNamespace="https://openhab.org/schemas/config-description/v1.0.0">
 
 	<xs:element name="config-descriptions">
 		<xs:complexType>
