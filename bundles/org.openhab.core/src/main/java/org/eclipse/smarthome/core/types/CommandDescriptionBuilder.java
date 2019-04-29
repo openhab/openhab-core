@@ -30,19 +30,45 @@ public class CommandDescriptionBuilder {
         // prevent public instantiation
     }
 
+    /**
+     * Create and return a fresh builder instance.
+     *
+     * @return a fresh {@link CommandDescriptionBuilder} instance.
+     */
     public static CommandDescriptionBuilder create() {
         return new CommandDescriptionBuilder();
     }
 
+    /**
+     * Build a {@link CommandDescription} from the values of this builder.
+     *
+     * @return a {@link CommandDescription} from the values of this builder.
+     */
+    public CommandDescription build() {
+        CommandDescriptionImpl commandDescription = new CommandDescriptionImpl();
+        commandOptions.forEach(co -> commandDescription.addCommandOption(co));
+        return commandDescription;
+    }
+
+    /**
+     * Add a {@link CommandOption} for the resulting {@link CommandDescription}.
+     *
+     * @param commandOption a {@link CommandOption} for the resulting {@link CommandDescription}.
+     * @return this builder.
+     */
     public CommandDescriptionBuilder withCommandOption(CommandOption commandOption) {
         this.commandOptions.add(commandOption);
         return this;
     }
 
-    public CommandDescription build() {
-        CommandDescriptionImpl commandDescription = new CommandDescriptionImpl();
-        commandOptions.forEach(co -> commandDescription.addCommandOption(co));
-
-        return commandDescription;
+    /**
+     * Set the {@link CommandOption}s for the resulting {@link CommandDescription}.
+     *
+     * @param commandOptions the {@link CommandOption}s for the resulting {@link CommandDescription}.
+     * @return this builder.
+     */
+    public CommandDescriptionBuilder withCommandOptions(List<CommandOption> commandOptions) {
+        commandOptions.forEach(co -> this.commandOptions.add(co));
+        return this;
     }
 }

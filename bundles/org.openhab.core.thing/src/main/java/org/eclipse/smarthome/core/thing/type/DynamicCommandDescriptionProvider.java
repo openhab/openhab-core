@@ -20,14 +20,13 @@ import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.types.CommandDescription;
 
 /**
- * Implementations may provide channel specific {@link CommandDescription}s.
+ * Implementations may provide channel specific {@link CommandDescription}s. Therefore the provider must be registered
+ * as OSGi service.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public interface DynamicCommandDescriptionProvider {
-
     /**
      * For a given channel UID, return a {@link CommandDescription} that should be used for the channel, instead of the
      * one defined statically in the {@link ChannelType}.
