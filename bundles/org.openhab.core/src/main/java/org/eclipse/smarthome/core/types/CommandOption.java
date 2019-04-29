@@ -34,15 +34,31 @@ public class CommandOption {
      */
     private @Nullable String label;
 
+    /**
+     * Creates a {@link CommandOption} object.
+     *
+     * @param command the command of the item
+     * @param label label
+     */
     public CommandOption(String command, @Nullable String label) {
         this.command = command;
         this.label = label;
     }
 
+    /**
+     * Returns the command.
+     *
+     * @return command
+     */
     public String getCommand() {
         return command;
     }
 
+    /**
+     * Returns the label.
+     *
+     * @return label
+     */
     public @Nullable String getLabel() {
         return label;
     }

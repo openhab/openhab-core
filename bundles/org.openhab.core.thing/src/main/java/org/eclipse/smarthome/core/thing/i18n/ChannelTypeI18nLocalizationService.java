@@ -98,6 +98,20 @@ public class ChannelTypeI18nLocalizationService {
         return builder.withOptions(localizedOptions).build().toStateDescription();
     }
 
+    public List<CommandOption> createLocalizedCommandOptions(final Bundle bundle, List<CommandOption> commandOptions,
+            final ChannelTypeUID channelTypeUID, final @Nullable Locale locale) {
+        List<CommandOption> localizedOptions = new ArrayList<>();
+        for (final CommandOption commandOption : commandOptions) {
+            String optionLabel = commandOption.getLabel();
+            if (optionLabel != null) {
+                optionLabel = thingTypeI18nUtil.getChannelCommandOption(bundle, channelTypeUID,
+                        commandOption.getCommand(), optionLabel, locale);
+            }
+            localizedOptions.add(new CommandOption(commandOption.getCommand(), optionLabel));
+        }
+        return localizedOptions;
+    }
+
     public @Nullable CommandDescription createLocalizedCommandDescription(final Bundle bundle,
             final @Nullable CommandDescription command, final ChannelTypeUID channelTypeUID,
             final @Nullable Locale locale) {
@@ -105,17 +119,11 @@ public class ChannelTypeI18nLocalizationService {
             return null;
         }
 
-        CommandDescriptionBuilder commandDescriptionBuilder = CommandDescriptionBuilder.create();
-        for (final CommandOption options : command.getCommandOptions()) {
-            String optionLabel = options.getLabel();
-            if (optionLabel != null) {
-                optionLabel = thingTypeI18nUtil.getChannelCommandOption(bundle, channelTypeUID, options.getCommand(),
-                        optionLabel, locale);
-            }
-            commandDescriptionBuilder.withCommandOption(new CommandOption(options.getCommand(), optionLabel));
-        }
+        List<CommandOption> localizedOptions = createLocalizedCommandOptions(bundle, command.getCommandOptions(),
+                channelTypeUID, locale);
 
-        return commandDescriptionBuilder.build();
+        CommandDescriptionBuilder commandDescriptionBuilder = CommandDescriptionBuilder.create();
+        return commandDescriptionBuilder.withCommandOptions(localizedOptions).build();
     }
 
     public ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
