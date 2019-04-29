@@ -446,7 +446,7 @@
     <dependency>
       <groupId>com.neuronrobotics</groupId>
       <artifactId>nrjavaserial</artifactId>
-      <version>3.14.0</version>
+      <version>3.15.0</version>
       <scope>compile</scope>
     </dependency>
 

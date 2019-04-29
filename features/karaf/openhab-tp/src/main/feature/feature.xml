@@ -154,7 +154,12 @@
 
   <feature name="openhab.tp-serial-rxtx" version="${project.version}">
     <capability>openhab.tp;feature=serial;impl=rxtx</capability>
-    <bundle>mvn:com.neuronrobotics/nrjavaserial/3.14.0</bundle>
+    
+    <!-- Use "no liblockdev" version -->
+    <!-- See: https://github.com/openhab/openhab-core/pull/761 -->
+    <!-- See: https://github.com/openhab/openhab-core/issues/750 -->
+    <!-- <bundle>mvn:com.neuronrobotics/nrjavaserial/3.15.0</bundle> -->
+    <bundle>mvn:org.openhab/nrjavaserial/3.15.0.OH2</bundle>
   </feature>
 
   <feature name="openhab.tp-xtext" description="Xtext - Language Engineering Made Easy" version="${project.version}">

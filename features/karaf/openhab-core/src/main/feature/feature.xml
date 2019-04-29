@@ -345,7 +345,6 @@
     <requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
     <feature dependency="true">openhab-core-io-transport-serial-rxtx</feature>
 
-
     <requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
     <feature dependency="true">openhab.tp-commons-net</feature>
 
@@ -609,7 +608,6 @@
   </feature>
 
   <feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
-    <bundle>mvn:org.openhab/nrjavaserial/${nrjavaserial.version}</bundle>
     <feature>openhab-core-io-transport-serial-rfc2217</feature>
     <feature>openhab-core-config-serial</feature>
     <feature>openhab-core-config-discovery-usbserial</feature>
