@@ -107,7 +107,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * Default value of delay between rule's re-initialization tries.
      */
-    private static final long DEFAULT_REINITIALIZATION_DELAY = 500;
+    static final long DEFAULT_REINITIALIZATION_DELAY = 500;
 
     /**
      * Delay between rule's re-initialization tries.
@@ -243,12 +243,12 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * @param rule a {@link Rule} instance which have to be added into the {@link RuleEngineImpl}.
      * @return a copy of the added {@link Rule}
      * @throws RuntimeException
-     *                                  when passed module has a required configuration property and it is not specified
-     *                                  in rule definition
-     *                                  nor
-     *                                  in the module's module type definition.
+     *             when passed module has a required configuration property and it is not specified
+     *             in rule definition
+     *             nor
+     *             in the module's module type definition.
      * @throws IllegalArgumentException
-     *                                  when a module id contains dot or when the rule with the same UID already exists.
+     *             when a module id contains dot or when the rule with the same UID already exists.
      */
     @Override
     public Rule add(Rule rule) {
@@ -298,7 +298,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * This method can be used in order to post events through the openHAB events bus. A common
      * use case is to notify event subscribers about the {@link Rule}'s status change.
      *
-     * @param ruleUID    the UID of the {@link Rule}, whose status is changed.
+     * @param ruleUID the UID of the {@link Rule}, whose status is changed.
      * @param statusInfo the new {@link Rule}s status.
      */
     protected void postRuleStatusInfoEvent(String ruleUID, RuleStatusInfo statusInfo) {
@@ -386,9 +386,9 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * Updates the content of the {@link Map} that maps the template to rules, using it to complete their definitions.
      *
      * @param templateUID the {@link RuleTemplate}'s UID specifying the template.
-     * @param ruleUID     the {@link Rule}'s UID specifying a rule created by the specified template.
-     * @param resolved    specifies if the {@link Map} should be updated by adding or removing the specified rule
-     *                    accordingly if the rule is resolved or not.
+     * @param ruleUID the {@link Rule}'s UID specifying a rule created by the specified template.
+     * @param resolved specifies if the {@link Map} should be updated by adding or removing the specified rule
+     *            accordingly if the rule is resolved or not.
      */
     private void updateRuleTemplateMapping(String templateUID, String ruleUID, boolean resolved) {
         synchronized (this) {
@@ -484,7 +484,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * This method serves to resolve and normalize the {@link Rule}s configuration values and its module configurations.
      *
      * @param rule the {@link Rule}, whose configuration values and module configuration values should be resolved and
-     *             normalized.
+     *            normalized.
      */
     private void resolveConfigurations(Rule rule) {
         List<ConfigDescriptionParameter> configDescriptions = rule.getConfigurationDescriptions();
@@ -565,7 +565,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * Utility method for {@link Rule}s configuration validation. Validates the value of a configuration property.
      *
-     * @param configValue     the value for {@link Rule}s configuration property, that should be validated.
+     * @param configValue the value for {@link Rule}s configuration property, that should be validated.
      * @param configParameter the meta-data for {@link Rule}s configuration value, used for validation.
      */
     private void processValue(Object configValue, ConfigDescriptionParameter configParameter) {
@@ -599,7 +599,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * Avoid code duplication in {@link #processValue(Object, ConfigDescriptionParameter)} method.
      *
-     * @param type        the {@link Type} of a parameter that should be checked.
+     * @param type the {@link Type} of a parameter that should be checked.
      * @param configValue the value of a parameter that should be checked.
      * @return <code>true</code> if the type and value matching or <code>false</code> in the opposite.
      */
@@ -621,9 +621,9 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * This method serves to replace module configuration references with the {@link Rule}s configuration values.
      *
-     * @param modules           the {@link Rule}'s modules, whose configuration values should be resolved.
+     * @param modules the {@link Rule}'s modules, whose configuration values should be resolved.
      * @param ruleConfiguration the {@link Rule}'s configuration values that should be resolve module configuration
-     *                          values.
+     *            values.
      */
     private void resolveModuleConfigReferences(List<? extends Module> modules, Map<String, ?> ruleConfiguration) {
         if (modules != null) {
