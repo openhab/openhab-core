@@ -279,15 +279,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         for (Rule rule : ruleRegistry.getAll()) {
             addRule(rule);
         }
-
-        // enable the rules that are not persisted as Disabled;
-        for (Rule rule : ruleRegistry.getAll()) {
-            String uid = rule.getUID();
-            final Storage<Boolean> disabledRulesStorage = this.disabledRulesStorage;
-            if (disabledRulesStorage == null || disabledRulesStorage.get(uid) == null) {
-                setEnabled(uid, true);
-            }
-        }
     }
 
     /**
