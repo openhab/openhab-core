@@ -38,10 +38,13 @@ import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.smarthome.model.core.EventType;
 import org.eclipse.smarthome.model.core.ModelRepository;
 import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
+import org.eclipse.smarthome.model.core.SafeEMF;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +61,12 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
 
-    public ModelRepositoryImpl() {
+    private final SafeEMF safeEmf;
+
+    @Activate
+    public ModelRepositoryImpl(final @Reference SafeEMF safeEmf) {
+        this.safeEmf = safeEmf;
+
         XtextResourceSet xtextResourceSet = new SynchronizedXtextResourceSet();
         xtextResourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
         this.resourceSet = xtextResourceSet;
@@ -278,8 +286,8 @@ public class ModelRepositoryImpl implements ModelRepository {
 
                 // Check for validation errors, but log them only
                 try {
-                    org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE
-                            .validate(resource.getContents().get(0));
+                    final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
+                            .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().get(0)));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
                         warnings.add(d.getMessage());
                     }
