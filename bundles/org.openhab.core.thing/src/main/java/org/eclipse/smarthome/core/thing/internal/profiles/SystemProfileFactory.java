@@ -15,6 +15,7 @@ package org.eclipse.smarthome.core.thing.internal.profiles;
 import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.*;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,17 +55,17 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
 
     private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
 
-    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream
-            .of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
-                    RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE, RAWROCKER_NEXT_PREVIOUS_TYPE,
-                    RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE, RAWROCKER_REWIND_FASTFORWARD_TYPE,
-                    RAWROCKER_STOP_MOVE_TYPE, RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE)
-            .collect(Collectors.toSet());
+    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Collections.unmodifiableSet(Stream.of(DEFAULT_TYPE,
+            FOLLOW_TYPE, OFFSET_TYPE, ROUND_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
+            RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE, RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE,
+            RAWROCKER_PLAY_PAUSE_TYPE, RAWROCKER_REWIND_FASTFORWARD_TYPE, RAWROCKER_STOP_MOVE_TYPE,
+            RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE).collect(Collectors.toSet()));
 
-    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream.of(DEFAULT, FOLLOW, OFFSET,
-            RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER,
-            RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD,
-            RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE).collect(Collectors.toSet());
+    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Collections
+            .unmodifiableSet(Stream.of(DEFAULT, FOLLOW, OFFSET, ROUND, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_PLAYER,
+                    RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER, RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF,
+                    RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD, RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN,
+                    TIMESTAMP_CHANGE, TIMESTAMP_UPDATE).collect(Collectors.toSet()));
 
     @Override
     public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
@@ -75,6 +76,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new SystemFollowProfile(callback);
         } else if (OFFSET.equals(profileTypeUID)) {
             return new SystemOffsetProfile(callback, context);
+        } else if (ROUND.equals(profileTypeUID)) {
+            return new SystemRoundProfile(callback, context);
         } else if (RAWBUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
             return new RawButtonToggleSwitchProfile(callback);
         } else if (RAWBUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {

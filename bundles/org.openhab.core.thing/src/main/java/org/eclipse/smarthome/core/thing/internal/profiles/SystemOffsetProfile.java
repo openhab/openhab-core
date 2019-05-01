@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
+import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.OFFSET;
+
 import java.math.BigDecimal;
 
 import javax.measure.UnconvertibleException;
@@ -29,7 +31,6 @@ import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
 import org.eclipse.smarthome.core.thing.profiles.ProfileContext;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
 import org.eclipse.smarthome.core.thing.profiles.StateProfile;
-import org.eclipse.smarthome.core.thing.profiles.SystemProfiles;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.Type;
@@ -40,8 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Applies the given parameter "offset" to a QuantityType or DecimalType state
  *
- * @author Stefan Triller - initial contribution
- *
+ * @author Stefan Triller - Initial contribution
  */
 @NonNullByDefault
 public class SystemOffsetProfile implements StateProfile {
@@ -83,7 +83,7 @@ public class SystemOffsetProfile implements StateProfile {
 
     @Override
     public ProfileTypeUID getProfileTypeUID() {
-        return SystemProfiles.OFFSET;
+        return OFFSET;
     }
 
     @Override

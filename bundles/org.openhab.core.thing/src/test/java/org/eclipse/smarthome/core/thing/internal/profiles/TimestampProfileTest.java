@@ -28,8 +28,7 @@ import org.mockito.ArgumentCaptor;
 /**
  * Tests for the system:timestamp-update profile
  *
- * @author Gaël L'hopital - initial contribution
- *
+ * @author Gaël L'hopital - Initial contribution
  */
 public class TimestampProfileTest {
 
@@ -75,5 +74,4 @@ public class TimestampProfileTest {
         DateTimeType updatedResult = (DateTimeType) result;
         assertTrue(updatedResult.getZonedDateTime().isAfter(newChangeResult.getZonedDateTime()));
     }
-
 }
