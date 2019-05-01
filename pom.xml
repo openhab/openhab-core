@@ -772,7 +772,6 @@ Import-Package: \\
 
   <modules>
     <module>bom</module>
-    <module>demo</module>
     <module>bundles</module>
     <module>features</module>
     <module>tools</module>
