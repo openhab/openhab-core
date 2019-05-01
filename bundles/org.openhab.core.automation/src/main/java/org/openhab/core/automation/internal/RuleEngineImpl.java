@@ -113,7 +113,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     /**
      * Delay between rule's re-initialization tries.
      */
-    private long scheduleReinitializationDelay;
+    private final long scheduleReinitializationDelay;
 
     private final @NonNullByDefault({}) Map<String, WrappedRule> managedRules = new ConcurrentHashMap<>();
 
@@ -134,7 +134,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * {@link Map} holding all available {@link ModuleHandlerFactory}s linked with {@link ModuleType}s that they
      * supporting. The relation is {@link ModuleType}'s UID to {@link ModuleHandlerFactory} instance.
      */
-    private final @NonNullByDefault({}) Map<String, ModuleHandlerFactory> moduleHandlerFactories;
+    private final Map<String, ModuleHandlerFactory> moduleHandlerFactories;
 
     /**
      * {@link Set} holding all available {@link ModuleHandlerFactory}s.
@@ -151,12 +151,12 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     private boolean isDisposed = false;
 
-    protected Logger logger = LoggerFactory.getLogger(RuleEngineImpl.class.getName());
+    protected final Logger logger = LoggerFactory.getLogger(RuleEngineImpl.class);
 
     /**
      * A callback that is notified when the status of a {@link Rule} changes.
      */
-    private @NonNullByDefault({}) RuleRegistryImpl ruleRegistry;
+    private final RuleRegistry ruleRegistry;
 
     /**
      * {@link Map} holding all Rule context maps. Rule context maps contain dynamic parameters used by the
@@ -164,25 +164,25 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The context map of a {@link Rule} is cleaned when the execution is completed. The relation is
      * {@link Rule}'s UID to Rule context map.
      */
-    private @NonNullByDefault({}) final Map<String, Map<String, Object>> contextMap;
+    private final Map<String, Map<String, Object>> contextMap;
 
     /**
      * This field holds reference to {@link ModuleTypeRegistry}. The {@link RuleEngineImpl} needs it to auto-map
      * connection between rule's modules and to determine module handlers.
      */
-    private @NonNullByDefault({}) ModuleTypeRegistry mtRegistry;
+    private final ModuleTypeRegistry mtRegistry;
 
     /**
      * Provides all composite {@link ModuleHandler}s.
      */
-    private @NonNullByDefault({}) CompositeModuleHandlerFactory compositeFactory;
+    private final CompositeModuleHandlerFactory compositeFactory;
 
     /**
      * {@link Map} holding all scheduled {@link Rule} re-initialization tasks. The relation is {@link Rule}'s
      * UID to
      * re-initialization task as a {@link Future} instance.
      */
-    private final @NonNullByDefault({}) Map<String, Future<?>> scheduleTasks = new HashMap<>(31);
+    private final Map<String, Future<?>> scheduleTasks = new HashMap<>(31);
 
     /**
      * Performs the {@link Rule} re-initialization tasks.
@@ -193,7 +193,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * This field holds {@link RegistryChangeListener} that listen for changes in the rule registry.
      * We cannot implement the interface ourselves as we are already a RegistryChangeListener for module types.
      */
-    private @NonNullByDefault({}) RegistryChangeListener<Rule> listener;
+    private final RegistryChangeListener<Rule> listener;
 
     /**
      * Posts an event through the event bus in an asynchronous way. {@link RuleEngineImpl} use it for posting the
@@ -237,100 +237,77 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     };
 
     /**
-     * Constructor of {@link RuleEngineImpl}. It initializes the logger and starts tracker for
-     * {@link ModuleHandlerFactory} services.
-     */
-    public RuleEngineImpl() {
-        this.contextMap = new HashMap<String, Map<String, Object>>();
-        this.moduleHandlerFactories = new HashMap<String, ModuleHandlerFactory>(20);
-    }
-
-    /**
-     * This method is used to create a {@link CompositeModuleHandlerFactory} that handles all composite
-     * {@link ModuleType}s. Called from DS to activate the rule engine component.
+     * Constructor of {@link RuleEngineImpl}.
      */
     @Activate
-    protected void activate() {
-        compositeFactory = new CompositeModuleHandlerFactory(mtRegistry, this);
+    public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
+            final @Reference RuleRegistry ruleRegistry) {
+        this.contextMap = new HashMap<String, Map<String, Object>>();
+        this.moduleHandlerFactories = new HashMap<String, ModuleHandlerFactory>(20);
 
-        // enable the rules that are not persisted as Disabled;
-        for (Rule rule : ruleRegistry.getAll()) {
-            String uid = rule.getUID();
-            final Storage<Boolean> disabledRulesStorage = this.disabledRulesStorage;
-            if (disabledRulesStorage == null || disabledRulesStorage.get(uid) == null) {
-                setEnabled(uid, true);
-            }
-        }
-    }
-
-    /**
-     * Bind the {@link ModuleTypeRegistry} service - called from DS.
-     *
-     * @param moduleTypeRegistry a {@link ModuleTypeRegistry} service.
-     */
-    @Reference
-    protected void setModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
         mtRegistry = moduleTypeRegistry;
         mtRegistry.addRegistryChangeListener(this);
-    }
 
-    /**
-     * Unbind the {@link ModuleTypeRegistry} service - called from DS.
-     *
-     * @param moduleTypeRegistry a {@link ModuleTypeRegistry} service.
-     */
-    protected void unsetModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        mtRegistry.removeRegistryChangeListener(this);
-        mtRegistry = null;
-    }
+        compositeFactory = new CompositeModuleHandlerFactory(mtRegistry, this);
 
-    /**
-     * Bind the {@link RuleRegistry} service - called from DS.
-     *
-     * @param ruleRegistry a {@link RuleRegistry} service.
-     */
-    @Reference
-    protected void setRuleRegistry(RuleRegistry ruleRegistry) {
+        this.ruleRegistry = ruleRegistry;
+
         if (ruleRegistry instanceof RuleRegistryImpl) {
-            this.ruleRegistry = (RuleRegistryImpl) ruleRegistry;
-            scheduleReinitializationDelay = this.ruleRegistry.getScheduleReinitializationDelay();
-            listener = new RegistryChangeListener<Rule>() {
-                @Override
-                public void added(Rule rule) {
-                    RuleEngineImpl.this.addRule(rule);
-                }
-
-                @Override
-                public void removed(Rule rule) {
-                    RuleEngineImpl.this.removeRule(rule.getUID());
-                }
-
-                @Override
-                public void updated(Rule oldRule, Rule rule) {
-                    removed(oldRule);
-                    added(rule);
-                }
-            };
-            ruleRegistry.addRegistryChangeListener(listener);
-            for (Rule rule : ruleRegistry.getAll()) {
-                addRule(rule);
-            }
+            scheduleReinitializationDelay = ((RuleRegistryImpl) this.ruleRegistry).getScheduleReinitializationDelay();
         } else {
-            logger.error("Unexpected RuleRegistry service: {}", ruleRegistry);
+            scheduleReinitializationDelay = RuleRegistryImpl.DEFAULT_REINITIALIZATION_DELAY;
+        }
+
+        listener = new RegistryChangeListener<Rule>() {
+            @Override
+            public void added(Rule rule) {
+                RuleEngineImpl.this.addRule(rule);
+            }
+
+            @Override
+            public void removed(Rule rule) {
+                RuleEngineImpl.this.removeRule(rule.getUID());
+            }
+
+            @Override
+            public void updated(Rule oldRule, Rule rule) {
+                removed(oldRule);
+                added(rule);
+            }
+        };
+        ruleRegistry.addRegistryChangeListener(listener);
+        for (Rule rule : ruleRegistry.getAll()) {
+            addRule(rule);
         }
     }
 
     /**
-     * Unbind the {@link RuleRegistry} service - called from DS.
-     *
-     * @param ruleRegistry a {@link RuleRegistry} service.
+     * The method cleans used resources by rule engine when it is deactivated.
      */
-    protected void unsetRuleRegistry(RuleRegistry ruleRegistry) {
-        if (this.ruleRegistry == ruleRegistry) {
-            ruleRegistry.removeRegistryChangeListener(listener);
-            listener = null;
-            this.ruleRegistry = null;
+    @Deactivate
+    protected void deactivate() {
+        synchronized (this) {
+            if (isDisposed) {
+                return;
+            }
+            isDisposed = true;
         }
+
+        compositeFactory.deactivate();
+
+        for (Future<?> f : scheduleTasks.values()) {
+            f.cancel(true);
+        }
+        if (scheduleTasks.isEmpty() && executor != null) {
+            executor.shutdown();
+            executor = null;
+        }
+        scheduleTasks.clear();
+        contextMap.clear();
+
+        mtRegistry.removeRegistryChangeListener(this);
+
+        ruleRegistry.removeRegistryChangeListener(listener);
     }
 
     /**
@@ -907,18 +884,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     protected void scheduleRuleInitialization(final String rUID) {
         Future<?> f = scheduleTasks.get(rUID);
         if (f == null || f.isDone()) {
-            ScheduledExecutorService ex = getScheduledExecutor();
-            f = ex.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    final WrappedRule managedRule = getManagedRule(rUID);
-                    if (managedRule == null) {
-                        return;
-                    }
-                    setRule(managedRule);
+            scheduleTasks.put(rUID, getScheduledExecutor().schedule(() -> {
+                final WrappedRule managedRule = getManagedRule(rUID);
+                if (managedRule == null) {
+                    return;
                 }
-            }, scheduleReinitializationDelay, TimeUnit.MILLISECONDS);
-            scheduleTasks.put(rUID, f);
+                setRule(managedRule);
+            }, scheduleReinitializationDelay, TimeUnit.MILLISECONDS));
         }
     }
 
@@ -1208,33 +1180,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 }
             }
         }
-    }
-
-    /**
-     * The method cleans used resources by rule engine when it is deactivated.
-     */
-    @Deactivate
-    protected void deactivate() {
-        synchronized (this) {
-            if (isDisposed) {
-                return;
-            }
-            isDisposed = true;
-        }
-        if (compositeFactory != null) {
-            compositeFactory.deactivate();
-            compositeFactory = null;
-        }
-        for (Future<?> f : scheduleTasks.values()) {
-            f.cancel(true);
-        }
-        if (scheduleTasks.isEmpty() && executor != null) {
-            executor.shutdown();
-            executor = null;
-        }
-        scheduleTasks.clear();
-        contextMap.clear();
-        unsetRuleRegistry(ruleRegistry);
     }
 
     /**
