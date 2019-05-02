@@ -4,12 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.openhab.core</groupId>
-    <artifactId>org.openhab.core.tools</artifactId>
+    <groupId>org.openhab.core.tools</groupId>
+    <artifactId>org.openhab.core.reactor.tools</artifactId>
     <version>2.5.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.tools.archetypes</artifactId>
+  <groupId>org.openhab.core.tools.archetypes</groupId>
+  <artifactId>org.openhab.core.reactor.tools.archetypes</artifactId>
   <packaging>pom</packaging>
 
   <name>openHAB Core :: Tools :: Archetypes</name>
@@ -39,7 +40,6 @@
         </executions>
       </plugin>
     </plugins>
-    
   </build>
 
 </project>
