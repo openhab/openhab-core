@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.common.registry;
 
+import org.eclipse.smarthome.core.storage.StorageService;
+
 /**
  * {@link DefaultAbstractManagedProvider} is a specific {@link AbstractManagedProvider} implementation, where the stored
  * element is
@@ -27,6 +29,10 @@ package org.eclipse.smarthome.core.common.registry;
  */
 public abstract class DefaultAbstractManagedProvider<E extends Identifiable<K>, K>
         extends AbstractManagedProvider<E, K, E> {
+
+    public DefaultAbstractManagedProvider(final StorageService storageService) {
+        super(storageService);
+    }
 
     @Override
     protected E toElement(String key, E element) {

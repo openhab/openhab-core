@@ -44,10 +44,13 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> extends AbstractProvider<E>
         implements ManagedProvider<E, K> {
 
-    private StorageService storageService;
     private volatile Storage<PE> storage;
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractManagedProvider.class);
+
+    public AbstractManagedProvider(final StorageService storageService) {
+        storage = storageService.getStorage(getStorageName(), this.getClass().getClassLoader());
+    }
 
     @Override
     public void add(E element) {
@@ -143,20 +146,6 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
      * @return string representation of the key
      */
     protected abstract @NonNull String keyToString(@NonNull K key);
-
-    protected void setStorageService(final StorageService storageService) {
-        if (this.storageService != storageService) {
-            this.storageService = storageService;
-            storage = storageService.getStorage(getStorageName(), this.getClass().getClassLoader());
-        }
-    }
-
-    protected void unsetStorageService(final StorageService storageService) {
-        if (this.storageService == storageService) {
-            this.storageService = null;
-            this.storage = null;
-        }
-    }
 
     /**
      * Converts the persistable element into the original element.

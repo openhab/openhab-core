@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.items.MetadataKey;
 import org.eclipse.smarthome.core.items.MetadataPredicates;
 import org.eclipse.smarthome.core.items.MetadataProvider;
 import org.eclipse.smarthome.core.storage.StorageService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -37,6 +38,11 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
         implements ManagedMetadataProvider {
 
     private final Logger logger = LoggerFactory.getLogger(ManagedMetadataProviderImpl.class);
+
+    @Activate
+    public ManagedMetadataProviderImpl(final @Reference StorageService storageService) {
+        super(storageService);
+    }
 
     @Override
     protected String getStorageName() {
@@ -56,17 +62,6 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
     @Override
     protected Metadata toPersistableElement(Metadata element) {
         return element;
-    }
-
-    @Override
-    @Reference
-    protected void setStorageService(StorageService storageService) {
-        super.setStorageService(storageService);
-    }
-
-    @Override
-    protected void unsetStorageService(StorageService storageService) {
-        super.unsetStorageService(storageService);
     }
 
     /**

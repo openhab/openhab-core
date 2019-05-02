@@ -1362,7 +1362,7 @@ public class ThingManagerImpl
         this.safeCaller = null;
     }
 
-    @Reference(policy = ReferencePolicy.DYNAMIC)
+    @Reference
     protected void setStorageService(StorageService storageService) {
         if (this.storageService != storageService) {
             this.storageService = storageService;

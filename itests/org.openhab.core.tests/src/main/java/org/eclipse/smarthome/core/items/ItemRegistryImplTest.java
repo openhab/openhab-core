@@ -90,9 +90,8 @@ public class ItemRegistryImplTest extends JavaTest {
         cameraItem4.addTag(CAMERA_TAG_UPPERCASE);
 
         // setup ManageItemProvider with necessary dependencies:
-        itemProvider = new ManagedItemProvider() {
+        itemProvider = new ManagedItemProvider(new VolatileStorageService()) {
             {
-                setStorageService(new VolatileStorageService());
                 addItemFactory(coreItemFactory);
             }
         };

@@ -22,10 +22,14 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -35,6 +39,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
+import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
@@ -57,6 +62,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
+import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
 import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.type.ThingType;
@@ -154,7 +160,6 @@ public class InboxOSGITest extends JavaOSGiTest {
     private PersistentInbox inbox;
     private ManagedThingProvider managedThingProvider;
     private ThingRegistry registry;
-    private ThingTypeRegistry thingTypeRegistry = new ThingTypeRegistry();
     private ConfigDescriptionRegistry configDescRegistry;
 
     @Before
@@ -953,21 +958,43 @@ public class InboxOSGITest extends JavaOSGiTest {
     @Test
     @SuppressWarnings("null")
     public void assertThatApproveAddsPropertiesOfDiscoveryResultWhichAreConfigDescriptionParametersAsThingConfigurationPropertiesAndPropertiesWhichAreNoConfigDescriptionParametersAsThingProperties() {
+        final List<Object> services = new LinkedList<>();
+
         inbox.add(testDiscoveryResult);
-        thingTypeRegistry = new ThingTypeRegistry() {
+
+        final ThingTypeProvider thingTypeProvider = new ThingTypeProvider() {
             @Override
-            public ThingType getThingType(ThingTypeUID thingTypeUID) {
-                return testThingType;
+            public Collection<ThingType> getThingTypes(@Nullable Locale locale) {
+                return Collections.singleton(testThingType);
+            }
+
+            @Override
+            public ThingType getThingType(ThingTypeUID thingTypeUID, @Nullable Locale locale) {
+                return thingTypeUID.equals(testThingType.getUID()) ? testThingType : null;
             }
         };
-        inbox.setThingTypeRegistry(thingTypeRegistry);
-        configDescRegistry = new ConfigDescriptionRegistry() {
+        services.add(registerService(thingTypeProvider));
+        final ThingTypeRegistry thingTypeRegistry = getService(ThingTypeRegistry.class);
+        assertNotNull(thingTypeRegistry);
+        waitForAssert(() -> assertNotNull(thingTypeRegistry.getThingType(testThingType.getUID())));
+
+        final ConfigDescriptionProvider configDescriptionProvider = new ConfigDescriptionProvider() {
             @Override
-            public ConfigDescription getConfigDescription(URI uri) {
-                return testConfigDescription;
+            public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
+                return Collections.singleton(testConfigDescription);
+            }
+
+            @Override
+            public @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
+                return uri.equals(testConfigDescription.getUID()) ? testConfigDescription : null;
             }
         };
-        inbox.setConfigDescriptionRegistry(configDescRegistry);
+        services.add(registerService(configDescriptionProvider));
+        final ConfigDescriptionRegistry configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
+        assertNotNull(configDescriptionRegistry);
+        waitForAssert(
+                () -> assertNotNull(configDescriptionRegistry.getConfigDescription(testConfigDescription.getUID())));
+
         Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel);
         Thing addedThing = registry.get(testThing.getUID());
         assertTrue(approvedThing.equals(addedThing));
@@ -989,6 +1016,8 @@ public class InboxOSGITest extends JavaOSGiTest {
             assertFalse(descResultParam == null);
             assertTrue(thingProperty.equals(descResultParam));
         }
+
+        services.forEach(obj -> unregisterService(obj));
     }
 
     @Test
