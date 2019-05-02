@@ -64,8 +64,9 @@ import org.eclipse.smarthome.core.thing.binding.ThingFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -130,17 +131,43 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     private final Logger logger = LoggerFactory.getLogger(PersistentInbox.class);
 
     private final Set<InboxListener> listeners = new CopyOnWriteArraySet<>();
-    private @NonNullByDefault({}) DiscoveryServiceRegistry discoveryServiceRegistry;
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
-    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
-    private @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistry;
-    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescRegistry;
-    private @NonNullByDefault({}) StorageService storageService;
-    private volatile @NonNullByDefault({}) Storage<DiscoveryResult> discoveryResultStorage;
+    private final DiscoveryServiceRegistry discoveryServiceRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ManagedThingProvider managedThingProvider;
+    private final ThingTypeRegistry thingTypeRegistry;
+    private final ConfigDescriptionRegistry configDescRegistry;
+    private final Storage<DiscoveryResult> discoveryResultStorage;
     private final Map<DiscoveryResult, Class<?>> resultDiscovererMap = new ConcurrentHashMap<>();
-    private @NonNullByDefault({}) ScheduledFuture<?> timeToLiveChecker;
+    private ScheduledFuture<?> timeToLiveChecker;
     private @Nullable EventPublisher eventPublisher;
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<>();
+
+    @Activate
+    public PersistentInbox(final @Reference StorageService storageService,
+            final @Reference DiscoveryServiceRegistry discoveryServiceRegistry,
+            final @Reference ThingRegistry thingRegistry, final @Reference ManagedThingProvider thingProvider,
+            final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
+        this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
+                .scheduleWithFixedDelay(new TimeToLiveCheckingThread(this), 0, 30, TimeUnit.SECONDS);
+        this.discoveryResultStorage = storageService.getStorage(DiscoveryResult.class.getName(),
+                this.getClass().getClassLoader());
+        this.discoveryServiceRegistry = discoveryServiceRegistry;
+        this.discoveryServiceRegistry.addDiscoveryListener(this);
+        this.thingRegistry = thingRegistry;
+        this.thingRegistry.addRegistryChangeListener(this);
+        this.managedThingProvider = thingProvider;
+        this.thingTypeRegistry = thingTypeRegistry;
+        this.configDescRegistry = configDescriptionRegistry;
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        this.thingRegistry.removeRegistryChangeListener(this);
+        this.discoveryServiceRegistry.removeDiscoveryListener(this);
+        this.listeners.clear();
+        this.timeToLiveChecker.cancel(true);
+    }
 
     @Override
     public @Nullable Thing approve(ThingUID thingUID, @Nullable String label) {
@@ -599,67 +626,10 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         thingRegistry.add(thing);
     }
 
-    protected void activate(ComponentContext componentContext) {
-        this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
-                .scheduleWithFixedDelay(new TimeToLiveCheckingThread(this), 0, 30, TimeUnit.SECONDS);
-        this.discoveryServiceRegistry.addDiscoveryListener(this);
-    }
-
     void setTimeToLiveCheckingInterval(int interval) {
         this.timeToLiveChecker.cancel(true);
         this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
                 .scheduleWithFixedDelay(new TimeToLiveCheckingThread(this), 0, interval, TimeUnit.SECONDS);
-    }
-
-    protected void deactivate(ComponentContext componentContext) {
-        this.discoveryServiceRegistry.removeDiscoveryListener(this);
-        this.listeners.clear();
-        this.timeToLiveChecker.cancel(true);
-    }
-
-    @Reference
-    protected void setDiscoveryServiceRegistry(DiscoveryServiceRegistry discoveryServiceRegistry) {
-        this.discoveryServiceRegistry = discoveryServiceRegistry;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-        this.thingRegistry.addRegistryChangeListener(this);
-    }
-
-    @Reference
-    protected void setManagedThingProvider(ManagedThingProvider thingProvider) {
-        this.managedThingProvider = thingProvider;
-    }
-
-    protected void unsetDiscoveryServiceRegistry(DiscoveryServiceRegistry discoveryServiceRegistry) {
-        this.discoveryServiceRegistry = null;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry.removeRegistryChangeListener(this);
-        this.thingRegistry = null;
-    }
-
-    protected void unsetManagedThingProvider(ManagedThingProvider thingProvider) {
-        this.managedThingProvider = null;
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected void setStorageService(final StorageService storageService) {
-        if (this.storageService != storageService) {
-            this.storageService = storageService;
-            this.discoveryResultStorage = storageService.getStorage(DiscoveryResult.class.getName(),
-                    this.getClass().getClassLoader());
-        }
-    }
-
-    protected void unsetStorageService(final StorageService storageService) {
-        if (this.storageService == storageService) {
-            this.storageService = null;
-            this.discoveryResultStorage = null;
-        }
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
@@ -669,24 +639,6 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     protected void unsetEventPublisher(EventPublisher eventPublisher) {
         this.eventPublisher = null;
-    }
-
-    @Reference
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = thingTypeRegistry;
-    }
-
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

@@ -144,7 +144,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     /**
      * The storage for the disable information
      */
-    private @Nullable Storage<Boolean> disabledRulesStorage;
+    private final Storage<Boolean> disabledRulesStorage;
 
     /**
      * Locker which does not permit rule initialization when the rule engine is stopping.
@@ -241,9 +241,12 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     @Activate
     public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
-            final @Reference RuleRegistry ruleRegistry) {
+            final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService) {
         this.contextMap = new HashMap<String, Map<String, Object>>();
         this.moduleHandlerFactories = new HashMap<String, ModuleHandlerFactory>(20);
+
+        this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
+                this.getClass().getClassLoader());
 
         mtRegistry = moduleTypeRegistry;
         mtRegistry.addRegistryChangeListener(this);
@@ -308,26 +311,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         mtRegistry.removeRegistryChangeListener(this);
 
         ruleRegistry.removeRegistryChangeListener(listener);
-    }
-
-    /**
-     * Bind the {@link StorageService} - called from DS.
-     *
-     * @param storageService the {@link StorageService} instance.
-     */
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setStorageService(StorageService storageService) {
-        this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
-                this.getClass().getClassLoader());
-    }
-
-    /**
-     * Unbind the {@link StorageService} - called from DS.
-     *
-     * @param storageService the {@link StorageService} instance.
-     */
-    protected void unsetStorageService(StorageService storageService) {
-        this.disabledRulesStorage = null;
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
+import org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry;
 import org.eclipse.smarthome.core.thing.ManagedThingProvider;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
@@ -152,12 +153,8 @@ public class AutomaticInboxProcessorTest {
                                         (ThingUID) invocation.getArguments()[2])
                                 .withConfiguration((Configuration) invocation.getArguments()[1]).build());
 
-        inbox = new PersistentInbox();
-        inbox.setThingRegistry(thingRegistry);
-        inbox.setStorageService(new VolatileStorageService());
-        inbox.setManagedThingProvider(thingProvider);
-        inbox.setConfigDescriptionRegistry(configDescriptionRegistry);
-        inbox.setThingTypeRegistry(thingTypeRegistry);
+        inbox = new PersistentInbox(new VolatileStorageService(), mock(DiscoveryServiceRegistry.class), thingRegistry,
+                thingProvider, thingTypeRegistry, configDescriptionRegistry);
         inbox.addThingHandlerFactory(thingHandlerFactory);
 
         automaticInboxProcessor = new AutomaticInboxProcessor();

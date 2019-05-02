@@ -14,14 +14,11 @@ package org.openhab.core.automation;
 
 import org.eclipse.smarthome.core.common.registry.AbstractManagedProvider;
 import org.eclipse.smarthome.core.storage.StorageService;
-import org.openhab.core.automation.Rule;
-import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.dto.RuleDTO;
 import org.openhab.core.automation.dto.RuleDTOMapper;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * Implementation of a rule provider that uses the storage service for persistence
@@ -34,15 +31,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(service = { RuleProvider.class, ManagedRuleProvider.class })
 public class ManagedRuleProvider extends AbstractManagedProvider<Rule, String, RuleDTO> implements RuleProvider {
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
-    @Override
-    protected void setStorageService(final StorageService storageService) {
-        super.setStorageService(storageService);
-    }
-
-    @Override
-    protected void unsetStorageService(final StorageService storageService) {
-        super.unsetStorageService(storageService);
+    @Activate
+    public ManagedRuleProvider(final @Reference StorageService storageService) {
+        super(storageService);
     }
 
     @Override

@@ -30,6 +30,7 @@ import org.eclipse.smarthome.core.items.ManagedItemProvider.PersistedItem;
 import org.eclipse.smarthome.core.items.dto.GroupFunctionDTO;
 import org.eclipse.smarthome.core.items.dto.ItemDTOMapper;
 import org.eclipse.smarthome.core.storage.StorageService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -85,6 +86,11 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     private final Collection<ItemFactory> itemFactories = new CopyOnWriteArrayList<ItemFactory>();
 
     private final Map<String, PersistedItem> failedToCreate = new ConcurrentHashMap<>();
+
+    @Activate
+    public ManagedItemProvider(final @Reference StorageService storageService) {
+        super(storageService);
+    }
 
     /**
      * Removes an item and it´s member if recursive flag is set to true.
@@ -285,17 +291,6 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
                 }
             }
         }
-    }
-
-    @Override
-    @Reference
-    protected void setStorageService(StorageService storageService) {
-        super.setStorageService(storageService);
-    }
-
-    @Override
-    protected void unsetStorageService(StorageService storageService) {
-        super.unsetStorageService(storageService);
     }
 
 }
