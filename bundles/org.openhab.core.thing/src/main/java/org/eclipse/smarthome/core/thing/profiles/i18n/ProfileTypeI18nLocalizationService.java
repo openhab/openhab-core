@@ -24,6 +24,7 @@ import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
 import org.eclipse.smarthome.core.thing.profiles.StateProfileType;
 import org.eclipse.smarthome.core.thing.profiles.TriggerProfileType;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -36,15 +37,11 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ProfileTypeI18nLocalizationService {
 
-    private @NonNullByDefault({}) ThingTypeI18nUtil thingTypeI18nUtil;
+    private final ThingTypeI18nUtil thingTypeI18nUtil;
 
-    @Reference
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
+    @Activate
+    public ProfileTypeI18nLocalizationService(final @Reference TranslationProvider i18nProvider) {
         this.thingTypeI18nUtil = new ThingTypeI18nUtil(i18nProvider);
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.thingTypeI18nUtil = null;
     }
 
     public ProfileType createLocalizedProfileType(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {

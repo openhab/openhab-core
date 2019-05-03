@@ -13,45 +13,53 @@
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
+
+import java.util.Collection;
 
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
+import org.eclipse.smarthome.core.thing.profiles.ProfileType;
+import org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider;
 import org.eclipse.smarthome.core.thing.profiles.SystemProfiles;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
+import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
+ * Test cases for the {@link SystemProfileFactory} class.
  *
- * @author Simon Kaufmann - initial contribution and API.
- *
+ * @author Simon Kaufmann - Initial contribution
  */
-public class SystemProfileFactoryTest {
+public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
-    private ChannelTypeRegistry channelTypeRegistry;
-    private SystemProfileFactory factory;
+    private SystemProfileFactory profileFactory;
 
     @Before
-    public void setup() {
-        channelTypeRegistry = new ChannelTypeRegistry();
+    public void setUp() {
+        profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
+        assertNotNull(profileFactory);
+    }
 
-        factory = new SystemProfileFactory();
-        factory.setChannelTypeRegistry(channelTypeRegistry);
+    @Test
+    public void systemProfileTypesShouldBeAvailable() {
+        Collection<ProfileType> systemProfileTypes = profileFactory.getProfileTypes(null);
+        assertEquals(14, systemProfileTypes.size());
     }
 
     @Test
     public void testGetSuggestedProfileTypeUID_nullChannelType1() {
-        assertThat(factory.getSuggestedProfileTypeUID((ChannelType) null, CoreItemFactory.SWITCH), is(nullValue()));
+        assertThat(profileFactory.getSuggestedProfileTypeUID((ChannelType) null, CoreItemFactory.SWITCH),
+                is(nullValue()));
     }
 
     @Test
     public void testGetSuggestedProfileTypeUID_nullChannelType2() {
         Channel channel = ChannelBuilder.create(new ChannelUID("test:test:test:test"), CoreItemFactory.SWITCH).build();
-        assertThat(factory.getSuggestedProfileTypeUID(channel, CoreItemFactory.SWITCH), is(SystemProfiles.DEFAULT));
+        assertThat(profileFactory.getSuggestedProfileTypeUID(channel, CoreItemFactory.SWITCH),
+                is(SystemProfiles.DEFAULT));
     }
-
 }

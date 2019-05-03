@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test cases for the {@link SystemProfileFactory} class.
+ * Test cases for i18n of the {@link SystemProfileFactory} class.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
@@ -40,12 +40,6 @@ public class SystemProfileI18nOSGiTest extends JavaOSGiTest {
         ProfileTypeProvider provider = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
         assertTrue(provider instanceof SystemProfileFactory);
         systemProfileTypeProvider = provider;
-    }
-
-    @Test
-    public void systemProfileTypesShouldBeAvailable() {
-        Collection<ProfileType> systemProfileTypes = systemProfileTypeProvider.getProfileTypes(null);
-        assertEquals(14, systemProfileTypes.size());
     }
 
     @Test

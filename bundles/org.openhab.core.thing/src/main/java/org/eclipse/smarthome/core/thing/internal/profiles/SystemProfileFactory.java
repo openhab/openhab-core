@@ -43,6 +43,7 @@ import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
 import org.eclipse.smarthome.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -61,7 +62,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = { SystemProfileFactory.class, ProfileTypeProvider.class })
 public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, ProfileTypeProvider {
 
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
 
     private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream
             .of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
@@ -77,10 +78,17 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
 
     private final Map<LocalizedProfileTypeKey, @Nullable ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
 
-    @Reference
-    private @NonNullByDefault({}) ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService;
-    @Reference
-    private @NonNullByDefault({}) BundleResolver bundleResolver;
+    private final ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService;
+    private final BundleResolver bundleResolver;
+
+    @Activate
+    public SystemProfileFactory(final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService,
+            final @Reference BundleResolver bundleResolver) {
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.profileTypeI18nLocalizationService = profileTypeI18nLocalizationService;
+        this.bundleResolver = bundleResolver;
+    }
 
     @Override
     public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
@@ -187,15 +195,6 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     @Override
     public Collection<ProfileTypeUID> getSupportedProfileTypeUIDs() {
         return SUPPORTED_PROFILE_TYPE_UIDS;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
     }
 
     private ProfileType createLocalizedProfileType(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
