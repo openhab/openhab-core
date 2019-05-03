@@ -35,129 +35,29 @@
     <feature dependency="true">openhab.tp-httpclient</feature>
 
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.config.core.ConfigDescriptionRegistry
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.config.core.status.ConfigStatusService
-    </capability>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.config.discovery.inbox.Inbox
-    </capability>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
     <bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.config.xml/${project.version}</bundle>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.binding.BindingInfoRegistry
-    </capability>
-    <capability>
-      osgi.service;objectClass:List&lt;String&gt;=org.eclipse.smarthome.core.events.EventPublisher;event.topics:String=smarthome
-    </capability>
-    <capability>
-      <!-- org.eclipse.smarthome.core.internal.i18n.I18nProviderImpl -->
-      osgi.service;objectClass:List&lt;String&gt;="org.eclipse.smarthome.core.i18n.LocaleProvider,org.eclipse.smarthome.core.i18n.LocationProvider,org.eclipse.smarthome.core.i18n.TimeZoneProvider,org.eclipse.smarthome.core.i18n.TranslationProvider"
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.items.ItemFactory
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.items.ItemRegistry
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.items.ManagedItemProvider
-    </capability>
-
     <feature dependency="true">openhab-core-storage-mapdb</feature>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.binding.xml/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry
-    </capability>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.semantics.TagService
-    </capability>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.scheduler/${project.version}</bundle>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.ManagedThingProvider
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.ThingRegistry
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.firmware.FirmwareRegistry
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateService
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.i18n.ThingStatusInfoI18nLocalizationService
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.i18n.ThingTypeI18nLocalizationService
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.link.ManagedItemChannelLinkProvider
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.link.ThingLinkManager
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry
-    </capability>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.thing.type.ThingTypeRegistry
-    </capability>
-
     <bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.thing.xml/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.core.audio.AudioHTTPServer
-    </capability>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.voice/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.monitor/${project.version}</bundle>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.net/${project.version}</bundle>
-
     <feature dependency="true">pax-http-whiteboard</feature>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass:List&lt;String&gt;=org.eclipse.smarthome.io.rest.LocaleService
-    </capability>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.optimize/${project.version}</bundle>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.io.rest.core.config.ConfigurationService
-    </capability>
-
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
   </feature>
 
@@ -174,9 +74,6 @@
   <feature name="openhab-core-automation" version="${project.version}">
     <feature>openhab-core-base</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.openhab.core.automation.RuleRegistry
-    </capability>
   </feature>
 
   <feature name="openhab-core-automation-module-script" version="${project.version}">
@@ -293,9 +190,6 @@
 
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mdns/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.mdns/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.io.transport.mdns.MDNSService
-    </capability>
   </feature>
 
   <feature name="openhab-core-io-transport-mqtt" version="${project.version}">
@@ -305,9 +199,6 @@
     <feature dependency="true">openhab.tp-paho</feature>
 
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mqtt/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass=org.eclipse.smarthome.io.transport.mqtt.MqttService
-    </capability>
   </feature>
 
   <feature name="openhab-core-io-transport-serial" version="${project.version}">
@@ -486,9 +377,6 @@
     <feature>openhab-core-base</feature>
 
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.storage.mapdb/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass:List&lt;String&gt;="org.eclipse.smarthome.core.storage.StorageService,org.eclipse.smarthome.core.storage.DeletableStorageService";storage.format:String="mapdb"
-    </capability>
 
     <requirement>openhab.tp;filter:="(feature=mapdb)"</requirement>
     <feature dependency="true">openhab.tp-mapdb</feature>
@@ -498,9 +386,6 @@
     <feature>openhab-core-base</feature>
 
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.storage.json/${project.version}</bundle>
-    <capability>
-      osgi.service;objectClass:List&lt;String&gt;="org.eclipse.smarthome.core.storage.StorageService";storage.format:String="json"
-    </capability>
   </feature>
 
   <feature name="openhab-core-ui" version="${project.version}">
