@@ -16,7 +16,6 @@
   <name>openHAB Core :: Features :: p2</name>
 
   <modules>
-    <module>poms</module>
     <module>repo</module>
   </modules>
 
