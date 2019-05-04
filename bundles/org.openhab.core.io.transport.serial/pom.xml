@@ -12,4 +12,12 @@
 
   <name>openHAB Core :: Bundles :: Serial Transport</name>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.console</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
 </project>
