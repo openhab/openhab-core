@@ -191,7 +191,6 @@ Import-Package: \\
   org.eclipse.smarthome.*
 -sources: false
 -contract: *
--dsannotations-options: norequirements
 ]]></bnd>
             <!-- Bundle-SymbolicName: ${project.groupId}.${project.artifactId} -->
           </configuration>
