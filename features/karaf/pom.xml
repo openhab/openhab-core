@@ -41,6 +41,33 @@
     </dependency>
   </dependencies>
 
+  <repositories>
+    <repository>
+      <id>kura-releases</id>
+      <url>https://repo.eclipse.org/content/repositories/kura-releases</url>
+    </repository>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>bintray-maggu2810-maven</id>
+      <url>https://dl.bintray.com/maggu2810/maven/</url>
+    </repository>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>jupnp-bintray</id>
+      <url>https://dl.bintray.com/jupnp/mvn/</url>
+    </repository>
+  </repositories>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -98,32 +125,5 @@
       </plugins>
     </pluginManagement>
   </build>
-
-  <repositories>
-    <repository>
-      <id>kura-releases</id>
-      <url>https://repo.eclipse.org/content/repositories/kura-releases</url>
-    </repository>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>bintray-maggu2810-maven</id>
-      <url>https://dl.bintray.com/maggu2810/maven/</url>
-    </repository>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>jupnp-bintray</id>
-      <url>https://dl.bintray.com/jupnp/mvn/</url>
-    </repository>
-  </repositories>
 
 </project>

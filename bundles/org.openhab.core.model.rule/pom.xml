@@ -22,18 +22,16 @@
   </dependencies>
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>notestsources</testSourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
           <execution>
-            <phase>generate-sources</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
+            <phase>generate-sources</phase>
             <configuration>
               <sources>
                 <source>src-gen</source>
@@ -88,6 +86,8 @@
         <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
     </plugins>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>notestsources</testSourceDirectory>
   </build>
 
 </project>
