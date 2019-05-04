@@ -55,7 +55,6 @@ public class ChannelI18nUtil {
             ChannelTypeRegistry channelTypeRegistry) {
         this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
         this.channelTypeRegistry = channelTypeRegistry;
-
     }
 
     public List<ChannelDefinition> createLocalizedChannelDefinitions(final Bundle bundle,

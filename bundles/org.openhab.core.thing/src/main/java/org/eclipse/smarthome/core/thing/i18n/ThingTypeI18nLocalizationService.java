@@ -31,7 +31,6 @@ import org.eclipse.smarthome.core.thing.type.ThingTypeBuilder;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
@@ -47,87 +46,20 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ThingTypeI18nLocalizationService {
 
-    @NonNullByDefault({})
-    private ThingTypeI18nUtil thingTypeI18nUtil;
-
-    @NonNullByDefault({})
-    private ChannelI18nUtil channelI18nUtil;
-
-    @NonNullByDefault({})
-    private ChannelGroupI18nUtil channelGroupI18nUtil;
-
-    @NonNullByDefault({})
-    private ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
-
-    @NonNullByDefault({})
-    private ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService;
-
-    @NonNullByDefault({})
-    private ChannelTypeRegistry channelTypeRegistry;
-
-    @NonNullByDefault({})
-    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
-
-    @Reference
-    protected void setChannelTypeI18nLocalizationService(
-            ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
-    }
-
-    protected void unsetChannelTypeI18nLocalizationService(
-            ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = null;
-    }
-
-    @Reference
-    protected void setChannelGroupTypeI18nLocalizationService(
-            ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService) {
-        this.channelGroupTypeI18nLocalizationService = channelGroupTypeI18nLocalizationService;
-    }
-
-    protected void unsetChannelGroupTypeI18nLocalizationService(
-            ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService) {
-        this.channelGroupTypeI18nLocalizationService = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        this.thingTypeI18nUtil = new ThingTypeI18nUtil(i18nProvider);
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.thingTypeI18nUtil = null;
-    }
-
-    @Reference
-    protected void setChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = channelGroupTypeRegistry;
-    }
-
-    protected void unsetChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = null;
-    }
+    private final ThingTypeI18nUtil thingTypeI18nUtil;
+    private final ChannelGroupI18nUtil channelGroupI18nUtil;
+    private final ChannelI18nUtil channelI18nUtil;
 
     @Activate
-    protected void activate() {
-        channelI18nUtil = new ChannelI18nUtil(channelTypeI18nLocalizationService, channelTypeRegistry);
-        channelGroupI18nUtil = new ChannelGroupI18nUtil(channelGroupTypeI18nLocalizationService,
+    public ThingTypeI18nLocalizationService(final @Reference TranslationProvider i18nProvider,
+            final @Reference ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService,
+            final @Reference ChannelGroupTypeRegistry channelGroupTypeRegistry,
+            final @Reference ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService,
+            final @Reference ChannelTypeRegistry channelTypeRegistry) {
+        this.thingTypeI18nUtil = new ThingTypeI18nUtil(i18nProvider);
+        this.channelGroupI18nUtil = new ChannelGroupI18nUtil(channelGroupTypeI18nLocalizationService,
                 channelGroupTypeRegistry);
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        channelI18nUtil = null;
-        channelGroupI18nUtil = null;
+        this.channelI18nUtil = new ChannelI18nUtil(channelTypeI18nLocalizationService, channelTypeRegistry);
     }
 
     public ThingType createLocalizedThingType(Bundle bundle, ThingType thingType, @Nullable Locale locale) {
