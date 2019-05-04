@@ -28,6 +28,11 @@ public class OSGiConsole implements Console {
     }
 
     @Override
+    public void printf(String format, Object... args) {
+        System.out.printf(format, args);
+    }
+
+    @Override
     public void print(final String s) {
         System.out.print(s);
     }

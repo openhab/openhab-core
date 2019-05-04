@@ -52,4 +52,5 @@ public class ConsoleStub implements Console {
     public boolean isPrintUsagesMethodCalled() {
         return isPrintUsagesMethodCalled;
     }
+
 }
