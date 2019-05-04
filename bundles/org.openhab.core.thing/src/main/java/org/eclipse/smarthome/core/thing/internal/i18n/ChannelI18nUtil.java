@@ -36,8 +36,7 @@ import org.osgi.framework.Bundle;
  * @see {@link ThingTypeI18nLocalizationService}
  * @see {@link ChannelGroupTypeI18nLocalizationService}
  *
- * @author Henning Treu - initial contribution
- *
+ * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
 public class ChannelI18nUtil {

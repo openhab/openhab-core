@@ -31,9 +31,10 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This OSGi service could be used to localize a {@link ChannelGroupType} type using the I18N mechanism of the Eclipse
- * SmartHome framework.
+ * This OSGi service could be used to localize a {@link ChannelGroupType} type using the I18N mechanism of the openHAB
+ * framework.
  *
+ * @author Markus Rathgeb - Initial contribution
  * @author Markus Rathgeb - Move code from XML thing type provider to separate service
  * @author Laurent Garnier - fix localized label and description for channel group definition
  * @author Christoph Weitkamp - factored out from {@link XmlChannelTypeProvider} and {@link XmlChannelGroupTypeProvider}
@@ -44,10 +45,10 @@ import org.osgi.service.component.annotations.Reference;
 public class ChannelGroupTypeI18nLocalizationService {
 
     @NonNullByDefault({})
-    private ChannelI18nUtil channelI18nUtil;
+    private ThingTypeI18nUtil thingTypeI18nUtil;
 
     @NonNullByDefault({})
-    private ThingTypeI18nUtil thingTypeI18nUtil;
+    private ChannelI18nUtil channelI18nUtil;
 
     @NonNullByDefault({})
     private ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;

@@ -12,22 +12,19 @@
  */
 package org.eclipse.smarthome.core.thing.i18n;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.smarthome.core.thing.internal.i18n.ChannelGroupI18nUtil;
 import org.eclipse.smarthome.core.thing.internal.i18n.ChannelI18nUtil;
 import org.eclipse.smarthome.core.thing.type.BridgeType;
 import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupDefinition;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
 import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.eclipse.smarthome.core.thing.type.ThingTypeBuilder;
@@ -41,6 +38,7 @@ import org.osgi.service.component.annotations.Reference;
  * This OSGi service could be used to localize a {@link ThingType} using the I18N mechanism of the openHAB
  * framework.
  *
+ * @author Markus Rathgeb - Initial contribution
  * @author Markus Rathgeb - Move code from XML thing type provider to separate service
  * @author Laurent Garnier - fix localized label and description for channel group definition
  * @author Christoph Weitkamp - factored out from {@link XmlChannelTypeProvider} and {@link XmlChannelGroupTypeProvider}
@@ -56,13 +54,19 @@ public class ThingTypeI18nLocalizationService {
     private ChannelI18nUtil channelI18nUtil;
 
     @NonNullByDefault({})
-    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    private ChannelGroupI18nUtil channelGroupI18nUtil;
 
     @NonNullByDefault({})
     private ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
 
     @NonNullByDefault({})
+    private ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService;
+
+    @NonNullByDefault({})
     private ChannelTypeRegistry channelTypeRegistry;
+
+    @NonNullByDefault({})
+    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
 
     @Reference
     protected void setChannelTypeI18nLocalizationService(
@@ -73,6 +77,17 @@ public class ThingTypeI18nLocalizationService {
     protected void unsetChannelTypeI18nLocalizationService(
             ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
         this.channelTypeI18nLocalizationService = null;
+    }
+
+    @Reference
+    protected void setChannelGroupTypeI18nLocalizationService(
+            ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService) {
+        this.channelGroupTypeI18nLocalizationService = channelGroupTypeI18nLocalizationService;
+    }
+
+    protected void unsetChannelGroupTypeI18nLocalizationService(
+            ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService) {
+        this.channelGroupTypeI18nLocalizationService = null;
     }
 
     @Reference
@@ -105,41 +120,14 @@ public class ThingTypeI18nLocalizationService {
     @Activate
     protected void activate() {
         channelI18nUtil = new ChannelI18nUtil(channelTypeI18nLocalizationService, channelTypeRegistry);
+        channelGroupI18nUtil = new ChannelGroupI18nUtil(channelGroupTypeI18nLocalizationService,
+                channelGroupTypeRegistry);
     }
 
     @Deactivate
     protected void deactivate() {
         channelI18nUtil = null;
-    }
-
-    private List<ChannelGroupDefinition> createLocalizedChannelGroupDefinitions(final Bundle bundle,
-            final List<ChannelGroupDefinition> channelGroupDefinitions,
-            final Function<ChannelGroupDefinition, @Nullable String> channelGroupLabelResolver,
-            final Function<ChannelGroupDefinition, @Nullable String> channelGroupDescriptionResolver,
-            final @Nullable Locale locale) {
-        List<ChannelGroupDefinition> localizedChannelGroupDefinitions = new ArrayList<>(channelGroupDefinitions.size());
-        for (final ChannelGroupDefinition channelGroupDefinition : channelGroupDefinitions) {
-            String channelGroupLabel = channelGroupLabelResolver.apply(channelGroupDefinition);
-            String channelGroupDescription = channelGroupDescriptionResolver.apply(channelGroupDefinition);
-            if (channelGroupLabel == null || channelGroupDescription == null) {
-                ChannelGroupTypeUID channelGroupTypeUID = channelGroupDefinition.getTypeUID();
-                ChannelGroupType channelGroupType = channelGroupTypeRegistry.getChannelGroupType(channelGroupTypeUID,
-                        locale);
-                if (channelGroupType != null) {
-                    if (channelGroupLabel == null) {
-                        channelGroupLabel = thingTypeI18nUtil.getChannelGroupLabel(bundle, channelGroupTypeUID,
-                                channelGroupType.getLabel(), locale);
-                    }
-                    if (channelGroupDescription == null) {
-                        channelGroupDescription = thingTypeI18nUtil.getChannelGroupDescription(bundle,
-                                channelGroupTypeUID, channelGroupType.getDescription(), locale);
-                    }
-                }
-            }
-            localizedChannelGroupDefinitions.add(new ChannelGroupDefinition(channelGroupDefinition.getId(),
-                    channelGroupDefinition.getTypeUID(), channelGroupLabel, channelGroupDescription));
-        }
-        return localizedChannelGroupDefinitions;
+        channelGroupI18nUtil = null;
     }
 
     public ThingType createLocalizedThingType(Bundle bundle, ThingType thingType, @Nullable Locale locale) {
@@ -155,13 +143,13 @@ public class ThingTypeI18nLocalizationService {
                         channelDefinition.getDescription(), locale),
                 locale);
 
-        List<ChannelGroupDefinition> localizedChannelGroupDefinitions = createLocalizedChannelGroupDefinitions(bundle,
-                thingType.getChannelGroupDefinitions(),
-                channelGroupDefinition -> thingTypeI18nUtil.getChannelGroupLabel(bundle, thingTypeUID,
-                        channelGroupDefinition, channelGroupDefinition.getLabel(), locale),
-                channelGroupDefinition -> thingTypeI18nUtil.getChannelGroupDescription(bundle, thingTypeUID,
-                        channelGroupDefinition, channelGroupDefinition.getDescription(), locale),
-                locale);
+        List<ChannelGroupDefinition> localizedChannelGroupDefinitions = channelGroupI18nUtil
+                .createLocalizedChannelGroupDefinitions(bundle, thingType.getChannelGroupDefinitions(),
+                        channelGroupDefinition -> thingTypeI18nUtil.getChannelGroupLabel(bundle, thingTypeUID,
+                                channelGroupDefinition, channelGroupDefinition.getLabel(), locale),
+                        channelGroupDefinition -> thingTypeI18nUtil.getChannelGroupDescription(bundle, thingTypeUID,
+                                channelGroupDefinition, channelGroupDefinition.getDescription(), locale),
+                        locale);
 
         ThingTypeBuilder builder = ThingTypeBuilder.instance(thingType);
         if (label != null) {

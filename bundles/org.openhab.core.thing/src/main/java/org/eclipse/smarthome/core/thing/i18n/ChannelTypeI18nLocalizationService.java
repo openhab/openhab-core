@@ -38,6 +38,7 @@ import org.osgi.service.component.annotations.Reference;
  * This OSGi service could be used to localize a {@link ChannelType} using the I18N mechanism of the openHAB
  * framework.
  *
+ * @author Markus Rathgeb - Initial contribution
  * @author Markus Rathgeb - Move code from XML thing type provider to separate service
  * @author Laurent Garnier - fix localized label and description for channel group definition
  * @author Christoph Weitkamp - factored out from {@link XmlChannelTypeProvider} and {@link XmlChannelGroupTypeProvider}
