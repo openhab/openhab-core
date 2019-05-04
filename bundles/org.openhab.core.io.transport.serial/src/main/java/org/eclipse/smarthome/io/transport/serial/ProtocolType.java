@@ -30,8 +30,8 @@ public class ProtocolType {
      *
      */
     public enum PathType {
-    NET,
-    LOCAL;
+        NET,
+        LOCAL;
         public static PathType fromURI(URI uri) {
             return uri.getSchemeSpecificPart().startsWith("//") ? NET : LOCAL;
         }
@@ -51,6 +51,11 @@ public class ProtocolType {
 
     public String getScheme() {
         return scheme;
+    }
+
+    @Override
+    public String toString() {
+        return "ProtocolType [pathType=" + pathType + ", scheme=" + scheme + "]";
     }
 
 }
