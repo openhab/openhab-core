@@ -85,7 +85,7 @@ def addBundleToFeature(bundleAfter, newBundle, bundleName) {
         <bundle start-level="80">mvn:org.openhab.addons.bundles/##3/${project.version}</bundle>
     </feature>
 '''.replace('##1', newBundle.replace('org.', '').replace('.', '-')).replace('##2', bundleName).replace('##3', newBundle)
-    def bomFile = new File(outputDirectory, '../features/karaf/openhab-addons/src/main/feature/feature.xml')
+    def bomFile = new File(outputDirectory, '../features/openhab-addons/src/main/feature/feature.xml')
     def newContent = ''
     def insertIndex = 0;
     def lines = bomFile.eachLine { line, index ->
