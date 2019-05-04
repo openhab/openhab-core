@@ -17,7 +17,6 @@
 
   <modules>
     <module>poms</module>
-    <module>poms/tycho</module>
     <module>repo</module>
   </modules>
 
