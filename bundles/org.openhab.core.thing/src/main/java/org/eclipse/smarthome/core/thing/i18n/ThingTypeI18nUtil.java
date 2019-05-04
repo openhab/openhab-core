@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.I18nUtil;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
 import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupDefinition;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
@@ -34,7 +33,6 @@ import org.osgi.framework.Bundle;
  * @author Dennis Nobel - Initial contribution
  * @author Laurent Garnier - add translation for channel group label and channel group description
  * @author Christoph Weitkamp - fix localized label and description for channel definition
- * @author Christoph Weitkamp - Added translation for profile labels
  */
 @NonNullByDefault
 public class ThingTypeI18nUtil {
@@ -143,12 +141,6 @@ public class ThingTypeI18nUtil {
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
-    public @Nullable String getProfileLabel(Bundle bundle, ProfileTypeUID profileTypeUID, String defaultLabel,
-            @Nullable Locale locale) {
-        String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferProfileTypeKey(profileTypeUID, "label"));
-        return i18nProvider.getText(bundle, key, defaultLabel, locale);
-    }
-
     private String inferChannelKey(ChannelTypeUID channelTypeUID, String lastSegment) {
         return "channel-type." + channelTypeUID.getBindingId() + "." + channelTypeUID.getId() + "." + lastSegment;
     }
@@ -179,7 +171,4 @@ public class ThingTypeI18nUtil {
                 + "." + lastSegment;
     }
 
-    private String inferProfileTypeKey(ProfileTypeUID profileTypeUID, String lastSegment) {
-        return "profile-type." + profileTypeUID.getBindingId() + "." + profileTypeUID.getId() + "." + lastSegment;
-    }
 }

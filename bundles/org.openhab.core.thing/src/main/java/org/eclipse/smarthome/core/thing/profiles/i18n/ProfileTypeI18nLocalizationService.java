@@ -17,7 +17,7 @@ import java.util.Locale;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.thing.i18n.ThingTypeI18nUtil;
+import org.eclipse.smarthome.core.thing.internal.profiles.i18n.ProfileI18nUtil;
 import org.eclipse.smarthome.core.thing.profiles.ProfileType;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeBuilder;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
@@ -37,17 +37,17 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ProfileTypeI18nLocalizationService {
 
-    private final ThingTypeI18nUtil thingTypeI18nUtil;
+    private final ProfileI18nUtil profileI18nUtil;
 
     @Activate
     public ProfileTypeI18nLocalizationService(final @Reference TranslationProvider i18nProvider) {
-        this.thingTypeI18nUtil = new ThingTypeI18nUtil(i18nProvider);
+        this.profileI18nUtil = new ProfileI18nUtil(i18nProvider);
     }
 
     public ProfileType createLocalizedProfileType(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
         ProfileTypeUID profileTypeUID = profileType.getUID();
         String defaultLabel = profileType.getLabel();
-        String label = thingTypeI18nUtil.getProfileLabel(bundle, profileTypeUID, defaultLabel, locale);
+        String label = profileI18nUtil.getProfileLabel(bundle, profileTypeUID, defaultLabel, locale);
 
         if (profileType instanceof StateProfileType) {
             return ProfileTypeBuilder.newTrigger(profileTypeUID, label != null ? label : defaultLabel)
