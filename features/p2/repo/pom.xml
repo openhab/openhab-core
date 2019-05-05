@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -8,19 +9,28 @@
     <version>2.5.0-SNAPSHOT</version>
     <relativePath>../poms/pom.xml</relativePath>
   </parent>
-  
+
   <groupId>org.openhab.core.features.p2.repo</groupId>
   <artifactId>org.openhab.core.features.p2.repo</artifactId>
 
-  <name>openHAB Core P2 Repository</name>
-
   <packaging>pom</packaging>
+
+  <name>openHAB Core P2 Repository</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <build>
+    <resources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/filtered-resources</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -38,10 +48,10 @@
         <executions>
           <execution>
             <id>default-cli</id>
-            <phase>package</phase>
             <goals>
               <goal>site</goal>
             </goals>
+            <phase>package</phase>
             <configuration>
               <!--<compressSite>false</compressSite>-->
               <additionalArgs>-metadataRepositoryName openhab.core.repo.metadata -artifactRepositoryName openhab.core.repo.artifact</additionalArgs>
@@ -482,14 +492,5 @@
         </executions>
       </plugin>
     </plugins>
-    <resources>
-      <resource>
-        <filtering>true</filtering>
-        <directory>src/main/filtered-resources</directory>
-        <includes>
-          <include>**/*</include>
-        </includes>
-      </resource>
-    </resources>
   </build>
 </project>

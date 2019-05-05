@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.openhab.core</groupId>
@@ -23,6 +22,13 @@
       <url>https://www.eclipse.org/legal/epl-2.0/</url>
     </license>
   </licenses>
+
+  <modules>
+    <module>bom</module>
+    <module>bundles</module>
+    <module>features</module>
+    <module>tools</module>
+  </modules>
 
   <scm>
     <connection>scm:git:https://github.com/openhab/openhab-core.git</connection>
@@ -62,6 +68,39 @@
     <slf4j.version>1.7.21</slf4j.version>
     <xtext.version>2.17.0</xtext.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.openhab.core.bom</groupId>
+        <artifactId>org.openhab.core.bom.compile</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.openhab.core.bom</groupId>
+        <artifactId>org.openhab.core.bom.compile-model</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.openhab.core.bom</groupId>
+        <artifactId>org.openhab.core.bom.runtime</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.openhab.core.bom</groupId>
+        <artifactId>org.openhab.core.bom.test</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <repositories>
     <repository>
@@ -117,39 +156,6 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.openhab.core.bom</groupId>
-        <artifactId>org.openhab.core.bom.compile</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.openhab.core.bom</groupId>
-        <artifactId>org.openhab.core.bom.compile-model</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.openhab.core.bom</groupId>
-        <artifactId>org.openhab.core.bom.runtime</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.openhab.core.bom</groupId>
-        <artifactId>org.openhab.core.bom.test</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <build>
     <resources>
       <resource>
@@ -158,8 +164,8 @@
       <resource>
         <directory>.</directory>
         <includes>
-          <include>NOTICE</include> <!-- general -->
-          <include>*.xsd</include> <!-- only a very rare -->
+          <include>NOTICE</include>
+          <include>*.xsd</include>
         </includes>
       </resource>
     </resources>
@@ -174,8 +180,7 @@
           <artifactId>bnd-maven-plugin</artifactId>
           <version>${bnd.version}</version>
           <configuration>
-            <bnd><![CDATA[
-Bundle-SymbolicName: ${project.artifactId}
+            <bnd><![CDATA[Bundle-SymbolicName: ${project.artifactId}
 Automatic-Module-Name: ${def;bsn}
 Import-Package: \\
   io.swagger.annotations.*;resolution:=optional,\\
@@ -190,8 +195,7 @@ Import-Package: \\
   org.openhab.*,\\
   org.eclipse.smarthome.*
 -sources: false
--contract: *
-]]></bnd>
+-contract: *]]></bnd>
             <!-- Bundle-SymbolicName: ${project.groupId}.${project.artifactId} -->
           </configuration>
           <executions>
@@ -247,8 +251,7 @@ Import-Package: \\
           <version>${bnd.version}</version>
           <configuration>
             <failOnChanges>false</failOnChanges>
-            <bndruns>
-            </bndruns>
+            <bndruns></bndruns>
           </configuration>
           <executions>
             <execution>
@@ -768,12 +771,5 @@ Import-Package: \\
       </build>
     </profile>
   </profiles>
-
-  <modules>
-    <module>bom</module>
-    <module>bundles</module>
-    <module>features</module>
-    <module>tools</module>
-  </modules>
 
 </project>
