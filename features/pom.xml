@@ -17,7 +17,6 @@
 
   <modules>
     <module>karaf</module>
-    <module>p2</module>
   </modules>
 
 </project>
