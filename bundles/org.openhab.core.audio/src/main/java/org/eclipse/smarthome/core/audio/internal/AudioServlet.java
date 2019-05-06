@@ -15,7 +15,10 @@ package org.eclipse.smarthome.core.audio.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -143,16 +146,20 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
     }
 
     private synchronized void removeTimedOutStreams() {
-        for (String streamId : multiTimeStreams.keySet()) {
-            if (streamTimeouts.get(streamId) < System.nanoTime()) {
-                // the stream has expired, we need to remove it!
-                FixedLengthAudioStream stream = multiTimeStreams.remove(streamId);
-                streamTimeouts.remove(streamId);
-                IOUtils.closeQuietly(stream);
-                stream = null;
-                logger.debug("Removed timed out stream {}", streamId);
+        // Build list of expired streams.
+        final List<String> toRemove = new LinkedList<>();
+        for (Entry<String, Long> entry : streamTimeouts.entrySet()) {
+            if (entry.getValue() < System.nanoTime()) {
+                toRemove.add(entry.getKey());
             }
         }
+        toRemove.forEach(streamId -> {
+            // the stream has expired, we need to remove it!
+            final FixedLengthAudioStream stream = multiTimeStreams.remove(streamId);
+            streamTimeouts.remove(streamId);
+            IOUtils.closeQuietly(stream);
+            logger.debug("Removed timed out stream {}", streamId);
+        });
     }
 
     @Override
