@@ -127,7 +127,7 @@ public class AudioServletTest extends AbstractAudioServeltTest {
 
             ContentResponse response = request.send();
 
-            logger.info("AST: diagnostic%n  audioStream: {}%n  url: {}%n  response: {}", audioStream, url, response);
+            logger.info("AST: diagnostic\n  audioStream: {}\n  url: {}\n  response: {}", audioStream, url, response);
             assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
             assertThat("The response content was not as expected", response.getContent(), is(testByteArray));
             assertThat("The response media type was not as expected", response.getMediaType(),
