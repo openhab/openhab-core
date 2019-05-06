@@ -25,6 +25,8 @@ import org.eclipse.smarthome.core.audio.AudioStream;
 import org.eclipse.smarthome.core.audio.FileAudioStream;
 import org.eclipse.smarthome.core.audio.internal.utils.BundledSoundFileHandler;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test cases for {@link AudioServlet}
@@ -33,6 +35,8 @@ import org.junit.Test;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 public class AudioServletTest extends AbstractAudioServeltTest {
+
+    private final Logger logger = LoggerFactory.getLogger(AudioServletTest.class);
 
     private final String MEDIA_TYPE_AUDIO_WAV = "audio/wav";
     private final String MEDIA_TYPE_AUDIO_OGG = "audio/ogg";
@@ -111,35 +115,42 @@ public class AudioServletTest extends AbstractAudioServeltTest {
 
     @Test
     public void requestToMultitimeStreamCannotBeDoneAfterTheTimeoutOfTheStreamHasExipred() throws Exception {
-        AudioStream audioStream = getByteArrayAudioStream(testByteArray, AudioFormat.CONTAINER_NONE,
-                AudioFormat.CODEC_MP3);
+        logger.info("AST: BEG: requestToMultitimeStreamCannotBeDoneAfterTheTimeoutOfTheStreamHasExipred");
+        try {
+            AudioStream audioStream = getByteArrayAudioStream(testByteArray, AudioFormat.CONTAINER_NONE,
+                    AudioFormat.CODEC_MP3);
 
-        int streamTimeout = 1;
-        String url = serveStream(audioStream, streamTimeout);
+            int streamTimeout = 1;
+            String url = serveStream(audioStream, streamTimeout);
 
-        Request request = getHttpRequest(url);
+            Request request = getHttpRequest(url);
 
-        ContentResponse response = request.send();
+            ContentResponse response = request.send();
 
-        assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
-        assertThat("The response content was not as expected", response.getContent(), is(testByteArray));
-        assertThat("The response media type was not as expected", response.getMediaType(), is(MEDIA_TYPE_AUDIO_MPEG));
+            logger.info("AST: diagnostic%n  audioStream: {}%n  url: {}%n  response: {}", audioStream, url, response);
+            assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
+            assertThat("The response content was not as expected", response.getContent(), is(testByteArray));
+            assertThat("The response media type was not as expected", response.getMediaType(),
+                    is(MEDIA_TYPE_AUDIO_MPEG));
 
-        assertThat("The audio stream was not added to the multitime streams",
-                audioServlet.getMultiTimeStreams().containsValue(audioStream), is(true));
+            assertThat("The audio stream was not added to the multitime streams",
+                    audioServlet.getMultiTimeStreams().containsValue(audioStream), is(true));
 
-        waitForAssert(() -> {
-            try {
-                request.send();
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-            assertThat("The audio stream was not removed from multitime streams",
-                    audioServlet.getMultiTimeStreams().containsValue(audioStream), is(false));
-        });
+            waitForAssert(() -> {
+                try {
+                    request.send();
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+                assertThat("The audio stream was not removed from multitime streams",
+                        audioServlet.getMultiTimeStreams().containsValue(audioStream), is(false));
+            });
 
-        response = request.send();
-        assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.NOT_FOUND_404));
+            response = request.send();
+            assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.NOT_FOUND_404));
+        } finally {
+            logger.info("AST: END: requestToMultitimeStreamCannotBeDoneAfterTheTimeoutOfTheStreamHasExipred");
+        }
     }
 
 }
