@@ -12,10 +12,11 @@
  */
 package org.eclipse.smarthome.core.audio.internal;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
@@ -111,22 +112,33 @@ public class AudioServletTest extends AbstractAudioServeltTest {
 
     @Test
     public void requestToMultitimeStreamCannotBeDoneAfterTheTimeoutOfTheStreamHasExipred() throws Exception {
+        final int streamTimeout = 1;
+
         AudioStream audioStream = getByteArrayAudioStream(testByteArray, AudioFormat.CONTAINER_NONE,
                 AudioFormat.CODEC_MP3);
 
-        int streamTimeout = 1;
+        final long beg = System.currentTimeMillis();
+
         String url = serveStream(audioStream, streamTimeout);
 
         Request request = getHttpRequest(url);
 
         ContentResponse response = request.send();
 
-        assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
-        assertThat("The response content was not as expected", response.getContent(), is(testByteArray));
-        assertThat("The response media type was not as expected", response.getMediaType(), is(MEDIA_TYPE_AUDIO_MPEG));
+        final long end = System.currentTimeMillis();
 
-        assertThat("The audio stream was not added to the multitime streams",
-                audioServlet.getMultiTimeStreams().containsValue(audioStream), is(true));
+        if (response.getStatus() == HttpStatus.NOT_FOUND_404) {
+            assertThat("Response status 404 is only allowed if streamTimeout is exceeded.",
+                    TimeUnit.MILLISECONDS.toSeconds(end - beg), greaterThan((long) streamTimeout));
+        } else {
+            assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.OK_200));
+            assertThat("The response content was not as expected", response.getContent(), is(testByteArray));
+            assertThat("The response media type was not as expected", response.getMediaType(),
+                    is(MEDIA_TYPE_AUDIO_MPEG));
+
+            assertThat("The audio stream was not added to the multitime streams",
+                    audioServlet.getMultiTimeStreams().containsValue(audioStream), is(true));
+        }
 
         waitForAssert(() -> {
             try {
