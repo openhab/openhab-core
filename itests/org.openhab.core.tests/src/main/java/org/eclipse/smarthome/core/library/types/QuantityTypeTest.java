@@ -24,6 +24,7 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
+import javax.measure.quantity.Time;
 
 import org.eclipse.smarthome.core.library.dimension.DataAmount;
 import org.eclipse.smarthome.core.library.dimension.DataTransferRate;
@@ -289,6 +290,12 @@ public class QuantityTypeTest {
     public void testMWh() {
         QuantityType<Energy> energy = new QuantityType<>("1 MWh");
         assertEquals("1000000 Wh", energy.toUnit("Wh").toString());
+    }
+
+    @Test
+    public void testMilliseonds() {
+        QuantityType<Time> oneSecond = new QuantityType<>("1 s");
+        assertEquals("1000 ms", oneSecond.toUnit("ms").toString());
     }
 
     @Test

@@ -152,6 +152,8 @@ public final class SmartHomeUnits extends CustomUnits {
             new RationalConverter(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
     public static final Unit<SolidAngle> STERADIAN = addUnit(Units.STERADIAN);
     public static final Unit<Temperature> KELVIN = addUnit(Units.KELVIN);
+    public static final Unit<Time> MILLISECOND = addUnit(
+            new TransformedUnit<>("ms", Units.SECOND, Units.SECOND, new RationalConverter(1l, 1000l)));
     public static final Unit<Time> SECOND = addUnit(Units.SECOND);
     public static final Unit<Time> MINUTE = addUnit(Units.MINUTE);
     public static final Unit<Time> HOUR = addUnit(Units.HOUR);
