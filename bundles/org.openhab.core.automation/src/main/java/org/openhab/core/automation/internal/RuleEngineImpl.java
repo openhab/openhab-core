@@ -446,7 +446,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         final String rUID = newRule.getUID();
         final WrappedRule rule = new WrappedRule(newRule);
         managedRules.put(rUID, rule);
-        RuleStatusInfo initStatusInfo = disabledRulesStorage == null || disabledRulesStorage.get(rUID) == null
+        RuleStatusInfo initStatusInfo = disabledRulesStorage.get(rUID) == null
                 ? new RuleStatusInfo(RuleStatus.INITIALIZING)
                 : new RuleStatusInfo(RuleStatus.UNINITIALIZED, RuleStatusDetail.DISABLED);
         rule.setStatusInfo(initStatusInfo);
@@ -804,18 +804,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             throw new IllegalArgumentException(String.format("No rule with id=%s was found!", uid));
         }
         if (enable) {
-            if (disabledRulesStorage != null) {
-                disabledRulesStorage.remove(uid);
-            }
+            disabledRulesStorage.remove(uid);
             if (getStatus(rule.getUID()) == RuleStatus.UNINITIALIZED) {
                 register(rule);
                 // change status to IDLE
                 setStatus(rule.getUID(), new RuleStatusInfo(RuleStatus.IDLE));
             }
         } else {
-            if (disabledRulesStorage != null) {
-                disabledRulesStorage.put(uid, true);
-            }
+            disabledRulesStorage.put(uid, true);
             unregister(rule, RuleStatusDetail.DISABLED, null);
         }
     }
