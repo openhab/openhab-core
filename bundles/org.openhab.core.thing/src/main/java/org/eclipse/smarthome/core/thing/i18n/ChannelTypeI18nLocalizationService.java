@@ -31,6 +31,7 @@ import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.eclipse.smarthome.core.types.StateOption;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -38,6 +39,7 @@ import org.osgi.service.component.annotations.Reference;
  * This OSGi service could be used to localize a {@link ChannelType} using the I18N mechanism of the openHAB
  * framework.
  *
+ * @author Markus Rathgeb - Initial contribution
  * @author Markus Rathgeb - Move code from XML thing type provider to separate service
  * @author Laurent Garnier - fix localized label and description for channel group definition
  * @author Christoph Weitkamp - factored out from {@link XmlChannelTypeProvider} and {@link XmlChannelGroupTypeProvider}
@@ -47,15 +49,11 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ChannelTypeI18nLocalizationService {
 
-    private @NonNullByDefault({}) ThingTypeI18nUtil thingTypeI18nUtil;
+    private final ThingTypeI18nUtil thingTypeI18nUtil;
 
-    @Reference
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
+    @Activate
+    public ChannelTypeI18nLocalizationService(final @Reference TranslationProvider i18nProvider) {
         this.thingTypeI18nUtil = new ThingTypeI18nUtil(i18nProvider);
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.thingTypeI18nUtil = null;
     }
 
     public @Nullable String createLocalizedStatePattern(final Bundle bundle, String pattern,

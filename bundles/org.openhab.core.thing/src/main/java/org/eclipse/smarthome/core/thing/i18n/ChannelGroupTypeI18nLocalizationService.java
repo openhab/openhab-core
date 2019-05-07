@@ -27,13 +27,13 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This OSGi service could be used to localize a {@link ChannelGroupType} type using the I18N mechanism of the Eclipse
- * SmartHome framework.
+ * This OSGi service could be used to localize a {@link ChannelGroupType} type using the I18N mechanism of the openHAB
+ * framework.
  *
+ * @author Markus Rathgeb - Initial contribution
  * @author Markus Rathgeb - Move code from XML thing type provider to separate service
  * @author Laurent Garnier - fix localized label and description for channel group definition
  * @author Christoph Weitkamp - factored out from {@link XmlChannelTypeProvider} and {@link XmlChannelGroupTypeProvider}
@@ -43,55 +43,15 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ChannelGroupTypeI18nLocalizationService {
 
-    @NonNullByDefault({})
-    private ChannelI18nUtil channelI18nUtil;
-
-    @NonNullByDefault({})
-    private ThingTypeI18nUtil thingTypeI18nUtil;
-
-    @NonNullByDefault({})
-    private ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
-
-    @NonNullByDefault({})
-    private ChannelTypeRegistry channelTypeRegistry;
-
-    @Reference
-    protected void setChannelTypeI18nLocalizationService(
-            ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
-    }
-
-    protected void unsetChannelTypeI18nLocalizationService(
-            ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        this.thingTypeI18nUtil = new ThingTypeI18nUtil(i18nProvider);
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.thingTypeI18nUtil = null;
-    }
+    private final ThingTypeI18nUtil thingTypeI18nUtil;
+    private final ChannelI18nUtil channelI18nUtil;
 
     @Activate
-    protected void activate() {
-        channelI18nUtil = new ChannelI18nUtil(channelTypeI18nLocalizationService, channelTypeRegistry);
-    }
-
-    @Deactivate
-    protected void deactivate() {
-        channelI18nUtil = null;
+    public ChannelGroupTypeI18nLocalizationService(final @Reference TranslationProvider i18nProvider,
+            final @Reference ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService,
+            final @Reference ChannelTypeRegistry channelTypeRegistry) {
+        this.thingTypeI18nUtil = new ThingTypeI18nUtil(i18nProvider);
+        this.channelI18nUtil = new ChannelI18nUtil(channelTypeI18nLocalizationService, channelTypeRegistry);
     }
 
     public ChannelGroupType createLocalizedChannelGroupType(Bundle bundle, ChannelGroupType channelGroupType,
