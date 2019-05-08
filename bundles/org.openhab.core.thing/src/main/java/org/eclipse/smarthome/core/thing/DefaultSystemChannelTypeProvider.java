@@ -37,6 +37,7 @@ import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.eclipse.smarthome.core.types.StateOption;
 import org.eclipse.smarthome.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -337,8 +338,16 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
 
     private final Map<LocalizedChannelTypeKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 
-    private ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
-    private BundleResolver bundleResolver;
+    private final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
+    private final BundleResolver bundleResolver;
+
+    @Activate
+    public DefaultSystemChannelTypeProvider(
+            final @Reference ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService,
+            final @Reference BundleResolver bundleResolver) {
+        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
+        this.bundleResolver = bundleResolver;
+    }
 
     @Override
     public Collection<ChannelType> getChannelTypes(Locale locale) {
@@ -361,26 +370,6 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             }
         }
         return null;
-    }
-
-    @Reference
-    public void setChannelTypeI18nLocalizationService(
-            final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
-    }
-
-    public void unsetChannelTypeI18nLocalizationService(
-            final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = null;
-    }
-
-    @Reference
-    public void setBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
-    public void unsetBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
     }
 
     private ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, Locale locale) {
