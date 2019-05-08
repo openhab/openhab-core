@@ -139,9 +139,9 @@
   </feature>
 
   <feature name="openhab.tp-paho" description="MQTT v3 Client" version="${project.version}">
-    <capability>openhab.tp;feature=paho;version=1.2.0</capability>
+    <capability>openhab.tp;feature=paho;version=1.2.1</capability>
 
-    <bundle>mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.0</bundle>
+    <bundle>mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.1</bundle>
   </feature>
 
   <feature name="openhab.tp-serial-javacomm" version="${project.version}">
@@ -154,7 +154,7 @@
 
   <feature name="openhab.tp-serial-rxtx" version="${project.version}">
     <capability>openhab.tp;feature=serial;impl=rxtx</capability>
-    
+
     <!-- Use "no liblockdev" version -->
     <!-- See: https://github.com/openhab/openhab-core/pull/761 -->
     <!-- See: https://github.com/openhab/openhab-core/issues/750 -->
