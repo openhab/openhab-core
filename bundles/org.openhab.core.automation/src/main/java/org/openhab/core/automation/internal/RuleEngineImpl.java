@@ -497,11 +497,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     "Validation of rule " + rUID + " has failed! " + e.getLocalizedMessage()));
             return;
         }
-        final String errMsgs = setModuleHandlers(rUID, rule.getModules());
-        if (errMsgs == null) {
-            register(rule);
-            // change status to IDLE
-            setStatus(rUID, new RuleStatusInfo(RuleStatus.IDLE));
+        final boolean activated = activateRule(rule);
+        if (activated) {
             Future<?> f = scheduleTasks.remove(rUID);
             if (f != null) {
                 if (!f.isDone()) {
@@ -514,11 +511,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     executor = null;
                 }
             }
-        } else {
-            // change status to UNINITIALIZED
-            setStatus(rUID,
-                    new RuleStatusInfo(RuleStatus.UNINITIALIZED, RuleStatusDetail.HANDLER_INITIALIZING_ERROR, errMsgs));
-            unregister(rule);
         }
     }
 
@@ -803,17 +795,63 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (rule == null) {
             throw new IllegalArgumentException(String.format("No rule with id=%s was found!", uid));
         }
+
         if (enable) {
             disabledRulesStorage.remove(uid);
-            if (getStatus(rule.getUID()) == RuleStatus.UNINITIALIZED) {
-                register(rule);
-                // change status to IDLE
-                setStatus(rule.getUID(), new RuleStatusInfo(RuleStatus.IDLE));
+            final RuleStatusInfo statusInfo = rule.getStatusInfo();
+            if (statusInfo.getStatus() == RuleStatus.UNINITIALIZED) {
+                activateRule(rule);
             }
         } else {
             disabledRulesStorage.put(uid, true);
             unregister(rule, RuleStatusDetail.DISABLED, null);
         }
+    }
+
+    /**
+     * Activate an existing rule.
+     *
+     * <p>
+     * This method should be called only if:
+     * <ul>
+     * <li>the rule has not been activated before.
+     * <li>the rule has been disabled (uninitialized) and should be enabled now.
+     *
+     * <p>
+     * This method behaves in this way:
+     * <ul>
+     * <li>Set the module handlers. If there are errors, set the rule status (handler error) and return with error
+     * indication.
+     * <li>Register the rule. Set the rule status and return with success indication.
+     * </ul>
+     *
+     * @param rule the rule that should be activated
+     * @return true if activation succeeded, otherwise false
+     */
+    private boolean activateRule(final WrappedRule rule) {
+        // Check precondition.
+        final RuleStatusInfo statusInfo = rule.getStatusInfo();
+        final RuleStatus status = statusInfo.getStatus();
+        if (status != RuleStatus.UNINITIALIZED && status != RuleStatus.INITIALIZING) {
+            logger.warn(
+                    "This method should be called only if the rule has not been activated before or has been disabled.");
+            return false;
+        }
+
+        // Set the module handlers and so check if all handlers are available.
+        final String ruleUID = rule.getUID();
+        final String errMsgs = setModuleHandlers(ruleUID, rule.getModules());
+        if (errMsgs != null) {
+            setStatus(ruleUID,
+                    new RuleStatusInfo(RuleStatus.UNINITIALIZED, RuleStatusDetail.HANDLER_INITIALIZING_ERROR, errMsgs));
+            unregister(rule);
+            return false;
+        }
+
+        // Register the rule and set idle status.
+        register(rule);
+        setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+        return true;
     }
 
     @Override
