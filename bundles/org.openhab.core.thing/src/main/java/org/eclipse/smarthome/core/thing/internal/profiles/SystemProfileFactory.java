@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.i18n.LocalizedKey;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.DefaultSystemChannelTypeProvider;
@@ -76,7 +77,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD,
             RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE).collect(Collectors.toSet());
 
-    private final Map<LocalizedProfileTypeKey, @Nullable ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
+    private final Map<LocalizedKey, @Nullable ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
 
     private final ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService;
     private final BundleResolver bundleResolver;
@@ -198,16 +199,16 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     }
 
     private ProfileType createLocalizedProfileType(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
-        LocalizedProfileTypeKey localizedProfileTypeKey = getLocalizedProfileTypeKey(profileType.getUID(), locale);
+        LocalizedKey localizedKey = getLocalizedProfileTypeKey(profileType.getUID(), locale);
 
-        ProfileType cachedEntry = localizedProfileTypeCache.get(localizedProfileTypeKey);
+        ProfileType cachedEntry = localizedProfileTypeCache.get(localizedKey);
         if (cachedEntry != null) {
             return cachedEntry;
         }
 
         ProfileType localizedProfileType = localize(bundle, profileType, locale);
         if (localizedProfileType != null) {
-            localizedProfileTypeCache.put(localizedProfileTypeKey, localizedProfileType);
+            localizedProfileTypeCache.put(localizedKey, localizedProfileType);
             return localizedProfileType;
         } else {
             return profileType;
@@ -221,55 +222,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         return profileTypeI18nLocalizationService.createLocalizedProfileType(bundle, profileType, locale);
     }
 
-    private LocalizedProfileTypeKey getLocalizedProfileTypeKey(UID uid, @Nullable Locale locale) {
-        return new LocalizedProfileTypeKey(uid, locale != null ? locale.toLanguageTag() : null);
-    }
-
-    private static class LocalizedProfileTypeKey {
-        public final UID uid;
-        public final @Nullable String locale;
-
-        public LocalizedProfileTypeKey(UID uid, @Nullable String locale) {
-            this.uid = uid;
-            this.locale = locale;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            LocalizedProfileTypeKey other = (LocalizedProfileTypeKey) obj;
-            if (locale == null) {
-                if (other.locale != null) {
-                    return false;
-                }
-            } else if (!locale.equals(other.locale)) {
-                return false;
-            }
-            if (uid == null) {
-                if (other.uid != null) {
-                    return false;
-                }
-            } else if (!uid.equals(other.uid)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((locale != null) ? locale.hashCode() : 0);
-            result = prime * result + ((uid == null) ? 0 : uid.hashCode());
-            return result;
-        }
+    private LocalizedKey getLocalizedProfileTypeKey(UID uid, @Nullable Locale locale) {
+        return new LocalizedKey(uid, locale != null ? locale.toLanguageTag() : null);
     }
 }
