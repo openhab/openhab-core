@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
@@ -37,6 +38,7 @@ import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.eclipse.smarthome.core.types.StateOption;
 import org.eclipse.smarthome.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -52,6 +54,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Stefan Triller - Added more system channels
  * @author Christoph Weitkamp - factored out common i18n aspects into ThingTypeI18nLocalizationService
  */
+@NonNullByDefault
 @Component
 public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
 
@@ -279,16 +282,16 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .build();
 
     private static class LocalizedChannelTypeKey {
-        public final String locale;
+        public @Nullable final String locale;
         public final UID uid;
 
-        public LocalizedChannelTypeKey(UID uid, String locale) {
+        public LocalizedChannelTypeKey(UID uid, @Nullable String locale) {
             this.uid = uid;
             this.locale = locale;
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -335,13 +338,21 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
                     SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED, SYSTEM_OUTDOOR_TEMPERATURE,
                     SYSTEM_ATMOSPHERIC_HUMIDITY, SYSTEM_BAROMETRIC_PRESSURE).collect(Collectors.toList()));
 
-    private final Map<LocalizedChannelTypeKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
+    private final Map<LocalizedChannelTypeKey, @Nullable ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 
-    private ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
-    private BundleResolver bundleResolver;
+    private final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
+    private final BundleResolver bundleResolver;
+
+    @Activate
+    public DefaultSystemChannelTypeProvider(
+            final @Reference ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService,
+            final @Reference BundleResolver bundleResolver) {
+        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
+        this.bundleResolver = bundleResolver;
+    }
 
     @Override
-    public Collection<ChannelType> getChannelTypes(Locale locale) {
+    public @Nullable Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         final List<ChannelType> allChannelTypes = new ArrayList<>();
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
@@ -352,7 +363,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     }
 
     @Override
-    public ChannelType getChannelType(ChannelTypeUID channelTypeUID, Locale locale) {
+    public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
         for (final ChannelType channelType : CHANNEL_TYPES) {
@@ -363,27 +374,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
         return null;
     }
 
-    @Reference
-    public void setChannelTypeI18nLocalizationService(
-            final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
-    }
-
-    public void unsetChannelTypeI18nLocalizationService(
-            final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = null;
-    }
-
-    @Reference
-    public void setBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
-    public void unsetBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
-    private ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, Locale locale) {
+    private ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
         LocalizedChannelTypeKey localizedChannelTypeKey = getLocalizedChannelTypeKey(channelType.getUID(), locale);
 
         ChannelType cachedEntry = localizedChannelTypeCache.get(localizedChannelTypeKey);
@@ -400,14 +391,14 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
         }
     }
 
-    private @Nullable ChannelType localize(Bundle bundle, ChannelType channelType, Locale locale) {
+    private @Nullable ChannelType localize(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
         if (channelTypeI18nLocalizationService == null) {
             return null;
         }
         return channelTypeI18nLocalizationService.createLocalizedChannelType(bundle, channelType, locale);
     }
 
-    private LocalizedChannelTypeKey getLocalizedChannelTypeKey(UID uid, Locale locale) {
+    private LocalizedChannelTypeKey getLocalizedChannelTypeKey(UID uid, @Nullable Locale locale) {
         return new LocalizedChannelTypeKey(uid, locale != null ? locale.toLanguageTag() : null);
     }
 }
