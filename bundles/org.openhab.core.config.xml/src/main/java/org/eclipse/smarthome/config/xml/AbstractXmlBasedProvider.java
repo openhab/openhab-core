@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.smarthome.core.common.registry.Identifiable;
+import org.eclipse.smarthome.core.i18n.LocalizedKey;
 import org.osgi.framework.Bundle;
 
 /**
@@ -36,47 +36,6 @@ import org.osgi.framework.Bundle;
  * @param <T_OBJECT> the object type, e.g. ThingType, ChannelType, ConfigDescription,...
  */
 public abstract class AbstractXmlBasedProvider<T_ID, T_OBJECT extends Identifiable<T_ID>> {
-
-    private static class LocalizedKey {
-        public final Object id;
-        public final String locale;
-
-        public LocalizedKey(Object id, String locale) {
-            this.id = id;
-            this.locale = locale;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((id == null) ? 0 : id.hashCode());
-            result = prime * result + ((locale == null) ? 0 : locale.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            LocalizedKey other = (LocalizedKey) obj;
-            if (!Objects.equals(id, other.id)) {
-                return false;
-            }
-            if (!Objects.equals(locale, other.locale)) {
-                return false;
-            }
-            return true;
-        }
-
-    }
 
     private final Map<Bundle, List<T_OBJECT>> bundleObjectMap = new ConcurrentHashMap<>();
     private final Map<LocalizedKey, T_OBJECT> localizedObjectCache = new ConcurrentHashMap<>();
@@ -199,7 +158,7 @@ public abstract class AbstractXmlBasedProvider<T_ID, T_OBJECT extends Identifiab
     private void removeCachedEntries(T_OBJECT object) {
         for (Iterator<Entry<LocalizedKey, T_OBJECT>> it = localizedObjectCache.entrySet().iterator(); it.hasNext();) {
             Entry<LocalizedKey, T_OBJECT> entry = it.next();
-            if (entry.getKey().id.equals(object.getUID())) {
+            if (entry.getKey().getKey().equals(object.getUID())) {
                 it.remove();
             }
         }
