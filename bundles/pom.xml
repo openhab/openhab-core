@@ -238,38 +238,6 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>model-antlr-profile</id>
-      <activation>
-        <file>
-          <exists>org.openhab.core.model.codegen/model.profile-marker</exists>
-        </file>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.googlecode.maven-download-plugin</groupId>
-            <artifactId>download-maven-plugin</artifactId>
-            <version>1.2.1</version>
-            <inherited>false</inherited>
-            <executions>
-              <execution>
-                <id>install-antrl3</id>
-                <goals>
-                  <goal>wget</goal>
-                </goals>
-                <phase>initialize</phase>
-                <configuration>
-                  <url>http://download.itemis.com/antlr-generator-3.2.0-patch.jar</url>
-                  <unpack>false</unpack>
-                  <outputDirectory>/${basedir}</outputDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
 
 </project>
