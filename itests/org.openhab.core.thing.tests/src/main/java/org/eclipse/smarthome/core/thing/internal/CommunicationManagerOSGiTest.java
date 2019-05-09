@@ -61,6 +61,7 @@ import org.eclipse.smarthome.core.thing.profiles.ProfileAdvisor;
 import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
 import org.eclipse.smarthome.core.thing.profiles.ProfileContext;
 import org.eclipse.smarthome.core.thing.profiles.ProfileFactory;
+import org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
 import org.eclipse.smarthome.core.thing.profiles.StateProfile;
 import org.eclipse.smarthome.core.thing.profiles.TriggerProfile;
@@ -79,10 +80,9 @@ import org.mockito.Mock;
 
 /**
  *
- * @author Simon Kaufmann - initial contribution and API.
- *
+ * @author Simon Kaufmann - Initial contribution
  */
-public class CommunicationManagerTest extends JavaOSGiTest {
+public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
         @Override
@@ -167,9 +167,12 @@ public class CommunicationManagerTest extends JavaOSGiTest {
         safeCaller = getService(SafeCaller.class);
         assertNotNull(safeCaller);
 
+        SystemProfileFactory profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
+        assertNotNull(profileFactory);
+
         manager = new CommunicationManager();
         manager.setEventPublisher(eventPublisher);
-        manager.setDefaultProfileFactory(new SystemProfileFactory());
+        manager.setDefaultProfileFactory(profileFactory);
         manager.setSafeCaller(safeCaller);
 
         doAnswer(invocation -> {

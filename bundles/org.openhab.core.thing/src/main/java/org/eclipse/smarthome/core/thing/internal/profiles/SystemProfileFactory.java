@@ -14,9 +14,13 @@ package org.eclipse.smarthome.core.thing.internal.profiles;
 
 import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,6 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.DefaultSystemChannelTypeProvider;
+import org.eclipse.smarthome.core.thing.UID;
 import org.eclipse.smarthome.core.thing.profiles.Profile;
 import org.eclipse.smarthome.core.thing.profiles.ProfileAdvisor;
 import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
@@ -33,8 +38,12 @@ import org.eclipse.smarthome.core.thing.profiles.ProfileFactory;
 import org.eclipse.smarthome.core.thing.profiles.ProfileType;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
+import org.eclipse.smarthome.core.thing.profiles.i18n.ProfileTypeI18nLocalizationService;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
+import org.eclipse.smarthome.core.util.BundleResolver;
+import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -47,12 +56,13 @@ import org.osgi.service.component.annotations.Reference;
  * required profile type.
  *
  * @author Simon Kaufmann - Initial contribution
+ * @author Christoph Weitkamp - Added translation for profile labels
  */
 @NonNullByDefault
 @Component(service = { SystemProfileFactory.class, ProfileTypeProvider.class })
 public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, ProfileTypeProvider {
 
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
 
     private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream
             .of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
@@ -65,6 +75,20 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER,
             RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD,
             RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE).collect(Collectors.toSet());
+
+    private final Map<LocalizedProfileTypeKey, @Nullable ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
+
+    private final ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService;
+    private final BundleResolver bundleResolver;
+
+    @Activate
+    public SystemProfileFactory(final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService,
+            final @Reference BundleResolver bundleResolver) {
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.profileTypeI18nLocalizationService = profileTypeI18nLocalizationService;
+        this.bundleResolver = bundleResolver;
+    }
 
     @Override
     public @Nullable Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback,
@@ -159,7 +183,13 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
 
     @Override
     public Collection<ProfileType> getProfileTypes(@Nullable Locale locale) {
-        return SUPPORTED_PROFILE_TYPES;
+        final List<ProfileType> allProfileTypes = new ArrayList<>();
+        final Bundle bundle = bundleResolver.resolveBundle(SystemProfileFactory.class);
+
+        for (final ProfileType profileType : SUPPORTED_PROFILE_TYPES) {
+            allProfileTypes.add(createLocalizedProfileType(bundle, profileType, locale));
+        }
+        return allProfileTypes;
     }
 
     @Override
@@ -167,13 +197,79 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         return SUPPORTED_PROFILE_TYPE_UIDS;
     }
 
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
+    private ProfileType createLocalizedProfileType(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
+        LocalizedProfileTypeKey localizedProfileTypeKey = getLocalizedProfileTypeKey(profileType.getUID(), locale);
+
+        ProfileType cachedEntry = localizedProfileTypeCache.get(localizedProfileTypeKey);
+        if (cachedEntry != null) {
+            return cachedEntry;
+        }
+
+        ProfileType localizedProfileType = localize(bundle, profileType, locale);
+        if (localizedProfileType != null) {
+            localizedProfileTypeCache.put(localizedProfileTypeKey, localizedProfileType);
+            return localizedProfileType;
+        } else {
+            return profileType;
+        }
     }
 
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
+    private @Nullable ProfileType localize(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
+        if (profileTypeI18nLocalizationService == null) {
+            return null;
+        }
+        return profileTypeI18nLocalizationService.createLocalizedProfileType(bundle, profileType, locale);
     }
 
+    private LocalizedProfileTypeKey getLocalizedProfileTypeKey(UID uid, @Nullable Locale locale) {
+        return new LocalizedProfileTypeKey(uid, locale != null ? locale.toLanguageTag() : null);
+    }
+
+    private static class LocalizedProfileTypeKey {
+        public final UID uid;
+        public final @Nullable String locale;
+
+        public LocalizedProfileTypeKey(UID uid, @Nullable String locale) {
+            this.uid = uid;
+            this.locale = locale;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            LocalizedProfileTypeKey other = (LocalizedProfileTypeKey) obj;
+            if (locale == null) {
+                if (other.locale != null) {
+                    return false;
+                }
+            } else if (!locale.equals(other.locale)) {
+                return false;
+            }
+            if (uid == null) {
+                if (other.uid != null) {
+                    return false;
+                }
+            } else if (!uid.equals(other.uid)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((locale != null) ? locale.hashCode() : 0);
+            result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+            return result;
+        }
+    }
 }
