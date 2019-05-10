@@ -244,7 +244,8 @@ public class PageChangeListener implements StateChangeListener {
                 // event.state is an adjustment of the item state to the widget type, but is only sent if both
                 // - the new state belongs to the widget in question and
                 // - the state actually changed
-                event.state = itemBelongsToWidget ? itemUIRegistry.convertState(w, item, state).toFullString() : null;
+                final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
+                event.state = itemUIRegistry.convertState(w, itemToBeSent, stateToBeSent).toFullString();
                 if (event.state != null && event.state.equals(event.item.state)) {
                     event.state = null;
                 }
