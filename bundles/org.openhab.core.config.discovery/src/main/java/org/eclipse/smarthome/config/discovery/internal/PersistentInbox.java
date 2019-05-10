@@ -148,8 +148,6 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
             final @Reference ThingRegistry thingRegistry, final @Reference ManagedThingProvider thingProvider,
             final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
-                .scheduleWithFixedDelay(new TimeToLiveCheckingThread(this), 0, 30, TimeUnit.SECONDS);
         this.discoveryResultStorage = storageService.getStorage(DiscoveryResult.class.getName(),
                 this.getClass().getClassLoader());
         this.discoveryServiceRegistry = discoveryServiceRegistry;
@@ -159,6 +157,12 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         this.managedThingProvider = thingProvider;
         this.thingTypeRegistry = thingTypeRegistry;
         this.configDescRegistry = configDescriptionRegistry;
+
+        // This should be the last step (to be more precise: providing the "this" reference to other ones as long as the
+        // constructor is not finished is a bad idea at all) as "this" will be used by another thread and so we need
+        // already fully instantiated object.
+        this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
+                .scheduleWithFixedDelay(new TimeToLiveCheckingThread(this), 0, 30, TimeUnit.SECONDS);
     }
 
     @Deactivate
