@@ -74,6 +74,7 @@ import org.openhab.core.automation.type.TriggerType;
 import org.openhab.core.automation.util.ReferenceResolver;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ComponentPropertyType;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -102,6 +103,14 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 @NonNullByDefault
 public class RuleEngineImpl implements RuleManager, RegistryChangeListener<ModuleType> {
+
+    @ComponentPropertyType
+    public @interface Config {
+        /**
+         * Delay between rule's re-initialization tries.
+         */
+        long rule_reinitialization_delay() default 500;
+    }
 
     /**
      * Constant defining separator between module id and output name.
@@ -240,7 +249,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * Constructor of {@link RuleEngineImpl}.
      */
     @Activate
-    public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
+    public RuleEngineImpl(final Config config, final @Reference ModuleTypeRegistry moduleTypeRegistry,
             final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService) {
         this.contextMap = new HashMap<String, Map<String, Object>>();
         this.moduleHandlerFactories = new HashMap<String, ModuleHandlerFactory>(20);
@@ -255,11 +264,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
         this.ruleRegistry = ruleRegistry;
 
-        if (ruleRegistry instanceof RuleRegistryImpl) {
-            scheduleReinitializationDelay = ((RuleRegistryImpl) this.ruleRegistry).getScheduleReinitializationDelay();
-        } else {
-            scheduleReinitializationDelay = RuleRegistryImpl.DEFAULT_REINITIALIZATION_DELAY;
-        }
+        this.scheduleReinitializationDelay = config.rule_reinitialization_delay();
 
         listener = new RegistryChangeListener<Rule>() {
             @Override
