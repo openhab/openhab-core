@@ -624,6 +624,30 @@ Import-Package: \\
             </execution>
           </executions>
         </plugin>
+
+        <plugin>
+          <groupId>com.github.ekryd.sortpom</groupId>
+          <artifactId>sortpom-maven-plugin</artifactId>
+          <version>2.10.0</version>
+          <configuration>
+            <predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
+            <createBackupFile>false</createBackupFile>
+            <keepBlankLines>true</keepBlankLines>
+          </configuration>
+          <executions>
+            <execution>
+              <id>sortpom-verify</id>
+              <goals>
+                <goal>verify</goal>
+              </goals>
+              <phase>verify</phase>
+              <configuration>
+                <verifyFail>Stop</verifyFail>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
         <plugin>
           <groupId>com.itemis.maven.plugins</groupId>
           <artifactId>unleash-maven-plugin</artifactId>
@@ -675,6 +699,10 @@ Import-Package: \\
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.github.ekryd.sortpom</groupId>
+        <artifactId>sortpom-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
