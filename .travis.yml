@@ -39,24 +39,9 @@ install:
         prevent_timeout $pid &
         wait $pid
     }
-    function check_pom_convention() {
-        mvnp com.github.ekryd.sortpom:sortpom-maven-plugin:sort -Dsort.keepBlankLines=true -Dsort.createBackupFile=false -Dsort.predefinedSortOrder=recommended_2008_06
-        if [ $? != 0 ]; then
-            echo "sortpom failed"
-            exit 1
-        fi
-        if [ $(git diff | wc -l) != 0 ]; then
-            echo "At least one POM file breaks the convention, please use sortpom to fix the POM file(s)."
-            git status | grep 'modified:'
-            echo "You should run the following command in the root directory of your working copy:"
-            echo "    $(grep 'sortpom-maven-plugin:sort' .travis.yml | grep -v grep | sed 's: *mvnp:mvn:g')"
-            exit 1
-        fi
-    }
 after_success:
   - print_reactor_summary .build.log
 after_failure:
   - tail -n 2000 .build.log
 script:
-  - check_pom_convention
   - mvnp clean verify -B -DskipChecks
