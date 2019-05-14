@@ -632,6 +632,7 @@ public class MqttBrokerConnection {
         }
 
         options.setKeepAliveInterval(keepAliveInterval);
+        options.setHttpsHostnameVerificationEnabled(false);
         return options;
     }
 
