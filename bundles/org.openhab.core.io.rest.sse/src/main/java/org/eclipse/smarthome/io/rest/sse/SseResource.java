@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -111,21 +111,9 @@ public class SseResource {
         // This allows you to not disable proxy buffering in nginx and still have working sse
         response.addHeader(X_ACCEL_BUFFERING_HEADER, "no");
 
-        if (!SseUtil.SERVLET3_SUPPORT) {
-            // if we don't have sevlet 3.0 async support, we want to make sure
-            // that the response is not compressed and buffered so that the
-            // client receives server sent events at the moment of sending them
-            response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
-
-            // Response headers are written now, since the thread will be
-            // blocked later on.
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType(SseFeature.SERVER_SENT_EVENTS);
-            response.flushBuffer();
-
-            // enable blocking for this thread
-            SseUtil.enableBlockingSse();
-        }
+        // We want to make sure that the response is not compressed and buffered so that the client receives server sent
+        // events at the moment of sending them.
+        response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
 
         return eventOutput;
     }

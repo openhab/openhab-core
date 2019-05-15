@@ -8,9 +8,9 @@ bin/
 .DS_Store
 *.iml
 .idea/
+**/.settings/org.eclipse.*
 
 dependency-reduced-pom.xml
-bundles/antlr-generator-3.2.0-patch.jar
 bundles/org.openhab.core.model.*/META-INF/
 features/karaf/*/src/main/history
 

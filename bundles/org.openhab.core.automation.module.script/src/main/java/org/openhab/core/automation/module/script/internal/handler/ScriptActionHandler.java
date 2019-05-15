@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
 /**
  * This handler can execute script actions.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann
  *
  */
 public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> implements ActionHandler {
 
-    public static final String SCRIPT_ACTION_ID = "script.ScriptAction";
+    public static final String TYPE_ID = "script.ScriptAction";
 
     private final Logger logger = LoggerFactory.getLogger(ScriptActionHandler.class);
 

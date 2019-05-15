@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.eclipse.smarthome.core.common.registry;
+
+import org.eclipse.smarthome.core.storage.StorageService;
 
 /**
  * {@link DefaultAbstractManagedProvider} is a specific {@link AbstractManagedProvider} implementation, where the stored
@@ -27,6 +29,10 @@ package org.eclipse.smarthome.core.common.registry;
  */
 public abstract class DefaultAbstractManagedProvider<E extends Identifiable<K>, K>
         extends AbstractManagedProvider<E, K, E> {
+
+    public DefaultAbstractManagedProvider(final StorageService storageService) {
+        super(storageService);
+    }
 
     @Override
     protected E toElement(String key, E element) {

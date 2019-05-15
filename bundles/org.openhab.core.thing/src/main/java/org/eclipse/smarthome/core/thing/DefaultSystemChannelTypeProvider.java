@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -24,7 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.i18n.LocalizedKey;
 import org.eclipse.smarthome.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
@@ -37,6 +39,7 @@ import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.eclipse.smarthome.core.types.StateOption;
 import org.eclipse.smarthome.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -52,6 +55,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Stefan Triller - Added more system channels
  * @author Christoph Weitkamp - factored out common i18n aspects into ThingTypeI18nLocalizationService
  */
+@NonNullByDefault
 @Component
 public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
 
@@ -278,55 +282,6 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
                     .build().toStateDescription())
             .build();
 
-    private static class LocalizedChannelTypeKey {
-        public final String locale;
-        public final UID uid;
-
-        public LocalizedChannelTypeKey(UID uid, String locale) {
-            this.uid = uid;
-            this.locale = locale;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            LocalizedChannelTypeKey other = (LocalizedChannelTypeKey) obj;
-            if (locale == null) {
-                if (other.locale != null) {
-                    return false;
-                }
-            } else if (!locale.equals(other.locale)) {
-                return false;
-            }
-            if (uid == null) {
-                if (other.uid != null) {
-                    return false;
-                }
-            } else if (!uid.equals(other.uid)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((locale == null) ? 0 : locale.hashCode());
-            result = prime * result + ((uid == null) ? 0 : uid.hashCode());
-            return result;
-        }
-
-    }
-
     private static final Collection<ChannelType> CHANNEL_TYPES = Collections
             .unmodifiableList(Stream.of(SYSTEM_CHANNEL_SIGNAL_STRENGTH, SYSTEM_CHANNEL_LOW_BATTERY,
                     SYSTEM_CHANNEL_BATTERY_LEVEL, SYSTEM_TRIGGER, SYSTEM_RAWBUTTON, SYSTEM_BUTTON, SYSTEM_RAWROCKER,
@@ -335,13 +290,21 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
                     SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED, SYSTEM_OUTDOOR_TEMPERATURE,
                     SYSTEM_ATMOSPHERIC_HUMIDITY, SYSTEM_BAROMETRIC_PRESSURE).collect(Collectors.toList()));
 
-    private final Map<LocalizedChannelTypeKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
+    private final Map<LocalizedKey, @Nullable ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 
-    private ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
-    private BundleResolver bundleResolver;
+    private final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
+    private final BundleResolver bundleResolver;
+
+    @Activate
+    public DefaultSystemChannelTypeProvider(
+            final @Reference ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService,
+            final @Reference BundleResolver bundleResolver) {
+        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
+        this.bundleResolver = bundleResolver;
+    }
 
     @Override
-    public Collection<ChannelType> getChannelTypes(Locale locale) {
+    public @Nullable Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         final List<ChannelType> allChannelTypes = new ArrayList<>();
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
@@ -352,7 +315,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     }
 
     @Override
-    public ChannelType getChannelType(ChannelTypeUID channelTypeUID, Locale locale) {
+    public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
         for (final ChannelType channelType : CHANNEL_TYPES) {
@@ -363,51 +326,31 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
         return null;
     }
 
-    @Reference
-    public void setChannelTypeI18nLocalizationService(
-            final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
-    }
+    private ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
+        LocalizedKey localizedKey = getLocalizedChannelTypeKey(channelType.getUID(), locale);
 
-    public void unsetChannelTypeI18nLocalizationService(
-            final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = null;
-    }
-
-    @Reference
-    public void setBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
-    public void unsetBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
-    private ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, Locale locale) {
-        LocalizedChannelTypeKey localizedChannelTypeKey = getLocalizedChannelTypeKey(channelType.getUID(), locale);
-
-        ChannelType cachedEntry = localizedChannelTypeCache.get(localizedChannelTypeKey);
+        ChannelType cachedEntry = localizedChannelTypeCache.get(localizedKey);
         if (cachedEntry != null) {
             return cachedEntry;
         }
 
         ChannelType localizedChannelType = localize(bundle, channelType, locale);
         if (localizedChannelType != null) {
-            localizedChannelTypeCache.put(localizedChannelTypeKey, localizedChannelType);
+            localizedChannelTypeCache.put(localizedKey, localizedChannelType);
             return localizedChannelType;
         } else {
             return channelType;
         }
     }
 
-    private @Nullable ChannelType localize(Bundle bundle, ChannelType channelType, Locale locale) {
+    private @Nullable ChannelType localize(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
         if (channelTypeI18nLocalizationService == null) {
             return null;
         }
         return channelTypeI18nLocalizationService.createLocalizedChannelType(bundle, channelType, locale);
     }
 
-    private LocalizedChannelTypeKey getLocalizedChannelTypeKey(UID uid, Locale locale) {
-        return new LocalizedChannelTypeKey(uid, locale != null ? locale.toLanguageTag() : null);
+    private LocalizedKey getLocalizedChannelTypeKey(UID uid, @Nullable Locale locale) {
+        return new LocalizedKey(uid, locale != null ? locale.toLanguageTag() : null);
     }
 }

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -29,11 +31,18 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Denis Nobel - Initial contribution
+ * @author Christoph Weitkamp - Added method `getThing(ThingUID)`
  */
+@NonNullByDefault
 public class BridgeImpl extends ThingImpl implements Bridge {
 
+    private final transient Logger logger = LoggerFactory.getLogger(BridgeImpl.class);
+
+    /*
+     * !!! DO NOT CHANGE - We are not allowed to change the members of the BridgeImpl implementation as the storage for
+     * things uses this implementation itself to store and restore the data.
+     */
     private transient List<Thing> things = new CopyOnWriteArrayList<>();
-    private transient Logger logger = LoggerFactory.getLogger(BridgeImpl.class);
 
     /**
      * Package protected default constructor to allow reflective instantiation.
@@ -45,16 +54,6 @@ public class BridgeImpl extends ThingImpl implements Bridge {
 
     public BridgeImpl(ThingTypeUID thingTypeUID, String bridgeId) {
         super(thingTypeUID, bridgeId);
-    }
-
-    /**
-     * @param thingUID
-     * @throws IllegalArgumentException
-     * @deprecated use {@link #BridgeImpl(ThingTypeUID, ThingUID)} instead.
-     */
-    @Deprecated
-    public BridgeImpl(ThingUID thingUID) throws IllegalArgumentException {
-        super(thingUID);
     }
 
     /**
@@ -75,12 +74,22 @@ public class BridgeImpl extends ThingImpl implements Bridge {
     }
 
     @Override
+    public @Nullable Thing getThing(ThingUID thingUID) {
+        for (Thing thing : things) {
+            if (thing.getUID().equals(thingUID)) {
+                return thing;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<Thing> getThings() {
         return Collections.unmodifiableList(new ArrayList<>(things));
     }
 
     @Override
-    public BridgeHandler getHandler() {
+    public @Nullable BridgeHandler getHandler() {
         BridgeHandler bridgeHandler = null;
         ThingHandler thingHandler = super.getHandler();
         if (thingHandler instanceof BridgeHandler) {

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -23,12 +23,16 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.model.core.ModelRepository;
+import org.eclipse.smarthome.model.thing.testsupport.hue.TestHueThingHandlerFactoryX;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class GenericThingProviderTest2 extends JavaOSGiTest {
 
     private final static String TESTMODEL_NAME = "testModelX.things";

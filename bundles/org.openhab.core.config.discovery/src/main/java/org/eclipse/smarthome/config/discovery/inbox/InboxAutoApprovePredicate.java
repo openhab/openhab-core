@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -29,8 +29,8 @@ import org.osgi.service.component.annotations.Component;
  * automatically approved (e.g., because another such {@link Predicate} returned <code>true</code>) - i.e., it is not
  * possible to veto the automatic approval of a {@link DiscoveryResult}.
  * <p/>
- * Please note that this interface is intended to be implemented by solutions integrating Eclipse SmartHome. This
- * interface is <em>not</em> intended to be implemented by Eclipse SmartHome addons (like, e.g., bindings).
+ * Please note that this interface is intended to be implemented by solutions integrating openHAB. This
+ * interface is <em>not</em> intended to be implemented by openHAB addons (like, e.g., bindings).
  *
  * @author Henning Sudbrock - initial contribution
  */

@@ -13,4 +13,17 @@
 
   <name>openHAB Core :: Integration Tests :: Model Thing Tests</name>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.compile-model</artifactId>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.itests</groupId>
+      <artifactId>org.openhab.core.model.thing.testsupport</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
 </project>

@@ -25,7 +25,7 @@
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>framework</artifactId>
-      <version>${karaf.version}</version>
+      <version>${karaf.tooling.version}</version>
       <type>kar</type>
       <scope>provided</scope>
     </dependency>
@@ -34,70 +34,12 @@
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>standard</artifactId>
-      <version>${karaf.version}</version>
+      <version>${karaf.tooling.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>provided</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.karaf.tooling</groupId>
-          <artifactId>karaf-maven-plugin</artifactId>
-          <version>${karaf.version}</version>
-          <extensions>true</extensions>
-          <configuration>
-            <startLevel>80</startLevel>
-            <aggregateFeatures>true</aggregateFeatures>
-            <checkDependencyChange>true</checkDependencyChange>
-            <failOnDependencyChange>false</failOnDependencyChange>
-            <logDependencyChanges>true</logDependencyChanges>
-            <overwriteChangedDependencies>true</overwriteChangedDependencies>
-          </configuration>
-          <executions>
-            <execution>
-              <id>compile</id>
-              <goals>
-                <goal>features-generate-descriptor</goal>
-              </goals>
-              <phase>generate-resources</phase>
-            </execution>
-            <execution>
-              <id>karaf-feature-verification</id>
-              <goals>
-                <goal>verify</goal>
-              </goals>
-              <phase>process-resources</phase>
-              <configuration>
-                <descriptors combine.children="append">
-                  <!-- Apache Karaf -->
-                  <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
-                  <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
-                  <!-- Current feature under verification -->
-                  <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
-                </descriptors>
-                <distribution>org.apache.karaf.features:framework</distribution>
-                <javase>1.8</javase>
-                <framework>
-                  <feature>framework</feature>
-                </framework>
-                <features>
-                  <feature>openhab-core.tp-*</feature>
-                  <feature>openhab-core-*</feature>
-                </features>
-                <verifyTransitive>false</verifyTransitive>
-                <ignoreMissingConditions>true</ignoreMissingConditions>
-                <fail>first</fail>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 
   <repositories>
     <repository>
@@ -125,5 +67,63 @@
       <url>https://dl.bintray.com/jupnp/mvn/</url>
     </repository>
   </repositories>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.karaf.tooling</groupId>
+          <artifactId>karaf-maven-plugin</artifactId>
+          <version>${karaf.tooling.version}</version>
+          <extensions>true</extensions>
+          <configuration>
+            <startLevel>80</startLevel>
+            <aggregateFeatures>true</aggregateFeatures>
+            <checkDependencyChange>true</checkDependencyChange>
+            <failOnDependencyChange>false</failOnDependencyChange>
+            <logDependencyChanges>true</logDependencyChanges>
+            <overwriteChangedDependencies>true</overwriteChangedDependencies>
+          </configuration>
+          <executions>
+            <execution>
+              <id>compile</id>
+              <goals>
+                <goal>features-generate-descriptor</goal>
+              </goals>
+              <phase>generate-resources</phase>
+            </execution>
+            <execution>
+              <id>karaf-feature-verification</id>
+              <goals>
+                <goal>verify</goal>
+              </goals>
+              <phase>process-resources</phase>
+              <configuration>
+                <descriptors combine.children="append">
+                  <!-- Apache Karaf -->
+                  <descriptor>mvn:org.apache.karaf.features/framework/${karaf.tooling.version}/xml/features</descriptor>
+                  <descriptor>mvn:org.apache.karaf.features/standard/${karaf.tooling.version}/xml/features</descriptor>
+                  <!-- Current feature under verification -->
+                  <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
+                </descriptors>
+                <distribution>org.apache.karaf.features:framework</distribution>
+                <javase>1.8</javase>
+                <framework>
+                  <feature>framework</feature>
+                </framework>
+                <features>
+                  <feature>openhab-core.tp-*</feature>
+                  <feature>openhab-core-*</feature>
+                </features>
+                <verifyTransitive>false</verifyTransitive>
+                <ignoreMissingConditions>true</ignoreMissingConditions>
+                <fail>first</fail>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>

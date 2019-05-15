@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -29,10 +29,9 @@ import org.eclipse.smarthome.core.thing.internal.BridgeImpl;
 /**
  * This class allows the easy construction of a {@link Bridge} instance using the builder pattern.
  *
- * @author Dennis Nobel - Initial contribution and API
+ * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Refactoring to make BridgeBuilder a subclass of ThingBuilder
  * @author Markus Rathgeb - Override methods to return BridgeBuidler instead of ThingBuidler
- *
  */
 @NonNullByDefault
 public class BridgeBuilder extends ThingBuilder {
@@ -44,12 +43,6 @@ public class BridgeBuilder extends ThingBuilder {
     public static BridgeBuilder create(ThingTypeUID thingTypeUID, String bridgeId) {
         BridgeImpl bridge = new BridgeImpl(thingTypeUID, bridgeId);
         bridge.setChannels(new ArrayList<Channel>());
-        return new BridgeBuilder(bridge);
-    }
-
-    @Deprecated
-    public static BridgeBuilder create(ThingUID thingUID) {
-        BridgeImpl bridge = new BridgeImpl(thingUID);
         return new BridgeBuilder(bridge);
     }
 

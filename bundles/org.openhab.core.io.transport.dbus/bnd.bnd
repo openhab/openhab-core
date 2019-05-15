@@ -5,4 +5,6 @@ Export-Package: \
 Import-Package: \
   cx.ath.matthew.debug.*;resolution:=optional,\
   cx.ath.matthew.utils.*;resolution:=optional,\
+  com.sun.security.auth.module.*;resolution:=optional,\
   *
+

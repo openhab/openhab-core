@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -61,7 +61,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 
 /**
- * This class is the core of the Eclipse SmartHome rule engine.
+ * This class is the core of the openHAB rule engine.
  * It listens to changes to the rules folder, evaluates the trigger conditions of the rules and
  * schedules them for execution dependent on their triggering conditions.
  *

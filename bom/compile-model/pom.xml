@@ -17,8 +17,8 @@
   <properties>
     <emf.1.version>2.12.0</emf.1.version>
     <emf.3.version>2.11.0</emf.3.version>
-    <emf.mwe.version>1.3.21.201705291010</emf.mwe.version>
-    <emf.mwe2.version>2.9.1.201705291010</emf.mwe2.version>
+    <emf.mwe.version>1.4.0</emf.mwe.version>
+    <emf.mwe2.version>2.10.0</emf.mwe2.version>
   </properties>
 
   <dependencies>
@@ -127,6 +127,12 @@
       <artifactId>org.eclipse.xtext</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.platform</groupId>
+          <artifactId>org.eclipse.osgi</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
   </dependencies>

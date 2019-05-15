@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -76,6 +76,10 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
             assertThat(channelType1, is(not(nullValue())));
             assertThat(channelType1.getLabel(), is(equalTo("Channel Label")));
             assertThat(channelType1.getDescription(), is(equalTo("Channel Description")));
+            assertThat(channelType1.getCommandDescription().getCommandOptions().get(0).getLabel(),
+                    is(equalTo("Short Alarm")));
+            assertThat(channelType1.getCommandDescription().getCommandOptions().get(1).getLabel(),
+                    is(equalTo("Long Alarm")));
 
             Collection<ChannelGroupType> channelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null);
             ChannelGroupType channelGroupType = channelGroupTypes.stream()

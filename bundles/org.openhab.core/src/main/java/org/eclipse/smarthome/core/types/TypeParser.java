@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * This is a helper class that helps parsing a string into an Eclipse SmartHome type (state or command).
+ * This is a helper class that helps parsing a string into an openHAB type (state or command).
  *
  * @author Kai Kreuzer - Initial contribution and API
  *

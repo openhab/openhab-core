@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -21,10 +21,9 @@ import org.eclipse.smarthome.core.types.StateDescription;
 
 /**
  * The {@link DynamicStateDescriptionProvider} is responsible for providing {@link StateDescription} for a channel
- * dynamically in the runtime.
+ * dynamically in the runtime. Therefore the provider must be registered as OSGi service.
  *
- * @author Pawel Pieczul - initial contribution
- *
+ * @author Pawel Pieczul - Initial contribution
  */
 @NonNullByDefault
 public interface DynamicStateDescriptionProvider {

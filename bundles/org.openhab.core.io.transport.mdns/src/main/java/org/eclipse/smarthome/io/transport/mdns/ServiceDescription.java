@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -31,10 +31,10 @@ public class ServiceDescription {
      * Constructor for a {@link ServiceDescription}, which takes all details as parameters
      * 
      * @param serviceType String service type, like "_smarthome-server._tcp.local."
-     * @param serviceName String service name, like "Eclipse SmartHome"
+     * @param serviceName String service name, like "openHAB"
      * @param servicePort Int service port, like 8080
      * @param serviceProperties Hashtable service props, like url = "/rest"
-     * @param serviceDescription String service description text, like "Eclipse SmartHome REST interface"
+     * @param serviceDescription String service description text, like "openHAB REST interface"
      */
     public ServiceDescription(String serviceType, String serviceName, int servicePort,
             Hashtable<String, String> serviceProperties) {

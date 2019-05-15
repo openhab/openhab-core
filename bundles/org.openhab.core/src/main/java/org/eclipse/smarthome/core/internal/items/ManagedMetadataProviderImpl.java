@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.items.MetadataKey;
 import org.eclipse.smarthome.core.items.MetadataPredicates;
 import org.eclipse.smarthome.core.items.MetadataProvider;
 import org.eclipse.smarthome.core.storage.StorageService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -37,6 +38,11 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
         implements ManagedMetadataProvider {
 
     private final Logger logger = LoggerFactory.getLogger(ManagedMetadataProviderImpl.class);
+
+    @Activate
+    public ManagedMetadataProviderImpl(final @Reference StorageService storageService) {
+        super(storageService);
+    }
 
     @Override
     protected String getStorageName() {
@@ -56,17 +62,6 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
     @Override
     protected Metadata toPersistableElement(Metadata element) {
         return element;
-    }
-
-    @Override
-    @Reference
-    protected void setStorageService(StorageService storageService) {
-        super.setStorageService(storageService);
-    }
-
-    @Override
-    protected void unsetStorageService(StorageService storageService) {
-        super.unsetStorageService(storageService);
     }
 
     /**

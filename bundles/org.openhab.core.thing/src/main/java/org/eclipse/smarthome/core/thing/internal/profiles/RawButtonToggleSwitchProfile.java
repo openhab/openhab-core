@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,13 +12,14 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
+import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.RAWBUTTON_TOGGLE_SWITCH;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
 import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
 import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.SystemProfiles;
 import org.eclipse.smarthome.core.thing.profiles.TriggerProfile;
 import org.eclipse.smarthome.core.types.State;
 
@@ -28,16 +29,14 @@ import org.eclipse.smarthome.core.types.State;
  * It reads the triggered events and uses the item's current state and toggles it once it detects that the
  * button was pressed.
  *
- * @author Simon Kaufmann - initial contribution and API.
- *
+ * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
 public class RawButtonToggleSwitchProfile implements TriggerProfile {
 
     private final ProfileCallback callback;
 
-    @Nullable
-    private State previousState;
+    private @Nullable State previousState;
 
     public RawButtonToggleSwitchProfile(ProfileCallback callback) {
         this.callback = callback;
@@ -45,7 +44,7 @@ public class RawButtonToggleSwitchProfile implements TriggerProfile {
 
     @Override
     public ProfileTypeUID getProfileTypeUID() {
-        return SystemProfiles.RAWBUTTON_TOGGLE_SWITCH;
+        return RAWBUTTON_TOGGLE_SWITCH;
     }
 
     @Override

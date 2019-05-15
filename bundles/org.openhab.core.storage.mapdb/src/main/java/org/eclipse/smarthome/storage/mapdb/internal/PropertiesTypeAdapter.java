@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -31,15 +31,15 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * Type adapter that makes sure that all Numeric values in Maps of type
- * Map<String, Object> are deserialized as BigDecimal instances instead of
- * doubles.
+ * Type adapter that makes sure that all Numeric values in Maps of type Map&lt;String, Object&gt; are deserialized as
+ * BigDecimal instances instead of doubles.
  *
  * @author Ivan Iliev
  *
  */
 public class PropertiesTypeAdapter extends TypeAdapter<Map<String, Object>> {
 
+    /** Type token. */
     public static final TypeToken<Map<String, Object>> TOKEN = new TypeToken<Map<String, Object>>() {
     };
 
@@ -51,7 +51,12 @@ public class PropertiesTypeAdapter extends TypeAdapter<Map<String, Object>> {
 
     private final TypeAdapter<Object> valueAdapter;
 
-    public PropertiesTypeAdapter(Gson gson) {
+    /**
+     * Constructor.
+     *
+     * @param gson the gson reference
+     */
+    public PropertiesTypeAdapter(final Gson gson) {
         // obtain the default type adapters for String and Object classes
         keyAdapter = gson.getAdapter(String.class);
         valueAdapter = gson.getAdapter(Object.class);

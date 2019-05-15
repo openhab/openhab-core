@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -14,7 +14,6 @@ package org.eclipse.smarthome.core.thing.binding.builder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -34,13 +33,13 @@ import org.eclipse.smarthome.core.thing.util.ThingHelper;
 /**
  * This class allows the easy construction of a {@link Thing} instance using the builder pattern.
  *
- * @author Dennis Nobel - Initial contribution and API
+ * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Refactoring to make BridgeBuilder a subclass
- *
  */
 @NonNullByDefault
 public class ThingBuilder {
 
+    private final List<Channel> channels = new ArrayList<>();
     private final ThingImpl thing;
 
     protected ThingBuilder(ThingImpl thing) {
@@ -49,12 +48,6 @@ public class ThingBuilder {
 
     public static ThingBuilder create(ThingTypeUID thingTypeUID, String thingId) {
         ThingImpl thing = new ThingImpl(thingTypeUID, thingId);
-        return new ThingBuilder(thing);
-    }
-
-    @Deprecated
-    public static ThingBuilder create(ThingUID thingUID) {
-        ThingImpl thing = new ThingImpl(thingUID);
         return new ThingBuilder(thing);
     }
 
@@ -69,10 +62,9 @@ public class ThingBuilder {
     }
 
     public ThingBuilder withChannel(Channel channel) {
-        final Collection<Channel> mutableThingChannels = this.thing.getChannelsMutable();
         validateChannelUIDs(Collections.singletonList(channel));
-        ThingHelper.ensureUniqueChannels(mutableThingChannels, channel);
-        mutableThingChannels.add(channel);
+        ThingHelper.ensureUniqueChannels(channels, channel);
+        channels.add(channel);
         return this;
     }
 
@@ -83,12 +75,13 @@ public class ThingBuilder {
     public ThingBuilder withChannels(List<Channel> channels) {
         validateChannelUIDs(channels);
         ThingHelper.ensureUniqueChannels(channels);
-        this.thing.setChannels(new ArrayList<>(channels));
+        this.channels.clear();
+        this.channels.addAll(channels);
         return this;
     }
 
     public ThingBuilder withoutChannel(ChannelUID channelUID) {
-        Iterator<Channel> iterator = this.thing.getChannelsMutable().iterator();
+        Iterator<Channel> iterator = channels.iterator();
         while (iterator.hasNext()) {
             if (iterator.next().getUID().equals(channelUID)) {
                 iterator.remove();
@@ -132,7 +125,8 @@ public class ThingBuilder {
     }
 
     public Thing build() {
-        return this.thing;
+        thing.setChannels(channels);
+        return thing;
     }
 
     private void validateChannelUIDs(List<Channel> channels) {

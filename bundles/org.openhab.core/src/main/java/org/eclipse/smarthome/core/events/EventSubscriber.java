@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link EventSubscriber} defines the callback interface for receiving events from
- * the Eclipse SmartHome event bus.
+ * the openHAB event bus.
  *
  * @author Stefan Bußweiler - Initial contribution
  */
@@ -49,7 +49,7 @@ public interface EventSubscriber {
     EventFilter getEventFilter();
 
     /**
-     * Callback method for receiving {@link Event}s from the Eclipse SmartHome event bus. This method is called for
+     * Callback method for receiving {@link Event}s from the openHAB event bus. This method is called for
      * every event where the event subscriber is subscribed to and the event filter applies.
      *
      * @param event the received event (not null)

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,44 +12,44 @@
  */
 package org.eclipse.smarthome.core.types;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Describes one possible value an item might have.
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public final class StateOption {
 
     private String value;
-    private String label;
+    private @Nullable String label;
 
     /**
      * Creates a {@link StateOption} object.
      *
-     * @param value value of the item
+     * @param value the value of the item
      * @param label label
-     * @throws IllegalArgumentException if value is null
      */
-    public StateOption(String value, String label) {
-        if (value == null) {
-            throw new IllegalArgumentException("Value must not be null.");
-        }
+    public StateOption(String value, @Nullable String label) {
         this.value = value;
         this.label = label;
     }
 
     /**
-     * Returns the label (can be null).
+     * Returns the label.
      *
-     * @return label (can be null)
+     * @return label
      */
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
     /**
-     * Returns the value (can not be null).
+     * Returns the value.
      *
-     * @return value (can not be null)
+     * @return value
      */
     public String getValue() {
         return value;

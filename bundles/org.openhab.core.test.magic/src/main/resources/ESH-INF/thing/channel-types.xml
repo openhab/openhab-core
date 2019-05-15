@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <thing:thing-descriptions bindingId="magic"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
-	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
 	<channel-type id="switch">
 		<item-type>Switch</item-type>
@@ -28,7 +28,8 @@
 		<item-type>Color</item-type>
 		<label>Color</label>
 		<description>The color channel allows to control the color of a light.
-			It is also possible to dim values and switch the light on and off.
+			It is also possible to dim values and switch the
+			light on and off.
 		</description>
 		<category>ColorLight</category>
 		<tags>
@@ -55,13 +56,14 @@
 		<item-type>String</item-type>
 		<label>Alert</label>
 		<description>The alert channel allows a temporary change to the bulb’s state.</description>
-		<state>
+		<command>
 			<options>
 				<option value="NONE">None</option>
 				<option value="SELECT">Alert</option>
 				<option value="LSELECT">Long Alert</option>
 			</options>
-		</state>
+		</command>
+
 		<autoUpdatePolicy>recommend</autoUpdatePolicy>
 	</channel-type>
 
@@ -88,6 +90,11 @@
 		<item-type>String</item-type>
 		<label>Text channel</label>
 		<autoUpdatePolicy>recommend</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="systemcommand">
+		<label>Send system command</label>
+		<description>Sends a system command to Kodi. This allows to shutdown/suspend/hibernate/reboot/quit Kodi.</description>
 	</channel-type>
 
 	<channel-type id="temperature">

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -14,6 +14,7 @@ package org.eclipse.smarthome.core.types.util;
 
 import static org.eclipse.smarthome.core.library.unit.MetricPrefix.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
 
 import javax.measure.Quantity;
@@ -30,6 +31,9 @@ import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.junit.Test;
 
+/**
+ * @author Henning Treu - Initial contribution
+ */
 public class UnitUtilsTest {
 
     @Test
@@ -63,12 +67,24 @@ public class UnitUtilsTest {
     }
 
     @Test
+    public void testConversionOfUnit() {
+        assertThat(SmartHomeUnits.DECIBEL_MILLIWATTS.getConverterTo(SmartHomeUnits.WATT).convert(50),
+                closeTo(100, 0.001));
+        assertThat(SmartHomeUnits.WATT.getConverterTo(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1),
+                closeTo(20, 0.0001));
+        assertThat(
+                SmartHomeUnits.METRE_PER_SQUARE_SECOND.getConverterTo(SmartHomeUnits.STANDARD_GRAVITY).convert(9.8065),
+                closeTo(1.0, 0.0001));
+    }
+
+    @Test
     public void shouldParseUnitFromPattern() {
         assertThat(UnitUtils.parseUnit("%.2f °F"), is(ImperialUnits.FAHRENHEIT));
         assertThat(UnitUtils.parseUnit("%.2f °C"), is(SIUnits.CELSIUS));
         assertThat(UnitUtils.parseUnit("myLabel km"), is(KILO(SIUnits.METRE)));
         assertThat(UnitUtils.parseUnit("%.2f %%"), is(SmartHomeUnits.PERCENT));
         assertThat(UnitUtils.parseUnit("myLabel %unit%"), is(nullValue()));
+        assertThat(UnitUtils.parseUnit("%.2f kvarh"), is(SmartHomeUnits.KILOVAR_HOUR));
     }
 
     @Test

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * This discovery service is intended to be used by bindings that support USB devices, but do not directly talk to the
  * USB devices but rather use a serial port for the communication, where the serial port is provided by an operating
- * system driver outside the scope of Eclipse SmartHome. Examples for such USB devices are USB dongles that provide
+ * system driver outside the scope of openHAB. Examples for such USB devices are USB dongles that provide
  * access to wireless networks, like, e.g., Zigbeee or Zwave dongles.
  * <p/>
  * This discovery service provides functionality for discovering added and removed USB devices and the corresponding

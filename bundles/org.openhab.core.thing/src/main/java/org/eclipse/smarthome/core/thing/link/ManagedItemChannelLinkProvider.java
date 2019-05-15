@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -17,6 +17,7 @@ import java.util.Collection;
 import org.eclipse.smarthome.core.common.registry.DefaultAbstractManagedProvider;
 import org.eclipse.smarthome.core.storage.StorageService;
 import org.eclipse.smarthome.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -30,6 +31,11 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true, service = { ItemChannelLinkProvider.class, ManagedItemChannelLinkProvider.class })
 public class ManagedItemChannelLinkProvider extends DefaultAbstractManagedProvider<ItemChannelLink, String>
         implements ItemChannelLinkProvider {
+
+    @Activate
+    public ManagedItemChannelLinkProvider(final @Reference StorageService storageService) {
+        super(storageService);
+    }
 
     @Override
     protected String getStorageName() {
@@ -48,17 +54,6 @@ public class ManagedItemChannelLinkProvider extends DefaultAbstractManagedProvid
                 this.remove(itemChannelLink.getUID());
             }
         }
-    }
-
-    @Reference
-    @Override
-    protected void setStorageService(StorageService storageService) {
-        super.setStorageService(storageService);
-    }
-
-    @Override
-    protected void unsetStorageService(StorageService storageService) {
-        super.unsetStorageService(storageService);
     }
 
 }

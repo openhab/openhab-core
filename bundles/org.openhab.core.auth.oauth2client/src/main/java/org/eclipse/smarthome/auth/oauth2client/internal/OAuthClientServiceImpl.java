@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -221,7 +221,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     /**
      * Implicit Grant (RFC 6749 section 4.2) is not implemented. It is directly interacting with user-agent
      * The implicit grant is not implemented. It usually involves browser/javascript redirection flows
-     * and is out of Eclipse SmartHome scope.
+     * and is out of openHAB scope.
      */
     @Override
     public AccessTokenResponse getAccessTokenByImplicit(@Nullable String redirectURI, @Nullable String scope,

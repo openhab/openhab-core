@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -33,6 +33,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
+import org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry;
 import org.eclipse.smarthome.config.discovery.inbox.events.InboxAddedEvent;
 import org.eclipse.smarthome.config.discovery.inbox.events.InboxUpdatedEvent;
 import org.eclipse.smarthome.core.events.EventPublisher;
@@ -96,12 +97,8 @@ public class PersistentInboxTest {
                 .then(invocation -> ThingBuilder.create(THING_TYPE_UID, "test")
                         .withConfiguration((Configuration) invocation.getArguments()[1]).build());
 
-        inbox = new PersistentInbox();
-        inbox.setThingRegistry(thingRegistry);
-        inbox.setStorageService(storageService);
-        inbox.setManagedThingProvider(thingProvider);
-        inbox.setConfigDescriptionRegistry(configDescriptionRegistry);
-        inbox.setThingTypeRegistry(thingTypeRegistry);
+        inbox = new PersistentInbox(storageService, mock(DiscoveryServiceRegistry.class), thingRegistry, thingProvider,
+                thingTypeRegistry, configDescriptionRegistry);
         inbox.addThingHandlerFactory(thingHandlerFactory);
     }
 

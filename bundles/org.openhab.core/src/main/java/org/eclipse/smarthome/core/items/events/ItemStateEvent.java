@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -16,7 +16,7 @@ import org.eclipse.smarthome.core.events.AbstractEvent;
 import org.eclipse.smarthome.core.types.State;
 
 /**
- * {@link ItemStateEvent}s can be used to deliver item status updates through the Eclipse SmartHome event bus.
+ * {@link ItemStateEvent}s can be used to deliver item status updates through the openHAB event bus.
  * State events must be created with the {@link ItemEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution

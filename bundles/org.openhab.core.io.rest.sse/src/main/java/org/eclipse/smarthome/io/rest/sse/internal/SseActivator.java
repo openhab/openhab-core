@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,8 +12,6 @@
  */
 package org.eclipse.smarthome.io.rest.sse.internal;
 
-import org.eclipse.smarthome.io.rest.sse.internal.async.BlockingAsyncFeature;
-import org.eclipse.smarthome.io.rest.sse.internal.util.SseUtil;
 import org.glassfish.jersey.media.sse.SseFeature;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -22,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Bundle activator for Eclipse SmartHome SSE bundle.
+ * Bundle activator for openHAB SSE bundle.
  *
  * @author Ivan Iliev - Initial Contribution and API
  *
@@ -51,12 +49,6 @@ public class SseActivator implements BundleActivator {
             logger.debug("SSE API - SseFeature registered.");
         }
 
-        if (!SseUtil.SERVLET3_SUPPORT) {
-            blockingAsyncFeatureRegistration = bc.registerService(BlockingAsyncFeature.class.getName(),
-                    new BlockingAsyncFeature(), null);
-
-            logger.debug("SSE API - SSE BlockingAsyncFeature registered.");
-        }
         logger.debug("SSE API has been started.");
     }
 

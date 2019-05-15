@@ -12,8 +12,6 @@
  */
 package org.openhab.core.internal;
 
-import java.security.Permission;
-
 import org.eclipse.smarthome.model.rule.runtime.RuleEngine;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -46,18 +44,6 @@ public class CoreActivator implements BundleActivator {
             tracker.waitForService(10000);
         } catch (NoClassDefFoundError e) {
         }
-
-        // see https://github.com/eclipse/smarthome/issues/6291
-        final SecurityManager securityManager = new SecurityManager() {
-            @Override
-            public void checkPermission(Permission permission) {
-                if (permission.getName().contains("exitVM")) {
-                    throw new SecurityException("Prevented System.exit() call.");
-                }
-            }
-        };
-        System.setSecurityManager(securityManager);
-
     }
 
     /*
@@ -68,7 +54,6 @@ public class CoreActivator implements BundleActivator {
      */
     @Override
     public void stop(BundleContext context) throws Exception {
-        System.setSecurityManager(null);
     }
 
 }

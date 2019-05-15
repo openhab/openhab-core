@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -25,7 +25,7 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  * This is a data class for storing meta-data for a given item and namespace.
  * It is the entity used for within the {@link MetadataRegistry}.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault
@@ -34,6 +34,17 @@ public final class Metadata implements Identifiable<MetadataKey> {
     private final MetadataKey key;
     private final String value;
     private final Map<String, Object> configuration;
+
+    /**
+     * Package protected default constructor to allow reflective instantiation.
+     *
+     * !!! DO NOT REMOVE - Gson needs it !!!
+     */
+    Metadata() {
+        key = new MetadataKey("", "");
+        value = "";
+        configuration = Collections.emptyMap();
+    }
 
     public Metadata(MetadataKey key, String value, @Nullable Map<String, Object> configuration) {
         this.key = key;

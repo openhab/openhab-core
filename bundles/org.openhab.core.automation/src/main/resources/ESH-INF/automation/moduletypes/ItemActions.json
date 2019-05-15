@@ -51,7 +51,7 @@
      "inputs":[
       {
         "name":"command",
-        "type":"org.eclipse.smarthome.core.types.Command",
+        "type":"command",
         "label":"Command",
         "description":"command that will be sent to the item."
       }

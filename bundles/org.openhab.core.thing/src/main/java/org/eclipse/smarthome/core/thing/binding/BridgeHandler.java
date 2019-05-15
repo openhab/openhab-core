@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -17,7 +17,7 @@ import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 
 /**
- * A {@link BridgeHandler} handles the communication between the Eclipse SmartHome framework and
+ * A {@link BridgeHandler} handles the communication between the openHAB framework and
  * a <i>bridge</i> (a device that acts as a gateway to enable the communication with other devices)
  * represented by a {@link Bridge} instance.
  * <p>

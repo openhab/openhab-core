@@ -30,9 +30,6 @@
     <bundle dependency="true">mvn:commons-lang/commons-lang/2.6</bundle>
     <!--<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>-->
 
-    <!-- Gson -->
-    <bundle dependency="true">mvn:com.google.code.gson/gson/2.3.1</bundle>
-
     <!-- Measurement -->
     <bundle dependency="true">mvn:javax.measure/unit-api/1.0</bundle>
     <bundle dependency="true">mvn:tec.uom/uom-se/1.0.8</bundle>
@@ -53,6 +50,11 @@
   <feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
     <capability>openhab.tp;feature=commons-net;version=3.3</capability>
     <bundle dependency="true">mvn:commons-net/commons-net/3.3</bundle>
+  </feature>
+
+  <feature name="openhab.tp-gson" description="Gson" version="${project.version}">
+    <capability>openhab.tp;feature=gson;version=2.8.2.v20180104-1110</capability>
+    <bundle>mvn:org.eclipse.orbit.bundles/com.google.gson/2.8.2.v20180104-1110</bundle>
   </feature>
 
   <feature name="openhab.tp-httpclient" version="${project.version}">
@@ -108,14 +110,11 @@
   </feature>
 
   <feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
-    <capability>openhab.tp;feature=jupnp;version=2.5.1</capability>
+    <capability>openhab.tp;feature=jupnp;version=2.5.2</capability>
     <feature dependency="true">http</feature>
     <feature dependency="true">scr</feature>
     <feature dependency="true">openhab.tp-httpclient</feature>
-    <bundle>mvn:org.jupnp/org.jupnp/2.5.1</bundle>
-    <capability>
-      osgi.service;objectClass:List&lt;String&gt;=org.jupnp.UpnpService
-    </capability>
+    <bundle>mvn:org.jupnp/org.jupnp/2.5.2</bundle>
   </feature>
 
   <feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
@@ -125,12 +124,12 @@
   </feature>
 
   <feature name="openhab.tp-lsp4j" description="Eclipse LSP4J" version="${project.version}">
-    <capability>openhab.tp;feature=lsp4j;version=0.4.1</capability>
-    <bundle>mvn:org.eclipse.lsp4j/org.eclipse.lsp4j/0.4.1</bundle>
-    <bundle>mvn:org.eclipse.lsp4j/org.eclipse.lsp4j.jsonrpc/0.4.1</bundle>
+    <capability>openhab.tp;feature=lsp4j;version=0.6.0</capability>
+    <bundle>mvn:org.eclipse.lsp4j/org.eclipse.lsp4j/0.6.0</bundle>
+    <bundle>mvn:org.eclipse.lsp4j/org.eclipse.lsp4j.jsonrpc/0.6.0</bundle>
 
+    <feature dependency="true">openhab.tp-gson</feature>
     <feature dependency="true">openhab.tp-xtext</feature>
-    <bundle dependency="true">mvn:org.eclipse.orbit.bundles/com.google.gson/2.7.0.v20170129-0911</bundle>
   </feature>
 
   <feature name="openhab.tp-mapdb" description="MapDB" version="${project.version}">
@@ -140,9 +139,9 @@
   </feature>
 
   <feature name="openhab.tp-paho" description="MQTT v3 Client" version="${project.version}">
-    <capability>openhab.tp;feature=paho;version=1.2.0</capability>
+    <capability>openhab.tp;feature=paho;version=1.2.1</capability>
 
-    <bundle>mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.0</bundle>
+    <bundle>mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.1</bundle>
   </feature>
 
   <feature name="openhab.tp-serial-javacomm" version="${project.version}">
@@ -155,30 +154,35 @@
 
   <feature name="openhab.tp-serial-rxtx" version="${project.version}">
     <capability>openhab.tp;feature=serial;impl=rxtx</capability>
-    <bundle>mvn:com.neuronrobotics/nrjavaserial/3.14.0</bundle>
+
+    <!-- Use "no liblockdev" version -->
+    <!-- See: https://github.com/openhab/openhab-core/pull/761 -->
+    <!-- See: https://github.com/openhab/openhab-core/issues/750 -->
+    <!-- <bundle>mvn:com.neuronrobotics/nrjavaserial/3.15.0</bundle> -->
+    <bundle>mvn:org.openhab/nrjavaserial/3.15.0.OH2</bundle>
   </feature>
 
   <feature name="openhab.tp-xtext" description="Xtext - Language Engineering Made Easy" version="${project.version}">
-    <capability>openhab.tp;feature=xtext;version=2.14.0</capability>
+    <capability>openhab.tp;feature=xtext;version=2.17.0</capability>
 
-    <bundle>mvn:org.eclipse.xtext/org.eclipse.xtext/2.14.0</bundle>
+    <bundle>mvn:org.eclipse.xtext/org.eclipse.xtext/2.17.0</bundle>
 
     <bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.common/2.12.0</bundle>
     <bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore/2.12.0</bundle>
     <bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore.change/2.11.0</bundle>
     <bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore.xmi/2.12.0</bundle>
-    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.common.types/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.common.types/2.17.0</bundle>
 
     <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
 
-    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase/2.14.0</bundle>
-    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.lib/2.14.0</bundle>
-    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.smap/2.14.0</bundle>
-    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.util/2.14.0</bundle>
-    <bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib/2.14.0</bundle>
-    <bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib.macro/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase/2.17.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.lib/2.17.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.smap/2.17.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.util/2.17.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib/2.17.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib.macro/2.17.0</bundle>
 
-    <bundle dependency="true">mvn:com.google.guava/guava/15.0</bundle>
+    <bundle dependency="true">mvn:com.google.guava/guava/21.0</bundle>
     <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
 
     <!--<bundle dependency="true">mvn:com.google.inject/guice/3.0</bundle>-->
@@ -188,22 +192,22 @@
     <bundle dependency="true">mvn:de.maggu2810.p2redist/com.google.inject/3.0.0.v201312141243</bundle>
     <bundle dependency="true">mvn:de.maggu2810.p2redist/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
-    <bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.8.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.9.0</bundle>
     <bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.registry/3.6.100</bundle>
     <bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.supplement/1.6.100</bundle>
 
     <!-- Add ASM package -->
     <!-- org.eclipse.xtext.common.types is using Require-Bundle -->
-    <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm/6.1.1</bundle>
+    <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm/7.0</bundle>
   </feature>
 
   <feature name="openhab.tp-xtext-ide" description="Xtext - IDE Support" version="${project.version}">
-    <capability>openhab.tp;feature=xtext-ide;version=2.14.0</capability>
+    <capability>openhab.tp;feature=xtext-ide;version=2.17.0</capability>
     <feature dependency="true">openhab.tp-xtext</feature>
 
     <!-- Support for the Language Server Protocol -->
-    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.ide/2.14.0</bundle>
-    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.ide/2.14.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.ide/2.17.0</bundle>
+    <bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.ide/2.17.0</bundle>
   </feature>
 
   <!--

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -38,22 +38,27 @@ import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
  * <p>
  * This class is mutable.
  *
+ * @author Denis Nobel - Initial contribution
  * @author Michael Grammling - Configuration could never be null but may be empty
  * @author Benedikt Niehues - Fix ESH Bug 450236
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=450236 - Considering
  *         ThingType Description
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Simon Kaufmann - Added label
- *
+ * @author Christoph Weitkamp - Added method `getChannel(ChannelUID)`
  */
 @NonNullByDefault
 public class ThingImpl implements Thing {
 
+    /*
+     * !!! DO NOT CHANGE - We are not allowed to change the members of the ThingImpl implementation as the storage for
+     * things uses this implementation itself to store and restore the data.
+     */
     private @Nullable String label;
 
     private @Nullable ThingUID bridgeUID;
 
-    private List<Channel> channels = new ArrayList<>(0);
+    private List<Channel> channels = new ArrayList<>();
 
     private Configuration configuration = new Configuration();
 
@@ -88,21 +93,6 @@ public class ThingImpl implements Thing {
     public ThingImpl(ThingTypeUID thingTypeUID, String thingId) throws IllegalArgumentException {
         this.uid = new ThingUID(thingTypeUID.getBindingId(), thingTypeUID.getId(), thingId);
         this.thingTypeUID = thingTypeUID;
-    }
-
-    /**
-     * @param thingUID
-     * @throws IllegalArgumentException
-     * @deprecated use {@link #ThingImpl(ThingTypeUID, ThingUID)} instead.
-     */
-    @Deprecated
-    public ThingImpl(ThingUID thingUID) throws IllegalArgumentException {
-        if ("".equals(thingUID.getThingTypeId())) {
-            throw new IllegalArgumentException(
-                    "The given ThingUID does not specify a ThingType. You might want to use ThingImpl(ThingTypeUID, ThingUID) instead.");
-        }
-        this.uid = thingUID;
-        this.thingTypeUID = new ThingTypeUID(thingUID.getBindingId(), thingUID.getThingTypeId());
     }
 
     /**
@@ -156,8 +146,9 @@ public class ThingImpl implements Thing {
         return null;
     }
 
-    public List<Channel> getChannelsMutable() {
-        return this.channels;
+    @Override
+    public @Nullable Channel getChannel(ChannelUID channelUID) {
+        return getChannel(channelUID.getId());
     }
 
     @Override
@@ -190,8 +181,15 @@ public class ThingImpl implements Thing {
         this.bridgeUID = bridgeUID;
     }
 
+    public void addChannel(Channel channel) {
+        this.channels.add(channel);
+    }
+
     public void setChannels(List<Channel> channels) {
-        this.channels = channels;
+        this.channels.clear();
+        for (Channel channel : channels) {
+            addChannel(channel);
+        }
     }
 
     public void setConfiguration(@Nullable Configuration configuration) {

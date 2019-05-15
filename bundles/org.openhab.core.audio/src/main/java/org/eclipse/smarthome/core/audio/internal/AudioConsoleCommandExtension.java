@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -144,7 +144,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 try {
                     volume = PercentType.valueOf(args[2]);
                 } catch (Exception e) {
-                    console.println(e.getMessage());
+                    console.println("Specify volume as percentage between 0 and 100");
                     break;
                 }
                 playOnSinks(args[0], args[1], volume, console);

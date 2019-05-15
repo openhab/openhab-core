@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.items.Item;
 
 /**
  * A queryable persistence service which can be used to store and retrieve
- * data from Eclipse SmartHome. This is most likely some kind of database system.
+ * data from openHAB. This is most likely some kind of database system.
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Chris Jackson - Added getItems method

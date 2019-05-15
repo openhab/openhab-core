@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -61,22 +61,20 @@ public class ThingEventFactory extends AbstractEventFactory {
 
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
-        Event event = null;
         if (eventType.equals(ThingStatusInfoEvent.TYPE)) {
-            event = createStatusInfoEvent(topic, payload);
+            return createStatusInfoEvent(topic, payload);
         } else if (eventType.equals(ThingStatusInfoChangedEvent.TYPE)) {
-            event = createStatusInfoChangedEvent(topic, payload);
+            return createStatusInfoChangedEvent(topic, payload);
         } else if (eventType.equals(ThingAddedEvent.TYPE)) {
-            event = createAddedEvent(topic, payload);
+            return createAddedEvent(topic, payload);
         } else if (eventType.equals(ThingRemovedEvent.TYPE)) {
-            event = createRemovedEvent(topic, payload);
+            return createRemovedEvent(topic, payload);
         } else if (eventType.equals(ThingUpdatedEvent.TYPE)) {
-            event = createUpdatedEvent(topic, payload);
+            return createUpdatedEvent(topic, payload);
         } else if (eventType.equals(ChannelTriggeredEvent.TYPE)) {
-            event = createTriggerEvent(topic, payload, source);
+            return createTriggerEvent(topic, payload, source);
         }
-
-        return event;
+        throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
     }
 
     /**

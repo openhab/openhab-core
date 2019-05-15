@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -21,9 +21,13 @@ package org.eclipse.smarthome.io.console;
  */
 public interface Console {
 
-    public void print(String s);
+    default void printf(String format, Object... args) {
+        print(String.format(format, args));
+    }
 
-    public void println(String s);
+    void print(String s);
+
+    void println(String s);
 
     /**
      * usage output is treated differently from other output as it might
@@ -31,5 +35,5 @@ public interface Console {
      *
      * @param s the main usage string (console independent)
      */
-    public void printUsage(String s);
+    void printUsage(String s);
 }

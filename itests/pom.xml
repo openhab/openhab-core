@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -26,7 +25,7 @@
     <!-- <module>org.openhab.core.automation.module.script.defaultscope.tests</module> -->
     <!-- <module>org.openhab.core.automation.module.script.tests</module> -->
     <!-- <module>org.openhab.core.automation.integration.tests</module> -->
-    <!-- <module>org.openhab.core.binding.xml.tests</module> -->
+    <module>org.openhab.core.binding.xml.tests</module>
     <module>org.openhab.core.compat1x.tests</module>
     <module>org.openhab.core.config.core.tests</module>
     <module>org.openhab.core.config.discovery.mdns.tests</module>
@@ -34,24 +33,24 @@
     <!-- <module>org.openhab.core.config.discovery.usbserial.tests</module> -->
     <!-- <module>org.openhab.core.config.dispatch.tests</module> -->
     <!-- <module>org.openhab.core.config.xml.tests</module> -->
-    <!-- <module>org.openhab.core.io.http.tests</module> -->
+    <module>org.openhab.core.io.http.tests</module>
     <module>org.openhab.core.io.net.tests</module>
     <!-- <module>org.openhab.core.io.rest.tests</module> -->
     <module>org.openhab.core.io.rest.core.tests</module>
     <!-- <module>org.openhab.core.io.rest.sse.tests</module> -->
-    <!-- <module>org.openhab.core.io.rest.sitemap.tests</module> -->
     <!-- <module>org.openhab.core.io.transport.mqtt.tests</module> -->
     <!-- <module>org.openhab.core.io.transport.upnp.tests</module> -->
-    <!-- <module>org.openhab.core.magic.tests</module> -->
-    <!-- <module>org.openhab.core.model.core.tests</module> -->
+    <module>org.openhab.core.magic.tests</module>
+    <module>org.openhab.core.model.core.tests</module>
     <!-- <module>org.openhab.core.model.item.tests</module> -->
-    <!-- <module>org.openhab.core.model.lsp.tests</module> -->
-    <!-- <module>org.openhab.core.model.persistence.tests</module> -->
+    <module>org.openhab.core.model.lsp.tests</module>
+    <module>org.openhab.core.model.persistence.tests</module>
     <!-- <module>org.openhab.core.model.rule.tests</module> -->
     <!-- <module>org.openhab.core.model.script.tests</module> -->
-    <!-- <module>org.openhab.core.model.thing.tests</module> -->
-    <!-- <module>org.openhab.core.semantics.tests</module> -->
-    <!-- <module>org.openhab.core.storage.json.tests</module> -->
+    <module>org.openhab.core.model.thing.testsupport</module>
+    <module>org.openhab.core.model.thing.tests</module>
+    <module>org.openhab.core.semantics.tests</module>
+    <module>org.openhab.core.storage.json.tests</module>
     <module>org.openhab.core.thing.tests</module>
     <module>org.openhab.core.thing.xml.tests</module>
     <module>org.openhab.core.transform.tests</module>
@@ -59,6 +58,49 @@
     <module>org.openhab.core.ui.icon.tests</module>
     <module>org.openhab.core.voice.tests</module>
   </modules>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.openhab-core</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.compile</artifactId>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+            </archive>
+            <skipIfEmpty>true</skipIfEmpty>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
   <profiles>
     <profile>
@@ -73,7 +115,7 @@
       </modules>
     </profile>
 
-    <profile> <!-- BEG: itests common -->
+    <profile>
       <id>itests-common</id>
       <activation>
         <file>
@@ -85,19 +127,6 @@
         <dependency>
           <groupId>org.openhab.core.bom</groupId>
           <artifactId>org.openhab.core.bom.test</artifactId>
-          <type>pom</type>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.openhab.core.bom</groupId>
-          <artifactId>org.openhab.core.bom.openhab-core</artifactId>
-          <version>${project.version}</version>
-          <type>pom</type>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.openhab.core.bom</groupId>
-          <artifactId>org.openhab.core.bom.compile</artifactId>
           <type>pom</type>
           <scope>provided</scope>
         </dependency>
@@ -162,38 +191,7 @@
         </plugins>
       </build>
 
-    </profile> <!-- END: itests common -->
+    </profile>
   </profiles>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <configuration>
-            <archive>
-              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-            </archive>
-            <skipIfEmpty>true</skipIfEmpty>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.openhab.core.bom</groupId>
-      <artifactId>org.openhab.core.bom.compile</artifactId>
-      <type>pom</type>
-    </dependency>
-  </dependencies>
 
 </project>

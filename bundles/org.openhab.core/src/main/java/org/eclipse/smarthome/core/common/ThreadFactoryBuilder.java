@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -98,7 +98,7 @@ public class ThreadFactoryBuilder {
      * incremented with each new thread, initialized to 1. If set to null, threads are named 'name-i'.
      * <p>
      * Defaults to the name prefix 'ESH'. Setting a name prefix different than the default one is intended to be used by
-     * solutions integrating Eclipse SmartHome.
+     * solutions integrating openHAB.
      *
      * @param namePrefix The name prefix (can be null)
      * @return this {@link ThreadFactoryBuilder} instance

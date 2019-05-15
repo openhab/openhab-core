@@ -38,7 +38,7 @@ Fragment-Host: org.openhab.core.config.discovery.usbserial
 	org.openhab.core.thing;version='[2.5.0,2.5.1)',\
 	net.bytebuddy.byte-buddy;version='[1.7.9,1.7.10)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.7.9,1.7.10)',\
-	org.mockito.mockito-core;version='[2.13.0,2.13.1)',\
+	org.mockito.mockito-core;version='[2.25.0,2.25.1)',\
 	org.objenesis;version='[2.6.0,2.6.1)',\
 	org.openhab.core.config.discovery;version='[2.5.0,2.5.1)',\
 	org.openhab.core.config.discovery.usbserial;version='[2.5.0,2.5.1)',\

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -12,7 +12,8 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,66 +21,55 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
+ * An implementation of {@link ScriptEngineFactory} with customizations for Nashorn ScriptEngines.
  *
  * @author Simon Merschjohann - Initial contribution
+ * @author Scott Rushworth - removed default methods provided by ScriptEngineFactory
  */
+@NonNullByDefault
 @Component(service = ScriptEngineFactory.class)
-public class NashornScriptEngineFactory implements ScriptEngineFactory {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
 
-    private ScriptEngineManager engineManager = new ScriptEngineManager();
+    private static final String SCRIPT_TYPE = "js";
 
     @Override
-    public List<String> getLanguages() {
-        return Arrays.asList("js", "javascript", "application/javascript");
+    public List<String> getScriptTypes() {
+        List<String> scriptTypes = new ArrayList<>();
+
+        for (javax.script.ScriptEngineFactory f : engineManager.getEngineFactories()) {
+            List<String> extensions = f.getExtensions();
+
+            if (extensions.contains(SCRIPT_TYPE)) {
+                scriptTypes.addAll(extensions);
+                scriptTypes.addAll(f.getMimeTypes());
+            }
+        }
+        return Collections.unmodifiableList(scriptTypes);
     }
 
     @Override
-    public void scopeValues(ScriptEngine engine, Map<String, Object> scopeValues) {
-        Set<String> expressions = new HashSet<String>();
+    public void scopeValues(ScriptEngine scriptEngine, Map<String, Object> scopeValues) {
+        Set<String> expressions = new HashSet<>();
 
         for (Entry<String, Object> entry : scopeValues.entrySet()) {
-            engine.put(entry.getKey(), entry.getValue());
-
+            scriptEngine.put(entry.getKey(), entry.getValue());
             if (entry.getValue() instanceof Class) {
-                expressions.add(String.format("%s = %s.static;", entry.getKey(), entry.getKey()));
+                expressions.add(String.format("%s = %<s.static;", entry.getKey()));
             }
         }
         String scriptToEval = String.join("\n", expressions);
         try {
-            engine.eval(scriptToEval);
-        } catch (ScriptException e) {
-            logger.error("ScriptException while importing scope: {}", e.getMessage());
+            scriptEngine.eval(scriptToEval);
+        } catch (ScriptException ex) {
+            logger.error("ScriptException while importing scope: {}", ex.getMessage());
         }
-    }
-
-    @Override
-    public ScriptEngine createScriptEngine(String fileExtension) {
-        ScriptEngine engine = engineManager.getEngineByExtension(fileExtension);
-
-        if (engine == null) {
-            engine = engineManager.getEngineByName(fileExtension);
-        }
-
-        if (engine == null) {
-            engine = engineManager.getEngineByMimeType(fileExtension);
-        }
-
-        return engine;
-    }
-
-    @Override
-    public boolean isSupported(String fileExtension) {
-        return getLanguages().contains(fileExtension);
     }
 
 }

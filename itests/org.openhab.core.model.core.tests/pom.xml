@@ -13,4 +13,12 @@
 
   <name>openHAB Core :: Integration Tests :: Model Core Tests</name>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.compile-model</artifactId>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+
 </project>

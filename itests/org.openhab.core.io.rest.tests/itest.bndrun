@@ -30,7 +30,7 @@ Fragment-Host: org.openhab.core.io.rest
 	net.bytebuddy.byte-buddy;version='[1.7.9,1.7.10)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.7.9,1.7.10)',\
 	org.apache.aries.javax.jax.rs-api;version='[1.0.0,1.0.1)',\
-	org.mockito.mockito-core;version='[2.13.0,2.13.1)',\
+	org.mockito.mockito-core;version='[2.25.0,2.25.1)',\
 	org.objenesis;version='[2.6.0,2.6.1)',\
 	org.openhab.core.io.rest;version='[2.5.0,2.5.1)',\
 	org.openhab.core.io.rest.tests;version='[2.5.0,2.5.1)'

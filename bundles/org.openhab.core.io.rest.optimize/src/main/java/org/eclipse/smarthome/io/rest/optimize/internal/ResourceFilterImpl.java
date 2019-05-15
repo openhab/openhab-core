@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -65,7 +65,7 @@ public class ResourceFilterImpl implements ResourceFilter {
     private static final String[] WHITELIST = new String[] {
             // JAX-RS
             "javax.ws.rs.ext.MessageBodyReader", "javax.ws.rs.ext.MessageBodyWriter",
-            // Eclipse SmartHome
+            // openHAB
             "org.eclipse.smarthome.io.rest.internal.filter.ProxyFilter",
             "org.eclipse.smarthome.io.rest.internal.resources.RootResource",
             "org.eclipse.smarthome.io.rest.JSONResponse$ExceptionMapper", "org.eclipse.smarthome.io.rest.RESTResource",

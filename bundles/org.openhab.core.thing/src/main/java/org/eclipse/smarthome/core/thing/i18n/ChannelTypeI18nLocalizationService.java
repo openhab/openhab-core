@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2014,2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2010-2019 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * information.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -24,16 +24,22 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.eclipse.smarthome.core.thing.type.StateChannelTypeBuilder;
 import org.eclipse.smarthome.core.thing.type.TriggerChannelTypeBuilder;
+import org.eclipse.smarthome.core.types.CommandDescription;
+import org.eclipse.smarthome.core.types.CommandDescriptionBuilder;
+import org.eclipse.smarthome.core.types.CommandOption;
 import org.eclipse.smarthome.core.types.StateDescription;
+import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.eclipse.smarthome.core.types.StateOption;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This OSGi service could be used to localize a {@link ChannelType} using the I18N mechanism of the Eclipse SmartHome
+ * This OSGi service could be used to localize a {@link ChannelType} using the I18N mechanism of the openHAB
  * framework.
  *
+ * @author Markus Rathgeb - Initial contribution
  * @author Markus Rathgeb - Move code from XML thing type provider to separate service
  * @author Laurent Garnier - fix localized label and description for channel group definition
  * @author Christoph Weitkamp - factored out from {@link XmlChannelTypeProvider} and {@link XmlChannelGroupTypeProvider}
@@ -43,35 +49,79 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ChannelTypeI18nLocalizationService {
 
-    @NonNullByDefault({})
-    private ThingTypeI18nUtil thingTypeI18nUtil;
+    private final ThingTypeI18nUtil thingTypeI18nUtil;
 
-    @Reference
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
+    @Activate
+    public ChannelTypeI18nLocalizationService(final @Reference TranslationProvider i18nProvider) {
         this.thingTypeI18nUtil = new ThingTypeI18nUtil(i18nProvider);
     }
 
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.thingTypeI18nUtil = null;
+    public @Nullable String createLocalizedStatePattern(final Bundle bundle, String pattern,
+            final ChannelTypeUID channelTypeUID, final @Nullable Locale locale) {
+        return thingTypeI18nUtil.getChannelStatePattern(bundle, channelTypeUID, pattern, locale);
     }
 
-    private @Nullable StateDescription createLocalizedStateDescription(final Bundle bundle,
+    public List<StateOption> createLocalizedStateOptions(final Bundle bundle, List<StateOption> stateOptions,
+            final ChannelTypeUID channelTypeUID, final @Nullable Locale locale) {
+        List<StateOption> localizedOptions = new ArrayList<>();
+        for (final StateOption stateOption : stateOptions) {
+            String optionLabel = stateOption.getLabel();
+            if (optionLabel != null) {
+                optionLabel = thingTypeI18nUtil.getChannelStateOption(bundle, channelTypeUID, stateOption.getValue(),
+                        optionLabel, locale);
+            }
+            localizedOptions.add(new StateOption(stateOption.getValue(), optionLabel));
+        }
+        return localizedOptions;
+    }
+
+    public @Nullable StateDescription createLocalizedStateDescription(final Bundle bundle,
             final @Nullable StateDescription state, final ChannelTypeUID channelTypeUID,
             final @Nullable Locale locale) {
         if (state == null) {
             return null;
         }
-        String pattern = thingTypeI18nUtil.getChannelStatePattern(bundle, channelTypeUID, state.getPattern(), locale);
 
-        List<StateOption> localizedOptions = new ArrayList<>();
-        for (final StateOption options : state.getOptions()) {
-            String optionLabel = thingTypeI18nUtil.getChannelStateOption(bundle, channelTypeUID, options.getValue(),
-                    options.getLabel(), locale);
-            localizedOptions.add(new StateOption(options.getValue(), optionLabel));
+        String localizedPattern = state.getPattern();
+        if (localizedPattern != null) {
+            localizedPattern = createLocalizedStatePattern(bundle, localizedPattern, channelTypeUID, locale);
+        }
+        List<StateOption> localizedOptions = createLocalizedStateOptions(bundle, state.getOptions(), channelTypeUID,
+                locale);
+
+        StateDescriptionFragmentBuilder builder = StateDescriptionFragmentBuilder.create(state);
+        if (localizedPattern != null) {
+            builder.withPattern(localizedPattern);
+        }
+        return builder.withOptions(localizedOptions).build().toStateDescription();
+    }
+
+    public List<CommandOption> createLocalizedCommandOptions(final Bundle bundle, List<CommandOption> commandOptions,
+            final ChannelTypeUID channelTypeUID, final @Nullable Locale locale) {
+        List<CommandOption> localizedOptions = new ArrayList<>();
+        for (final CommandOption commandOption : commandOptions) {
+            String optionLabel = commandOption.getLabel();
+            if (optionLabel != null) {
+                optionLabel = thingTypeI18nUtil.getChannelCommandOption(bundle, channelTypeUID,
+                        commandOption.getCommand(), optionLabel, locale);
+            }
+            localizedOptions.add(new CommandOption(commandOption.getCommand(), optionLabel));
+        }
+        return localizedOptions;
+    }
+
+    public @Nullable CommandDescription createLocalizedCommandDescription(final Bundle bundle,
+            final @Nullable CommandDescription command, final ChannelTypeUID channelTypeUID,
+            final @Nullable Locale locale) {
+        if (command == null) {
+            return null;
         }
 
-        return new StateDescription(state.getMinimum(), state.getMaximum(), state.getStep(), pattern,
-                state.isReadOnly(), localizedOptions);
+        List<CommandOption> localizedOptions = createLocalizedCommandOptions(bundle, command.getCommandOptions(),
+                channelTypeUID, locale);
+
+        CommandDescriptionBuilder commandDescriptionBuilder = CommandDescriptionBuilder.create();
+        return commandDescriptionBuilder.withCommandOptions(localizedOptions).build();
     }
 
     public ChannelType createLocalizedChannelType(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
@@ -85,12 +135,15 @@ public class ChannelTypeI18nLocalizationService {
             case STATE:
                 StateDescription state = createLocalizedStateDescription(bundle, channelType.getState(), channelTypeUID,
                         locale);
+                CommandDescription command = createLocalizedCommandDescription(bundle,
+                        channelType.getCommandDescription(), channelTypeUID, locale);
 
                 StateChannelTypeBuilder stateBuilder = ChannelTypeBuilder
                         .state(channelTypeUID, label == null ? defaultLabel : label, channelType.getItemType())
                         .isAdvanced(channelType.isAdvanced()).withCategory(channelType.getCategory())
                         .withConfigDescriptionURI(channelType.getConfigDescriptionURI()).withTags(channelType.getTags())
-                        .withStateDescription(state).withAutoUpdatePolicy(channelType.getAutoUpdatePolicy());
+                        .withStateDescription(state).withAutoUpdatePolicy(channelType.getAutoUpdatePolicy())
+                        .withCommandDescription(command);
                 if (description != null) {
                     stateBuilder.withDescription(description);
                 }
