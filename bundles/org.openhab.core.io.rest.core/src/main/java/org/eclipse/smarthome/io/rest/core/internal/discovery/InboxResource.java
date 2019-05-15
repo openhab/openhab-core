@@ -30,6 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
 import org.eclipse.smarthome.config.discovery.dto.DiscoveryResultDTO;
 import org.eclipse.smarthome.config.discovery.dto.DiscoveryResultDTOMapper;
@@ -72,7 +73,7 @@ public class InboxResource {
     public static final String PATH_INBOX = "inbox";
 
     @Reference
-    private @NonNullByDefault({}) Inbox inbox;
+    protected @NonNullByDefault({}) Inbox inbox;
 
     @POST
     @Path("/{thingUID}/approve")
@@ -81,7 +82,8 @@ public class InboxResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Thing unable to be approved."),
             @ApiResponse(code = 409, message = "No binding found that supports this thing.") })
-    public void approve(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public void approve(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thingUID", required = true) String thingUID,
             @ApiParam(value = "thing label") String label) {
         ThingUID thingUIDObject = new ThingUID(thingUID);

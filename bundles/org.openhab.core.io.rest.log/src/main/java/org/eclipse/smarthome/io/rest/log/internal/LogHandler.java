@@ -13,26 +13,28 @@
 package org.eclipse.smarthome.io.rest.log.internal;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.io.rest.RESTService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,17 +43,19 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.osgi.service.component.annotations.Component;
 
 /**
  *
  * @author Sebastian Janzen - Initial contribution
  */
-@Component
 @Path("/log")
 @Api(value = LogHandler.PATH_LOG)
 @Produces(MediaType.APPLICATION_JSON)
-public class LogHandler implements RESTResource {
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class LogHandler {
 
     private final Logger logger = LoggerFactory.getLogger(LogHandler.class);
     public static final String PATH_LOG = "log";
@@ -62,11 +66,12 @@ public class LogHandler implements RESTResource {
      * Rolling array to store the last LOG_BUFFER_LIMIT messages. Those can be fetched e.g. by a
      * diagnostic UI to display errors of other clients, where e.g. the logs are not easily accessible.
      */
-    private final ConcurrentLinkedDeque<LogMessage> LOG_BUFFER = new ConcurrentLinkedDeque<>();
+    private final Deque<LogMessage> LOG_BUFFER = new ConcurrentLinkedDeque<>();
 
     /**
      * Container for a log message
      */
+    @NonNullByDefault({})
     public class LogMessage {
         public long timestamp;
         public String severity;
@@ -77,37 +82,29 @@ public class LogHandler implements RESTResource {
     @GET
     @Path("/levels")
     @ApiOperation(value = "Get log severities, which are logged by the current logger settings.", code = 200, notes = "This depends on the current log settings at the backend.")
-    public Response getLogLevels() {
-        return Response.ok(createLogLevelsMap()).build();
+    public Map<String, Boolean> getLogLevels() {
+        return createLogLevelsMap();
     }
 
     @GET
     @ApiOperation(value = "Returns the last logged frontend messages. The amount is limited to the "
             + LogConstants.LOG_BUFFER_LIMIT + " last entries.")
     @ApiParam(name = "limit", allowableValues = "range[1, " + LogConstants.LOG_BUFFER_LIMIT + "]")
-    public Response getLastLogs(@DefaultValue(LogConstants.LOG_BUFFER_LIMIT + "") @QueryParam("limit") Integer limit) {
+    public Stream<LogMessage> getLastLogs(
+            @DefaultValue(LogConstants.LOG_BUFFER_LIMIT + "") @QueryParam("limit") Integer limit) {
         if (LOG_BUFFER.size() <= 0) {
-            return Response.ok("[]").build();
+            return Stream.empty();
         }
 
         int effectiveLimit;
-        if (limit == null || limit <= 0 || limit > LogConstants.LOG_BUFFER_LIMIT) {
+        if (limit <= 0 || limit > LogConstants.LOG_BUFFER_LIMIT) {
             effectiveLimit = LOG_BUFFER.size();
         } else {
             effectiveLimit = limit;
         }
 
-        if (effectiveLimit >= LOG_BUFFER.size()) {
-            return Response.ok(LOG_BUFFER.toArray()).build();
-        } else {
-            final List<LogMessage> result = new ArrayList<>();
-            Iterator<LogMessage> iter = LOG_BUFFER.descendingIterator();
-            do {
-                result.add(iter.next());
-            } while (iter.hasNext() && result.size() < effectiveLimit);
-            Collections.reverse(result);
-            return Response.ok(result).build();
-        }
+        return LOG_BUFFER.stream().limit(effectiveLimit);
+
     }
 
     @POST
@@ -116,25 +113,18 @@ public class LogHandler implements RESTResource {
     @ApiParam(name = "logMessage", value = "Severity is required and can be one of error, warn, info or debug, depending on activated severities which you can GET at /logLevels.", example = "{\"severity\": \"error\", \"url\": \"http://example.org\", \"message\": \"Error message\"}")
     @ApiResponses({ @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 403, message = LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED) })
-    public Response log(final LogMessage logMessage) {
-        if (logMessage == null) {
-            logger.debug("Received null log message model!");
-            return Response.status(500)
-                    .entity(String.format(TEMPLATE_INTERNAL_ERROR, LogConstants.LOG_HANDLE_ERROR, "ERROR")).build();
-        }
+    public void log(final LogMessage logMessage) {
         logMessage.timestamp = Calendar.getInstance().getTimeInMillis();
 
         if (!doLog(logMessage)) {
-            return Response.status(403).entity(String.format(TEMPLATE_INTERNAL_ERROR,
-                    LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED, logMessage.severity)).build();
+            throw new NotSupportedException(String.format(TEMPLATE_INTERNAL_ERROR,
+                    LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED, logMessage.severity));
         }
 
         LOG_BUFFER.add(logMessage);
         if (LOG_BUFFER.size() > LogConstants.LOG_BUFFER_LIMIT) {
             LOG_BUFFER.pollLast(); // Remove last element of Deque
         }
-
-        return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
     /**

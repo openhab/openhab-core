@@ -101,13 +101,13 @@ public class PersistenceResource {
     public static final String PATH = "persistence";
 
     @Reference
-    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    protected @NonNullByDefault({}) ItemRegistry itemRegistry;
     @Reference
-    private @NonNullByDefault({}) PersistenceServiceRegistry persistenceServiceRegistry;
+    protected @NonNullByDefault({}) PersistenceServiceRegistry persistenceServiceRegistry;
     @Reference
-    private @NonNullByDefault({}) TimeZoneProvider timeZoneProvider;
+    protected @NonNullByDefault({}) TimeZoneProvider timeZoneProvider;
     @Reference
-    private @NonNullByDefault({}) LocaleService localeService;
+    protected @NonNullByDefault({}) LocaleService localeService;
 
     @GET
     @RolesAllowed({ Role.ADMIN })

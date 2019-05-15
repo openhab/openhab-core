@@ -15,59 +15,62 @@ package org.eclipse.smarthome.io.rest.sitemap.internal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.sse.OutboundSseEvent;
+import javax.ws.rs.sse.OutboundSseEvent.Builder;
+import javax.ws.rs.sse.Sse;
+import javax.ws.rs.sse.SseBroadcaster;
+import javax.ws.rs.sse.SseEventSink;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.items.GenericItem;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.StateChangeListener;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.io.rest.JSONResponse;
 import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTOMapper;
 import org.eclipse.smarthome.io.rest.sitemap.SitemapSubscriptionService;
-import org.eclipse.smarthome.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
+import org.eclipse.smarthome.io.rest.sitemap.internal.SitemapSubscriptionServiceImpl.SitemapSubscriptionCallback;
+import org.eclipse.smarthome.io.rest.sitemap.internal.dto.MappingDTO;
+import org.eclipse.smarthome.io.rest.sitemap.internal.dto.PageDTO;
+import org.eclipse.smarthome.io.rest.sitemap.internal.dto.SitemapDTO;
+import org.eclipse.smarthome.io.rest.sitemap.internal.dto.WidgetDTO;
+import org.eclipse.smarthome.io.rest.sitemap.internal.events.SitemapEvent;
 import org.eclipse.smarthome.model.sitemap.Chart;
-import org.eclipse.smarthome.model.sitemap.ColorArray;
 import org.eclipse.smarthome.model.sitemap.Frame;
 import org.eclipse.smarthome.model.sitemap.Image;
 import org.eclipse.smarthome.model.sitemap.LinkableWidget;
-import org.eclipse.smarthome.model.sitemap.List;
 import org.eclipse.smarthome.model.sitemap.Mapping;
 import org.eclipse.smarthome.model.sitemap.Mapview;
 import org.eclipse.smarthome.model.sitemap.Selection;
@@ -77,26 +80,19 @@ import org.eclipse.smarthome.model.sitemap.SitemapProvider;
 import org.eclipse.smarthome.model.sitemap.Slider;
 import org.eclipse.smarthome.model.sitemap.Switch;
 import org.eclipse.smarthome.model.sitemap.Video;
-import org.eclipse.smarthome.model.sitemap.VisibilityRule;
 import org.eclipse.smarthome.model.sitemap.Webview;
 import org.eclipse.smarthome.model.sitemap.Widget;
 import org.eclipse.smarthome.ui.items.ItemUIRegistry;
-import org.glassfish.jersey.media.sse.EventOutput;
-import org.glassfish.jersey.media.sse.OutboundEvent;
-import org.glassfish.jersey.media.sse.SseBroadcaster;
-import org.glassfish.jersey.media.sse.SseFeature;
-import org.glassfish.jersey.server.BroadcasterListener;
-import org.glassfish.jersey.server.ChunkedOutput;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.MapMaker;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -113,11 +109,14 @@ import io.swagger.annotations.ApiResponses;
  * @author Chris Jackson
  * @author Yordan Zhelev - Added Swagger annotations
  */
-@Component(service = RESTResource.class)
 @Path(SitemapResource.PATH_SITEMAPS)
 @RolesAllowed({ Role.USER, Role.ADMIN })
 @Api(value = SitemapResource.PATH_SITEMAPS)
-public class SitemapResource implements RESTResource, SitemapSubscriptionCallback, BroadcasterListener<OutboundEvent> {
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class SitemapResource implements SitemapSubscriptionCallback {
 
     private final Logger logger = LoggerFactory.getLogger(SitemapResource.class);
 
@@ -125,108 +124,54 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     private static final String SEGMENT_EVENTS = "events";
     private static final String X_ACCEL_BUFFERING_HEADER = "X-Accel-Buffering";
 
-    private static final long TIMEOUT_IN_MS = 30000;
+    @Reference
+    protected @NonNullByDefault({}) ItemUIRegistry itemUIRegistry;
 
-    private SseBroadcaster broadcaster;
+    @Reference
+    protected @NonNullByDefault({}) SitemapSubscriptionService subscriptions;
+
+    @Reference
+    protected @NonNullByDefault({}) LocaleService localeService;
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected final List<SitemapProvider> sitemapProviders = new ArrayList<>();
+
+    private final Map<String, SitemapEventOutput> eventOutputs = new TreeMap<>();
+
+    private @NonNullByDefault({}) Builder eventBuilder;
+    private @NonNullByDefault({}) SseBroadcaster broadcaster;
 
     @Context
-    UriInfo uriInfo;
-
-    @Context
-    HttpServletRequest request;
-
-    @Context
-    private HttpServletResponse response;
-
-    private ItemUIRegistry itemUIRegistry;
-
-    private SitemapSubscriptionService subscriptions;
-
-    private LocaleService localeService;
-
-    private final java.util.List<SitemapProvider> sitemapProviders = new ArrayList<>();
-
-    private final Map<String, EventOutput> eventOutputs = new MapMaker().weakValues().makeMap();
-
-    private final ScheduledExecutorService scheduler = ThreadPoolManager
-            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
-
-    private ScheduledFuture<?> cleanSubscriptionsJob;
+    public void setSse(Sse sse) {
+        eventBuilder = sse.newEventBuilder();
+        broadcaster = sse.newBroadcaster();
+        broadcaster.onClose(event -> {
+            if (event instanceof SitemapEventOutput) {
+                SitemapEventOutput sitemapEvent = (SitemapEventOutput) event;
+                logger.debug("SSE connection for subscription {} has been closed.", sitemapEvent.getSubscriptionId());
+                subscriptions.removeSubscription(sitemapEvent.getSubscriptionId());
+                eventOutputs.remove(sitemapEvent.getSubscriptionId());
+            }
+        });
+        broadcaster.onError((c, e) -> {
+        });
+    }
 
     @Activate
     protected void activate() {
-        broadcaster = new SseBroadcaster();
-        broadcaster.add(this);
-
-        // The clean SSE subscriptions job sends an ALIVE event to all subscribers. This will trigger
-        // an exception when the subscriber is dead, leading to the release of the SSE subscription
-        // on server side.
-        // In practice, the exception occurs only after the sending of a second ALIVE event. So this
-        // will require two runs of the job to release an SSE subscription.
-        // The clean SSE subscriptions job is run every 5 minutes.
-        cleanSubscriptionsJob = scheduler.scheduleAtFixedRate(() -> {
-            logger.debug("Run clean SSE subscriptions job");
-            if (subscriptions != null) {
-                subscriptions.checkAliveClients();
-            }
-        }, 1, 5, TimeUnit.MINUTES);
     }
 
     @Deactivate
     protected void deactivate() {
-        if (cleanSubscriptionsJob != null && !cleanSubscriptionsJob.isCancelled()) {
-            logger.debug("Cancel clean SSE subscriptions job");
-            cleanSubscriptionsJob.cancel(true);
-            cleanSubscriptionsJob = null;
-        }
-        broadcaster.remove(this);
-        broadcaster = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = itemUIRegistry;
-    }
-
-    public void unsetItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setSitemapSubscriptionService(SitemapSubscriptionService subscriptions) {
-        this.subscriptions = subscriptions;
-    }
-
-    public void unsetSitemapSubscriptionService(SitemapSubscriptionService subscriptions) {
-        this.subscriptions = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addSitemapProvider(SitemapProvider provider) {
-        sitemapProviders.add(provider);
-    }
-
-    public void removeSitemapProvider(SitemapProvider provider) {
-        sitemapProviders.remove(provider);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
+        broadcaster.close();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all available sitemaps.", response = SitemapDTO.class, responseContainer = "Collection")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response getSitemaps() {
-        logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
-        Object responseObject = getSitemapBeans(uriInfo.getAbsolutePathBuilder().build());
-        return Response.ok(responseObject).build();
+    public Collection<SitemapDTO> getSitemaps(@Context UriInfo uriInfo) {
+        return getSitemapBeans(uriInfo.getAbsolutePathBuilder().build());
     }
 
     @GET
@@ -234,17 +179,19 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get sitemap by name.", response = SitemapDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response getSitemapData(@Context HttpHeaders headers,
+    public SitemapDTO getSitemapData(@Context UriInfo uriInfo, @Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
             @PathParam("sitemapname") @ApiParam(value = "sitemap name") String sitemapname,
             @QueryParam("type") String type, @QueryParam("jsoncallback") @DefaultValue("callback") String callback,
             @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets", required = false) boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
-        logger.debug("Received HTTP GET request from IP {} at '{}' for media type '{}'.", request.getRemoteAddr(),
-                uriInfo.getPath(), type);
-        Object responseObject = getSitemapBean(sitemapname, uriInfo.getBaseUriBuilder().build(), locale,
-                includeHiddenWidgets);
-        return Response.ok(responseObject).build();
+        Sitemap sitemap = getSitemap(sitemapname);
+        if (sitemap != null) {
+            return createSitemapBean(sitemapname, sitemap, uriInfo.getBaseUriBuilder().build(), locale,
+                    includeHiddenWidgets);
+        } else {
+            throw new NotFoundException();
+        }
     }
 
     @GET
@@ -254,35 +201,25 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget"),
             @ApiResponse(code = 400, message = "Invalid subscription id has been provided.") })
-    public Response getPageData(@Context HttpHeaders headers,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public PageDTO getPageData(@Context UriInfo uriInfo, @Context HttpHeaders headers,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("sitemapname") @ApiParam(value = "sitemap name") String sitemapname,
             @PathParam("pageid") @ApiParam(value = "page id") String pageId,
-            @QueryParam("subscriptionid") @ApiParam(value = "subscriptionid", required = false) String subscriptionId,
+            @QueryParam("subscriptionid") @ApiParam(value = "subscriptionid", required = false) @Nullable String subscriptionId,
             @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets", required = false) boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
-        logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
 
         if (subscriptionId != null) {
             try {
                 subscriptions.setPageId(subscriptionId, sitemapname, pageId);
             } catch (IllegalArgumentException e) {
-                return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+                throw new BadRequestException(e);
             }
         }
 
         boolean timeout = false;
-        if (headers.getRequestHeader("X-Atmosphere-Transport") != null) {
-            // Make the REST-API pseudo-compatible with openHAB 1.x
-            // The client asks Atmosphere for server push functionality,
-            // so we do a simply listening for changes on the appropriate items
-            // The blocking has a timeout of 30 seconds. If this timeout is reached,
-            // we notice this information in the response object.
-            timeout = blockUnlessChangeOccurs(sitemapname, pageId);
-        }
-        PageDTO responseObject = getPageBean(sitemapname, pageId, uriInfo.getBaseUriBuilder().build(), locale, timeout,
+        return getPageBean(sitemapname, pageId, uriInfo.getBaseUriBuilder().build(), locale, timeout,
                 includeHiddenWidgets);
-        return Response.ok(responseObject).build();
     }
 
     /**
@@ -291,23 +228,24 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      * @return a subscription id
      */
     @POST
+    @Produces(MediaType.SERVER_SENT_EVENTS)
     @Path(SEGMENT_EVENTS + "/subscribe")
     @ApiOperation(value = "Creates a sitemap event subscription.")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Subscription created."),
             @ApiResponse(code = 503, message = "Subscriptions limit reached.") })
-    public Object createEventSubscription() {
+    public String createEventSubscription(@Context HttpServletRequest request, @Context UriInfo uriInfo,
+            @Context SseEventSink es) {
         String subscriptionId = subscriptions.createSubscription(this);
         if (subscriptionId == null) {
-            return JSONResponse.createResponse(Status.SERVICE_UNAVAILABLE, null,
-                    "Max number of subscriptions is reached.");
+            throw new ServiceUnavailableException("Max number of subscriptions is reached.");
         }
-        final EventOutput eventOutput = new SitemapEventOutput(subscriptions, subscriptionId);
-        broadcaster.add(eventOutput);
+        final SitemapEventOutput eventOutput = new SitemapEventOutput(es, subscriptions, subscriptionId);
+        broadcaster.register(eventOutput);
         eventOutputs.put(subscriptionId, eventOutput);
         URI uri = uriInfo.getBaseUriBuilder().path(PATH_SITEMAPS).path(SEGMENT_EVENTS).path(subscriptionId).build();
         logger.debug("Client from IP {} requested new subscription => got id {}.", request.getRemoteAddr(),
                 subscriptionId);
-        return Response.created(uri);
+        return uri.toString();
     }
 
     /**
@@ -316,126 +254,110 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      * @return {@link EventOutput} object associated with the incoming
      *         connection.
      */
+    @SuppressWarnings("null")
     @GET
     @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]*}/")
-    @Produces(SseFeature.SERVER_SENT_EVENTS)
-    @ApiOperation(value = "Get sitemap events.", response = EventOutput.class)
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @ApiOperation(value = "Get sitemap events.", response = SseEventSink.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "Page not linked to the subscription."),
             @ApiResponse(code = 404, message = "Subscription not found.") })
-    public Object getSitemapEvents(
+    public SseEventSink getSitemapEvents(@Context HttpServletResponse response,
             @PathParam("subscriptionid") @ApiParam(value = "subscription id") String subscriptionId,
-            @QueryParam("sitemap") @ApiParam(value = "sitemap name", required = false) String sitemapname,
-            @QueryParam("pageid") @ApiParam(value = "page id", required = false) String pageId) {
-        EventOutput eventOutput = eventOutputs.get(subscriptionId);
+            @QueryParam("sitemap") @ApiParam(value = "sitemap name", required = false) @Nullable String sitemapname,
+            @QueryParam("pageid") @ApiParam(value = "page id", required = false) @Nullable String pageId) {
+        SitemapEventOutput eventOutput = eventOutputs.get(subscriptionId);
         if (!subscriptions.exists(subscriptionId) || eventOutput == null) {
-            return JSONResponse.createResponse(Status.NOT_FOUND, null,
-                    "Subscription id " + subscriptionId + " does not exist.");
+            throw new NotFoundException("Subscription id " + subscriptionId + " does not exist.");
         }
         if (sitemapname != null && pageId != null) {
             subscriptions.setPageId(subscriptionId, sitemapname, pageId);
         }
         if (subscriptions.getSitemapName(subscriptionId) == null || subscriptions.getPageId(subscriptionId) == null) {
-            return JSONResponse.createResponse(Status.BAD_REQUEST, null,
-                    "Subscription id " + subscriptionId + " is not yet linked to a sitemap/page.");
+            throw new BadRequestException("Subscription id " + subscriptionId + " s not yet linked to a sitemap/page.");
         }
-        logger.debug("Client from IP {} requested sitemap event stream for subscription {}.", request.getRemoteAddr(),
-                subscriptionId);
+        logger.debug("Client requested sitemap event stream for subscription {}.", subscriptionId);
 
         // Disables proxy buffering when using an nginx http server proxy for this response.
-        // This allows you to not disable proxy buffering in nginx and still have working sse
         response.addHeader(X_ACCEL_BUFFERING_HEADER, "no");
-
+        response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
         return eventOutput;
     }
 
     private PageDTO getPageBean(String sitemapName, String pageId, URI uri, Locale locale, boolean timeout,
             boolean includeHidden) {
         Sitemap sitemap = getSitemap(sitemapName);
-        if (sitemap != null) {
-            if (pageId.equals(sitemap.getName())) {
-                EList<Widget> children = itemUIRegistry.getChildren(sitemap);
-                return createPageBean(sitemapName, sitemap.getLabel(), sitemap.getIcon(), sitemap.getName(), children,
-                        false, isLeaf(children), uri, locale, timeout, includeHidden);
-            } else {
-                Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget) {
-                    EList<Widget> children = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
-                    PageDTO pageBean = createPageBean(sitemapName, itemUIRegistry.getLabel(pageWidget),
-                            itemUIRegistry.getCategory(pageWidget), pageId, children, false, isLeaf(children), uri,
-                            locale, timeout, includeHidden);
-                    EObject parentPage = pageWidget.eContainer();
-                    while (parentPage instanceof Frame) {
-                        parentPage = parentPage.eContainer();
-                    }
-                    if (parentPage instanceof Widget) {
-                        String parentId = itemUIRegistry.getWidgetId((Widget) parentPage);
-                        pageBean.parent = getPageBean(sitemapName, parentId, uri, locale, timeout, includeHidden);
-                        pageBean.parent.widgets = null;
-                        pageBean.parent.parent = null;
-                    } else if (parentPage instanceof Sitemap) {
-                        pageBean.parent = getPageBean(sitemapName, sitemap.getName(), uri, locale, timeout,
-                                includeHidden);
-                        pageBean.parent.widgets = null;
-                    }
-                    return pageBean;
+        if (sitemap == null) {
+            throw new NotFoundException();
+        }
+        if (pageId.equals(sitemap.getName())) {
+            EList<Widget> children = itemUIRegistry.getChildren(sitemap);
+            return createPageBean(sitemapName, sitemap.getLabel(), sitemap.getIcon(), sitemap.getName(), children,
+                    false, isLeaf(children), uri, locale, timeout, includeHidden);
+        }
+
+        Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
+        if (pageWidget instanceof LinkableWidget) {
+            EList<Widget> children = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
+            PageDTO pageBean = createPageBean(sitemapName, itemUIRegistry.getLabel(pageWidget),
+                    itemUIRegistry.getCategory(pageWidget), pageId, children, false, isLeaf(children), uri, locale,
+                    timeout, includeHidden);
+            EObject parentPage = pageWidget.eContainer();
+            while (parentPage instanceof Frame) {
+                parentPage = parentPage.eContainer();
+            }
+            if (parentPage instanceof Widget) {
+                String parentId = itemUIRegistry.getWidgetId((Widget) parentPage);
+                pageBean.parent = getPageBean(sitemapName, parentId, uri, locale, timeout, includeHidden);
+                pageBean.parent.widgets = null;
+                pageBean.parent.parent = null;
+            } else if (parentPage instanceof Sitemap) {
+                pageBean.parent = getPageBean(sitemapName, sitemap.getName(), uri, locale, timeout, includeHidden);
+                pageBean.parent.widgets = null;
+            }
+            return pageBean;
+        } else {
+            if (logger.isDebugEnabled()) {
+                if (pageWidget == null) {
+                    logger.debug("Received HTTP GET request at '{}' for the unknown page id '{}'.", uri, pageId);
                 } else {
-                    if (logger.isDebugEnabled()) {
-                        if (pageWidget == null) {
-                            logger.debug("Received HTTP GET request at '{}' for the unknown page id '{}'.", uri,
-                                    pageId);
-                        } else {
-                            logger.debug("Received HTTP GET request at '{}' for the page id '{}'. "
-                                    + "This id refers to a non-linkable widget and is therefore no valid page id.", uri,
-                                    pageId);
-                        }
-                    }
-                    throw new WebApplicationException(404);
+                    logger.debug(
+                            "Received HTTP GET request at '{}' for the page id '{}'. "
+                                    + "This id refers to a non-linkable widget and is therefore no valid page id.",
+                            uri, pageId);
                 }
             }
-        } else {
-            logger.info("Received HTTP GET request at '{}' for the unknown sitemap '{}'.", uri, sitemapName);
-            throw new WebApplicationException(404);
+            throw new NotFoundException();
         }
     }
 
     public Collection<SitemapDTO> getSitemapBeans(URI uri) {
         Collection<SitemapDTO> beans = new LinkedList<SitemapDTO>();
         Set<String> names = new HashSet<>();
-        logger.debug("Received HTTP GET request at '{}'.", UriBuilder.fromUri(uri).build().toASCIIString());
         for (SitemapProvider provider : sitemapProviders) {
             for (String modelName : provider.getSitemapNames()) {
                 Sitemap sitemap = provider.getSitemap(modelName);
-                if (sitemap != null) {
-                    if (!names.contains(modelName)) {
-                        names.add(modelName);
-                        SitemapDTO bean = new SitemapDTO();
-                        bean.name = modelName;
-                        bean.icon = sitemap.getIcon();
-                        bean.label = sitemap.getLabel();
-                        bean.link = UriBuilder.fromUri(uri).path(bean.name).build().toASCIIString();
-                        bean.homepage = new PageDTO();
-                        bean.homepage.link = bean.link + "/" + sitemap.getName();
-                        beans.add(bean);
-                    } else {
-                        logger.warn("Found duplicate sitemap name '{}' - ignoring it. Please check your configuration.",
-                                modelName);
-                    }
+                if (sitemap == null) {
+                    continue;
                 }
+                if (names.contains(modelName)) {
+                    logger.warn("Found duplicate sitemap name '{}' - ignoring it. Please check your configuration.",
+                            modelName);
+                    continue;
+                }
+                names.add(modelName);
+                SitemapDTO bean = new SitemapDTO();
+                bean.name = modelName;
+                bean.icon = sitemap.getIcon();
+                bean.label = sitemap.getLabel();
+                bean.link = uri.resolve(bean.name).toASCIIString();
+                bean.homepage = new PageDTO();
+                bean.homepage.link = bean.link + "/" + sitemap.getName();
+                beans.add(bean);
+
             }
         }
         return beans;
-    }
-
-    private SitemapDTO getSitemapBean(String sitemapname, URI uri, Locale locale, boolean includeHiddenWidgets) {
-        Sitemap sitemap = getSitemap(sitemapname);
-        if (sitemap != null) {
-            return createSitemapBean(sitemapname, sitemap, uri, locale, includeHiddenWidgets);
-        } else {
-            logger.info("Received HTTP GET request at '{}' for the unknown sitemap '{}'.", uriInfo.getPath(),
-                    sitemapname);
-            throw new WebApplicationException(404);
-        }
     }
 
     private SitemapDTO createSitemapBean(String sitemapName, Sitemap sitemap, URI uri, Locale locale,
@@ -446,21 +368,22 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         bean.icon = sitemap.getIcon();
         bean.label = sitemap.getLabel();
 
-        bean.link = UriBuilder.fromUri(uri).path(SitemapResource.PATH_SITEMAPS).path(bean.name).build().toASCIIString();
+        bean.link = uri.resolve(SitemapResource.PATH_SITEMAPS).resolve(bean.name).toASCIIString();
         bean.homepage = createPageBean(sitemap.getName(), sitemap.getLabel(), sitemap.getIcon(), sitemap.getName(),
                 itemUIRegistry.getChildren(sitemap), true, false, uri, locale, false, includeHiddenWidgets);
         return bean;
     }
 
-    private PageDTO createPageBean(String sitemapName, String title, String icon, String pageId, EList<Widget> children,
-            boolean drillDown, boolean isLeaf, URI uri, Locale locale, boolean timeout, boolean includeHiddenWidgets) {
+    private PageDTO createPageBean(String sitemapName, @Nullable String title, @Nullable String icon, String pageId,
+            @Nullable EList<Widget> children, boolean drillDown, boolean isLeaf, URI uri, Locale locale,
+            boolean timeout, boolean includeHiddenWidgets) {
         PageDTO bean = new PageDTO();
         bean.timeout = timeout;
         bean.id = pageId;
         bean.title = title;
         bean.icon = icon;
         bean.leaf = isLeaf;
-        bean.link = UriBuilder.fromUri(uri).path(PATH_SITEMAPS).path(sitemapName).path(pageId).build().toASCIIString();
+        bean.link = uri.resolve(SitemapResource.PATH_SITEMAPS).resolve(sitemapName).resolve(pageId).toASCIIString();
         if (children != null) {
             for (Widget widget : children) {
                 String widgetId = itemUIRegistry.getWidgetId(widget);
@@ -476,8 +399,8 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         return bean;
     }
 
-    private WidgetDTO createWidgetBean(String sitemapName, Widget widget, boolean drillDown, URI uri, String widgetId,
-            Locale locale, boolean evenIfHidden) {
+    private @Nullable WidgetDTO createWidgetBean(String sitemapName, Widget widget, boolean drillDown, URI uri,
+            String widgetId, Locale locale, boolean evenIfHidden) {
         // Test visibility
         if (!evenIfHidden && !itemUIRegistry.getVisiblity(widget)) {
             return null;
@@ -491,9 +414,9 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
                         .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
                 boolean isMapview = "mapview".equalsIgnoreCase(widgetTypeName);
                 Predicate<Item> itemFilter = (i -> i.getType().equals(CoreItemFactory.LOCATION));
-                bean.item = EnrichedItemDTOMapper.map(item, isMapview, itemFilter, UriBuilder.fromUri(uri).build(),
-                        locale);
-                bean.state = itemUIRegistry.getState(widget).toFullString();
+                bean.item = EnrichedItemDTOMapper.map(item, isMapview, itemFilter, uri, locale);
+                State state = itemUIRegistry.getState(widget);
+                bean.state = state != null ? state.toFullString() : null;
                 // In case the widget state is identical to the item state, its value is set to null.
                 if (bean.state != null && bean.state.equals(bean.item.state)) {
                     bean.state = null;
@@ -554,8 +477,8 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
             bean.maxValue = sliderWidget.getMaxValue();
             bean.step = sliderWidget.getStep();
         }
-        if (widget instanceof List) {
-            List listWidget = (List) widget;
+        if (widget instanceof org.eclipse.smarthome.model.sitemap.List) {
+            org.eclipse.smarthome.model.sitemap.List listWidget = (org.eclipse.smarthome.model.sitemap.List) widget;
             bean.separator = listWidget.getSeparator();
         }
         if (widget instanceof Image) {
@@ -630,7 +553,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         return true;
     }
 
-    private Sitemap getSitemap(String sitemapname) {
+    private @Nullable Sitemap getSitemap(String sitemapname) {
         for (SitemapProvider provider : sitemapProviders) {
             Sitemap sitemap = provider.getSitemap(sitemapname);
             if (sitemap != null) {
@@ -641,203 +564,16 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         return null;
     }
 
-    private boolean blockUnlessChangeOccurs(String sitemapname, String pageId) {
-        boolean timeout = false;
-        Sitemap sitemap = getSitemap(sitemapname);
-        if (sitemap != null) {
-            if (pageId.equals(sitemap.getName())) {
-                EList<Widget> children = itemUIRegistry.getChildren(sitemap);
-                timeout = waitForChanges(children);
-            } else {
-                Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget) {
-                    EList<Widget> children = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
-                    timeout = waitForChanges(children);
-                }
-            }
-        }
-        return timeout;
-    }
-
-    /**
-     * This method only returns when a change has occurred to any item on the
-     * page to display or if the timeout is reached
-     *
-     * @param widgets
-     *            the widgets of the page to observe
-     * @return true if the timeout is reached
-     */
-    private boolean waitForChanges(EList<Widget> widgets) {
-        long startTime = (new Date()).getTime();
-        boolean timeout = false;
-        BlockingStateChangeListener listener = new BlockingStateChangeListener();
-        // let's get all items for these widgets
-        Set<GenericItem> items = getAllItems(widgets);
-        for (GenericItem item : items) {
-            item.addStateChangeListener(listener);
-        }
-        while (!listener.hasChangeOccurred() && !timeout) {
-            timeout = (new Date()).getTime() - startTime > TIMEOUT_IN_MS;
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                timeout = true;
-                break;
-            }
-        }
-        for (GenericItem item : items) {
-            item.removeStateChangeListener(listener);
-        }
-        return timeout;
-    }
-
-    /**
-     * Collects all items that are represented by a given list of widgets
-     *
-     * @param widgets
-     *            the widget list to get the items for added to all bundles containing REST resources
-     * @return all items that are represented by the list of widgets
-     */
-    private Set<GenericItem> getAllItems(EList<Widget> widgets) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
-        if (itemUIRegistry != null) {
-            for (Widget widget : widgets) {
-                // We skip the chart widgets having a refresh argument
-                boolean skipWidget = false;
-                if (widget instanceof Chart) {
-                    Chart chartWidget = (Chart) widget;
-                    skipWidget = chartWidget.getRefresh() > 0;
-                }
-                String itemName = widget.getItem();
-                if (!skipWidget && itemName != null) {
-                    try {
-                        Item item = itemUIRegistry.getItem(itemName);
-                        if (item instanceof GenericItem) {
-                            items.add((GenericItem) item);
-                        }
-                    } catch (ItemNotFoundException e) {
-                        // ignore
-                    }
-                }
-                // Consider all items inside the frame
-                if (widget instanceof Frame) {
-                    items.addAll(getAllItems(((Frame) widget).getChildren()));
-                }
-                // Consider items involved in any visibility, labelcolor and valuecolor condition
-                items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
-                items.addAll(getItemsInColorCond(widget.getLabelColor()));
-                items.addAll(getItemsInColorCond(widget.getValueColor()));
-            }
-        }
-        return items;
-    }
-
-    private Set<GenericItem> getItemsInVisibilityCond(EList<VisibilityRule> ruleList) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
-        for (VisibilityRule rule : ruleList) {
-            String itemName = rule.getItem();
-            if (itemName != null) {
-                try {
-                    Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem) {
-                        items.add((GenericItem) item);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // ignore
-                }
-            }
-        }
-        return items;
-    }
-
-    private Set<GenericItem> getItemsInColorCond(EList<ColorArray> colorList) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
-        for (ColorArray color : colorList) {
-            String itemName = color.getItem();
-            if (itemName != null) {
-                try {
-                    Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem) {
-                        items.add((GenericItem) item);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // ignore
-                }
-            }
-        }
-        return items;
-    }
-
-    /**
-     * This is a state change listener, which is merely used to determine, if a
-     * state change has occurred on one of a list of items.
-     *
-     * @author Kai Kreuzer - Initial contribution and API
-     *
-     */
-    private static class BlockingStateChangeListener implements StateChangeListener {
-
-        private boolean changed = false;
-
-        @Override
-        public void stateChanged(Item item, State oldState, State newState) {
-            changed = true;
-        }
-
-        /**
-         * determines, whether a state change has occurred since its creation
-         *
-         * @return true, if a state has changed
-         */
-        public boolean hasChangeOccurred() {
-            return changed;
-        }
-
-        @Override
-        public void stateUpdated(Item item, State state) {
-            // ignore if the state did not change
-        }
-    }
-
     @Override
     public void onEvent(SitemapEvent event) {
-        OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-        OutboundEvent outboundEvent = eventBuilder.name("event").mediaType(MediaType.APPLICATION_JSON_TYPE).data(event)
-                .build();
+        OutboundSseEvent outboundEvent = eventBuilder.name("event").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                .data(event).build();
         broadcaster.broadcast(outboundEvent);
     }
 
     @Override
     public void onRelease(String subscriptionId) {
         logger.debug("SSE connection for subscription {} has been released.", subscriptionId);
-        EventOutput eventOutput = eventOutputs.remove(subscriptionId);
-        if (eventOutput != null) {
-            broadcaster.remove(eventOutput);
-        }
+        eventOutputs.remove(subscriptionId);
     }
-
-    @Override
-    public void onClose(ChunkedOutput<OutboundEvent> event) {
-        if (event instanceof SitemapEventOutput) {
-            SitemapEventOutput sitemapEvent = (SitemapEventOutput) event;
-            logger.debug("SSE connection for subscription {} has been closed.", sitemapEvent.getSubscriptionId());
-            subscriptions.removeSubscription(sitemapEvent.getSubscriptionId());
-            EventOutput eventOutput = eventOutputs.remove(sitemapEvent.getSubscriptionId());
-            if (eventOutput != null) {
-                broadcaster.remove(eventOutput);
-            }
-        }
-    }
-
-    @Override
-    public void onException(ChunkedOutput<OutboundEvent> event, Exception e) {
-        // the exception is usually "null" and onClose() is automatically called afterwards
-        // - so let's don't do anything in this method.
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return itemUIRegistry != null && subscriptions != null && localeService != null;
-    }
-
 }

@@ -451,32 +451,29 @@ public class ItemResource {
             @ApiResponse(code = 400, message = "Metadata value empty."), //
             @ApiResponse(code = 404, message = "Item not found."), //
             @ApiResponse(code = 405, message = "Metadata not editable.") })
-    public Response addMetadata(@PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
+    public void addMetadata(@Context HttpServletResponse response,
+            @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
             @PathParam("namespace") @ApiParam(value = "namespace", required = true) String namespace,
             @ApiParam(value = "metadata", required = true) MetadataDTO metadata) {
 
         Item item = itemRegistry.get(itemname);
 
         if (item == null) {
-            logger.info("Received HTTP PUT request at '{}' for the unknown item '{}'.", uriInfo.getPath(), itemname);
-            return Response.status(Status.NOT_FOUND).build();
+            throw new NotFoundException();
         }
 
         String value = metadata.value;
         if (value == null || value.isEmpty()) {
-            logger.info("Received HTTP PUT request at '{}' for item '{}' with empty metadata.", uriInfo.getPath(),
-                    itemname);
-            return Response.status(Status.BAD_REQUEST).build();
+            throw new BadRequestException("Empty metadata!");
         }
 
         MetadataKey key = new MetadataKey(namespace, itemname);
         Metadata md = new Metadata(key, value, metadata.config);
         if (metadataRegistry.get(key) == null) {
             metadataRegistry.add(md);
-            return Response.status(Status.CREATED).type(MediaType.TEXT_PLAIN).build();
+            response.setStatus(Response.Status.CREATED.getStatusCode());
         } else {
             metadataRegistry.update(md);
-            return Response.ok(null, MediaType.TEXT_PLAIN).build();
         }
 
     }

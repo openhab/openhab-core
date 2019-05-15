@@ -46,10 +46,10 @@ public class MetadataSelectorMatcher {
     private static final String METADATA_SCHEME_PREFIX = METADATA_SCHEME + ":";
 
     @Reference
-    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
+    protected @NonNullByDefault({}) MetadataRegistry metadataRegistry;
 
     @Reference
-    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    protected @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
 
     /**
      * Filter existing metadata namespaces against the given namespaeSelector. The given String might consist of a comma
@@ -59,7 +59,7 @@ public class MetadataSelectorMatcher {
      * @param locale the locale for config descriptions with the scheme "metadata".
      * @return a {@link Set} of matching namespaces.
      */
-    public Set<String> filterNamespaces(@Nullable String namespaceSelector, Locale locale) {
+    public Set<String> filterNamespaces(@Nullable String namespaceSelector, @Nullable Locale locale) {
         if (namespaceSelector == null || namespaceSelector.isEmpty()) {
             return Collections.emptySet();
         } else {

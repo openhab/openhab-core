@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +28,6 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -42,6 +42,8 @@ import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.io.rest.LocaleService;
+import org.eclipse.smarthome.io.rest.sitemap.internal.dto.PageDTO;
+import org.eclipse.smarthome.io.rest.sitemap.internal.dto.SitemapDTO;
 import org.eclipse.smarthome.model.sitemap.ColorArray;
 import org.eclipse.smarthome.model.sitemap.Sitemap;
 import org.eclipse.smarthome.model.sitemap.SitemapProvider;
@@ -84,6 +86,9 @@ public class SitemapResourceTest extends JavaTest {
     private UriInfo uriInfo;
 
     @Mock
+    private UriBuilder uriBuilder;
+
+    @Mock
     private HttpServletRequest request;
 
     @Mock
@@ -105,17 +110,18 @@ public class SitemapResourceTest extends JavaTest {
 
     private EList<Widget> widgets;
 
+    private URI base = URI.create("http://" + CLIENT_IP + SITEMAP_PATH);
+
     @Before
     public void setup() throws Exception {
         initMocks(this);
         sitemapResource = new SitemapResource();
 
-        when(uriInfo.getAbsolutePathBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));
-        when(uriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));
-        sitemapResource.uriInfo = uriInfo;
+        when(uriBuilder.build()).thenReturn(base);
+        when(uriInfo.getAbsolutePathBuilder()).thenReturn(uriBuilder); // UriBuilder.fromPath(SITEMAP_PATH)
+        when(uriInfo.getBaseUriBuilder()).thenReturn(uriBuilder);
 
         when(request.getRemoteAddr()).thenReturn(CLIENT_IP);
-        sitemapResource.request = request;
 
         item = new TestItem(ITEM_NAME);
         visibilityRuleItem = new TestItem(VISIBILITY_RULE_ITEM_NAME);
@@ -124,15 +130,15 @@ public class SitemapResourceTest extends JavaTest {
 
         LocaleService localeService = mock(LocaleService.class);
         when(localeService.getLocale(null)).thenReturn(Locale.US);
-        sitemapResource.setLocaleService(localeService);
+        sitemapResource.localeService = (localeService);
 
         configureSitemapProviderMock();
         configureSitemapMock();
-        sitemapResource.addSitemapProvider(sitemapProvider);
+        sitemapResource.sitemapProviders.add(sitemapProvider);
 
         widgets = initSitemapWidgets();
         configureItemUIRegistry(PercentType.HUNDRED, OnOffType.ON);
-        sitemapResource.setItemUIRegistry(itemUIRegistry);
+        sitemapResource.itemUIRegistry = (itemUIRegistry);
 
         // Disable long polling
         when(headers.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(null);
@@ -140,23 +146,20 @@ public class SitemapResourceTest extends JavaTest {
 
     @Test
     public void whenNoSitemapProvidersAreSet_ShouldReturnEmptyList() {
-        sitemapResource.removeSitemapProvider(sitemapProvider);
-        Response sitemaps = sitemapResource.getSitemaps();
-
-        assertThat(sitemaps.getEntity(), instanceOf(Collection.class));
-        assertThat((Collection<?>) sitemaps.getEntity(), is(empty()));
+        sitemapResource.sitemapProviders.remove(sitemapProvider);
+        Collection<SitemapDTO> sitemaps = sitemapResource.getSitemaps(uriInfo);
+        assertThat(sitemaps, is(empty()));
     }
 
     @Test
     public void whenSitemapsAreProvided_ShouldReturnSitemapBeans() {
-        Response sitemaps = sitemapResource.getSitemaps();
+        Collection<SitemapDTO> sitemaps = sitemapResource.getSitemaps(uriInfo);
 
-        assertThat((Collection<?>) sitemaps.getEntity(), hasSize(1));
+        assertThat(sitemaps, hasSize(1));
 
-        @SuppressWarnings("unchecked")
-        SitemapDTO dto = ((Collection<SitemapDTO>) sitemaps.getEntity()).iterator().next();
+        SitemapDTO dto = sitemaps.iterator().next();
         assertThat(dto.name, is(SITEMAP_MODEL_NAME));
-        assertThat(dto.link, is(SITEMAP_PATH + "/" + SITEMAP_MODEL_NAME));
+        assertThat(dto.link, is(base.resolve(SITEMAP_MODEL_NAME).toASCIIString()));
     }
 
     @Test
@@ -173,9 +176,9 @@ public class SitemapResourceTest extends JavaTest {
         // non-null is sufficient here.
         when(headers.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(Collections.emptyList());
 
-        Response response = sitemapResource.getPageData(headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null, false);
+        PageDTO pageDTO = sitemapResource.getPageData(uriInfo, headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null,
+                false);
 
-        PageDTO pageDTO = (PageDTO) response.getEntity();
         assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
                                                 // return
     }
@@ -194,9 +197,9 @@ public class SitemapResourceTest extends JavaTest {
         // non-null is sufficient here.
         when(headers.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(Collections.emptyList());
 
-        Response response = sitemapResource.getPageData(headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null, false);
+        PageDTO pageDTO = sitemapResource.getPageData(uriInfo, headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null,
+                false);
 
-        PageDTO pageDTO = (PageDTO) response.getEntity();
         assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
                                                 // return
     }
@@ -215,9 +218,9 @@ public class SitemapResourceTest extends JavaTest {
         // non-null is sufficient here.
         when(headers.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(Collections.emptyList());
 
-        Response response = sitemapResource.getPageData(headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null, false);
+        PageDTO pageDTO = sitemapResource.getPageData(uriInfo, headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null,
+                false);
 
-        PageDTO pageDTO = (PageDTO) response.getEntity();
         assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
                                                 // return
     }
@@ -236,9 +239,9 @@ public class SitemapResourceTest extends JavaTest {
         // non-null is sufficient here.
         when(headers.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(Collections.emptyList());
 
-        Response response = sitemapResource.getPageData(headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null, false);
+        PageDTO pageDTO = sitemapResource.getPageData(uriInfo, headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null,
+                false);
 
-        PageDTO pageDTO = (PageDTO) response.getEntity();
         assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
                                                 // return
     }
@@ -251,9 +254,9 @@ public class SitemapResourceTest extends JavaTest {
         // Disable long polling
         when(headers.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(null);
 
-        Response response = sitemapResource.getPageData(headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null, false);
+        PageDTO pageDTO = sitemapResource.getPageData(uriInfo, headers, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null,
+                false);
 
-        PageDTO pageDTO = (PageDTO) response.getEntity();
         assertThat(pageDTO.id, is(SITEMAP_NAME));
         assertThat(pageDTO.title, is(SITEMAP_TITLE));
         assertThat(pageDTO.leaf, is(true));

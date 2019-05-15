@@ -134,11 +134,6 @@
     </config>
   </feature>
 
-  <feature name="openhab-core-io-rest-auth" version="${project.version}">
-    <feature>openhab-core-base</feature>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.auth/${project.version}</bundle>
-  </feature>
-
   <feature name="openhab-core-io-rest-log" version="${project.version}">
     <feature>openhab-core-base</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.log/${project.version}</bundle>

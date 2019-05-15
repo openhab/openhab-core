@@ -29,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NoContentException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
@@ -76,22 +77,22 @@ public class ChannelTypeResource {
     public static final String PATH_CHANNEL_TYPES = "channel-types";
 
     @Reference
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    protected @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
 
     @Reference
-    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    protected @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Reference
-    private @NonNullByDefault({}) ProfileTypeRegistry profileTypeRegistry;
+    protected @NonNullByDefault({}) ProfileTypeRegistry profileTypeRegistry;
 
     @Reference
-    private @NonNullByDefault({}) LocaleService localeService;
+    protected @NonNullByDefault({}) LocaleService localeService;
 
     @GET
     @ApiOperation(value = "Gets all available channel types.", response = ChannelTypeDTO.class, responseContainer = "Set")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ChannelTypeDTO.class, responseContainer = "Set"))
     public Stream<?> getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         return channelTypeRegistry.getChannelTypes(locale).stream().map(c -> convertToChannelTypeDTO(c, locale));
     }
@@ -120,7 +121,7 @@ public class ChannelTypeResource {
             @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "Set"),
             @ApiResponse(code = 204, message = "No content: channel type has no linkable items or is no trigger channel."),
             @ApiResponse(code = 404, message = "Given channel type UID not found.") })
-    public Stream<?> getLinkableItemTypes(
+    public Stream<String> getLinkableItemTypes(
             @PathParam("channelTypeUID") @ApiParam(value = "channelTypeUID") String channelTypeUID)
             throws NoContentException {
         ChannelTypeUID ctUID = new ChannelTypeUID(channelTypeUID);

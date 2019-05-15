@@ -12,23 +12,20 @@
  */
 package org.openhab.core.automation.rest.internal;
 
-import java.util.Collection;
 import java.util.Locale;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
 import org.openhab.core.automation.dto.RuleTemplateDTOMapper;
 import org.openhab.core.automation.template.RuleTemplate;
@@ -36,8 +33,8 @@ import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.template.TemplateRegistry;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,64 +49,42 @@ import io.swagger.annotations.ApiResponses;
  */
 @Path("templates")
 @Api("templates")
-@Component
-public class TemplateResource implements RESTResource {
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class TemplateResource {
 
-    private TemplateRegistry<RuleTemplate> templateRegistry;
-    private LocaleService localeService;
-
-    @Context
-    private UriInfo uriInfo;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {
-        this.templateRegistry = templateRegistry;
-    }
-
-    protected void unsetTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {
-        this.templateRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
+    @Reference
+    protected @NonNullByDefault({}) TemplateRegistry<RuleTemplate> templateRegistry;
+    @Reference
+    protected @NonNullByDefault({}) LocaleService localeService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all available templates.", response = Template.class, responseContainer = "Collection")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = Template.class, responseContainer = "Collection") })
-    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language) {
+    public Stream<?> getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language) {
         Locale locale = localeService.getLocale(language);
-        Collection<RuleTemplateDTO> result = templateRegistry.getAll(locale).stream()
-                .map(template -> RuleTemplateDTOMapper.map(template)).collect(Collectors.toList());
-        return Response.ok(result).build();
+        return templateRegistry.getAll(locale).stream().map(template -> RuleTemplateDTOMapper.map(template));
     }
 
+    @SuppressWarnings("null")
     @GET
     @Path("/{templateUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets a template corresponding to the given UID.", response = Template.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Template.class),
+    @ApiOperation(value = "Gets a template corresponding to the given UID.", response = RuleTemplateDTO.class)
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = RuleTemplateDTO.class),
             @ApiResponse(code = 404, message = "Template corresponding to the given UID does not found.") })
-    public Response getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
+    public RuleTemplateDTO getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
             @PathParam("templateUID") @ApiParam(value = "templateUID", required = true) String templateUID) {
         Locale locale = localeService.getLocale(language);
         RuleTemplate template = templateRegistry.get(templateUID, locale);
         if (template != null) {
-            return Response.ok(RuleTemplateDTOMapper.map(template)).build();
+            return RuleTemplateDTOMapper.map(template);
         } else {
-            return Response.status(Status.NOT_FOUND).build();
+            throw new NotFoundException();
         }
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return templateRegistry != null && localeService != null;
     }
 }

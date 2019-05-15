@@ -12,60 +12,79 @@
  */
 package org.eclipse.smarthome.io.rest.sitemap.internal;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
+import javax.ws.rs.sse.OutboundSseEvent;
+import javax.ws.rs.sse.SseEventSink;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.io.rest.sitemap.SitemapSubscriptionService;
-import org.glassfish.jersey.media.sse.EventOutput;
-import org.glassfish.jersey.media.sse.OutboundEvent;
+import org.eclipse.smarthome.io.rest.sitemap.internal.events.ServerAliveEvent;
+import org.eclipse.smarthome.io.rest.sitemap.internal.events.SitemapEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * {@link EventOutput} implementation that takes a subscription id parameter and only writes out events that match the
  * page of this subscription.
- * Should only be used when the {@link OutboundEvent}s sent through this {@link EventOutput} contain a data object of
- * type {@link SitemapEvent}
+ * Should only be used when the {@link OutboundSseEvent}s sent through this {@link SseEventSink} contain a data object
+ * of type {@link SitemapEvent}.
  *
  * @author Kai Kreuzer - Initial contribution and API
  *
  */
-public class SitemapEventOutput extends EventOutput {
+@NonNullByDefault
+public class SitemapEventOutput implements SseEventSink {
 
     private final Logger logger = LoggerFactory.getLogger(SitemapEventOutput.class);
 
     private final String subscriptionId;
     private final SitemapSubscriptionService subscriptions;
+    private SseEventSink proxy;
 
-    public SitemapEventOutput(SitemapSubscriptionService subscriptions, String subscriptionId) {
-        super();
+    public SitemapEventOutput(SseEventSink sseEventSink, SitemapSubscriptionService subscriptions,
+            String subscriptionId) {
+        this.proxy = sseEventSink;
         this.subscriptions = subscriptions;
         this.subscriptionId = subscriptionId;
     }
 
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
     @Override
-    public void write(OutboundEvent chunk) throws IOException {
-        if (chunk.getName().equals("subscriptionId") && chunk.getData().equals(subscriptionId)) {
-            super.write(chunk);
+    public boolean isClosed() {
+        return proxy.isClosed();
+    }
+
+    @Override
+    public CompletionStage<?> send(@NonNullByDefault({}) OutboundSseEvent event) {
+        if (event.getName().equals("subscriptionId") && event.getData().equals(subscriptionId)) {
+            return proxy.send(event);
         } else {
-            SitemapEvent event = (SitemapEvent) chunk.getData();
-            String sitemapName = event.sitemapName;
-            String pageId = event.pageId;
+            SitemapEvent sitemapEvent = (SitemapEvent) event.getData();
+            String sitemapName = sitemapEvent.sitemapName;
+            String pageId = sitemapEvent.pageId;
             if (sitemapName != null && sitemapName.equals(subscriptions.getSitemapName(subscriptionId))
                     && pageId != null && pageId.equals(subscriptions.getPageId(subscriptionId))) {
-                super.write(chunk);
                 if (logger.isDebugEnabled()) {
-                    if (event instanceof SitemapWidgetEvent) {
+                    if (sitemapEvent instanceof SitemapWidgetEvent) {
                         logger.debug("Sent sitemap event for widget {} to subscription {}.",
-                                ((SitemapWidgetEvent) event).widgetId, subscriptionId);
-                    } else if (event instanceof ServerAliveEvent) {
+                                ((SitemapWidgetEvent) sitemapEvent).widgetId, subscriptionId);
+                    } else if (sitemapEvent instanceof ServerAliveEvent) {
                         logger.debug("Sent alive event to subscription {}.", subscriptionId);
                     }
                 }
+                return proxy.send(event);
             }
         }
+        return CompletableFuture.completedFuture(true);
     }
 
-    public String getSubscriptionId() {
-        return subscriptionId;
+    @Override
+    public void close() {
+        proxy.close();
     }
 }

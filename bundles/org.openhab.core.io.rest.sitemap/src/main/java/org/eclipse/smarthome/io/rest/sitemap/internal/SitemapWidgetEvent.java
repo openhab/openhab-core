@@ -13,6 +13,7 @@
 package org.eclipse.smarthome.io.rest.sitemap.internal;
 
 import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTO;
+import org.eclipse.smarthome.io.rest.sitemap.internal.events.SitemapEvent;
 
 /**
  * A sitemap event, which provides details about a widget that has changed.

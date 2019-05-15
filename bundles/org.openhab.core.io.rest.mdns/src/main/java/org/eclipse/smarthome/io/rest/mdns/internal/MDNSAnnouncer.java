@@ -13,10 +13,10 @@
 package org.eclipse.smarthome.io.rest.mdns.internal;
 
 import java.util.Hashtable;
-import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.net.HttpServiceUtil;
-import org.eclipse.smarthome.io.rest.RESTConstants;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.eclipse.smarthome.io.transport.mdns.MDNSService;
 import org.eclipse.smarthome.io.transport.mdns.ServiceDescription;
 import org.osgi.framework.BundleContext;
@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
  * This class announces the REST API through mDNS for clients to automatically
@@ -37,69 +37,68 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(immediate = true, configurationPid = "org.eclipse.smarthome.mdns", property = {
         Constants.SERVICE_PID + "=org.eclipse.smarthome.mdns" //
 })
+@NonNullByDefault
 public class MDNSAnnouncer {
 
     private int httpSSLPort;
 
     private int httpPort;
 
-    private String mdnsName;
+    @Reference
+    private @NonNullByDefault({}) MDNSService mdnsService;
 
-    private MDNSService mdnsService;
+    @Reference
+    private @NonNullByDefault({}) RESTService restService;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    public void setMDNSService(MDNSService mdnsService) {
-        this.mdnsService = mdnsService;
-    }
+    private @NonNullByDefault({}) Config config;
 
-    public void unsetMDNSService(MDNSService mdnsService) {
-        this.mdnsService = null;
+    @ObjectClassDefinition(description = "%cors_description", name = "%cors_name")
+    @interface Config {
+        String mdnsName() default "smarthome";
+
+        boolean enabled() default true;
     }
 
     @Activate
-    public void activate(BundleContext bundleContext, Map<String, Object> properties) {
-        if (!"false".equalsIgnoreCase((String) properties.get("enabled"))) {
-            if (mdnsService != null) {
-                mdnsName = bundleContext.getProperty("mdnsName");
-                if (mdnsName == null) {
-                    mdnsName = "smarthome";
-                }
-                try {
-                    httpPort = HttpServiceUtil.getHttpServicePort(bundleContext);
-                    if (httpPort != -1) {
-                        mdnsService.registerService(getDefaultServiceDescription());
-                    }
-                } catch (NumberFormatException e) {
-                }
-                try {
-                    httpSSLPort = HttpServiceUtil.getHttpServicePortSecure(bundleContext);
-                    if (httpSSLPort != -1) {
-                        mdnsService.registerService(getSSLServiceDescription());
-                    }
-                } catch (NumberFormatException e) {
-                }
+    public void activate(BundleContext bundleContext, Config config) {
+        this.config = config;
+        if (!config.enabled()) {
+            return;
+        }
+
+        try {
+            httpPort = HttpServiceUtil.getHttpServicePort(bundleContext);
+            if (httpPort != -1) {
+                mdnsService.registerService(getDefaultServiceDescription());
             }
+        } catch (NumberFormatException e) {
+        }
+        try {
+            httpSSLPort = HttpServiceUtil.getHttpServicePortSecure(bundleContext);
+            if (httpSSLPort != -1) {
+                mdnsService.registerService(getSSLServiceDescription());
+            }
+        } catch (NumberFormatException e) {
         }
     }
 
     @Deactivate
     public void deactivate() {
-        if (mdnsService != null) {
-            mdnsService.unregisterService(getDefaultServiceDescription());
-            mdnsService.unregisterService(getSSLServiceDescription());
-        }
+        mdnsService.unregisterService(getDefaultServiceDescription());
+        mdnsService.unregisterService(getSSLServiceDescription());
     }
 
     private ServiceDescription getDefaultServiceDescription() {
         Hashtable<String, String> serviceProperties = new Hashtable<String, String>();
-        serviceProperties.put("uri", RESTConstants.REST_URI);
-        return new ServiceDescription("_" + mdnsName + "-server._tcp.local.", mdnsName, httpPort, serviceProperties);
+        serviceProperties.put("uri", restService.getRESTroot());
+        return new ServiceDescription("_" + config.mdnsName() + "-server._tcp.local.", config.mdnsName(), httpPort,
+                serviceProperties);
     }
 
     private ServiceDescription getSSLServiceDescription() {
         ServiceDescription description = getDefaultServiceDescription();
-        description.serviceType = "_" + mdnsName + "-server-ssl._tcp.local.";
-        description.serviceName = "" + mdnsName + "-ssl";
+        description.serviceType = "_" + config.mdnsName() + "-server-ssl._tcp.local.";
+        description.serviceName = "" + config.mdnsName() + "-ssl";
         description.servicePort = httpSSLPort;
         return description;
     }

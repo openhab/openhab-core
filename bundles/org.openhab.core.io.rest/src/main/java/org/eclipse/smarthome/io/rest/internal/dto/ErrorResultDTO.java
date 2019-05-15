@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Represents an error message that is send on exceptions etc
@@ -27,9 +28,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @NonNullByDefault
 public class ErrorResultDTO {
     public static class exceptionDTO {
-        public final @JsonProperty("class") String clazz;
+        public final @JsonProperty("class") @SerializedName("class") String clazz;
         public final String message;
-        public final @JsonProperty("localized-message") String localizedMessage;
+        public final @JsonProperty("localized-message") @SerializedName("localized-message") String localizedMessage;
         public final @Nullable Object cause;
 
         exceptionDTO() {
@@ -49,7 +50,7 @@ public class ErrorResultDTO {
 
     public static class errorDTO {
         public final String message;
-        public final @Nullable @JsonProperty("http-code") Integer httpCode;
+        public final @Nullable @JsonProperty("http-code") @SerializedName("http-code") Integer httpCode;
         public final ErrorResultDTO.@Nullable exceptionDTO exception;
 
         errorDTO() {

@@ -18,18 +18,18 @@ import java.util.Locale;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.openhab.core.automation.dto.ActionTypeDTOMapper;
 import org.openhab.core.automation.dto.ConditionTypeDTOMapper;
 import org.openhab.core.automation.dto.ModuleTypeDTO;
@@ -44,8 +44,8 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.TriggerType;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,41 +62,24 @@ import io.swagger.annotations.ApiResponses;
  */
 @Path("module-types")
 @Api("module-types")
-@Component
-public class ModuleTypeResource implements RESTResource {
-
-    private ModuleTypeRegistry moduleTypeRegistry;
-    private LocaleService localeService;
-
-    @Context
-    private UriInfo uriInfo;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        this.moduleTypeRegistry = moduleTypeRegistry;
-    }
-
-    protected void unsetModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        this.moduleTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class ModuleTypeResource {
+    @Reference
+    protected @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
+    @Reference
+    protected @NonNullByDefault({}) LocaleService localeService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all available module types.", response = ModuleTypeDTO.class, responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ModuleTypeDTO.class, responseContainer = "List") })
-    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
-            @QueryParam("tags") @ApiParam(value = "tags for filtering", required = false) String tagList,
-            @QueryParam("type") @ApiParam(value = "filtering by action, condition or trigger", required = false) String type) {
+    public List<ModuleTypeDTO> getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
+            @QueryParam("tags") @ApiParam(value = "tags for filtering", required = false) @Nullable String tagList,
+            @QueryParam("type") @ApiParam(value = "filtering by action, condition or trigger", required = false) @Nullable String type) {
         final Locale locale = localeService.getLocale(language);
         final String[] tags = tagList != null ? tagList.split(",") : null;
         final List<ModuleTypeDTO> modules = new ArrayList<ModuleTypeDTO>();
@@ -110,7 +93,7 @@ public class ModuleTypeResource implements RESTResource {
         if (type == null || type.equals("action")) {
             modules.addAll(ActionTypeDTOMapper.map(moduleTypeRegistry.getActions(locale, tags)));
         }
-        return Response.ok(modules).build();
+        return modules;
     }
 
     @GET
@@ -119,18 +102,13 @@ public class ModuleTypeResource implements RESTResource {
     @ApiOperation(value = "Gets a module type corresponding to the given UID.", response = ModuleTypeDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ModuleTypeDTO.class),
             @ApiResponse(code = 404, message = "Module Type corresponding to the given UID does not found.") })
-    public Response getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
+    public ModuleTypeDTO getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
             @PathParam("moduleTypeUID") @ApiParam(value = "moduleTypeUID", required = true) String moduleTypeUID) {
         Locale locale = localeService.getLocale(language);
         final ModuleType moduleType = moduleTypeRegistry.get(moduleTypeUID, locale);
-        if (moduleType != null) {
-            return Response.ok(getModuleTypeDTO(moduleType)).build();
-        } else {
-            return Response.status(Status.NOT_FOUND).build();
+        if (moduleType == null) {
+            throw new NotFoundException();
         }
-    }
-
-    private ModuleTypeDTO getModuleTypeDTO(final ModuleType moduleType) {
         if (moduleType instanceof ActionType) {
             if (moduleType instanceof CompositeActionType) {
                 return ActionTypeDTOMapper.map((CompositeActionType) moduleType);
@@ -147,14 +125,8 @@ public class ModuleTypeResource implements RESTResource {
             }
             return TriggerTypeDTOMapper.map((TriggerType) moduleType);
         } else {
-            throw new IllegalArgumentException(
+            throw new InternalServerErrorException(
                     String.format("Cannot handle given module type class (%s)", moduleType.getClass()));
         }
     }
-
-    @Override
-    public boolean isSatisfied() {
-        return moduleTypeRegistry != null && localeService != null;
-    }
-
 }

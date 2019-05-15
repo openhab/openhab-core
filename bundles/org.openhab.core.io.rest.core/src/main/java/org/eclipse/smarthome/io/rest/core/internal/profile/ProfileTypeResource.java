@@ -69,19 +69,19 @@ public class ProfileTypeResource {
     public static final String PATH_PROFILE_TYPES = "profile-types";
 
     @Reference
-    private @NonNullByDefault({}) ProfileTypeRegistry profileTypeRegistry;
+    protected @NonNullByDefault({}) ProfileTypeRegistry profileTypeRegistry;
     @Reference
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    protected @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
     @Reference
-    private @NonNullByDefault({}) LocaleService localeService;
+    protected @NonNullByDefault({}) LocaleService localeService;
 
     @GET
     @RolesAllowed({ Role.USER })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gets all available profile types.", response = ProfileTypeDTO.class, responseContainer = "Set")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ProfileTypeDTO.class, responseContainer = "Set"))
-    public Stream<?> getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language,
+    public Stream<ProfileTypeDTO> getAll(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) @Nullable String language,
             @QueryParam("channelTypeUID") @ApiParam(value = "channel type filter", required = false) @Nullable String channelTypeUID,
             @QueryParam("itemType") @ApiParam(value = "item type filter", required = false) @Nullable String itemType) {
         Locale locale = localeService.getLocale(language);

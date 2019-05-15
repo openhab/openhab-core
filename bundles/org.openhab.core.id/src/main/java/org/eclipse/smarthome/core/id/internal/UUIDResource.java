@@ -17,12 +17,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.auth.Role;
 import org.eclipse.smarthome.core.id.InstanceUUID;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.eclipse.smarthome.io.rest.RESTService;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,11 +36,14 @@ import io.swagger.annotations.ApiResponses;
  *
  * @author Kai Kreuzer - Initial contribution and API
  */
-@Component
 @Path(UUIDResource.PATH_UUID)
 @Api(value = UUIDResource.PATH_UUID)
 @RolesAllowed({ Role.ADMIN })
-public class UUIDResource implements RESTResource {
+@Component(immediate = true)
+@JaxrsApplicationSelect("(osgi.jaxrs.name=" + RESTService.REST_APP_NAME + ")")
+@JaxrsResource
+@NonNullByDefault
+public class UUIDResource {
 
     public static final String PATH_UUID = "uuid";
 
@@ -46,8 +51,8 @@ public class UUIDResource implements RESTResource {
     @Produces(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "A unified unique id.", response = String.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
-    public Response getInstanceUUID() {
-        return Response.ok(InstanceUUID.get()).build();
+    public String getInstanceUUID() {
+        return InstanceUUID.get();
     }
 
 }

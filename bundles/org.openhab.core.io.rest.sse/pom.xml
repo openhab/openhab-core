@@ -20,12 +20,6 @@
 			<artifactId>org.openhab.core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<version>2.1.1</version>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 
 </project>

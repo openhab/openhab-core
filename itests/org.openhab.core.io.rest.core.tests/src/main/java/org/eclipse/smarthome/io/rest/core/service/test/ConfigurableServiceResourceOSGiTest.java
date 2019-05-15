@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -77,7 +78,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertGetConfigurableServicesWorks() {
-        int num = configurableServiceResource.getAll().size();
+        int num = (int) configurableServiceResource.getAll().count();
 
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put("service.pid", "pid");
@@ -87,7 +88,8 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
         registerService(mock(SomeServiceInterface.class), properties);
 
-        List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll();
+        List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll()
+                .collect(Collectors.toList());
         assertThat(configurableServices.size(), is(num + 1));
 
         ConfigurableServiceDTO lastService = configurableServices.get(configurableServices.size() - 1);
@@ -99,7 +101,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertComponentNameFallbackWorks() {
-        int num = configurableServiceResource.getAll().size();
+        int num = (int) configurableServiceResource.getAll().count();
 
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put("component.name", "component.name");
@@ -107,7 +109,8 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
         registerService(mock(SomeServiceInterface.class), properties);
 
-        List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll();
+        List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll()
+                .collect(Collectors.toList());
         assertThat(configurableServices.size(), is(num + 1));
 
         ConfigurableServiceDTO lastService = configurableServices.get(configurableServices.size() - 1);

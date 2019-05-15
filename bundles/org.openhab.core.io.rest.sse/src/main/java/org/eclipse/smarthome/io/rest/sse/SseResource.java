@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Singleton;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
@@ -57,7 +56,6 @@ import io.swagger.annotations.ApiResponses;
 @Component(immediate = true, service = SseResource.class)
 @Path(SseResource.PATH_EVENTS)
 @RolesAllowed({ Role.USER })
-@Singleton
 @Produces(MediaType.SERVER_SENT_EVENTS)
 @Api(value = SseResource.PATH_EVENTS, hidden = true)
 @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
@@ -102,6 +100,10 @@ public class SseResource implements EventSubscriber {
                 .broadcast(eventBuilder.name("message").mediaType(MediaType.APPLICATION_JSON_TYPE).data(event).build());
     }
 
+    public static boolean isValidTopic(String expression) { // For testing
+        return expression.matches(TOPIC_VALIDATE_PATTERN);
+    }
+
     /**
      * Subscribes the connecting client to the stream of events filtered by the
      * given eventFilter.
@@ -112,7 +114,7 @@ public class SseResource implements EventSubscriber {
     public void listen(@Context SseEventSink sseEventSink,
             @QueryParam("topics") @ApiParam(value = "topics") String eventFilter)
             throws IOException, InterruptedException {
-        if (!StringUtils.isEmpty(eventFilter) && eventFilter.matches(TOPIC_VALIDATE_PATTERN)) {
+        if (!StringUtils.isEmpty(eventFilter) && isValidTopic(eventFilter)) {
             sseEventSink.close();
             throw new BadRequestException("Topic invalid");
         }
@@ -121,18 +123,9 @@ public class SseResource implements EventSubscriber {
         // the given filter
         this.sseBroadcaster.register(new CustomSseEventSink(sseEventSink, eventFilter));
 
-        // Disables proxy buffering when using an nginx http server proxy for this response.
-        // This allows you to not disable proxy buffering in nginx and still have working sse
+        // Disables proxy buffering and compression
         response.addHeader(X_ACCEL_BUFFERING_HEADER, "no");
-
-        // we want to make sure
-        // that the response is not compressed and buffered so that the
-        // client receives server sent events at the moment of sending them
         response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
-
-        // Response headers are written now, since the thread will be
-        // blocked later on.
-        response.setStatus(HttpServletResponse.SC_OK);
         response.flushBuffer();
     }
 }
