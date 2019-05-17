@@ -42,7 +42,8 @@ import org.osgi.service.http.HttpContext;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
-@Component(service = { HttpContext.class, WrappingHttpContext.class })
+@Component(service = { HttpContext.class, WrappingHttpContext.class }, property = {
+        "httpContext.id:String=oh-dfl-http-ctx" })
 public class SmartHomeHttpContext implements WrappingHttpContext {
 
     /**
