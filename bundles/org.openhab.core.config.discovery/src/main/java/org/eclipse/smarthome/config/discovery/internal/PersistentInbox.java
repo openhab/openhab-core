@@ -148,19 +148,20 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
             final @Reference ThingRegistry thingRegistry, final @Reference ManagedThingProvider thingProvider,
             final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
+        // First set all member variables to ensure the object itself is initialized (as most as possible).
         this.discoveryResultStorage = storageService.getStorage(DiscoveryResult.class.getName(),
                 this.getClass().getClassLoader());
         this.discoveryServiceRegistry = discoveryServiceRegistry;
-        this.discoveryServiceRegistry.addDiscoveryListener(this);
         this.thingRegistry = thingRegistry;
-        this.thingRegistry.addRegistryChangeListener(this);
         this.managedThingProvider = thingProvider;
         this.thingTypeRegistry = thingTypeRegistry;
         this.configDescRegistry = configDescriptionRegistry;
 
-        // This should be the last step (to be more precise: providing the "this" reference to other ones as long as the
-        // constructor is not finished is a bad idea at all) as "this" will be used by another thread and so we need
+        // This should be the last steps (to be more precise: providing the "this" reference to other ones as long as
+        // the constructor is not finished is a bad idea at all) as "this" will be used by another thread and so we need
         // already fully instantiated object.
+        this.discoveryServiceRegistry.addDiscoveryListener(this);
+        this.thingRegistry.addRegistryChangeListener(this);
         this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
                 .scheduleWithFixedDelay(new TimeToLiveCheckingThread(this), 0, 30, TimeUnit.SECONDS);
     }

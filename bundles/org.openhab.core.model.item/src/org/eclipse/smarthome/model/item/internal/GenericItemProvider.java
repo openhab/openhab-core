@@ -53,7 +53,9 @@ import org.eclipse.smarthome.model.items.ModelGroupItem;
 import org.eclipse.smarthome.model.items.ModelItem;
 import org.eclipse.smarthome.model.items.ModelNormalItem;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -75,9 +77,9 @@ public class GenericItemProvider extends AbstractProvider<Item>
     /** to keep track of all binding config readers */
     private final Map<String, BindingConfigReader> bindingConfigReaders = new HashMap<String, BindingConfigReader>();
 
-    private ModelRepository modelRepository = null;
+    private final ModelRepository modelRepository;
 
-    private GenericMetadataProvider genericMetaDataProvider = null;
+    private final GenericMetadataProvider genericMetaDataProvider;
 
     private final Map<String, Collection<Item>> itemsMap = new ConcurrentHashMap<>();
 
@@ -86,9 +88,13 @@ public class GenericItemProvider extends AbstractProvider<Item>
     private final Map<String, StateDescriptionFragment> stateDescriptionFragments = new ConcurrentHashMap<>();
 
     private Integer rank;
-    private boolean active = false;
 
-    protected void activate(Map<String, Object> properties) {
+    @Activate
+    public GenericItemProvider(final @Reference ModelRepository modelRepository,
+            final @Reference GenericMetadataProvider genericMetadataProvider, Map<String, Object> properties) {
+        this.modelRepository = modelRepository;
+        this.genericMetaDataProvider = genericMetadataProvider;
+
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
         if (serviceRanking instanceof Integer) {
             rank = (Integer) serviceRanking;
@@ -103,36 +109,16 @@ public class GenericItemProvider extends AbstractProvider<Item>
             modelChanged(modelName, EventType.ADDED);
         }
         modelRepository.addModelRepositoryChangeListener(this);
-
-        active = true;
     }
 
+    @Deactivate
     protected void deactivate() {
-        active = false;
         modelRepository.removeModelRepositoryChangeListener(this);
     }
 
     @Override
     public Integer getRank() {
         return rank;
-    }
-
-    @Reference
-    public void setModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = modelRepository;
-    }
-
-    public void unsetModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = null;
-    }
-
-    @Reference
-    protected void setGenericMetadataProvider(GenericMetadataProvider genericMetadataProvider) {
-        this.genericMetaDataProvider = genericMetadataProvider;
-    }
-
-    protected void unsetGenericMetadataProvider(GenericMetadataProvider genericMetadataProvider) {
-        this.genericMetaDataProvider = null;
     }
 
     /**
@@ -143,9 +129,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addItemFactory(ItemFactory factory) {
         itemFactorys.add(factory);
-        if (active) {
-            dispatchBindingsPerItemType(null, factory.getSupportedItemTypes());
-        }
+        dispatchBindingsPerItemType(null, factory.getSupportedItemTypes());
     }
 
     /**
@@ -188,17 +172,15 @@ public class GenericItemProvider extends AbstractProvider<Item>
         logger.debug("Read items from model '{}'", modelName);
 
         List<Item> items = new ArrayList<Item>();
-        if (modelRepository != null) {
-            ItemModel model = (ItemModel) modelRepository.getModel(modelName);
-            if (model != null) {
-                for (ModelItem modelItem : model.getItems()) {
-                    Item item = createItemFromModelItem(modelItem);
-                    if (item != null) {
-                        for (String groupName : modelItem.getGroups()) {
-                            ((GenericItem) item).addGroupName(groupName);
-                        }
-                        items.add(item);
+        ItemModel model = (ItemModel) modelRepository.getModel(modelName);
+        if (model != null) {
+            for (ModelItem modelItem : model.getItems()) {
+                Item item = createItemFromModelItem(modelItem);
+                if (item != null) {
+                    for (String groupName : modelItem.getGroups()) {
+                        ((GenericItem) item).addGroupName(groupName);
                     }
+                    items.add(item);
                 }
             }
         }
@@ -209,32 +191,30 @@ public class GenericItemProvider extends AbstractProvider<Item>
     private void processBindingConfigsFromModel(String modelName, EventType type) {
         logger.debug("Processing binding configs for items from model '{}'", modelName);
 
-        if (modelRepository != null) {
-            ItemModel model = (ItemModel) modelRepository.getModel(modelName);
-            if (model == null) {
-                return;
-            }
+        ItemModel model = (ItemModel) modelRepository.getModel(modelName);
+        if (model == null) {
+            return;
+        }
 
-            // start binding configuration processing
-            for (BindingConfigReader reader : bindingConfigReaders.values()) {
-                reader.startConfigurationUpdate(modelName);
-            }
+        // start binding configuration processing
+        for (BindingConfigReader reader : bindingConfigReaders.values()) {
+            reader.startConfigurationUpdate(modelName);
+        }
 
-            // create items and read new binding configuration
-            if (!EventType.REMOVED.equals(type)) {
-                for (ModelItem modelItem : model.getItems()) {
-                    genericMetaDataProvider.removeMetadata(modelItem.getName());
-                    Item item = createItemFromModelItem(modelItem);
-                    if (item != null) {
-                        internalDispatchBindings(modelName, item, modelItem.getBindings());
-                    }
+        // create items and read new binding configuration
+        if (!EventType.REMOVED.equals(type)) {
+            for (ModelItem modelItem : model.getItems()) {
+                genericMetaDataProvider.removeMetadata(modelItem.getName());
+                Item item = createItemFromModelItem(modelItem);
+                if (item != null) {
+                    internalDispatchBindings(modelName, item, modelItem.getBindings());
                 }
             }
+        }
 
-            // end binding configuration processing
-            for (BindingConfigReader reader : bindingConfigReaders.values()) {
-                reader.stopConfigurationUpdate(modelName);
-            }
+        // end binding configuration processing
+        for (BindingConfigReader reader : bindingConfigReaders.values()) {
+            reader.stopConfigurationUpdate(modelName);
         }
     }
 
@@ -313,13 +293,33 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     private void dispatchBindingsPerItemType(BindingConfigReader reader, String[] itemTypes) {
-        if (modelRepository != null) {
-            for (String modelName : modelRepository.getAllModelNamesOfType("items")) {
-                ItemModel model = (ItemModel) modelRepository.getModel(modelName);
-                if (model != null) {
-                    for (ModelItem modelItem : model.getItems()) {
-                        for (String itemType : itemTypes) {
-                            if (itemType.equals(modelItem.getType())) {
+        for (String modelName : modelRepository.getAllModelNamesOfType("items")) {
+            ItemModel model = (ItemModel) modelRepository.getModel(modelName);
+            if (model != null) {
+                for (ModelItem modelItem : model.getItems()) {
+                    for (String itemType : itemTypes) {
+                        if (itemType.equals(modelItem.getType())) {
+                            Item item = createItemFromModelItem(modelItem);
+                            if (item != null) {
+                                internalDispatchBindings(reader, modelName, item, modelItem.getBindings());
+                            }
+                        }
+                    }
+                }
+            } else {
+                logger.debug("Model repository returned NULL for model named '{}'", modelName);
+            }
+        }
+    }
+
+    private void dispatchBindingsPerType(BindingConfigReader reader, String[] bindingTypes) {
+        for (String modelName : modelRepository.getAllModelNamesOfType("items")) {
+            ItemModel model = (ItemModel) modelRepository.getModel(modelName);
+            if (model != null) {
+                for (ModelItem modelItem : model.getItems()) {
+                    for (ModelBinding modelBinding : modelItem.getBindings()) {
+                        for (String bindingType : bindingTypes) {
+                            if (bindingType.equals(modelBinding.getType())) {
                                 Item item = createItemFromModelItem(modelItem);
                                 if (item != null) {
                                     internalDispatchBindings(reader, modelName, item, modelItem.getBindings());
@@ -327,38 +327,10 @@ public class GenericItemProvider extends AbstractProvider<Item>
                             }
                         }
                     }
-                } else {
-                    logger.debug("Model repository returned NULL for model named '{}'", modelName);
                 }
+            } else {
+                logger.debug("Model repository returned NULL for model named '{}'", modelName);
             }
-        } else {
-            logger.warn("ModelRepository is NULL > dispatch bindings aborted!");
-        }
-    }
-
-    private void dispatchBindingsPerType(BindingConfigReader reader, String[] bindingTypes) {
-        if (modelRepository != null) {
-            for (String modelName : modelRepository.getAllModelNamesOfType("items")) {
-                ItemModel model = (ItemModel) modelRepository.getModel(modelName);
-                if (model != null) {
-                    for (ModelItem modelItem : model.getItems()) {
-                        for (ModelBinding modelBinding : modelItem.getBindings()) {
-                            for (String bindingType : bindingTypes) {
-                                if (bindingType.equals(modelBinding.getType())) {
-                                    Item item = createItemFromModelItem(modelItem);
-                                    if (item != null) {
-                                        internalDispatchBindings(reader, modelName, item, modelItem.getBindings());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    logger.debug("Model repository returned NULL for model named '{}'", modelName);
-                }
-            }
-        } else {
-            logger.warn("ModelRepository is NULL > dispatch bindings aborted!");
         }
     }
 

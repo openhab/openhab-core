@@ -17,6 +17,7 @@
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>1.52</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -33,6 +34,7 @@
             </goals>
             <phase>package</phase>
             <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <artifactSet>
                 <includes>
                   <include>org.bouncycastle:*</include>

@@ -49,7 +49,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -100,28 +99,14 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - added events for rules
  * @author Victor Toni - return only copies of {@link Rule}s
  */
-@Component(service = RuleRegistry.class, immediate = true, property = { "rule.reinitialization.delay:Long=500" })
+@Component(service = RuleRegistry.class, immediate = true)
 public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvider>
         implements RuleRegistry, RegistryChangeListener<RuleTemplate> {
-
-    /**
-     * Default value of delay between rule's re-initialization tries.
-     */
-    static final long DEFAULT_REINITIALIZATION_DELAY = 500;
-
-    /**
-     * Delay between rule's re-initialization tries.
-     */
-    private static final String CONFIG_PROPERTY_REINITIALIZATION_DELAY = "rule.reinitialization.delay";
 
     private static final String SOURCE = RuleRegistryImpl.class.getSimpleName();
 
     private final Logger logger = LoggerFactory.getLogger(RuleRegistryImpl.class.getName());
 
-    /**
-     * Delay between rule's re-initialization tries.
-     */
-    private long scheduleReinitializationDelay;
     private ModuleTypeRegistry moduleTypeRegistry;
     private RuleTemplateRegistry templateRegistry;
 
@@ -143,25 +128,10 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      *
      * @param componentContext this component context.
      */
+    @Override
     @Activate
-    protected void activate(BundleContext bundleContext, Map<String, Object> properties) throws Exception {
-        modified(properties);
+    protected void activate(BundleContext bundleContext) {
         super.activate(bundleContext);
-    }
-
-    /**
-     * This method is responsible for updating the value of delay between rule's re-initialization tries.
-     *
-     * @param config a {@link Map} containing the new value of delay.
-     */
-    @Modified
-    protected void modified(Map<String, Object> config) {
-        Object value = config == null ? null : config.get(CONFIG_PROPERTY_REINITIALIZATION_DELAY);
-        this.scheduleReinitializationDelay = (value != null && value instanceof Number) ? (((Number) value).longValue())
-                : DEFAULT_REINITIALIZATION_DELAY;
-        if (value != null && !(value instanceof Number)) {
-            logger.warn("Invalid configuration value: {}. It MUST be Number.", value);
-        }
     }
 
     @Override
@@ -676,17 +646,6 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     @Override
     public void updated(RuleTemplate oldElement, RuleTemplate element) {
         // Do nothing - resolved rules are independent from templates
-    }
-
-    /**
-     * Getter for {@link #scheduleReinitializationDelay} used by {@link RuleEngineImpl} to schedule rule's
-     * re-initialization
-     * tries.
-     *
-     * @return the {@link #scheduleReinitializationDelay}.
-     */
-    long getScheduleReinitializationDelay() {
-        return scheduleReinitializationDelay;
     }
 
 }

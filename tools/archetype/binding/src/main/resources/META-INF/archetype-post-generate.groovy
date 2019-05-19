@@ -75,33 +75,6 @@ def addBundleToBom(bundleAfter, newBundle) {
      println 'Added bundle to bom pom'
 }
 
-/**
- * Add the new bundle to the feature.xml
- */
-def addBundleToFeature(bundleAfter, newBundle, bundleName) {
-    def feature = '''
-    <feature name="##1" description="##2 Binding" version="${project.version}">
-        <feature>openhab-runtime-base</feature>
-        <bundle start-level="80">mvn:org.openhab.addons.bundles/##3/${project.version}</bundle>
-    </feature>
-'''.replace('##1', newBundle.replace('org.', '').replace('.', '-')).replace('##2', bundleName).replace('##3', newBundle)
-    def bomFile = new File(outputDirectory, '../features/openhab-addons/src/main/feature/feature.xml')
-    def newContent = ''
-    def insertIndex = 0;
-    def lines = bomFile.eachLine { line, index ->
-        newContent += line + nl
-        if (line.contains(bundleAfter) && line.contains('<bundle')) {
-            insertIndex = index + 1
-        }
-        if (insertIndex > 0 && index == insertIndex) {
-            newContent += feature
-            insertIndex = 0
-        }
-    }
-     bomFile.write(newContent)
-     println 'Added bundle to feature.xml'
-}
-
 //
 /**
  * Fix the bundle parent pom. The maven archytype adds the bundle, but add the end of the module list.
@@ -139,7 +112,6 @@ if (codeownersFile.exists()) {
     println 'Add new bundle after: ' + bundleAfter
     addUserToCodewoners(githubUser, codeownersFile, bundleAfter, newBundle)
     addBundleToBom(bundleAfter, newBundle)
-    addBundleToFeature(bundleAfter, newBundle, bundleName)
     fixBundlePom(bundleAfter, newBundle)
 
     println ''
