@@ -241,11 +241,10 @@ public class PageChangeListener implements StateChangeListener {
                 Predicate<Item> itemFilter = (i -> i.getType().equals(CoreItemFactory.LOCATION));
                 event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
 
-                // event.state is an adjustment of the item state to the widget type, but is only sent if both
-                // - the new state belongs to the widget in question and
-                // - the state actually changed
+                // event.state is an adjustment of the item state to the widget type.
                 final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
                 event.state = itemUIRegistry.convertState(w, itemToBeSent, stateToBeSent).toFullString();
+                // In case this state is identical to the item state, its value is set to null.
                 if (event.state != null && event.state.equals(event.item.state)) {
                     event.state = null;
                 }
