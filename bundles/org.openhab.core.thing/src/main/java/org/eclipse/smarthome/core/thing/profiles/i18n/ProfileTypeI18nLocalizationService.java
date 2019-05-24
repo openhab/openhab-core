@@ -50,7 +50,7 @@ public class ProfileTypeI18nLocalizationService {
         String label = profileI18nUtil.getProfileLabel(bundle, profileTypeUID, defaultLabel, locale);
 
         if (profileType instanceof StateProfileType) {
-            return ProfileTypeBuilder.newTrigger(profileTypeUID, label != null ? label : defaultLabel)
+            return ProfileTypeBuilder.newState(profileTypeUID, label != null ? label : defaultLabel)
                     .withSupportedItemTypes(profileType.getSupportedItemTypes())
                     .withSupportedItemTypesOfChannel(((StateProfileType) profileType).getSupportedItemTypesOfChannel())
                     .build();
