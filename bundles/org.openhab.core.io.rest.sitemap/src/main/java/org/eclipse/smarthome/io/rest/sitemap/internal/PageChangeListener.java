@@ -216,7 +216,8 @@ public class PageChangeListener implements StateChangeListener {
                 events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren((Frame) w)));
             }
 
-            boolean skipWidget = (w.getItem() == null) || !w.getItem().equals(item.getName());
+            boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());
+            boolean skipWidget = !itemBelongsToWidget;
             // We skip the chart widgets having a refresh argument
             if (!skipWidget && w instanceof Chart) {
                 Chart chartWidget = (Chart) w;
@@ -231,15 +232,18 @@ public class PageChangeListener implements StateChangeListener {
                 event.valuecolor = itemUIRegistry.getValueColor(w);
                 event.widgetId = itemUIRegistry.getWidgetId(w);
                 event.visibility = itemUIRegistry.getVisiblity(w);
-                // event.item contains data from the item including its state (in event.item.state)
+                // event.item contains the (potentially changed) data of the item belonging to
+                // the widget including its state (in event.item.state)
+                final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(w);
                 String widgetTypeName = w.eClass().getInstanceTypeName()
                         .substring(w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
                 boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
                 Predicate<Item> itemFilter = (i -> i.getType().equals(CoreItemFactory.LOCATION));
-                event.item = EnrichedItemDTOMapper.map(item, drillDown, itemFilter, null, null);
+                event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
 
                 // event.state is an adjustment of the item state to the widget type.
-                event.state = itemUIRegistry.convertState(w, item, state).toFullString();
+                final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
+                event.state = itemUIRegistry.convertState(w, itemToBeSent, stateToBeSent).toFullString();
                 // In case this state is identical to the item state, its value is set to null.
                 if (event.state != null && event.state.equals(event.item.state)) {
                     event.state = null;
@@ -249,6 +253,18 @@ public class PageChangeListener implements StateChangeListener {
             }
         }
         return events;
+    }
+
+    private Item getItemForWidget(Widget w) {
+        final String itemName = w.getItem();
+        if (itemName != null) {
+            try {
+                return itemUIRegistry.getItem(itemName);
+            } catch (ItemNotFoundException e) {
+                // fall through to returning null
+            }
+        }
+        return null;
     }
 
     private boolean definesVisibilityOrColor(Widget w, String name) {
