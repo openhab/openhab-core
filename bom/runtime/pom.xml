@@ -442,9 +442,14 @@
 
     <!-- All serial transports -->
     <dependency>
-      <groupId>com.neuronrobotics</groupId>
+      <groupId>org.openhab</groupId>
       <artifactId>nrjavaserial</artifactId>
-      <version>3.15.0</version>
+      <!-- Use "no liblockdev" version -->
+      <!-- See: https://github.com/openhab/openhab-core/pull/761 -->
+      <!-- See: https://github.com/openhab/openhab-core/issues/750 -->
+      <!-- <groupId>com.neuronrobotics</groupId> -->
+      <!-- <version>3.15.0</version> -->
+      <version>3.15.0.OH2</version>
       <scope>compile</scope>
     </dependency>
 
