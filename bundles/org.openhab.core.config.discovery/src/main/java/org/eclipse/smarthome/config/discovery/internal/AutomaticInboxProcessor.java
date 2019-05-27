@@ -39,7 +39,9 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.events.ThingStatusInfoChangedEvent;
 import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -76,7 +78,7 @@ import org.slf4j.LoggerFactory;
  * {@code autoApprove} configuration property can be set to {@code true}.
  * </p>
  *
- * @author Andre Fuechsel - Initial Contribution
+ * @author Andre Fuechsel - Initial contribution
  * @author Kai Kreuzer - added auto-approve functionality
  * @author Henning Sudbrock - added hook for selectively auto-approving inbox entries
  */
@@ -92,19 +94,33 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @NonNullByDefault({})
-    private ThingRegistry thingRegistry;
-    @NonNullByDefault({})
-    private ThingTypeRegistry thingTypeRegistry;
-    @NonNullByDefault({})
-    private Inbox inbox;
+    private final ThingRegistry thingRegistry;
+    private final ThingTypeRegistry thingTypeRegistry;
+    private final Inbox inbox;
     private boolean autoIgnore = true;
     private boolean alwaysAutoApprove = false;
 
     private final Set<InboxAutoApprovePredicate> inboxAutoApprovePredicates = new CopyOnWriteArraySet<>();
 
-    public AutomaticInboxProcessor() {
+    @Activate
+    public AutomaticInboxProcessor(final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference ThingRegistry thingRegistry, final @Reference Inbox inbox) {
         super(ThingStatusInfoChangedEvent.TYPE);
+        this.thingTypeRegistry = thingTypeRegistry;
+        this.thingRegistry = thingRegistry;
+        this.inbox = inbox;
+
+        // This should be the last step (to be more precise: providing the "this" reference to other ones as long as
+        // the constructor is not finished is a bad idea at all) as "this" will be used by another thread and so we need
+        // an already fully instantiated object.
+        this.thingRegistry.addRegistryChangeListener(this);
+        this.inbox.addInboxListener(this);
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        this.inbox.removeInboxListener(this);
+        this.thingRegistry.removeRegistryChangeListener(this);
     }
 
     @Override
@@ -248,37 +264,6 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
             alwaysAutoApprove = value != null && value.toString().equals("true");
             autoApproveInboxEntries();
         }
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-        thingRegistry.addRegistryChangeListener(this);
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        thingRegistry.removeRegistryChangeListener(this);
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = thingTypeRegistry;
-    }
-
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setInbox(Inbox inbox) {
-        this.inbox = inbox;
-        inbox.addInboxListener(this);
-    }
-
-    protected void unsetInbox(Inbox inbox) {
-        inbox.removeInboxListener(this);
-        this.inbox = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
