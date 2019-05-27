@@ -109,10 +109,10 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
         this.thingTypeRegistry = thingTypeRegistry;
         this.thingRegistry = thingRegistry;
         this.inbox = inbox;
+    }
 
-        // This should be the last step (to be more precise: providing the "this" reference to other ones as long as
-        // the constructor is not finished is a bad idea at all) as "this" will be used by another thread and so we need
-        // an already fully instantiated object.
+    @Activate
+    protected void activate() {
         this.thingRegistry.addRegistryChangeListener(this);
         this.inbox.addInboxListener(this);
     }

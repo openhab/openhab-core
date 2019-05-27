@@ -138,7 +138,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     private final ConfigDescriptionRegistry configDescRegistry;
     private final Storage<DiscoveryResult> discoveryResultStorage;
     private final Map<DiscoveryResult, Class<?>> resultDiscovererMap = new ConcurrentHashMap<>();
-    private ScheduledFuture<?> timeToLiveChecker;
+    private @NonNullByDefault({}) ScheduledFuture<?> timeToLiveChecker;
     private @Nullable EventPublisher eventPublisher;
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<>();
 
@@ -156,10 +156,10 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         this.managedThingProvider = thingProvider;
         this.thingTypeRegistry = thingTypeRegistry;
         this.configDescRegistry = configDescriptionRegistry;
+    }
 
-        // This should be the last steps (to be more precise: providing the "this" reference to other ones as long as
-        // the constructor is not finished is a bad idea at all) as "this" will be used by another thread and so we need
-        // already fully instantiated object.
+    @Activate
+    protected void activate() {
         this.discoveryServiceRegistry.addDiscoveryListener(this);
         this.thingRegistry.addRegistryChangeListener(this);
         this.timeToLiveChecker = ThreadPoolManager.getScheduledPool("discovery")
