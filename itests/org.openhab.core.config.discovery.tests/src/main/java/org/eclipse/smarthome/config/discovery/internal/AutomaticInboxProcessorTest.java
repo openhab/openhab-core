@@ -48,6 +48,7 @@ import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.eclipse.smarthome.core.thing.type.ThingTypeBuilder;
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
 import org.eclipse.smarthome.test.storage.VolatileStorageService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -157,10 +158,12 @@ public class AutomaticInboxProcessorTest {
                 thingProvider, thingTypeRegistry, configDescriptionRegistry);
         inbox.addThingHandlerFactory(thingHandlerFactory);
 
-        automaticInboxProcessor = new AutomaticInboxProcessor();
-        automaticInboxProcessor.setThingRegistry(thingRegistry);
-        automaticInboxProcessor.setThingTypeRegistry(thingTypeRegistry);
-        automaticInboxProcessor.setInbox(inbox);
+        automaticInboxProcessor = new AutomaticInboxProcessor(thingTypeRegistry, thingRegistry, inbox);
+    }
+
+    @After
+    public void tearDown() {
+        automaticInboxProcessor.deactivate();
     }
 
     /**
