@@ -15,6 +15,7 @@ package org.eclipse.smarthome.core.thing.link;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
@@ -59,6 +60,7 @@ import org.slf4j.LoggerFactory;
         EventSubscriber.class }, property = { "service.config.description.uri:String=system:links",
                 "service.config.label:String=Item Linking", "service.config.category:String=system",
                 "service.pid:String=org.eclipse.smarthome.links" })
+@NonNullByDefault
 public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusInfoChangedEvent> {
 
     private static final String THREADPOOL_NAME = "thingLinkManager";
@@ -67,11 +69,11 @@ public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusIn
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREADPOOL_NAME);
 
-    private ThingRegistry thingRegistry;
-    private ManagedThingProvider managedThingProvider;
-    private ItemRegistry itemRegistry;
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ChannelTypeRegistry channelTypeRegistry;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
 
     private boolean autoLinks = true;
 

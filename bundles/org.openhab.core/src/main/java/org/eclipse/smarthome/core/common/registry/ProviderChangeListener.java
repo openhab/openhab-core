@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.common.registry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * {@link ProviderChangeListener} can be added to {@link Provider} services, to
  * listen for changes. The {@link AbstractRegistry} implements a {@link ProviderChangeListener} and subscribes itself to
@@ -19,9 +21,9 @@ package org.eclipse.smarthome.core.common.registry;
  *
  * @author Dennis Nobel - Initial contribution
  *
- * @param <E>
- *            type of the element from the provider
+ * @param <E> type of the element from the provider
  */
+@NonNullByDefault
 public interface ProviderChangeListener<E> {
 
     /**

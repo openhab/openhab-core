@@ -13,7 +13,9 @@
 package org.eclipse.smarthome.core.thing.link;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
+import java.util.Hashtable;
 import java.util.Set;
 
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -27,6 +29,7 @@ import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * Tests for {@link ManagedItemChannelLinkProvider}.
@@ -64,7 +67,9 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
     public void teardown() {
         managedItemChannelLinkProvider.getAll().forEach(it -> managedItemChannelLinkProvider.remove(it.getUID()));
         managedThingProvider.getAll().forEach(it -> managedThingProvider.remove(it.getUID()));
-        thingLinkManager.activate(null);
+        ComponentContext componentContext = mock(ComponentContext.class);
+        when(componentContext.getProperties()).thenReturn(new Hashtable<>());
+        thingLinkManager.activate(componentContext);
     }
 
     @Test

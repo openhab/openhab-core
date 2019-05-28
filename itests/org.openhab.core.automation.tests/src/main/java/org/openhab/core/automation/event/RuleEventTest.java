@@ -84,7 +84,7 @@ public class RuleEventTest extends JavaOSGiTest {
         ItemProvider itemProvider = new ItemProvider() {
 
             @Override
-            public void addProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
 
             @Override
@@ -95,7 +95,7 @@ public class RuleEventTest extends JavaOSGiTest {
             }
 
             @Override
-            public void removeProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
         };
         registerService(itemProvider);
