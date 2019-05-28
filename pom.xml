@@ -51,11 +51,11 @@
   <distributionManagement>
     <repository>
       <id>bintray</id>
-      <url>https://api.bintray.com/maven/openhab/mvn/openhab-core/;publish=1</url>
+      <url>${oh.repo.distBaseUrl}/openhab-core/;publish=1</url>
     </repository>
     <snapshotRepository>
       <id>jfrog</id>
-      <url>https://openhab.jfrog.io/openhab/libs-snapshot-local</url>
+      <url>${oh.repo.snapshotBaseUrl}/libs-snapshot-local</url>
     </snapshotRepository>
   </distributionManagement>
 
@@ -107,49 +107,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <repositories>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>jcenter</id>
-      <name>JCenter Repository</name>
-      <url>https://jcenter.bintray.com</url>
-    </repository>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>esh-3rdparty-mvn</id>
-      <name>openHAB Core :: 3rd party Maven Repository</name>
-      <url>http://eclipse.github.io/smarthome/third-party/m2-repo/</url>
-    </repository>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>openhab-artifactory-release</id>
-      <name>JFrog Artifactory Repository</name>
-      <url>https://openhab.jfrog.io/openhab/libs-release</url>
-    </repository>
-    <repository>
-      <id>bintray-maggu2810-maven</id>
-      <url>https://dl.bintray.com/maggu2810/maven/</url>
-    </repository>
-  </repositories>
 
   <pluginRepositories>
     <pluginRepository>
@@ -351,12 +308,6 @@ Import-Package: \\
               <version>3.16.0</version>
             </dependency>
           </dependencies>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
         </plugin>
 
         <plugin>
