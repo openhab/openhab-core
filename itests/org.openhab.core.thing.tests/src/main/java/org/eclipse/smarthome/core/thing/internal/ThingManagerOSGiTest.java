@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -103,6 +104,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * {@link ThingManagerOSGiTest} tests the {@link ThingManager}.
@@ -188,7 +190,9 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     @After
     public void teardown() {
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
-        thingLinkManager.activate(null);
+        ComponentContext componentContext = mock(ComponentContext.class);
+        when(componentContext.getProperties()).thenReturn(new Hashtable<>());
+        thingLinkManager.activate(componentContext);
     }
 
     @Test
