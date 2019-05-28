@@ -108,6 +108,25 @@
     </dependencies>
   </dependencyManagement>
 
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>esh-3rdparty-mvn</id>
+      <name>openHAB Core :: 3rd party Maven Repository</name>
+      <url>http://eclipse.github.io/smarthome/third-party/m2-repo/</url>
+    </repository>
+    <repository>
+      <id>bintray-maggu2810-maven</id>
+      <url>https://dl.bintray.com/maggu2810/maven/</url>
+    </repository>
+  </repositories>
+
   <pluginRepositories>
     <pluginRepository>
       <id>jcenter</id>
