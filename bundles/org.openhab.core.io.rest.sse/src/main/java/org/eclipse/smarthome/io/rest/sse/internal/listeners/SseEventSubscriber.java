@@ -15,10 +15,13 @@ package org.eclipse.smarthome.io.rest.sse.internal.listeners;
 import java.util.Collections;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFilter;
 import org.eclipse.smarthome.core.events.EventSubscriber;
 import org.eclipse.smarthome.io.rest.sse.SseResource;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -29,19 +32,16 @@ import org.osgi.service.component.annotations.Reference;
  * @author Stefan Bußweiler - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class SseEventSubscriber implements EventSubscriber {
 
     private final Set<String> subscribedEventTypes = Collections.singleton(EventSubscriber.ALL_EVENT_TYPES);
 
-    private SseResource sseResource;
+    private final SseResource sseResource;
 
-    @Reference
-    protected void setSseResource(SseResource sseResource) {
+    @Activate
+    public SseEventSubscriber(final @Reference SseResource sseResource) {
         this.sseResource = sseResource;
-    }
-
-    protected void unsetSseResource(SseResource sseResource) {
-        this.sseResource = null;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SseEventSubscriber implements EventSubscriber {
     }
 
     @Override
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return null;
     }
 
@@ -58,5 +58,4 @@ public class SseEventSubscriber implements EventSubscriber {
     public void receive(Event event) {
         sseResource.broadcastEvent(event);
     }
-
 }
