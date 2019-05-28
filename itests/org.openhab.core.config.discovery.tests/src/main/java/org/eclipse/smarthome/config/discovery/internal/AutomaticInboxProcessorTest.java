@@ -157,8 +157,10 @@ public class AutomaticInboxProcessorTest {
         inbox = new PersistentInbox(new VolatileStorageService(), mock(DiscoveryServiceRegistry.class), thingRegistry,
                 thingProvider, thingTypeRegistry, configDescriptionRegistry);
         inbox.addThingHandlerFactory(thingHandlerFactory);
+        inbox.activate();
 
         automaticInboxProcessor = new AutomaticInboxProcessor(thingTypeRegistry, thingRegistry, inbox);
+        automaticInboxProcessor.activate();
     }
 
     @After

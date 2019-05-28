@@ -100,6 +100,7 @@ public class PersistentInboxTest {
         inbox = new PersistentInbox(storageService, mock(DiscoveryServiceRegistry.class), thingRegistry, thingProvider,
                 thingTypeRegistry, configDescriptionRegistry);
         inbox.addThingHandlerFactory(thingHandlerFactory);
+        inbox.activate();
     }
 
     @Test
