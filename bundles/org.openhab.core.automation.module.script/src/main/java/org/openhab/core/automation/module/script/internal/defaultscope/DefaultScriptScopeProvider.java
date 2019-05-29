@@ -67,7 +67,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann - refactored to be an ScriptExtensionProvider
- *
  */
 @Component(immediate = true)
 public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
@@ -76,52 +75,23 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     private Map<String, Object> elements;
 
-    private ItemRegistry itemRegistry;
-
-    private ThingRegistry thingRegistry;
-
-    private EventPublisher eventPublisher;
+    private final ItemRegistry itemRegistry;
+    private final ThingRegistry thingRegistry;
+    private final RuleRegistry ruleRegistry;
+    private final EventPublisher eventPublisher;
 
     private ScriptBusEvent busEvent;
 
     private ScriptThingActions thingActions;
 
-    private RuleRegistry ruleRegistry;
-
-    @Reference
-    protected void setRuleRegistry(RuleRegistry ruleRegistry) {
-        this.ruleRegistry = ruleRegistry;
-    }
-
-    protected void unsetRuleRegistry(RuleRegistry ruleRegistry) {
-        this.ruleRegistry = null;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
+    @Activate
+    public DefaultScriptScopeProvider(final @Reference ItemRegistry itemRegistry,
+            final @Reference ThingRegistry thingRegistry, final @Reference RuleRegistry ruleRegistry,
+            final @Reference EventPublisher eventPublisher) {
         this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
+        this.thingRegistry = thingRegistry;
+        this.ruleRegistry = ruleRegistry;
         this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
@@ -225,6 +195,7 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         busEvent = null;
         thingActions.dispose();
         thingActions = null;
+        elements.clear();
         elements = null;
     }
 
@@ -261,5 +232,4 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
     public void unload(String scriptIdentifier) {
         // nothing todo
     }
-
 }
