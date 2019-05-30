@@ -139,18 +139,6 @@
   </pluginRepositories>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>.</directory>
-        <includes>
-          <include>NOTICE</include>
-          <include>*.xsd</include>
-        </includes>
-      </resource>
-    </resources>
     <pluginManagement>
       <plugins>
 
@@ -177,7 +165,8 @@ Import-Package: \\
   org.openhab.*,\\
   org.eclipse.smarthome.*
 -sources: false
--contract: *]]></bnd>
+-contract: *
+-includeresource: -${.}/NOTICE, -${.}/*.xsd]]></bnd>
             <!-- Bundle-SymbolicName: ${project.groupId}.${project.artifactId} -->
           </configuration>
           <executions>
