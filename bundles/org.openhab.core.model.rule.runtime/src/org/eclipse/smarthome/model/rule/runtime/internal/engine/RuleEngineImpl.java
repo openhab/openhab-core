@@ -65,9 +65,8 @@ import com.google.inject.Injector;
  * It listens to changes to the rules folder, evaluates the trigger conditions of the rules and
  * schedules them for execution dependent on their triggering conditions.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Bugfixing
- *
  */
 @SuppressWarnings("restriction")
 @Component(immediate = true, service = { EventSubscriber.class, RuleEngine.class })
@@ -80,9 +79,9 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
 
     protected final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME);
 
-    private ItemRegistry itemRegistry;
-    private ModelRepository modelRepository;
-    private ScriptEngine scriptEngine;
+    private final ItemRegistry itemRegistry;
+    private final ModelRepository modelRepository;
+    private final ScriptEngine scriptEngine;
 
     private RuleTriggerManager triggerManager;
 
@@ -94,6 +93,14 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     // ready to be operational.
     // This field is package private to allow access for unit tests.
     boolean starting = true;
+
+    @Activate
+    public RuleEngineImpl(final @Reference ItemRegistry itemRegistry, final @Reference ModelRepository modelRepository,
+            final @Reference ScriptEngine scriptEngine) {
+        this.itemRegistry = itemRegistry;
+        this.modelRepository = modelRepository;
+        this.scriptEngine = scriptEngine;
+    }
 
     @Activate
     public void activate() {
@@ -135,33 +142,6 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
         executeRules(triggerManager.getRules(SHUTDOWN));
         triggerManager.clearAll();
         triggerManager = null;
-    }
-
-    @Reference
-    public void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    public void setModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = modelRepository;
-    }
-
-    public void unsetModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = null;
-    }
-
-    @Reference
-    public void setScriptEngine(ScriptEngine scriptEngine) {
-        this.scriptEngine = scriptEngine;
-    }
-
-    public void unsetScriptEngine(ScriptEngine scriptEngine) {
-        this.scriptEngine = null;
     }
 
     @Reference
@@ -331,7 +311,6 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     }
 
     protected synchronized void executeRule(Rule rule, RuleEvaluationContext context) {
-
         scheduler.execute(() -> {
             Script script = scriptEngine.newScriptFromXExpression(rule.getScript());
 
