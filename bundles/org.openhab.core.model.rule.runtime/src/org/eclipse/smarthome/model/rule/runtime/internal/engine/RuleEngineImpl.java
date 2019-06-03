@@ -40,6 +40,7 @@ import org.eclipse.smarthome.core.thing.events.ChannelTriggeredEvent;
 import org.eclipse.smarthome.core.thing.events.ThingStatusInfoChangedEvent;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
+import org.eclipse.smarthome.model.core.EventType;
 import org.eclipse.smarthome.model.core.ModelRepository;
 import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
 import org.eclipse.smarthome.model.rule.RulesStandaloneSetup;
@@ -242,19 +243,17 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     }
 
     @Override
-    public void modelChanged(String modelName, org.eclipse.smarthome.model.core.EventType type) {
+    public void modelChanged(String modelName, EventType type) {
         if (modelName.endsWith("rules")) {
             RuleModel model = (RuleModel) modelRepository.getModel(modelName);
 
             // remove the rules from the trigger sets
-            if (type == org.eclipse.smarthome.model.core.EventType.REMOVED
-                    || type == org.eclipse.smarthome.model.core.EventType.MODIFIED) {
+            if (type == EventType.REMOVED || type == EventType.MODIFIED) {
                 triggerManager.removeRuleModel(model);
             }
 
             // add new and modified rules to the trigger sets
-            if (model != null && (type == org.eclipse.smarthome.model.core.EventType.ADDED
-                    || type == org.eclipse.smarthome.model.core.EventType.MODIFIED)) {
+            if (model != null && (type == EventType.ADDED || type == EventType.MODIFIED)) {
                 triggerManager.addRuleModel(model);
                 // now execute all rules that are meant to trigger at startup
                 scheduleStartupRules();
