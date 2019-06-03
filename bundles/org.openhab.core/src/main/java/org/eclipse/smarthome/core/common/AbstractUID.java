@@ -28,7 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public abstract class AbstractUID {
 
-    public static final String SEGMENT_PATTERN = "[A-Za-z0-9_-]*";
+    public static final String SEGMENT_PATTERN = "[\\w-%]*";
     public static final String SEPARATOR = ":";
     private final List<String> segments;
 
