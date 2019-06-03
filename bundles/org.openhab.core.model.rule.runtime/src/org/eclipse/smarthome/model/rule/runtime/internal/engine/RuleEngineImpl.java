@@ -40,6 +40,7 @@ import org.eclipse.smarthome.core.thing.events.ChannelTriggeredEvent;
 import org.eclipse.smarthome.core.thing.events.ThingStatusInfoChangedEvent;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
+import org.eclipse.smarthome.model.core.EventType;
 import org.eclipse.smarthome.model.core.ModelRepository;
 import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
 import org.eclipse.smarthome.model.rule.RulesStandaloneSetup;
@@ -70,7 +71,6 @@ import com.google.inject.Injector;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Bugfixing
  */
-@SuppressWarnings("restriction")
 @Component(immediate = true, service = { EventSubscriber.class, RuleEngine.class })
 @NonNullByDefault
 public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeListener, ModelRepositoryChangeListener,
@@ -86,8 +86,8 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     private final ModelRepository modelRepository;
     private final ScriptEngine scriptEngine;
 
-    private @NonNullByDefault({}) Injector injector;
-    private @NonNullByDefault({}) RuleTriggerManager triggerManager;
+    private final Injector injector;
+    private final RuleTriggerManager triggerManager;
 
     private @Nullable ScheduledFuture<?> startupJob;
 
@@ -102,13 +102,13 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
         this.itemRegistry = itemRegistry;
         this.modelRepository = modelRepository;
         this.scriptEngine = scriptEngine;
+
+        this.injector = RulesStandaloneSetup.getInjector();
+        this.triggerManager = new RuleTriggerManager(injector);
     }
 
     @Activate
     public void activate() {
-        injector = RulesStandaloneSetup.getInjector();
-        triggerManager = new RuleTriggerManager(injector);
-
         logger.debug("Started rule engine");
 
         // read all rule files
@@ -143,7 +143,6 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
         // execute all scripts that were registered for system shutdown
         executeRules(triggerManager.getRules(SHUTDOWN));
         triggerManager.clearAll();
-        triggerManager = null;
     }
 
     @Reference
@@ -177,7 +176,7 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
 
     @Override
     public void stateChanged(Item item, State oldState, State newState) {
-        if (!starting && triggerManager != null) {
+        if (!starting) {
             Iterable<Rule> rules = triggerManager.getRules(CHANGE, item, oldState, newState);
 
             executeRules(rules, item, oldState);
@@ -186,14 +185,14 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
 
     @Override
     public void stateUpdated(Item item, State state) {
-        if (!starting && triggerManager != null) {
+        if (!starting) {
             Iterable<Rule> rules = triggerManager.getRules(UPDATE, item, state);
             executeRules(rules, item);
         }
     }
 
     private void receiveCommand(ItemCommandEvent commandEvent) {
-        if (!starting && triggerManager != null) {
+        if (!starting) {
             String itemName = commandEvent.getItemName();
             Command command = commandEvent.getItemCommand();
             try {
@@ -244,24 +243,20 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     }
 
     @Override
-    public void modelChanged(String modelName, org.eclipse.smarthome.model.core.EventType type) {
-        if (triggerManager != null) {
-            if (modelName.endsWith("rules")) {
-                RuleModel model = (RuleModel) modelRepository.getModel(modelName);
+    public void modelChanged(String modelName, EventType type) {
+        if (modelName.endsWith("rules")) {
+            RuleModel model = (RuleModel) modelRepository.getModel(modelName);
 
-                // remove the rules from the trigger sets
-                if (type == org.eclipse.smarthome.model.core.EventType.REMOVED
-                        || type == org.eclipse.smarthome.model.core.EventType.MODIFIED) {
-                    triggerManager.removeRuleModel(model);
-                }
+            // remove the rules from the trigger sets
+            if (type == EventType.REMOVED || type == EventType.MODIFIED) {
+                triggerManager.removeRuleModel(model);
+            }
 
-                // add new and modified rules to the trigger sets
-                if (model != null && (type == org.eclipse.smarthome.model.core.EventType.ADDED
-                        || type == org.eclipse.smarthome.model.core.EventType.MODIFIED)) {
-                    triggerManager.addRuleModel(model);
-                    // now execute all rules that are meant to trigger at startup
-                    scheduleStartupRules();
-                }
+            // add new and modified rules to the trigger sets
+            if (model != null && (type == EventType.ADDED || type == EventType.MODIFIED)) {
+                triggerManager.addRuleModel(model);
+                // now execute all rules that are meant to trigger at startup
+                scheduleStartupRules();
             }
         }
     }
@@ -277,40 +272,35 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     }
 
     private void runStartupRules() {
-        if (triggerManager != null) {
-            Iterable<Rule> startupRules = triggerManager.getRules(STARTUP);
-
-            for (Rule rule : startupRules) {
-                scheduler.execute(() -> {
-                    try {
-                        Script script = scriptEngine.newScriptFromXExpression(rule.getScript());
-                        logger.debug("Executing startup rule '{}'", rule.getName());
-                        RuleEvaluationContext context = new RuleEvaluationContext();
-                        context.setGlobalContext(RuleContextHelper.getContext(rule, injector));
-                        script.execute(context);
-                        triggerManager.removeRule(STARTUP, rule);
-                    } catch (ScriptExecutionException e) {
-                        if (!e.getMessage().contains("cannot be resolved to an item or type")) {
-                            if (e.getCause() != null) {
-                                logger.error("Error during the execution of startup rule '{}': {}", rule.getName(),
-                                        e.getCause().getMessage());
-                            } else {
-                                logger.error("Error during the execution of startup rule '{}': {}", rule.getName(),
-                                        e.getMessage());
-                            }
-                            triggerManager.removeRule(STARTUP, rule);
+        for (Rule rule : triggerManager.getRules(STARTUP)) {
+            scheduler.execute(() -> {
+                try {
+                    Script script = scriptEngine.newScriptFromXExpression(rule.getScript());
+                    logger.debug("Executing startup rule '{}'", rule.getName());
+                    RuleEvaluationContext context = new RuleEvaluationContext();
+                    context.setGlobalContext(RuleContextHelper.getContext(rule, injector));
+                    script.execute(context);
+                    triggerManager.removeRule(STARTUP, rule);
+                } catch (ScriptExecutionException e) {
+                    if (!e.getMessage().contains("cannot be resolved to an item or type")) {
+                        if (e.getCause() != null) {
+                            logger.error("Error during the execution of startup rule '{}': {}", rule.getName(),
+                                    e.getCause().getMessage());
                         } else {
-                            logger.debug(
-                                    "Execution of startup rule '{}' has been postponed as items are still missing: {}",
-                                    rule.getName(), e.getMessage());
+                            logger.error("Error during the execution of startup rule '{}': {}", rule.getName(),
+                                    e.getMessage());
                         }
+                        triggerManager.removeRule(STARTUP, rule);
+                    } else {
+                        logger.debug("Execution of startup rule '{}' has been postponed as items are still missing: {}",
+                                rule.getName(), e.getMessage());
                     }
-                });
-            }
-            // now that we have scheduled the startup rules, we are ready for others as well
-            starting = false;
-            triggerManager.startTimerRuleExecution();
+                }
+            });
         }
+        // now that we have scheduled the startup rules, we are ready for others as well
+        starting = false;
+        triggerManager.startTimerRuleExecution();
     }
 
     protected synchronized void executeRule(Rule rule, RuleEvaluationContext context) {
