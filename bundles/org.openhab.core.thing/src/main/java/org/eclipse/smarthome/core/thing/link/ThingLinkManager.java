@@ -69,16 +69,25 @@ public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusIn
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREADPOOL_NAME);
 
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
-    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
-    private @NonNullByDefault({}) ItemRegistry itemRegistry;
-    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ManagedThingProvider managedThingProvider;
+    private final ItemRegistry itemRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
 
     private boolean autoLinks = true;
 
-    public ThingLinkManager() {
+    @Activate
+    public ThingLinkManager(final @Reference ThingRegistry thingRegistry,
+            final @Reference ManagedThingProvider managedThingProvider, final @Reference ItemRegistry itemRegistry,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+            final @Reference ChannelTypeRegistry channelTypeRegistry) {
         super(ThingStatusInfoChangedEvent.TYPE);
+        this.thingRegistry = thingRegistry;
+        this.managedThingProvider = managedThingProvider;
+        this.itemRegistry = itemRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.channelTypeRegistry = channelTypeRegistry;
     }
 
     @Activate
@@ -103,51 +112,6 @@ public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusIn
         itemRegistry.removeRegistryChangeListener(itemRegistryChangeListener);
         itemChannelLinkRegistry.removeRegistryChangeListener(itemChannelLinkRegistryChangeListener);
         managedThingProvider.removeProviderChangeListener(managedThingProviderListener);
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setManagedThingProvider(ManagedThingProvider managedThingProvider) {
-        this.managedThingProvider = managedThingProvider;
-    }
-
-    protected void unsetManagedThingProvider(ManagedThingProvider managedThingProvider) {
-        this.managedThingProvider = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
     }
 
     public boolean isAutoLinksEnabled() {
