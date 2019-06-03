@@ -12,12 +12,14 @@
  */
 package org.eclipse.smarthome.model.rule.runtime;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is a marker interface for Rule Engines.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface RuleEngine {
 
 }

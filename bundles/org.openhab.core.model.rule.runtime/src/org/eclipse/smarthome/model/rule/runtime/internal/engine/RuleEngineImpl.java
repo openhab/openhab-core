@@ -21,6 +21,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFilter;
@@ -70,6 +72,7 @@ import com.google.inject.Injector;
  */
 @SuppressWarnings("restriction")
 @Component(immediate = true, service = { EventSubscriber.class, RuleEngine.class })
+@NonNullByDefault
 public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeListener, ModelRepositoryChangeListener,
         RuleEngine, EventSubscriber {
 
@@ -83,11 +86,10 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     private final ModelRepository modelRepository;
     private final ScriptEngine scriptEngine;
 
-    private RuleTriggerManager triggerManager;
+    private @NonNullByDefault({}) Injector injector;
+    private @NonNullByDefault({}) RuleTriggerManager triggerManager;
 
-    private Injector injector;
-
-    private ScheduledFuture<?> startupJob;
+    private @Nullable ScheduledFuture<?> startupJob;
 
     // This flag is used to signal that items are still being added and that we hence do not consider the rule engine
     // ready to be operational.
@@ -191,7 +193,7 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     }
 
     private void receiveCommand(ItemCommandEvent commandEvent) {
-        if (!starting && triggerManager != null && itemRegistry != null) {
+        if (!starting && triggerManager != null) {
             String itemName = commandEvent.getItemName();
             Command command = commandEvent.getItemCommand();
             try {
@@ -265,8 +267,9 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     }
 
     private void scheduleStartupRules() {
-        if (startupJob != null && !startupJob.isCancelled() && !startupJob.isDone()) {
-            startupJob.cancel(true);
+        ScheduledFuture<?> job = startupJob;
+        if (job != null && !job.isCancelled() && !job.isDone()) {
+            job.cancel(true);
         }
         startupJob = scheduler.schedule(() -> {
             runStartupRules();
@@ -393,7 +396,7 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     }
 
     @Override
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return null;
     }
 
