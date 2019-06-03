@@ -14,6 +14,7 @@ package org.eclipse.smarthome.core.persistence.internal;
 
 import java.text.DateFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,13 +52,15 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.quartz.Job;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class implements a persistence manager to manage all persistence services etc.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Separation of persistence core and model, drop Quartz usage.
  */
 @Component(service = PersistenceManager.class, immediate = true)
@@ -80,7 +83,7 @@ public class PersistenceManagerImpl implements PersistenceManager, ItemRegistryC
     }
 
     protected void activate() {
-        allItemsChanged(null);
+        allItemsChanged(Collections.emptySet());
         started = true;
         itemRegistry.addRegistryChangeListener(this);
     }

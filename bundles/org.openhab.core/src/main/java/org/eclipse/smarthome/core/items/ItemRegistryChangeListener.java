@@ -14,20 +14,21 @@ package org.eclipse.smarthome.core.items;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
 
 /**
  * This is a listener interface which should be implemented where ever the item registry is
  * used in order to be notified of any dynamic changes in the provided items.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface ItemRegistryChangeListener extends RegistryChangeListener<Item> {
 
     /**
      * Notifies the listener that all items in the registry have changed and thus should be reloaded.
-     * 
+     *
      * @param oldItemNames a collection of all previous item names, so that references can be removed
      */
     public void allItemsChanged(Collection<String> oldItemNames);
