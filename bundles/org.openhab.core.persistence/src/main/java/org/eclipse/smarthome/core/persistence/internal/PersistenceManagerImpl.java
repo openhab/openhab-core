@@ -52,8 +52,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.quartz.Job;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -331,7 +329,8 @@ public class PersistenceManagerImpl implements PersistenceManager, ItemRegistryC
     }
 
     /**
-     * Creates and schedules a new quartz-job.
+     * Creates new {@link ScheduledCompletableFuture}s in the group <code>dbId</code> for the given collection of
+     * {@link SimpleStrategy strategies}.
      *
      * @param dbId the database id used by the persistence service
      * @param strategies a collection of strategies
@@ -358,9 +357,9 @@ public class PersistenceManagerImpl implements PersistenceManager, ItemRegistryC
     }
 
     /**
-     * Delete all {@link Job}s of the group <code>dbId</code>
+     * Deletes all {@link ScheduledCompletableFuture}s of the group <code>dbId</code>.
      *
-     * @throws SchedulerException if there is an internal Scheduler error.
+     * @param dbId the database id used by the persistence service
      */
     private void removeTimers(String dbId) {
         if (!persistenceJobs.containsKey(dbId)) {
