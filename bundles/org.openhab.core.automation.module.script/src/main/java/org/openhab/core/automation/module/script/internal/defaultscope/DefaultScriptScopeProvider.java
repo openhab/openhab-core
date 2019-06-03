@@ -16,10 +16,8 @@ import java.io.File;
 import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -43,6 +41,7 @@ import org.eclipse.smarthome.core.library.types.StopMoveType;
 import org.eclipse.smarthome.core.library.types.StringListType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.library.types.UpDownType;
+import org.eclipse.smarthome.core.library.unit.BinaryPrefix;
 import org.eclipse.smarthome.core.library.unit.ImperialUnits;
 import org.eclipse.smarthome.core.library.unit.MetricPrefix;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
@@ -50,6 +49,7 @@ import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.binding.ThingActions;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.core.automation.RuleRegistry;
@@ -66,85 +66,25 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * Nonetheless, solutions are free to remove it and have more specific scope providers for their own purposes.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Simon Merschjohann - refactored to be an ScriptExtensionProvider
- *
+ * @author Simon Merschjohann - Refactored to be a {@link ScriptExtensionProvider}
  */
 @Component(immediate = true)
 public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
-    private final Queue<ThingActions> queuedBeforeActivation = new LinkedList<>();
+    private static final String PRESET_DEFAULT = "default";
 
-    private Map<String, Object> elements;
+    private final Map<String, Object> elements = new ConcurrentHashMap<>();
 
-    private ItemRegistry itemRegistry;
-
-    private ThingRegistry thingRegistry;
-
-    private EventPublisher eventPublisher;
-
-    private ScriptBusEvent busEvent;
-
-    private ScriptThingActions thingActions;
-
-    private RuleRegistry ruleRegistry;
-
-    @Reference
-    protected void setRuleRegistry(RuleRegistry ruleRegistry) {
-        this.ruleRegistry = ruleRegistry;
-    }
-
-    protected void unsetRuleRegistry(RuleRegistry ruleRegistry) {
-        this.ruleRegistry = null;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    synchronized void addThingActions(ThingActions thingActions) {
-        if (this.thingActions == null) { // bundle may not be active yet
-            queuedBeforeActivation.add(thingActions);
-        } else {
-            this.thingActions.addThingActions(thingActions);
-            elements.put(thingActions.getClass().getSimpleName(), thingActions.getClass());
-        }
-    }
-
-    protected void removeThingActions(ThingActions thingActions) {
-        elements.remove(thingActions.getClass().getSimpleName());
-        this.thingActions.removeThingActions(thingActions);
-    }
+    private final ScriptBusEvent busEvent;
+    private final ScriptThingActions thingActions;
 
     @Activate
-    protected synchronized void activate() {
-        busEvent = new ScriptBusEvent(itemRegistry, eventPublisher);
-        thingActions = new ScriptThingActions(thingRegistry);
+    public DefaultScriptScopeProvider(final @Reference ItemRegistry itemRegistry,
+            final @Reference ThingRegistry thingRegistry, final @Reference RuleRegistry ruleRegistry,
+            final @Reference EventPublisher eventPublisher) {
+        this.busEvent = new ScriptBusEvent(itemRegistry, eventPublisher);
+        this.thingActions = new ScriptThingActions(thingRegistry);
 
-        elements = new HashMap<>();
         elements.put("State", State.class);
         elements.put("Command", Command.class);
         elements.put("StringUtils", StringUtils.class);
@@ -178,6 +118,9 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         elements.put("NULL", UnDefType.NULL);
         elements.put("UNDEF", UnDefType.UNDEF);
 
+        elements.put("RefreshType", RefreshType.class);
+        elements.put("REFRESH", RefreshType.REFRESH);
+
         elements.put("NextPreviousType", NextPreviousType.class);
         elements.put("NEXT", NextPreviousType.NEXT);
         elements.put("PREVIOUS", NextPreviousType.PREVIOUS);
@@ -204,38 +147,44 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         elements.put("ImperialUnits", ImperialUnits.class);
         elements.put("MetricPrefix", MetricPrefix.class);
         elements.put("SmartHomeUnits", SmartHomeUnits.class);
+        elements.put("BinaryPrefix", BinaryPrefix.class);
 
         // services
         elements.put("items", new ItemRegistryDelegate(itemRegistry));
         elements.put("ir", itemRegistry);
         elements.put("itemRegistry", itemRegistry);
         elements.put("things", thingRegistry);
-        elements.put("events", busEvent);
         elements.put("rules", ruleRegistry);
+        elements.put("events", busEvent);
         elements.put("actions", thingActions);
+    }
 
-        // if any thingActions were queued before this got activated, add them now
-        queuedBeforeActivation.forEach(thingActions -> this.addThingActions(thingActions));
-        queuedBeforeActivation.clear();
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    synchronized void addThingActions(ThingActions thingActions) {
+        this.thingActions.addThingActions(thingActions);
+        elements.put(thingActions.getClass().getSimpleName(), thingActions.getClass());
+    }
+
+    protected void removeThingActions(ThingActions thingActions) {
+        elements.remove(thingActions.getClass().getSimpleName());
+        this.thingActions.removeThingActions(thingActions);
     }
 
     @Deactivate
     protected void deactivate() {
         busEvent.dispose();
-        busEvent = null;
         thingActions.dispose();
-        thingActions = null;
-        elements = null;
+        elements.clear();
     }
 
     @Override
     public Collection<String> getDefaultPresets() {
-        return Collections.singleton("default");
+        return Collections.singleton(PRESET_DEFAULT);
     }
 
     @Override
     public Collection<String> getPresets() {
-        return Collections.singleton("default");
+        return Collections.singleton(PRESET_DEFAULT);
     }
 
     @Override
@@ -250,16 +199,14 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     @Override
     public Map<String, Object> importPreset(String scriptIdentifier, String preset) {
-        if (preset.equals("default")) {
-            return elements;
+        if (preset.equals(PRESET_DEFAULT)) {
+            return Collections.unmodifiableMap(elements);
         }
-
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override
     public void unload(String scriptIdentifier) {
         // nothing todo
     }
-
 }
