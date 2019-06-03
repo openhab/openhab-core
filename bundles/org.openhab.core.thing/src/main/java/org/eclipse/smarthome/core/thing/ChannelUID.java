@@ -30,7 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class ChannelUID extends UID {
 
-    private static final String CHANNEL_SEGMENT_PATTERN = "[\\w-]*|[\\w-]*#[\\w-]*";
+    private static final String CHANNEL_SEGMENT_PATTERN = "[\\w-%]*|[\\w-%]*#[\\w-]*";
     private static final String CHANNEL_GROUP_SEPARATOR = "#";
 
     /**
