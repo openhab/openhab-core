@@ -24,6 +24,7 @@ import org.eclipse.smarthome.core.library.types.RewindFastforwardType;
 import org.eclipse.smarthome.core.library.types.StopMoveType;
 import org.eclipse.smarthome.core.library.types.UpDownType;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.Type;
 import org.eclipse.smarthome.core.types.UnDefType;
@@ -35,15 +36,14 @@ import com.google.inject.Singleton;
  * name).
  * A future version might gather the sets through an extension mechanism, for the moment it is simply statically coded.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @Singleton
 public class StateAndCommandProvider {
 
-    final static protected Set<Command> COMMANDS = new HashSet<Command>();
-    final static protected Set<State> STATES = new HashSet<State>();
-    final static protected Set<Type> TYPES = new HashSet<Type>();
+    protected static final Set<Command> COMMANDS = new HashSet<>();
+    protected static final Set<State> STATES = new HashSet<>();
+    protected static final Set<Type> TYPES = new HashSet<>();
 
     static {
         COMMANDS.add(OnOffType.ON);
@@ -60,6 +60,7 @@ public class StateAndCommandProvider {
         COMMANDS.add(NextPreviousType.PREVIOUS);
         COMMANDS.add(RewindFastforwardType.REWIND);
         COMMANDS.add(RewindFastforwardType.FASTFORWARD);
+        COMMANDS.add(RefreshType.REFRESH);
 
         STATES.add(UnDefType.UNDEF);
         STATES.add(UnDefType.NULL);
