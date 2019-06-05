@@ -58,7 +58,9 @@ public class ThreadedEventHandler implements Closeable {
             final EventHandler worker = new EventHandler(typedEventSubscribers, typedEventFactories, safeCaller);
             while (running.get()) {
                 try {
+                    logger.trace("wait for event");
                     final Event event = queue.poll(1, TimeUnit.HOURS);
+                    logger.trace("inspect event: {}", event);
                     if (event == null) {
                         logger.debug("Hey, you have really very few events.");
                     } else if (event == notifyEvent) {

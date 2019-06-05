@@ -56,8 +56,6 @@ public class EventHandler {
     }
 
     public void handleEvent(org.osgi.service.event.Event osgiEvent) {
-        logger.trace("Handle OSGi event (event: {})", osgiEvent);
-
         Object typeObj = osgiEvent.getProperty("type");
         Object payloadObj = osgiEvent.getProperty("payload");
         Object topicObj = osgiEvent.getProperty("topic");
