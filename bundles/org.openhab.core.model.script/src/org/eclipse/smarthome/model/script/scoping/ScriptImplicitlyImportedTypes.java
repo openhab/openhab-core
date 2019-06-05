@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.smarthome.core.library.unit.BinaryPrefix;
 import org.eclipse.smarthome.core.library.unit.ImperialUnits;
 import org.eclipse.smarthome.core.library.unit.MetricPrefix;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
@@ -106,6 +107,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(MetricPrefix.class);
         result.add(SIUnits.class);
         result.add(SmartHomeUnits.class);
+        result.add(BinaryPrefix.class);
 
         // jodatime static functions
         result.add(DateTime.class);
