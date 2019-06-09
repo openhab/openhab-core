@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.io.rest.sse.internal;
 
+import javax.ws.rs.ext.RuntimeDelegate;
+
 import org.glassfish.jersey.media.sse.SseFeature;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -26,6 +28,31 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class SseActivator implements BundleActivator {
+
+    // See: https://github.com/openhab/openhab-core/issues/597
+    private static class WorkAroundIssue597 {
+        public static RuntimeDelegate getRuntimeDelegate(final long millisMax, final long millisSleep)
+                throws InterruptedException {
+            final Logger logger = LoggerFactory.getLogger(WorkAroundIssue597.class);
+
+            logger.trace("get runtime delegate");
+            final long begMillis = System.currentTimeMillis();
+            do {
+                try {
+                    final RuntimeDelegate runtimeDelegate = RuntimeDelegate.getInstance();
+                    logger.trace("succeeded");
+                    return runtimeDelegate;
+                } catch (final LinkageError ex) {
+                    logger.trace("linkage error");
+                    if (System.currentTimeMillis() - begMillis <= millisMax) {
+                        Thread.sleep(millisSleep);
+                    }
+                }
+            } while (System.currentTimeMillis() - begMillis <= millisMax);
+            logger.trace("give up");
+            return null;
+        }
+    }
 
     private final Logger logger = LoggerFactory.getLogger(SseActivator.class);
 
@@ -42,6 +69,7 @@ public class SseActivator implements BundleActivator {
     public void start(BundleContext bc) throws Exception {
         context = bc;
 
+        WorkAroundIssue597.getRuntimeDelegate(5000, 200);
         String featureName = SseFeature.class.getName();
         if (bc.getServiceReference(featureName) == null) {
             sseFeatureRegistration = bc.registerService(featureName, new SseFeature(), null);
