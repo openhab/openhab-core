@@ -56,8 +56,6 @@ public class EventHandler {
     }
 
     public void handleEvent(org.osgi.service.event.Event osgiEvent) {
-        logger.trace("Handle OSGi event (event: {})", osgiEvent);
-
         Object typeObj = osgiEvent.getProperty("type");
         Object payloadObj = osgiEvent.getProperty("payload");
         Object topicObj = osgiEvent.getProperty("topic");
@@ -132,6 +130,7 @@ public class EventHandler {
         for (final EventSubscriber eventSubscriber : eventSubscribers) {
             EventFilter filter = eventSubscriber.getEventFilter();
             if (filter == null || filter.apply(event)) {
+                logger.trace("Delegate event to subscriber ({}).", eventSubscriber.getClass());
                 safeCaller.create(eventSubscriber, EventSubscriber.class).withAsync().onTimeout(() -> {
                     logger.warn("Dispatching event to subscriber '{}' takes more than {}ms.",
                             eventSubscriber.toString(), SafeCaller.DEFAULT_TIMEOUT);
@@ -139,6 +138,8 @@ public class EventHandler {
                     logger.error("Dispatching/filtering event for subscriber '{}' failed: {}",
                             EventSubscriber.class.getName(), e.getMessage(), e);
                 }).build().receive(event);
+            } else {
+                logger.trace("Skip event subscriber ({}) because of its filter.", eventSubscriber.getClass());
             }
         }
     }
