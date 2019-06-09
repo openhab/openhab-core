@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.SafeCaller;
 import org.eclipse.smarthome.core.events.EventFactory;
 import org.eclipse.smarthome.core.events.EventSubscriber;
 import org.osgi.service.event.Event;
@@ -50,31 +49,32 @@ public class ThreadedEventHandler implements Closeable {
      *
      * @param typedEventSubscribers the event subscribers
      * @param typedEventFactories the event factories indexed by the event type
-     * @param safeCaller the safe caller to use
      */
     ThreadedEventHandler(Map<String, Set<EventSubscriber>> typedEventSubscribers,
-            final Map<String, EventFactory> typedEventFactories, final SafeCaller safeCaller) {
+            final Map<String, EventFactory> typedEventFactories) {
         thread = new Thread(() -> {
-            final EventHandler worker = new EventHandler(typedEventSubscribers, typedEventFactories, safeCaller);
-            while (running.get()) {
-                try {
-                    logger.trace("wait for event");
-                    final Event event = queue.poll(1, TimeUnit.HOURS);
-                    logger.trace("inspect event: {}", event);
-                    if (event == null) {
-                        logger.debug("Hey, you have really very few events.");
-                    } else if (event == notifyEvent) {
-                        // received an internal notification
-                    } else {
-                        worker.handleEvent(event);
+            try (EventHandler worker = new EventHandler(typedEventSubscribers, typedEventFactories)) {
+                while (running.get()) {
+                    try {
+                        logger.trace("wait for event");
+                        final Event event = queue.poll(1, TimeUnit.HOURS);
+                        logger.trace("inspect event: {}", event);
+                        if (event == null) {
+                            logger.debug("Hey, you have really very few events.");
+                        } else if (event == notifyEvent) {
+                            // received an internal notification
+                        } else {
+                            worker.handleEvent(event);
+                        }
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    } catch (RuntimeException ex) {
+                        logger.error("Error on event handling.", ex);
                     }
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                } catch (RuntimeException ex) {
-                    logger.error("Error on event handling.", ex);
                 }
             }
-        }, "ESH-OSGiEventManager");
+        }, "OH-OSGiEventManager");
+
     }
 
     void open() {

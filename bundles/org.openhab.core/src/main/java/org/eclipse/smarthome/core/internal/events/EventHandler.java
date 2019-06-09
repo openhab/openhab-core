@@ -16,10 +16,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.SafeCaller;
+import org.eclipse.smarthome.core.common.NamedThreadFactory;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFactory;
 import org.eclipse.smarthome.core.events.EventFilter;
@@ -33,26 +38,36 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
-public class EventHandler {
+public class EventHandler implements AutoCloseable {
+
+    private static final long EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS = TimeUnit.SECONDS.toMillis(5);
 
     private final Logger logger = LoggerFactory.getLogger(EventHandler.class);
 
     private final Map<String, Set<EventSubscriber>> typedEventSubscribers;
     private final Map<String, EventFactory> typedEventFactories;
-    private final SafeCaller safeCaller;
+
+    private final ScheduledExecutorService watcher = Executors
+            .newSingleThreadScheduledExecutor(new NamedThreadFactory("EventHandlerWatcher"));
+    private final ExecutorService executor = Executors
+            .newSingleThreadExecutor(new NamedThreadFactory("EventHandlerExecutor"));
 
     /**
      * Create a new event handler.
      *
      * @param typedEventSubscribers the event subscribers indexed by the event type
      * @param typedEventFactories the event factories indexed by the event type
-     * @param safeCaller the safe caller to use
      */
     public EventHandler(final Map<String, Set<EventSubscriber>> typedEventSubscribers,
-            final Map<String, EventFactory> typedEventFactories, final SafeCaller safeCaller) {
+            final Map<String, EventFactory> typedEventFactories) {
         this.typedEventSubscribers = typedEventSubscribers;
         this.typedEventFactories = typedEventFactories;
-        this.safeCaller = safeCaller;
+    }
+
+    @Override
+    public void close() {
+        watcher.shutdownNow();
+        executor.shutdownNow();
     }
 
     public void handleEvent(org.osgi.service.event.Event osgiEvent) {
@@ -131,17 +146,22 @@ public class EventHandler {
             EventFilter filter = eventSubscriber.getEventFilter();
             if (filter == null || filter.apply(event)) {
                 logger.trace("Delegate event to subscriber ({}).", eventSubscriber.getClass());
-                safeCaller.create(eventSubscriber, EventSubscriber.class).withAsync().onTimeout(() -> {
-                    logger.warn("Dispatching event to subscriber '{}' takes more than {}ms.",
-                            eventSubscriber.toString(), SafeCaller.DEFAULT_TIMEOUT);
-                }).onException(e -> {
-                    logger.error("Dispatching/filtering event for subscriber '{}' failed: {}",
-                            EventSubscriber.class.getName(), e.getMessage(), e);
-                }).build().receive(event);
+                executor.submit(() -> {
+                    ScheduledFuture<?> logTimeout = watcher.schedule(
+                            () -> logger.warn("Dispatching event to subscriber '{}' takes more than {}ms.",
+                                    eventSubscriber, EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS),
+                            EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS, TimeUnit.MILLISECONDS);
+                    try {
+                        eventSubscriber.receive(event);
+                    } catch (final Exception ex) {
+                        logger.error("Dispatching/filtering event for subscriber '{}' failed: {}",
+                                EventSubscriber.class.getName(), ex.getMessage(), ex);
+                    }
+                    logTimeout.cancel(false);
+                });
             } else {
                 logger.trace("Skip event subscriber ({}) because of its filter.", eventSubscriber.getClass());
             }
         }
     }
-
 }

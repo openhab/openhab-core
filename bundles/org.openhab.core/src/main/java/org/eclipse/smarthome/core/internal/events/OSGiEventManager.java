@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.eclipse.smarthome.core.common.SafeCaller;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFactory;
 import org.eclipse.smarthome.core.events.EventSubscriber;
@@ -51,11 +50,9 @@ public class OSGiEventManager implements EventHandler {
 
     private ThreadedEventHandler eventHandler;
 
-    private SafeCaller safeCaller;
-
     @Activate
     protected void activate(ComponentContext componentContext) {
-        eventHandler = new ThreadedEventHandler(typedEventSubscribers, typedEventFactories, safeCaller);
+        eventHandler = new ThreadedEventHandler(typedEventSubscribers, typedEventFactories);
         eventHandler.open();
     }
 
@@ -114,15 +111,6 @@ public class OSGiEventManager implements EventHandler {
         for (String supportedEventType : supportedEventTypes) {
             typedEventFactories.remove(supportedEventType);
         }
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
     }
 
     @Override
