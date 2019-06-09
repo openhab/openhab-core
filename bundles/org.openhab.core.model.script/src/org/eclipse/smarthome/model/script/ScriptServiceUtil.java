@@ -23,7 +23,6 @@ import org.eclipse.smarthome.core.thing.binding.ThingActions;
 import org.eclipse.smarthome.model.core.ModelRepository;
 import org.eclipse.smarthome.model.script.engine.ScriptEngine;
 import org.eclipse.smarthome.model.script.engine.action.ActionService;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -46,22 +45,23 @@ public class ScriptServiceUtil {
 
     private static ScriptServiceUtil instance;
 
-    private ItemRegistry itemRegistry;
-
-    private ThingRegistry thingRegistry;
-
-    private EventPublisher eventPublisher;
-
-    private ModelRepository modelRepository;
+    private final ItemRegistry itemRegistry;
+    private final ThingRegistry thingRegistry;
+    private final EventPublisher eventPublisher;
+    private final ModelRepository modelRepository;
 
     private final AtomicReference<ScriptEngine> scriptEngine = new AtomicReference<>();
-
-    public List<ActionService> actionServices = new CopyOnWriteArrayList<>();
-
-    public List<ThingActions> thingActions = new CopyOnWriteArrayList<>();
+    public final List<ActionService> actionServices = new CopyOnWriteArrayList<>();
+    public final List<ThingActions> thingActions = new CopyOnWriteArrayList<>();
 
     @Activate
-    public void activate(final BundleContext bc) {
+    public ScriptServiceUtil(final @Reference ItemRegistry itemRegistry, final @Reference ThingRegistry thingRegistry,
+            final @Reference EventPublisher eventPublisher, final @Reference ModelRepository modelRepository) {
+        this.itemRegistry = itemRegistry;
+        this.thingRegistry = thingRegistry;
+        this.eventPublisher = eventPublisher;
+        this.modelRepository = modelRepository;
+
         if (instance != null) {
             throw new IllegalStateException("ScriptServiceUtil should only be activated once!");
         }
@@ -139,42 +139,6 @@ public class ScriptServiceUtil {
 
     public void removeThingActions(ThingActions thingActions) {
         this.thingActions.remove(thingActions);
-    }
-
-    @Reference
-    public void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    public void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    public void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    public void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    public void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference
-    public void setModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = modelRepository;
-    }
-
-    public void unsetModelRepository(ModelRepository modelRepository) {
-        this.modelRepository = null;
     }
 
     public void setScriptEngine(ScriptEngine scriptEngine) {
