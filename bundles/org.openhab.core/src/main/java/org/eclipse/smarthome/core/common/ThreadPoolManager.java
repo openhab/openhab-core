@@ -19,10 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.smarthome.core.internal.common.WrappedScheduledExecutorService;
 import org.osgi.service.component.annotations.Component;
@@ -123,10 +121,11 @@ public class ThreadPoolManager {
                 pool = pools.get(poolName);
                 if (pool == null) {
                     int cfg = getConfig(poolName);
-                    pool = new WrappedScheduledExecutorService(cfg, new NamedThreadFactory(poolName));
+                    pool = new WrappedScheduledExecutorService(cfg,
+                            new NamedThreadFactory(poolName, true, Thread.NORM_PRIORITY));
                     ((ThreadPoolExecutor) pool).setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
                     ((ThreadPoolExecutor) pool).allowCoreThreadTimeOut(true);
-                    ((ScheduledThreadPoolExecutor)pool).setRemoveOnCancelPolicy(true);
+                    ((ScheduledThreadPoolExecutor) pool).setRemoveOnCancelPolicy(true);
                     pools.put(poolName, pool);
                     LOGGER.debug("Created scheduled thread pool '{}' of size {}", new Object[] { poolName, cfg });
                 }
@@ -168,41 +167,6 @@ public class ThreadPoolManager {
     protected static int getConfig(String poolName) {
         Integer cfg = configs.get(poolName);
         return (cfg != null) ? cfg : DEFAULT_THREAD_POOL_SIZE;
-    }
-
-    /**
-     * This is a normal thread factory, which adds a named prefix to all created threads.
-     */
-    protected static class NamedThreadFactory implements ThreadFactory {
-
-        protected final ThreadGroup group;
-        protected final AtomicInteger threadNumber = new AtomicInteger(1);
-        protected final String namePrefix;
-        protected final String name;
-
-        public NamedThreadFactory(String threadPool) {
-            this.name = threadPool;
-            this.namePrefix = "ESH-" + threadPool + "-";
-            SecurityManager s = System.getSecurityManager();
-            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-            if (!t.isDaemon()) {
-                t.setDaemon(true);
-            }
-            if (t.getPriority() != Thread.NORM_PRIORITY) {
-                t.setPriority(Thread.NORM_PRIORITY);
-            }
-
-            return t;
-        }
-
-        public String getName() {
-            return name;
-        }
     }
 
 }
