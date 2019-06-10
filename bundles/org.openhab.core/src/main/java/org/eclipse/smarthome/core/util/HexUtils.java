@@ -12,8 +12,7 @@
  */
 package org.eclipse.smarthome.core.util;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,7 +27,8 @@ import org.eclipse.jdt.annotation.Nullable;
 public class HexUtils {
 
     // used for hex conversions
-    private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
+    private static final byte[] HEX = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E',
+            'F' };
 
     private static final int ASCII_DIGITS_START_POSITION = 48;
     private static final int ASCII_UPPERCASE_LETTERS_START_POSITION = 65;
@@ -46,10 +46,25 @@ public class HexUtils {
      * @return the corresponding hex string
      */
     public static String bytesToHex(byte[] bytes, @Nullable CharSequence delimiter) {
-        return Arrays.stream(toObjects(bytes)).map(b -> {
-            int v = b & 0xFF;
-            return "" + hexArray[v >>> 4] + hexArray[v & 0x0F];
-        }).collect(Collectors.joining(delimiter != null ? delimiter : ""));
+        return bytesToHexInt(bytes, delimiter != null ? delimiter : "");
+    }
+
+    private static String bytesToHexInt(byte[] bytes, CharSequence delimiter) {
+        if (bytes.length == 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(bytes.length * 2 + delimiter.length() * (bytes.length - 1));
+        int pos = 0;
+        while (pos < bytes.length - 1) {
+            final byte[] hex = byteToHex(bytes[pos++]);
+            sb.append((char) hex[0]);
+            sb.append((char) hex[1]);
+            sb.append(delimiter);
+        }
+        final byte[] hex = byteToHex(bytes[pos++]);
+        sb.append((char) hex[0]);
+        sb.append((char) hex[1]);
+        return sb.toString();
     }
 
     /**
@@ -59,13 +74,14 @@ public class HexUtils {
      * @return the corresponding hex string
      */
     public static String bytesToHex(byte[] bytes) {
-        return bytesToHex(bytes, null);
+        return bytesToHexInt(bytes, "");
     }
 
-    private static Byte[] toObjects(byte[] bytes) {
-        Byte[] bytesObjects = new Byte[bytes.length];
-        Arrays.setAll(bytesObjects, n -> bytes[n]);
-        return bytesObjects;
+    public static byte[] byteToHex(final byte value) {
+        final byte[] out = new byte[2];
+        out[0] = HEX[(value >>> 4) & 0x0F];
+        out[1] = HEX[value & 0x0F];
+        return out;
     }
 
     /**
@@ -79,17 +95,16 @@ public class HexUtils {
         // first convert to upper case to ease the rest
         String ucHexString = hexString.toUpperCase();
 
-        Byte[] bytesObjects = Arrays.stream(ucHexString.split(delimiter)).map(s -> {
-            if (s.length() != 2) {
+        final String[] splitted = ucHexString.split(delimiter);
+
+        final byte[] bytes = new byte[splitted.length];
+        int pos = 0;
+        for (final String part : splitted) {
+            final byte[] in = part.getBytes(StandardCharsets.UTF_8);
+            if (in.length != 2) {
                 throw new IllegalArgumentException("hexString needs to have an even length: " + hexString);
             }
-
-            return (byte) (hexCharacterToBin(s.charAt(0)) * 16 + hexCharacterToBin(s.charAt(1)));
-        }).toArray(Byte[]::new);
-
-        byte[] bytes = new byte[bytesObjects.length];
-        for (int i = 0; i < bytesObjects.length; i++) {
-            bytes[i] = bytesObjects[i];
+            bytes[pos++] = (byte) (unhex(in[0]) << 4 | unhex(in[1]));
         }
         return bytes;
     }
@@ -104,20 +119,25 @@ public class HexUtils {
         return hexToBytes(hexString, "(?<=\\G.{2})");
     }
 
+    public static byte hexToByte(byte high, byte low) {
+        return (byte) ((unhex(high) << 4) | unhex(low));
+    }
+
     /**
-     * Convert an upper case hex character to a byte
+     * Convert an hex byte created by this utilities back.
      *
-     * @param chacacter an upper case hex character
-     * @return the byte value of the character
-     * @throws IllegalArgumentException if a value is found which is not an upper case hex character
+     * @param value the byte created by the hex array
+     * @return the byte value
+     * @throws IllegalArgumentException if a value is invalid
      */
-    private static byte hexCharacterToBin(char character) {
-        if ('0' <= character && character <= '9') {
-            return (byte) (character - ASCII_DIGITS_START_POSITION);
-        } else if ('A' <= character && character <= 'F') {
-            return (byte) (character - ASCII_UPPERCASE_LETTERS_START_POSITION + 10);
+    private static byte unhex(byte value) {
+        if ('0' <= value && value <= '9') {
+            return (byte) (value - ASCII_DIGITS_START_POSITION);
+        } else if ('A' <= value && value <= 'F') {
+            return (byte) (value - ASCII_UPPERCASE_LETTERS_START_POSITION + 10);
         } else {
-            throw new IllegalArgumentException("hexString contains illegal character for hexToBytes: " + character);
+            throw new IllegalArgumentException("hexString contains illegal character for hexToBytes: " + value);
         }
     }
+
 }
