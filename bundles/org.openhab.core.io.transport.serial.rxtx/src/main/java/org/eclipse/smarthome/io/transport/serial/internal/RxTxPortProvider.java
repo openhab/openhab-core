@@ -13,12 +13,11 @@
 package org.eclipse.smarthome.io.transport.serial.internal;
 
 import java.net.URI;
-import java.util.Enumeration;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -31,11 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
 
 /**
  *
  * @author Matthias Steigenberger - Initial Contribution
- *
+ * @author Wouter Born - Fix serial ports missing when ports are added to system property
  */
 @NonNullByDefault
 @Component
@@ -45,18 +45,13 @@ public class RxTxPortProvider implements SerialPortProvider {
 
     @Override
     public @Nullable SerialPortIdentifier getPortIdentifier(URI port) {
-        CommPortIdentifier ident = null;
-        if ((System.getProperty("os.name").toLowerCase().indexOf("linux") != -1)) {
-            SerialPortUtil.appendSerialPortProperty(port.getPath());
-        }
         try {
-            ident = CommPortIdentifier.getPortIdentifier(port.getPath());
-        } catch (gnu.io.NoSuchPortException e) {
+            CommPortIdentifier ident = SerialPortUtil.getPortIdentifier(port.getPath());
+            return new SerialPortIdentifierImpl(ident);
+        } catch (NoSuchPortException e) {
             logger.debug("No SerialPortIdentifier found for: {}", port.getPath());
             return null;
         }
-        return new SerialPortIdentifierImpl(ident);
-
     }
 
     @Override
@@ -66,37 +61,17 @@ public class RxTxPortProvider implements SerialPortProvider {
 
     @Override
     public Stream<SerialPortIdentifier> getSerialPortIdentifiers() {
-        @SuppressWarnings("unchecked")
-        final Enumeration<CommPortIdentifier> ids = CommPortIdentifier.getPortIdentifiers();
-        return StreamSupport.stream(new SplitIteratorForEnumeration<>(ids), false)
+        Stream<CommPortIdentifier> scanIds = SerialPortUtil.getPortIdentifiersUsingScan();
+        Stream<CommPortIdentifier> propIds = SerialPortUtil.getPortIdentifiersUsingProperty();
+
+        return Stream.concat(scanIds, propIds).filter(distinctByKey(CommPortIdentifier::getName))
                 .filter(id -> id.getPortType() == CommPortIdentifier.PORT_SERIAL)
                 .map(sid -> new SerialPortIdentifierImpl(sid));
     }
 
-    private static class SplitIteratorForEnumeration<T> extends Spliterators.AbstractSpliterator<T> {
-        private final Enumeration<T> e;
-
-        public SplitIteratorForEnumeration(final Enumeration<T> e) {
-            super(Long.MAX_VALUE, Spliterator.ORDERED);
-            this.e = e;
-        }
-
-        @Override
-        @NonNullByDefault({})
-        public boolean tryAdvance(Consumer<? super T> action) {
-            if (e.hasMoreElements()) {
-                action.accept(e.nextElement());
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        @NonNullByDefault({})
-        public void forEachRemaining(Consumer<? super T> action) {
-            while (e.hasMoreElements()) {
-                action.accept(e.nextElement());
-            }
-        }
+    @SuppressWarnings("null")
+    private static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
+        Map<Object, String> seen = new ConcurrentHashMap<>();
+        return t -> seen.put(keyExtractor.apply(t), "") == null;
     }
 }
