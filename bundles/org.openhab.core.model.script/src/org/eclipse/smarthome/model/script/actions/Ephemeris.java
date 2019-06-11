@@ -13,7 +13,6 @@
 package org.eclipse.smarthome.model.script.actions;
 
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
 
 import org.eclipse.smarthome.model.script.engine.action.ActionDoc;
 import org.eclipse.smarthome.model.script.internal.engine.action.EphemerisActionService;
@@ -78,7 +77,7 @@ public class Ephemeris {
     public static String getBankHolidayName(int offset, String filename) {
         try {
             return EphemerisActionService.ephemerisManager.getBankHolidayName(offset, filename);
-        } catch (MalformedURLException | FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             logger.error("Error reading holiday user file {} : {}", filename, e.getMessage());
             return null;
         }
