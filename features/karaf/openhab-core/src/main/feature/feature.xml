@@ -114,6 +114,17 @@
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
   </feature>
 
+  <feature name="openhab-core-ephemeris" version="${project.version}">
+    <requirement>openhab.tp;filter:="(feature=jollyday)"</requirement>
+    <feature dependency="true">openhab.tp-jollyday</feature>
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
+    <config name="org.openhab.ephemeris">
+        dayset-weekend=Saturday,Sunday
+        dayset-school=Monday,Tuesday,Wednesday,Thursday,Friday
+    </config>
+  </feature>
+
   <feature name="openhab-core-io-console-karaf" description="Karaf Console support for SmartHome stuff" version="${project.version}">
     <feature>openhab-core-base</feature>
     <feature>shell</feature>
@@ -310,6 +321,7 @@
 
   <feature name="openhab-core-model-script" version="${project.version}">
     <feature>openhab-core-base</feature>
+    <feature>openhab-core-ephemeris</feature>
     <feature>openhab-core-model-persistence</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script.runtime/${project.version}</bundle>
@@ -405,6 +417,7 @@
     <requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
     <feature dependency="true">openhab.tp-commons-net</feature>
     <feature>openhab-core-base</feature>
+    <feature>openhab-core-ephemeris</feature>
     <feature>openhab-core-io-console-karaf</feature>
     <feature>openhab-core-io-rest-sitemap</feature>
     <feature>openhab-core-io-rest-voice</feature>

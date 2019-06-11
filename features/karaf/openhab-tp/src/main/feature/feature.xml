@@ -109,18 +109,23 @@
     <bundle dependency="true">mvn:org.jvnet.mimepull/mimepull/1.9.6</bundle>
   </feature>
 
+  <feature name="openhab.tp-jollyday" description="Jollyday library" version="${project.version}">
+    <capability>openhab.tp;feature=jollyday;version=0.5.7</capability>
+    <bundle>mvn:org.threeten/threeten-extra/1.4</bundle>
+    <bundle>mvn:de.jollyday/jollyday/0.5.7</bundle>
+  </feature>
+
+  <feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
+    <capability>openhab.tp;feature=jmdns;version=3.5.5</capability>
+    <bundle>mvn:org.jmdns/jmdns/3.5.5</bundle>
+  </feature>
+
   <feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
     <capability>openhab.tp;feature=jupnp;version=2.5.2</capability>
     <feature dependency="true">http</feature>
     <feature dependency="true">scr</feature>
     <feature dependency="true">openhab.tp-httpclient</feature>
     <bundle>mvn:org.jupnp/org.jupnp/2.5.2</bundle>
-  </feature>
-
-  <feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
-    <capability>openhab.tp;feature=jmdns;version=3.5.5</capability>
-
-    <bundle>mvn:org.jmdns/jmdns/3.5.5</bundle>
   </feature>
 
   <feature name="openhab.tp-lsp4j" description="Eclipse LSP4J" version="${project.version}">

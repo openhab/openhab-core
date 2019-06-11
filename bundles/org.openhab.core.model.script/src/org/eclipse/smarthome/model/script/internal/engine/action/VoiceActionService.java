@@ -29,11 +29,6 @@ public class VoiceActionService implements ActionService {
     public static VoiceManager voiceManager;
 
     @Override
-    public String getActionClassName() {
-        return Voice.class.getCanonicalName();
-    }
-
-    @Override
     public Class<?> getActionClass() {
         return Voice.class;
     }
