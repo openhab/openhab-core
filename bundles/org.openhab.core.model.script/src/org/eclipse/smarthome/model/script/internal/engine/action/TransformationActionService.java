@@ -28,11 +28,6 @@ public class TransformationActionService implements ActionService {
     }
 
     @Override
-    public String getActionClassName() {
-        return Transformation.class.getCanonicalName();
-    }
-
-    @Override
     public Class<?> getActionClass() {
         return Transformation.class;
     }

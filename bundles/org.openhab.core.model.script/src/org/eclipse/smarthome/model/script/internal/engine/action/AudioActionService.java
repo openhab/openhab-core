@@ -24,11 +24,6 @@ public class AudioActionService implements ActionService {
     public static AudioManager audioManager;
 
     @Override
-    public String getActionClassName() {
-        return Audio.class.getCanonicalName();
-    }
-
-    @Override
     public Class<?> getActionClass() {
         return Audio.class;
     }

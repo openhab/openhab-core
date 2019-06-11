@@ -29,11 +29,6 @@ public class EphemerisActionService implements ActionService {
     public static EphemerisManager ephemerisManager;
 
     @Override
-    public String getActionClassName() {
-        return Ephemeris.class.getCanonicalName();
-    }
-
-    @Override
     public Class<?> getActionClass() {
         return Ephemeris.class;
     }

@@ -13,7 +13,6 @@
 package org.eclipse.smarthome.core.ephemeris;
 
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,7 +38,7 @@ public interface EphemerisManager {
      * Tests given day (related to today) status against configured dayset
      *
      * @param daysetName name of the requested dayset, witout prefix
-     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
+     * @param offset     Today +/- offset days (+1 = tomorrow, -1 = yesterday)
      * @return whether the day is on weekend
      */
     boolean isInDayset(String daysetName, int offset);
@@ -65,10 +64,10 @@ public interface EphemerisManager {
      * Get given day name from given userfile
      *
      * @param filename absolute or relative path to the file on local file system
-     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
+     * @param offset   Today +/- offset days (+1 = tomorrow, -1 = yesterday)
      * @return name of the day or null if no corresponding entry
-     * @throws FileNotFoundException or MalformedURLException
+     * @throws FileNotFoundException if given file does not exist
      */
     @Nullable
-    String getBankHolidayName(int offset, String filename) throws MalformedURLException, FileNotFoundException;
+    String getBankHolidayName(int offset, String filename) throws FileNotFoundException;
 }

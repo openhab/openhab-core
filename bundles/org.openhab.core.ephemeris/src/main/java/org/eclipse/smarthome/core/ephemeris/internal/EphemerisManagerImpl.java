@@ -59,8 +59,8 @@ import de.jollyday.ManagerParameters;
  *
  * @author Gaël L'hopital - Initial contribution and API
  */
-@Component(immediate = true, name = "org.openhab.ephemeris", property = {
-        Constants.SERVICE_PID + "=org.openhab.ephemeris", ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
+@Component(name = "org.openhab.ephemeris", property = { Constants.SERVICE_PID + "=org.openhab.ephemeris",
+        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Ephemeris",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + EphemerisManagerImpl.CONFIG_URI })
 @NonNullByDefault
@@ -79,9 +79,14 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
     private final List<String> countryParameters = new ArrayList<>();
 
+    private final LocaleProvider localeProvider;
+
     private @NonNullByDefault({}) String country;
 
-    private @NonNullByDefault({}) LocaleProvider localeProvider;
+    @Activate
+    public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider) {
+        this.localeProvider = localeProvider;
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -118,15 +123,6 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         if (config.containsKey(CONFIG_CITY)) {
             countryParameters.add(config.get(CONFIG_CITY).toString());
         }
-    }
-
-    @Reference
-    protected void setLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = null;
     }
 
     @Override
@@ -207,20 +203,22 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return getBankHolidayName(ZonedDateTime.now().plusDays(offset));
     }
 
-    private Optional<String> getHolidayUserFile(ZonedDateTime date, String filename)
-            throws MalformedURLException, FileNotFoundException {
+    private Optional<String> getHolidayUserFile(ZonedDateTime date, String filename) throws FileNotFoundException {
         if (Files.exists(Paths.get(filename))) {
-            URL url = new URL("file:" + filename);
-            Set<Holiday> days = getHolidayManager(url).getHolidays(date.toLocalDate(), date.toLocalDate());
-            return days.isEmpty() ? Optional.empty() : Optional.of(days.iterator().next().getPropertiesKey());
+            try {
+                URL url = new URL("file:" + filename);
+                Set<Holiday> days = getHolidayManager(url).getHolidays(date.toLocalDate(), date.toLocalDate());
+                return days.isEmpty() ? Optional.empty() : Optional.of(days.iterator().next().getPropertiesKey());
+            } catch (MalformedURLException e) {
+                throw new FileNotFoundException(e.getMessage());
+            }
         } else {
             throw new FileNotFoundException();
         }
     }
 
     @Override
-    public @Nullable String getBankHolidayName(int offset, String filename)
-            throws MalformedURLException, FileNotFoundException {
+    public @Nullable String getBankHolidayName(int offset, String filename) throws FileNotFoundException {
         Optional<String> holiday = getHolidayUserFile(ZonedDateTime.now().plusDays(offset), filename);
         return holiday.isPresent() ? holiday.get() : null;
     }

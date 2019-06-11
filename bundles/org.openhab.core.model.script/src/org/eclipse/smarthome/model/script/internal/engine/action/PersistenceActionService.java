@@ -28,11 +28,6 @@ public class PersistenceActionService implements ActionService {
     }
 
     @Override
-    public String getActionClassName() {
-        return PersistenceExtensions.class.getCanonicalName();
-    }
-
-    @Override
     public Class<?> getActionClass() {
         return PersistenceExtensions.class;
     }

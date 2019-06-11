@@ -43,11 +43,6 @@ public class ThingActionService implements ActionService {
     private static final Map<String, ThingActions> thingActionsMap = new HashMap<>();
 
     @Override
-    public String getActionClassName() {
-        return Things.class.getCanonicalName();
-    }
-
-    @Override
     public Class<?> getActionClass() {
         return Things.class;
     }
