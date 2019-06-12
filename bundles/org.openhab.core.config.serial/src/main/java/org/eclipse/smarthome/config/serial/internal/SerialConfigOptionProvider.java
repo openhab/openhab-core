@@ -12,10 +12,11 @@
  */
 package org.eclipse.smarthome.config.serial.internal;
 
+import static java.util.stream.Collectors.toList;
+
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 import java.util.Locale;
 
 import org.eclipse.smarthome.config.core.ConfigOptionProvider;
@@ -46,12 +47,12 @@ public class SerialConfigOptionProvider implements ConfigOptionProvider {
 
     @Override
     public Collection<ParameterOption> getParameterOptions(URI uri, String param, String context, Locale locale) {
-        List<ParameterOption> options = new ArrayList<>();
         if ("serial-port".equals(context)) {
-            serialPortManager.getIdentifiers()
-                    .forEach(id -> options.add(new ParameterOption(id.getName(), id.getName())));
+            return serialPortManager.getIdentifiers()
+                    .sorted((id1, id2) -> id1.getName().compareToIgnoreCase(id2.getName()))
+                    .map(id -> new ParameterOption(id.getName(), id.getName())).collect(toList());
         }
-        return options;
+        return Collections.emptyList();
     }
 
     @Override
