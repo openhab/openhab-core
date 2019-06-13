@@ -20,6 +20,7 @@ Export-Package: org.eclipse.smarthome.model.script,\
 Import-Package: \
  org.eclipse.smarthome.core.audio,\
  org.eclipse.smarthome.core.common.registry,\
+ org.eclipse.smarthome.core.ephemeris,\
  org.eclipse.smarthome.core.events,\
  org.eclipse.smarthome.core.items,\
  org.eclipse.smarthome.core.items.events,\
