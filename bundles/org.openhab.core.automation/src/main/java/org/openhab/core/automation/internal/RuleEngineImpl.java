@@ -989,12 +989,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
             setTriggerOutputs(ruleUID, td);
             final WrappedRule rule = managedRules.get(ruleUID);
-            boolean isSatisfied = calculateConditions(rule);
-            if (isSatisfied) {
-                executeActions(rule, true);
-                logger.debug("The rule '{}' is executed.", ruleUID);
-            } else {
-                logger.debug("The rule '{}' is NOT executed, since it has unsatisfied conditions.", ruleUID);
+            if (rule != null) {
+                boolean isSatisfied = calculateConditions(rule);
+                if (isSatisfied) {
+                    executeActions(rule, true);
+                    logger.debug("The rule '{}' is executed.", ruleUID);
+                } else {
+                    logger.debug("The rule '{}' is NOT executed, since it has unsatisfied conditions.", ruleUID);
+                }
             }
         } catch (Throwable t) {
             logger.error("Failed to execute rule '{}': {}", ruleUID, t.getMessage());
