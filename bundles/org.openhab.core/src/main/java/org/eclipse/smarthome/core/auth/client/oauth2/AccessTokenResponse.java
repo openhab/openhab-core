@@ -179,7 +179,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
         try {
             return super.clone();
         } catch (CloneNotSupportedException e) {
-            return null; // not possible
+            throw new IllegalStateException("not possible", e);
         }
     }
 
