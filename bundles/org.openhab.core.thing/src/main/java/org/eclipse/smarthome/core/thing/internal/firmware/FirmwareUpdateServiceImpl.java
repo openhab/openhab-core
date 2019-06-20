@@ -274,11 +274,12 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     }
 
     protected ProgressCallbackImpl getProgressCallback(ThingUID thingUID) {
-        if (!progressCallbackMap.containsKey(thingUID)) {
+        final ProgressCallbackImpl entry = progressCallbackMap.get(thingUID);
+        if (entry == null) {
             throw new IllegalStateException(
                     String.format("No ProgressCallback available for thing with UID %s.", thingUID));
         }
-        return progressCallbackMap.get(thingUID);
+        return entry;
     }
 
     @Nullable
