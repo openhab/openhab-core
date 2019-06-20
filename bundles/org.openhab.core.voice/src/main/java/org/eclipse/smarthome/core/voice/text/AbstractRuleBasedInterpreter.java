@@ -585,16 +585,17 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting tokens
      */
     protected ArrayList<String> tokenize(Locale locale, String text) {
+        final Locale localeSafe = locale != null ? locale : Locale.getDefault();
         ArrayList<String> parts = new ArrayList<String>();
         if (text == null) {
             return parts;
         }
         String[] split;
-        if ((locale != null) && locale.getLanguage().equalsIgnoreCase(Locale.FRENCH.getLanguage())) {
-            split = text.toLowerCase(locale).replaceAll("[\\']", " ").replaceAll("[^\\w\\sàâäçéèêëîïôùûü]", " ")
+        if (localeSafe.getLanguage().equalsIgnoreCase(Locale.FRENCH.getLanguage())) {
+            split = text.toLowerCase(localeSafe).replaceAll("[\\']", " ").replaceAll("[^\\w\\sàâäçéèêëîïôùûü]", " ")
                     .split("\\s");
         } else {
-            split = text.toLowerCase(locale).replaceAll("[\\']", "").replaceAll("[^\\w\\s]", " ").split("\\s");
+            split = text.toLowerCase(localeSafe).replaceAll("[\\']", "").replaceAll("[^\\w\\s]", " ").split("\\s");
         }
         for (int i = 0; i < split.length; i++) {
             String part = split[i].trim();
