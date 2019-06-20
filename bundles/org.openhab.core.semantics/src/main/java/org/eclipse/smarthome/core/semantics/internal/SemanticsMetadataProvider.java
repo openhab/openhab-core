@@ -135,6 +135,9 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
      */
     private void processProperties(Item item, Map<String, Object> configuration) {
         Class<? extends Tag> type = SemanticTags.getSemanticType(item);
+        if (type == null) {
+            return;
+        }
         for (Entry<List<Class<? extends Tag>>, String> relation : propertyRelations.entrySet()) {
             Class<? extends Tag> entityClass = relation.getKey().get(0);
             if (entityClass.isAssignableFrom(type)) {
