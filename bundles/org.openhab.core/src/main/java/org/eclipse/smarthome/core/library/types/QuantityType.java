@@ -229,12 +229,14 @@ public class QuantityType<T extends Quantity<T>> extends Number
     }
 
     @Override
-    public String format(@Nullable String pattern) {
-        String formatPattern = pattern;
+    public String format(String pattern) {
+        final String formatPattern;
 
-        if (formatPattern != null && formatPattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
+        if (pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
             String unitSymbol = getUnit().equals(SmartHomeUnits.PERCENT) ? "%%" : getUnit().toString();
-            formatPattern = formatPattern.replace(UnitUtils.UNIT_PLACEHOLDER, unitSymbol);
+            formatPattern = pattern.replace(UnitUtils.UNIT_PLACEHOLDER, unitSymbol);
+        } else {
+            formatPattern = pattern;
         }
 
         // The value could be an integer value. Try to convert to BigInteger in
