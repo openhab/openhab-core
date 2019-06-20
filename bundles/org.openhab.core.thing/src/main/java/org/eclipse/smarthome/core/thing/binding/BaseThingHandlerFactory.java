@@ -168,7 +168,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                         // we only add specific ThingHandlerServices, i.e. those that derive from the
                         // ThingHandlerService interface, NOT the ThingHandlerService itself. We do this to register
                         // them as specific OSGi services later, rather than as a generic ThingHandlerService.
-                        if (!ThingHandlerService.class.getCanonicalName().equals(className)) {
+                        if (className != null && !className.equals(ThingHandlerService.class.getCanonicalName())) {
                             serviceNames.add(className);
                         }
                     }
