@@ -161,8 +161,7 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
                     .map(e -> e.get(1))
                     .map(Object::toString)
                     .map(linkedTrustManager::get)
-                    .filter(Objects::nonNull)
-                    .map(Queue::peek)
+                    .map(queue -> queue == null ? null : queue.peek())
                     .filter(Objects::nonNull)
                     .findFirst()
                     .orElse(null);
