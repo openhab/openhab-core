@@ -141,14 +141,12 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     private HolidayManager getHolidayManager(Object managerKey) {
-        if (!holidayManagers.containsKey(managerKey)) {
-            ManagerParameter parameters = managerKey.getClass() == String.class
+        return holidayManagers.computeIfAbsent(managerKey, key -> {
+            final ManagerParameter parameters = managerKey.getClass() == String.class
                     ? ManagerParameters.create((String) managerKey)
                     : ManagerParameters.create((URL) managerKey);
-
-            holidayManagers.put(managerKey, HolidayManager.getInstance(parameters));
-        }
-        return holidayManagers.get(managerKey);
+            return HolidayManager.getInstance(parameters);
+        });
     }
 
     private Optional<Holiday> getHoliday(ZonedDateTime date) {
