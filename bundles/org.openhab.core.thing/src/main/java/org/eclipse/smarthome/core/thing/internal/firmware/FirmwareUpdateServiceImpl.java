@@ -332,7 +332,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     }
 
     private void transferLatestFirmware(final FirmwareUpdateBackgroundTransferHandler fubtHandler,
-            final Firmware latestFirmware, final FirmwareStatusInfo previousFirmwareStatusInfo) {
+            final Firmware latestFirmware, final @Nullable FirmwareStatusInfo previousFirmwareStatusInfo) {
         getPool().submit(new Runnable() {
             @Override
             public void run() {
