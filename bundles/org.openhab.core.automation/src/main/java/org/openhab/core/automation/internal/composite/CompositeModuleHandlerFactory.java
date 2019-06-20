@@ -62,9 +62,9 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
     /**
      * The constructor of system handler factory for composite module types.
      *
-     * @param context   is a bundle context
+     * @param context is a bundle context
      * @param mtManager is a module type manager
-     * @param re        is a rule engine
+     * @param re is a rule engine
      */
     public CompositeModuleHandlerFactory(ModuleTypeRegistry mtRegistry, RuleEngineImpl re) {
         this.mtRegistry = mtRegistry;
@@ -93,12 +93,16 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
         if (handlerOfModule instanceof AbstractCompositeModuleHandler) {
             AbstractCompositeModuleHandler<ModuleImpl, ?, ?> h = (AbstractCompositeModuleHandler<ModuleImpl, ?, ?>) handlerOfModule;
             Set<ModuleImpl> modules = h.moduleHandlerMap.keySet();
-            if (modules != null) {
-                for (ModuleImpl child : modules) {
-                    ModuleHandler childHandler = h.moduleHandlerMap.get(child);
-                    ModuleHandlerFactory mhf = ruleEngine.getModuleHandlerFactory(child.getTypeUID());
-                    mhf.ungetHandler(child, childModulePrefix + ":" + module.getId(), childHandler);
+            for (ModuleImpl child : modules) {
+                ModuleHandler childHandler = h.moduleHandlerMap.get(child);
+                if (childHandler == null) {
+                    continue;
                 }
+                ModuleHandlerFactory mhf = ruleEngine.getModuleHandlerFactory(child.getTypeUID());
+                if (mhf == null) {
+                    continue;
+                }
+                mhf.ungetHandler(child, childModulePrefix + ":" + module.getId(), childHandler);
             }
         }
         String ruleId = getRuleId(childModulePrefix);
@@ -157,11 +161,11 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
      * properties and configuration of composite module see:
      * {@link ReferenceResolver#updateConfiguration(Configuration, Map, Logger)}.
      *
-     * @param compositeConfig   configuration values of composite module.
-     * @param childModules      list of child modules
+     * @param compositeConfig configuration values of composite module.
+     * @param childModules list of child modules
      * @param childModulePrefix defines UID of child module. The rule id is not enough for prefix when a composite type
-     *                          is used more then one time in one and the same rule. For example the prefix can be:
-     *                          ruleId:compositeModuleId:compositeModileId2.
+     *            is used more then one time in one and the same rule. For example the prefix can be:
+     *            ruleId:compositeModuleId:compositeModileId2.
      * @return map of pairs of module and its handler. Return null when some of the child modules can not find its
      *         handler.
      */
