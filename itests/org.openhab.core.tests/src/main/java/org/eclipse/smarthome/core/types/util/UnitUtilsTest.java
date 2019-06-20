@@ -60,9 +60,11 @@ public class UnitUtilsTest {
     @Test
     public void whenValidDimensionIsGiven_shouldCreateQuantityClass() {
         Class<? extends Quantity<?>> temperature = UnitUtils.parseDimension("Temperature");
+        assertNotNull(temperature);
         assertTrue(Temperature.class.isAssignableFrom(temperature));
 
         Class<? extends Quantity<?>> intensity = UnitUtils.parseDimension("Intensity");
+        assertNotNull(intensity);
         assertTrue(Intensity.class.isAssignableFrom(intensity));
     }
 
