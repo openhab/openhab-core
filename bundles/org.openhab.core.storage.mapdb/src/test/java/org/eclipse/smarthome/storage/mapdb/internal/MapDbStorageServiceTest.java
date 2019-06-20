@@ -75,7 +75,7 @@ public class MapDbStorageServiceTest {
             configuration.put(key, value);
         }
 
-        public Object get(String key) {
+        public @Nullable Object get(String key) {
             return configuration.get(key);
         }
     }
