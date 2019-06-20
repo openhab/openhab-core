@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.smarthome.config.xml.util.ConverterAttributeMapValidator;
 import org.eclipse.smarthome.config.xml.util.GenericUnmarshaller;
@@ -92,19 +93,10 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
 
     private StateOption toChannelStateOption(NodeValue nodeValue) throws ConversionException {
         if ("option".equals(nodeValue.getNodeName())) {
-            String value;
-            String label;
-
-            Map<String, String> attributes = nodeValue.getAttributes();
-            if ((attributes != null) && (attributes.containsKey("value"))) {
-                value = attributes.get("value");
-            } else {
-                throw new ConversionException("The node 'option' requires the attribute 'value'!");
-            }
-
-            label = (String) nodeValue.getValue();
-
-            return new StateOption(value, label);
+            final Map<String, String> attributes = nodeValue.getAttributes();
+            final String value = Optional.ofNullable(attributes).map(entry -> entry.get("value"))
+                    .orElseThrow(() -> new ConversionException("The node 'option' requires the attribute 'value'!"));
+            return new StateOption(value, nodeValue.getValue().toString());
         }
 
         throw new ConversionException("Unknown type in the list of 'options'!");
