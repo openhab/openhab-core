@@ -10,7 +10,6 @@
   <description>The dependencies are used to provide JAXB bundles</description>
 
   <!-- do not upgrade to 2.3 as long as Java 8 support is needed -->
-  
   <dependencies>
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
@@ -23,14 +22,9 @@
       <version>2.9.0</version>
     </dependency>
     <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-      <version>2.2.11</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-core</artifactId>
-      <version>2.2.11</version>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.jaxb-impl</artifactId>
+      <version>2.2.11_1</version>
     </dependency>
   </dependencies>
 
