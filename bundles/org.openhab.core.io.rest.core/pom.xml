@@ -11,7 +11,7 @@
 
   <artifactId>org.openhab.core.io.rest.core</artifactId>
 
-  <name>openHAB Core :: Bundles :: REST Interface</name>
+  <name>openHAB Core :: Bundles :: REST Interface :: Core</name>
 
   <dependencies>
     <dependency>
