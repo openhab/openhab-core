@@ -242,7 +242,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
 
                 startScan();
             } catch (RouterException e) {
-                logger.error("Could not retstart UPnP network components.", e);
+                logger.error("Could not restart UPnP network components.", e);
             }
         });
 
