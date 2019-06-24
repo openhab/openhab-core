@@ -54,7 +54,7 @@ public class PollingUsbSerialScanner implements UsbSerialDiscovery {
     private static final String THREAD_NAME = "usb-serial-discovery-linux-sysfs";
 
     public static final String PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE = "pauseBetweenScansInSeconds";
-    private static final Duration DEFAULT_PAUSE_BETWEEN_SCANS = Duration.ofSeconds(5);
+    private static final Duration DEFAULT_PAUSE_BETWEEN_SCANS = Duration.ofSeconds(15);
     private Duration pauseBetweenScans = DEFAULT_PAUSE_BETWEEN_SCANS;
 
     private @NonNullByDefault({}) DeltaUsbSerialScanner deltaUsbSerialScanner;
