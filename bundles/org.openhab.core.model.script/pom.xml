@@ -61,6 +61,7 @@
               <sources>
                 <source>src-gen</source>
                 <source>xtend-gen</source>
+                <source>resources</source>
               </sources>
             </configuration>
           </execution>
