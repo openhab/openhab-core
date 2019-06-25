@@ -18,6 +18,8 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.function.Predicate;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.items.GroupItem;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.dto.ItemDTO;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Dennis Nobel - Initial contribution
  * @author Jochen Hiller - Fix #473630 - handle optional dependency to TransformationHelper
  */
+@NonNullByDefault
 public class EnrichedItemDTOMapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnrichedItemDTOMapper.class);
@@ -47,18 +50,19 @@ public class EnrichedItemDTOMapper {
      * @param item the item
      * @param drillDown defines whether the whole tree should be traversed or only direct members are considered
      * @param itemFilter a predicate that filters items while traversing the tree (true means that an item is
-     *            considered)
-     * @param uri the uri
+     *            considered, can be null)
+     * @param uri the uri (can be null)
+     * @param locale locale (can be null)
      * @return item DTO object
      */
-    public static EnrichedItemDTO map(Item item, boolean drillDown, Predicate<Item> itemFilter, URI uri,
-            Locale locale) {
+    public static EnrichedItemDTO map(Item item, boolean drillDown, @Nullable Predicate<Item> itemFilter,
+            @Nullable URI uri, @Nullable Locale locale) {
         ItemDTO itemDTO = ItemDTOMapper.map(item);
         return map(item, itemDTO, uri, drillDown, itemFilter, locale);
     }
 
-    private static EnrichedItemDTO map(Item item, ItemDTO itemDTO, URI uri, boolean drillDown,
-            Predicate<Item> itemFilter, Locale locale) {
+    private static EnrichedItemDTO map(Item item, ItemDTO itemDTO, @Nullable URI uri, boolean drillDown,
+            @Nullable Predicate<Item> itemFilter, @Nullable Locale locale) {
         String state = item.getState().toFullString();
         String transformedState = considerTransformation(state, item, locale);
         if (transformedState != null && transformedState.equals(state)) {
@@ -93,7 +97,7 @@ public class EnrichedItemDTOMapper {
         return enrichedItemDTO;
     }
 
-    private static StateDescription considerTransformation(StateDescription stateDescription) {
+    private static @Nullable StateDescription considerTransformation(@Nullable StateDescription stateDescription) {
         if (stateDescription != null) {
             String pattern = stateDescription.getPattern();
             if (pattern != null) {
@@ -111,14 +115,13 @@ public class EnrichedItemDTOMapper {
         return stateDescription;
     }
 
-    private static String considerTransformation(String state, Item item, Locale locale) {
+    private static @Nullable String considerTransformation(String state, Item item, @Nullable Locale locale) {
         StateDescription stateDescription = item.getStateDescription(locale);
-        if (stateDescription != null && state != null) {
+        if (stateDescription != null) {
             String pattern = stateDescription.getPattern();
             if (pattern != null) {
                 try {
-                    return TransformationHelper.transform(RESTCoreActivator.getBundleContext(), pattern,
-                            state.toString());
+                    return TransformationHelper.transform(RESTCoreActivator.getBundleContext(), pattern, state);
                 } catch (NoClassDefFoundError ex) {
                     // TransformationHelper is optional dependency, so ignore if class not found
                     // return state as it is without transformation
