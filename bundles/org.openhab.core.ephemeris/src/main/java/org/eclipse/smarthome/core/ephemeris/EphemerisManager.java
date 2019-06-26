@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * This service provides functionality around days of the year and is the central
  * service to be used directly by others.
  *
- * @author Gaël L'hopital - Initial contribution and API
+ * @author Gaël L'hopital - Initial contribution
  */
 @NonNullByDefault
 public interface EphemerisManager {
@@ -38,7 +38,7 @@ public interface EphemerisManager {
      * Tests given day (related to today) status against configured dayset
      *
      * @param daysetName name of the requested dayset, witout prefix
-     * @param offset     Today +/- offset days (+1 = tomorrow, -1 = yesterday)
+     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
      * @return whether the day is on weekend
      */
     boolean isInDayset(String daysetName, int offset);
@@ -52,6 +52,16 @@ public interface EphemerisManager {
     boolean isBankHoliday(int offset);
 
     /**
+     * Tests given day status against given userfile
+     *
+     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
+     * @param filename absolute or relative path to the file on local file system
+     * @return whether the day is bank holiday or not
+     * @throws FileNotFoundException if given file does not exist
+     */
+    boolean isBankHoliday(int offset, String filename) throws FileNotFoundException;
+
+    /**
      * Get given day bank holiday name
      *
      * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
@@ -63,8 +73,8 @@ public interface EphemerisManager {
     /**
      * Get given day name from given userfile
      *
+     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
      * @param filename absolute or relative path to the file on local file system
-     * @param offset   Today +/- offset days (+1 = tomorrow, -1 = yesterday)
      * @return name of the day or null if no corresponding entry
      * @throws FileNotFoundException if given file does not exist
      */

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * The static methods of this class are made available as functions in the scripts.
  * This allows a script to use ephemeris features.
  *
- * @author Gaël L'hopital - Initial contribution and API
+ * @author Gaël L'hopital - Initial contribution
  */
 public class Ephemeris {
     private final static Logger logger = LoggerFactory.getLogger(Ephemeris.class);
@@ -56,6 +56,16 @@ public class Ephemeris {
     @ActionDoc(text = "checks if today plus or minus a given offset is bank holiday")
     public static boolean isBankHoliday(int offset) {
         return EphemerisActionService.ephemerisManager.isBankHoliday(offset);
+    }
+
+    @ActionDoc(text = "checks if today plus or minus a given offset is bank holiday from a given userfile")
+    public static boolean isBankHoliday(int offset, String filename) {
+        try {
+            return EphemerisActionService.ephemerisManager.isBankHoliday(offset, filename);
+        } catch (FileNotFoundException e) {
+            logger.error("Error reading holiday user file {} : {}", filename, e.getMessage());
+            return false;
+        }
     }
 
     @ActionDoc(text = "get todays bank holiday name")
