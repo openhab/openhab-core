@@ -57,7 +57,7 @@ import de.jollyday.ManagerParameters;
  * This service provides functionality around ephemeris services and is the central service to be used directly by
  * others.
  *
- * @author Gaël L'hopital - Initial contribution and API
+ * @author Gaël L'hopital - Initial contribution
  */
 @Component(name = "org.openhab.ephemeris", property = { Constants.SERVICE_PID + "=org.openhab.ephemeris",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
@@ -165,6 +165,12 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     @Override
     public boolean isBankHoliday(int offset) {
         return isBankHoliday(ZonedDateTime.now().plusDays(offset));
+    }
+
+    @Override
+    public boolean isBankHoliday(int offset, String filename) throws FileNotFoundException {
+        Optional<String> holiday = getHolidayUserFile(ZonedDateTime.now().plusDays(offset), filename);
+        return holiday.isPresent();
     }
 
     @Override
