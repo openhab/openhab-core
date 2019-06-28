@@ -61,12 +61,7 @@ public class ResourceFilterImpl implements ResourceFilter {
     /**
      * All classes and interfaces which are considered to be relevant for JAX-RS.
      */
-    private static final String[] WHITELIST = new String[] {
-            // openHAB
-            "org.eclipse.smarthome.io.rest.internal.filter.ProxyFilter",
-            "org.eclipse.smarthome.io.rest.internal.resources.RootResource",
-            "org.eclipse.smarthome.io.rest.JSONResponse$ExceptionMapper",
-            "org.eclipse.smarthome.io.rest.sse.internal.async.BlockingAsyncFeature" };
+    private static final String[] WHITELIST = new String[] {};
 
     @Override
     public Filter getFilter() {

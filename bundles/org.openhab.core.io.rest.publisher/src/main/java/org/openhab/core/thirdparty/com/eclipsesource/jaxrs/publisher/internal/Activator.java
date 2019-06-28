@@ -19,6 +19,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+import org.eclipse.smarthome.io.rest.OhJaxRsResource;
 import org.eclipse.smarthome.io.rest.RESTResource;
 import org.eclipse.smarthome.io.rest.sse.SseResource;
 import org.glassfish.jersey.media.sse.SseFeature;
@@ -115,6 +116,15 @@ public class Activator {
     }
 
     public void removeOhSSEResource(final ServiceReference<SseResource> resource) {
+        jaxRsConnector.removeResource(resource);
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    public void addOhJaxRsResource(final ServiceReference<OhJaxRsResource> resource) {
+        jaxRsConnector.addResource(resource);
+    }
+
+    public void removeOhJaxRsResource(final ServiceReference<OhJaxRsResource> resource) {
         jaxRsConnector.removeResource(resource);
     }
 
