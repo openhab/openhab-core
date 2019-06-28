@@ -19,26 +19,26 @@ import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 /**
  * <p>
  * Tracker for OSGi Services implementing the {@link ApplicationConfiguration} interface.
- * </p> 
+ * </p>
  */
 public class ApplicationConfigurationTracker extends ServiceTracker {
 
-  private final JAXRSConnector connector;
+    private final JAXRSConnector connector;
 
-  ApplicationConfigurationTracker( BundleContext context, JAXRSConnector connector ) {
-    super( context, ApplicationConfiguration.class.getName(), null );
-    this.connector = connector;
-  }
-
-  @Override
-  public Object addingService( ServiceReference reference ) {
-    return connector.addApplicationConfiguration( reference );
-  }
-
-  @Override
-  public void removedService( ServiceReference reference, Object service ) {
-    if( service instanceof ApplicationConfiguration ) {
-      connector.removeApplicationConfiguration( reference, ( ApplicationConfiguration )service );
+    ApplicationConfigurationTracker(BundleContext context, JAXRSConnector connector) {
+        super(context, ApplicationConfiguration.class.getName(), null);
+        this.connector = connector;
     }
-  }
+
+    @Override
+    public Object addingService(ServiceReference reference) {
+        return connector.addApplicationConfiguration(reference);
+    }
+
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        if (service instanceof ApplicationConfiguration) {
+            connector.removeApplicationConfiguration(reference, (ApplicationConfiguration) service);
+        }
+    }
 }

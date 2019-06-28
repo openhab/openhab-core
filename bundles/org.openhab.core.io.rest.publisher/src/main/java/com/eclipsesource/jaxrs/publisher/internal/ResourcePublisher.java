@@ -18,63 +18,60 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-
 public class ResourcePublisher {
 
-  private final ServletContainerBridge servletContainerBridge;
-  private final ScheduledExecutorService executor;
-  private long publishDelay;
-  private volatile ScheduledFuture<?> scheduledFuture;
+    private final ServletContainerBridge servletContainerBridge;
+    private final ScheduledExecutorService executor;
+    private long publishDelay;
+    private volatile ScheduledFuture<?> scheduledFuture;
 
-  public ResourcePublisher( ServletContainerBridge servletContainerBridge, long publishDelay ) {
-    this( createExecutor(), servletContainerBridge, publishDelay );
-  }
-
-  ResourcePublisher( ScheduledExecutorService executor,
-                     ServletContainerBridge servletContainerBridge,
-                     long publishDelay )
-  {
-    this.servletContainerBridge = servletContainerBridge;
-    this.publishDelay = publishDelay;
-    this.executor = executor;
-  }
-
-  private static ScheduledExecutorService createExecutor() {
-    return Executors.newSingleThreadScheduledExecutor( new ThreadFactory() {
-
-      @Override
-      public Thread newThread( Runnable runnable ) {
-        Thread thread = new Thread( runnable, "ResourcePublisher" );
-        thread.setUncaughtExceptionHandler( new UncaughtExceptionHandler() {
-
-          @Override
-          public void uncaughtException( Thread thread, Throwable exception ) {
-            throw new IllegalStateException( exception );
-          }
-        } );
-        return thread;
-      }
-    } );
-  }
-
-  public void setPublishDelay( long publishDelay ) {
-    this.publishDelay = publishDelay;
-  }
-
-  public void schedulePublishing() {
-    if( scheduledFuture != null ) {
-      scheduledFuture.cancel( false );
+    public ResourcePublisher(ServletContainerBridge servletContainerBridge, long publishDelay) {
+        this(createExecutor(), servletContainerBridge, publishDelay);
     }
-    scheduledFuture = executor.schedule( servletContainerBridge, publishDelay, TimeUnit.MILLISECONDS );
-  }
 
-  public void shutdown() {
-    executor.shutdown();
-  }
-
-  public void cancelPublishing() {
-    if( scheduledFuture != null ) {
-      scheduledFuture.cancel( true );
+    ResourcePublisher(ScheduledExecutorService executor, ServletContainerBridge servletContainerBridge,
+            long publishDelay) {
+        this.servletContainerBridge = servletContainerBridge;
+        this.publishDelay = publishDelay;
+        this.executor = executor;
     }
-  }
+
+    private static ScheduledExecutorService createExecutor() {
+        return Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+
+            @Override
+            public Thread newThread(Runnable runnable) {
+                Thread thread = new Thread(runnable, "ResourcePublisher");
+                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+
+                    @Override
+                    public void uncaughtException(Thread thread, Throwable exception) {
+                        throw new IllegalStateException(exception);
+                    }
+                });
+                return thread;
+            }
+        });
+    }
+
+    public void setPublishDelay(long publishDelay) {
+        this.publishDelay = publishDelay;
+    }
+
+    public void schedulePublishing() {
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(false);
+        }
+        scheduledFuture = executor.schedule(servletContainerBridge, publishDelay, TimeUnit.MILLISECONDS);
+    }
+
+    public void shutdown() {
+        executor.shutdown();
+    }
+
+    public void cancelPublishing() {
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(true);
+        }
+    }
 }

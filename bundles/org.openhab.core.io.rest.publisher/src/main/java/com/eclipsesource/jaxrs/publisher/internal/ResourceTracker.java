@@ -22,63 +22,62 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-
 public class ResourceTracker extends ServiceTracker {
 
-  private final BundleContext context;
-  private final JAXRSConnector connector;
+    private final BundleContext context;
+    private final JAXRSConnector connector;
 
-  public ResourceTracker( BundleContext context, Filter filter, JAXRSConnector connector ) {
-    super( context, filter, null );
-    this.context = context;
-    this.connector = connector;
-  }
-
-  @Override
-  public Object addingService( ServiceReference reference ) {
-    Object service = context.getService( reference );
-    return delegateAddService( reference, service );
-  }
-
-  private Object delegateAddService( ServiceReference reference, Object service ) {
-    Object result;
-    if( isResource( service ) ) {
-      result = connector.addResource( reference );
-    } else {
-      context.ungetService( reference );
-      result = null;
+    public ResourceTracker(BundleContext context, Filter filter, JAXRSConnector connector) {
+        super(context, filter, null);
+        this.context = context;
+        this.connector = connector;
     }
-    return result;
-  }
 
-  @Override
-  public void removedService( ServiceReference reference, Object service ) {
-    connector.removeResource( service );
-    context.ungetService( reference );
-  }
-
-  @Override
-  public void modifiedService( ServiceReference reference, Object service ) {
-    connector.removeResource( service );
-    delegateAddService( reference, service );
-  }
-
-  private boolean isResource( Object service ) {
-    return service != null && ( hasRegisterableAnnotation( service ) || service instanceof Feature );
-  }
-
-  private boolean hasRegisterableAnnotation( Object service ) {
-    boolean result = isRegisterableAnnotationPresent( service.getClass() );
-    if( !result ) {
-      Class<?>[] interfaces = service.getClass().getInterfaces();
-      for( Class<?> type : interfaces ) {
-        result = result || isRegisterableAnnotationPresent( type );
-      }
+    @Override
+    public Object addingService(ServiceReference reference) {
+        Object service = context.getService(reference);
+        return delegateAddService(reference, service);
     }
-    return result;
-  }
 
-  private boolean isRegisterableAnnotationPresent( Class<?> type ) {
-    return type.isAnnotationPresent( Path.class ) || type.isAnnotationPresent( Provider.class );
-  }
+    private Object delegateAddService(ServiceReference reference, Object service) {
+        Object result;
+        if (isResource(service)) {
+            result = connector.addResource(reference);
+        } else {
+            context.ungetService(reference);
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        connector.removeResource(service);
+        context.ungetService(reference);
+    }
+
+    @Override
+    public void modifiedService(ServiceReference reference, Object service) {
+        connector.removeResource(service);
+        delegateAddService(reference, service);
+    }
+
+    private boolean isResource(Object service) {
+        return service != null && (hasRegisterableAnnotation(service) || service instanceof Feature);
+    }
+
+    private boolean hasRegisterableAnnotation(Object service) {
+        boolean result = isRegisterableAnnotationPresent(service.getClass());
+        if (!result) {
+            Class<?>[] interfaces = service.getClass().getInterfaces();
+            for (Class<?> type : interfaces) {
+                result = result || isRegisterableAnnotationPresent(type);
+            }
+        }
+        return result;
+    }
+
+    private boolean isRegisterableAnnotationPresent(Class<?> type) {
+        return type.isAnnotationPresent(Path.class) || type.isAnnotationPresent(Provider.class);
+    }
 }

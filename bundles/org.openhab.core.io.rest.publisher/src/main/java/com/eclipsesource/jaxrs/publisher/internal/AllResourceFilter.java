@@ -18,30 +18,29 @@ import org.osgi.framework.InvalidSyntaxException;
 
 import com.eclipsesource.jaxrs.publisher.ResourceFilter;
 
-
 public class AllResourceFilter implements ResourceFilter {
-  
-  static final String ANY_SERVICE_FILTER = "(&(objectClass=*)(!(" + PUBLISH + "=false)))";
-  
-  private final BundleContext context;
 
-  public AllResourceFilter( BundleContext context ) {
-    validateContext( context );
-    this.context = context;
-  }
+    static final String ANY_SERVICE_FILTER = "(&(objectClass=*)(!(" + PUBLISH + "=false)))";
 
-  private void validateContext( BundleContext context ) {
-    if( context == null ) {
-      throw new IllegalArgumentException( "context must not be null" );
+    private final BundleContext context;
+
+    public AllResourceFilter(BundleContext context) {
+        validateContext(context);
+        this.context = context;
     }
-  }
 
-  @Override
-  public Filter getFilter() {
-    try {
-      return context.createFilter( ANY_SERVICE_FILTER );
-    } catch( InvalidSyntaxException willNotHappen ) {
-      throw new IllegalStateException( willNotHappen );
+    private void validateContext(BundleContext context) {
+        if (context == null) {
+            throw new IllegalArgumentException("context must not be null");
+        }
     }
-  }
+
+    @Override
+    public Filter getFilter() {
+        try {
+            return context.createFilter(ANY_SERVICE_FILTER);
+        } catch (InvalidSyntaxException willNotHappen) {
+            throw new IllegalStateException(willNotHappen);
+        }
+    }
 }

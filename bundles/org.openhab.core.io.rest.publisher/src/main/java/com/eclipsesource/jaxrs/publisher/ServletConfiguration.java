@@ -21,30 +21,31 @@ import org.osgi.service.http.HttpService;
  * Service that allows contribution of initial parameters and HttpContext for the Jersey servlet.
  * Only the first tracked service implementing this interface will be used.
  * </p>
- * 
+ *
  * @since 4.2
  */
 public interface ServletConfiguration {
 
-  /**
-   * <p>
-   * Returns an HttpContext or <code>null</code> for the given httpService and rootPath.
-   * </p>
-   * 
-   * @param httpService the {@link HttpService} to configure the servlet for.
-   * @param rootPath the configured root path of the servlet to register.
-   * @return the {@link HttpContext} to use for the servlet registration.
-   */
-  HttpContext getHttpContext( HttpService httpService, String rootPath );
+    /**
+     * <p>
+     * Returns an HttpContext or <code>null</code> for the given httpService and rootPath.
+     * </p>
+     *
+     * @param httpService the {@link HttpService} to configure the servlet for.
+     * @param rootPath    the configured root path of the servlet to register.
+     * @return the {@link HttpContext} to use for the servlet registration.
+     */
+    HttpContext getHttpContext(HttpService httpService, String rootPath);
 
-  /**
-   * <p>
-   * Returns initial parameters or <code>null</code> for the given httpService and rootPath.
-   * </p>
-   * @param httpService the {@link HttpService} to configure the servlet for.
-   * @param rootPath the configured root path of the servlet to register.
-   * @return the init properties to use for the servlet registration.
-   */
-  Dictionary<String, String> getInitParams( HttpService httpService, String rootPath );
-  
+    /**
+     * <p>
+     * Returns initial parameters or <code>null</code> for the given httpService and rootPath.
+     * </p>
+     *
+     * @param httpService the {@link HttpService} to configure the servlet for.
+     * @param rootPath    the configured root path of the servlet to register.
+     * @return the init properties to use for the servlet registration.
+     */
+    Dictionary<String, String> getInitParams(HttpService httpService, String rootPath);
+
 }

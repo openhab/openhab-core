@@ -20,26 +20,26 @@ import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 /**
  * <p>
  * Tracker for OSGi Services implementing the {@link ServletConfiguration} interface.
- * </p> 
+ * </p>
  */
 public class ServletConfigurationTracker extends ServiceTracker {
 
-  private final JAXRSConnector connector;
+    private final JAXRSConnector connector;
 
-  ServletConfigurationTracker( BundleContext context, JAXRSConnector connector ) {
-    super( context, ServletConfiguration.class.getName(), null );
-    this.connector = connector;
-  }
-
-  @Override
-  public Object addingService( ServiceReference reference ) {
-    return connector.setServletConfiguration( reference );
-  }
-
-  @Override
-  public void removedService( ServiceReference reference, Object service ) {
-    if( service instanceof ServletConfiguration ) {
-      connector.unsetServletConfiguration( reference, ( ServletConfiguration )service );
+    ServletConfigurationTracker(BundleContext context, JAXRSConnector connector) {
+        super(context, ServletConfiguration.class.getName(), null);
+        this.connector = connector;
     }
-  }
+
+    @Override
+    public Object addingService(ServiceReference reference) {
+        return connector.setServletConfiguration(reference);
+    }
+
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        if (service instanceof ServletConfiguration) {
+            connector.unsetServletConfiguration(reference, (ServletConfiguration) service);
+        }
+    }
 }
