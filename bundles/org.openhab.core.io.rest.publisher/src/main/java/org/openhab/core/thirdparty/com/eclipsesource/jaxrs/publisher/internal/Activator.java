@@ -24,13 +24,11 @@ import org.eclipse.smarthome.io.rest.RESTResource;
 import org.eclipse.smarthome.io.rest.sse.SseResource;
 import org.glassfish.jersey.media.sse.SseFeature;
 import org.glassfish.jersey.server.monitoring.ApplicationEventListener;
-import org.openhab.core.io.rest.publisher.internal.ResourceFilterImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
@@ -51,12 +49,8 @@ public class Activator {
     private ApplicationConfigurationTracker applicationConfigurationTracker;
     private ServiceRegistration<ManagedService> configRegistration;
 
-    private ResourceFilterImpl ohResourceFilter;
-    private ResourceTracker ohTracker;
-
     @Activate
     public Activator(final BundleContext context) {
-        ohResourceFilter = new ResourceFilterImpl();
         jaxRsConnector = new JAXRSConnector(context);
     }
 
@@ -70,7 +64,6 @@ public class Activator {
         openHttpServiceTracker(context);
         openServletConfigurationTracker(context);
         openApplicationConfigurationTracker(context);
-        openOhServiceTracker(context);
     }
 
     @Deactivate
@@ -78,7 +71,6 @@ public class Activator {
         httpTracker.close();
         servletConfigurationTracker.close();
         applicationConfigurationTracker.close();
-        ohTracker.close();
         connectorRegistration.unregister();
         configRegistration.unregister();
     }
@@ -173,11 +165,6 @@ public class Activator {
     private void openApplicationConfigurationTracker(BundleContext context) {
         applicationConfigurationTracker = new ApplicationConfigurationTracker(context, jaxRsConnector);
         applicationConfigurationTracker.open();
-    }
-
-    private void openOhServiceTracker(BundleContext context) throws InvalidSyntaxException {
-        ohTracker = new ResourceTracker(context, ohResourceFilter.getFilter(), jaxRsConnector);
-        ohTracker.open();
     }
 
     // For testing purpose
