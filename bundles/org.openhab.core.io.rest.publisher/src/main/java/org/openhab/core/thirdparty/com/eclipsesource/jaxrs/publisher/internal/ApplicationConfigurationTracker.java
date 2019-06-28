@@ -8,13 +8,12 @@
  * Contributors:
  *    Holger Staudacher - initial API and implementation
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-
-import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 
 /**
  * <p>

@@ -11,7 +11,7 @@
  *    Frank Appel - specified Filter to exclude resources from publishing
  *    Ivan Iliev - Performance Optimizations
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Feature;

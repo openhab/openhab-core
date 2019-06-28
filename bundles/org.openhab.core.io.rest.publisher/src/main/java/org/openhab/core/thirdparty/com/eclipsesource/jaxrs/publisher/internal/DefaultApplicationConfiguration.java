@@ -8,14 +8,13 @@
  * Contributors:
  *    Holger Staudacher - initial API and implementation, ongoing development
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.glassfish.jersey.server.ServerProperties;
-
-import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
 
 public class DefaultApplicationConfiguration implements ApplicationConfiguration {
 

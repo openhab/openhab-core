@@ -9,7 +9,7 @@
  *    Holger Staudacher - initial API and implementation, ongoing development
  *    ProSyst Software GmbH. - compatibility with OSGi specification 4.2 APIs
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
 import java.util.Dictionary;
 

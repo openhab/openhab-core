@@ -8,15 +8,14 @@
  * Contributors:
  *    Holger Staudacher - initial API and implementation
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
-import static com.eclipsesource.jaxrs.publisher.ServiceProperties.PUBLISH;
+import static org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ServiceProperties.PUBLISH;
 
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ResourceFilter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-
-import com.eclipsesource.jaxrs.publisher.ResourceFilter;
 
 public class AllResourceFilter implements ResourceFilter {
 

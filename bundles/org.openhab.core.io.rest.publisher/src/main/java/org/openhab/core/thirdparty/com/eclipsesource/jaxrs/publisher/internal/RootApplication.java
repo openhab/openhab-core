@@ -10,7 +10,7 @@
  *    Dragos Dascalita  - added properties
  *    Ivan Iliev - Performance Optimizations
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
 import java.util.HashMap;
 import java.util.HashSet;

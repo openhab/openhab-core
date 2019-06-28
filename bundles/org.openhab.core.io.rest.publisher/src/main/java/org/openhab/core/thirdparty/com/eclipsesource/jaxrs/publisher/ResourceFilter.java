@@ -8,7 +8,7 @@
  * Contributors:
  *    Holger Staudacher - initial API and implementation
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher;
 
 import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;

@@ -10,13 +10,14 @@
  *    ProSyst Software GmbH. - compatibility with OSGi specification 4.2 APIs
  *    Ivan Iliev - added ServletConfigurationTracker
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import javax.ws.rs.Path;
 
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ResourceFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -27,8 +28,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
-
-import com.eclipsesource.jaxrs.publisher.ResourceFilter;
 
 public class Activator implements BundleActivator {
 

@@ -9,7 +9,7 @@
  *    Holger Staudacher - initial API and implementation
  *    Ivan Iliev - Performance Optimizations
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Executors;

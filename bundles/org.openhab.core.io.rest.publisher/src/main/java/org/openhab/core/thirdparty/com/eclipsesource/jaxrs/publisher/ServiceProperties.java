@@ -8,7 +8,7 @@
  * Contributors:
  *    Holger Staudacher - initial API and implementation, ongoing development
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher;
 
 public class ServiceProperties {
 

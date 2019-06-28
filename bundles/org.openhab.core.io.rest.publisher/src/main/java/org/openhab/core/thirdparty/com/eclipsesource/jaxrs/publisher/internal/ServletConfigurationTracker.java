@@ -9,13 +9,12 @@
  *    Ivan Iliev - initial API and implementation
  *    Holger Staudacher  - ongoing development
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-
-import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 
 /**
  * <p>

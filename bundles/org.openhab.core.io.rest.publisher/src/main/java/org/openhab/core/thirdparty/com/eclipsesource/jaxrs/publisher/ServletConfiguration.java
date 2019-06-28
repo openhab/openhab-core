@@ -9,7 +9,7 @@
  *    Ivan Iliev - initial API and implementation
  *    Holger Staudacher  - ongoing development
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher;
 
 import java.util.Dictionary;
 

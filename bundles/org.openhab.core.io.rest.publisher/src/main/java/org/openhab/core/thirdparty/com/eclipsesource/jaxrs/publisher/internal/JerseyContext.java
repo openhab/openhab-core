@@ -11,7 +11,7 @@
  *    Lars Pfannenschmidt  - made WADL generation configurable
  *    Ivan Iliev - added ServletConfiguration handling, Optimized Performance
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -21,13 +21,12 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.ws.rs.core.Application;
 
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ServletConfiguration;
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal.ServiceContainer.ServiceHolder;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
-import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
-import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
-import com.eclipsesource.jaxrs.publisher.internal.ServiceContainer.ServiceHolder;
 
 @SuppressWarnings("rawtypes")
 public class JerseyContext {

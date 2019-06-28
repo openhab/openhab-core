@@ -10,20 +10,19 @@
  *    ProSyst Software GmbH. - compatibility with OSGi specification 4.2 APIs
  *    Ivan Iliev - Performance Optimizations
  ******************************************************************************/
-package com.eclipsesource.jaxrs.publisher.internal;
+package org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ServletConfiguration;
+import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.internal.ServiceContainer.ServiceHolder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-
-import com.eclipsesource.jaxrs.publisher.ApplicationConfiguration;
-import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
-import com.eclipsesource.jaxrs.publisher.internal.ServiceContainer.ServiceHolder;
 
 public class JAXRSConnector {
 
