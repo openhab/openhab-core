@@ -154,7 +154,7 @@ public class JAXRSConnector {
         }
     }
 
-    Object addResource(ServiceReference reference) {
+    public Object addResource(ServiceReference reference) {
         synchronized (lock) {
             return doAddResource(reference);
         }
@@ -208,7 +208,7 @@ public class JAXRSConnector {
         return result;
     }
 
-    void removeResource(Object resource) {
+    public void removeResource(Object resource) {
         synchronized (lock) {
             doRemoveResource(resource);
         }
