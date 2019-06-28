@@ -852,11 +852,11 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- ... -->
+    <!-- EclipseSource JAX RS -->
     <dependency>
       <groupId>com.eclipsesource.jaxrs</groupId>
-      <artifactId>publisher</artifactId>
-      <version>5.3.1</version>
+      <artifactId>jersey-all</artifactId>
+      <version>2.22.2</version>
       <scope>compile</scope>
     </dependency>
 

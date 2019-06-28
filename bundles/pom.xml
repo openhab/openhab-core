@@ -62,7 +62,7 @@
     <module>org.openhab.core.io.rest.core</module>
     <module>org.openhab.core.io.rest.log</module>
     <module>org.openhab.core.io.rest.mdns</module>
-    <module>org.openhab.core.io.rest.optimize</module>
+    <module>org.openhab.core.io.rest.publisher</module>
     <module>org.openhab.core.io.rest.sitemap</module>
     <module>org.openhab.core.io.rest.sse</module>
     <module>org.openhab.core.io.rest.voice</module>
