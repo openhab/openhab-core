@@ -62,7 +62,7 @@ public class StateDescriptionFragmentBuilder {
      * @return a {@link StateDescriptionFragment} from the values of this builder.
      */
     public StateDescriptionFragment build() {
-        return new StateDescriptionFragmentImpl(fragment);
+        return fragment;
     }
 
     /**
