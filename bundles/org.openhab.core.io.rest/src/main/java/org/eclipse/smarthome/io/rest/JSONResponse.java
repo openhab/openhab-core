@@ -187,7 +187,7 @@ public class JSONResponse {
      * @author Joerg Plewe
      */
     @Provider
-    public static class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Exception> {
+    public static class ExceptionMapper implements OhJAXRSResource, javax.ws.rs.ext.ExceptionMapper<Exception> {
 
         private final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 
