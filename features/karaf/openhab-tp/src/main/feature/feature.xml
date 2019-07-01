@@ -40,11 +40,6 @@
     <bundle dependency="true">mvn:joda-time/joda-time/2.9.2</bundle>
   </feature>
 
-  <feature name="openhab.tp-jbbp" description="Java Binary Block Parser library" version="${project.version}">
-    <capability>openhab.tp;feature=jbbp;version=1.4.1</capability>
-    <bundle dependency="true">mvn:com.igormaznitsa/jbbp/1.4.1</bundle>
-  </feature>
-  
   <feature name="openhab.tp-coap" description="Californium CoAP library" version="${project.version}">
     <capability>openhab.tp;feature=coap;version=1.0.7</capability>
     <bundle>mvn:org.eclipse.californium/californium-osgi/1.0.7</bundle>
@@ -90,9 +85,9 @@
     </config>
   </feature>
 
-  <feature name="openhab.tp-jbbp" version="${project.version}">
+  <feature name="openhab.tp-jbbp" description="Java Binary Block Parser library" version="${project.version}">
     <capability>openhab.tp;feature=jbbp;version=1.4.1</capability>
-    <bundle dependency="true">mvn:com.igormaznitsa/jbbp/1.4.1</bundle>
+    <bundle dependency="true">wrap:mvn:com.igormaznitsa/jbbp/1.4.1</bundle>
   </feature>
   
   <feature name="openhab.tp-kat.cpy-jersey-min-2.22.2" version="${project.version}">

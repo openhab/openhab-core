@@ -521,4 +521,5 @@
   <feature name="openhab-transport-upnp" description="UPnP Transport" version="${project.version}">
     <feature>openhab-core-io-transport-upnp</feature>
   </feature>
+
 </features>
