@@ -50,7 +50,6 @@
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.voice/${project.version}</bundle>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.bin2json/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.monitor/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.net/${project.version}</bundle>
@@ -426,7 +425,6 @@
     <feature dependency="true">openhab.tp-commons-net</feature>
     <feature>openhab-core-base</feature>
     <feature>openhab-core-ephemeris</feature>
-    <feature>openhab-core-io-bin2json</feature>
     <feature>openhab-core-io-console-karaf</feature>
     <feature>openhab-core-io-rest-sitemap</feature>
     <feature>openhab-core-io-rest-voice</feature>

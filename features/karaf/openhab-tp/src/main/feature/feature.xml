@@ -30,9 +30,6 @@
     <bundle dependency="true">mvn:commons-lang/commons-lang/2.6</bundle>
     <!--<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.4</bundle>-->
 
-    <!-- JBBP -->
-    <bundle dependency="true">mvn:com.igormaznitsa/jbbp/1.4.1</bundle>
-
     <!-- Measurement -->
     <bundle dependency="true">mvn:javax.measure/unit-api/1.0</bundle>
     <bundle dependency="true">mvn:tec.uom/uom-se/1.0.8</bundle>
@@ -93,6 +90,11 @@
     </config>
   </feature>
 
+  <feature name="openhab.tp-jbbp" version="${project.version}">
+    <capability>openhab.tp;feature=jbbp;version=1.4.1</capability>
+    <bundle dependency="true">mvn:com.igormaznitsa/jbbp/1.4.1</bundle>
+  </feature>
+  
   <feature name="openhab.tp-kat.cpy-jersey-min-2.22.2" version="${project.version}">
     <feature>http</feature>
     <bundle start-level="36">mvn:org.glassfish.jersey.containers/jersey-container-servlet/2.22.2</bundle>
