@@ -27,7 +27,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.io.rest.OhJaxRsResource;
+import org.eclipse.smarthome.io.rest.OhJAXRSResource;
 import org.eclipse.smarthome.io.rest.RESTConstants;
 import org.eclipse.smarthome.io.rest.RESTResource;
 import org.eclipse.smarthome.io.rest.internal.Constants;
@@ -55,8 +55,8 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution and API
  */
 @Path("/")
-@Component(service = { OhJaxRsResource.class }, configurationPid = "org.eclipse.smarthome.io.rest.root")
-public class RootResource implements OhJaxRsResource {
+@Component(service = { OhJAXRSResource.class }, configurationPid = "org.eclipse.smarthome.io.rest.root")
+public class RootResource implements OhJAXRSResource {
 
     private final transient Logger logger = LoggerFactory.getLogger(RootResource.class);
 

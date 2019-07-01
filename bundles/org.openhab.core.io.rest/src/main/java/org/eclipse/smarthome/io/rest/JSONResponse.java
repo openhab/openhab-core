@@ -74,8 +74,8 @@ public class JSONResponse {
      * Depending on the status, create a Response object containing either the entity alone or an error JSON
      * which might hold the entity as well.
      *
-     * @param status       the status for the response.
-     * @param entity       the entity which is transformed into a JSON stream.
+     * @param status the status for the response.
+     * @param entity the entity which is transformed into a JSON stream.
      * @param errormessage an optional error message (may be null), ignored if the status family is successful
      * @return Response configure for error or success
      */
@@ -187,7 +187,7 @@ public class JSONResponse {
      * @author Joerg Plewe
      */
     @Provider
-    public static class ExceptionMapper implements OhJaxRsResource, javax.ws.rs.ext.ExceptionMapper<Exception> {
+    public static class ExceptionMapper implements OhJAXRSResource, javax.ws.rs.ext.ExceptionMapper<Exception> {
 
         private final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 

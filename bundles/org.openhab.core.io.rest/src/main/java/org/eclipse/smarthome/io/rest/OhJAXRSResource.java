@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.io.rest;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Marker interface for an openHAB JAX RS resource that needs to be registered by the publisher.
  *
@@ -21,6 +23,8 @@ package org.eclipse.smarthome.io.rest;
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public interface OhJaxRsResource {
+@NonNullByDefault
+@Deprecated
+public interface OhJAXRSResource {
 
 }

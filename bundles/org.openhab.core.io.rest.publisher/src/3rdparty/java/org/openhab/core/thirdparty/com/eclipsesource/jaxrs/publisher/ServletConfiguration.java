@@ -32,7 +32,7 @@ public interface ServletConfiguration {
      * </p>
      *
      * @param httpService the {@link HttpService} to configure the servlet for.
-     * @param rootPath    the configured root path of the servlet to register.
+     * @param rootPath the configured root path of the servlet to register.
      * @return the {@link HttpContext} to use for the servlet registration.
      */
     HttpContext getHttpContext(HttpService httpService, String rootPath);
@@ -43,7 +43,7 @@ public interface ServletConfiguration {
      * </p>
      *
      * @param httpService the {@link HttpService} to configure the servlet for.
-     * @param rootPath    the configured root path of the servlet to register.
+     * @param rootPath the configured root path of the servlet to register.
      * @return the init properties to use for the servlet registration.
      */
     Dictionary<String, String> getInitParams(HttpService httpService, String rootPath);

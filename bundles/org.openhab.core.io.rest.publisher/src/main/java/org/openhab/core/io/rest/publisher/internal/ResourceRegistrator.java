@@ -16,7 +16,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.io.rest.OhJaxRsResource;
+import org.eclipse.smarthome.io.rest.OhJAXRSResource;
 import org.eclipse.smarthome.io.rest.RESTResource;
 import org.eclipse.smarthome.io.rest.sse.SseResource;
 import org.glassfish.jersey.media.sse.SseFeature;
@@ -82,11 +82,11 @@ public class ResourceRegistrator {
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addOhJaxRsResource(final ServiceReference<OhJaxRsResource> resource) {
+    public void addOhJaxRsResource(final ServiceReference<OhJAXRSResource> resource) {
         jaxRsConnector.addResource(resource);
     }
 
-    public void removeOhJaxRsResource(final ServiceReference<OhJaxRsResource> resource) {
+    public void removeOhJaxRsResource(final ServiceReference<OhJAXRSResource> resource) {
         jaxRsConnector.removeResource(resource);
     }
 
