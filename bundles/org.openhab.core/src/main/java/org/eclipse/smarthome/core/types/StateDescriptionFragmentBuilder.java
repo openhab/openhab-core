@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.internal.types.StateDescriptionFragmentImpl;
 
 /**
@@ -26,14 +27,26 @@ import org.eclipse.smarthome.core.internal.types.StateDescriptionFragmentImpl;
 @NonNullByDefault
 public class StateDescriptionFragmentBuilder {
 
-    private final StateDescriptionFragmentImpl fragment;
+    private @Nullable BigDecimal minimum;
+    private @Nullable BigDecimal maximum;
+    private @Nullable BigDecimal step;
+    private @Nullable String pattern;
+    private @Nullable Boolean readOnly;
+    private @Nullable List<StateOption> options;
 
     private StateDescriptionFragmentBuilder() {
-        fragment = new StateDescriptionFragmentImpl();
+        //
     }
 
     private StateDescriptionFragmentBuilder(StateDescription legacy) {
-        fragment = new StateDescriptionFragmentImpl(legacy);
+        this.minimum = legacy.getMinimum();
+        this.maximum = legacy.getMaximum();
+        this.step = legacy.getStep();
+        this.pattern = legacy.getPattern();
+        this.readOnly = Boolean.valueOf(legacy.isReadOnly());
+        if (!legacy.getOptions().isEmpty()) {
+            this.options = legacy.getOptions();
+        }
     }
 
     /**
@@ -46,10 +59,10 @@ public class StateDescriptionFragmentBuilder {
     }
 
     /**
-     * Create a builder instance and initialise all fields from the given {@link StateDescription}.
+     * Create a builder instance and initialize all fields from the given {@link StateDescription}.
      * Note: State options will only be taken into account if the list is not empty.
      *
-     * @param legacy the {@link StateDescription} this builder be initialised from.
+     * @param legacy the {@link StateDescription} this builder be initialized from.
      * @return the builder.
      */
     public static StateDescriptionFragmentBuilder create(StateDescription legacy) {
@@ -61,8 +74,9 @@ public class StateDescriptionFragmentBuilder {
      *
      * @return a {@link StateDescriptionFragment} from the values of this builder.
      */
+    @SuppressWarnings("deprecation")
     public StateDescriptionFragment build() {
-        return new StateDescriptionFragmentImpl(fragment);
+        return new StateDescriptionFragmentImpl(minimum, maximum, step, pattern, readOnly, options);
     }
 
     /**
@@ -72,7 +86,7 @@ public class StateDescriptionFragmentBuilder {
      * @return this builder.
      */
     public StateDescriptionFragmentBuilder withMaximum(BigDecimal maximum) {
-        fragment.setMaximum(maximum);
+        this.maximum = maximum;
         return this;
     }
 
@@ -83,7 +97,7 @@ public class StateDescriptionFragmentBuilder {
      * @return this builder.
      */
     public StateDescriptionFragmentBuilder withMinimum(BigDecimal minimum) {
-        fragment.setMinimum(minimum);
+        this.minimum = minimum;
         return this;
     }
 
@@ -94,7 +108,7 @@ public class StateDescriptionFragmentBuilder {
      * @return this builder.
      */
     public StateDescriptionFragmentBuilder withStep(BigDecimal step) {
-        fragment.setStep(step);
+        this.step = step;
         return this;
     }
 
@@ -105,7 +119,7 @@ public class StateDescriptionFragmentBuilder {
      * @return this builder.
      */
     public StateDescriptionFragmentBuilder withPattern(String pattern) {
-        fragment.setPattern(pattern);
+        this.pattern = pattern;
         return this;
     }
 
@@ -116,7 +130,7 @@ public class StateDescriptionFragmentBuilder {
      * @return this builder.
      */
     public StateDescriptionFragmentBuilder withReadOnly(Boolean readOnly) {
-        fragment.setReadOnly(readOnly);
+        this.readOnly = readOnly;
         return this;
     }
 
@@ -127,7 +141,7 @@ public class StateDescriptionFragmentBuilder {
      * @return this builder.
      */
     public StateDescriptionFragmentBuilder withOptions(List<StateOption> options) {
-        fragment.setOptions(options);
+        this.options = options;
         return this;
     }
 }

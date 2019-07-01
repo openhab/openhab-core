@@ -13,12 +13,14 @@
 package org.eclipse.smarthome.core.internal.types;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.StateDescriptionFragment;
+import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.eclipse.smarthome.core.types.StateOption;
 
 /**
@@ -26,6 +28,7 @@ import org.eclipse.smarthome.core.types.StateOption;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
     private @Nullable BigDecimal minimum;
@@ -43,10 +46,33 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     /**
-     * Create a {@link StateDescriptionFragmentImpl} and initialise from the given {@link StateDescription}.
+     * Create a {@link StateDescriptionFragmentImpl} and initialize from the given values.
+     *
+     * @param minimum minimum value of the state
+     * @param maximum maximum value of the state
+     * @param step step size
+     * @param pattern pattern to render the state
+     * @param readOnly if the state can be changed by the system
+     * @param options predefined list of options
+     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
+     */
+    @Deprecated
+    public StateDescriptionFragmentImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum,
+            @Nullable BigDecimal step, @Nullable String pattern, @Nullable Boolean readOnly,
+            @Nullable List<StateOption> options) {
+        this.minimum = minimum;
+        this.maximum = maximum;
+        this.step = step;
+        this.pattern = pattern;
+        this.readOnly = readOnly;
+        this.options = options == null ? Collections.emptyList() : Collections.unmodifiableList(options);
+    }
+
+    /**
+     * Create a {@link StateDescriptionFragmentImpl} and initialize from the given {@link StateDescription}.
      * Note: State options will only be set if not empty.
      *
-     * @param legacy the {@link StateDescription} to initialise from.
+     * @param legacy the {@link StateDescription} to initialize from.
      */
     public StateDescriptionFragmentImpl(StateDescription legacy) {
         this.minimum = legacy.getMinimum();
@@ -54,7 +80,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         this.step = legacy.getStep();
         this.pattern = legacy.getPattern();
         this.readOnly = Boolean.valueOf(legacy.isReadOnly());
-        if (legacy.getOptions() != null && !legacy.getOptions().isEmpty()) {
+        if (!legacy.getOptions().isEmpty()) {
             this.options = legacy.getOptions();
         }
     }
@@ -64,7 +90,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      *
      * @param source the source to copy from.
      */
-    public StateDescriptionFragmentImpl(@NonNull StateDescriptionFragmentImpl source) {
+    public StateDescriptionFragmentImpl(StateDescriptionFragmentImpl source) {
         this.minimum = source.getMinimum();
         this.maximum = source.getMaximum();
         this.step = source.getStep();
@@ -74,7 +100,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     @Override
-    public BigDecimal getMinimum() {
+    public @Nullable BigDecimal getMinimum() {
         return minimum;
     }
 
@@ -83,7 +109,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     @Override
-    public BigDecimal getMaximum() {
+    public @Nullable BigDecimal getMaximum() {
         return maximum;
     }
 
@@ -92,7 +118,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     @Override
-    public BigDecimal getStep() {
+    public @Nullable BigDecimal getStep() {
         return step;
     }
 
@@ -101,7 +127,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     @Override
-    public String getPattern() {
+    public @Nullable String getPattern() {
         return pattern;
     }
 
@@ -110,7 +136,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     @Override
-    public Boolean isReadOnly() {
+    public @Nullable Boolean isReadOnly() {
         return readOnly;
     }
 
@@ -119,7 +145,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     }
 
     @Override
-    public List<StateOption> getOptions() {
+    public @Nullable List<StateOption> getOptions() {
         return options;
     }
 
@@ -127,6 +153,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         this.options = options;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public @Nullable StateDescription toStateDescription() {
         if (minimum == null && maximum == null && step == null && readOnly == null && pattern == null
