@@ -12,11 +12,14 @@
  */
 package org.openhab.core.io.bin2json;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * {@link ConversionException} generic exception for errors which occurs during conversion.
  *
  * @author Pauli Anttila - Initial contribution
  */
+@NonNullByDefault
 public class ConversionException extends Exception {
 
     private static final long serialVersionUID = 1L;

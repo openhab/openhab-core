@@ -48,6 +48,7 @@ logger.debug(json.toString());
 ```
 
 Outputs:
+
 ```javascript
 {
   "cc": 204,
