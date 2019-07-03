@@ -34,6 +34,7 @@ import org.openhab.core.automation.internal.module.handler.ItemStateConditionHan
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.RuleEnablementActionHandler;
 import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
+import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -46,9 +47,8 @@ import org.slf4j.LoggerFactory;
  * This HandlerFactory creates ModuleHandlers to control items within the
  * RuleManager. It contains basic Triggers, Conditions and Actions.
  *
- * @author Benedikt Niehues - Initial contribution and API
+ * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
- *
  */
 @Component
 public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implements ModuleHandlerFactory {
@@ -57,6 +57,7 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
 
     private static final Collection<String> TYPES = Arrays.asList(ItemCommandTriggerHandler.MODULE_TYPE_ID,
             ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID, ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID,
+            ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID, ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID,
             ItemStateConditionHandler.ITEM_STATE_CONDITION, ItemCommandActionHandler.ITEM_COMMAND_ACTION,
             GenericEventTriggerHandler.MODULE_TYPE_ID, ChannelEventTriggerHandler.MODULE_TYPE_ID,
             GenericEventConditionHandler.MODULETYPE_ID, GenericEventConditionHandler.MODULETYPE_ID,
@@ -151,13 +152,15 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
         final String moduleTypeUID = module.getTypeUID();
         if (module instanceof Trigger) {
             // Handle triggers
-
             if (GenericEventTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new GenericEventTriggerHandler((Trigger) module, bundleContext);
             } else if (ChannelEventTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ChannelEventTriggerHandler((Trigger) module, bundleContext);
             } else if (ItemCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ItemCommandTriggerHandler((Trigger) module, bundleContext);
+            } else if (ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
+                    || ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
+                return new ThingStatusTriggerHandler((Trigger) module, bundleContext);
             } else if (ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ItemStateTriggerHandler((Trigger) module, bundleContext);
@@ -175,7 +178,6 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             }
         } else if (module instanceof Action) {
             // Handle actions
-
             if (ItemCommandActionHandler.ITEM_COMMAND_ACTION.equals(moduleTypeUID)) {
                 final ItemCommandActionHandler postCommandActionHandler = new ItemCommandActionHandler((Action) module);
                 postCommandActionHandler.setEventPublisher(eventPublisher);
