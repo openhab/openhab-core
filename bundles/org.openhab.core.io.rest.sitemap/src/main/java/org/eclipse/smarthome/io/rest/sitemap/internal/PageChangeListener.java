@@ -235,18 +235,20 @@ public class PageChangeListener implements StateChangeListener {
                 // event.item contains the (potentially changed) data of the item belonging to
                 // the widget including its state (in event.item.state)
                 final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(w);
-                String widgetTypeName = w.eClass().getInstanceTypeName()
-                        .substring(w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
-                boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
-                Predicate<Item> itemFilter = (i -> i.getType().equals(CoreItemFactory.LOCATION));
-                event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
+                if (itemToBeSent != null) {
+                    String widgetTypeName = w.eClass().getInstanceTypeName().substring(
+                            w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
+                    boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
+                    Predicate<Item> itemFilter = (i -> i.getType().equals(CoreItemFactory.LOCATION));
+                    event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
 
-                // event.state is an adjustment of the item state to the widget type.
-                final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
-                event.state = itemUIRegistry.convertState(w, itemToBeSent, stateToBeSent).toFullString();
-                // In case this state is identical to the item state, its value is set to null.
-                if (event.state != null && event.state.equals(event.item.state)) {
-                    event.state = null;
+                    // event.state is an adjustment of the item state to the widget type.
+                    final State stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();
+                    event.state = itemUIRegistry.convertState(w, itemToBeSent, stateToBeSent).toFullString();
+                    // In case this state is identical to the item state, its value is set to null.
+                    if (event.state != null && event.state.equals(event.item.state)) {
+                        event.state = null;
+                    }
                 }
 
                 events.add(event);
