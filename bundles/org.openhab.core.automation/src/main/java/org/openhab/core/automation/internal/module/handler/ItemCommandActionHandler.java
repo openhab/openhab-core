@@ -23,20 +23,18 @@ import org.eclipse.smarthome.core.items.events.ItemEventFactory;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.TypeParser;
 import org.openhab.core.automation.Action;
-import org.openhab.core.automation.handler.ActionHandler;
-import org.openhab.core.automation.handler.BaseModuleHandler;
+import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is an implementation of an ActionHandler. It sends commands for items.
  *
- * @author Benedikt Niehues - Initial contribution and API
+ * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
  * @author Stefan Triller - use command from input first and if not set, use command from configuration
- *
  */
-public class ItemCommandActionHandler extends BaseModuleHandler<Action> implements ActionHandler {
+public class ItemCommandActionHandler extends BaseActionModuleHandler {
 
     private final Logger logger = LoggerFactory.getLogger(ItemCommandActionHandler.class);
 

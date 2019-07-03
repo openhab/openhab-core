@@ -18,18 +18,16 @@ import java.util.Map;
 
 import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.core.automation.Condition;
-import org.openhab.core.automation.handler.BaseModuleHandler;
-import org.openhab.core.automation.handler.ConditionHandler;
+import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * ConditionHandler implementation for time based conditions.
  *
- * @author Dominik Schlierf - initial contribution
- *
+ * @author Dominik Schlierf - Initial contribution
  */
-public class TimeOfDayConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
+public class TimeOfDayConditionHandler extends BaseConditionModuleHandler {
 
     private final Logger logger = LoggerFactory.getLogger(TimeOfDayConditionHandler.class);
 

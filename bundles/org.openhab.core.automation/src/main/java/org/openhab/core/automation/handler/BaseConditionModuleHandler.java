@@ -13,18 +13,18 @@
 package org.openhab.core.automation.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.automation.Condition;
 
 /**
- * This Handler interface is used by the RuleManager to set a callback interface to
- * itself. The callback has to implemented {@link TriggerHandlerCallback} interface
- * and it is used to notify the RuleManager when {@link TriggerHandler} was triggered
+ * This is a base class that can be used by ConditionModuleHandler implementations
  *
- * @author Yordan Mihaylov - Initial contribution
- * @author Ana Dimova - Initial contribution
- * @author Vasil Ilchev - Initial contribution
- * @see ModuleHandler
+ * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public interface TriggerHandler extends ModuleHandler {
+public abstract class BaseConditionModuleHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
+
+    public BaseConditionModuleHandler(Condition module) {
+        super(module);
+    }
 
 }

@@ -15,17 +15,15 @@ package org.openhab.core.automation.module.script.rulesupport.internal.delegates
 import java.util.Map;
 
 import org.openhab.core.automation.Condition;
-import org.openhab.core.automation.handler.BaseModuleHandler;
-import org.openhab.core.automation.handler.ConditionHandler;
+import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.automation.module.script.rulesupport.shared.simple.SimpleConditionHandler;
 
 /**
  * The SimpleConditionHandlerDelegate allows the registration of {@link SimpleConditionHandler}s to the RuleManager.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
-public class SimpleConditionHandlerDelegate extends BaseModuleHandler<Condition> implements ConditionHandler {
+public class SimpleConditionHandlerDelegate extends BaseConditionModuleHandler {
 
     private SimpleConditionHandler conditionHandler;
 

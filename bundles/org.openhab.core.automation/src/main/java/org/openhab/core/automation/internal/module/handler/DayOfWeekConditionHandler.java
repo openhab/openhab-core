@@ -18,18 +18,16 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openhab.core.automation.Condition;
-import org.openhab.core.automation.handler.BaseModuleHandler;
-import org.openhab.core.automation.handler.ConditionHandler;
+import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is a ConditionHandler implementation, which checks the current day of the week against a specified list.
  *
- * @author Kai Kreuzer - Initial Contribution
- *
+ * @author Kai Kreuzer - Initial contribution
  */
-public class DayOfWeekConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
+public class DayOfWeekConditionHandler extends BaseConditionModuleHandler {
 
     private final Logger logger = LoggerFactory.getLogger(DayOfWeekConditionHandler.class);
 

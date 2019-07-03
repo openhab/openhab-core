@@ -16,16 +16,14 @@ import java.util.Map;
 
 import org.eclipse.smarthome.core.voice.VoiceManager;
 import org.openhab.core.automation.Action;
-import org.openhab.core.automation.handler.ActionHandler;
-import org.openhab.core.automation.handler.BaseModuleHandler;
+import org.openhab.core.automation.handler.BaseActionModuleHandler;
 
 /**
  * This is an ModuleHandler implementation for Actions that trigger a TTS output through "say".
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
-public class SayActionHandler extends BaseModuleHandler<Action> implements ActionHandler {
+public class SayActionHandler extends BaseActionModuleHandler {
 
     public static final String TYPE_ID = "media.SayAction";
     public static final String PARAM_TEXT = "text";

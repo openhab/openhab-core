@@ -18,6 +18,7 @@ import java.util.Optional;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.ConditionHandler;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
@@ -29,8 +30,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann
- *
  */
+@NonNullByDefault
 public class ScriptConditionHandler extends AbstractScriptModuleHandler<Condition> implements ConditionHandler {
 
     public static final String TYPE_ID = "script.ScriptCondition";
@@ -63,5 +64,4 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
 
         return result;
     }
-
 }

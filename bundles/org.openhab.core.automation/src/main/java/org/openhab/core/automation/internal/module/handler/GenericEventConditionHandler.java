@@ -16,19 +16,18 @@ import java.util.Map;
 
 import org.eclipse.smarthome.core.events.Event;
 import org.openhab.core.automation.Condition;
-import org.openhab.core.automation.handler.BaseModuleHandler;
-import org.openhab.core.automation.handler.ConditionHandler;
+import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is the implementation of a event condition which checks if inputs matches configured values.
  *
- * @author Benedikt Niehues - Initial contribution and API
+ * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
- *
  */
-public class GenericEventConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
+public class GenericEventConditionHandler extends BaseConditionModuleHandler {
+
     public final Logger logger = LoggerFactory.getLogger(GenericEventConditionHandler.class);
 
     public static final String MODULETYPE_ID = "core.GenericEventCondition";

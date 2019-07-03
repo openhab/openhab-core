@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Trigger;
 
 /**
@@ -19,6 +20,7 @@ import org.openhab.core.automation.Trigger;
  *
  * @author Vasil Ilchev - Initial contribution
  */
+@NonNullByDefault
 public class BaseTriggerModuleHandler extends BaseModuleHandler<Trigger> implements TriggerHandler {
 
     public BaseTriggerModuleHandler(Trigger module) {

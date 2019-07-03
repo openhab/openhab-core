@@ -17,6 +17,8 @@ import java.util.Map;
 
 import javax.script.ScriptException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.ActionHandler;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
@@ -28,8 +30,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann
- *
  */
+@NonNullByDefault
 public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> implements ActionHandler {
 
     public static final String TYPE_ID = "script.ScriptAction";
@@ -51,8 +53,8 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     }
 
     @Override
-    public Map<String, Object> execute(final Map<String, Object> context) {
-        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+    public @Nullable Map<String, Object> execute(final Map<String, Object> context) {
+        HashMap<String, Object> resultMap = new HashMap<>();
 
         getScriptEngine().ifPresent(scriptEngine -> {
             setExecutionContext(scriptEngine, context);
