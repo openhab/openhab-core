@@ -82,6 +82,16 @@ public class BridgeBuilder extends ThingBuilder {
     }
 
     @Override
+    public BridgeBuilder withoutChannels(Channel... channels) {
+        return (BridgeBuilder) super.withoutChannels(channels);
+    }
+
+    @Override
+    public BridgeBuilder withoutChannels(List<Channel> channels) {
+        return (BridgeBuilder) super.withoutChannels(channels);
+    }
+
+    @Override
     public BridgeBuilder withConfiguration(Configuration thingConfiguration) {
         return (BridgeBuilder) super.withConfiguration(thingConfiguration);
     }
