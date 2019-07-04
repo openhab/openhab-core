@@ -22,7 +22,6 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
@@ -54,8 +53,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     private final String engineIdentifier;
 
     private Optional<ScriptEngine> scriptEngine = Optional.empty();
-    private @NonNullByDefault({}) String type;
-    protected @NonNullByDefault({}) String script;
+    private final String type;
+    protected final String script;
 
     private final String ruleUID;
 
@@ -65,7 +64,19 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         this.ruleUID = ruleUID;
         this.engineIdentifier = UUID.randomUUID().toString();
 
-        loadConfig();
+        this.type = getValidConfigParameter(SCRIPT_TYPE);
+        this.script = getValidConfigParameter(SCRIPT);
+    }
+
+    private String getValidConfigParameter(String parameter) {
+        Object value = module.getConfiguration().get(parameter);
+        if (value != null && value instanceof String && !((String) value).trim().isEmpty()) {
+            return (String) value;
+        } else {
+            throw new IllegalStateException(
+                    String.format("Config parameter '{}' is missing in the configuration of module '%s'.", parameter,
+                            module.getId()));
+        }
     }
 
     @Override
@@ -87,25 +98,6 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             logger.debug("No engine available for script type '{}' in action '{}'.", type, module.getId());
             return Optional.empty();
         }
-    }
-
-    private void loadConfig() {
-        Object type = module.getConfiguration().get(SCRIPT_TYPE);
-        Object script = module.getConfiguration().get(SCRIPT);
-        if (!isValid(type)) {
-            throw new IllegalStateException(
-                    String.format("Type is missing in the configuration of module '%s'.", module.getId()));
-        } else if (!isValid(script)) {
-            throw new IllegalStateException(
-                    String.format("Script is missing in the configuration of module '%s'.", module.getId()));
-        } else {
-            this.type = (String) type;
-            this.script = (String) script;
-        }
-    }
-
-    private boolean isValid(@Nullable Object parameter) {
-        return parameter != null && parameter instanceof String && !((String) parameter).trim().isEmpty();
     }
 
     /**
