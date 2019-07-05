@@ -22,6 +22,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
@@ -64,18 +65,17 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         this.ruleUID = ruleUID;
         this.engineIdentifier = UUID.randomUUID().toString();
 
-        this.type = getValidConfigParameter(SCRIPT_TYPE);
-        this.script = getValidConfigParameter(SCRIPT);
+        this.type = getValidConfigParameter(SCRIPT_TYPE, module.getConfiguration(), module.getId());
+        this.script = getValidConfigParameter(SCRIPT, module.getConfiguration(), module.getId());
     }
 
-    private String getValidConfigParameter(String parameter) {
-        Object value = module.getConfiguration().get(parameter);
+    private static String getValidConfigParameter(String parameter, Configuration config, String moduleId) {
+        Object value = config.get(parameter);
         if (value != null && value instanceof String && !((String) value).trim().isEmpty()) {
             return (String) value;
         } else {
-            throw new IllegalStateException(
-                    String.format("Config parameter '{}' is missing in the configuration of module '%s'.", parameter,
-                            module.getId()));
+            throw new IllegalStateException(String.format(
+                    "Config parameter '%s' is missing in the configuration of module '%s'.", parameter, moduleId));
         }
     }
 
