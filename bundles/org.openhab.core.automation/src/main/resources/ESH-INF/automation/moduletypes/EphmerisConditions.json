@@ -1,0 +1,75 @@
+{
+	"conditions": [
+		{
+			"uid": "ephmeris.HolidayCondition",
+			"label": "It is a holiday",
+			"description": "Checks if the current day is a holiday.",
+			"configDescriptions": [
+				{
+					"name": "offset",
+					"type": "integer",
+					"label": "Offset",
+					"description": "Today +/- offset days (+1 = tomorrow, -1 = yesterday).",
+					"default": 0,
+					"step": 1,
+					"required": false
+				}
+			]
+		},
+		{
+			"uid": "ephmeris.WeekendCondition",
+			"label": "It is a day on the weekend",
+			"description": "Checks if the current day is on the weekend.",
+			"configDescriptions": [
+				{
+					"name": "offset",
+					"type": "integer",
+					"label": "Offset",
+					"description": "Today +/- offset days (+1 = tomorrow, -1 = yesterday).",
+					"default": 0,
+					"step": 1,
+					"required": false
+				}
+			]
+		},
+		{
+			"uid": "ephmeris.WeekdayCondition",
+			"label": "It is a day in a week",
+			"description": "Checks if the current day is not on the weekend.",
+			"configDescriptions": [
+				{
+					"name": "offset",
+					"type": "integer",
+					"label": "Offset",
+					"description": "Today +/- offset days (+1 = tomorrow, -1 = yesterday).",
+					"default": 0,
+					"step": 1,
+					"required": false
+				}
+			]
+		},
+		{
+			"uid": "ephmeris.DaysetCondition",
+			"label": "It is a day in a configured dayset",
+			"description": "Checks if the current day is in a configured dayset.",
+			"configDescriptions": [
+				{
+					"name": "dayset",
+					"type": "text",
+					"label": "Dayset",
+					"description": "Name of the requested dayset, witout prefix.",
+					"required": true
+				},
+				{
+					"name": "offset",
+					"type": "integer",
+					"label": "Offset",
+					"description": "Today +/- offset days (+1 = tomorrow, -1 = yesterday).",
+					"default": 0,
+					"step": 1,
+					"required": false
+				}
+			]
+		}
+	]
+}
