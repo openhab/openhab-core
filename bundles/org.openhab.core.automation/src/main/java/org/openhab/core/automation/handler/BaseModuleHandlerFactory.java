@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
@@ -34,7 +33,7 @@ import org.openhab.core.automation.Rule;
 @NonNullByDefault
 public abstract class BaseModuleHandlerFactory implements ModuleHandlerFactory {
 
-    private final Map<@NonNull String, @NonNull ModuleHandler> handlers = new HashMap<>();
+    private final Map<String, ModuleHandler> handlers = new HashMap<>();
 
     /**
      * Should be overridden by the implementations that extend this base class. Called from DS to deactivate the
@@ -73,7 +72,7 @@ public abstract class BaseModuleHandlerFactory implements ModuleHandlerFactory {
     /**
      * Creates a new {@link ModuleHandler} for a given {@code module} and {@code ruleUID}.
      *
-     * @param module  the {@link Module} for which a handler should be created.
+     * @param module the {@link Module} for which a handler should be created.
      * @param ruleUID the identifier of the {@link Rule} that the given module belongs to.
      * @return a {@link ModuleHandler} instance or {@code null} if thins module type is not supported.
      */

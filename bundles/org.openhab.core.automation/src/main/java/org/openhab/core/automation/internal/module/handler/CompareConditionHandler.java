@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
  * Generic Comparation Condition
  *
  * @author Benedikt Niehues - Initial contribution
- *
  */
 public class CompareConditionHandler extends BaseConditionModuleHandler {
 
@@ -94,7 +93,7 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
                     case "GT":
                     case ">":
                         // Greater
-                        if (toCompare == null || rightValue == null) {
+                        if (toCompare == null) {
                             return false;
                         } else {
                             return compare(toCompare, rightValue) > 0;
@@ -104,7 +103,7 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
                     case ">=":
                     case "=>":
                         // Greater or equal
-                        if (toCompare == null || rightValue == null) {
+                        if (toCompare == null) {
                             return false;
                         } else {
                             return compare(toCompare, rightValue) >= 0;
@@ -112,7 +111,7 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
                     case "lt":
                     case "LT":
                     case "<":
-                        if (toCompare == null || rightValue == null) {
+                        if (toCompare == null) {
                             return false;
                         } else {
                             return compare(toCompare, rightValue) < 0;
@@ -121,14 +120,14 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
                     case "LTE":
                     case "<=":
                     case "=<":
-                        if (toCompare == null || rightValue == null) {
+                        if (toCompare == null) {
                             return false;
                         } else {
                             return compare(toCompare, rightValue) <= 0;
                         }
                     case "matches":
                         // Matcher...
-                        if (toCompare instanceof String && rightValue != null && rightValue instanceof String) {
+                        if (toCompare instanceof String && rightValue instanceof String) {
                             return ((String) toCompare).matches((String) rightValue);
                         }
                     default:
