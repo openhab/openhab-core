@@ -17,18 +17,16 @@ import java.util.Map;
 import org.eclipse.smarthome.core.audio.AudioException;
 import org.eclipse.smarthome.core.audio.AudioManager;
 import org.openhab.core.automation.Action;
-import org.openhab.core.automation.handler.ActionHandler;
-import org.openhab.core.automation.handler.BaseModuleHandler;
+import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is an ModuleHandler implementation for Actions that play a sound file from the file system.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
-public class PlayActionHandler extends BaseModuleHandler<Action> implements ActionHandler {
+public class PlayActionHandler extends BaseActionModuleHandler {
 
     public static final String TYPE_ID = "media.PlayAction";
     public static final String PARAM_SOUND = "sound";

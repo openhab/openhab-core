@@ -14,16 +14,16 @@ package org.openhab.core.automation.module.script.rulesupport.internal.delegates
 
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
-import org.openhab.core.automation.handler.BaseModuleHandler;
-import org.openhab.core.automation.handler.TriggerHandler;
+import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
 
 /**
  * The {@link SimpleTriggerHandlerDelegate} allows to define triggers in a script language in different ways.
  *
- * @author Simon Merschjohann
+ * @author Simon Merschjohann - Initial contribution
  */
-public class SimpleTriggerHandlerDelegate extends BaseModuleHandler<Trigger> implements TriggerHandler {
+public class SimpleTriggerHandlerDelegate extends BaseTriggerModuleHandler {
+
     private final org.openhab.core.automation.module.script.rulesupport.shared.simple.SimpleTriggerHandler triggerHandler;
 
     public SimpleTriggerHandlerDelegate(Trigger module,

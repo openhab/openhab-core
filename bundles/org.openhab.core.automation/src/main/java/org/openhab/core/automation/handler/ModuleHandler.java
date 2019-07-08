@@ -19,7 +19,7 @@ import org.openhab.core.automation.ModuleHandlerCallback;
  * A common interface for all module Handler interfaces. The Handler interfaces are
  * bridge between RuleManager and external modules used by the RuleManager.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @see ModuleHandlerFactory
  */
 @NonNullByDefault

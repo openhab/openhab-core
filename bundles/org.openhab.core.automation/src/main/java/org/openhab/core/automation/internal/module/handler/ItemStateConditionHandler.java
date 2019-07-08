@@ -21,19 +21,17 @@ import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.TypeParser;
 import org.openhab.core.automation.Condition;
-import org.openhab.core.automation.handler.BaseModuleHandler;
-import org.openhab.core.automation.handler.ConditionHandler;
+import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * ConditionHandler implementation to check item state
  *
- * @author Benedikt Niehues - Initial contribution and API
+ * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
- *
  */
-public class ItemStateConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
+public class ItemStateConditionHandler extends BaseConditionModuleHandler {
 
     private final Logger logger = LoggerFactory.getLogger(ItemStateConditionHandler.class);
 

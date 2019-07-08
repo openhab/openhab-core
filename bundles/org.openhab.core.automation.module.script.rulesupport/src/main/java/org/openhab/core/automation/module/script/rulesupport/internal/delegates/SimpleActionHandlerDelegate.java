@@ -18,16 +18,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openhab.core.automation.Action;
-import org.openhab.core.automation.handler.ActionHandler;
-import org.openhab.core.automation.handler.BaseModuleHandler;
+import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.automation.module.script.rulesupport.shared.simple.SimpleActionHandler;
 
 /**
  * The SimpleActionHandlerDelegate allows the registration of {@link SimpleActionHandler}s to the RuleManager.
  *
- * @author Simon Merschjohann
+ * @author Simon Merschjohann - Initial contribution
  */
-public class SimpleActionHandlerDelegate extends BaseModuleHandler<Action> implements ActionHandler {
+public class SimpleActionHandlerDelegate extends BaseActionModuleHandler {
 
     private org.openhab.core.automation.module.script.rulesupport.shared.simple.SimpleActionHandler actionHandler;
 

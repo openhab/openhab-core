@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.ModuleHandlerCallback;
 
@@ -20,10 +22,11 @@ import org.openhab.core.automation.ModuleHandlerCallback;
  *
  * @author Kai Kreuzer - Initial Contribution
  */
+@NonNullByDefault
 public class BaseModuleHandler<T extends Module> implements ModuleHandler {
 
     protected T module;
-    protected ModuleHandlerCallback callback;
+    protected @Nullable ModuleHandlerCallback callback;
 
     public BaseModuleHandler(T module) {
         this.module = module;

@@ -24,9 +24,10 @@ import org.openhab.core.automation.Trigger;
  * This interface should be implemented by external modules which provide functionality for processing {@link Action}
  * modules. This functionality is called to execute the {@link Action}s of the {@link Rule} when it is needed.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial ontribution
+ * @see ModuleHandler
  */
 @NonNullByDefault
 public interface ActionHandler extends ModuleHandler {
@@ -35,7 +36,7 @@ public interface ActionHandler extends ModuleHandler {
      * Called to execute an {@link Action} of the {@link Rule} when it is needed.
      *
      * @param context an unmodifiable map containing the outputs of the {@link Trigger} that triggered the {@link Rule},
-     *                the outputs of all preceding {@link Action}s, and the inputs for this {@link Action}.
+     *            the outputs of all preceding {@link Action}s, and the inputs for this {@link Action}.
      *
      * @return a map with the {@code outputs} which are the result of the {@link Action}'s execution (may be null).
      */

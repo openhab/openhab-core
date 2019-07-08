@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
@@ -34,8 +35,9 @@ import org.openhab.core.automation.type.TriggerType;
  * Trigger modules are placed in <b>triggers</b> section of the {@link Rule} definition.
  *
  * @see Module
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
+@NonNullByDefault
 public interface Trigger extends Module {
 
 }

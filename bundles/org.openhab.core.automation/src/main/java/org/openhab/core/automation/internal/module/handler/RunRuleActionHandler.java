@@ -17,8 +17,7 @@ import java.util.Map;
 
 import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.core.automation.Action;
-import org.openhab.core.automation.handler.ActionHandler;
-import org.openhab.core.automation.handler.BaseModuleHandler;
+import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +38,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - use rule engine instead of registry
- *
  */
-public class RunRuleActionHandler extends BaseModuleHandler<Action> implements ActionHandler {
+public class RunRuleActionHandler extends BaseActionModuleHandler {
 
     /**
      * The UID for this handler for identification in the factory.

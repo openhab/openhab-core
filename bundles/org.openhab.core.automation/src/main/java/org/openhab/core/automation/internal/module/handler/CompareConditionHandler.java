@@ -21,8 +21,7 @@ import java.util.Map;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.TypeParser;
 import org.openhab.core.automation.Condition;
-import org.openhab.core.automation.handler.BaseModuleHandler;
-import org.openhab.core.automation.handler.ConditionHandler;
+import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.automation.internal.module.exception.UncomparableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution and API
  *
  */
-public class CompareConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
+public class CompareConditionHandler extends BaseConditionModuleHandler {
 
     public final Logger logger = LoggerFactory.getLogger(CompareConditionHandler.class);
 
@@ -56,7 +55,8 @@ public class CompareConditionHandler extends BaseModuleHandler<Condition> implem
         String rightOperandString = (rightObj != null && rightObj instanceof String) ? (String) rightObj : null;
         Object leftObjFieldNameObj = this.module.getConfiguration().get(INPUT_LEFT_FIELD);
         String leftObjectFieldName = (leftObjFieldNameObj != null && leftObjFieldNameObj instanceof String)
-                ? (String) leftObjFieldNameObj : null;
+                ? (String) leftObjFieldNameObj
+                : null;
         if (rightOperandString == null || operator == null) {
             return false;
         } else {
