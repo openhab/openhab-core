@@ -27,6 +27,7 @@ import org.eclipse.smarthome.core.events.EventSubscriber;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.events.ThingStatusInfoChangedEvent;
 import org.eclipse.smarthome.core.thing.events.ThingStatusInfoEvent;
+import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -95,28 +96,31 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
 
     @Override
     public void receive(Event event) {
-        if (callback != null) {
-            logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
-                    event.getTopic(), event.getType(), event.getPayload());
-            Map<String, Object> values = new HashMap<>();
-            if (event instanceof ThingStatusInfoEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                ThingStatus status = ((ThingStatusInfoEvent) event).getStatusInfo().getStatus();
-                if (statusMatches(this.status, status)) {
-                    values.put(OUT_STATUS, status);
-                }
-            } else if (event instanceof ThingStatusInfoChangedEvent
-                    && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                ThingStatus newStatus = ((ThingStatusInfoChangedEvent) event).getStatusInfo().getStatus();
-                ThingStatus oldStatus = ((ThingStatusInfoChangedEvent) event).getOldStatusInfo().getStatus();
-                if (statusMatches(this.status, newStatus) && statusMatches(this.previousStatus, oldStatus)) {
-                    values.put(OUT_NEW_STATUS, newStatus);
-                    values.put(OUT_OLD_STATUS, oldStatus);
-                }
+        final ModuleHandlerCallback callback = this.callback;
+        if (!(callback instanceof TriggerHandlerCallback)) {
+            return;
+        }
+
+        TriggerHandlerCallback thCallback = (TriggerHandlerCallback) callback;
+        logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(), event.getTopic(),
+                event.getType(), event.getPayload());
+        Map<String, Object> values = new HashMap<>();
+        if (event instanceof ThingStatusInfoEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+            ThingStatus status = ((ThingStatusInfoEvent) event).getStatusInfo().getStatus();
+            if (statusMatches(this.status, status)) {
+                values.put(OUT_STATUS, status);
             }
-            if (!values.isEmpty()) {
-                values.put(OUT_EVENT, event);
-                ((TriggerHandlerCallback) callback).triggered(module, values);
+        } else if (event instanceof ThingStatusInfoChangedEvent && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
+            ThingStatus newStatus = ((ThingStatusInfoChangedEvent) event).getStatusInfo().getStatus();
+            ThingStatus oldStatus = ((ThingStatusInfoChangedEvent) event).getOldStatusInfo().getStatus();
+            if (statusMatches(this.status, newStatus) && statusMatches(this.previousStatus, oldStatus)) {
+                values.put(OUT_NEW_STATUS, newStatus);
+                values.put(OUT_OLD_STATUS, oldStatus);
             }
+        }
+        if (!values.isEmpty()) {
+            values.put(OUT_EVENT, event);
+            thCallback.triggered(module, values);
         }
     }
 
@@ -124,8 +128,8 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
         if (requiredStatus == null) {
             return true;
         }
-        String reqState = requiredStatus.trim();
-        return reqState.isEmpty() || reqState.equals(status.toString());
+        String reqStatus = requiredStatus.trim();
+        return reqStatus.isEmpty() || reqStatus.equals(status.toString());
     }
 
     /**
@@ -133,8 +137,8 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
      */
     @Override
     public void dispose() {
-        super.dispose();
         eventSubscriberRegistration.unregister();
+        super.dispose();
     }
 
     @Override
