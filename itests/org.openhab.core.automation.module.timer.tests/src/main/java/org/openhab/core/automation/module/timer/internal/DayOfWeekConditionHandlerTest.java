@@ -53,20 +53,20 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
                 .build();
         DayOfWeekConditionHandler handler = new DayOfWeekConditionHandler(condition);
 
-        assertThat(handler.isSatisfied(null), is(true));
+        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
 
         condition = ModuleBuilder.createCondition(condition)
                 .withConfiguration(new Configuration(Collections.singletonMap("days", Collections.emptyList())))
                 .build();
         handler = new DayOfWeekConditionHandler(condition);
-        assertThat(handler.isSatisfied(null), is(false));
+        assertThat(handler.isSatisfied(Collections.emptyMap()), is(false));
 
         condition = ModuleBuilder.createCondition(condition)
                 .withConfiguration(
                         new Configuration(Collections.singletonMap("days", Collections.singletonList(dayOfWeek))))
                 .build();
         handler = new DayOfWeekConditionHandler(condition);
-        assertThat(handler.isSatisfied(null), is(true));
+        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
     }
 
     @Test
