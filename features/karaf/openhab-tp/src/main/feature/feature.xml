@@ -108,6 +108,19 @@
     <bundle dependency="true">mvn:org.jvnet.mimepull/mimepull/1.9.6</bundle>
   </feature>
 
+  <feature name="openhab.tp-jaxb" description="JAXB bundles" version="${project.version}">
+    <capability>openhab.tp;feature=jaxb;version=2.9.0</capability>
+    <bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/2.9.0</bundle>
+    <bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxb-api-2.2/2.9.0</bundle>
+    <bundle start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-impl/2.2.11_1</bundle>
+  </feature>
+
+  <feature name="openhab.tp-jaxws" description="JAX-WS (SOAP) bundles" version="${project.version}">
+    <capability>openhab.tp;feature=jax-ws;version=2.9.0</capability>
+    <bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.saaj-api-1.3/2.9.0</bundle>
+    <bundle start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saaj-impl/1.3.23_2</bundle>
+  </feature>
+
   <feature name="openhab.tp-jollyday" description="Jollyday library" version="${project.version}">
     <capability>openhab.tp;feature=jollyday;version=0.5.8</capability>
     <bundle>mvn:org.threeten/threeten-extra/1.4</bundle>
