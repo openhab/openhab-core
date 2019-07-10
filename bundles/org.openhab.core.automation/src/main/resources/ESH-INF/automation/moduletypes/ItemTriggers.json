@@ -59,7 +59,7 @@
                "name":"event",
                "type":"org.eclipse.smarthome.core.events.Event",
                "label":"Event",
-               "description":"The events which was sent.",
+               "description":"The event which was sent.",
                "reference":"event"
             }
          ]
@@ -123,7 +123,7 @@
                 "name":"event",
                 "type":"org.eclipse.smarthome.core.events.Event",
                 "label":"Event",
-                "description":"The events which was sent.",
+                "description":"The event which was sent.",
                 "reference":"event"
             }
           ]
@@ -227,7 +227,7 @@
                "name":"event",
                "type":"org.eclipse.smarthome.core.events.Event",
                "label":"Event",
-               "description":"The events which was sent.",
+               "description":"The event which was sent.",
                "reference":"event"
             }
          ]

@@ -1,0 +1,184 @@
+{
+	"triggers": [
+		{
+			"uid": "core.ThingStatusUpdateTrigger",
+			"label": "A thing status is updated",
+			"description": "This triggers the rule if a thing status is updated (even if it does not change).",
+			"configDescriptions": [
+				{
+					"name": "thingUID",
+					"type": "TEXT",
+					"context": "thing",
+					"label": "Thing",
+					"description": "The UID of the thing.",
+					"required": true
+				},
+				{
+					"name": "status",
+					"type": "TEXT",
+					"label": "Status",
+					"description": "The status of the thing.",
+					"required": false,
+					"limitToOptions": true,
+					"options": [
+						{
+							"label": "UNINITIALIZED",
+							"value": "UNINITIALIZED"
+						},
+						{
+							"label": "INITIALIZING",
+							"value": "INITIALIZING"
+						},
+						{
+							"label": "UNKNOWN",
+							"value": "UNKNOWN"
+						},
+						{
+							"label": "ONLINE",
+							"value": "ONLINE"
+						},
+						{
+							"label": "OFFLINE",
+							"value": "OFFLINE"
+						},
+						{
+							"label": "REMOVING",
+							"value": "REMOVING"
+						},
+						{
+							"label": "REMOVED",
+							"value": "REMOVED"
+						}
+					]
+				}
+			],
+			"outputs": [
+				{
+					"name": "status",
+					"type": "org.eclipse.smarthome.core.thing.ThingStatus",
+					"label": "Status",
+					"description": "The status of the thing."
+				},
+				{
+					"name": "event",
+					"type": "org.eclipse.smarthome.core.events.Event",
+					"label": "Event",
+					"description": "The event which was sent.",
+					"reference": "event"
+				}
+			]
+		},
+		{
+			"uid": "core.ThingStatusChangeTrigger",
+			"label": "A thing status changes",
+			"description": "This triggers the rule if a thing status has changed.",
+			"configDescriptions": [
+				{
+					"name": "thingUID",
+					"type": "TEXT",
+					"context": "thing",
+					"label": "Thing",
+					"description": "The UID of the thing.",
+					"required": true
+				},
+				{
+					"name": "previousStatus",
+					"type": "TEXT",
+					"label": "Previous Status",
+					"description": "The previous status of the thing.",
+					"required": false,
+					"limitToOptions": true,
+					"options": [
+						{
+							"label": "UNINITIALIZED",
+							"value": "UNINITIALIZED"
+						},
+						{
+							"label": "INITIALIZING",
+							"value": "INITIALIZING"
+						},
+						{
+							"label": "UNKNOWN",
+							"value": "UNKNOWN"
+						},
+						{
+							"label": "ONLINE",
+							"value": "ONLINE"
+						},
+						{
+							"label": "OFFLINE",
+							"value": "OFFLINE"
+						},
+						{
+							"label": "REMOVING",
+							"value": "REMOVING"
+						},
+						{
+							"label": "REMOVED",
+							"value": "REMOVED"
+						}
+					]
+				},
+				{
+					"name": "status",
+					"type": "TEXT",
+					"label": "Status",
+					"description": "The status of the thing.",
+					"required": false,
+					"limitToOptions": true,
+					"options": [
+						{
+							"label": "UNINITIALIZED",
+							"value": "UNINITIALIZED"
+						},
+						{
+							"label": "INITIALIZING",
+							"value": "INITIALIZING"
+						},
+						{
+							"label": "UNKNOWN",
+							"value": "UNKNOWN"
+						},
+						{
+							"label": "ONLINE",
+							"value": "ONLINE"
+						},
+						{
+							"label": "OFFLINE",
+							"value": "OFFLINE"
+						},
+						{
+							"label": "REMOVING",
+							"value": "REMOVING"
+						},
+						{
+							"label": "REMOVED",
+							"value": "REMOVED"
+						}
+					]
+				}
+			],
+			"outputs": [
+				{
+					"name": "newStatus",
+					"type": "org.eclipse.smarthome.core.thing.ThingStatus",
+					"label": "New Status",
+					"description": "The new status of the thing."
+				},
+				{
+					"name": "oldStatus",
+					"type": "org.eclipse.smarthome.core.thing.ThingStatus",
+					"label": "Old Status",
+					"description": "The old status of the thing."
+				},
+				{
+					"name": "event",
+					"type": "org.eclipse.smarthome.core.events.Event",
+					"label": "Event",
+					"description": "The event which was sent.",
+					"reference": "event"
+				}
+			]
+		}
+	]
+}
