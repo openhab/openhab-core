@@ -18,7 +18,7 @@
 		},
 		{
 			"uid": "ephmeris.WeekendCondition",
-			"label": "It is a day on the weekend",
+			"label": "It is a weekend",
 			"description": "Checks if the current day is on the weekend.",
 			"configDescriptions": [
 				{
@@ -34,7 +34,7 @@
 		},
 		{
 			"uid": "ephmeris.WeekdayCondition",
-			"label": "It is a day in a week",
+			"label": "It is a weekday",
 			"description": "Checks if the current day is not on the weekend.",
 			"configDescriptions": [
 				{
@@ -57,7 +57,7 @@
 					"name": "dayset",
 					"type": "text",
 					"label": "Dayset",
-					"description": "Name of the requested dayset, witout prefix.",
+					"description": "Name of the requested dayset, without prefix.",
 					"required": true
 				},
 				{

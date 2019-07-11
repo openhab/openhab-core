@@ -37,7 +37,7 @@ public interface EphemerisManager {
     /**
      * Tests given day (related to today) status against configured dayset
      *
-     * @param daysetName name of the requested dayset, witout prefix
+     * @param daysetName name of the requested dayset, without prefix
      * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
      * @return whether the day is on weekend
      */
