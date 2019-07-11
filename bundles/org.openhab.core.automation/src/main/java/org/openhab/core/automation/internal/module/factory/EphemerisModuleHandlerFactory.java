@@ -70,8 +70,8 @@ public class EphemerisModuleHandlerFactory extends BaseModuleHandlerFactory impl
 
     @Override
     protected @Nullable ModuleHandler internalCreate(final Module module, final String ruleUID) {
-        logger.trace("create {} -> {} : {}", module.getId(), module.getTypeUID(), ruleUID);
         final String moduleTypeUID = module.getTypeUID();
+        logger.trace("create {} -> {} : {}", module.getId(), moduleTypeUID, ruleUID);
 
         if (module instanceof Condition) {
             switch (moduleTypeUID) {
@@ -83,7 +83,7 @@ public class EphemerisModuleHandlerFactory extends BaseModuleHandlerFactory impl
             }
         }
 
-        logger.error("The ModuleHandler is not supported:{}", moduleTypeUID);
+        logger.error("The ModuleHandler is not supported: {}", moduleTypeUID);
         return null;
     }
 }
