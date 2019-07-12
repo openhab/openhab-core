@@ -144,7 +144,7 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}: {}", event.getTopic(), thingUID);
-        return event.getTopic().contains("smarthome/thing/" + thingUID + "/");
+        return event.getTopic().contains("smarthome/things/" + thingUID + "/");
     }
 
 }
