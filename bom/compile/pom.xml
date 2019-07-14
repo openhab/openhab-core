@@ -192,13 +192,13 @@
     <dependency>
       <groupId>tec.uom</groupId>
       <artifactId>uom-se</artifactId>
-      <version>1.0.8</version>
+      <version>1.0.10</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tec.uom.lib</groupId>
       <artifactId>uom-lib-common</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
       <scope>compile</scope>
     </dependency>
 
