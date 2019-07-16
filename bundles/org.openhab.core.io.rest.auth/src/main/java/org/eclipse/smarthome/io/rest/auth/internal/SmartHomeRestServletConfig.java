@@ -15,11 +15,12 @@ package org.eclipse.smarthome.io.rest.auth.internal;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.openhab.core.thirdparty.com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
+
+import com.eclipsesource.jaxrs.publisher.ServletConfiguration;
 
 /**
  * Custom servlet configuration for jaxrs handler.

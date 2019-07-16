@@ -13,7 +13,6 @@
 package org.eclipse.smarthome.io.rest.core.internal;
 
 import org.eclipse.smarthome.io.rest.JSONResponse;
-import org.eclipse.smarthome.io.rest.OhJAXRSResource;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -36,7 +35,7 @@ public class RESTCoreActivator implements BundleActivator {
     @Override
     public void start(BundleContext bc) throws Exception {
         context = bc;
-        mExcMapper = bc.registerService(OhJAXRSResource.class, new JSONResponse.ExceptionMapper(), null);
+        mExcMapper = bc.registerService(JSONResponse.ExceptionMapper.class.getName(), new JSONResponse.ExceptionMapper(), null);
     }
 
     /**

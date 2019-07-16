@@ -25,7 +25,6 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.smarthome.io.rest.OhJAXRSResource;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +38,8 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @PreMatching
-@Component(configurationPid = "org.eclipse.smarthome.io.rest.proxyfilter", immediate = true, service = {
-        OhJAXRSResource.class })
-public class ProxyFilter implements OhJAXRSResource, ContainerRequestFilter {
+@Component(configurationPid = "org.eclipse.smarthome.io.rest.proxyfilter", immediate = true, service = ProxyFilter.class)
+public class ProxyFilter implements ContainerRequestFilter {
 
     static final String PROTO_PROXY_HEADER = "x-forwarded-proto";
 

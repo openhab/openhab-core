@@ -79,6 +79,7 @@
     <capability>openhab.tp;feature=jax-rs-min;version=5.3.1</capability>
     <feature dependency="true">http</feature>
     <feature dependency="true">openhab.tp-kat.cpy-jersey-min-2.22.2</feature>
+    <bundle>mvn:com.eclipsesource.jaxrs/publisher/5.3.1</bundle>
     <config name="com.eclipsesource.jaxrs.connector">
       root=/rest
     </config>
