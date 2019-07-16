@@ -1,0 +1,2 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Activator: org.eclipse.smarthome.io.rest.optimize.internal.Activator
