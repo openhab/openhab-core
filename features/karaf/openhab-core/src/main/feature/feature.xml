@@ -56,7 +56,7 @@
     <feature dependency="true">pax-http-whiteboard</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.publisher/${project.version}</bundle>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.optimize/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
   </feature>

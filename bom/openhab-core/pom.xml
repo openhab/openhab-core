@@ -233,7 +233,7 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.io.rest.publisher</artifactId>
+      <artifactId>org.openhab.core.io.rest.optimize</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
