@@ -38,7 +38,6 @@
     <!-- <module>org.openhab.core.io.rest.tests</module> -->
     <module>org.openhab.core.io.rest.core.tests</module>
     <!-- <module>org.openhab.core.io.rest.sse.tests</module> -->
-    <!-- <module>org.openhab.core.io.transport.mqtt.tests</module> -->
     <!-- <module>org.openhab.core.io.transport.upnp.tests</module> -->
     <module>org.openhab.core.magic.tests</module>
     <module>org.openhab.core.model.core.tests</module>

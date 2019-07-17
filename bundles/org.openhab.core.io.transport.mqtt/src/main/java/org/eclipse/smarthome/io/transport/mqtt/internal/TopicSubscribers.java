@@ -65,4 +65,8 @@ public class TopicSubscribers extends ArrayList<MqttMessageSubscriber> {
     public String getTopicRegexPattern() {
         return topicRegexPattern.pattern();
     }
+
+    public String getRegexMatchTopic() {
+        return regexMatchTopic;
+    }
 }

@@ -16,10 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
 import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionObserver;
 import org.eclipse.smarthome.io.transport.mqtt.MqttConnectionState;
@@ -29,12 +27,17 @@ import org.eclipse.smarthome.io.transport.mqtt.reconnect.AbstractReconnectStrate
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
+import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
+
 /**
- * Processes the paho MqttCallbacks for the {@link MqttBrokerConnection}.
+ * Processes the MqttCallbacks for the {@link MqttBrokerConnection}.
  *
  * @author David Graeff - Initial contribution
+ * @author Jan N. Klug - adjusted to HiveMQ client
  */
-public class ClientCallback implements MqttCallback {
+@NonNullByDefault
+public class ClientCallback {
     final Logger logger = LoggerFactory.getLogger(ClientCallback.class);
     private final MqttBrokerConnection connection;
     private final List<MqttConnectionObserver> connectionObservers;
@@ -47,12 +50,11 @@ public class ClientCallback implements MqttCallback {
         this.subscribers = subscribers;
     }
 
-    @Override
     public synchronized void connectionLost(@Nullable Throwable exception) {
         if (exception instanceof MqttException) {
             MqttException e = (MqttException) exception;
-            logger.info("MQTT connection to '{}' was lost: {} : ReasonCode {} : Cause : {}", connection.getHost(),
-                    e.getMessage(), e.getReasonCode(), (e.getCause() == null ? "Unknown" : e.getCause().getMessage()));
+            logger.info("MQTT connection to '{}' was lost: {} : Cause : {}", connection.getHost(), e.getMessage(),
+                    e.getCause().getMessage());
         } else if (exception != null) {
             logger.info("MQTT connection to '{}' was lost", connection.getHost(), exception);
         }
@@ -64,14 +66,33 @@ public class ClientCallback implements MqttCallback {
         }
     }
 
-    @Override
-    public void deliveryComplete(IMqttDeliveryToken token) {
-        logger.trace("Message with id {} delivered.", token.getMessageId());
+    public void messageArrived(Mqtt3Publish message) {
+        byte[] payload = message.getPayloadAsBytes();
+        String topic = message.getTopic().toString();
+        logger.trace("Received message on topic '{}' : {}", topic, new String(payload));
+        List<MqttMessageSubscriber> matches = new ArrayList<>();
+        synchronized (subscribers) {
+            subscribers.values().forEach(subscriberList -> {
+                if (topic.matches(subscriberList.getRegexMatchTopic())) {
+                    logger.trace("Topic match for '{}' using regex {}", message.getTopic(),
+                            subscriberList.getRegexMatchTopic());
+                    subscriberList.forEach(consumer -> matches.add(consumer));
+                } else {
+                    logger.trace("No topic match for '{}' using regex {}", topic, subscriberList.getRegexMatchTopic());
+                }
+            });
+
+        }
+        try {
+            matches.forEach(subscriber -> subscriber.processMessage(topic, payload));
+        } catch (Exception e) {
+            logger.error("MQTT message received. MqttMessageSubscriber#processMessage() implementation failure", e);
+        }
     }
 
-    @Override
-    public void messageArrived(String topic, MqttMessage message) {
-        byte[] payload = message.getPayload();
+    public void messageArrived(Mqtt5Publish message) {
+        byte[] payload = message.getPayloadAsBytes();
+        String topic = message.getTopic().toString();
         logger.trace("Received message on topic '{}' : {}", topic, new String(payload));
         List<MqttMessageSubscriber> matches = new ArrayList<>();
         synchronized (subscribers) {
