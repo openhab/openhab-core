@@ -40,7 +40,7 @@ public class MqttServiceTests {
         service.addBrokersListener(observer);
         assertTrue(service.hasBrokerObservers());
 
-        MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("tcp://123.123.123.123", null, false,
+        MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false,
                 "brokerConnectionListenerTests");
         assertTrue(service.addBrokerConnection("name", connection));
 

@@ -24,6 +24,7 @@ import org.osgi.service.cm.ConfigurationException;
  *
  * @author David Graeff - Initial contribution
  */
+@Deprecated
 public interface SSLContextProvider {
     /**
      * Return an {@link SSLContext} to be used by secure Mqtt broker connections. Never return null here. If you are not

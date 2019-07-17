@@ -15,7 +15,6 @@ package org.eclipse.smarthome.io.transport.mqtt.internal;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.Configuration;
@@ -68,10 +67,11 @@ public class MqttBrokerConnectionServiceInstance {
             connection.stop();
         }
 
-        if (configMap == null || configMap.isEmpty() || mqttService == null) {
+        final MqttServiceImpl service = (MqttServiceImpl) mqttService;
+
+        if (configMap == null || configMap.isEmpty() || service == null) {
             return;
         }
-        final @NonNull MqttServiceImpl service = (@NonNull MqttServiceImpl) mqttService;
 
         // Parse configuration
         MqttBrokerConnectionConfig config = new Configuration(configMap).as(MqttBrokerConnectionConfig.class);
@@ -79,7 +79,7 @@ public class MqttBrokerConnectionServiceInstance {
         try {
             // Compute brokerID and make sure it is not empty
             String brokerID = config.getBrokerID();
-            if (StringUtils.isBlank(brokerID) || brokerID == null) {
+            if (StringUtils.isBlank(brokerID)) {
                 logger.warn("Ignore invalid broker connection configuration: {}", config);
                 return;
             }
