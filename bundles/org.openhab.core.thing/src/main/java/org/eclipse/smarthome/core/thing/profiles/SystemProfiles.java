@@ -41,6 +41,7 @@ public interface SystemProfiles {
     ProfileTypeUID RAWROCKER_UP_DOWN = new ProfileTypeUID(SYSTEM_SCOPE, "rawrocker-to-up-down");
     ProfileTypeUID TIMESTAMP_CHANGE = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-change");
     ProfileTypeUID TIMESTAMP_UPDATE = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-update");
+    ProfileTypeUID FACE_RECOGNITION = new ProfileTypeUID(SYSTEM_SCOPE, "face-recognition");
 
     StateProfileType DEFAULT_TYPE = ProfileTypeBuilder.newState(DEFAULT, "Default").build();
 
@@ -102,5 +103,9 @@ public interface SystemProfiles {
 
     StateProfileType TIMESTAMP_UPDATE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_UPDATE, "Timestamp on update")
             .withSupportedItemTypes(CoreItemFactory.DATETIME).build();
+
+    StateProfileType FACE_RECOGNITION_TYPE = ProfileTypeBuilder.newState(FACE_RECOGNITION, "Face recognition")
+            .withSupportedItemTypes(CoreItemFactory.STRING, CoreItemFactory.NUMBER, CoreItemFactory.IMAGE)
+            .withSupportedItemTypesOfChannel(CoreItemFactory.IMAGE).build();
 
 }
