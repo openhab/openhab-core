@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This test class tests the Host - Fragment support for automation and localization resources
  *
- * @author Ana Dimova - initial contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - Refactored to Java
  */
 @SuppressWarnings("deprecation")

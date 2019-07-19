@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Can be implemented to point one config description URI to another.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 @NonNullByDefault

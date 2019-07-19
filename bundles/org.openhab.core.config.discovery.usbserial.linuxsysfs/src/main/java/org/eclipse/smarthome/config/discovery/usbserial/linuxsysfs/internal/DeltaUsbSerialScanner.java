@@ -24,7 +24,7 @@ import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformati
  * Permits to perform repeated scans for USB devices with associated serial port. Keeps the last scan result as internal
  * state, for detecting which devices were added, as well as which devices were removed.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 @NonNullByDefault
 public class DeltaUsbSerialScanner {

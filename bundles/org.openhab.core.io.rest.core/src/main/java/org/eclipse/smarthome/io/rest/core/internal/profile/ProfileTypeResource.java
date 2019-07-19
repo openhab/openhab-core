@@ -58,7 +58,7 @@ import io.swagger.annotations.ApiResponses;
 /**
  * REST resource to obtain profile-types
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @Path(ProfileTypeResource.PATH_PROFILE_TYPES)

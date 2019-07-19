@@ -26,7 +26,7 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
  *
  * It can be used to obtain instances instead of implementing any of the interfaces derived from {@link ProfileType}.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  * @param <T> the concrete {@link ProfileType} sub-interface.
  */

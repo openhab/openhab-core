@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Example service which makes use of the metadata of the "magic" namespace.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 @NonNullByDefault

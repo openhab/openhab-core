@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * This tests the RuleEngineImpl and the import from JSON resources contained in the ESH-INF folder.
  * This test must be run first otherwise imported rules will be cleared.
  *
- * @author Benedikt Niehues - initial contribution
+ * @author Benedikt Niehues - Initial contribution
  * @author Marin Mitev - make the test to pass on each run
  * @author Kai Kreuzer - refactored to Java
  *

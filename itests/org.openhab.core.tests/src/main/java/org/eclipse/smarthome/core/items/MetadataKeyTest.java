@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  */
 public class MetadataKeyTest {
 

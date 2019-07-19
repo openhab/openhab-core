@@ -16,7 +16,7 @@ package org.eclipse.smarthome.core.thing.type;
  * A binding's recommendation to the framework whether a state update should be automatically sent to an item if a
  * command was received.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 public enum AutoUpdatePolicy {

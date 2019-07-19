@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of a {@link CronScheduler}.
  *
- * @author Peter Kriens - initial contribution and API
+ * @author Peter Kriens - Initial contribution and API
  * @author Simon Kaufmann - adapted to CompletableFutures
  * @author Hilbrand Bouwkamp - moved cron scheduling to it's own interface
  */

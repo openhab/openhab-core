@@ -37,7 +37,7 @@ import com.google.gson.GsonBuilder;
 /**
  * JSON reader/writer for Jersey using GSON.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  * @param <T>
  */

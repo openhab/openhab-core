@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * ThingHandler that randomly sends numbers and strings to channels based on a configured interval
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @NonNullByDefault

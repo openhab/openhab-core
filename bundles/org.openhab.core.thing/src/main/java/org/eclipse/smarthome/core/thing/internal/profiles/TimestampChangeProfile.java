@@ -26,7 +26,7 @@ import org.eclipse.smarthome.core.types.State;
  * This is the default implementation for a change timestamp profile.
  * The timestamp updates to now each time the channel or item state changes.
  *
- * @author Gaël L'hopital - initial contribution
+ * @author Gaël L'hopital - Initial contribution
  *
  */
 @NonNullByDefault

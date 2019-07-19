@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Implementors are capable of creating a {@link Profile} instances.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

@@ -25,7 +25,7 @@ import com.eclipsesource.jaxrs.publisher.ResourceFilter;
  * It registers a {@link ResourceFilter} in order to prevent the JAX-RS implementation to
  * enforce starting all services once they are registered.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 public class Activator implements BundleActivator {

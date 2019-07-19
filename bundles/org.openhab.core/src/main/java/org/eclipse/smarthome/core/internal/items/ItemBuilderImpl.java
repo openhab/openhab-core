@@ -31,7 +31,7 @@ import org.eclipse.smarthome.core.items.ItemFactory;
 /**
  * The {@link ItemBuilder} implementation.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 @NonNullByDefault

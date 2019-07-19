@@ -29,7 +29,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 /**
  * {@link ProfileTypeRegistry} implementation.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @Component(service = ProfileTypeRegistry.class)

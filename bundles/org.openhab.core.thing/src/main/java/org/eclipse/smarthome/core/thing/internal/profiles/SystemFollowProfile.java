@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The ThingHandler may send commands to the framework, but no state updates are forwarded.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

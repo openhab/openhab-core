@@ -20,7 +20,7 @@ import org.osgi.framework.Bundle;
 /**
  * Interface for a service that offer i18n functionality
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 public interface ModuleTypeI18nService {

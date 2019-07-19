@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 /**
  *
- * @author Peter Kriens - initial contribution and API
+ * @author Peter Kriens - Initial contribution and API
  * @author Simon Kaufmann - adapted to Java 8
  * @author Hilbrand Bouwkamp - refactored to run as parameterized unit test and added missing cases to complete coverage
  */

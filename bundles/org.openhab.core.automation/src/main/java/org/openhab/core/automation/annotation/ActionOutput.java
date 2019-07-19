@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 /**
  * Output parameter for an action module
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  */
 @Repeatable(ActionOutputs.class)
 @Retention(RUNTIME)

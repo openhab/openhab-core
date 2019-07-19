@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test the {@link ItemStateConverterImpl}.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public class ItemStateConverterImplTest {

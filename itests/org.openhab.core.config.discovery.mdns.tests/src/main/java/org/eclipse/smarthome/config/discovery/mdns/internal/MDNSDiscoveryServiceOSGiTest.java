@@ -29,7 +29,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Integration tests for the {@link MDNSDiscoveryService}.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 

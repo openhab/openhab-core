@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * this tests the timeOfDay trigger
  *
- * @author Kai Kreuzer - initial contribution
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class TimeOfDayTriggerHandlerTest extends JavaOSGiTest {

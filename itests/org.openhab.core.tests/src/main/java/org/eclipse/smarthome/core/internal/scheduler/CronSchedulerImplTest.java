@@ -29,7 +29,7 @@ import org.junit.Test;
  * Test class for {@link CronSchedulerImpl}.
  * Because the test run on scheduler all tests are guarded by a timeout to avoid having a test blocking.
  *
- * @author Peter Kriens - initial contribution and API
+ * @author Peter Kriens - Initial contribution and API
  * @author Simon Kaufmann - adapted to Java 8
  * @author Hilbrand Bouwkamp - moved cron scheduling to it's own class
  */

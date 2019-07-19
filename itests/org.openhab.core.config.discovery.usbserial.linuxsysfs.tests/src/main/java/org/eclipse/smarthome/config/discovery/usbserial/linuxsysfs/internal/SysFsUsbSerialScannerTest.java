@@ -40,7 +40,7 @@ import org.junit.rules.TemporaryFolder;
 /**
  * Unit tests for the {@link SysfsUsbSerialScanner}.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 public class SysFsUsbSerialScannerTest {
 

@@ -26,7 +26,7 @@ import org.eclipse.smarthome.core.voice.KSServiceHandle;
 /**
  * A {@link KSService} stub used for the tests.
  *
- * @author Mihaela Memova - initial contribution
+ * @author Mihaela Memova - Initial contribution
  *
  * @author Velin Yordanov - migrated from groovy to java
  *

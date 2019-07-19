@@ -29,7 +29,7 @@ import org.eclipse.smarthome.core.library.types.PercentType;
  * An {@link AudioSink} stub used for the tests. Since the tests do not cover all the voice's features,
  * some of the methods are not needed. That's why their implementation is left empty.
  *
- * @author Mihaela Memova - initial contribution
+ * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated from groovy to java
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  *

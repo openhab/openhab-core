@@ -38,7 +38,7 @@ import org.quartz.spi.TriggerFiredBundle;
  * we don't need to wait for arbitrary lengths of time
  * for jobs to execute
  *
- * @author Jon Evans - initial contribution
+ * @author Jon Evans - Initial contribution
  *
  */
 public class MockScheduler extends AbstractScheduler {

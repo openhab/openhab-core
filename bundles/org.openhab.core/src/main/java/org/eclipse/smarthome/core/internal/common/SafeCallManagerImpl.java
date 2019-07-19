@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * It therefore tracks the executions in order to detect parallel execution and offers some helper methods for the
  * invocation handlers.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

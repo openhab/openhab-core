@@ -18,7 +18,7 @@ import javax.measure.Quantity;
  * Define Area density type (basic unit is kg/m^2)
  * https://en.wikipedia.org/wiki/Area_density
  *
- * @author Gaël L'hopital - initial contribution
+ * @author Gaël L'hopital - Initial contribution
  *
  */
 public interface ArealDensity extends Quantity<ArealDensity> {

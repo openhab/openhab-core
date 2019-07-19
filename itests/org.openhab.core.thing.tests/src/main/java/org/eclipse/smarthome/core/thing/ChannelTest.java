@@ -17,7 +17,7 @@ import org.junit.Test;
 /**
  * Test cases for the {@link Channel} class.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public class ChannelTest {

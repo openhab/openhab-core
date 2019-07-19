@@ -38,7 +38,7 @@ import com.google.gson.stream.JsonWriter;
 /**
  * Static helper methods to build up JSON-like Response objects and error handling.
  *
- * @author Joerg Plewe - initial contribution
+ * @author Joerg Plewe - Initial contribution
  * @author Henning Treu - Provide streaming capabilities
  */
 public class JSONResponse {

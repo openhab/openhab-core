@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * This discovery service requires a component implementing the interface {@link UsbSerialDiscovery}, which performs the
  * actual serial port and USB device discovery (as this discovery might differ depending on the operating system).
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { DiscoveryService.class,

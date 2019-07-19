@@ -35,7 +35,7 @@ import com.google.inject.AbstractModule;
 /**
  * This class configures the injector for the Language Server.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 public class RuntimeServerModule extends AbstractModule {

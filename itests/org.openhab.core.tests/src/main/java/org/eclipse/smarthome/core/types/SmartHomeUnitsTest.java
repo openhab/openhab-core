@@ -42,7 +42,7 @@ import tec.uom.se.unit.Units;
 /**
  * Test for the framework defined {@link SmartHomeUnits}.
  *
- * @author Henning Treu - initial contribution and API
+ * @author Henning Treu - Initial contribution and API
  *
  */
 public class SmartHomeUnitsTest {

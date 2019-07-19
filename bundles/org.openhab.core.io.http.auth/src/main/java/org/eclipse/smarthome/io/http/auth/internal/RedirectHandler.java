@@ -26,7 +26,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * Handler located after authentication which redirect client to page from which he started authentication process.
  *
- * @author Łukasz Dywicki - initial contribution.
+ * @author Łukasz Dywicki - Initial contribution.
  */
 @Component
 public class RedirectHandler implements Handler {

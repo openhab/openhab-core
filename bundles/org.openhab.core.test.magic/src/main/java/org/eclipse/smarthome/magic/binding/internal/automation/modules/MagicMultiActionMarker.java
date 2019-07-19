@@ -19,7 +19,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * Marker for the multiple action module
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @Component(immediate = true, service = MagicMultiActionMarker.class, property = {

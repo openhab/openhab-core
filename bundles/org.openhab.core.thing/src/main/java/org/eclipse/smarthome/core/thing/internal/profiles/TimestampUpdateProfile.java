@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * This is the default implementation for a state update timestamp profile.
  * The timestamp updates to now each time the channel or item state is updated.
  *
- * @author Gaël L'hopital - initial contribution
+ * @author Gaël L'hopital - Initial contribution
  *
  */
 

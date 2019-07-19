@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.voice.Voice;
 /**
  * A {@link Voice} stub used for the tests.
  *
- * @author Mihaela Memova - initial contribution
+ * @author Mihaela Memova - Initial contribution
  *
  * @author Velin Yordanov - migrated from groovy to java
  *

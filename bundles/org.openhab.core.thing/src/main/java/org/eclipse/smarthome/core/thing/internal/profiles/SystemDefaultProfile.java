@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.types.State;
  * It forwards commands to the {@link ThingHandler}. In the other direction it posts events to the event bus
  * for state updates.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

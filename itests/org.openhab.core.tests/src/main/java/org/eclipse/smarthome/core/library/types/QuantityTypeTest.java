@@ -38,7 +38,7 @@ import tec.uom.se.quantity.QuantityDimension;
 import tec.uom.se.unit.Units;
 
 /**
- * @author Gaël L'hopital - initial contribution
+ * @author Gaël L'hopital - Initial contribution
  */
 @SuppressWarnings({ "rawtypes", "unchecked", "null" })
 public class QuantityTypeTest {

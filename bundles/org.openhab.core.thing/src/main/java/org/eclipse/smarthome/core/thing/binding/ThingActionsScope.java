@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 /**
  * Scope definition for a thing action class
  *
- * @author Kai Kreuzer - initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -24,7 +24,7 @@ import org.junit.Test;
 /**
  * Tests the {@link ChannelGroupTypeBuilder}.
  *
- * @author Christoph Weitkamp - initial contribution
+ * @author Christoph Weitkamp - Initial contribution
  */
 public class ChannelGroupTypeBuilderTest {
 

@@ -28,7 +28,7 @@ import org.quartz.impl.StdSchedulerFactory;
 /**
  * Tests for {@link ScriptExecution}
  *
- * @author Jon Evans - initial contribution
+ * @author Jon Evans - Initial contribution
  *
  */
 public class ScriptExecutionTest {

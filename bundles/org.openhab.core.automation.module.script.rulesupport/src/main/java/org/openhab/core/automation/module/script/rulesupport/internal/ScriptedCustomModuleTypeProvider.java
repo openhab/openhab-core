@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Component;
  * {@link ScriptedCustomModuleHandlerFactory} to allow scripts to define custom types in the RuleManager. These
  * registered types can then be used publicly from any Rule-Editor.
  *
- * @author Simon Merschjohann - initial contribution
+ * @author Simon Merschjohann - Initial contribution
  *
  */
 @Component(immediate = true, service = { ScriptedCustomModuleTypeProvider.class, ModuleTypeProvider.class })

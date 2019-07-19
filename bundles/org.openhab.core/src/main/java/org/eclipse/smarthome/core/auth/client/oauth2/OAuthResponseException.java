@@ -24,7 +24,7 @@ package org.eclipse.smarthome.core.auth.client.oauth2;
  * The field names are kept exactly the same as the specification.
  * This allows the error responses to be directly deserialized from JSON.
  *
- * @author Gary Tse - initial contribution
+ * @author Gary Tse - Initial contribution
  *
  * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.2.1">rfc6749 section-4.1.2.1</a>
  * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2">rfc6749 section-5.2</a>

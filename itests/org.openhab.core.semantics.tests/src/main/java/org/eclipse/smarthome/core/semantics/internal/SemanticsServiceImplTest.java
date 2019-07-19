@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.osgi.framework.BundleContext;
 
 /**
- * @author Kai Kreuzer - initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public class SemanticsServiceImplTest {
 

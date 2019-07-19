@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.thing.profiles.TriggerProfileType;
  * The {@link ProfileTypeDTOMapper} is an utility class to map profile-types into profile-type data transfer
  * objects (DTOs).
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 public class ProfileTypeDTOMapper {

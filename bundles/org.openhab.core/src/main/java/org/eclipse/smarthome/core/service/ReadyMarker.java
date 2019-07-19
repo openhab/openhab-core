@@ -29,7 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * This class overrides {@link #hashCode()} and {@link #equals(Object)} so that any using class does not have to keep
  * original references, but new instances can be used for calls to the {@link ReadyService} every time.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

@@ -22,7 +22,7 @@ import org.eclipse.smarthome.config.core.Configuration;
  *
  * It gives access to related information like the profile's configuration or a scheduler.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

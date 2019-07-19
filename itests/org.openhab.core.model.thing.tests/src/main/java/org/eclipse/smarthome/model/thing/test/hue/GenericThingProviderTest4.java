@@ -51,7 +51,7 @@ import org.osgi.service.component.ComponentContext;
  * It focuses on the XML processing (i.e. ThingType loading) and verifies
  * that the loading of Things gets delayed until the XML processing is completed.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  */
 @RunWith(Parameterized.class)
 public class GenericThingProviderTest4 extends JavaOSGiTest {

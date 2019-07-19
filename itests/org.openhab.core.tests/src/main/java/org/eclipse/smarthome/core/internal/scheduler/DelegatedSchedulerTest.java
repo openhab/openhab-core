@@ -32,7 +32,7 @@ import org.mockito.Mock;
 /**
  * Test class for {@link DelegatedSchedulerImpl}.
  *
- * @author Hilbrand Bouwkamp - initial contribution
+ * @author Hilbrand Bouwkamp - Initial contribution
  */
 public class DelegatedSchedulerTest {
 

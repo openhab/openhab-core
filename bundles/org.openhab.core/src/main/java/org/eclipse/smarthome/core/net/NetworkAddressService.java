@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Interface that provides access to configured network addresses
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @NonNullByDefault

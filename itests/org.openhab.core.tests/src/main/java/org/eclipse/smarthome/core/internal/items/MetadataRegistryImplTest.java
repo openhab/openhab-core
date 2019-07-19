@@ -33,7 +33,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  */
 public class MetadataRegistryImplTest {
 

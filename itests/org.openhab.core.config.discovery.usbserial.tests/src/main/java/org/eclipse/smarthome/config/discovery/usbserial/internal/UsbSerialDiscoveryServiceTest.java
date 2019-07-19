@@ -45,7 +45,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Unit tests for the {@link UsbSerialDiscoveryService}.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
 

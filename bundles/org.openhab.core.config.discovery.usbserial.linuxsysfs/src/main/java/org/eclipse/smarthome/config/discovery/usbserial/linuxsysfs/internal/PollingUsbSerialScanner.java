@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * A {@link UsbSerialDiscovery} that implements background discovery by doing repetitive scans using a
  * {@link UsbSerialScanner}, pausing a configurable amount of time between subsequent scans.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 @NonNullByDefault
 @Component(configurationPid = "discovery.usbserial.linuxsysfs.pollingscanner")

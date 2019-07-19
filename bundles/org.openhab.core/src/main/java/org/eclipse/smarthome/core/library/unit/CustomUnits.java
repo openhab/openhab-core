@@ -17,7 +17,7 @@ import tec.uom.se.AbstractSystemOfUnits;
 /**
  * Base class for all custom unit classes added in openHAB.
  *
- * @author Hilbrand Bouwkamp - initial contribution
+ * @author Hilbrand Bouwkamp - Initial contribution
  */
 class CustomUnits extends AbstractSystemOfUnits {
 

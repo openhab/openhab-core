@@ -18,7 +18,7 @@ import java.net.ServerSocket;
 /**
  * {@link TestPortUtil} provides helper methods for working with ports in tests.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  * @author Wouter Born - Increase reusability
  */
 public final class TestPortUtil {

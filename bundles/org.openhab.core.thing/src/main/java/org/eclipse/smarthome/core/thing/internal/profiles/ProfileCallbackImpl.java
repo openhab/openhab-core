@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * {@link ProfileCallback} implementation.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 public class ProfileCallbackImpl implements ProfileCallback {

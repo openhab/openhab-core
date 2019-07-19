@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Request handler which allows to verify authentication.
  *
- * @author Łukasz Dywicki - initial contribution.
+ * @author Łukasz Dywicki - Initial contribution.
  */
 @Component(configurationPid = "org.eclipse.smarthome.auth")
 public class AuthenticationHandler implements Handler {

@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 /**
  * This class add support for prefixes for {@link Rule} UIDs and provide default predicates for prefixes and tags.
  *
- * @author Victor Toni - initial contribution
+ * @author Victor Toni - Initial contribution
  *
  */
 public class RulePredicates {

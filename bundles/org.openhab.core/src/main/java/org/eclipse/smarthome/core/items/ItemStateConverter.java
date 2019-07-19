@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.types.State;
 /**
  * Convert a {@link State} to an {@link Item} accepted {@link State}.
  *
- * @author Henning Treu - initial contribution and API
+ * @author Henning Treu - Initial contribution and API
  *
  */
 public interface ItemStateConverter {

@@ -17,7 +17,7 @@ import javax.measure.Quantity;
 /**
  * Define Volumetric Flow Rate type (basic unit is m^3/s).
  *
- * @author Łukasz Dywicki - initial contribution
+ * @author Łukasz Dywicki - Initial contribution
  *
  */
 public interface VolumetricFlowRate extends Quantity<VolumetricFlowRate> {

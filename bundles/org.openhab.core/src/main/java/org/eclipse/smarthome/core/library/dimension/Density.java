@@ -17,7 +17,7 @@ import javax.measure.Quantity;
 /**
  * Define Density type (basic unit is kg/m^3)
  *
- * @author Jan N. Klug - initial contribution
+ * @author Jan N. Klug - Initial contribution
  *
  */
 public interface Density extends Quantity<Density> {

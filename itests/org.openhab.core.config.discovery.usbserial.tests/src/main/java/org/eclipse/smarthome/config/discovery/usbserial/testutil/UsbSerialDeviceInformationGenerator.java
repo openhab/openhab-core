@@ -19,7 +19,7 @@ import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformati
 /**
  * Generate simple instances of {@link UsbSerialDeviceInformation} that can be used in tests.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 public class UsbSerialDeviceInformationGenerator {
 

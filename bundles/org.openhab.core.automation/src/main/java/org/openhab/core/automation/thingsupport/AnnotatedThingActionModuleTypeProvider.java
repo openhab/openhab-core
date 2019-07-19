@@ -47,7 +47,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 /**
  * ModuleTypeProvider that collects actions for {@link ThingHandler}s
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @Component(service = { ModuleTypeProvider.class, ModuleHandlerFactory.class })

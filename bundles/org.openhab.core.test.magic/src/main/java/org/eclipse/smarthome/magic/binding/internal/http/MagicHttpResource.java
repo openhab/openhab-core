@@ -32,7 +32,7 @@ import org.osgi.service.http.NamespaceException;
 /**
  * Registers itself under "/" and provides links to other web UIs
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @Component(immediate = true)
