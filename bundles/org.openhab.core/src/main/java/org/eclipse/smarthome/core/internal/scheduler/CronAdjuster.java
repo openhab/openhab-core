@@ -39,7 +39,7 @@ import org.eclipse.smarthome.core.scheduler.SchedulerTemporalAdjuster;
  *
  * @See http://www.cronmaker.com/
  * @See http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger
- * @author Peter Kriens - initial contribution and API
+ * @author Peter Kriens - Initial contribution and API
  * @author Hilbrand Bouwkamp - code cleanup
  */
 @NonNullByDefault

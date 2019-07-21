@@ -34,7 +34,7 @@ import org.junit.Test;
 /**
  * Tests for PersistenceItem Restresource
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 public class PersistenceResourceTest {

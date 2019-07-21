@@ -20,7 +20,7 @@ import org.eclipse.smarthome.config.core.Configuration;
  * The {@link ThingTypeMigrationService} describes a service to change the thing type
  * of a given {@link Thing}.
  *
- * @author Andre Fuechsel - initial contribution
+ * @author Andre Fuechsel - Initial contribution
  */
 @NonNullByDefault
 public interface ThingTypeMigrationService {

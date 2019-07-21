@@ -15,7 +15,7 @@ package org.openhab.core.automation.module.provider;
 /**
  * Type to distinguish annotated ActionModules
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 public enum ActionModuleKind {

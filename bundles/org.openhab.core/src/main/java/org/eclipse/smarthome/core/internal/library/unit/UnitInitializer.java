@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 /**
  * Make sure static blocks from {@link SIUnits} & {@link ImperialUnits} are executed to initialize the unit parser.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public class UnitInitializer {

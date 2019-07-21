@@ -21,7 +21,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
  * Therefore it considers numbers (0/1 and their {@link String} representations) as well as {@link String}s, containing
  * apart from the typical "true"/"false" also other values like "yes"/"no", "on"/"off".
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  * @author Thomas Höfer - made class final and minor javadoc changes
  */
 final class BooleanNormalizer extends AbstractNormalizer {

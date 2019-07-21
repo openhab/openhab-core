@@ -28,7 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * the other hand, the name of the serial port (for Linux, this would be, e.g., '/dev/ttyUSB0', for Windows, e.g.,
  * 'COM4').
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 @NonNullByDefault
 public class UsbSerialDeviceInformation {

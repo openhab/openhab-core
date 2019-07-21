@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Safe-calls are used within the framework in order to protect it from hanging/blocking binding code and log meaningful
  * messages to detect and identify such hanging code.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  */
 @NonNullByDefault
 public interface SafeCaller {

@@ -30,7 +30,7 @@ import com.google.gson.JsonParseException;
  *
  * The contained entities remain json objects and won't me deserialized to their corresponding types at this point.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 public class StorageEntryMapDeserializer implements JsonDeserializer<Map<String, StorageEntry>> {

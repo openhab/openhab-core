@@ -23,7 +23,7 @@ import org.osgi.service.http.HttpContext;
 /**
  * Http context which does nothing but lets the delegate do its job.
  *
- * @author Łukasz Dywicki - initial contribution.
+ * @author Łukasz Dywicki - Initial contribution.
  */
 class DelegatingHttpContext implements HttpContext {
 

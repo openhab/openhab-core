@@ -24,7 +24,7 @@ import org.junit.Test;
 /**
  * Unit tests for the {@link ThreadFactoryBuilder}.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 public class ThreadFactoryBuilderTest {
 

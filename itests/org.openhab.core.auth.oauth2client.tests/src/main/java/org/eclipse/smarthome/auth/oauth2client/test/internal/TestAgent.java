@@ -22,7 +22,7 @@ import org.eclipse.smarthome.core.auth.client.oauth2.OAuthResponseException;
 /**
  * For testing
  *
- * @author Gary Tse - initial contribution
+ * @author Gary Tse - Initial contribution
  *
  */
 public interface TestAgent {

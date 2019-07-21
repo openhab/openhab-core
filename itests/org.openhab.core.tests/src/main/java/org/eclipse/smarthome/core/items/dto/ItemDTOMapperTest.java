@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 /**
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  */
 package org.eclipse.smarthome.core.items.dto;
 

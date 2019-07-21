@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * This class allows the easy construction of an {@link Item} using the builder pattern.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 @NonNullByDefault

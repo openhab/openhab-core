@@ -34,7 +34,7 @@ import org.junit.Before;
 /**
  * Base class for tests using the {@link AudioServlet}.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public abstract class AbstractAudioServeltTest extends JavaTest {

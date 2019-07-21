@@ -19,7 +19,7 @@ import org.eclipse.smarthome.config.discovery.usbserial.internal.UsbSerialDiscov
  * Interface for implementations for discovering serial ports provided by a USB device. An implementation of this
  * interface is required by the {@link UsbSerialDiscoveryService}.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 @NonNullByDefault
 public interface UsbSerialDiscovery {

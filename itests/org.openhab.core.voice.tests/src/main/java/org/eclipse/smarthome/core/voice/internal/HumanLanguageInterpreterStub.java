@@ -23,7 +23,7 @@ import org.eclipse.smarthome.core.voice.text.InterpretationException;
  * all the voice's features, some of the methods are not needed.
  * That's why their implementation is left empty.
  *
- * @author Mihaela Memova - initial contribution
+ * @author Mihaela Memova - Initial contribution
  *
  * @author Velin Yordanov - migrated from groovy to java
  *

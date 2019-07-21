@@ -22,7 +22,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * Provides {@link ConfigDescription}s for bindings which are read from XML files.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 @Component(service = ConfigDescriptionProvider.class, immediate = true, property = { "esh.scope=core.xml.binding" })

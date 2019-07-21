@@ -20,7 +20,7 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
 /**
  * Describes a profile type.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

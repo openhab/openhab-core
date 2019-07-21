@@ -27,7 +27,7 @@ import org.junit.Test;
 /**
  * Test the {@link StateDescriptionFragmentBuilder}.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public class StateDescriptionFragmentBuilderTest {

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of the {@link ReadyService} interface.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @Component

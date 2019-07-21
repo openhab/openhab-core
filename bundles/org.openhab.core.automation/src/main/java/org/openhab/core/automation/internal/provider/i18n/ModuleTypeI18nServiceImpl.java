@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of a service that provides i18n functionality for automation modules
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @Component

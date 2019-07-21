@@ -34,7 +34,7 @@ import tec.uom.se.unit.Units;
 /**
  * Imperial units used for the United States and Liberia.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 @NonNullByDefault

@@ -22,7 +22,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  * @author Stefan Triller - test with on/off type
  *
  */

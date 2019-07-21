@@ -23,7 +23,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 /**
  * Mock implementations of Procedure0 and Procedure1
  *
- * @author Jon Evans - initial contribution
+ * @author Jon Evans - Initial contribution
  *
  */
 public class MockClosure {

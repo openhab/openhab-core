@@ -25,7 +25,7 @@ import org.eclipse.smarthome.core.types.Command;
 /**
  * ThingHandler for a thing that goes online after 15 seconds
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @NonNullByDefault

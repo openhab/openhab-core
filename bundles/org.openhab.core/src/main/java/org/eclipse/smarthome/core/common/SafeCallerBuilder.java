@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Builder to create a safe-call wrapper for another object.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  * @param <T>
  */

@@ -28,9 +28,9 @@ import org.eclipse.jdt.annotation.Nullable;
  * <p>
  * This scheduler has a millisecond resolution.
  *
- * @author Peter Kriens - initial contribution and API
+ * @author Peter Kriens - Initial contribution and API
  * @author Simon Kaufmann - adapted to CompletableFutures
- * @author Hilbrand Bouwkamp - initial contribution
+ * @author Hilbrand Bouwkamp - Initial contribution
  */
 @NonNullByDefault
 public interface Scheduler {

@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * {@link ConfigOptionProvider} that provides a list of
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  * @author Erdoan Hadzhiyusein - Added time zone
  *
  */

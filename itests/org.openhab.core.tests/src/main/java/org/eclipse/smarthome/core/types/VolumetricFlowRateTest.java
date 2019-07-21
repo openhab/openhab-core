@@ -31,7 +31,7 @@ import tec.uom.se.quantity.Quantities;
 /**
  * Test for volumentric flow rate constants defined in {@link SmartHomeUnits}.
  *
- * @author Łukasz Dywicki - initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution and API
  */
 @RunWith(Parameterized.class)
 public class VolumetricFlowRateTest {

@@ -30,7 +30,7 @@ import org.junit.Before;
  * A base class for the classes testing the different commands of the {@link VoiceConsoleCommandExtension}.
  * It takes care of the mocks, stubs and services that are used in all the extending classes.
  *
- * @author Mihaela Memova - initial contribution
+ * @author Mihaela Memova - Initial contribution
  *
  * @author Velin Yordanov - migrated tests from groovy to java
  *

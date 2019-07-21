@@ -38,7 +38,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 public class GenericItemProvider2Test extends JavaOSGiTest {

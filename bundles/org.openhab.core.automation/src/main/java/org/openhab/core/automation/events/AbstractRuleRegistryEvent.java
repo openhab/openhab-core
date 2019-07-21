@@ -18,7 +18,7 @@ import org.openhab.core.automation.dto.RuleDTO;
 /**
  * abstract class for rule events
  *
- * @author Benedikt Niehues - initial contribution
+ * @author Benedikt Niehues - Initial contribution
  * @author Markus Rathgeb - Use the DTO for the Rule representation
  *
  */

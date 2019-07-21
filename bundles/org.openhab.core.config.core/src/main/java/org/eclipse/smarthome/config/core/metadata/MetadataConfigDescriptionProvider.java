@@ -29,7 +29,7 @@ import org.eclipse.smarthome.config.core.ParameterOption;
  * Every extension which deals with specific metadata (in its own namespace) is expected to provide an implementation of
  * this interface.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  */
 @NonNullByDefault
 public interface MetadataConfigDescriptionProvider {

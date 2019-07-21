@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * Extract user name and password from incoming request.
  *
- * @author Łukasz Dywicki - initial contribution.
+ * @author Łukasz Dywicki - Initial contribution.
  */
 @Component(property = { "context=javax.servlet.http.HttpServletRequest" })
 public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServletRequest> {

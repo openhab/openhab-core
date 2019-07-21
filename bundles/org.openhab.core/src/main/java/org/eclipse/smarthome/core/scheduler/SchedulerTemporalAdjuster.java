@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Interface that extends {@link TemporalAdjuster} and adds more functionality.
  * This interface is passed to the scheduler for repeating schedules.
  *
- * @author Hilbrand Bouwkamp - initial contribution
+ * @author Hilbrand Bouwkamp - Initial contribution
  */
 @NonNullByDefault
 public interface SchedulerTemporalAdjuster extends TemporalAdjuster {

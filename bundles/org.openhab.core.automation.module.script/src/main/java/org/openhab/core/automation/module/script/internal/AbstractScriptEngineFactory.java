@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is an abstract class for implementing {@link ScriptEngineFactory}s.
  *
- * @author Scott Rushworth - initial contribution
+ * @author Scott Rushworth - Initial contribution
  */
 @NonNullByDefault
 public abstract class AbstractScriptEngineFactory implements ScriptEngineFactory {

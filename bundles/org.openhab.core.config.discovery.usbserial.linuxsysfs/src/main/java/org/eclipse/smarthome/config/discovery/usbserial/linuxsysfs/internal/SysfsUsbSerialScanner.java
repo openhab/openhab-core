@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * is collected from the sysfs and returned together with the name of the serial port in form of a
  * {@link UsbSerialDeviceInformation}.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 @Component(configurationPid = "discovery.usbserial.linuxsysfs.usbserialscanner")
 @NonNullByDefault

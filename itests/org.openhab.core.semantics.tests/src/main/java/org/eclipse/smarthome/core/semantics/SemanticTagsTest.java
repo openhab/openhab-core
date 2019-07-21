@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author Kai Kreuzer - initial contribution and API
+ * @author Kai Kreuzer - Initial contribution and API
  */
 public class SemanticTagsTest {
 

@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Represents a call to the dynamic proxy which wraps a {@link Callable} and tracks the executing thread.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 class Invocation implements Callable<Object> {

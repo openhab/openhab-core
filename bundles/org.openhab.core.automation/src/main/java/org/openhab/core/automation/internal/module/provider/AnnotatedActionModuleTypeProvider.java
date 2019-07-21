@@ -48,7 +48,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * This provider parses annotated {@link AnnotatedActions}s and creates action module types, as well as their handlers
  * from them
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @Component(service = { ModuleTypeProvider.class, ModuleHandlerFactory.class })

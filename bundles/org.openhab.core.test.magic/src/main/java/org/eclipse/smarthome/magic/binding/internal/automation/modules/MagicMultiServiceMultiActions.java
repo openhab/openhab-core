@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * The {@link MagicMultiActionMarker} holds the configuration URI and shows the system that THIS service can be
  * instantiated multiple times
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, configurationPid = "org.eclipse.smarthome.MagicMultiAction")

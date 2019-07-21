@@ -32,7 +32,7 @@ import org.openhab.core.automation.util.ModuleBuilder;
  * This tests the dayOfWeek Condition.
  *
  * @author Dominik Schlierf - added extension of BasicConditionHandlerTest
- * @author Kai Kreuzer - initial contribution
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {

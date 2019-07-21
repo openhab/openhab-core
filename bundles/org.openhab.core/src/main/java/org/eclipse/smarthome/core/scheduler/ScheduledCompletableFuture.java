@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Interface returned by all scheduled jobs. It can be used to wait for the value,
  * cancel the job or check how much time till the scheduled job will run.
  *
- * @author Hilbrand Bouwkamp - initial contribution
+ * @author Hilbrand Bouwkamp - Initial contribution
  */
 @NonNullByDefault
 public interface ScheduledCompletableFuture<T> extends ScheduledFuture<T> {

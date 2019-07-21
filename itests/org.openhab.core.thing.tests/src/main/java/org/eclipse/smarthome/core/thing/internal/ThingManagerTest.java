@@ -37,7 +37,7 @@ import org.osgi.service.component.ComponentContext;
 
 /**
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 public class ThingManagerTest {

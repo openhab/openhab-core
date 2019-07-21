@@ -25,7 +25,7 @@ import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference;
 /**
  * Calculates the type information used by Xbase to select the correct method during script execution.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 @SuppressWarnings("restriction")

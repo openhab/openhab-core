@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Reference;
  * Wraps the actual Scheduler and keeps track of scheduled jobs.
  * It shuts down jobs in case the service is deactivated.
  *
- * @author Peter Kriens - initial contribution and API
+ * @author Peter Kriens - Initial contribution and API
  */
 @Component(service = Scheduler.class, immediate = true)
 @NonNullByDefault

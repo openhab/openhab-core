@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * ThingHandler which provides annotated actions that will become Action modules for the automation engine
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @NonNullByDefault

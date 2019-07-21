@@ -15,7 +15,7 @@ package org.openhab.core.automation;
 /**
  * This interface is used by {@link RuleRegistry} implementation to be notified of changes related to statuses of rules.
  *
- * @author Yordan Mihaylov - initial contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 public interface StatusInfoCallback {
 

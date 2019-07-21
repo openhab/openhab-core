@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Embedded jetty server used in the tests.
  *
- * @author Velin Yordanov - initial contribution
+ * @author Velin Yordanov - Initial contribution
  * @author Henning Treu - provide in base test bundle
  *
  */

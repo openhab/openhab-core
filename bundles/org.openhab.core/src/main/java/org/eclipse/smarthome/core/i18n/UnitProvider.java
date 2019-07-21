@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Provides {@link Unit}s and the current {@link SystemOfUnits}.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 @NonNullByDefault

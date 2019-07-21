@@ -30,7 +30,7 @@ import org.osgi.framework.Bundle;
 /**
  * Common base class for XML based providers.
  *
- * @author Simon Kaufmann - initial contribution, factored out of subclasses
+ * @author Simon Kaufmann - Initial contribution, factored out of subclasses
  *
  * @param <T_ID> the key type, e.g. ThingTypeUID, ChannelUID, URI,...
  * @param <T_OBJECT> the object type, e.g. ThingType, ChannelType, ConfigDescription,...

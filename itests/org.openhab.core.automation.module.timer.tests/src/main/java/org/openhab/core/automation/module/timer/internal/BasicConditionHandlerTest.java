@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * This provides common functionality for all condition tests.
  *
  * @author Dominik Schlierf - extracting this base class from TimeOfDayConditionHandlerTest
- * @author Kai Kreuzer - initial contribution of TimeOfDayConditionHandlerTest
+ * @author Kai Kreuzer - Initial contribution of TimeOfDayConditionHandlerTest
  *
  */
 public abstract class BasicConditionHandlerTest extends JavaOSGiTest {

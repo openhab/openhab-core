@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * Implementation of a {@link PeriodicScheduler}.
  *
- * @author Peter Kriens - initial contribution and API
+ * @author Peter Kriens - Initial contribution and API
  * @author Simon Kaufmann - adapted to CompletableFutures
  * @author Hilbrand Bouwkamp - moved periodic scheduling to it's own interface
  */

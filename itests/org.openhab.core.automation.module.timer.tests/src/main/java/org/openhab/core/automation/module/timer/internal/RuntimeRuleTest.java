@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 /**
  * this tests the Timer Trigger
  *
- * @author Christoph Knauf - initial contribution
+ * @author Christoph Knauf - Initial contribution
  * @author Markus Rathgeb - fix module timer test
  * @author Kai Kreuzer - migrated to Java
  *

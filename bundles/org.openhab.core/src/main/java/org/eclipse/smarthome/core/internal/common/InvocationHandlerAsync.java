@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * Instead of directly invoking the called method it rather queues it in the {@link SafeCallManager} for asynchronous
  * execution.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  * @param <T>
  */

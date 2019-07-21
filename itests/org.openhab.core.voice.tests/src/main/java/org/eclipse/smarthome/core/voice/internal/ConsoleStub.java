@@ -20,7 +20,7 @@ import org.eclipse.smarthome.io.console.Console;
  * in an instance variable. In addition, when the {@link #printUsage(String)}
  * method is called, the corresponding boolean variable is set to true.
  *
- * @author Mihaela Memova - initial contribution
+ * @author Mihaela Memova - Initial contribution
  *
  * @author Velin Yordanov - migrated from groovy to java
  *

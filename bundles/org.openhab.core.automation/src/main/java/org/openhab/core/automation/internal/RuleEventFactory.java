@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is a factory that creates Rule Events.
  *
- * @author Benedikt Niehues - initial contribution
+ * @author Benedikt Niehues - Initial contribution
  * @author Markus Rathgeb - Use the DTO for the Rule representation
  */
 @Component(service = EventFactory.class, immediate = true)

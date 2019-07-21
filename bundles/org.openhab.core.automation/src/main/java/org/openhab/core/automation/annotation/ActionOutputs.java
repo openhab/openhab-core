@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 /**
  * Output parameter wrapper for an action module
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  */
 @Retention(RUNTIME)
 @Target(ElementType.METHOD)

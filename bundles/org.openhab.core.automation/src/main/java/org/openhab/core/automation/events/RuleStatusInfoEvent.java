@@ -18,7 +18,7 @@ import org.openhab.core.automation.RuleStatusInfo;
 /**
  * An {@link RuleStatusInfoEvent} notifies subscribers that a rule status has been updated.
  *
- * @author Benedikt Niehues - initial contribution
+ * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - added toString method
  *
  */

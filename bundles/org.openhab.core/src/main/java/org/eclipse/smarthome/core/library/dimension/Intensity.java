@@ -17,7 +17,7 @@ import javax.measure.Quantity;
 /**
  * This interface represents the intensity dimension.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public interface Intensity extends Quantity<Intensity> {

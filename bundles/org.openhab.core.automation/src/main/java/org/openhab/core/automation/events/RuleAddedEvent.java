@@ -17,7 +17,7 @@ import org.openhab.core.automation.dto.RuleDTO;
 /**
  * An {@link RuleAddedEvent} notifies subscribers that a rule has been added.
  *
- * @author Benedikt Niehues - initial contribution
+ * @author Benedikt Niehues - Initial contribution
  *
  */
 public class RuleAddedEvent extends AbstractRuleRegistryEvent {

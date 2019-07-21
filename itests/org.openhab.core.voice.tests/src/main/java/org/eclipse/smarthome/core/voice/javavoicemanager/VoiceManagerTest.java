@@ -49,7 +49,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Tests for {@link VoiceManagerImpl}
  *
- * @author Mihaela Memova - initial contribution
+ * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  *
  */

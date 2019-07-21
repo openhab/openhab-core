@@ -18,7 +18,7 @@ import org.eclipse.smarthome.core.thing.UID;
 /**
  * Identifier of a profile type.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

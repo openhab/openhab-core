@@ -41,7 +41,7 @@ import com.google.inject.Singleton;
  *
  * It just piggy-backs the static Resgitry instance that the runtime bundles are using anyway.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @Singleton

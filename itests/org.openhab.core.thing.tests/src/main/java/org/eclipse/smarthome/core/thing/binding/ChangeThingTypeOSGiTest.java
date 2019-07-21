@@ -63,7 +63,7 @@ import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
 /**
- * @author Simon Kaufmann - initial contribution
+ * @author Simon Kaufmann - Initial contribution
  */
 @SuppressWarnings("null")
 public class ChangeThingTypeOSGiTest extends JavaOSGiTest {

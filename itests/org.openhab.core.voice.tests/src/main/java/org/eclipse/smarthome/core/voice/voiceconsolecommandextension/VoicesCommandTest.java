@@ -27,7 +27,7 @@ import org.osgi.framework.BundleContext;
 /**
  * A {@link VoiceConsoleCommandExtensionTest} which tests the execution of the command "voices".
  *
- * @author Mihaela Memova - initial contribution
+ * @author Mihaela Memova - Initial contribution
  *
  * @author Velin Yordanov - migrated tests from groovy to java
  *

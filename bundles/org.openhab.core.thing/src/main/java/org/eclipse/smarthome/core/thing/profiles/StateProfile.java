@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.types.State;
 /**
  * A {@link StateProfile} defined the communication for channels of STATE kind.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

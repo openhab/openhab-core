@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This tests the RunRuleAction
  *
- * @author Benedikt Niehues - initial contribution
+ * @author Benedikt Niehues - Initial contribution
  * @author Markus Rathgeb - Migrated Groovy tests to pure Java ones and made it more robust
  */
 public class RunRuleModuleTest extends JavaOSGiTest {

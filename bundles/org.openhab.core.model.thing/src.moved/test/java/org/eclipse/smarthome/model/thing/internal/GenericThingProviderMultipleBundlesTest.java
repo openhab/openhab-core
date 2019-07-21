@@ -37,7 +37,7 @@ import org.osgi.framework.Bundle;
 /**
  * Test the GenericThingProvider for different {@link ThingHandlerFactory}s for Bridge and Thing.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public class GenericThingProviderMultipleBundlesTest {

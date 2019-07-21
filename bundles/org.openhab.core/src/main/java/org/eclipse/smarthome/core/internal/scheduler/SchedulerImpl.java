@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of the {@link Scheduler}.
  *
- * @author Peter Kriens - initial contribution and API
+ * @author Peter Kriens - Initial contribution and API
  * @author Simon Kaufmann - ported to CompletableFuture
  * @author Hilbrand Bouwkamp - improved implementation and moved cron and periodic to own implementations.
  */

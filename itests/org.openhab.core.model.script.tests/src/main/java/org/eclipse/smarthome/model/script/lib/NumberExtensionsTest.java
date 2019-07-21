@@ -29,7 +29,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public class NumberExtensionsTest {

@@ -37,7 +37,7 @@ import org.junit.Test;
 /**
  * Tests that the {@link FirmwareUpdateService} honors the prerequisite version of {@link Firmware}s.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 public class FirmwareUpdateServicePrerequisiteVersionTest extends JavaOSGiTest {
 

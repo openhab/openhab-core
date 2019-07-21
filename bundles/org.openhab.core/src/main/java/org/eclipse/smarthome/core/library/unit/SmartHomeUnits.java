@@ -74,7 +74,7 @@ import tec.uom.se.unit.Units;
  * See members of {@link Units} for a detailed description.
  * Also: Define common additional units used in {@link SIUnits} and {@link ImperialUnits}.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 @NonNullByDefault

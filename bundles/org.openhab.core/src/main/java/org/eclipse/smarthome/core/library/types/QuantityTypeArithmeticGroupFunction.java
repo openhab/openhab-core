@@ -29,7 +29,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * This interface is a container for dimension based functions that require {@link QuantityType}s for its calculations.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {

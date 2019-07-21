@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Describes a {@link StateProfile} type.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  * @author Stefan Triller - added getSupportedItemTypesOfChannel method
  *
  */

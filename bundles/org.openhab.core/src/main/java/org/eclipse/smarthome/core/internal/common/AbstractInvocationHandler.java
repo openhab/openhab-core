@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Common base class for synchronous and ansynchronous invocation handlers.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  * @param <T>
  */

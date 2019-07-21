@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * By default, this filter will match any {@link ReadyMarker}.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

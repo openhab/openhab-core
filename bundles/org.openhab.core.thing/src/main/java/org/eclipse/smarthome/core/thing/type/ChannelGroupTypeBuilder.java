@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * A {@link ChannelGroupType} builder.
  *
- * @author Christoph Weitkamp - initial contribution
+ * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
 public class ChannelGroupTypeBuilder {

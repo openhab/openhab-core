@@ -33,7 +33,7 @@ import org.osgi.service.component.runtime.dto.ReferenceDTO;
 /**
  * Utility class to analyze and print possible reasons for a service being not present.
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 public class MissingServiceAnalyzer {

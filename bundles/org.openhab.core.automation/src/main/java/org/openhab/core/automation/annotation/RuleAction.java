@@ -22,7 +22,7 @@ import org.openhab.core.automation.Visibility;
 /**
  * Marker annotation for an action module
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

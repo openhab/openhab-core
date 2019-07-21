@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * The {@link ProfileTypeRegistry} allows access to the {@link ProfileType}s provided by all
  * {@link ProfileTypeProvider}s.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 @NonNullByDefault

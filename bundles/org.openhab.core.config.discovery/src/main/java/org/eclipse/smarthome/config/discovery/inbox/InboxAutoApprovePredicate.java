@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.Component;
  * Please note that this interface is intended to be implemented by solutions integrating openHAB. This
  * interface is <em>not</em> intended to be implemented by openHAB addons (like, e.g., bindings).
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 public interface InboxAutoApprovePredicate extends Predicate<DiscoveryResult> {
 

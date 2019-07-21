@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This tests events of rules
  *
- * @author Benedikt Niehues - initial contribution
+ * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - ported test to Java
  *
  */

@@ -29,7 +29,7 @@ import com.google.gson.GsonBuilder;
  * from the top level elements of the stream. For best performance a flattened stream should be provided. Otherwise a
  * nested collections JSON representation will be fully transformed into memory.
  *
- * @author Henning Treu - initial contribution
+ * @author Henning Treu - Initial contribution
  *
  */
 public class Stream2JSONInputStream extends InputStream {

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Some automation actions to be used with a {@link MagicActionModuleThingHandler}
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 @ActionScope(name = "magic")

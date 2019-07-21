@@ -52,7 +52,7 @@ import com.eclipsesource.jaxrs.publisher.ResourceFilter;
  *
  * If this file is present, no other services will be scanned and hence won't be available.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  *
  */
 public class ResourceFilterImpl implements ResourceFilter {

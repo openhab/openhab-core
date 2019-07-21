@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 /**
  * Scope definition for an action module
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

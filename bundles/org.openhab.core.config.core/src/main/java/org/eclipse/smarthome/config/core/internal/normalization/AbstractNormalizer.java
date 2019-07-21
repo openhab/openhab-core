@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Common base class for all normalizers, doing the specific type conversion.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  * @author Thomas Höfer - renamed normalizer interface and added javadoc
  */
 abstract class AbstractNormalizer implements Normalizer {

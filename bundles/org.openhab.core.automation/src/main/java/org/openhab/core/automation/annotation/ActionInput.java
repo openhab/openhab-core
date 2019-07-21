@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 /**
  * Input parameter for an action module
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  */
 @Repeatable(ActionInputs.class)
 @Retention(RUNTIME)

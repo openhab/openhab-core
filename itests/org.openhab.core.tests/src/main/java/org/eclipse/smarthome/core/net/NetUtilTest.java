@@ -20,7 +20,7 @@ import org.junit.Test;
 /**
  * Tests for NetUtil class
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  * @author Mark Herwege - added tests for broadcast address
  *
  */

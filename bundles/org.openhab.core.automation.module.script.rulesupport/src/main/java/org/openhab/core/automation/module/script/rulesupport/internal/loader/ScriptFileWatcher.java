@@ -46,7 +46,7 @@ import org.osgi.service.component.annotations.Reference;
  * The {@link ScriptFileWatcher} watches the jsr223 directory for files. If a new/modified file is detected, the script
  * is read and passed to the {@link ScriptEngineManager}.
  *
- * @author Simon Merschjohann - initial contribution
+ * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - improved logging and removed thread pool
  *
  */

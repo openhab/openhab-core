@@ -20,7 +20,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
  * The normalizer for {@link ConfigDescriptionParameter.Type#DECIMAL}. It converts all number types to BigDecimal,
  * having at least one digit after the floating point. Also {@link String}s are converted if possible.
  *
- * @author Simon Kaufmann - initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution and API.
  * @author Thomas Höfer - made class final and minor javadoc changes
  */
 final class DecimalNormalizer extends AbstractNormalizer {

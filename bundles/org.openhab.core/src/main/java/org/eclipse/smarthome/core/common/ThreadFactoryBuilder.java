@@ -30,7 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * The built {@link ThreadFactory} uses a wrapped {@link ThreadFactory} to create threads (defaulting to
  * {@link Executors#defaultThreadFactory()}, and then overwrites thread properties as indicated in the build process.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 @NonNullByDefault
 public class ThreadFactoryBuilder {

@@ -40,7 +40,7 @@ import org.quartz.spi.JobFactory;
  * This hides all of the methods that we don't need to implement,
  * to make the {@see MockScheduler} class easier to read.
  *
- * @author Jon Evans - initial contribution
+ * @author Jon Evans - Initial contribution
  *
  */
 public abstract class AbstractScheduler implements Scheduler {

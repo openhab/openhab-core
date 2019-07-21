@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.thing.binding;
 /**
  * Marker interface for Automation Actions with access to a ThingHandler
  *
- * @author Stefan Triller - initial contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 public interface ThingActions extends ThingHandlerService {

@@ -17,7 +17,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Internal data structure of the {@link JsonStorage}
  *
- * @author Simon Kaufmann - initial contribution and API
+ * @author Simon Kaufmann - Initial contribution and API
  *
  */
 public class StorageEntry {

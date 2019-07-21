@@ -21,7 +21,7 @@ import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformati
 /**
  * Implementations of this interface scan for serial ports provided by USB devices.
  *
- * @author Henning Sudbrock - initial contribution
+ * @author Henning Sudbrock - Initial contribution
  */
 @NonNullByDefault
 public interface UsbSerialScanner {
