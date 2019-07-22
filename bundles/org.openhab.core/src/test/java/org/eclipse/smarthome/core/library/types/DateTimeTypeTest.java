@@ -12,17 +12,19 @@
  */
 package org.eclipse.smarthome.core.library.types;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -227,6 +229,27 @@ public class DateTimeTypeTest {
         assertThat(zdt1, is(zdt2));
         assertThat(zdt1, is(zdt3.withZoneSameInstant(zdt1.getZone())));
         assertThat(zdt2, is(zdt3.withZoneSameInstant(zdt2.getZone())));
+    }
+
+    @Test
+    public void formattingTest() {
+        DateTimeType dt1 = new DateTimeType("2019-05-25T17:53:10+00:00");
+        assertThat(dt1.toFullString(), is(dt1.toString()));
+        assertThat(dt1.toString(), is("2019-05-25T17:53:10.000+0000"));
+
+        assertThat(dt1.format(null), is("2019-05-25T17:53:10"));
+        assertThat(dt1.format("%1$td.%1$tm.%1$tY %1$tH:%1$tM"), is("25.05.2019 17:53"));
+
+        assertThat(dt1.format(Locale.GERMAN, "%1$td.%1$tm.%1$tY %1$tH:%1$tM"), is("25.05.2019 17:53"));
+
+        DateTimeType dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(ZoneId.of("Europe/Berlin")));
+        assertThat(dt2, not(is(dt1)));
+        assertThat(dt2.toString(), is("2019-05-25T19:53:10.000+0200"));
+
+        assertThat(dt2.format(null), is("2019-05-25T19:53:10"));
+        assertThat(dt2.format("%1$td.%1$tm.%1$tY %1$tH:%1$tM"), is("25.05.2019 19:53"));
+
+        assertThat(dt2.format(Locale.GERMAN, "%1$td.%1$tm.%1$tY %1$tH:%1$tM"), is("25.05.2019 19:53"));
     }
 
     @Test
