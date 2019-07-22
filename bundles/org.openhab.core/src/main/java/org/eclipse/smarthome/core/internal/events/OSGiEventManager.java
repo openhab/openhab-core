@@ -41,8 +41,12 @@ import org.osgi.service.event.EventHandler;
  * @author Stefan Bußweiler - Initial contribution
  * @author Markus Rathgeb - Return on received events as fast as possible (handle event in another thread)
  */
-@Component(immediate = true, property = { "event.topics:String=smarthome" })
+@Component(immediate = true, name = "openhab.eventmanager", property = { "event.topics:String=smarthome" })
 public class OSGiEventManager implements EventHandler {
+
+    public @interface Config {
+        int subscriber_threads() default 1;
+    }
 
     /** The event subscribers indexed by the event type. */
     // Use a concurrent hash map because the map is written and read by different threads!
@@ -52,8 +56,10 @@ public class OSGiEventManager implements EventHandler {
     private ThreadedEventHandler eventHandler;
 
     @Activate
-    public OSGiEventManager(final @Reference CallerFactory callerFactory, ComponentContext componentContext) {
-        eventHandler = new ThreadedEventHandler(callerFactory, typedEventSubscribers, typedEventFactories);
+    public OSGiEventManager(final @Reference CallerFactory callerFactory, ComponentContext componentContext,
+            final Config config) {
+        eventHandler = new ThreadedEventHandler(callerFactory, config.subscriber_threads(), typedEventSubscribers,
+                typedEventFactories);
         eventHandler.open();
     }
 

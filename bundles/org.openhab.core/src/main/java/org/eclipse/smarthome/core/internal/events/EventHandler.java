@@ -51,13 +51,14 @@ public class EventHandler implements AutoCloseable {
      * Create a new event handler.
      *
      * @param callerFactory the callerFactory
+     * @param numOfThreads the number of threads to use to inform subscribers
      * @param typedEventSubscribers the event subscribers indexed by the event type
      * @param typedEventFactories the event factories indexed by the event type
      */
-    public EventHandler(final CallerFactory callerFactory,
+    public EventHandler(final CallerFactory callerFactory, final int numOfThreads,
             final Map<String, Set<EventSubscriber>> typedEventSubscribers,
             final Map<String, EventFactory> typedEventFactories) {
-        this.caller = callerFactory.create("EventHandler", 1);
+        this.caller = callerFactory.create("EventHandler", numOfThreads);
         this.typedEventSubscribers = typedEventSubscribers;
         this.typedEventFactories = typedEventFactories;
     }

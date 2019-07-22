@@ -49,14 +49,16 @@ public class ThreadedEventHandler implements Closeable {
      * Create a new threaded event handler.
      *
      * @param callerFactory the caller factory
+     * @param numOfThreads the number of threads to use to inform subscribers
      * @param typedEventSubscribers the event subscribers
      * @param typedEventFactories the event factories indexed by the event type
      */
-    ThreadedEventHandler(final CallerFactory callerFactory,
+    ThreadedEventHandler(final CallerFactory callerFactory, final int numOfThreads,
             final Map<String, Set<EventSubscriber>> typedEventSubscribers,
             final Map<String, EventFactory> typedEventFactories) {
         thread = new Thread(() -> {
-            try (EventHandler worker = new EventHandler(callerFactory, typedEventSubscribers, typedEventFactories)) {
+            try (EventHandler worker = new EventHandler(callerFactory, numOfThreads, typedEventSubscribers,
+                    typedEventFactories)) {
                 while (running.get()) {
                     try {
                         logger.trace("wait for event");
