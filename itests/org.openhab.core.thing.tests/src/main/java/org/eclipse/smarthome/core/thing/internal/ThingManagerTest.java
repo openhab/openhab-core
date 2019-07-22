@@ -13,15 +13,11 @@
 package org.eclipse.smarthome.core.thing.internal;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import org.eclipse.smarthome.core.caller.Caller;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.eclipse.smarthome.core.storage.Storage;
 import org.eclipse.smarthome.core.storage.StorageService;
@@ -29,6 +25,7 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.core.util.BundleResolver;
+import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -40,7 +37,7 @@ import org.osgi.service.component.ComponentContext;
  * @author Simon Kaufmann - Initial contribution and API
  *
  */
-public class ThingManagerTest {
+public class ThingManagerTest extends JavaOSGiTest {
 
     private @Mock BundleResolver mockBundleResolver;
     private @Mock Bundle mockBundle;
@@ -52,6 +49,10 @@ public class ThingManagerTest {
     private @Mock Storage<Object> mockStorage;
 
     private final ThingRegistryImpl thingRegistry = new ThingRegistryImpl();
+
+    private Caller getCaller() {
+        return getService(Caller.class);
+    }
 
     @Before
     public void setup() {
@@ -66,7 +67,7 @@ public class ThingManagerTest {
         ThingHandlerFactory mockFactory1 = mock(ThingHandlerFactory.class);
         ThingHandlerFactory mockFactory2 = mock(ThingHandlerFactory.class);
 
-        ThingManagerImpl thingManager = new ThingManagerImpl();
+        ThingManagerImpl thingManager = new ThingManagerImpl(getCaller());
         thingManager.setBundleResolver(mockBundleResolver);
         thingManager.setThingRegistry(thingRegistry);
         thingManager.setReadyService(mockReadyService);
@@ -86,7 +87,7 @@ public class ThingManagerTest {
     @Test
     public void testCallSetEnabledWithUnknownThingUID() throws Exception {
         ThingUID unknownUID = new ThingUID("someBundle", "someType", "someID");
-        ThingManagerImpl thingManager = new ThingManagerImpl();
+        ThingManagerImpl thingManager = new ThingManagerImpl(getCaller());
 
         when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(mockStorage);
         thingManager.setStorageService(mockStorageService);
@@ -100,18 +101,17 @@ public class ThingManagerTest {
     @Test
     public void testCallIsEnabledWithUnknownThingUIDAndNullStorage() throws Exception {
         ThingUID unknownUID = new ThingUID("someBundle", "someType", "someID");
-        ThingManagerImpl thingManager = new ThingManagerImpl();
+        ThingManagerImpl thingManager = new ThingManagerImpl(getCaller());
 
         when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(null);
         thingManager.setStorageService(mockStorageService);
         assertEquals(thingManager.isEnabled(unknownUID), true);
-
     }
 
     @Test
     public void testCallIsEnabledWithUnknownThingUIDAndNonNullStorage() throws Exception {
         ThingUID unknownUID = new ThingUID("someBundle", "someType", "someID");
-        ThingManagerImpl thingManager = new ThingManagerImpl();
+        ThingManagerImpl thingManager = new ThingManagerImpl(getCaller());
 
         when(mockStorage.containsKey(unknownUID.getAsString())).thenReturn(false);
         when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(mockStorage);

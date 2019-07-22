@@ -39,6 +39,8 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
+import org.eclipse.smarthome.core.caller.Caller;
+import org.eclipse.smarthome.core.caller.ExecutionConstraints;
 import org.eclipse.smarthome.core.common.SafeCaller;
 import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.common.registry.Identifiable;
@@ -118,6 +120,7 @@ import org.slf4j.LoggerFactory;
  * @author Henning Sudbrock - Consider thing type properties when migrating to new thing type
  * @author Christoph Weitkamp - Added preconfigured ChannelGroupBuilder
  * @author Yordan Zhelev - Added thing disabling mechanism
+ * @author Markus Rathgeb - migrate from safe caller to caller
  */
 
 @Component(immediate = true, service = { ThingTypeMigrationService.class, ThingManager.class })
@@ -154,9 +157,9 @@ public class ThingManagerImpl
 
     private ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
 
+    private final Caller caller;
     private final Map<ThingUID, Lock> thingLocks = new HashMap<>();
     private final Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet<>();
-    private SafeCaller safeCaller;
     private volatile boolean active = false;
     private StorageService storageService;
     private Storage<String> storage;
@@ -349,6 +352,11 @@ public class ThingManagerImpl
 
     private final Set<ThingUID> thingUpdatedLock = new HashSet<>();
 
+    @Activate
+    public ThingManagerImpl(final @Reference Caller caller) {
+        this.caller = caller;
+    }
+
     @Override
     public void migrateThingType(final Thing thing, final ThingTypeUID thingTypeUID,
             final Configuration configuration) {
@@ -477,8 +485,16 @@ public class ThingManagerImpl
             if (thingHandlerFactory != null) {
                 unregisterAndDisposeHandler(thingHandlerFactory, thing, thingHandler);
                 if (thingTrackerEvent == ThingTrackerEvent.THING_REMOVED) {
-                    safeCaller.create(thingHandlerFactory, ThingHandlerFactory.class).build()
-                            .removeThing(thing.getUID());
+                    caller.execSync(() -> {
+                        thingHandlerFactory.removeThing(thing.getUID());
+                    }, new ExecutionConstraints(SafeCaller.DEFAULT_TIMEOUT, () -> {
+                        logger.warn("Remove thing '{}' from thing handler factory takes more than {}ms.",
+                                thingHandler.getThing().getUID(), SafeCaller.DEFAULT_TIMEOUT);
+                    })).exceptionally(ex -> {
+                        logger.error("Exception occurred while remove thing '{}' from thing handler factory",
+                                thing.getUID(), ex.getMessage(), ex);
+                        return Caller.VOID;
+                    });
                 }
             } else {
                 logger.warn("Cannot unregister handler. No handler factory for thing '{}' found.", thing.getUID());
@@ -508,7 +524,16 @@ public class ThingManagerImpl
                             oldThing.setHandler(null);
                         }
                         thing.setHandler(thingHandler);
-                        safeCaller.create(thingHandler, ThingHandler.class).build().thingUpdated(thing);
+                        caller.execSync(() -> {
+                            thingHandler.thingUpdated(thing);
+                        }, new ExecutionConstraints(SafeCaller.DEFAULT_TIMEOUT, () -> {
+                            logger.warn("Updating handler for thing '{}' takes more than {}ms.",
+                                    thingHandler.getThing().getUID(), SafeCaller.DEFAULT_TIMEOUT);
+                        })).exceptionally(ex -> {
+                            logger.error("Exception occurred while updating handler of thing '{}': {}",
+                                    thingHandler.getThing().getUID(), ex.getMessage(), ex);
+                            return Caller.VOID;
+                        });
                     } else {
                         logger.debug(
                                 "Cannot notify handler about updated thing '{}', because handler is not initialized (thing must be in status UNKNOWN, ONLINE or OFFLINE).",
@@ -758,16 +783,19 @@ public class ThingManagerImpl
     private void doInitializeHandler(final ThingHandler thingHandler) {
         logger.debug("Calling initialize handler for thing '{}' at '{}'.", thingHandler.getThing().getUID(),
                 thingHandler);
-        safeCaller.create(thingHandler, ThingHandler.class).onTimeout(() -> {
+        caller.execSync(() -> {
+            thingHandler.initialize();
+        }, new ExecutionConstraints(SafeCaller.DEFAULT_TIMEOUT, () -> {
             logger.warn("Initializing handler for thing '{}' takes more than {}ms.", thingHandler.getThing().getUID(),
                     SafeCaller.DEFAULT_TIMEOUT);
-        }).onException(e -> {
+        })).exceptionally(ex -> {
             ThingStatusInfo statusInfo = buildStatusInfo(ThingStatus.UNINITIALIZED,
-                    ThingStatusDetail.HANDLER_INITIALIZING_ERROR, e.getMessage());
+                    ThingStatusDetail.HANDLER_INITIALIZING_ERROR, ex.getMessage());
             setThingStatus(thingHandler.getThing(), statusInfo);
             logger.error("Exception occurred while initializing handler of thing '{}': {}",
-                    thingHandler.getThing().getUID(), e.getMessage(), e);
-        }).build().initialize();
+                    thingHandler.getThing().getUID(), ex.getMessage(), ex);
+            return Caller.VOID;
+        });
     }
 
     private boolean isInitializing(Thing thing) {
@@ -806,7 +834,7 @@ public class ThingManagerImpl
 
     private void doUnregisterHandler(final Thing thing, final ThingHandlerFactory thingHandlerFactory) {
         logger.debug("Calling unregisterHandler handler for thing '{}' at '{}'.", thing.getUID(), thingHandlerFactory);
-        safeCaller.create(() -> {
+        caller.execSync(() -> {
             ThingHandler thingHandler = thing.getHandler();
             thingHandlerFactory.unregisterHandler(thing);
             if (thingHandler != null) {
@@ -829,7 +857,14 @@ public class ThingManagerImpl
                     }
                 }
             }
-        }, Runnable.class).build().run();
+        }, new ExecutionConstraints(SafeCaller.DEFAULT_TIMEOUT, () -> {
+            logger.warn("Unregister handler for thing '{}' takes more than {}ms.", thing.getUID(),
+                    SafeCaller.DEFAULT_TIMEOUT);
+        })).exceptionally(ex -> {
+            logger.error("Exception occurred while unregister handler of thing '{}': {}", thing.getUID(),
+                    ex.getMessage(), ex);
+            return Caller.VOID;
+        });
     }
 
     private void disposeHandler(Thing thing, ThingHandler thingHandler) {
@@ -848,13 +883,16 @@ public class ThingManagerImpl
     private void doDisposeHandler(final ThingHandler thingHandler) {
         logger.debug("Calling dispose handler for thing '{}' at '{}'.", thingHandler.getThing().getUID(), thingHandler);
         setThingStatus(thingHandler.getThing(), buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE));
-        safeCaller.create(thingHandler, ThingHandler.class).onTimeout(() -> {
+        caller.execSync(() -> {
+            thingHandler.dispose();
+        }, new ExecutionConstraints(SafeCaller.DEFAULT_TIMEOUT, () -> {
             logger.warn("Disposing handler for thing '{}' takes more than {}ms.", thingHandler.getThing().getUID(),
                     SafeCaller.DEFAULT_TIMEOUT);
-        }).onException(e -> {
+        })).exceptionally(ex -> {
             logger.error("Exception occurred while disposing handler of thing '{}': {}",
-                    thingHandler.getThing().getUID(), e.getMessage(), e);
-        }).build().dispose();
+                    thingHandler.getThing().getUID(), ex.getMessage(), ex);
+            return Caller.VOID;
+        });
     }
 
     private void unregisterAndDisposeChildHandlers(Bridge bridge, ThingHandlerFactory thingHandlerFactory) {
@@ -1351,15 +1389,6 @@ public class ThingManagerImpl
 
     protected void unsetInboundCommunication(CommunicationManager communicationManager) {
         this.communicationManager = null;
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
     }
 
     @Reference
