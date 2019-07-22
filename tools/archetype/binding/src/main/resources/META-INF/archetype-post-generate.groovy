@@ -82,7 +82,7 @@ def addBundleToBom(bundleAfter, newBundle) {
  */
 def fixBundlePom(bundleAfter, newBundle) {
     def bomFile = new File(outputDirectory, 'pom.xml')
-    def module = '    <module>' + newBundle + '</module>' 
+    def module = '<module>' + newBundle + '</module>'
     def newContent = ''
     def insertIndex = 0;
     def lines = bomFile.eachLine { line, index ->
@@ -94,7 +94,7 @@ def fixBundlePom(bundleAfter, newBundle) {
             insertIndex = index
         }
         if (insertIndex > 0 && index == insertIndex) {
-            newContent += module + nl
+            newContent += '    ' + module + nl
             insertIndex = 0
         }
     }
