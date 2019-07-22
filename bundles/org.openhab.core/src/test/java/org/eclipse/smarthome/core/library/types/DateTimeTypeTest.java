@@ -12,6 +12,7 @@
  */
 package org.eclipse.smarthome.core.library.types;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
@@ -32,7 +33,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 /**
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas.Eichstaedt-Engelen - Initial contribution
  * @author Gaël L'hopital - Added Timezone and Milliseconds
  * @author Erdoan Hadzhiyusein - Added ZonedDateTime tests
  */
@@ -109,7 +110,6 @@ public class DateTimeTypeTest {
             this.inputTimeString = inputTimeString;
             this.expectedResult = expectedResult;
         }
-
     }
 
     /**
@@ -211,6 +211,22 @@ public class DateTimeTypeTest {
         assertTrue(dt1.toString().equals(dt2.toFullString()));
         assertTrue(dt1.getZonedDateTime().equals(dt2.getZonedDateTime()));
         assertTrue(dt1.equals(dt2));
+    }
+
+    @Test
+    public void parsingTest() {
+        DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
+        DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00+0000");
+        DateTimeType dt3 = new DateTimeType("2019-06-12T19:30:00+0200");
+        assertThat(dt1, is(dt2));
+
+        ZonedDateTime zdt1 = dt1.getZonedDateTime();
+        ZonedDateTime zdt2 = dt2.getZonedDateTime();
+        ZonedDateTime zdt3 = dt3.getZonedDateTime();
+        assertThat(zdt1.getZone(), is(zdt2.getZone()));
+        assertThat(zdt1, is(zdt2));
+        assertThat(zdt1, is(zdt3.withZoneSameInstant(zdt1.getZone())));
+        assertThat(zdt2, is(zdt3.withZoneSameInstant(zdt2.getZone())));
     }
 
     @Test
