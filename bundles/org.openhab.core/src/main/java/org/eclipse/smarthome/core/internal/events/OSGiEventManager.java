@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.eclipse.smarthome.core.caller.CallerFactory;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFactory;
 import org.eclipse.smarthome.core.events.EventSubscriber;
@@ -51,8 +52,8 @@ public class OSGiEventManager implements EventHandler {
     private ThreadedEventHandler eventHandler;
 
     @Activate
-    protected void activate(ComponentContext componentContext) {
-        eventHandler = new ThreadedEventHandler(typedEventSubscribers, typedEventFactories);
+    public OSGiEventManager(final @Reference CallerFactory callerFactory, ComponentContext componentContext) {
+        eventHandler = new ThreadedEventHandler(callerFactory, typedEventSubscribers, typedEventFactories);
         eventHandler.open();
     }
 

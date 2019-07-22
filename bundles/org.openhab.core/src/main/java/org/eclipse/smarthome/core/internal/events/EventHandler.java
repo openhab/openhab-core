@@ -16,15 +16,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.NamedThreadFactory;
+import org.eclipse.smarthome.core.caller.Caller;
+import org.eclipse.smarthome.core.caller.CallerFactory;
+import org.eclipse.smarthome.core.caller.ExecutionConstraints;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFactory;
 import org.eclipse.smarthome.core.events.EventFilter;
@@ -47,27 +45,26 @@ public class EventHandler implements AutoCloseable {
     private final Map<String, Set<EventSubscriber>> typedEventSubscribers;
     private final Map<String, EventFactory> typedEventFactories;
 
-    private final ScheduledExecutorService watcher = Executors
-            .newSingleThreadScheduledExecutor(new NamedThreadFactory("EventHandlerWatcher"));
-    private final ExecutorService executor = Executors
-            .newSingleThreadExecutor(new NamedThreadFactory("EventHandlerExecutor"));
+    private final Caller caller;
 
     /**
      * Create a new event handler.
      *
+     * @param callerFactory the callerFactory
      * @param typedEventSubscribers the event subscribers indexed by the event type
      * @param typedEventFactories the event factories indexed by the event type
      */
-    public EventHandler(final Map<String, Set<EventSubscriber>> typedEventSubscribers,
+    public EventHandler(final CallerFactory callerFactory,
+            final Map<String, Set<EventSubscriber>> typedEventSubscribers,
             final Map<String, EventFactory> typedEventFactories) {
+        this.caller = callerFactory.create("EventHandler", 1);
         this.typedEventSubscribers = typedEventSubscribers;
         this.typedEventFactories = typedEventFactories;
     }
 
     @Override
     public void close() {
-        watcher.shutdownNow();
-        executor.shutdownNow();
+        caller.close();
     }
 
     public void handleEvent(org.osgi.service.event.Event osgiEvent) {
@@ -146,19 +143,15 @@ public class EventHandler implements AutoCloseable {
             EventFilter filter = eventSubscriber.getEventFilter();
             if (filter == null || filter.apply(event)) {
                 logger.trace("Delegate event to subscriber ({}).", eventSubscriber.getClass());
-                executor.submit(() -> {
-                    ScheduledFuture<?> logTimeout = watcher.schedule(
-                            () -> logger.warn("Dispatching event to subscriber '{}' takes more than {}ms.",
-                                    eventSubscriber, EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS),
-                            EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS, TimeUnit.MILLISECONDS);
-                    try {
-                        eventSubscriber.receive(event);
-                    } catch (final Exception ex) {
-                        logger.error("Dispatching/filtering event for subscriber '{}' failed: {}",
-                                EventSubscriber.class.getName(), ex.getMessage(), ex);
-                    }
-                    logTimeout.cancel(false);
-                });
+                caller.execAsync(() -> eventSubscriber.receive(event),
+                        new ExecutionConstraints(EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS, () -> {
+                            logger.warn("Dispatching event to subscriber '{}' takes more than {}ms.", eventSubscriber,
+                                    EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS);
+                        })).exceptionally(ex -> {
+                            logger.error("Dispatching/filtering event for subscriber '{}' failed: {}",
+                                    EventSubscriber.class.getName(), ex.getMessage(), ex);
+                            return Caller.VOID;
+                        });
             } else {
                 logger.trace("Skip event subscriber ({}) because of its filter.", eventSubscriber.getClass());
             }

@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.caller.CallerFactory;
 import org.eclipse.smarthome.core.events.EventFactory;
 import org.eclipse.smarthome.core.events.EventSubscriber;
 import org.osgi.service.event.Event;
@@ -47,13 +48,15 @@ public class ThreadedEventHandler implements Closeable {
     /**
      * Create a new threaded event handler.
      *
+     * @param callerFactory the caller factory
      * @param typedEventSubscribers the event subscribers
      * @param typedEventFactories the event factories indexed by the event type
      */
-    ThreadedEventHandler(Map<String, Set<EventSubscriber>> typedEventSubscribers,
+    ThreadedEventHandler(final CallerFactory callerFactory,
+            final Map<String, Set<EventSubscriber>> typedEventSubscribers,
             final Map<String, EventFactory> typedEventFactories) {
         thread = new Thread(() -> {
-            try (EventHandler worker = new EventHandler(typedEventSubscribers, typedEventFactories)) {
+            try (EventHandler worker = new EventHandler(callerFactory, typedEventSubscribers, typedEventFactories)) {
                 while (running.get()) {
                     try {
                         logger.trace("wait for event");
