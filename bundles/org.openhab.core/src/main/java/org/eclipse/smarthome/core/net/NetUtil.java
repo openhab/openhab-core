@@ -38,7 +38,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.SafeCaller;
+import org.eclipse.smarthome.core.caller.Caller;
+import org.eclipse.smarthome.core.caller.ExecutionConstraints;
 import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -55,6 +56,7 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Converted to OSGi service with primary ipv4 conf
  * @author Gary Tse - Network address change listener
  * @author Tim Roberts - Added primary address change to network address change listener
+ * @author Markus Rathgeb - migrate from safe caller to caller
  */
 @Component(configurationPid = "org.eclipse.smarthome.network", property = { "service.pid=org.eclipse.smarthome.network",
         "service.config.description.uri=system:network", "service.config.label=Network Settings",
@@ -90,7 +92,12 @@ public class NetUtil implements NetworkAddressService {
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private @Nullable ScheduledFuture<?> networkInterfacePollFuture = null;
 
-    private @NonNullByDefault({}) SafeCaller safeCaller;
+    private final Caller caller;
+
+    @Activate
+    public NetUtil(final @Reference Caller caller) {
+        this.caller = caller;
+    }
 
     @Activate
     protected void activate(Map<String, Object> props) {
@@ -602,16 +609,16 @@ public class NetUtil implements NetworkAddressService {
 
         // notify each listener with a timeout of 15 seconds.
         // SafeCaller prevents bad listeners running too long or throws runtime exceptions
-        for (NetworkAddressChangeListener listener : networkAddressChangeListeners) {
-            if (safeCaller == null) {
-                // safeCaller null must be checked between each round, in case it is deactivated
-                break;
-            }
-            NetworkAddressChangeListener safeListener = safeCaller.create(listener, NetworkAddressChangeListener.class)
-                    .withTimeout(15000)
-                    .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception {}", exception))
-                    .build();
-            safeListener.onChanged(unmodifiableAddedList, unmodifiableRemovedList);
+        for (final NetworkAddressChangeListener listener : networkAddressChangeListeners) {
+            caller.execSync(() -> {
+                listener.onChanged(unmodifiableAddedList, unmodifiableRemovedList);
+            }, new ExecutionConstraints(15000, () -> {
+                LOGGER.warn("Inform listener ({}) about changed network addreess exceed runtime limit.",
+                        listener.getClass());
+            })).exceptionally(ex -> {
+                LOGGER.debug("notify listener about network address change failed", ex);
+                return Caller.VOID;
+            });
         }
     }
 
@@ -620,15 +627,15 @@ public class NetUtil implements NetworkAddressService {
             // notify each listener with a timeout of 15 seconds.
             // SafeCaller prevents bad listeners running too long or throws runtime exceptions
             for (NetworkAddressChangeListener listener : networkAddressChangeListeners) {
-                if (safeCaller == null) {
-                    // safeCaller null must be checked between each round, in case it is deactivated
-                    break;
-                }
-                NetworkAddressChangeListener safeListener = safeCaller
-                        .create(listener, NetworkAddressChangeListener.class).withTimeout(15000)
-                        .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception {}", exception))
-                        .build();
-                safeListener.onPrimaryAddressChanged(oldPrimaryAddress, newPrimaryAddress);
+                caller.execSync(() -> {
+                    listener.onPrimaryAddressChanged(oldPrimaryAddress, newPrimaryAddress);
+                }, new ExecutionConstraints(15000, () -> {
+                    LOGGER.warn("Inform listener ({}) about primary address change exceed runtime limit.",
+                            listener.getClass());
+                })).exceptionally(ex -> {
+                    LOGGER.debug("notify listener about primary address change failed", ex);
+                    return Caller.VOID;
+                });
             }
         }
     }
@@ -649,14 +656,5 @@ public class NetUtil implements NetworkAddressService {
         } else {
             return defaultValue;
         }
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
     }
 }
