@@ -6,7 +6,6 @@
 
 	<config-description uri="system:ephemeris">
 		<parameter name="dayset-weekend" type="text" required="true" multiple="true">
-			<context>dayOfWeek</context>
 			<label>Weekend Days</label>
 			<description>List of usual non workable days.</description>
 			<default>Saturday,Sunday</default>

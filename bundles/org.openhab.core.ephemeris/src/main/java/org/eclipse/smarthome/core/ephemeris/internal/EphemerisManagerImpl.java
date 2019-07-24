@@ -13,6 +13,8 @@
 package org.eclipse.smarthome.core.ephemeris.internal;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -23,6 +25,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -40,7 +44,9 @@ import org.eclipse.smarthome.config.core.ConfigurableService;
 import org.eclipse.smarthome.config.core.ParameterOption;
 import org.eclipse.smarthome.core.ephemeris.EphemerisManager;
 import org.eclipse.smarthome.core.i18n.LocaleProvider;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -65,6 +71,7 @@ import de.jollyday.ManagerParameters;
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + EphemerisManagerImpl.CONFIG_URI })
 @NonNullByDefault
 public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvider {
+
     private final Logger logger = LoggerFactory.getLogger(EphemerisManagerImpl.class);
 
     // constants for the configuration properties
@@ -75,6 +82,13 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private static final String CONFIG_REGION = "region";
     private static final String CONFIG_CITY = "city";
 
+    static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
+    static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
+
+    static final List<ParameterOption> COUNTRIES = new ArrayList<>();
+    static final Map<String, List<ParameterOption>> REGIONS = new HashMap<>();
+    static final Map<String, List<ParameterOption>> CITIES = new HashMap<>();
+
     private final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
     private final List<String> countryParameters = new ArrayList<>();
@@ -82,10 +96,22 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private final LocaleProvider localeProvider;
 
     private @NonNullByDefault({}) String country;
+    private @Nullable String region;
 
     @Activate
     public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider) {
         this.localeProvider = localeProvider;
+
+        final Bundle bundle = FrameworkUtil.getBundle(getClass());
+        try (InputStream stream = bundle.getResource("jolliday/country_names.properties").openStream()) {
+            final Properties properties = new Properties();
+            properties.load(stream);
+            properties.forEach(EphemerisManagerImpl::parseProperty);
+        } catch (IllegalArgumentException | IllegalStateException | IOException e) {
+            logger.warn(
+                    "The resource 'jolliday/country_names.properties' could not be loaded properly! ConfigDescription options are not available.",
+                    e);
+        }
     }
 
     @Activate
@@ -117,7 +143,11 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         }
 
         if (config.containsKey(CONFIG_REGION)) {
-            countryParameters.add(config.get(CONFIG_REGION).toString());
+            String region = config.get(CONFIG_REGION).toString();
+            countryParameters.add(region);
+            this.region = region;
+        } else {
+            this.region = null;
         }
 
         if (config.containsKey(CONFIG_CITY)) {
@@ -127,17 +157,33 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
 
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
-        List<ParameterOption> options = null;
         if (CONFIG_URI.equals(uri.toString())) {
-            Locale nullSafeLocale = locale == null ? localeProvider.getLocale() : locale;
-            options = new ArrayList<>();
-            for (DayOfWeek day : DayOfWeek.values()) {
-                ParameterOption option = new ParameterOption(day.name(),
-                        day.getDisplayName(TextStyle.FULL, nullSafeLocale));
-                options.add(option);
+            switch (param) {
+                case CONFIG_COUNTRY:
+                    return COUNTRIES;
+                case CONFIG_REGION:
+                    if (REGIONS.containsKey(country)) {
+                        return REGIONS.get(country);
+                    }
+                case CONFIG_CITY:
+                    if (region != null && CITIES.containsKey(region)) {
+                        return CITIES.get(region);
+                    }
+                default:
+                    if (param.startsWith(CONFIG_DAYSET_PREFIX)) {
+                        Locale nullSafeLocale = locale == null ? localeProvider.getLocale() : locale;
+                        final List<ParameterOption> options = new ArrayList<>();
+                        for (DayOfWeek day : DayOfWeek.values()) {
+                            ParameterOption option = new ParameterOption(day.name(),
+                                    day.getDisplayName(TextStyle.FULL, nullSafeLocale));
+                            options.add(option);
+                        }
+                        return options;
+                    }
+                    break;
             }
         }
-        return options;
+        return null;
     }
 
     private HolidayManager getHolidayManager(Object managerKey) {
@@ -227,4 +273,65 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return holiday.isPresent() ? holiday.get() : null;
     }
 
+    /**
+     * Parses each entry of a properties list loaded from 'jolliday/country_names.properties'. The content of that files
+     * has been copied from http://jollyday.sourceforge.net/names_country_default.html and contains values in the
+     * following format - some examples:
+     *
+     * country.description.at = Austria
+     * country.description.au = Australia
+     * country.description.au.sa = South Australia
+     * country.description.au.tas = Tasmania
+     * country.description.au.tas.ho = Hobard Area
+     * country.description.au.tas.nh = Non-Hobard Area
+     *
+     * "at" and "au" are keys of countries
+     * "sa" and "tas" are keys of regions inside the country "au"
+     * "ho" and "nh" are kess of cities or areas inside the region "tas"
+     *
+     * @param key key of the property will be parsed
+     * @param value value of the property will be used as name
+     * @throws IllegalArgumentException if the property could not be parsed properly
+     */
+    static void parseProperty(Object key, Object value) throws IllegalArgumentException {
+        final String property = key.toString().replace(PROPERTY_COUNTRY_DESCRIPTION_PREFIX, "");
+        final String[] parts = property.split(PROPERTY_COUNTRY_DESCRIPTION_DELIMITER);
+        final String name = value.toString();
+        final String part;
+        final ParameterOption option;
+        switch (parts.length) {
+            case 1:
+                COUNTRIES.add(new ParameterOption(getValidPart(parts[0]), name));
+                break;
+            case 2:
+                part = getValidPart(parts[0]);
+                option = new ParameterOption(getValidPart(parts[1]), name);
+                if (REGIONS.containsKey(part)) {
+                    REGIONS.get(part).add(option);
+                } else {
+                    REGIONS.put(part, Arrays.asList(option));
+                }
+                break;
+            case 3:
+                part = getValidPart(parts[1]);
+                option = new ParameterOption(getValidPart(parts[2]), name);
+                if (CITIES.containsKey(part)) {
+                    CITIES.get(part).add(option);
+                } else {
+                    CITIES.put(part, Arrays.asList(option));
+                }
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Unable to parse property '%s = %s'.", key, value));
+        }
+    }
+
+    private static String getValidPart(String part) {
+        final String subject = part.trim();
+        if (!subject.isEmpty()) {
+            return subject;
+        } else {
+            throw new IllegalArgumentException("Unable to parse property - token is empty.");
+        }
+    }
 }
