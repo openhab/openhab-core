@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,12 +81,12 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private static final String CONFIG_REGION = "region";
     private static final String CONFIG_CITY = "city";
 
-    static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
-    static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
+    private static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
+    private static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
 
-    static final List<ParameterOption> COUNTRIES = new ArrayList<>();
-    static final Map<String, List<ParameterOption>> REGIONS = new HashMap<>();
-    static final Map<String, List<ParameterOption>> CITIES = new HashMap<>();
+    final List<ParameterOption> countries = new ArrayList<>();
+    final Map<String, List<ParameterOption>> regions = new HashMap<>();
+    final Map<String, List<ParameterOption>> cities = new HashMap<>();
 
     private final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
@@ -103,13 +102,14 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         this.localeProvider = localeProvider;
 
         final Bundle bundle = FrameworkUtil.getBundle(getClass());
-        try (InputStream stream = bundle.getResource("jolliday/country_names.properties").openStream()) {
+        try (InputStream stream = bundle.getResource("jolliday/descriptions/country_descriptions.properties")
+                .openStream()) {
             final Properties properties = new Properties();
             properties.load(stream);
-            properties.forEach(EphemerisManagerImpl::parseProperty);
+            properties.forEach(this::parseProperty);
         } catch (IllegalArgumentException | IllegalStateException | IOException e) {
             logger.warn(
-                    "The resource 'jolliday/country_names.properties' could not be loaded properly! ConfigDescription options are not available.",
+                    "The resource 'country_descriptions' could not be loaded properly! ConfigDescription options are not available.",
                     e);
         }
     }
@@ -160,14 +160,14 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         if (CONFIG_URI.equals(uri.toString())) {
             switch (param) {
                 case CONFIG_COUNTRY:
-                    return COUNTRIES;
+                    return countries;
                 case CONFIG_REGION:
-                    if (REGIONS.containsKey(country)) {
-                        return REGIONS.get(country);
+                    if (regions.containsKey(country)) {
+                        return regions.get(country);
                     }
                 case CONFIG_CITY:
-                    if (region != null && CITIES.containsKey(region)) {
-                        return CITIES.get(region);
+                    if (region != null && cities.containsKey(region)) {
+                        return cities.get(region);
                     }
                 default:
                     if (param.startsWith(CONFIG_DAYSET_PREFIX)) {
@@ -274,9 +274,10 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     /**
-     * Parses each entry of a properties list loaded from 'jolliday/country_names.properties'. The content of that files
-     * has been copied from http://jollyday.sourceforge.net/names_country_default.html and contains values in the
-     * following format - some examples:
+     * Parses each entry of a properties list loaded from 'jolliday/descriptions/country_descriptions.properties'. The
+     * file has been copied from
+     * https://github.com/svendiedrichsen/jollyday/blob/master/src/main/resources/descriptions/country_descriptions.properties
+     * and contains values in the following format - some examples:
      *
      * country.description.at = Austria
      * country.description.au = Australia
@@ -293,7 +294,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
      * @param value value of the property will be used as name
      * @throws IllegalArgumentException if the property could not be parsed properly
      */
-    static void parseProperty(Object key, Object value) throws IllegalArgumentException {
+    void parseProperty(Object key, Object value) throws IllegalArgumentException {
         final String property = key.toString().replace(PROPERTY_COUNTRY_DESCRIPTION_PREFIX, "");
         final String[] parts = property.split(PROPERTY_COUNTRY_DESCRIPTION_DELIMITER);
         final String name = value.toString();
@@ -301,24 +302,28 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         final ParameterOption option;
         switch (parts.length) {
             case 1:
-                COUNTRIES.add(new ParameterOption(getValidPart(parts[0]), name));
+                countries.add(new ParameterOption(getValidPart(parts[0]), name));
                 break;
             case 2:
                 part = getValidPart(parts[0]);
                 option = new ParameterOption(getValidPart(parts[1]), name);
-                if (REGIONS.containsKey(part)) {
-                    REGIONS.get(part).add(option);
+                if (regions.containsKey(part)) {
+                    regions.get(part).add(option);
                 } else {
-                    REGIONS.put(part, Arrays.asList(option));
+                    final List<ParameterOption> options = new ArrayList<>();
+                    options.add(option);
+                    regions.put(part, options);
                 }
                 break;
             case 3:
                 part = getValidPart(parts[1]);
                 option = new ParameterOption(getValidPart(parts[2]), name);
-                if (CITIES.containsKey(part)) {
-                    CITIES.get(part).add(option);
+                if (cities.containsKey(part)) {
+                    cities.get(part).add(option);
                 } else {
-                    CITIES.put(part, Arrays.asList(option));
+                    final List<ParameterOption> options = new ArrayList<>();
+                    options.add(option);
+                    cities.put(part, options);
                 }
                 break;
             default:
