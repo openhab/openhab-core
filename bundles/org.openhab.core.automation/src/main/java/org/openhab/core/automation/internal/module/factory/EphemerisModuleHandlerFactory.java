@@ -25,7 +25,7 @@ import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandlerFactory;
 import org.openhab.core.automation.handler.ModuleHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
-import org.openhab.core.automation.internal.module.handler.EphmerisConditionHandler;
+import org.openhab.core.automation.internal.module.handler.EphemerisConditionHandler;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This HandlerFactory creates ModuleHandlers to control items within the RuleManager. It contains basic Ephmeris
+ * This HandlerFactory creates ModuleHandlers to control items within the RuleManager. It contains basic Ephemeris
  * Conditions.
  *
  * @author Christoph Weitkamp - Initial contribution
@@ -46,8 +46,8 @@ public class EphemerisModuleHandlerFactory extends BaseModuleHandlerFactory impl
     private final Logger logger = LoggerFactory.getLogger(EphemerisModuleHandlerFactory.class);
 
     private static final Collection<String> TYPES = Collections.unmodifiableList(Stream
-            .of(EphmerisConditionHandler.HOLIDAY_MODULE_TYPE_ID, EphmerisConditionHandler.WEEKEND_MODULE_TYPE_ID,
-                    EphmerisConditionHandler.WEEKDAY_MODULE_TYPE_ID, EphmerisConditionHandler.DAYSET_MODULE_TYPE_ID)
+            .of(EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID, EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID,
+                    EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID, EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID)
             .collect(Collectors.toList()));
 
     private final EphemerisManager ephemerisManager;
@@ -75,11 +75,11 @@ public class EphemerisModuleHandlerFactory extends BaseModuleHandlerFactory impl
 
         if (module instanceof Condition) {
             switch (moduleTypeUID) {
-                case EphmerisConditionHandler.HOLIDAY_MODULE_TYPE_ID:
-                case EphmerisConditionHandler.WEEKEND_MODULE_TYPE_ID:
-                case EphmerisConditionHandler.WEEKDAY_MODULE_TYPE_ID:
-                case EphmerisConditionHandler.DAYSET_MODULE_TYPE_ID:
-                    return new EphmerisConditionHandler((Condition) module, ephemerisManager);
+                case EphemerisConditionHandler.HOLIDAY_MODULE_TYPE_ID:
+                case EphemerisConditionHandler.WEEKEND_MODULE_TYPE_ID:
+                case EphemerisConditionHandler.WEEKDAY_MODULE_TYPE_ID:
+                case EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID:
+                    return new EphemerisConditionHandler((Condition) module, ephemerisManager);
             }
         }
 

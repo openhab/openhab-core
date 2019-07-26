@@ -1,7 +1,7 @@
 {
 	"conditions": [
 		{
-			"uid": "ephmeris.HolidayCondition",
+			"uid": "ephemeris.HolidayCondition",
 			"label": "It is a holiday",
 			"description": "Checks if the current day is a holiday.",
 			"configDescriptions": [
@@ -17,7 +17,7 @@
 			]
 		},
 		{
-			"uid": "ephmeris.WeekendCondition",
+			"uid": "ephemeris.WeekendCondition",
 			"label": "It is a weekend",
 			"description": "Checks if the current day is on the weekend.",
 			"configDescriptions": [
@@ -33,7 +33,7 @@
 			]
 		},
 		{
-			"uid": "ephmeris.WeekdayCondition",
+			"uid": "ephemeris.WeekdayCondition",
 			"label": "It is a weekday",
 			"description": "Checks if the current day is not on the weekend.",
 			"configDescriptions": [
@@ -49,7 +49,7 @@
 			]
 		},
 		{
-			"uid": "ephmeris.DaysetCondition",
+			"uid": "ephemeris.DaysetCondition",
 			"label": "It is a day in a configured dayset",
 			"description": "Checks if the current day is in a configured dayset.",
 			"configDescriptions": [

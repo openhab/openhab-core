@@ -23,17 +23,17 @@ import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.handler.ConditionHandler;
 
 /**
- * ConditionHandler implementation for Ephmeris based conditions.
+ * ConditionHandler implementation for Ephemeris based conditions.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
-public class EphmerisConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
+public class EphemerisConditionHandler extends BaseModuleHandler<Condition> implements ConditionHandler {
 
-    public static final String HOLIDAY_MODULE_TYPE_ID = "ephmeris.HolidayCondition";
-    public static final String WEEKEND_MODULE_TYPE_ID = "ephmeris.WeekendCondition";
-    public static final String WEEKDAY_MODULE_TYPE_ID = "ephmeris.WeekdayCondition";
-    public static final String DAYSET_MODULE_TYPE_ID = "ephmeris.DaysetCondition";
+    public static final String HOLIDAY_MODULE_TYPE_ID = "ephemeris.HolidayCondition";
+    public static final String WEEKEND_MODULE_TYPE_ID = "ephemeris.WeekendCondition";
+    public static final String WEEKDAY_MODULE_TYPE_ID = "ephemeris.WeekdayCondition";
+    public static final String DAYSET_MODULE_TYPE_ID = "ephemeris.DaysetCondition";
 
     private static final String DAYSET = "dayset";
     private static final String OFFSET = "offset";
@@ -42,7 +42,7 @@ public class EphmerisConditionHandler extends BaseModuleHandler<Condition> imple
     private final @Nullable String dayset;
     private final int offset;
 
-    public EphmerisConditionHandler(Condition condition, EphemerisManager ephemerisManager) {
+    public EphemerisConditionHandler(Condition condition, EphemerisManager ephemerisManager) {
         super(condition);
         this.ephemerisManager = ephemerisManager;
 
