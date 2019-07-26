@@ -77,9 +77,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     protected static final String CONFIG_URI = "system:ephemeris";
     private static final String CONFIG_DAYSET_PREFIX = "dayset-";
     private static final String CONFIG_DAYSET_WEEKEND = "weekend";
-    private static final String CONFIG_COUNTRY = "country";
-    private static final String CONFIG_REGION = "region";
-    private static final String CONFIG_CITY = "city";
+    public static final String CONFIG_COUNTRY = "country";
+    public static final String CONFIG_REGION = "region";
+    public static final String CONFIG_CITY = "city";
 
     private static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
@@ -136,14 +136,14 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         });
 
         if (config.containsKey(CONFIG_COUNTRY)) {
-            country = config.get(CONFIG_COUNTRY).toString();
+            country = config.get(CONFIG_COUNTRY).toString().toLowerCase();
         } else {
-            country = localeProvider.getLocale().getCountry();
+            country = localeProvider.getLocale().getCountry().toLowerCase();
             logger.debug("Using system default country '{}' ", country);
         }
 
         if (config.containsKey(CONFIG_REGION)) {
-            String region = config.get(CONFIG_REGION).toString();
+            String region = config.get(CONFIG_REGION).toString().toLowerCase();
             countryParameters.add(region);
             this.region = region;
         } else {
@@ -334,7 +334,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private static String getValidPart(String part) {
         final String subject = part.trim();
         if (!subject.isEmpty()) {
-            return subject;
+            return subject.toLowerCase();
         } else {
             throw new IllegalArgumentException("Unable to parse property - token is empty.");
         }
