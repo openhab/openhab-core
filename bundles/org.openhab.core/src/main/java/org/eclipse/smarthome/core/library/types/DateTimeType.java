@@ -34,6 +34,7 @@ import org.eclipse.smarthome.core.types.State;
  * @author Erdoan Hadzhiyusein - Refactored to use ZonedDateTime
  * @author Jan N. Klug - add ability to use time or date only
  * @author Wouter Born - increase parsing and formatting precision
+ * @author Laurent Garnier - added methods toLocaleZone and toZone
  */
 @NonNullByDefault
 public class DateTimeType implements PrimitiveType, State, Command {
@@ -108,7 +109,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
             throw new IllegalArgumentException(zonedValue + " is not in a valid format.", invalidFormatException);
         }
 
-        zonedDateTime = date;
+        zonedDateTime = date.withFixedOffsetZone();
     }
 
     /**
@@ -138,6 +139,22 @@ public class DateTimeType implements PrimitiveType, State, Command {
 
     public String format(Locale locale, String pattern) {
         return String.format(locale, pattern, zonedDateTime);
+    }
+
+    /**
+     * Translate to the locale time zone
+     */
+    public void toLocaleZone() {
+        toZone(ZoneId.systemDefault());
+    }
+
+    /**
+     * Translate to a given zone
+     *
+     * @param zone the destination zone
+     */
+    public void toZone(ZoneId zone) {
+        zonedDateTime = zonedDateTime.withZoneSameInstant(zone);
     }
 
     @Override

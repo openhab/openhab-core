@@ -12,12 +12,11 @@
  */
 package org.eclipse.smarthome.core.library.types;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -29,6 +28,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -38,6 +38,7 @@ import org.junit.runners.Parameterized.Parameters;
  * @author Thomas.Eichstaedt-Engelen - Initial contribution
  * @author Gaël L'hopital - Added Timezone and Milliseconds
  * @author Erdoan Hadzhiyusein - Added ZonedDateTime tests
+ * @author Laurent Garnier - Enhanced tests
  */
 @RunWith(Parameterized.class)
 public class DateTimeTypeTest {
@@ -72,13 +73,38 @@ public class DateTimeTypeTest {
          */
         public final String inputTimeString;
         /**
-         * the expected result of the test.
+         * the expected result of the test without any additional translation to the time zone specified in the
+         * {@link ParameterSet#defaultTimeZone}.
          * golden rule:
          * should always return the input time minus or plus the offset of the given time zone.
          * if no time zone is specified or the time zone in the {@link ParameterSet#inputTimeString} is wrong, then the
          * {@link ParameterSet#defaultTimeZone} is used.
          */
         public final String expectedResult;
+        /**
+         * the expected result of the test with an additional translation to the time zone specified in the
+         * {@link ParameterSet#defaultTimeZone}.
+         * golden rule:
+         * should always return the input time minus or plus the offset of the time zone specified in the
+         * {@link ParameterSet#defaultTimeZone}.
+         * if no time zone is specified or the time zone in the {@link ParameterSet#inputTimeString} is wrong, then the
+         * {@link ParameterSet#defaultTimeZone} is used to first build the date.
+         */
+        public final String expectedResultLocalTZ;
+        /**
+         * the locale parameter to be used to test the method {@link DateTimeType#format(Locale, String)}.
+         */
+        public final Locale locale;
+        /**
+         * the pattern parameter to be used to test the method {@link DateTimeType#format(Locale, String)}
+         * or {@link DateTimeType#format(String)}.
+         */
+        public final String pattern;
+        /**
+         * the expected result when testing the method {@link DateTimeType#format(Locale, String)}
+         * or {@link DateTimeType#format(String)}.
+         */
+        public final String expectedFormattedResult;
 
         /**
          * create a parameter set with {@link ParameterSet#inputTimeMap} and {@link ParameterSet#inputTimeZone}
@@ -88,14 +114,19 @@ public class DateTimeTypeTest {
          * @param inputTimeMap
          * @param inputTimeZone
          * @param expectedResult
+         * @param expectedResultLocalTZ
          */
         public ParameterSet(TimeZone defaultTimeZone, Map<String, Integer> inputTimeMap, TimeZone inputTimeZone,
-                String expectedResult) {
+                String expectedResult, String expectedResultLocalTZ) {
             this.defaultTimeZone = defaultTimeZone;
             this.inputTimeMap = inputTimeMap;
             this.inputTimeZone = inputTimeZone;
             this.inputTimeString = null;
             this.expectedResult = expectedResult;
+            this.expectedResultLocalTZ = expectedResultLocalTZ;
+            this.locale = null;
+            this.pattern = null;
+            this.expectedFormattedResult = expectedResult.substring(0, 19);
         }
 
         /**
@@ -104,13 +135,48 @@ public class DateTimeTypeTest {
          * @param defaultTimeZone
          * @param inputTimeString
          * @param expectedResult
+         * @param expectedResultLocalTZ
          */
-        public ParameterSet(TimeZone defaultTimeZone, String inputTimeString, String expectedResult) {
+        public ParameterSet(TimeZone defaultTimeZone, String inputTimeString, String expectedResult,
+                String expectedResultLocalTZ) {
             this.defaultTimeZone = defaultTimeZone;
             this.inputTimeMap = null;
             this.inputTimeZone = null;
             this.inputTimeString = inputTimeString;
             this.expectedResult = expectedResult;
+            this.expectedResultLocalTZ = expectedResultLocalTZ;
+            this.locale = null;
+            this.pattern = null;
+            this.expectedFormattedResult = expectedResult.substring(0, 19);
+        }
+
+        /**
+         * create a parameter set with either {@link ParameterSet#inputTimeMap} and {@link ParameterSet#inputTimeZone}
+         * parameters or {@link ParameterSet#inputTimeString} parameter. Non default values can be set for testing
+         * the format method.
+         *
+         * @param defaultTimeZone
+         * @param inputTimeMap
+         * @param inputTimeZone
+         * @param inputTimeString
+         * @param expectedResult
+         * @param expectedResultLocalTZ
+         * @param locale
+         * @param pattern
+         * @param expectedFormattedResult
+         */
+        public ParameterSet(TimeZone defaultTimeZone, Map<String, Integer> inputTimeMap, TimeZone inputTimeZone,
+                String inputTimeString, String expectedResult, String expectedResultLocalTZ, Locale locale,
+                String pattern, String expectedFormattedResult) {
+            this.defaultTimeZone = defaultTimeZone;
+            this.inputTimeMap = inputTimeMap;
+            this.inputTimeZone = inputTimeZone;
+            this.inputTimeString = inputTimeString;
+            this.expectedResult = expectedResult;
+            this.expectedResultLocalTZ = expectedResultLocalTZ;
+            this.locale = locale;
+            this.pattern = pattern;
+            this.expectedFormattedResult = expectedFormattedResult;
         }
     }
 
@@ -124,34 +190,45 @@ public class DateTimeTypeTest {
         // for simplicity we use always the same input time.
         return Arrays.asList(new Object[][] {
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("UTC"),
-                        "2014-03-30T10:58:47.033+0000") },
+                        "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("CET"),
-                        "2014-03-30T08:58:47.033+0000") },
+                        "2014-03-30T10:58:47.033+0200", "2014-03-30T08:58:47.033+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30T10:58:47UTC",
-                        "2014-03-30T10:58:47.000+0000") },
+                        "2014-03-30T10:58:47.000+0000", "2014-03-30T10:58:47.000+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("UTC"),
-                        "2014-03-30T12:58:47.033+0200") },
+                        "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("CET"),
-                        "2014-03-30T10:58:47.033+0200") },
+                        "2014-03-30T10:58:47.033+0200", "2014-03-30T10:58:47.033+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("CET"), "2014-03-30T10:58:47CET",
-                        "2014-03-30T10:58:47.000+0200") },
+                        "2014-03-30T10:58:47.000+0200", "2014-03-30T10:58:47.000+0200") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT+5"), "2014-03-30T10:58:47.000Z",
-                        "2014-03-30T15:58:47.000+0500") },
+                        "2014-03-30T10:58:47.000+0000", "2014-03-30T15:58:47.000+0500") },
+                { new ParameterSet(TimeZone.getTimeZone("GMT+2"), null, null, "2014-03-30T10:58:47",
+                        "2014-03-30T10:58:47.000+0200", "2014-03-30T10:58:47.000+0200", null,
+                        "%1$td.%1$tm.%1$tY %1$tH:%1$tM", "30.03.2014 10:58") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT"), initTimeMap(), TimeZone.getTimeZone("GMT"),
-                        "2014-03-30T10:58:47.033+0000") },
+                        "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
+                // Parameter set with an invalid time zone id as input, leading to GMT being considered
                 { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("+02:00"),
-                        "2014-03-30T12:58:47.033+0200") },
+                        "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
+                // Parameter set with an invalid time zone id as input, leading to GMT being considered
                 { new ParameterSet(TimeZone.getTimeZone("GMT+2"), initTimeMap(), TimeZone.getTimeZone("GML"),
-                        "2014-03-30T12:58:47.033+0200") },
-                { new ParameterSet(TimeZone.getTimeZone("GMT-2"), initTimeMap(), TimeZone.getTimeZone("GMT+3"),
-                        "2014-03-30T05:58:47.033-0200") },
+                        "2014-03-30T10:58:47.033+0000", "2014-03-30T12:58:47.033+0200") },
+                { new ParameterSet(TimeZone.getTimeZone("GMT-2"), initTimeMap(), TimeZone.getTimeZone("GMT+3"), null,
+                        "2014-03-30T10:58:47.033+0300", "2014-03-30T05:58:47.033-0200", Locale.GERMAN,
+                        "%1$tA %1$td.%1$tm.%1$tY %1$tH:%1$tM", "Sonntag 30.03.2014 10:58") },
                 { new ParameterSet(TimeZone.getTimeZone("GMT-2"), initTimeMap(), TimeZone.getTimeZone("GMT-4"),
-                        "2014-03-30T12:58:47.033-0200") },
-                { new ParameterSet(TimeZone.getTimeZone("UTC"), "10:58:47", "1970-01-01T10:58:47.000+0000") },
-                { new ParameterSet(TimeZone.getTimeZone("UTC"), "10:58", "1970-01-01T10:58:00.000+0000") },
-                { new ParameterSet(TimeZone.getTimeZone("CET"), "10:58:47CET", "1970-01-01T10:58:47.000+0100") },
-                { new ParameterSet(TimeZone.getTimeZone("CET"), "10:58CET", "1970-01-01T10:58:00.000+0100") },
-                { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30", "2014-03-30T00:00:00.000+0000") }, });
+                        "2014-03-30T10:58:47.033-0400", "2014-03-30T12:58:47.033-0200") },
+                { new ParameterSet(TimeZone.getTimeZone("UTC"), "10:58:47", "1970-01-01T10:58:47.000+0000",
+                        "1970-01-01T10:58:47.000+0000") },
+                { new ParameterSet(TimeZone.getTimeZone("UTC"), "10:58", "1970-01-01T10:58:00.000+0000",
+                        "1970-01-01T10:58:00.000+0000") },
+                { new ParameterSet(TimeZone.getTimeZone("CET"), "10:58:47CET", "1970-01-01T10:58:47.000+0100",
+                        "1970-01-01T10:58:47.000+0100") },
+                { new ParameterSet(TimeZone.getTimeZone("CET"), "10:58CET", "1970-01-01T10:58:00.000+0100",
+                        "1970-01-01T10:58:00.000+0100") },
+                { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30", "2014-03-30T00:00:00.000+0000",
+                        "2014-03-30T00:00:00.000+0000") }, });
     }
 
     private static Map<String, Integer> initTimeMap() {
@@ -178,6 +255,12 @@ public class DateTimeTypeTest {
         this.parameterSet = parameterSet;
     }
 
+    @Before
+    public void setUp() {
+        // set default time zone
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
+    }
+
     @Test
     public void serializationTest() {
         DateTimeType dt = new DateTimeType(Calendar.getInstance());
@@ -198,9 +281,7 @@ public class DateTimeTypeTest {
         DateTimeType dt2 = DateTimeType.valueOf(dt1.toFullString());
 
         assertTrue(dt1.toString().equals(dt2.toString()));
-        assertTrue(dt1.equals(dt2));
         assertTrue(dt1.getCalendar().equals(dt2.getCalendar()));
-
         assertTrue(dt1.equals(dt2));
     }
 
@@ -232,61 +313,34 @@ public class DateTimeTypeTest {
     }
 
     @Test
-    public void formattingTest() {
-        DateTimeType dt1 = new DateTimeType("2019-05-25T17:53:10+00:00");
-        assertThat(dt1.toFullString(), is(dt1.toString()));
-        assertThat(dt1.toString(), is("2019-05-25T17:53:10.000+0000"));
-
-        assertThat(dt1.format(null), is("2019-05-25T17:53:10"));
-        assertThat(dt1.format("%1$td.%1$tm.%1$tY %1$tH:%1$tM"), is("25.05.2019 17:53"));
-
-        assertThat(dt1.format(Locale.GERMAN, "%1$td.%1$tm.%1$tY %1$tH:%1$tM"), is("25.05.2019 17:53"));
-
-        DateTimeType dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(ZoneId.of("Europe/Berlin")));
-        assertThat(dt2, not(is(dt1)));
-        assertThat(dt2.toString(), is("2019-05-25T19:53:10.000+0200"));
-
-        assertThat(dt2.format(null), is("2019-05-25T19:53:10"));
-        assertThat(dt2.format("%1$td.%1$tm.%1$tY %1$tH:%1$tM"), is("25.05.2019 19:53"));
-
-        assertThat(dt2.format(Locale.GERMAN, "%1$td.%1$tm.%1$tY %1$tH:%1$tM"), is("25.05.2019 19:53"));
-    }
-
-    @Test
     public void createDate() {
-        String inputTimeString;
-
-        // set default time zone
-        TimeZone.setDefault(parameterSet.defaultTimeZone);
-
-        // get formatted time string
-        if (parameterSet.inputTimeString == null) {
-            final Calendar calendar = Calendar.getInstance(parameterSet.inputTimeZone);
-            calendar.set(parameterSet.inputTimeMap.get("year"), parameterSet.inputTimeMap.get("month"),
-                    parameterSet.inputTimeMap.get("date"), parameterSet.inputTimeMap.get("hourOfDay"),
-                    parameterSet.inputTimeMap.get("minute"), parameterSet.inputTimeMap.get("second"));
-            calendar.set(Calendar.MILLISECOND, parameterSet.inputTimeMap.get("milliseconds"));
-            inputTimeString = new SimpleDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).format(calendar.getTime());
-        } else {
-            inputTimeString = parameterSet.inputTimeString;
+        if (parameterSet.inputTimeMap == null || parameterSet.inputTimeZone == null) {
+            return;
         }
-        DateTimeType dt = DateTimeType.valueOf(inputTimeString);
-        if (parameterSet.inputTimeZone == null) {
-            dt = new DateTimeType(dt.getZonedDateTime().withZoneSameInstant(TimeZone.getDefault().toZoneId()));
-        }
+
+        // get DateTimeType from the current parameter
+        final Calendar calendar = Calendar.getInstance(parameterSet.inputTimeZone);
+        calendar.set(parameterSet.inputTimeMap.get("year"), parameterSet.inputTimeMap.get("month"),
+                parameterSet.inputTimeMap.get("date"), parameterSet.inputTimeMap.get("hourOfDay"),
+                parameterSet.inputTimeMap.get("minute"), parameterSet.inputTimeMap.get("second"));
+        calendar.set(Calendar.MILLISECOND, parameterSet.inputTimeMap.get("milliseconds"));
+        DateTimeType dt1 = new DateTimeType(calendar);
+        DateTimeType dt2 = new DateTimeType(
+                new SimpleDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).format(calendar.getTime()));
         // Test
-        assertEquals(parameterSet.expectedResult, dt.toString());
+        assertEquals(dt1.toFullString(), dt1.toString());
+        assertEquals(parameterSet.expectedResultLocalTZ, dt1.toString());
+        assertEquals(parameterSet.expectedResultLocalTZ, dt2.toString());
+        assertEquals(dt1, dt2);
     }
 
     @Test
     public void createZonedDate() {
-        String inputTimeString;
-
-        // set default time zone
-        TimeZone.setDefault(parameterSet.defaultTimeZone);
-
-        // get formatted time string
-        if (parameterSet.inputTimeString == null) {
+        // get DateTimeType from the current parameter
+        DateTimeType dt1;
+        DateTimeType dt2;
+        DateTimeType dt3;
+        if (parameterSet.inputTimeMap != null && parameterSet.inputTimeZone != null) {
             int durationInNano = (int) TimeUnit.NANOSECONDS.convert(parameterSet.inputTimeMap.get("milliseconds"),
                     TimeUnit.MILLISECONDS);
 
@@ -294,17 +348,61 @@ public class DateTimeTypeTest {
                     parameterSet.inputTimeMap.get("month") + 1, parameterSet.inputTimeMap.get("date"),
                     parameterSet.inputTimeMap.get("hourOfDay"), parameterSet.inputTimeMap.get("minute"),
                     parameterSet.inputTimeMap.get("second"), durationInNano);
-            ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, parameterSet.inputTimeZone.toZoneId()).toInstant()
+            ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, parameterSet.inputTimeZone.toZoneId());
+            dt1 = new DateTimeType(zonedDate);
+            dt3 = new DateTimeType(
+                    zonedDate.format((DateTimeFormatter.ofPattern(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS))));
+            zonedDate = ZonedDateTime.of(dateTime, parameterSet.inputTimeZone.toZoneId()).toInstant()
                     .atZone(parameterSet.defaultTimeZone.toZoneId());
-            inputTimeString = zonedDate.format((DateTimeFormatter.ofPattern(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS)));
+            dt2 = new DateTimeType(zonedDate);
+        } else if (parameterSet.inputTimeString != null) {
+            dt1 = new DateTimeType(parameterSet.inputTimeString);
+            dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(TimeZone.getDefault().toZoneId()));
+            dt3 = new DateTimeType(dt1.getZonedDateTime());
         } else {
-            inputTimeString = parameterSet.inputTimeString;
-        }
-        DateTimeType dt = new DateTimeType(inputTimeString);
-        if (parameterSet.inputTimeZone == null) {
-            dt = new DateTimeType(dt.getZonedDateTime().withZoneSameInstant(TimeZone.getDefault().toZoneId()));
+            return;
         }
         // Test
-        assertEquals(parameterSet.expectedResult, dt.toString());
+        assertEquals(dt1.toFullString(), dt1.toString());
+        assertEquals(dt2.toFullString(), dt2.toString());
+        assertEquals(parameterSet.expectedResult, dt1.toString());
+        assertEquals(parameterSet.expectedResultLocalTZ, dt2.toString());
+        assertEquals(parameterSet.expectedResult, dt3.toString());
+        assertEquals(dt1, dt3);
+    }
+
+    @Test
+    public void formattingTest() {
+        DateTimeType dt = createDateTimeType();
+        if (parameterSet.locale != null) {
+            assertEquals(parameterSet.expectedFormattedResult, dt.format(parameterSet.locale, parameterSet.pattern));
+        } else {
+            assertEquals(parameterSet.expectedFormattedResult, dt.format(parameterSet.pattern));
+        }
+    }
+
+    @Test
+    public void changingZoneTest() {
+        DateTimeType dt = createDateTimeType();
+        dt.toLocaleZone();
+        assertEquals(parameterSet.expectedResultLocalTZ, dt.toFullString());
+    }
+
+    private DateTimeType createDateTimeType() {
+        DateTimeType dt = null;
+        if (parameterSet.inputTimeMap != null && parameterSet.inputTimeZone != null) {
+            int durationInNano = (int) TimeUnit.NANOSECONDS.convert(parameterSet.inputTimeMap.get("milliseconds"),
+                    TimeUnit.MILLISECONDS);
+
+            LocalDateTime dateTime = LocalDateTime.of(parameterSet.inputTimeMap.get("year"),
+                    parameterSet.inputTimeMap.get("month") + 1, parameterSet.inputTimeMap.get("date"),
+                    parameterSet.inputTimeMap.get("hourOfDay"), parameterSet.inputTimeMap.get("minute"),
+                    parameterSet.inputTimeMap.get("second"), durationInNano);
+            ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, parameterSet.inputTimeZone.toZoneId());
+            dt = new DateTimeType(zonedDate);
+        } else if (parameterSet.inputTimeString != null) {
+            dt = new DateTimeType(parameterSet.inputTimeString);
+        }
+        return dt;
     }
 }
