@@ -50,7 +50,7 @@ public class SerialPortRegistry {
      *
      * @param creator
      */
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     protected void registerSerialPortCreator(SerialPortProvider creator) {
         synchronized (this.portCreators) {
             this.portCreators.add(creator);
