@@ -241,8 +241,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
         // The value could be an integer value. Try to convert to BigInteger in
         // order to have access to more conversion formats.
+        BigDecimal bd = toBigDecimal();
         try {
-            return String.format(formatPattern, toBigDecimal().toBigIntegerExact());
+            return String.format(formatPattern, bd.toBigIntegerExact());
         } catch (ArithmeticException ae) {
             // Could not convert to integer value without loss of
             // information. Fall through to default behavior.
@@ -252,7 +253,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             // integer. Fall through to default behavior.
         }
 
-        return String.format(formatPattern, toBigDecimal());
+        return String.format(formatPattern, bd);
     }
 
     @Override
@@ -314,7 +315,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             }
         } else if (target == HSBType.class) {
             return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO,
-                    new PercentType(this.toBigDecimal().multiply(HUNDRED))));
+                    new PercentType(toBigDecimal().multiply(HUNDRED))));
         } else if (target == PercentType.class) {
             if (SmartHomeUnits.PERCENT.equals(getUnit())) {
                 return target.cast(new PercentType(toBigDecimal()));
