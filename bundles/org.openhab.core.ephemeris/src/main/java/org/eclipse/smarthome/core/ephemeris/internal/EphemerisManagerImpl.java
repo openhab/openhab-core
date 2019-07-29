@@ -81,6 +81,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     public static final String CONFIG_REGION = "region";
     public static final String CONFIG_CITY = "city";
 
+    private static final String JOLLYDAY_COUNTRY_DESCRIPTIONS = "jollyday/descriptions/country_descriptions.properties";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
 
@@ -102,15 +103,13 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         this.localeProvider = localeProvider;
 
         final Bundle bundle = FrameworkUtil.getBundle(getClass());
-        try (InputStream stream = bundle.getResource("jolliday/descriptions/country_descriptions.properties")
-                .openStream()) {
+        try (InputStream stream = bundle.getResource(JOLLYDAY_COUNTRY_DESCRIPTIONS).openStream()) {
             final Properties properties = new Properties();
             properties.load(stream);
             properties.forEach(this::parseProperty);
         } catch (IllegalArgumentException | IllegalStateException | IOException e) {
-            logger.warn(
-                    "The resource 'country_descriptions' could not be loaded properly! ConfigDescription options are not available.",
-                    e);
+            logger.warn("The resource '{}' could not be loaded properly! ConfigDescription options are not available.",
+                    JOLLYDAY_COUNTRY_DESCRIPTIONS, e);
         }
     }
 
