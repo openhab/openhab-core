@@ -39,25 +39,35 @@ import org.eclipse.smarthome.core.thing.util.ThingHelper;
 @NonNullByDefault
 public class ThingBuilder {
 
+    protected final ThingUID thingUID;
+    protected final ThingTypeUID thingTypeUID;
+    private @Nullable String label;
     private final List<Channel> channels = new ArrayList<>();
-    private final ThingImpl thing;
+    private @Nullable Configuration configuration;
+    private @Nullable ThingUID bridgeUID;
+    private @Nullable Map<String, String> properties;
+    private @Nullable String location;
 
-    protected ThingBuilder(ThingImpl thing) {
-        this.thing = thing;
+    protected ThingBuilder(ThingTypeUID thingTypeUID, ThingUID thingUID) {
+        this.thingUID = thingUID;
+        this.thingTypeUID = thingTypeUID;
     }
 
     public static ThingBuilder create(ThingTypeUID thingTypeUID, String thingId) {
-        ThingImpl thing = new ThingImpl(thingTypeUID, thingId);
-        return new ThingBuilder(thing);
+        return new ThingBuilder(thingTypeUID, new ThingUID(thingTypeUID.getBindingId(), thingTypeUID.getId(), thingId));
     }
 
     public static ThingBuilder create(ThingTypeUID thingTypeUID, ThingUID thingUID) {
-        ThingImpl thing = new ThingImpl(thingTypeUID, thingUID);
-        return new ThingBuilder(thing);
+        return new ThingBuilder(thingTypeUID, thingUID);
+    }
+
+    public Thing build() {
+        final ThingImpl thing = new ThingImpl(thingTypeUID, thingUID);
+        return populate(thing);
     }
 
     public ThingBuilder withLabel(@Nullable String label) {
-        this.thing.setLabel(label);
+        this.label = label;
         return this;
     }
 
@@ -102,38 +112,45 @@ public class ThingBuilder {
         return this;
     }
 
-    public ThingBuilder withConfiguration(Configuration thingConfiguration) {
-        this.thing.setConfiguration(thingConfiguration);
+    public ThingBuilder withConfiguration(Configuration configuration) {
+        this.configuration = configuration;
         return this;
     }
 
     public ThingBuilder withBridge(@Nullable ThingUID bridgeUID) {
-        this.thing.setBridgeUID(bridgeUID);
+        this.bridgeUID = bridgeUID;
         return this;
     }
 
     public ThingBuilder withProperties(Map<String, String> properties) {
-        for (String key : properties.keySet()) {
-            this.thing.setProperty(key, properties.get(key));
-        }
+        this.properties = properties;
         return this;
     }
 
     public ThingBuilder withLocation(@Nullable String location) {
-        this.thing.setLocation(location);
+        this.location = location;
         return this;
     }
 
-    public Thing build() {
+    protected Thing populate(ThingImpl thing) {
+        thing.setLabel(label);
         thing.setChannels(channels);
+        thing.setConfiguration(configuration);
+        thing.setBridgeUID(bridgeUID);
+        if (properties != null) {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
+                thing.setProperty(entry.getKey(), entry.getValue());
+            }
+        }
+        thing.setLocation(location);
         return thing;
     }
 
     private void validateChannelUIDs(List<Channel> channels) {
         for (Channel channel : channels) {
-            if (!thing.getUID().equals(channel.getUID().getThingUID())) {
+            if (!thingUID.equals(channel.getUID().getThingUID())) {
                 throw new IllegalArgumentException(
-                        "Channel UID '" + channel.getUID() + "' does not match thing UID '" + thing.getUID() + "'");
+                        "Channel UID '" + channel.getUID() + "' does not match thing UID '" + thingUID + "'");
             }
         }
     }
