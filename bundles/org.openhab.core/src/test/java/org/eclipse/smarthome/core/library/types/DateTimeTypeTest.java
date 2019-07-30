@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -384,8 +385,17 @@ public class DateTimeTypeTest {
     @Test
     public void changingZoneTest() {
         DateTimeType dt = createDateTimeType();
-        dt.toLocaleZone();
-        assertEquals(parameterSet.expectedResultLocalTZ, dt.toFullString());
+        DateTimeType dt2 = dt.toLocaleZone();
+        assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
+        dt2 = dt.toZone(parameterSet.defaultTimeZone.toZoneId());
+        assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
+        boolean thrown = false;
+        try {
+            dt2 = dt.toZone("XXX");
+        } catch (DateTimeException e) {
+            thrown = true;
+        }
+        assertTrue(thrown);
     }
 
     private DateTimeType createDateTimeType() {
