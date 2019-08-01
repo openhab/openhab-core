@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +43,7 @@ import org.junit.runners.Parameterized.Parameters;
  * @author Erdoan Hadzhiyusein - Added ZonedDateTime tests
  * @author Laurent Garnier - Enhanced tests
  */
+@NonNullByDefault
 @RunWith(Parameterized.class)
 public class DateTimeTypeTest {
 
@@ -59,12 +62,14 @@ public class DateTimeTypeTest {
          * input time.
          * used to call the {@link Calendar#set(int, int, int, int, int, int)} method to set the time.
          */
+        @Nullable
         public final Map<String, Integer> inputTimeMap;
         /**
          * input time zone.
          * used to call the {@link Calendar#setTimeZone(TimeZone)} to set the time zone.
          * the time zone offset has direct impact on the result.
          */
+        @Nullable
         public final TimeZone inputTimeZone;
         /**
          * direct input of a time string (with or without time zone).
@@ -72,6 +77,7 @@ public class DateTimeTypeTest {
          * @see {@link DateTimeType#valueOf(String)}
          *      if this is set, the {@link ParameterSet#inputTimeMap} and {@link ParameterSet#inputTimeZone} are ignored
          */
+        @Nullable
         public final String inputTimeString;
         /**
          * the expected result of the test without any additional translation to the time zone specified in the
@@ -95,11 +101,13 @@ public class DateTimeTypeTest {
         /**
          * the locale parameter to be used to test the method {@link DateTimeType#format(Locale, String)}.
          */
+        @Nullable
         public final Locale locale;
         /**
          * the pattern parameter to be used to test the method {@link DateTimeType#format(Locale, String)}
          * or {@link DateTimeType#format(String)}.
          */
+        @Nullable
         public final String pattern;
         /**
          * the expected result when testing the method {@link DateTimeType#format(Locale, String)}
@@ -119,15 +127,8 @@ public class DateTimeTypeTest {
          */
         public ParameterSet(TimeZone defaultTimeZone, Map<String, Integer> inputTimeMap, TimeZone inputTimeZone,
                 String expectedResult, String expectedResultLocalTZ) {
-            this.defaultTimeZone = defaultTimeZone;
-            this.inputTimeMap = inputTimeMap;
-            this.inputTimeZone = inputTimeZone;
-            this.inputTimeString = null;
-            this.expectedResult = expectedResult;
-            this.expectedResultLocalTZ = expectedResultLocalTZ;
-            this.locale = null;
-            this.pattern = null;
-            this.expectedFormattedResult = expectedResult.substring(0, 19);
+            this(defaultTimeZone, inputTimeMap, inputTimeZone, null, expectedResult, expectedResultLocalTZ, null, null,
+                    expectedResult.substring(0, 19));
         }
 
         /**
@@ -140,15 +141,8 @@ public class DateTimeTypeTest {
          */
         public ParameterSet(TimeZone defaultTimeZone, String inputTimeString, String expectedResult,
                 String expectedResultLocalTZ) {
-            this.defaultTimeZone = defaultTimeZone;
-            this.inputTimeMap = null;
-            this.inputTimeZone = null;
-            this.inputTimeString = inputTimeString;
-            this.expectedResult = expectedResult;
-            this.expectedResultLocalTZ = expectedResultLocalTZ;
-            this.locale = null;
-            this.pattern = null;
-            this.expectedFormattedResult = expectedResult.substring(0, 19);
+            this(defaultTimeZone, null, null, inputTimeString, expectedResult, expectedResultLocalTZ, null, null,
+                    expectedResult.substring(0, 19));
         }
 
         /**
@@ -166,9 +160,10 @@ public class DateTimeTypeTest {
          * @param pattern
          * @param expectedFormattedResult
          */
-        public ParameterSet(TimeZone defaultTimeZone, Map<String, Integer> inputTimeMap, TimeZone inputTimeZone,
-                String inputTimeString, String expectedResult, String expectedResultLocalTZ, Locale locale,
-                String pattern, String expectedFormattedResult) {
+        public ParameterSet(TimeZone defaultTimeZone, @Nullable Map<String, Integer> inputTimeMap,
+                @Nullable TimeZone inputTimeZone, @Nullable String inputTimeString, String expectedResult,
+                String expectedResultLocalTZ, @Nullable Locale locale, @Nullable String pattern,
+                String expectedFormattedResult) {
             this.defaultTimeZone = defaultTimeZone;
             this.inputTimeMap = inputTimeMap;
             this.inputTimeZone = inputTimeZone;
@@ -315,16 +310,17 @@ public class DateTimeTypeTest {
 
     @Test
     public void createDate() {
-        if (parameterSet.inputTimeMap == null || parameterSet.inputTimeZone == null) {
+        Map<String, Integer> inputTimeMap = parameterSet.inputTimeMap;
+        TimeZone inputTimeZone = parameterSet.inputTimeZone;
+        if (inputTimeMap == null || inputTimeZone == null) {
             return;
         }
 
         // get DateTimeType from the current parameter
-        final Calendar calendar = Calendar.getInstance(parameterSet.inputTimeZone);
-        calendar.set(parameterSet.inputTimeMap.get("year"), parameterSet.inputTimeMap.get("month"),
-                parameterSet.inputTimeMap.get("date"), parameterSet.inputTimeMap.get("hourOfDay"),
-                parameterSet.inputTimeMap.get("minute"), parameterSet.inputTimeMap.get("second"));
-        calendar.set(Calendar.MILLISECOND, parameterSet.inputTimeMap.get("milliseconds"));
+        final Calendar calendar = Calendar.getInstance(inputTimeZone);
+        calendar.set(inputTimeMap.get("year"), inputTimeMap.get("month"), inputTimeMap.get("date"),
+                inputTimeMap.get("hourOfDay"), inputTimeMap.get("minute"), inputTimeMap.get("second"));
+        calendar.set(Calendar.MILLISECOND, inputTimeMap.get("milliseconds"));
         DateTimeType dt1 = new DateTimeType(calendar);
         DateTimeType dt2 = new DateTimeType(
                 new SimpleDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).format(calendar.getTime()));
@@ -341,27 +337,29 @@ public class DateTimeTypeTest {
         DateTimeType dt1;
         DateTimeType dt2;
         DateTimeType dt3;
-        if (parameterSet.inputTimeMap != null && parameterSet.inputTimeZone != null) {
-            int durationInNano = (int) TimeUnit.NANOSECONDS.convert(parameterSet.inputTimeMap.get("milliseconds"),
+        Map<String, Integer> inputTimeMap = parameterSet.inputTimeMap;
+        TimeZone inputTimeZone = parameterSet.inputTimeZone;
+        String inputTimeString = parameterSet.inputTimeString;
+        if (inputTimeMap != null && inputTimeZone != null) {
+            int durationInNano = (int) TimeUnit.NANOSECONDS.convert(inputTimeMap.get("milliseconds"),
                     TimeUnit.MILLISECONDS);
 
-            LocalDateTime dateTime = LocalDateTime.of(parameterSet.inputTimeMap.get("year"),
-                    parameterSet.inputTimeMap.get("month") + 1, parameterSet.inputTimeMap.get("date"),
-                    parameterSet.inputTimeMap.get("hourOfDay"), parameterSet.inputTimeMap.get("minute"),
-                    parameterSet.inputTimeMap.get("second"), durationInNano);
-            ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, parameterSet.inputTimeZone.toZoneId());
+            LocalDateTime dateTime = LocalDateTime.of(inputTimeMap.get("year"), inputTimeMap.get("month") + 1,
+                    inputTimeMap.get("date"), inputTimeMap.get("hourOfDay"), inputTimeMap.get("minute"),
+                    inputTimeMap.get("second"), durationInNano);
+            ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, inputTimeZone.toZoneId());
             dt1 = new DateTimeType(zonedDate);
             dt3 = new DateTimeType(
                     zonedDate.format((DateTimeFormatter.ofPattern(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS))));
-            zonedDate = ZonedDateTime.of(dateTime, parameterSet.inputTimeZone.toZoneId()).toInstant()
+            zonedDate = ZonedDateTime.of(dateTime, inputTimeZone.toZoneId()).toInstant()
                     .atZone(parameterSet.defaultTimeZone.toZoneId());
             dt2 = new DateTimeType(zonedDate);
-        } else if (parameterSet.inputTimeString != null) {
-            dt1 = new DateTimeType(parameterSet.inputTimeString);
+        } else if (inputTimeString != null) {
+            dt1 = new DateTimeType(inputTimeString);
             dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(TimeZone.getDefault().toZoneId()));
             dt3 = new DateTimeType(dt1.getZonedDateTime());
         } else {
-            return;
+            throw new DateTimeException("Invalid inputs in parameter set");
         }
         // Test
         assertEquals(dt1.toFullString(), dt1.toString());
@@ -375,10 +373,12 @@ public class DateTimeTypeTest {
     @Test
     public void formattingTest() {
         DateTimeType dt = createDateTimeType();
-        if (parameterSet.locale != null) {
-            assertEquals(parameterSet.expectedFormattedResult, dt.format(parameterSet.locale, parameterSet.pattern));
+        Locale locale = parameterSet.locale;
+        String pattern = parameterSet.pattern;
+        if (locale != null && pattern != null) {
+            assertEquals(parameterSet.expectedFormattedResult, dt.format(locale, pattern));
         } else {
-            assertEquals(parameterSet.expectedFormattedResult, dt.format(parameterSet.pattern));
+            assertEquals(parameterSet.expectedFormattedResult, dt.format(pattern));
         }
     }
 
@@ -389,30 +389,30 @@ public class DateTimeTypeTest {
         assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
         dt2 = dt.toZone(parameterSet.defaultTimeZone.toZoneId());
         assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
-        boolean thrown = false;
-        try {
-            dt2 = dt.toZone("XXX");
-        } catch (DateTimeException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
     }
 
-    private DateTimeType createDateTimeType() {
-        DateTimeType dt = null;
-        if (parameterSet.inputTimeMap != null && parameterSet.inputTimeZone != null) {
-            int durationInNano = (int) TimeUnit.NANOSECONDS.convert(parameterSet.inputTimeMap.get("milliseconds"),
+    @Test(expected = DateTimeException.class)
+    public void changingZoneThrowsExceptionTest() {
+        DateTimeType dt = createDateTimeType();
+        dt.toZone("XXX");
+    }
+
+    private DateTimeType createDateTimeType() throws DateTimeException {
+        Map<String, Integer> inputTimeMap = parameterSet.inputTimeMap;
+        TimeZone inputTimeZone = parameterSet.inputTimeZone;
+        String inputTimeString = parameterSet.inputTimeString;
+        if (inputTimeMap != null && inputTimeZone != null) {
+            int durationInNano = (int) TimeUnit.NANOSECONDS.convert(inputTimeMap.get("milliseconds"),
                     TimeUnit.MILLISECONDS);
 
-            LocalDateTime dateTime = LocalDateTime.of(parameterSet.inputTimeMap.get("year"),
-                    parameterSet.inputTimeMap.get("month") + 1, parameterSet.inputTimeMap.get("date"),
-                    parameterSet.inputTimeMap.get("hourOfDay"), parameterSet.inputTimeMap.get("minute"),
-                    parameterSet.inputTimeMap.get("second"), durationInNano);
-            ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, parameterSet.inputTimeZone.toZoneId());
-            dt = new DateTimeType(zonedDate);
-        } else if (parameterSet.inputTimeString != null) {
-            dt = new DateTimeType(parameterSet.inputTimeString);
+            LocalDateTime dateTime = LocalDateTime.of(inputTimeMap.get("year"), inputTimeMap.get("month") + 1,
+                    inputTimeMap.get("date"), inputTimeMap.get("hourOfDay"), inputTimeMap.get("minute"),
+                    inputTimeMap.get("second"), durationInNano);
+            ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, inputTimeZone.toZoneId());
+            return new DateTimeType(zonedDate);
+        } else if (inputTimeString != null) {
+            return new DateTimeType(inputTimeString);
         }
-        return dt;
+        throw new DateTimeException("Invalid inputs in parameter set");
     }
 }
