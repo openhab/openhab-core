@@ -12,6 +12,7 @@
  */
 package org.eclipse.smarthome.ui.internal.items;
 
+import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -537,15 +538,22 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private String fillFormatPattern(String formatPattern, Type state) throws IllegalArgumentException {
         String ret = formatPattern;
-        if (ret != null && state != null) {
+        Type itemState = state;
+        if (state instanceof DateTimeType) {
+            try {
+                itemState = ((DateTimeType) state).toLocaleZone();
+            } catch (DateTimeException e) {
+            }
+        }
+        if (ret != null && itemState != null) {
             Matcher matcher = EXTRACT_TRANSFORMFUNCTION_PATTERN_WITHOUT_SQUARE_BRACKETS.matcher(ret);
             if (matcher.find()) {
                 String type = matcher.group(1);
                 String pattern = matcher.group(2);
                 String value = matcher.group(3);
-                ret = type + "(" + pattern + "):" + state.format(value);
+                ret = type + "(" + pattern + "):" + itemState.format(value);
             } else {
-                ret = state.format(formatPattern);
+                ret = itemState.format(formatPattern);
             }
         }
         return ret;
