@@ -12,11 +12,13 @@
  */
 package org.eclipse.smarthome.core.library.types;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.zone.ZoneRulesException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -34,6 +36,7 @@ import org.eclipse.smarthome.core.types.State;
  * @author Erdoan Hadzhiyusein - Refactored to use ZonedDateTime
  * @author Jan N. Klug - add ability to use time or date only
  * @author Wouter Born - increase parsing and formatting precision
+ * @author Laurent Garnier - added methods toLocaleZone and toZone
  */
 @NonNullByDefault
 public class DateTimeType implements PrimitiveType, State, Command {
@@ -108,7 +111,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
             throw new IllegalArgumentException(zonedValue + " is not in a valid format.", invalidFormatException);
         }
 
-        zonedDateTime = date;
+        zonedDateTime = date.withFixedOffsetZone();
     }
 
     /**
@@ -138,6 +141,46 @@ public class DateTimeType implements PrimitiveType, State, Command {
 
     public String format(Locale locale, String pattern) {
         return String.format(locale, pattern, zonedDateTime);
+    }
+
+    /**
+     * Create a {@link DateTimeType} being the translation of the current object to the locale time zone
+     *
+     * @return a {@link DateTimeType} translated to the locale time zone
+     *
+     * @throws DateTimeException if the converted zone ID has an invalid format or the result exceeds the supported date
+     *             range
+     * @throws ZoneRulesException if the converted zone region ID cannot be found
+     */
+    public DateTimeType toLocaleZone() throws DateTimeException, ZoneRulesException {
+        return toZone(ZoneId.systemDefault());
+    }
+
+    /**
+     * Create a {@link DateTimeType} being the translation of the current object to a given zone
+     *
+     * @param zone the target zone as a string
+     *
+     * @return a {@link DateTimeType} translated to the given zone
+     *
+     * @throws DateTimeException if the zone has an invalid format or the result exceeds the supported date range
+     * @throws ZoneRulesException if the zone is a region ID that cannot be found
+     */
+    public DateTimeType toZone(String zone) throws DateTimeException, ZoneRulesException {
+        return toZone(ZoneId.of(zone));
+    }
+
+    /**
+     * Create a {@link DateTimeType} being the translation of the current object to a given zone
+     *
+     * @param zoneId the target {@link ZoneId}
+     *
+     * @return a {@link DateTimeType} translated to the given zone
+     *
+     * @throws DateTimeException if the result exceeds the supported date range
+     */
+    public DateTimeType toZone(ZoneId zoneId) throws DateTimeException {
+        return new DateTimeType(zonedDateTime.withZoneSameInstant(zoneId));
     }
 
     @Override
