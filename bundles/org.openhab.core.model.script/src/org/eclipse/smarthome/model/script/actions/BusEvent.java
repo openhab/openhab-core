@@ -71,6 +71,20 @@ public class BusEvent {
     }
 
     /**
+     * Sends a state as a command for a specified item to the event bus.
+     *
+     * @param item the item to send the command to
+     * @param state the state from which to get the command to send
+     */
+    static public Object sendCommand(Item item, State state) {
+        if (item != null && state != null) {
+            return sendCommand(item.getName(), state.toString());
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Sends a command for a specified item to the event bus.
      *
      * @param itemName the name of the item to send the command to
