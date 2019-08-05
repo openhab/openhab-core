@@ -76,12 +76,12 @@ public class ClientCallback implements MqttCallback {
         List<MqttMessageSubscriber> matches = new ArrayList<>();
         synchronized (subscribers) {
             subscribers.values().forEach(subscriberList -> {
-                if (topic.matches(subscriberList.regexMatchTopic)) {
-                    logger.trace("Topic match for '{}' using regex {}", topic, subscriberList.regexMatchTopic);
+                if (subscriberList.topicMatch(topic)) {
+                    logger.trace("Topic match for '{}' using regex {}", topic, subscriberList.getTopicRegexPattern());
                     subscriberList.forEach(consumer -> matches.add(consumer));
                 } else {
-                    logger.trace("No topic match for '{}' using regex {}", topic, subscriberList.regexMatchTopic);
-
+                    logger.trace("No topic match for '{}' using regex {}", topic,
+                            subscriberList.getTopicRegexPattern());
                 }
             });
 
