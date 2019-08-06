@@ -116,8 +116,7 @@ public class RuleImpl implements Rule {
     }
 
     @Override
-    @Nullable
-    public String getTemplateUID() {
+    public @Nullable String getTemplateUID() {
         return templateUID;
     }
 
@@ -131,8 +130,7 @@ public class RuleImpl implements Rule {
     }
 
     @Override
-    @Nullable
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
@@ -160,8 +158,7 @@ public class RuleImpl implements Rule {
     }
 
     @Override
-    @Nullable
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 

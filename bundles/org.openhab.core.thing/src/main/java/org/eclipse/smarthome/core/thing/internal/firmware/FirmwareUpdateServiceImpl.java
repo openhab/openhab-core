@@ -167,8 +167,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     }
 
     @Override
-    @Nullable
-    public FirmwareStatusInfo getFirmwareStatusInfo(ThingUID thingUID) {
+    public @Nullable FirmwareStatusInfo getFirmwareStatusInfo(ThingUID thingUID) {
         ParameterChecks.checkNotNull(thingUID, "Thing UID");
         FirmwareUpdateHandler firmwareUpdateHandler = getFirmwareUpdateHandler(thingUID);
 
@@ -252,8 +251,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     }
 
     @Override
-    @Nullable
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return null;
     }
 
@@ -282,8 +280,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
         return entry;
     }
 
-    @Nullable
-    private Firmware getLatestSuitableFirmware(Thing thing) {
+    private @Nullable Firmware getLatestSuitableFirmware(Thing thing) {
         Collection<Firmware> firmwares = firmwareRegistry.getFirmwares(thing);
         if (firmwares != null) {
             Optional<Firmware> first = firmwares.stream().findFirst();
@@ -380,8 +377,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
         return firmware;
     }
 
-    @Nullable
-    private FirmwareUpdateHandler getFirmwareUpdateHandler(ThingUID thingUID) {
+    private @Nullable FirmwareUpdateHandler getFirmwareUpdateHandler(ThingUID thingUID) {
         for (FirmwareUpdateHandler firmwareUpdateHandler : firmwareUpdateHandlers) {
             if (thingUID.equals(firmwareUpdateHandler.getThing().getUID())) {
                 return firmwareUpdateHandler;
@@ -390,8 +386,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
         return null;
     }
 
-    @Nullable
-    private String getThingFirmwareVersion(FirmwareUpdateHandler firmwareUpdateHandler) {
+    private @Nullable String getThingFirmwareVersion(FirmwareUpdateHandler firmwareUpdateHandler) {
         return firmwareUpdateHandler.getThing().getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION);
     }
 

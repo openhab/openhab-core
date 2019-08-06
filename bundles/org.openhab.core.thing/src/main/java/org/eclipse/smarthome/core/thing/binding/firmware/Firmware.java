@@ -72,7 +72,7 @@ public interface Firmware extends Comparable<Firmware> {
      *
      * @return the thing type UID (not null)
      */
-    public ThingTypeUID getThingTypeUID();
+    ThingTypeUID getThingTypeUID();
 
     /**
      * Returns the vendor of the firmware.
@@ -80,7 +80,7 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the vendor of the firmware (can be null)
      */
     @Nullable
-    public String getVendor();
+    String getVendor();
 
     /**
      * Returns the model of the firmware.
@@ -88,14 +88,14 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the model of the firmware (can be null)
      */
     @Nullable
-    public String getModel();
+    String getModel();
 
     /**
      * Returns whether this firmware is restricted to things with the model provided by the {@link #getModel()} method.
      *
      * @return whether the firmware is restricted to a particular model
      */
-    public boolean isModelRestricted();
+    boolean isModelRestricted();
 
     /**
      * Returns the description of the firmware.
@@ -103,14 +103,14 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the description of the firmware (can be null)
      */
     @Nullable
-    public String getDescription();
+    String getDescription();
 
     /**
      * Returns the version of the firmware.
      *
      * @return the version of the firmware (not null)
      */
-    public String getVersion();
+    String getVersion();
 
     /**
      * Returns the prerequisite version of the firmware.
@@ -121,14 +121,14 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the prerequisite version of the firmware (can be null)
      */
     @Nullable
-    public String getPrerequisiteVersion();
+    String getPrerequisiteVersion();
 
     /**
      * Provides the restriction of the firmware as {@link FirmwareRestriction} function.
      *
      * @return the restriction of the firmware as {@link FirmwareRestriction} function (not null)
      */
-    public FirmwareRestriction getFirmwareRestriction();
+    FirmwareRestriction getFirmwareRestriction();
 
     /**
      * Returns the changelog of the firmware.
@@ -136,7 +136,7 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the changelog of the firmware (can be null)
      */
     @Nullable
-    public String getChangelog();
+    String getChangelog();
 
     /**
      * Returns the URL to the online changelog of the firmware.
@@ -144,7 +144,7 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the URL the an online changelog of the firmware (can be null)
      */
     @Nullable
-    public URL getOnlineChangelog();
+    URL getOnlineChangelog();
 
     /**
      * Returns the input stream for the binary content of the firmware.
@@ -152,7 +152,7 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the input stream for the binary content of the firmware (can be null)
      */
     @Nullable
-    public InputStream getInputStream();
+    InputStream getInputStream();
 
     /**
      * Returns the MD5 hash value of the firmware.
@@ -160,7 +160,7 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the MD5 hash value of the firmware (can be null)
      */
     @Nullable
-    public String getMd5Hash();
+    String getMd5Hash();
 
     /**
      * Returns the binary content of the firmware using the firmware´s input stream. If the firmware provides a MD5 hash
@@ -169,14 +169,14 @@ public interface Firmware extends Comparable<Firmware> {
      * @return the binary content of the firmware (can be null)
      * @throws IllegalStateException if the MD5 hash value of the firmware is invalid
      */
-    public byte @Nullable [] getBytes();
+    byte @Nullable [] getBytes();
 
     /**
      * Returns the immutable properties of the firmware.
      *
      * @return the immutable properties of the firmware (not null)
      */
-    public Map<String, String> getProperties();
+    Map<String, String> getProperties();
 
     /**
      * Returns true, if this firmware is a successor version of the given firmware version, otherwise false. If the
@@ -185,7 +185,7 @@ public interface Firmware extends Comparable<Firmware> {
      * @param firmwareVersion the firmware version to be compared
      * @return true, if this firmware is a successor version for the given firmware version, otherwise false
      */
-    public boolean isSuccessorVersion(@Nullable String firmwareVersion);
+    boolean isSuccessorVersion(@Nullable String firmwareVersion);
 
     /**
      * Checks whether this firmware is suitable for the given thing.
@@ -194,5 +194,5 @@ public interface Firmware extends Comparable<Firmware> {
      * @return <code>true</code> if the current firmware is suitable for the given thing and <code>false</code>
      *         otherwise.
      */
-    public boolean isSuitableFor(Thing thing);
+    boolean isSuitableFor(Thing thing);
 }

@@ -54,18 +54,15 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractFileTransformationService<T> implements TransformationService {
 
-    @Nullable
-    private WatchService watchService = null;
+    private @Nullable WatchService watchService = null;
 
     protected final Map<String, T> cachedFiles = new ConcurrentHashMap<>();
     protected final List<String> watchedDirectories = new ArrayList<String>();
 
     private final Logger logger = LoggerFactory.getLogger(AbstractFileTransformationService.class);
 
-    @NonNullByDefault({})
-    private LocaleProvider localeProvider;
-    @NonNullByDefault({})
-    private ServiceTracker<LocaleProvider, LocaleProvider> localeProviderTracker;
+    private @NonNullByDefault({}) LocaleProvider localeProvider;
+    private @NonNullByDefault({}) ServiceTracker<LocaleProvider, LocaleProvider> localeProviderTracker;
 
     private class LocaleProviderServiceTrackerCustomizer
             implements ServiceTrackerCustomizer<LocaleProvider, LocaleProvider> {

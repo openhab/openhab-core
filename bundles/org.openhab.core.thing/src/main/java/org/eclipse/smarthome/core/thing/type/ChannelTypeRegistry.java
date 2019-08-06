@@ -65,8 +65,7 @@ public class ChannelTypeRegistry {
      *
      * @return channel type or null if no channel type for the given UID exists
      */
-    @Nullable
-    public ChannelType getChannelType(@Nullable ChannelTypeUID channelTypeUID) {
+    public @Nullable ChannelType getChannelType(@Nullable ChannelTypeUID channelTypeUID) {
         return getChannelType(channelTypeUID, null);
     }
 
@@ -76,8 +75,7 @@ public class ChannelTypeRegistry {
      * @param locale (can be null)
      * @return channel type or null if no channel type for the given UID exists
      */
-    @Nullable
-    public ChannelType getChannelType(@Nullable ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
+    public @Nullable ChannelType getChannelType(@Nullable ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
         if (channelTypeUID == null) {
             return null;
         }

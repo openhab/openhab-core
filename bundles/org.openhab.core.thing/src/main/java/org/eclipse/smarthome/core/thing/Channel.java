@@ -47,8 +47,8 @@ public class Channel {
 
     private final ChannelKind kind;
 
-    @NonNullByDefault({}) // uid might not have been initialized by the default constructor.
-    private ChannelUID uid;
+    // uid might not have been initialized by the default constructor.
+    private @NonNullByDefault({}) ChannelUID uid;
 
     private @Nullable ChannelTypeUID channelTypeUID;
 

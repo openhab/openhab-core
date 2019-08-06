@@ -73,14 +73,12 @@ public class RuleTemplate implements Template {
     /**
      * Holds the short, human-readable label of the {@link RuleTemplate}.
      */
-    @Nullable
-    private final String label;
+    private final @Nullable String label;
 
     /**
      * Describes the usage of the {@link RuleTemplate} and its benefits.
      */
-    @Nullable
-    private final String description;
+    private final @Nullable String description;
 
     /**
      * Determines {@link Visibility} of the {@link RuleTemplate}.
@@ -97,19 +95,19 @@ public class RuleTemplate implements Template {
      * belong to the template. When {@code null} is passed for the {@code uid} parameter, the {@link RuleTemplate}'s
      * identifier will be randomly generated.
      *
-     * @param uid                the {@link RuleTemplate}'s identifier, or {@code null} if a random identifier should be
-     *                           generated.
-     * @param label              the short human-readable {@link RuleTemplate}'s label.
-     * @param description        a detailed human-readable {@link RuleTemplate}'s description.
-     * @param tags               the {@link RuleTemplate}'s assigned tags.
-     * @param triggers           the {@link RuleTemplate}'s triggers list, or {@code null} if the {@link RuleTemplate}
-     *                           should have no triggers.
-     * @param conditions         the {@link RuleTemplate}'s conditions list, or {@code null} if the {@link RuleTemplate}
-     *                           should have no conditions.
-     * @param actions            the {@link RuleTemplate}'s actions list, or {@code null} if the {@link RuleTemplate}
-     *                           should have no actions.
+     * @param uid the {@link RuleTemplate}'s identifier, or {@code null} if a random identifier should be
+     *            generated.
+     * @param label the short human-readable {@link RuleTemplate}'s label.
+     * @param description a detailed human-readable {@link RuleTemplate}'s description.
+     * @param tags the {@link RuleTemplate}'s assigned tags.
+     * @param triggers the {@link RuleTemplate}'s triggers list, or {@code null} if the {@link RuleTemplate}
+     *            should have no triggers.
+     * @param conditions the {@link RuleTemplate}'s conditions list, or {@code null} if the {@link RuleTemplate}
+     *            should have no conditions.
+     * @param actions the {@link RuleTemplate}'s actions list, or {@code null} if the {@link RuleTemplate}
+     *            should have no actions.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Rule} instances.
-     * @param visibility         the {@link RuleTemplate}'s visibility.
+     * @param visibility the {@link RuleTemplate}'s visibility.
      */
     public RuleTemplate(@Nullable String UID, @Nullable String label, @Nullable String description,
             @Nullable Set<String> tags, @Nullable List<Trigger> triggers, @Nullable List<Condition> conditions,
@@ -207,7 +205,7 @@ public class RuleTemplate implements Template {
      * Gets the modules of the {@link RuleTemplate}, corresponding to the specified class.
      *
      * @param moduleClazz defines the class of the looking modules. It can be {@link Module}, {@link Trigger},
-     *                    {@link Condition} or {@link Action}.
+     *            {@link Condition} or {@link Action}.
      * @return the modules of defined type or empty list if the {@link RuleTemplate} has no modules that belong to the
      *         specified type.
      */

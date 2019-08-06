@@ -123,27 +123,19 @@ public class ItemResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_ITEMS = "items";
 
-    @NonNullByDefault({})
     @Context
+    @NonNullByDefault({})
     UriInfo uriInfo;
 
-    @NonNullByDefault({})
-    private ItemRegistry itemRegistry;
-    @NonNullByDefault({})
-    private MetadataRegistry metadataRegistry;
-    @NonNullByDefault({})
-    private EventPublisher eventPublisher;
-    @NonNullByDefault({})
-    private ManagedItemProvider managedItemProvider;
-    @NonNullByDefault({})
-    private DTOMapper dtoMapper;
-    @NonNullByDefault({})
-    private MetadataSelectorMatcher metadataSelectorMatcher;
-    @NonNullByDefault({})
-    private ItemBuilderFactory itemBuilderFactory;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
+    private @NonNullByDefault({}) EventPublisher eventPublisher;
+    private @NonNullByDefault({}) ManagedItemProvider managedItemProvider;
+    private @NonNullByDefault({}) DTOMapper dtoMapper;
+    private @NonNullByDefault({}) MetadataSelectorMatcher metadataSelectorMatcher;
+    private @NonNullByDefault({}) ItemBuilderFactory itemBuilderFactory;
 
-    @NonNullByDefault({})
-    private LocaleService localeService;
+    private @NonNullByDefault({}) LocaleService localeService;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     protected void setItemRegistry(ItemRegistry itemRegistry) {

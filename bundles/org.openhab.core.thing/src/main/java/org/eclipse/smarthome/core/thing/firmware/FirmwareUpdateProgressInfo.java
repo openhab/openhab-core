@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -124,7 +123,6 @@ public final class FirmwareUpdateProgressInfo {
      * @return FirmwareUpdateProgressInfo object (not null)
      * @throws IllegalArgumentException if sequence is null or empty
      */
-    @NonNull
     public static FirmwareUpdateProgressInfo createFirmwareUpdateProgressInfo(ThingUID thingUID,
             ThingTypeUID thingTypeUID, String firmwareVersion, ProgressStep progressStep,
             Collection<ProgressStep> sequence, boolean pending) {
@@ -172,8 +170,7 @@ public final class FirmwareUpdateProgressInfo {
      *
      * @return the progress between 0 and 100 or null if no progress was set
      */
-    @Nullable
-    public Integer getProgress() {
+    public @Nullable Integer getProgress() {
         return progress;
     }
 

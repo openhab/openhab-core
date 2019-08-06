@@ -41,10 +41,8 @@ public class RawRockerDimmerProfile implements TriggerProfile {
 
     private final ProfileContext context;
 
-    @Nullable
-    private ScheduledFuture<?> dimmFuture;
-    @Nullable
-    private ScheduledFuture<?> timeoutFuture;
+    private @Nullable ScheduledFuture<?> dimmFuture;
+    private @Nullable ScheduledFuture<?> timeoutFuture;
 
     private long pressedTime = 0;
 

@@ -131,8 +131,7 @@ public class SafeCallManagerImpl implements SafeCallManager {
         }
     }
 
-    @Nullable
-    public Invocation dequeue(Object identifier) {
+    public @Nullable Invocation dequeue(Object identifier) {
         synchronized (queues) {
             Queue<Invocation> queue = queues.get(identifier);
             if (queue != null) {
@@ -143,8 +142,7 @@ public class SafeCallManagerImpl implements SafeCallManager {
     }
 
     @Override
-    @Nullable
-    public Invocation getActiveInvocation() {
+    public @Nullable Invocation getActiveInvocation() {
         synchronized (activeIdentifiers) {
             for (Invocation invocation : activeIdentifiers.values()) {
                 if (invocation.getThread() == Thread.currentThread()) {

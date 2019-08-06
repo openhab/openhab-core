@@ -38,8 +38,8 @@ class InvocationHandlerAsync<T> extends AbstractInvocationHandler<T> implements 
     }
 
     @Override
-    @Nullable
-    public Object invoke(@Nullable Object proxy, @Nullable Method method, Object @Nullable [] args) throws Throwable {
+    public @Nullable Object invoke(@Nullable Object proxy, @Nullable Method method, Object @Nullable [] args)
+            throws Throwable {
         if (method != null) {
             try {
                 getManager().enqueue(new Invocation(this, method, args));

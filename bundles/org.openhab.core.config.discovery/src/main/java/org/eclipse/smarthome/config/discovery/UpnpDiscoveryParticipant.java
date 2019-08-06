@@ -43,7 +43,7 @@ public interface UpnpDiscoveryParticipant {
      *
      * @return a set of thing type UIDs for which results can be created
      */
-    public Set<ThingTypeUID> getSupportedThingTypeUIDs();
+    Set<ThingTypeUID> getSupportedThingTypeUIDs();
 
     /**
      * Creates a discovery result for a upnp device
@@ -52,7 +52,8 @@ public interface UpnpDiscoveryParticipant {
      * @return the according discovery result or <code>null</code>, if device is not
      *         supported by this participant
      */
-    public @Nullable DiscoveryResult createResult(RemoteDevice device);
+    @Nullable
+    DiscoveryResult createResult(RemoteDevice device);
 
     /**
      * Returns the thing UID for a upnp device
@@ -61,5 +62,6 @@ public interface UpnpDiscoveryParticipant {
      * @return a thing UID or <code>null</code>, if device is not supported
      *         by this participant
      */
-    public @Nullable ThingUID getThingUID(RemoteDevice device);
+    @Nullable
+    ThingUID getThingUID(RemoteDevice device);
 }

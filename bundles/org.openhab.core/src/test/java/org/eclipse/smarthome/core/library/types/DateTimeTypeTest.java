@@ -62,23 +62,20 @@ public class DateTimeTypeTest {
          * input time.
          * used to call the {@link Calendar#set(int, int, int, int, int, int)} method to set the time.
          */
-        @Nullable
-        public final Map<String, Integer> inputTimeMap;
+        public final @Nullable Map<String, Integer> inputTimeMap;
         /**
          * input time zone.
          * used to call the {@link Calendar#setTimeZone(TimeZone)} to set the time zone.
          * the time zone offset has direct impact on the result.
          */
-        @Nullable
-        public final TimeZone inputTimeZone;
+        public final @Nullable TimeZone inputTimeZone;
         /**
          * direct input of a time string (with or without time zone).
          *
          * @see {@link DateTimeType#valueOf(String)}
          *      if this is set, the {@link ParameterSet#inputTimeMap} and {@link ParameterSet#inputTimeZone} are ignored
          */
-        @Nullable
-        public final String inputTimeString;
+        public final @Nullable String inputTimeString;
         /**
          * the expected result of the test without any additional translation to the time zone specified in the
          * {@link ParameterSet#defaultTimeZone}.
@@ -101,14 +98,12 @@ public class DateTimeTypeTest {
         /**
          * the locale parameter to be used to test the method {@link DateTimeType#format(Locale, String)}.
          */
-        @Nullable
-        public final Locale locale;
+        public final @Nullable Locale locale;
         /**
          * the pattern parameter to be used to test the method {@link DateTimeType#format(Locale, String)}
          * or {@link DateTimeType#format(String)}.
          */
-        @Nullable
-        public final String pattern;
+        public final @Nullable String pattern;
         /**
          * the expected result when testing the method {@link DateTimeType#format(Locale, String)}
          * or {@link DateTimeType#format(String)}.

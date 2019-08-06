@@ -63,14 +63,12 @@ public abstract class ModuleType implements Identifiable<String> {
     /**
      * Defines short and accurate, human-readable label of the {@link ModuleType}.
      */
-    @Nullable
-    private final String label;
+    private final @Nullable String label;
 
     /**
      * Defines detailed, human-readable description of usage of {@link ModuleType} and its benefits.
      */
-    @Nullable
-    private final String description;
+    private final @Nullable String description;
 
     /**
      * Describes meta-data for the configuration of the future {@link Module} instances.
@@ -81,8 +79,8 @@ public abstract class ModuleType implements Identifiable<String> {
      * Creates a {@link ModuleType} instance. This constructor is responsible to initialize common base properties of
      * the {@link ModuleType}s.
      *
-     * @param UID                the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
-     *                           generated.
+     * @param UID the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
+     *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Module} instances
      */
     public ModuleType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions) {
@@ -93,17 +91,17 @@ public abstract class ModuleType implements Identifiable<String> {
      * Creates a {@link ModuleType} instance. This constructor is responsible to initialize all common properties of
      * the {@link ModuleType}s.
      *
-     * @param UID                the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
-     *                           generated.
+     * @param UID the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
+     *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Module} instances.
-     * @param label              a short and accurate, human-readable label of the {@link ModuleType}.
-     * @param description        a detailed, human-readable description of usage of {@link ModuleType} and its benefits.
-     * @param tags               defines categories that fit the {@link ModuleType} and which can serve as criteria for
-     *                           searching or filtering it.
-     * @param visibility         determines whether the {@link ModuleType} can be used by anyone if it is
-     *                           {@link Visibility#VISIBLE} or only by its creator if it is {@link Visibility#HIDDEN}.
-     *                           If {@code null} is provided the default visibility {@link Visibility#VISIBLE} will be
-     *                           used.
+     * @param label a short and accurate, human-readable label of the {@link ModuleType}.
+     * @param description a detailed, human-readable description of usage of {@link ModuleType} and its benefits.
+     * @param tags defines categories that fit the {@link ModuleType} and which can serve as criteria for
+     *            searching or filtering it.
+     * @param visibility determines whether the {@link ModuleType} can be used by anyone if it is
+     *            {@link Visibility#VISIBLE} or only by its creator if it is {@link Visibility#HIDDEN}.
+     *            If {@code null} is provided the default visibility {@link Visibility#VISIBLE} will be
+     *            used.
      */
     public ModuleType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,

@@ -64,11 +64,9 @@ public class ThingImpl implements Thing {
 
     private Map<String, String> properties = new HashMap<>();
 
-    @NonNullByDefault({})
-    private ThingUID uid;
+    private @NonNullByDefault({}) ThingUID uid;
 
-    @NonNullByDefault({})
-    private ThingTypeUID thingTypeUID;
+    private @NonNullByDefault({}) ThingTypeUID thingTypeUID;
 
     private @Nullable String location;
 

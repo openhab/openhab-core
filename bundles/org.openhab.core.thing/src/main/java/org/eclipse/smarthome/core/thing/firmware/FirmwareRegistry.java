@@ -46,7 +46,7 @@ public interface FirmwareRegistry {
      * @throws IllegalArgumentException if the thing is null; if the firmware version is null or empty
      */
     @Nullable
-    public Firmware getFirmware(Thing thing, String firmwareVersion);
+    Firmware getFirmware(Thing thing, String firmwareVersion);
 
     /**
      * Returns the firmware for the given thing, firmware version and locale.
@@ -58,7 +58,7 @@ public interface FirmwareRegistry {
      * @throws IllegalArgumentException if the thing is null; if the firmware version is null or empty
      */
     @Nullable
-    public Firmware getFirmware(Thing thing, String firmwareVersion, Locale locale);
+    Firmware getFirmware(Thing thing, String firmwareVersion, Locale locale);
 
     /**
      * Returns the latest firmware for the given thing, using the locale provided by the {@link LocaleProvider}.
@@ -68,7 +68,7 @@ public interface FirmwareRegistry {
      * @throws IllegalArgumentException if the thing is null
      */
     @Nullable
-    public Firmware getLatestFirmware(Thing thing);
+    Firmware getLatestFirmware(Thing thing);
 
     /**
      * Returns the latest firmware for the given thing and locale.
@@ -79,7 +79,7 @@ public interface FirmwareRegistry {
      * @throws IllegalArgumentException if the thing is null
      */
     @Nullable
-    public Firmware getLatestFirmware(Thing thing, @Nullable Locale locale);
+    Firmware getLatestFirmware(Thing thing, @Nullable Locale locale);
 
     /**
      * Returns the collection of available firmwares for the given thing using the locale provided by the
@@ -90,7 +90,7 @@ public interface FirmwareRegistry {
      * @return the collection of available firmwares for the given thing (not null)
      * @throws IllegalArgumentException if the thing is null
      */
-    public Collection<Firmware> getFirmwares(Thing thing);
+    Collection<Firmware> getFirmwares(Thing thing);
 
     /**
      * Returns the collection of available firmwares for the given thing and locale. The collection is
@@ -101,5 +101,5 @@ public interface FirmwareRegistry {
      * @return the collection of available firmwares for the given thing (not null)
      * @throws IllegalArgumentException if the thing is null
      */
-    public Collection<Firmware> getFirmwares(Thing thing, @Nullable Locale locale);
+    Collection<Firmware> getFirmwares(Thing thing, @Nullable Locale locale);
 }

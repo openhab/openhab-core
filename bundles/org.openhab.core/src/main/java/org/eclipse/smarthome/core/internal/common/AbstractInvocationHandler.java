@@ -48,10 +48,9 @@ abstract class AbstractInvocationHandler<T> {
     private final T target;
     private final Object identifier;
     private final long timeout;
-    @Nullable
-    private final Consumer<Throwable> exceptionHandler;
-    @Nullable
-    private final Runnable timeoutHandler;
+
+    private final @Nullable Consumer<Throwable> exceptionHandler;
+    private final @Nullable Runnable timeoutHandler;
 
     AbstractInvocationHandler(SafeCallManager manager, T target, Object identifier, long timeout,
             @Nullable Consumer<Throwable> exceptionHandler, @Nullable Runnable timeoutHandler) {

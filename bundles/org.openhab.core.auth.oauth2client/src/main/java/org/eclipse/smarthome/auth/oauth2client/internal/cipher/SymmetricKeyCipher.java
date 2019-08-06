@@ -58,10 +58,8 @@ public class SymmetricKeyCipher implements StorageCipher {
     private static final int ENCRYPTION_KEY_SIZE_BITS = 128; // do not use high grade encryption due to export limit
     private static final int IV_BYTE_SIZE = 16;
 
-    @NonNullByDefault({})
-    private ConfigurationAdmin configurationAdmin;
-    @NonNullByDefault({})
-    private SecretKey encryptionKey;
+    private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
+    private @NonNullByDefault({}) SecretKey encryptionKey;
 
     private final SecureRandom random = new SecureRandom();
 
@@ -83,9 +81,8 @@ public class SymmetricKeyCipher implements StorageCipher {
         return CIPHER_ID;
     }
 
-    @Nullable
     @Override
-    public String encrypt(@Nullable String plainText) throws GeneralSecurityException {
+    public @Nullable String encrypt(@Nullable String plainText) throws GeneralSecurityException {
         if (plainText == null) {
             return null;
         }
@@ -107,9 +104,8 @@ public class SymmetricKeyCipher implements StorageCipher {
         return encryptedBase64String;
     }
 
-    @Nullable
     @Override
-    public String decrypt(@Nullable String base64CipherText) throws GeneralSecurityException {
+    public @Nullable String decrypt(@Nullable String base64CipherText) throws GeneralSecurityException {
         if (base64CipherText == null) {
             return null;
         }

@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.library.types.PercentType;
  * @author Harald Kuhn - Initial API
  * @author Kelly Davis - Modified to match discussion in #584
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
- * 
+ *
  */
 @NonNullByDefault
 public interface AudioSink {
@@ -37,7 +37,7 @@ public interface AudioSink {
      *
      * @return an id that identifies this service
      */
-    public String getId();
+    String getId();
 
     /**
      * Returns a localized human readable label that can be used within UIs.
@@ -46,7 +46,7 @@ public interface AudioSink {
      * @return a localized string to be used in UIs
      */
     @Nullable
-    public String getLabel(Locale locale);
+    String getLabel(Locale locale);
 
     /**
      * Processes the passed {@link AudioStream}
@@ -71,14 +71,14 @@ public interface AudioSink {
      *
      * @return A Set containing all supported audio formats
      */
-    public Set<AudioFormat> getSupportedFormats();
+    Set<AudioFormat> getSupportedFormats();
 
     /**
      * Gets a set containing all supported audio stream formats
-     * 
+     *
      * @return A Set containing all supported audio stream formats
      */
-    public Set<Class<? extends AudioStream>> getSupportedStreams();
+    Set<Class<? extends AudioStream>> getSupportedStreams();
 
     /**
      * Gets the volume
@@ -86,7 +86,7 @@ public interface AudioSink {
      * @return a PercentType value between 0 and 100 representing the actual volume
      * @throws IOException if the volume can not be determined
      */
-    public PercentType getVolume() throws IOException;
+    PercentType getVolume() throws IOException;
 
     /**
      * Sets the volume
@@ -94,5 +94,5 @@ public interface AudioSink {
      * @param volume a PercentType value between 0 and 100 representing the desired volume
      * @throws IOException if the volume can not be set
      */
-    public void setVolume(PercentType volume) throws IOException;
+    void setVolume(PercentType volume) throws IOException;
 }

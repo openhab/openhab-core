@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -68,7 +69,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegistry, DiscoveryListener {
 
-    private final HashMap<DiscoveryService, Set<DiscoveryResult>> cachedResults = new HashMap<>();
+    private final Map<DiscoveryService, Set<DiscoveryResult>> cachedResults = new HashMap<>();
 
     private final class AggregatingScanListener implements ScanListener {
 
@@ -137,8 +138,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
 
     private final Logger logger = LoggerFactory.getLogger(DiscoveryServiceRegistryImpl.class);
 
-    @NonNullByDefault({})
-    private SafeCaller safeCaller;
+    private @NonNullByDefault({}) SafeCaller safeCaller;
 
     @Activate
     protected void activate() {

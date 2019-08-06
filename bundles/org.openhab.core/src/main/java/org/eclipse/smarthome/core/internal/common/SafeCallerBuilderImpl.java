@@ -39,10 +39,8 @@ public class SafeCallerBuilderImpl<T> implements SafeCallerBuilder<T> {
     private final Class<?>[] interfaceTypes;
     private long timeout;
     private Object identifier;
-    @Nullable
-    private Consumer<Throwable> exceptionHandler;
-    @Nullable
-    private Runnable timeoutHandler;
+    private @Nullable Consumer<Throwable> exceptionHandler;
+    private @Nullable Runnable timeoutHandler;
     private boolean async;
     private final SafeCallManager manager;
 

@@ -12,8 +12,7 @@
  */
 package org.eclipse.smarthome.core.thing.internal.firmware;
 
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_FIRMWARE_VERSION;
-import static org.eclipse.smarthome.core.thing.Thing.PROPERTY_MODEL_ID;
+import static org.eclipse.smarthome.core.thing.Thing.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,14 +111,12 @@ public final class FirmwareImpl implements Firmware {
     }
 
     @Override
-    @Nullable
-    public String getVendor() {
+    public @Nullable String getVendor() {
         return vendor;
     }
 
     @Override
-    @Nullable
-    public String getModel() {
+    public @Nullable String getModel() {
         return model;
     }
 
@@ -129,8 +126,7 @@ public final class FirmwareImpl implements Firmware {
     }
 
     @Override
-    @Nullable
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
@@ -140,8 +136,7 @@ public final class FirmwareImpl implements Firmware {
     }
 
     @Override
-    @Nullable
-    public String getPrerequisiteVersion() {
+    public @Nullable String getPrerequisiteVersion() {
         return (prerequisiteVersion != null) ? prerequisiteVersion.toString() : null;
     }
 
@@ -151,26 +146,22 @@ public final class FirmwareImpl implements Firmware {
     }
 
     @Override
-    @Nullable
-    public String getChangelog() {
+    public @Nullable String getChangelog() {
         return changelog;
     }
 
     @Override
-    @Nullable
-    public URL getOnlineChangelog() {
+    public @Nullable URL getOnlineChangelog() {
         return onlineChangelog;
     }
 
     @Override
-    @Nullable
-    public InputStream getInputStream() {
+    public @Nullable InputStream getInputStream() {
         return inputStream;
     }
 
     @Override
-    @Nullable
-    public String getMd5Hash() {
+    public @Nullable String getMd5Hash() {
         return md5Hash;
     }
 

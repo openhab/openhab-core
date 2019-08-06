@@ -51,11 +51,8 @@ public class SemanticsServiceImpl implements SemanticsService {
 
     private static final String SYNONYMS_NAMESPACE = "synonyms";
 
-    @NonNullByDefault({})
-    private ItemRegistry itemRegistry;
-
-    @NonNullByDefault({})
-    private MetadataRegistry metadataRegistry;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
 
     void activate(BundleContext context) {
     }

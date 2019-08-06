@@ -37,14 +37,14 @@ public interface MDNSDiscoveryParticipant {
      *
      * @return a set of thing type UIDs for which results can be created
      */
-    public Set<ThingTypeUID> getSupportedThingTypeUIDs();
+    Set<ThingTypeUID> getSupportedThingTypeUIDs();
 
     /**
      * Defines the mDNS service type this participant listens to
      *
      * @return a valid mDNS service type (see: http://www.dns-sd.org/ServiceTypes.html)
      */
-    public String getServiceType();
+    String getServiceType();
 
     /**
      * Creates a discovery result for a mDNS service
@@ -53,7 +53,7 @@ public interface MDNSDiscoveryParticipant {
      * @return the according discovery result or <code>null</code>, if device is not
      *         supported by this participant
      */
-    public DiscoveryResult createResult(ServiceInfo service);
+    DiscoveryResult createResult(ServiceInfo service);
 
     /**
      * Returns the thing UID for a mDNS service
@@ -62,5 +62,5 @@ public interface MDNSDiscoveryParticipant {
      * @return a thing UID or <code>null</code>, if device is not supported
      *         by this participant
      */
-    public ThingUID getThingUID(ServiceInfo service);
+    ThingUID getThingUID(ServiceInfo service);
 }
