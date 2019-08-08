@@ -14,7 +14,7 @@ package org.eclipse.smarthome.core.persistence;
 
 import java.util.Date;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Chris Jackson - Initial contribution
  *
  */
+@NonNullByDefault
 public interface PersistenceItemInfo {
     /**
      * Returns the item name.
@@ -33,7 +34,6 @@ public interface PersistenceItemInfo {
      *
      * @return Item name
      */
-    @NonNull
     String getName();
 
     /**

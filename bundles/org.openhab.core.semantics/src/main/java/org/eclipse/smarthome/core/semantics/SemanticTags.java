@@ -65,13 +65,11 @@ public class SemanticTags {
      *            (e.g. "Bedroom").
      * @return the class for the id or null, if non exists.
      */
-    @Nullable
-    public static Class<? extends Tag> getById(String tagId) {
+    public static @Nullable Class<? extends Tag> getById(String tagId) {
         return TAGS.get(tagId);
     }
 
-    @Nullable
-    public static Class<? extends Tag> getByLabel(String tagLabel, Locale locale) {
+    public static @Nullable Class<? extends Tag> getByLabel(String tagLabel, Locale locale) {
         return TAGS.values().stream().distinct().filter(t -> getLabel(t, locale).equalsIgnoreCase(tagLabel)).findFirst()
                 .orElse(null);
     }
@@ -112,8 +110,7 @@ public class SemanticTags {
      * @param item the item to get the semantic type for
      * @return a sub-type of Location, Equipment or Point
      */
-    @Nullable
-    public static Class<? extends Tag> getSemanticType(Item item) {
+    public static @Nullable Class<? extends Tag> getSemanticType(Item item) {
         Set<String> tags = item.getTags();
         for (String tag : tags) {
             Class<? extends Tag> type = getById(tag);
@@ -141,8 +138,7 @@ public class SemanticTags {
      * @return a sub-type of Property if the item represents a Point, otherwise null
      */
     @SuppressWarnings("unchecked")
-    @Nullable
-    public static Class<? extends Property> getProperty(Item item) {
+    public static @Nullable Class<? extends Property> getProperty(Item item) {
         Set<String> tags = item.getTags();
         for (String tag : tags) {
             Class<? extends Tag> type = getById(tag);

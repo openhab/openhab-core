@@ -53,14 +53,12 @@ public final class FirmwareRegistryImpl implements FirmwareRegistry {
     private @NonNullByDefault({}) LocaleProvider localeProvider;
 
     @Override
-    @Nullable
-    public Firmware getFirmware(Thing thing, String firmwareVersion) {
+    public @Nullable Firmware getFirmware(Thing thing, String firmwareVersion) {
         return getFirmware(thing, firmwareVersion, localeProvider.getLocale());
     }
 
     @Override
-    @Nullable
-    public Firmware getFirmware(Thing thing, String firmwareVersion, @Nullable Locale locale) {
+    public @Nullable Firmware getFirmware(Thing thing, String firmwareVersion, @Nullable Locale locale) {
         ParameterChecks.checkNotNull(thing, "Thing");
         ParameterChecks.checkNotNullOrEmpty(firmwareVersion, "Firmware version");
 
@@ -83,14 +81,12 @@ public final class FirmwareRegistryImpl implements FirmwareRegistry {
     }
 
     @Override
-    @Nullable
-    public Firmware getLatestFirmware(Thing thing) {
+    public @Nullable Firmware getLatestFirmware(Thing thing) {
         return getLatestFirmware(thing, localeProvider.getLocale());
     }
 
     @Override
-    @Nullable
-    public Firmware getLatestFirmware(Thing thing, @Nullable Locale locale) {
+    public @Nullable Firmware getLatestFirmware(Thing thing, @Nullable Locale locale) {
         Locale loc = locale != null ? locale : localeProvider.getLocale();
         Collection<Firmware> firmwares = getFirmwares(thing, loc);
 

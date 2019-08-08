@@ -41,7 +41,7 @@ public interface FirmwareUpdateService {
      *         available)
      */
     @Nullable
-    public FirmwareStatusInfo getFirmwareStatusInfo(ThingUID thingUID);
+    FirmwareStatusInfo getFirmwareStatusInfo(ThingUID thingUID);
 
     /**
      * Updates the firmware of the thing having the given thing UID by invoking the operation
@@ -66,7 +66,7 @@ public interface FirmwareUpdateService {
      *             <li>the firmware requires another prerequisite firmware version</li>
      *             </ul>
      */
-    public void updateFirmware(final ThingUID thingUID, final String firmwareVersion, @Nullable final Locale locale);
+    void updateFirmware(final ThingUID thingUID, final String firmwareVersion, @Nullable final Locale locale);
 
     /**
      * Cancels the firmware update of the thing having the given thing UID by invoking the operation
@@ -74,5 +74,5 @@ public interface FirmwareUpdateService {
      *
      * @param thingUID the thing UID (must not be null)
      */
-    public void cancelFirmwareUpdate(final ThingUID thingUID);
+    void cancelFirmwareUpdate(final ThingUID thingUID);
 }

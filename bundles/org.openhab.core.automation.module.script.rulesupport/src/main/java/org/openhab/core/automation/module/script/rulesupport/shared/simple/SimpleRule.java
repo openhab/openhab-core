@@ -44,28 +44,17 @@ import org.openhab.core.automation.template.RuleTemplate;
 @NonNullByDefault
 public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
 
-    @NonNullByDefault({})
-    protected List<Trigger> triggers;
-    @NonNullByDefault({})
-    protected List<Condition> conditions;
-    @NonNullByDefault({})
-    protected List<Action> actions;
-    @NonNullByDefault({})
-    protected Configuration configuration;
-    @NonNullByDefault({})
-    protected List<ConfigDescriptionParameter> configDescriptions;
-    @Nullable
-    protected String templateUID;
-    @NonNullByDefault({})
-    protected String uid;
-    @Nullable
-    protected String name;
-    @NonNullByDefault({})
-    protected Set<String> tags;
-    @NonNullByDefault({})
-    protected Visibility visibility;
-    @Nullable
-    protected String description;
+    protected @NonNullByDefault({}) List<Trigger> triggers;
+    protected @NonNullByDefault({}) List<Condition> conditions;
+    protected @NonNullByDefault({}) List<Action> actions;
+    protected @NonNullByDefault({}) Configuration configuration;
+    protected @NonNullByDefault({}) List<ConfigDescriptionParameter> configDescriptions;
+    protected @Nullable String templateUID;
+    protected @NonNullByDefault({}) String uid;
+    protected @Nullable String name;
+    protected @NonNullByDefault({}) Set<String> tags;
+    protected @NonNullByDefault({}) Visibility visibility;
+    protected @Nullable String description;
 
     protected transient volatile RuleStatusInfo status = new RuleStatusInfo(RuleStatus.UNINITIALIZED,
             RuleStatusDetail.NONE);
@@ -79,8 +68,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
     }
 
     @Override
-    @Nullable
-    public String getTemplateUID() {
+    public @Nullable String getTemplateUID() {
         return templateUID;
     }
 
@@ -94,8 +82,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
     }
 
     @Override
-    @Nullable
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
@@ -123,8 +110,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
     }
 
     @Override
-    @Nullable
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 

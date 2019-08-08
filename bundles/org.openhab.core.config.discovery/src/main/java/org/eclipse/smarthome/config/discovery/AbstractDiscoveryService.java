@@ -74,10 +74,8 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     private @Nullable ScheduledFuture<?> scheduledStop;
 
-    @NonNullByDefault({})
-    protected TranslationProvider i18nProvider;
-    @NonNullByDefault({})
-    protected LocaleProvider localeProvider;
+    protected @NonNullByDefault({}) TranslationProvider i18nProvider;
+    protected @NonNullByDefault({}) LocaleProvider localeProvider;
 
     /**
      * Creates a new instance of this class with the specified parameters.

@@ -57,8 +57,7 @@ public class SystemOffsetProfile implements StateProfile {
     private final ProfileCallback callback;
     private final ProfileContext context;
 
-    @Nullable
-    private QuantityType<?> offset;
+    private @Nullable QuantityType<?> offset;
 
     public SystemOffsetProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;

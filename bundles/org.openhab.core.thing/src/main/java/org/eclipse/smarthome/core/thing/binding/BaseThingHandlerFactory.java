@@ -53,8 +53,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
 
-    @NonNullByDefault({})
-    protected BundleContext bundleContext;
+    protected @NonNullByDefault({}) BundleContext bundleContext;
 
     private final Logger logger = LoggerFactory.getLogger(BaseThingHandlerFactory.class);
 
@@ -63,10 +62,8 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
 
     private final Map<ThingUID, Set<ServiceRegistration<?>>> thingHandlerServices = new ConcurrentHashMap<>();
 
-    @NonNullByDefault({})
-    private ServiceTracker<ThingTypeRegistry, ThingTypeRegistry> thingTypeRegistryServiceTracker;
-    @NonNullByDefault({})
-    private ServiceTracker<ConfigDescriptionRegistry, ConfigDescriptionRegistry> configDescriptionRegistryServiceTracker;
+    private @NonNullByDefault({}) ServiceTracker<ThingTypeRegistry, ThingTypeRegistry> thingTypeRegistryServiceTracker;
+    private @NonNullByDefault({}) ServiceTracker<ConfigDescriptionRegistry, ConfigDescriptionRegistry> configDescriptionRegistryServiceTracker;
 
     /**
      * Initializes the {@link BaseThingHandlerFactory}. If this method is overridden by a sub class, the implementing

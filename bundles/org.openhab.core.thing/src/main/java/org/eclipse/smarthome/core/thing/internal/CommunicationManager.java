@@ -100,24 +100,15 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 
-    @NonNullByDefault({})
-    private SystemProfileFactory defaultProfileFactory;
-    @NonNullByDefault({})
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    @NonNullByDefault({})
-    private ThingRegistry thingRegistry;
-    @NonNullByDefault({})
-    private ItemRegistry itemRegistry;
-    @NonNullByDefault({})
-    private EventPublisher eventPublisher;
-    @NonNullByDefault({})
-    private SafeCaller safeCaller;
-    @NonNullByDefault({})
-    private AutoUpdateManager autoUpdateManager;
-    @NonNullByDefault({})
-    private ItemStateConverter itemStateConverter;
-    @NonNullByDefault({})
-    private ChannelTypeRegistry channelTypeRegistry;
+    private @NonNullByDefault({}) SystemProfileFactory defaultProfileFactory;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) EventPublisher eventPublisher;
+    private @NonNullByDefault({}) SafeCaller safeCaller;
+    private @NonNullByDefault({}) AutoUpdateManager autoUpdateManager;
+    private @NonNullByDefault({}) ItemStateConverter itemStateConverter;
+    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
 
     private final Set<ItemFactory> itemFactories = new CopyOnWriteArraySet<>();
 

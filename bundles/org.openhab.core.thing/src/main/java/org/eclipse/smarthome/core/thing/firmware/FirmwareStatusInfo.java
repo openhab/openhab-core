@@ -34,8 +34,7 @@ public final class FirmwareStatusInfo {
 
     private final FirmwareStatus firmwareStatus;
 
-    @Nullable
-    private final String firmwareVersion;
+    private final @Nullable String firmwareVersion;
 
     /**
      * Package protected default constructor to allow reflective instantiation.
@@ -110,8 +109,7 @@ public final class FirmwareStatusInfo {
      *
      * @return the firmware version (only set if firmware status is {@link FirmwareStatus#UPDATE_EXECUTABLE})
      */
-    @Nullable
-    public String getUpdatableFirmwareVersion() {
+    public @Nullable String getUpdatableFirmwareVersion() {
         return this.firmwareVersion;
     }
 

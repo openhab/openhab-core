@@ -40,10 +40,8 @@ public class OAuthFactoryImpl implements OAuthFactory {
 
     private final Logger logger = LoggerFactory.getLogger(OAuthFactoryImpl.class);
 
-    @NonNullByDefault({})
-    private OAuthStoreHandler oAuthStoreHandler;
-    @NonNullByDefault({})
-    private HttpClientFactory httpClientFactory;
+    private @NonNullByDefault({}) OAuthStoreHandler oAuthStoreHandler;
+    private @NonNullByDefault({}) HttpClientFactory httpClientFactory;
 
     private int tokenExpiresInBuffer = OAuthClientServiceImpl.DEFAULT_TOKEN_EXPIRES_IN_BUFFER_SECOND;
 
@@ -82,8 +80,7 @@ public class OAuthFactoryImpl implements OAuthFactory {
     }
 
     @Override
-    @Nullable
-    public OAuthClientService getOAuthClientService(String handle) {
+    public @Nullable OAuthClientService getOAuthClientService(String handle) {
         OAuthClientService clientImpl = oauthClientServiceCache.get(handle);
 
         if (clientImpl == null || clientImpl.isClosed()) {

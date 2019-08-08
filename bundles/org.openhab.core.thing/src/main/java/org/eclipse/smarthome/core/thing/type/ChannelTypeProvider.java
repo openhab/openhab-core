@@ -45,8 +45,8 @@ public interface ChannelTypeProvider {
      * @deprecated The {@link ChannelGroupTypeProvider} is now to be implemented/used instead.
      */
     @Deprecated
-    @Nullable
-    default ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID, @Nullable Locale locale) {
+    default @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID,
+            @Nullable Locale locale) {
         return null;
     }
 
@@ -54,8 +54,7 @@ public interface ChannelTypeProvider {
      * @deprecated The {@link ChannelGroupTypeProvider} is now to be implemented/used instead.
      */
     @Deprecated
-    @Nullable
-    default Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
+    default @Nullable Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
         return Collections.emptyList();
     }
 }

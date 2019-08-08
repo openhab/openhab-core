@@ -98,8 +98,7 @@ public final class FirmwareUpdateResultInfo {
      *
      * @return the error message in case of erroneous firmware updates (is null for successful firmware updates)
      */
-    @Nullable
-    public String getErrorMessage() {
+    public @Nullable String getErrorMessage() {
         return errorMessage;
     }
 

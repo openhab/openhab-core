@@ -71,18 +71,15 @@ public abstract class BaseThingHandler implements ThingHandler {
             .getScheduledPool(THING_HANDLER_THREADPOOL_NAME);
 
     @Deprecated // this must not be used by bindings!
-    @NonNullByDefault({})
-    protected ThingRegistry thingRegistry;
+    protected @NonNullByDefault({}) ThingRegistry thingRegistry;
 
     @Deprecated // this must not be used by bindings!
-    @NonNullByDefault({})
-    protected BundleContext bundleContext;
+    protected @NonNullByDefault({}) BundleContext bundleContext;
 
     protected Thing thing;
 
     @SuppressWarnings("rawtypes")
-    @NonNullByDefault({})
-    private ServiceTracker thingRegistryServiceTracker;
+    private @NonNullByDefault({}) ServiceTracker thingRegistryServiceTracker;
 
     private @Nullable ThingHandlerCallback callback;
 

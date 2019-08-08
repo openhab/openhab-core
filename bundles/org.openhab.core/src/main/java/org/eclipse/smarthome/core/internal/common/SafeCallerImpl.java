@@ -39,11 +39,8 @@ public class SafeCallerImpl implements SafeCaller {
 
     private static final String SAFE_CALL_POOL_NAME = "safeCall";
 
-    @NonNullByDefault({})
-    private ScheduledExecutorService watcher;
-
-    @NonNullByDefault({})
-    private SafeCallManagerImpl manager;
+    private @NonNullByDefault({}) ScheduledExecutorService watcher;
+    private @NonNullByDefault({}) SafeCallManagerImpl manager;
 
     @Activate
     public void activate(@Nullable Map<String, Object> properties) {
