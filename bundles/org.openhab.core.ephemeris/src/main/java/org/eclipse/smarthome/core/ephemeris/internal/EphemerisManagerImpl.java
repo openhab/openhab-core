@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -75,8 +75,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
 
     // constants for the configuration properties
     protected static final String CONFIG_URI = "system:ephemeris";
-    private static final String CONFIG_DAYSET_PREFIX = "dayset-";
-    private static final String CONFIG_DAYSET_WEEKEND = "weekend";
+    public static final String CONFIG_DAYSET_PREFIX = "dayset-";
+    public static final String CONFIG_DAYSET_WEEKEND = "weekend";
     public static final String CONFIG_COUNTRY = "country";
     public static final String CONFIG_REGION = "region";
     public static final String CONFIG_CITY = "city";
@@ -89,7 +89,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     final Map<String, List<ParameterOption>> regions = new HashMap<>();
     final Map<String, List<ParameterOption>> cities = new HashMap<>();
 
-    private final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
+    final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
     private final List<String> countryParameters = new ArrayList<>();
 
@@ -121,16 +121,29 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     @Modified
     protected void modified(Map<String, Object> config) {
         config.entrySet().stream().filter(e -> e.getKey().startsWith(CONFIG_DAYSET_PREFIX)).forEach(e -> {
-            String[] setDefinition = e.getValue().toString().toUpperCase().split(",");
             String[] setNameParts = e.getKey().split("-");
-            if (setDefinition.length > 0 && setNameParts.length > 1) {
-                Set<DayOfWeek> dayset = new HashSet<>();
-                Stream.of(setDefinition).forEach(day -> {
-                    dayset.add(DayOfWeek.valueOf(day));
-                });
-                daysets.put(setNameParts[1], dayset);
+            if (setNameParts.length > 1) {
+                String setName = setNameParts[1];
+                Object entry = e.getValue();
+                if (entry instanceof String) {
+                    String value = entry.toString();
+                    while (value.startsWith("[")) {
+                        value = value.substring(1);
+                    }
+                    while (value.endsWith("]")) {
+                        value = value.substring(0, value.length() - 1);
+                    }
+                    String[] setDefinition = value.split(",");
+                    if (setDefinition.length > 0) {
+                        addDayset(setName, Arrays.asList(setDefinition));
+                    } else {
+                        logger.warn("Erroneous dayset definition {} : {}", e.getKey(), entry);
+                    }
+                } else if (entry instanceof Iterable) {
+                    addDayset(setName, (Iterable<?>) entry);
+                }
             } else {
-                logger.warn("Erroneous dayset definition {} : {}", e.getKey(), e.getValue());
+                logger.warn("Erroneous dayset definition {}", e.getKey());
             }
         });
 
@@ -270,6 +283,14 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     public @Nullable String getBankHolidayName(int offset, String filename) throws FileNotFoundException {
         Optional<String> holiday = getHolidayUserFile(ZonedDateTime.now().plusDays(offset), filename);
         return holiday.isPresent() ? holiday.get() : null;
+    }
+
+    private void addDayset(String setName, Iterable<?> values) {
+        Set<DayOfWeek> dayset = new HashSet<>();
+        for (Object day : values) {
+            dayset.add(DayOfWeek.valueOf(day.toString().trim().toUpperCase()));
+        }
+        daysets.put(setName, dayset);
     }
 
     /**

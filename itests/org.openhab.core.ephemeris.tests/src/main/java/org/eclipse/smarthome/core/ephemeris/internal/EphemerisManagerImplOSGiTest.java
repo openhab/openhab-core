@@ -16,10 +16,13 @@ import static org.eclipse.smarthome.core.ephemeris.internal.EphemerisManagerImpl
 import static org.junit.Assert.*;
 
 import java.net.URI;
+import java.time.DayOfWeek;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,14 +59,43 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         ephemerisManager = getService(EphemerisManager.class, EphemerisManagerImpl.class);
         assertNotNull(ephemerisManager);
 
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_COUNTRY, Locale.GERMANY.getCountry()));
+        ephemerisManager.modified(Stream
+                .of(new SimpleEntry<>(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Saturday,Sunday"),
+                        new SimpleEntry<>(CONFIG_COUNTRY, Locale.GERMANY.getCountry()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
     }
 
     @Test
     public void testEphemerisManagerLoadedProperly() {
+        assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
+        assertEquals(Stream.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).collect(Collectors.toSet()),
+                ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
         assertFalse(ephemerisManager.countries.isEmpty());
         assertFalse(ephemerisManager.regions.isEmpty());
         assertFalse(ephemerisManager.cities.isEmpty());
+    }
+
+    @Test(expected = java.lang.IllegalArgumentException.class)
+    public void testConfigurtationDaysetWeekendFailed() {
+        ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Foo,Bar"));
+    }
+
+    @Test
+    public void testConfigurtationDaysetWeekendIterable() {
+        ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND,
+                Stream.of("Saturday", "Sunday").collect(Collectors.toList())));
+        assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
+        assertEquals(Stream.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).collect(Collectors.toSet()),
+                ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
+    }
+
+    @Test
+    public void testConfigurtationDaysetWeekendListAsString() {
+        ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND,
+                Stream.of("Saturday", "Sunday").collect(Collectors.toList()).toString()));
+        assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
+        assertEquals(Stream.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).collect(Collectors.toSet()),
+                ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -167,29 +199,38 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testConfigOptionProviderCitiesNorthRhineWestphalia() {
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_REGION, REGION_NORTHRHINEWESTPHALIA_KEY));
+        ephemerisManager.modified(Stream
+                .of(new SimpleEntry<>(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
+                        new SimpleEntry<>(CONFIG_REGION, REGION_NORTHRHINEWESTPHALIA_KEY))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null);
         assertNull(options);
     }
 
     @Test
-    public void testConfigOptionProviderCitiesTasmania() {
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_REGION, REGION_TASMANIA_KEY));
-
-        final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null);
-        assertNotNull(options);
-        assertFalse(options.isEmpty());
-        assertEquals(ephemerisManager.cities.get(REGION_TASMANIA_KEY), options);
-    }
-
-    @Test
     public void testConfigOptionProviderCitiesBavaria() {
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_REGION, REGION_BAVARIA_KEY));
+        ephemerisManager.modified(Stream
+                .of(new SimpleEntry<>(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
+                        new SimpleEntry<>(CONFIG_REGION, REGION_BAVARIA_KEY))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null);
         assertNotNull(options);
         assertFalse(options.isEmpty());
         assertEquals(ephemerisManager.cities.get(REGION_BAVARIA_KEY), options);
+    }
+
+    @Test
+    public void testConfigOptionProviderCitiesTasmania() {
+        ephemerisManager.modified(Stream
+                .of(new SimpleEntry<>(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
+                        new SimpleEntry<>(CONFIG_REGION, REGION_TASMANIA_KEY))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+
+        final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null);
+        assertNotNull(options);
+        assertFalse(options.isEmpty());
+        assertEquals(ephemerisManager.cities.get(REGION_TASMANIA_KEY), options);
     }
 }
