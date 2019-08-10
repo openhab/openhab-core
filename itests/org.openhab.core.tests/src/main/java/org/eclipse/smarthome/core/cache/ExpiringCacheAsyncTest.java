@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
+import org.eclipse.smarthome.test.java.JavaTest;
 import org.junit.Test;
 
 /**
@@ -26,7 +27,7 @@ import org.junit.Test;
  *
  * @author David Graeff - Initial contribution
  */
-public class ExpiringCacheAsyncTest {
+public class ExpiringCacheAsyncTest extends JavaTest {
     double theValue = 0;
 
     @Test(expected = IllegalArgumentException.class)
@@ -49,6 +50,7 @@ public class ExpiringCacheAsyncTest {
 
         // We expect an immediate result with the value 10.0
         assertEquals(10.0, t.getValue(s).get(), 0.0);
+        verify(s, times(1)).get();
         // The value should be valid
         assertFalse(t.isExpired());
 
@@ -56,12 +58,11 @@ public class ExpiringCacheAsyncTest {
         assertEquals(10.0, t.getValue(s).get(), 0.0);
         verify(s, times(1)).get();
 
-        // Wait
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ignored) {
-            return;
-        }
+        // Wait for expiration
+        waitForAssert(() -> {
+            assertTrue(t.isExpired());
+        });
+
         // We expect an immediate result with the value 10.0, and an additional call to the supplier
         assertEquals(10.0, t.getValue(s).get(), 0.0);
         verify(s, times(2)).get();
