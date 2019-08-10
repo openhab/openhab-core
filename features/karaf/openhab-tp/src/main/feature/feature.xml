@@ -70,6 +70,13 @@
     <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
   </feature>
 
+  <feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
+    <capability>openhab.tp;feature=jackson;version=2.9.9</capability>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.9</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.9</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.9</bundle>
+  </feature>
+
   <feature name="openhab.tp-jax-rs" version="${project.version}">
     <capability>openhab.tp;feature=jax-rs;version=5.3.1</capability>
     <feature>openhab.tp-jax-rs-min</feature>
