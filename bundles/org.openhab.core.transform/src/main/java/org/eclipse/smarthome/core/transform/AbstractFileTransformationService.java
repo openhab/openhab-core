@@ -58,6 +58,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
     private WatchService watchService = null;
 
     protected final Map<String, T> cachedFiles = new ConcurrentHashMap<>();
+    private final Map<WatchKey, Path> registeredKeys = new ConcurrentHashMap<>();
     protected final List<String> watchedDirectories = new ArrayList<String>();
 
     private final Logger logger = LoggerFactory.getLogger(AbstractFileTransformationService.class);
@@ -101,6 +102,8 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
 
     protected void deactivate() {
         localeProviderTracker.close();
+        stopWatchService();
+        watchService = null;
     }
 
     protected Locale getLocale() {
@@ -190,9 +193,10 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
             String watchedDirectory = getSourcePath() + subDirectory;
             Path transformFilePath = Paths.get(watchedDirectory);
             try {
-                transformFilePath.register(watchService, ENTRY_DELETE, ENTRY_MODIFY);
+                WatchKey registrationKey = transformFilePath.register(watchService, ENTRY_DELETE, ENTRY_MODIFY);
                 logger.debug("Watching directory {}", transformFilePath);
                 watchedDirectories.add(subDirectory);
+                registeredKeys.put(registrationKey, transformFilePath);
             } catch (IOException e) {
                 logger.warn("Unable to watch transformation directory : {}", watchedDirectory);
                 cachedFiles.clear();
@@ -225,6 +229,23 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
                 }
             }
             key.reset();
+        }
+    }
+
+    private synchronized void stopWatchService() {
+        if (watchService != null) {
+            for (WatchKey watchKey : registeredKeys.keySet()) {
+                watchKey.cancel();
+            }
+            registeredKeys.clear();
+            watchedDirectories.clear();
+            try {
+                watchService.close();
+            } catch (IOException e) {
+                logger.warn("Cannot deactivate transformation directory watcher", e);
+            }
+            watchService = null;
+            cachedFiles.clear();
         }
     }
 
