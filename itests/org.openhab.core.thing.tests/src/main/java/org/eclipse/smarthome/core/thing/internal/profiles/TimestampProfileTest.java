@@ -12,7 +12,7 @@
  */
 package org.eclipse.smarthome.core.thing.internal.profiles;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import java.time.ZonedDateTime;
@@ -22,6 +22,7 @@ import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
 import org.eclipse.smarthome.core.types.State;
+import org.eclipse.smarthome.test.java.JavaTest;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -31,7 +32,7 @@ import org.mockito.ArgumentCaptor;
  * @author Gaël L'hopital - Initial contribution
  *
  */
-public class TimestampProfileTest {
+public class TimestampProfileTest extends JavaTest {
 
     @Test
     public void testTimestampOnUpdate() {
@@ -58,22 +59,24 @@ public class TimestampProfileTest {
         ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
         TimestampChangeProfile timestampProfile = new TimestampChangeProfile(callback);
 
+        // No existing previous state saved, the callback is first called
         timestampProfile.onStateUpdateFromItem(new DecimalType(23));
-        verify(callback, atLeastOnce()).sendUpdate(capture.capture());
+        verify(callback, times(1)).sendUpdate(capture.capture());
         State result = capture.getValue();
-
         DateTimeType changeResult = (DateTimeType) result;
-        timestampProfile.onStateUpdateFromItem(new DecimalType(23));
-        verify(callback, atLeastOnce()).sendUpdate(capture.capture());
-        result = capture.getValue();
-        DateTimeType newChangeResult = (DateTimeType) result;
-        assertEquals(changeResult, newChangeResult);
 
+        waitForAssert(() -> assertTrue(ZonedDateTime.now().isAfter(changeResult.getZonedDateTime())));
+
+        // The state is unchanged, no additional call to the callback
+        timestampProfile.onStateUpdateFromItem(new DecimalType(23));
+        verify(callback, times(1)).sendUpdate(capture.capture());
+
+        // The state is changed, one additional call to the callback
         timestampProfile.onStateUpdateFromItem(new DecimalType(24));
-        verify(callback, atLeastOnce()).sendUpdate(capture.capture());
+        verify(callback, times(2)).sendUpdate(capture.capture());
         result = capture.getValue();
         DateTimeType updatedResult = (DateTimeType) result;
-        assertTrue(updatedResult.getZonedDateTime().isAfter(newChangeResult.getZonedDateTime()));
+        assertTrue(updatedResult.getZonedDateTime().isAfter(changeResult.getZonedDateTime()));
     }
 
 }
