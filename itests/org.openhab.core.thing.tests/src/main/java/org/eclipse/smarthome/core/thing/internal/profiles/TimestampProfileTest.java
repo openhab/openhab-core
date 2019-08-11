@@ -65,9 +65,7 @@ public class TimestampProfileTest extends JavaTest {
         State result = capture.getValue();
         DateTimeType changeResult = (DateTimeType) result;
 
-        waitForAssert(() -> {
-            assertTrue(ZonedDateTime.now().isAfter(changeResult.getZonedDateTime()));
-        });
+        waitForAssert(() -> assertTrue(ZonedDateTime.now().isAfter(changeResult.getZonedDateTime())));
 
         // The state is unchanged, no additional call to the callback
         timestampProfile.onStateUpdateFromItem(new DecimalType(23));
