@@ -10,6 +10,6 @@
 
   <artifactId>org.openhab.core.config.xml.tests</artifactId>
 
-  <name>openHAB Core :: Integration Tests :: Config XML Tests</name>
+  <name>openHAB Core :: Integration Tests :: Configuration XML Tests</name>
 
 </project>
