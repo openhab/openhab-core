@@ -103,7 +103,6 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
     protected void deactivate() {
         localeProviderTracker.close();
         stopWatchService();
-        watchService = null;
     }
 
     protected Locale getLocale() {
