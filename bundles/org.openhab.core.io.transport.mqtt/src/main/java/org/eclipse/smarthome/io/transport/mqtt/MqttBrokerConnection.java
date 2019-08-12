@@ -717,7 +717,9 @@ public class MqttBrokerConnection {
         // Connect
         _client.setCallback(clientCallback);
         try {
-            _client.connect(createMqttOptions(), null, connectionCallback);
+            MqttConnectOptions mqttConnectOptions = createMqttOptions();
+            mqttConnectOptions.setMaxInflight(16384); // 1/4 of available message ids
+            _client.connect(mqttConnectOptions, null, connectionCallback);
             logger.info("Starting MQTT broker connection to '{}' with clientid {} and file store '{}'", host,
                     getClientId(), persistencePath);
         } catch (org.eclipse.paho.client.mqttv3.MqttException | ConfigurationException e) {
