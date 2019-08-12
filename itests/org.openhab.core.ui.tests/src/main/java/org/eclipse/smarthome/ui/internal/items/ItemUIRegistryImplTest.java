@@ -57,12 +57,13 @@ import org.mockito.Mock;
  */
 public class ItemUIRegistryImplTest {
 
-    private static ItemUIRegistryImpl uiRegistry;
     // we need to get the decimal separator of the default locale for our tests
     private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
 
+    private ItemUIRegistryImpl uiRegistry;
+
     @Mock
-    private static ItemRegistry registry;
+    private ItemRegistry registry;
 
     @Mock
     private Widget widget;

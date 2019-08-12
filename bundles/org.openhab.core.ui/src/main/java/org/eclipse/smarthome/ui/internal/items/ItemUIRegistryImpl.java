@@ -404,6 +404,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         // The widget may define its own unit in the widget label. Convert to this unit:
                         quantityState = convertStateToWidgetUnit(quantityState, w);
                         state = quantityState;
+                    } else if (state instanceof DateTimeType) {
+                        // Translate a DateTimeType state to the local time zone
+                        try {
+                            state = ((DateTimeType) state).toLocaleZone();
+                        } catch (DateTimeException e) {
+                        }
                     }
 
                     // The following exception handling has been added to work around a Java bug with formatting
@@ -538,22 +544,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private String fillFormatPattern(String formatPattern, Type state) throws IllegalArgumentException {
         String ret = formatPattern;
-        Type itemState = state;
-        if (state instanceof DateTimeType) {
-            try {
-                itemState = ((DateTimeType) state).toLocaleZone();
-            } catch (DateTimeException e) {
-            }
-        }
-        if (ret != null && itemState != null) {
+        if (ret != null && state != null) {
             Matcher matcher = EXTRACT_TRANSFORMFUNCTION_PATTERN_WITHOUT_SQUARE_BRACKETS.matcher(ret);
             if (matcher.find()) {
                 String type = matcher.group(1);
                 String pattern = matcher.group(2);
                 String value = matcher.group(3);
-                ret = type + "(" + pattern + "):" + itemState.format(value);
+                ret = type + "(" + pattern + "):" + state.format(value);
             } else {
-                ret = itemState.format(formatPattern);
+                ret = state.format(formatPattern);
             }
         }
         return ret;
