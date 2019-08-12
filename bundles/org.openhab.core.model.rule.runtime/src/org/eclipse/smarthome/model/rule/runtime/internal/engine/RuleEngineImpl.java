@@ -179,7 +179,7 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
         if (!starting) {
             Iterable<Rule> rules = triggerManager.getRules(CHANGE, item, oldState, newState);
 
-            executeRules(rules, item, oldState);
+            executeRules(rules, item, oldState, newState);
         }
     }
 
@@ -187,7 +187,7 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
     public void stateUpdated(Item item, State state) {
         if (!starting) {
             Iterable<Rule> rules = triggerManager.getRules(UPDATE, item, state);
-            executeRules(rules, item);
+            executeRules(rules, item, state);
         }
     }
 
@@ -337,10 +337,11 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
         }
     }
 
-    protected synchronized void executeRules(Iterable<Rule> rules, Item item) {
+    protected synchronized void executeRules(Iterable<Rule> rules, Item item, State state) {
         for (Rule rule : rules) {
             RuleEvaluationContext context = new RuleEvaluationContext();
             context.newValue(QualifiedName.create(RulesJvmModelInferrer.VAR_TRIGGERING_ITEM), item);
+            context.newValue(QualifiedName.create(RulesJvmModelInferrer.VAR_NEW_STATE), state);
             executeRule(rule, context);
         }
     }
@@ -354,11 +355,12 @@ public class RuleEngineImpl implements ItemRegistryChangeListener, StateChangeLi
         }
     }
 
-    protected synchronized void executeRules(Iterable<Rule> rules, Item item, State oldState) {
+    protected synchronized void executeRules(Iterable<Rule> rules, Item item, State oldState, State newState) {
         for (Rule rule : rules) {
             RuleEvaluationContext context = new RuleEvaluationContext();
             context.newValue(QualifiedName.create(RulesJvmModelInferrer.VAR_TRIGGERING_ITEM), item);
             context.newValue(QualifiedName.create(RulesJvmModelInferrer.VAR_PREVIOUS_STATE), oldState);
+            context.newValue(QualifiedName.create(RulesJvmModelInferrer.VAR_NEW_STATE), newState);
             executeRule(rule, context);
         }
     }
