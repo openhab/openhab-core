@@ -39,6 +39,7 @@ import org.eclipse.smarthome.core.semantics.model.Tag;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
@@ -50,7 +51,6 @@ import org.osgi.service.component.annotations.Reference;
  * (e.g. "hasLocation") and the value being the id of the referenced entity (e.g. its item name).
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -73,7 +73,12 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         }
     });
 
-    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private final ItemRegistry itemRegistry;
+
+    @Activate
+    public SemanticsMetadataProvider(final @Reference ItemRegistry itemRegistry) {
+        this.itemRegistry = itemRegistry;
+    }
 
     @Activate
     protected void activate() {
@@ -84,19 +89,10 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         itemRegistry.addRegistryChangeListener(this);
     }
 
+    @Deactivate
     protected void deactivate() {
         itemRegistry.removeRegistryChangeListener(this);
         semantics.clear();
-
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
     }
 
     @Override

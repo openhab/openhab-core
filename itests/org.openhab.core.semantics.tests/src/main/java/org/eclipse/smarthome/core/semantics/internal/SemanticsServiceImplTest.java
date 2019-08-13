@@ -21,7 +21,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.core.items.GenericItem;
 import org.eclipse.smarthome.core.items.GroupItem;
 import org.eclipse.smarthome.core.items.Item;
@@ -33,14 +32,12 @@ import org.eclipse.smarthome.core.semantics.model.location.LivingRoom;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.osgi.framework.BundleContext;
 
 /**
  * @author Kai Kreuzer - Initial contribution
  */
 public class SemanticsServiceImplTest {
 
-    private @Mock BundleContext bundleContext;
     private @Mock ItemRegistry itemRegistry;
     private @Mock MetadataRegistry metadataRegistry;
 
@@ -74,15 +71,12 @@ public class SemanticsServiceImplTest {
                 .thenReturn(Stream.of(locationItem, equipmentItem, pointItem))
                 .thenReturn(Stream.of(locationItem, equipmentItem, pointItem));
 
-        service = new SemanticsServiceImpl();
-        service.setItemRegistry(itemRegistry);
-        service.setMetadataRegistry(metadataRegistry);
-        service.activate(bundleContext);
+        service = new SemanticsServiceImpl(itemRegistry, metadataRegistry);
     }
 
     @Test
     public void testGetItemsInLocation() throws Exception {
-        Set<@NonNull Item> items = service.getItemsInLocation(Bathroom.class);
+        Set<Item> items = service.getItemsInLocation(Bathroom.class);
         assertTrue(items.contains(pointItem));
 
         items = service.getItemsInLocation("Room", Locale.ENGLISH);
@@ -91,7 +85,7 @@ public class SemanticsServiceImplTest {
 
     @Test
     public void testGetItemsInLocationByString() throws Exception {
-        Set<@NonNull Item> items = service.getItemsInLocation("joe's room", Locale.ENGLISH);
+        Set<Item> items = service.getItemsInLocation("joe's room", Locale.ENGLISH);
         assertTrue(items.contains(pointItem));
 
         items = service.getItemsInLocation(LivingRoom.class);

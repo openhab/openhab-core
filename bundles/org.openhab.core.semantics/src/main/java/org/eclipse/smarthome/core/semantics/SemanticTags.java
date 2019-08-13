@@ -18,12 +18,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.semantics.model.Property;
@@ -42,11 +43,11 @@ import org.eclipse.smarthome.core.types.StateDescription;
  * For everything that is not static, the {@link SemanticsService} should be used instead.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
+@NonNullByDefault
 public class SemanticTags {
 
-    private static String TAGS_BUNDLE_NAME = "tags";
+    private static final String TAGS_BUNDLE_NAME = "tags";
 
     private static final Map<String, Class<? extends Tag>> TAGS = new TreeMap<>();
 
@@ -70,11 +71,12 @@ public class SemanticTags {
     }
 
     public static @Nullable Class<? extends Tag> getByLabel(String tagLabel, Locale locale) {
-        return TAGS.values().stream().distinct().filter(t -> getLabel(t, locale).equalsIgnoreCase(tagLabel)).findFirst()
-                .orElse(null);
+        Optional<Class<? extends Tag>> tag = TAGS.values().stream().distinct()
+                .filter(t -> getLabel(t, locale).equalsIgnoreCase(tagLabel)).findFirst();
+        return tag.isPresent() ? tag.get() : null;
     }
 
-    public static List<Class<? extends @NonNull Tag>> getByLabelOrSynonym(String tagLabelOrSynonym, Locale locale) {
+    public static List<Class<? extends Tag>> getByLabelOrSynonym(String tagLabelOrSynonym, Locale locale) {
         return TAGS.values().stream().distinct()
                 .filter(t -> getLabelAndSynonyms(t, locale).contains(tagLabelOrSynonym.toLowerCase(locale)))
                 .collect(Collectors.toList());

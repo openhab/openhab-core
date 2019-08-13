@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.items.GroupItem;
 import org.eclipse.smarthome.core.items.Item;
@@ -35,7 +34,7 @@ import org.eclipse.smarthome.core.semantics.model.Equipment;
 import org.eclipse.smarthome.core.semantics.model.Location;
 import org.eclipse.smarthome.core.semantics.model.Point;
 import org.eclipse.smarthome.core.semantics.model.Tag;
-import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -43,7 +42,6 @@ import org.osgi.service.component.annotations.Reference;
  * The internal implementation of the {@link SemanticsService} interface, which is registered as an OSGi service.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 @Component
@@ -51,28 +49,14 @@ public class SemanticsServiceImpl implements SemanticsService {
 
     private static final String SYNONYMS_NAMESPACE = "synonyms";
 
-    private @NonNullByDefault({}) ItemRegistry itemRegistry;
-    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
+    private final ItemRegistry itemRegistry;
+    private final MetadataRegistry metadataRegistry;
 
-    void activate(BundleContext context) {
-    }
-
-    @Reference
-    void setItemRegistry(ItemRegistry itemRegistry) {
+    @Activate
+    public SemanticsServiceImpl(final @Reference ItemRegistry itemRegistry,
+            final @Reference MetadataRegistry metadataRegistry) {
         this.itemRegistry = itemRegistry;
-    }
-
-    void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    void setMetadataRegistry(MetadataRegistry metadataRegistry) {
         this.metadataRegistry = metadataRegistry;
-    }
-
-    void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
     }
 
     @Override
@@ -92,7 +76,7 @@ public class SemanticsServiceImpl implements SemanticsService {
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public @NonNull Set<Item> getItemsInLocation(@NonNull String labelOrSynonym, Locale locale) {
+    public Set<Item> getItemsInLocation(String labelOrSynonym, Locale locale) {
         Set<Item> items = new HashSet<>();
         List<Class<? extends Tag>> tagList = SemanticTags.getByLabelOrSynonym(labelOrSynonym, locale);
         if (!tagList.isEmpty()) {
