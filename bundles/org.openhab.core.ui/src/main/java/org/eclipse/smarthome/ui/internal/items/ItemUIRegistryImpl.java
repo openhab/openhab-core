@@ -112,10 +112,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     /* the image location inside the installation folder */
     protected static final String IMAGE_LOCATION = "./webapps/images/";
 
-    /* RegEx to extract and parse a function String <code>'\[(.*?)\((.*)\):(.*)\]'</code> */
-    protected static final Pattern EXTRACT_TRANSFORMFUNCTION_PATTERN = Pattern.compile("\\[(.*?)\\((.*)\\):(.*)\\]");
-    protected static final Pattern EXTRACT_TRANSFORMFUNCTION_PATTERN_WITHOUT_SQUARE_BRACKETS = Pattern
-            .compile("(.*?)\\((.*)\\):(.*)");
+    /* RegEx to extract and parse a function String <code>'(.*?)\((.*)\):(.*)'</code> */
+    protected static final Pattern EXTRACT_TRANSFORMFUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
     /* RegEx to identify format patterns. See java.util.Formatter#formatSpecifier (without the '%' at the very end). */
     protected static final String IDENTIFY_FORMAT_PATTERN_PATTERN = "%((unit%)|((\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z])))";
@@ -412,8 +410,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     // Without this catch, the whole sitemap, or page can not be displayed!
                     // This also handles IllegalFormatConversionException, which is a subclass of IllegalArgument.
                     try {
-                        Matcher matcher = EXTRACT_TRANSFORMFUNCTION_PATTERN_WITHOUT_SQUARE_BRACKETS
-                                .matcher(formatPattern);
+                        Matcher matcher = EXTRACT_TRANSFORMFUNCTION_PATTERN.matcher(formatPattern);
                         if (matcher.find()) {
                             considerTransform = true;
                             String type = matcher.group(1);
@@ -514,7 +511,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         String ret = label;
         String formatPattern = getFormatPattern(label);
         if (formatPattern != null) {
-            Matcher matcher = EXTRACT_TRANSFORMFUNCTION_PATTERN_WITHOUT_SQUARE_BRACKETS.matcher(formatPattern);
+            Matcher matcher = EXTRACT_TRANSFORMFUNCTION_PATTERN.matcher(formatPattern);
             if (matchTransform && matcher.find()) {
                 String type = matcher.group(1);
                 String pattern = matcher.group(2);
