@@ -120,8 +120,8 @@
     <feature>openhab-core-base</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
     <config name="org.openhab.ephemeris">
-        dayset-weekend=Saturday,Sunday
-        dayset-school=Monday,Tuesday,Wednesday,Thursday,Friday
+        dayset-weekend=[SATURDAY,SUNDAY]
+        dayset-school=[MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY]
     </config>
   </feature>
 

@@ -8,7 +8,7 @@
 		<parameter name="dayset-weekend" type="text" required="true" multiple="true">
 			<label>Weekend Days</label>
 			<description>List of usual non workable days.</description>
-			<default>Saturday,Sunday</default>
+			<default>SATURDAY,SUNDAY</default>
 		</parameter>
 		<parameter name="country" type="text">
 			<label>Country</label>
