@@ -18,19 +18,18 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Implementors are capable of creating a {@link Profile} instances.
+ * Implementors are capable of creating {@link Profile} instances.
  *
- * @author Simon Kaufmann - Initial contribution and API.
- *
+ * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
 public interface ProfileFactory {
 
     /**
-     * Create a {@link Profile} instance for the given profile tye ID.
+     * Creates a {@link Profile} instance for the given profile type identifier.
      *
-     * @param profileTypeUID the profile identifier
-     * @param callback the ProfileCallback instance to be used by the {@link Profile} instance
+     * @param profileTypeUID the profile type identifier
+     * @param callback the {@link ProfileCallback} instance to be used by the {@link Profile} instance
      * @param profileContext giving access to the profile's context like configuration, scheduler, etc.
      * @return the profile instance or {@code null} if this factory cannot handle the given link
      */
@@ -38,7 +37,7 @@ public interface ProfileFactory {
     Profile createProfile(ProfileTypeUID profileTypeUID, ProfileCallback callback, ProfileContext profileContext);
 
     /**
-     * Return the identifiers of all supported profile types
+     * Return the identifiers of all supported profile types.
      *
      * @return a collection of all profile type identifier which this class is capable of creating
      */
