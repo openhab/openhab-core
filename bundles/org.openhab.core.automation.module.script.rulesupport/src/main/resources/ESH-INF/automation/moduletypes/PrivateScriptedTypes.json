@@ -46,6 +46,14 @@
          "label":"Scripted trigger",
          "description":"allows the execution of a method defined by a script",
          "visibility": "EXPERT",
+         "configDescriptions":[  
+            {  
+               "name":"privId",
+               "type":"TEXT",
+               "description":"the identifier of the private method",
+               "required":true
+            }
+         ],
          "outputs":[  
             {  
                "name":"triggerOutput",
