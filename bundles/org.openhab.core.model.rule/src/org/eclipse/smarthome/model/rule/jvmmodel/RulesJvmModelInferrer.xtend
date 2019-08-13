@@ -60,6 +60,9 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
     /** Variable name for the previous state of an item in a "changed state triggered" rule */
     public static final String VAR_PREVIOUS_STATE = "previousState";
 
+    /** Variable name for the new state of an item in a "changed state triggered" or "updated state triggered" rule */
+    public static final String VAR_NEW_STATE = "newState";
+
     /** Variable name for the received command in a "command triggered" rule */
     public static final String VAR_RECEIVED_COMMAND = "receivedCommand";
 
@@ -160,6 +163,10 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     if (containsThingStateChangedEventTrigger(rule) && !containsParam(parameters, VAR_PREVIOUS_STATE)) {
                         val stateTypeRef = ruleModel.newTypeRef(State)
                         parameters += rule.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
+                    }
+                    if ((containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) && !containsParam(parameters, VAR_NEW_STATE)) {
+                        val stateTypeRef = ruleModel.newTypeRef(State)
+                        parameters += rule.toParameter(VAR_NEW_STATE, stateTypeRef)
                     }
 
                     body = rule.script
