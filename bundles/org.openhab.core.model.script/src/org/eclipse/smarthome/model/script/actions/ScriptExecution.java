@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ScriptExecution {
 
+    private static int timerCounter = 0;
+
     /**
      * Calls a script which must be located in the configurations/scripts folder.
      *
@@ -120,7 +122,7 @@ public class ScriptExecution {
     private static Timer makeTimer(AbstractInstant instant, String closure, JobDataMap dataMap) {
 
         Logger logger = LoggerFactory.getLogger(ScriptExecution.class);
-        JobKey jobKey = new JobKey(instant.toString() + ": " + closure.toString());
+        JobKey jobKey = new JobKey(getTimerId() + " " + instant.toString() + ": " + closure.toString());
         Trigger trigger = newTrigger().startAt(instant.toDate()).build();
         Timer timer = new TimerImpl(jobKey, trigger.getKey(), dataMap, instant);
         try {
@@ -136,5 +138,9 @@ public class ScriptExecution {
             logger.error("Failed to schedule code for execution.", e);
             return null;
         }
+    }
+
+    private static synchronized String getTimerId() {
+        return String.format("Timer %d", ++timerCounter);
     }
 }
