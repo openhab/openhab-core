@@ -12,9 +12,9 @@
  */
 package org.eclipse.smarthome.model.thing.internal
 
-import java.math.BigDecimal
 import java.util.ArrayList
 import java.util.Collection
+import java.util.Collections
 import java.util.HashSet
 import java.util.List
 import java.util.Map
@@ -22,7 +22,6 @@ import java.util.Set
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry
 import org.eclipse.smarthome.config.core.Configuration
 import org.eclipse.smarthome.core.common.registry.AbstractProvider
@@ -61,6 +60,7 @@ import org.osgi.service.component.annotations.Reference
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
+import org.eclipse.smarthome.config.core.ConfigUtil
 
 /**
  * {@link ThingProvider} implementation which computes *.things files.
@@ -77,6 +77,7 @@ import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
 @Component(immediate=true, service=ThingProvider)
 class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
 
+    private static final String DEFAULT_LIST_DELIMITER = ",";
     private static final String XML_THING_TYPE = "esh.xmlThingTypes";
 
     private LocaleProvider localeProvider
@@ -346,7 +347,6 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
         modelChannels.forEach [
             if (addedChannelIds.add(id)) {
                 var ChannelKind parsedKind = ChannelKind.STATE
-
                 var ChannelTypeUID channelTypeUID
                 var String itemType
                 var label = it.label
@@ -397,41 +397,39 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
     }
 
     def private applyDefaultConfiguration(Configuration configuration, ChannelType channelType) {
-        if (configDescriptionRegistry !== null && configuration !== null) {
-            if (channelType.configDescriptionURI !== null) {
-                val configDescription = configDescriptionRegistry.getConfigDescription(channelType.configDescriptionURI)
-                if (configDescription !== null) {
-                    configDescription.parameters.filter [
-                        ^default !== null && configuration.get(name) === null
-                    ].forEach [
-                        val value = getDefaultValueAsCorrectType(type, ^default)
+        // Set default values to channel configuration
+        if (configDescriptionRegistry !== null && configuration !== null && channelType.configDescriptionURI !== null) {
+            val configDescription = configDescriptionRegistry.getConfigDescription(channelType.configDescriptionURI)
+            if (configDescription !== null) {
+                configDescription.parameters.filter [
+                    ^default !== null && configuration.get(name) === null
+                ].forEach [
+                    if (it.isMultiple) {
+                        if (^default.contains(DEFAULT_LIST_DELIMITER)) {
+                            val Iterable<Object> values = ^default.split(DEFAULT_LIST_DELIMITER).map [ v |
+                                v.trim
+                            ]?.filter [ v |
+                                !v.isEmpty
+                            ]?.map [ v |
+                                ConfigUtil.normalizeType(v, it)
+                            ]?.filter [ v |
+                                v !== null
+                            ]
+                            configuration.put(name, values)
+                        } else {
+                            val value = ConfigUtil.normalizeType(^default, it)
+                            if (value !== null) {
+                                configuration.put(name, Collections.singletonList(value))
+                            }
+                        }
+                    } else {
+                        val value = ConfigUtil.normalizeType(^default, it)
                         if (value !== null) {
                             configuration.put(name, value);
                         }
-                    ]
-                }
+                    }
+                ]
             }
-        }
-    }
-
-    def private Object getDefaultValueAsCorrectType(Type parameterType, String defaultValue) {
-        try {
-            switch (parameterType) {
-                case TEXT:
-                    return defaultValue
-                case BOOLEAN:
-                    return Boolean.parseBoolean(defaultValue)
-                case INTEGER:
-                    return new BigDecimal(defaultValue)
-                case DECIMAL:
-                    return new BigDecimal(defaultValue)
-                default:
-                    return null
-            }
-        } catch (NumberFormatException ex) {
-            logger.warn("Could not parse default value '{}' as type '{}': {}", defaultValue, parameterType,
-                ex.getMessage(), ex);
-            return null;
         }
     }
 

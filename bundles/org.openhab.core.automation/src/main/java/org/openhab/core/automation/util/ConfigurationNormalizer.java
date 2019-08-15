@@ -83,11 +83,11 @@ public class ConfigurationNormalizer {
             if (parameter != null) {
                 String parameterName = entry.getKey();
                 final Object value = configuration.get(parameterName);
-                final Object defaultValue = parameter.getDefault();
                 if (value instanceof String && ((String) value).contains("${")) {
                     continue; // It is a reference
                 }
                 if (value == null) {
+                    final Object defaultValue = parameter.getDefault();
                     if (defaultValue == null) {
                         configuration.remove(parameterName);
                     } else {

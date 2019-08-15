@@ -12,9 +12,12 @@
  */
 package org.eclipse.smarthome.config.core.internal.normalization;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
@@ -28,16 +31,12 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
  */
 public final class NormalizerFactory {
 
-    private static final Map<Type, Normalizer> NORMALIZERS;
-
-    static {
-        Map<Type, Normalizer> map = new HashMap<>(11);
-        map.put(Type.BOOLEAN, new BooleanNormalizer());
-        map.put(Type.TEXT, new TextNormalizer());
-        map.put(Type.INTEGER, new IntNormalizer());
-        map.put(Type.DECIMAL, new DecimalNormalizer());
-        NORMALIZERS = Collections.unmodifiableMap(map);
-    }
+    private static final Map<Type, Normalizer> NORMALIZERS = Collections.unmodifiableMap(Stream
+            .of(new SimpleEntry<>(Type.BOOLEAN, new BooleanNormalizer()),
+                    new SimpleEntry<>(Type.TEXT, new TextNormalizer()),
+                    new SimpleEntry<>(Type.INTEGER, new IntNormalizer()),
+                    new SimpleEntry<>(Type.DECIMAL, new DecimalNormalizer()))
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
     private NormalizerFactory() {
         // prevent instantiation
@@ -56,12 +55,7 @@ public final class NormalizerFactory {
         }
 
         Normalizer ret = NORMALIZERS.get(configDescriptionParameter.getType());
-
-        if (configDescriptionParameter.isMultiple()) {
-            ret = new ListNormalizer(ret);
-        }
-
-        return ret;
+        return configDescriptionParameter.isMultiple() ? new ListNormalizer(ret) : ret;
     }
 
 }

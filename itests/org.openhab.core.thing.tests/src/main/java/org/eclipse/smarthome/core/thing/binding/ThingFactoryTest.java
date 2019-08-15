@@ -63,7 +63,8 @@ import org.mockito.stubbing.Answer;
 /**
  * ThingFactoryTest is a test for the ThingFactory class.
  *
- * @author Dennis Nobel - Initial contribution, added test for different default types
+ * @author Dennis Nobel - Initial contribution
+ * @author Dennis Nobel - Added test for different default types
  * @author Alex Tugarev - Adapted for constructor modification of ConfigDescriptionParameter
  * @author Thomas Höfer - Thing type constructor modified because of thing properties introduction
  * @author Wouter Born - Migrate tests from Groovy to Java

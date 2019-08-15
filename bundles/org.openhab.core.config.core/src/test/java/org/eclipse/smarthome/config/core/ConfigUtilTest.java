@@ -25,7 +25,6 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.junit.Test;
 
 /**
- *
  * @author Simon Kaufmann - Initial contribution
  */
 public class ConfigUtilTest {
@@ -55,4 +54,5 @@ public class ConfigUtilTest {
                         Arrays.asList(configDescriptionString, configDescriptionInteger)).get("foo"),
                 is(instanceOf(String.class)));
     }
+
 }

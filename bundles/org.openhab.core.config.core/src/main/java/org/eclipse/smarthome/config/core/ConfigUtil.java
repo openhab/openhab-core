@@ -42,7 +42,7 @@ public class ConfigUtil {
     /**
      * Normalizes the types to the ones allowed for configurations.
      *
-     * @param configuration the configuration that needs to be normalzed
+     * @param configuration the configuration that needs to be normalized
      * @return normalized configuration
      */
     public static Map<String, Object> normalizeTypes(Map<String, Object> configuration) {
