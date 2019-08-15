@@ -20,31 +20,39 @@ outputDirectory = new File(request.getOutputDirectory())
  * Find which bundle the new binding should be added
  */
 def String findAfterBundle(newBundle, codeownersFile) {
-    def codeowners = codeownersFile.getText('UTF-8') + '/bundles/' + newBundle
-    def lines = codeowners.split('\n').sort()
+    def codeowners = codeownersFile.getText('UTF-8')
     def lastIndex
-
+    def lines = codeowners.split('\n')
+                          .findAll{ it =~ /^.bundles/}
+                          .collect { it.replaceAll(/\/bundles\/([^\/]+)\/.+/, '$1')}
+    lines.add(newBundle)
+    lines = lines.sort()
     lines.eachWithIndex { line, index ->
         if (line.contains(newBundle)) {
             lastIndex = index-1
         }
     }
-    return lines[lastIndex].replaceAll(/\/bundles\/([^\/]+)\/.+/, '$1')
+    // if index == -1 it means its before all other bindings.
+    // To handle this case an empty string is returned.
+    // The other code handles the empty string as a special case
+    return lastIndex < 0 ? "" : lines[lastIndex]
 }
 
 /**
  * Add the new bundle to the CODEWONERS file
  */
 def addUserToCodewoners(githubUser, codeownersFile, bundleAfter, newBundle) {
-     def newContent = ''
-     def lines = codeownersFile.eachLine { line, index ->
-         newContent += line + nl
-         if (line.contains(bundleAfter)) {
-             newContent += '/bundles/' + newBundle + '/ @' + githubUser + nl
-         }
-     }
-     codeownersFile.write(newContent)
-     println 'Added github user to CODEOWNERS file'
+    def newContent = ''
+    // if new binding is a new first entry it's inserted directly after depencies tag
+    def matchBundleAfter = bundleAfter.isEmpty() ? '# Add-on maintainers:' : (bundleAfter + '/')
+    def lines = codeownersFile.eachLine { line, index ->
+        newContent += line + nl
+        if (line.contains(matchBundleAfter)) {
+            newContent += '/bundles/' + newBundle + '/ @' + githubUser + nl
+        }
+    }
+    codeownersFile.write(newContent)
+    println 'Added github user to CODEOWNERS file'
 }
 
 /**
@@ -60,19 +68,22 @@ def addBundleToBom(bundleAfter, newBundle) {
 '''.replace('###', newBundle)
     def bomFile = new File(outputDirectory, '../bom/openhab-addons/pom.xml')
     def newContent = ''
+    // if new binding is a new first entry it's inserted directly after dependencies tag
+    def matchBundleAfter = bundleAfter.isEmpty() ? '<dependencies>' : (bundleAfter + '<')
+    def offset = bundleAfter.isEmpty() ? 0 : 2
     def insertIndex = 0;
     def lines = bomFile.eachLine { line, index ->
         newContent += line + nl
-        if (line.contains(bundleAfter)) {
-            insertIndex = index + 2
+        if (line.contains(matchBundleAfter)) {
+            insertIndex = index + offset
         }
         if (insertIndex > 0 && index == insertIndex) {
             newContent += bomDependency
             insertIndex = 0
         }
     }
-     bomFile.write(newContent)
-     println 'Added bundle to bom pom'
+    bomFile.write(newContent)
+    println 'Added bundle to bom pom'
 }
 
 //
@@ -84,13 +95,15 @@ def fixBundlePom(bundleAfter, newBundle) {
     def bomFile = new File(outputDirectory, 'pom.xml')
     def module = '<module>' + newBundle + '</module>'
     def newContent = ''
+    // if new binding is a new first entry it's inserted directly after modules tag
+    def matchBundleAfter = bundleAfter.isEmpty() ? '<modules>' : (bundleAfter + '<')
     def insertIndex = 0;
     def lines = bomFile.eachLine { line, index ->
         if (!line.contains(module)) {
             // filter out the already added module by the achetype
             newContent += line + nl
         }
-        if (line.contains(bundleAfter)) {
+        if (line.contains(matchBundleAfter)) {
             insertIndex = index
         }
         if (insertIndex > 0 && index == insertIndex) {
@@ -126,4 +139,3 @@ if (codeownersFile.exists()) {
 } else {
     println 'Could not find the CODEOWNERS files to perform additional annotations: ' + codeownersFile
 }
-
