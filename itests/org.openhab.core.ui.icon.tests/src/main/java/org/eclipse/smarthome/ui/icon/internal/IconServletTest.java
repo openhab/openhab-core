@@ -151,4 +151,158 @@ public class IconServletTest {
         verify(response).sendError(404);
     }
 
+    @Test
+    public void testAnyFormatFalse() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/z");
+        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("false");
+        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+
+        when(response.getOutputStream()).thenReturn(responseOutputStream);
+
+        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+        when(provider1.getIcon("z", "test", "34", Format.SVG))
+                .thenReturn(new ByteArrayInputStream("provider 1 icon: z test 34 svg".getBytes()));
+
+        servlet.addIconProvider(provider1);
+        servlet.doGet(request, response);
+
+        assertEquals("provider 1 icon: z test 34 svg", responseOutputStream.getOutput());
+        verify(response, never()).sendError(anyInt());
+        verify(provider1, never()).hasIcon("z", "test", Format.PNG);
+    }
+
+    @Test
+    public void testAnyFormatSameProviders() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/z");
+        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+
+        when(response.getOutputStream()).thenReturn(responseOutputStream);
+
+        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(0);
+        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+        when(provider1.getIcon("z", "test", "34", Format.SVG))
+                .thenReturn(new ByteArrayInputStream("provider 1 icon: z test 34 svg".getBytes()));
+
+        servlet.addIconProvider(provider1);
+        servlet.doGet(request, response);
+
+        assertEquals("provider 1 icon: z test 34 svg", responseOutputStream.getOutput());
+        verify(response, never()).sendError(anyInt());
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+    }
+
+    @Test
+    public void testAnyFormatHigherPriorityOtherFormat() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/z");
+        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+
+        when(response.getOutputStream()).thenReturn(responseOutputStream);
+
+        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(0);
+        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+
+        when(provider2.hasIcon("z", "test", Format.PNG)).thenReturn(1);
+        when(provider2.hasIcon("z", "test", Format.SVG)).thenReturn(null);
+        when(provider2.getIcon("z", "test", "34", Format.PNG))
+                .thenReturn(new ByteArrayInputStream("provider 2 icon: z test 34 png".getBytes()));
+
+        servlet.addIconProvider(provider1);
+        servlet.addIconProvider(provider2);
+        servlet.doGet(request, response);
+
+        assertEquals("provider 2 icon: z test 34 png", responseOutputStream.getOutput());
+        verify(response, never()).sendError(anyInt());
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(provider2, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider2, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+    }
+
+    @Test
+    public void testAnyFormatHigherPriorityRequestedFormat() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/z");
+        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+
+        when(response.getOutputStream()).thenReturn(responseOutputStream);
+
+        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(0);
+        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+
+        when(provider2.hasIcon("z", "test", Format.PNG)).thenReturn(null);
+        when(provider2.hasIcon("z", "test", Format.SVG)).thenReturn(1);
+        when(provider2.getIcon("z", "test", "34", Format.SVG))
+                .thenReturn(new ByteArrayInputStream("provider 2 icon: z test 34 svg".getBytes()));
+
+        servlet.addIconProvider(provider1);
+        servlet.addIconProvider(provider2);
+        servlet.doGet(request, response);
+
+        assertEquals("provider 2 icon: z test 34 svg", responseOutputStream.getOutput());
+        verify(response, never()).sendError(anyInt());
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(provider2, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider2, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+    }
+
+    @Test
+    public void testAnyFormatNoOtherFormat() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/z");
+        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+
+        when(response.getOutputStream()).thenReturn(responseOutputStream);
+
+        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(null);
+        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+        when(provider1.getIcon("z", "test", "34", Format.SVG))
+                .thenReturn(new ByteArrayInputStream("provider 1 icon: z test 34 svg".getBytes()));
+
+        servlet.addIconProvider(provider1);
+        servlet.doGet(request, response);
+
+        assertEquals("provider 1 icon: z test 34 svg", responseOutputStream.getOutput());
+        verify(response, never()).sendError(anyInt());
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+    }
+
+    @Test
+    public void testAnyFormatNoRequestedFormat() throws ServletException, IOException {
+        when(request.getRequestURI()).thenReturn("/z");
+        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+
+        when(response.getOutputStream()).thenReturn(responseOutputStream);
+
+        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(0);
+        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(null);
+        when(provider1.getIcon("z", "test", "34", Format.PNG))
+                .thenReturn(new ByteArrayInputStream("provider 1 icon: z test 34 png".getBytes()));
+
+        servlet.addIconProvider(provider1);
+        servlet.doGet(request, response);
+
+        assertEquals("provider 1 icon: z test 34 png", responseOutputStream.getOutput());
+        verify(response, never()).sendError(anyInt());
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+    }
+
 }

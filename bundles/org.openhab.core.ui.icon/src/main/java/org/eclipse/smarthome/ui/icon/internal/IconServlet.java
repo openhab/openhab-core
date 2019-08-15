@@ -36,7 +36,6 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +55,7 @@ public class IconServlet extends SmartHomeServlet {
     private static final String SERVLET_NAME = "/icon";
     static final String PARAM_ICONSET = "iconset";
     static final String PARAM_FORMAT = "format";
+    static final String PARAM_ANY_FORMAT = "anyFormat";
     static final String PARAM_STATE = "state";
 
     private long startupTime;
@@ -66,11 +66,13 @@ public class IconServlet extends SmartHomeServlet {
 
     private List<IconProvider> iconProvider = new ArrayList<>();
 
+    @Override
     @Reference
     public void setHttpService(HttpService httpService) {
         super.setHttpService(httpService);
     }
 
+    @Override
     public void unsetHttpService(HttpService httpService) {
         super.unsetHttpService(httpService);
     }
@@ -116,9 +118,27 @@ public class IconServlet extends SmartHomeServlet {
         Format format = getFormat(req);
         String state = getState(req);
         String iconSetId = getIconSetId(req);
+        Format otherFormat = null;
+        if ("true".equalsIgnoreCase(req.getParameter(PARAM_ANY_FORMAT))) {
+            otherFormat = (format == Format.PNG) ? Format.SVG : Format.PNG;
+        }
 
-        IconProvider topProvider = getIconProvider(category, iconSetId, format);
-        if (topProvider == null) {
+        IconProvider provider = getIconProvider(category, iconSetId, format);
+        IconProvider provider2 = getIconProvider(category, iconSetId, otherFormat);
+        if (provider2 != null) {
+            if (provider == null) {
+                provider = provider2;
+                format = otherFormat;
+            } else if (provider2 != provider) {
+                Integer prio = provider.hasIcon(category, iconSetId, format);
+                Integer prio2 = provider2.hasIcon(category, iconSetId, otherFormat);
+                if (prio != null && prio2 != null && prio < prio2) {
+                    provider = provider2;
+                    format = otherFormat;
+                }
+            }
+        }
+        if (provider == null) {
             logger.debug("Requested icon category {} provided by no icon provider;", category);
             resp.sendError(404);
             return;
@@ -131,7 +151,7 @@ public class IconServlet extends SmartHomeServlet {
         }
         resp.setDateHeader("Last-Modified", new Date().getTime());
         ServletOutputStream os = resp.getOutputStream();
-        try (InputStream is = topProvider.getIcon(category, iconSetId, state, format)) {
+        try (InputStream is = provider.getIcon(category, iconSetId, state, format)) {
             IOUtils.copy(is, os);
             resp.flushBuffer();
         } catch (IOException e) {
@@ -188,12 +208,14 @@ public class IconServlet extends SmartHomeServlet {
 
     private IconProvider getIconProvider(String category, String iconSetId, Format format) {
         IconProvider topProvider = null;
-        int maxPrio = Integer.MIN_VALUE;
-        for (IconProvider provider : iconProvider) {
-            Integer prio = provider.hasIcon(category, iconSetId, format);
-            if (prio != null && prio > maxPrio) {
-                maxPrio = prio;
-                topProvider = provider;
+        if (format != null) {
+            int maxPrio = Integer.MIN_VALUE;
+            for (IconProvider provider : iconProvider) {
+                Integer prio = provider.hasIcon(category, iconSetId, format);
+                if (prio != null && prio > maxPrio) {
+                    maxPrio = prio;
+                    topProvider = provider;
+                }
             }
         }
         return topProvider;
