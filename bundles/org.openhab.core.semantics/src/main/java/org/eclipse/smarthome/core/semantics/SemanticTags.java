@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.ResourceBundle.Control;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -32,7 +33,6 @@ import org.eclipse.smarthome.core.semantics.model.Tag;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 import org.eclipse.smarthome.core.semantics.model.equipment.Equipments;
 import org.eclipse.smarthome.core.semantics.model.location.Locations;
-import org.eclipse.smarthome.core.semantics.model.point.Control;
 import org.eclipse.smarthome.core.semantics.model.point.Measurement;
 import org.eclipse.smarthome.core.semantics.model.point.Points;
 import org.eclipse.smarthome.core.semantics.model.property.Properties;
@@ -83,7 +83,8 @@ public class SemanticTags {
     }
 
     public static List<String> getLabelAndSynonyms(Class<? extends Tag> tag, Locale locale) {
-        ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale);
+        ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale,
+                Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
         try {
             String entry = rb.getString(tag.getAnnotation(TagInfo.class).id());
             return Arrays.asList(entry.toLowerCase(locale).split(","));
@@ -93,7 +94,8 @@ public class SemanticTags {
     }
 
     public static String getLabel(Class<? extends Tag> tag, Locale locale) {
-        ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale);
+        ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale,
+                Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
         try {
             String entry = rb.getString(tag.getAnnotation(TagInfo.class).id());
             if (entry.contains(",")) {
@@ -126,7 +128,7 @@ public class SemanticTags {
             if (stateDescription != null && stateDescription.isReadOnly()) {
                 return Measurement.class;
             } else {
-                return Control.class;
+                return org.eclipse.smarthome.core.semantics.model.point.Control.class;
             }
         } else {
             return null;
