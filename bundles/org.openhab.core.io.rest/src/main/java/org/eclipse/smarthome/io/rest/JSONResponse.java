@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.nio.charset.StandardCharsets;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -94,7 +95,8 @@ public class JSONResponse {
      * @return ResponseBuilder configured for "Content-Type" MediaType.APPLICATION_JSON
      */
     private ResponseBuilder responseBuilder(Response.StatusType status) {
-        return Response.status(status).header("Content-Type", MediaType.APPLICATION_JSON);
+        return Response.status(status).header("Content-Type", MediaType.APPLICATION_JSON)
+                .encoding(StandardCharsets.UTF_8.name());
     }
 
     /**

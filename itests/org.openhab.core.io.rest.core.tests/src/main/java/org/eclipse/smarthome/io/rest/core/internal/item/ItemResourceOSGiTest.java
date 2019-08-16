@@ -40,6 +40,7 @@ import org.eclipse.smarthome.core.items.MetadataProvider;
 import org.eclipse.smarthome.core.items.dto.GroupItemDTO;
 import org.eclipse.smarthome.core.items.dto.MetadataDTO;
 import org.eclipse.smarthome.core.library.items.DimmerItem;
+import org.eclipse.smarthome.core.library.items.StringItem;
 import org.eclipse.smarthome.core.library.items.SwitchItem;
 import org.eclipse.smarthome.io.rest.RESTResource;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
@@ -59,16 +60,18 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private static final String ITEM_NAME1 = "Item1";
     private static final String ITEM_NAME2 = "Item2";
     private static final String ITEM_NAME3 = "Item3";
+    private static final String ITEM_NAME4 = "Item4";
+    private static final String ITEM_LABEL4 = "Test äöüß";
 
     private GenericItem item1;
     private GenericItem item2;
     private GenericItem item3;
+    private GenericItem item4;
 
     @Mock
     private ItemProvider itemProvider;
 
     private ItemResource itemResource;
-
     private ManagedItemProvider managedItemProvider;
 
     @Before
@@ -86,9 +89,26 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         item1 = new SwitchItem(ITEM_NAME1);
         item2 = new SwitchItem(ITEM_NAME2);
         item3 = new DimmerItem(ITEM_NAME3);
+        item4 = new StringItem(ITEM_NAME4);
 
-        when(itemProvider.getAll()).thenReturn(Arrays.asList(item1, item2, item3));
+        when(itemProvider.getAll()).thenReturn(Arrays.asList(item1, item2, item3, item4));
         registerService(itemProvider);
+    }
+
+    @Test
+    public void shouldReturnUnicodeItems() throws IOException {
+        item4.setLabel(ITEM_LABEL4);
+
+        Response response = itemResource.getItems(null, null, null, null, false, null);
+        assertThat(readItemLabelsFromResponse(response), hasItems(ITEM_LABEL4));
+    }
+
+    @Test
+    public void shouldReturnUnicodeItem() throws IOException {
+        item4.setLabel(ITEM_LABEL4);
+
+        Response response = itemResource.getItemData(null, null, ITEM_NAME4);
+        assertThat(readItemLabelsFromResponse(response), hasItems(ITEM_LABEL4));
     }
 
     @Test
@@ -97,6 +117,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         item2.addTag("Tag1");
         item2.addTag("Tag2");
         item3.addTag("Tag2");
+        item4.addTag("Tag4");
 
         Response response = itemResource.getItems(null, null, "Tag1", null, false, null);
         assertThat(readItemNamesFromResponse(response), hasItems(ITEM_NAME1, ITEM_NAME2));
@@ -167,6 +188,11 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private List<String> readItemNamesFromResponse(Response response) throws IOException {
         String jsonResponse = IOUtils.toString((InputStream) response.getEntity());
         return JsonPath.read(jsonResponse, "$..name");
+    }
+
+    private List<String> readItemLabelsFromResponse(Response response) throws IOException {
+        String jsonResponse = IOUtils.toString((InputStream) response.getEntity());
+        return JsonPath.read(jsonResponse, "$..label");
     }
 
     @Test

@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.smarthome.core.library.types.DateTimeType;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,7 +31,6 @@ import com.google.gson.GsonBuilder;
  * nested collections JSON representation will be fully transformed into memory.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public class Stream2JSONInputStream extends InputStream {
 
@@ -40,7 +40,7 @@ public class Stream2JSONInputStream extends InputStream {
 
     private boolean firstIteratorElement;
 
-    private Gson gson = new GsonBuilder().create();
+    private final Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).create();
 
     /**
      * Creates a new {@link Stream2JSONInputStream} backed by the given {@link Stream} source.
