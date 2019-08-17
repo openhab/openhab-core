@@ -6,7 +6,7 @@
 
 	<!-- test dummy -->
 	<config-description uri="config:fragmentConfig">
-	    
+
 		<parameter name="testParam" type="text">
 			<label>Test</label>
 			<description>Test Parameter.</description>

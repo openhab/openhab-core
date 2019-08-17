@@ -24,14 +24,12 @@ import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterGroup;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
-import org.eclipse.smarthome.test.BundleCloseable;
-import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * The ConfigDescriptionsTest is a test for loading of configuration description from XML documents.
+ * The ConfigDescriptionI18nTest is a test for loading of configuration description from XML documents.
  *
  * @author Alex Tugarev - Initial contribution; Extended tests for options and filters
  * @author Wouter Born - Migrate tests from Groovy to Java
@@ -41,43 +39,37 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
     private static final String TEST_BUNDLE_NAME = "yahooweather.bundle";
 
     private ConfigDescriptionRegistry configDescriptionRegistry;
+    private BindingInstaller bindingInstaller;
 
     @Before
     public void setUp() {
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
         assertThat(configDescriptionRegistry, is(notNullValue()));
+        bindingInstaller = new BindingInstaller(this::waitForAssert, configDescriptionRegistry, bundleContext);
     }
 
     @Test
     public void assertConfigDescriptionsAreLocalized() throws Exception {
-        int initialNumberOfConfigDescriptions = configDescriptionRegistry.getConfigDescriptions().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
             Collection<ConfigDescription> configDescriptions = configDescriptionRegistry
                     .getConfigDescriptions(Locale.GERMAN);
-            assertThat(configDescriptions.size(), is(initialNumberOfConfigDescriptions + 1));
 
             ConfigDescription config = new LinkedList<>(configDescriptions).getFirst();
-
             assertThat(config, is(notNullValue()));
 
             String expected = "location.label = Ort\n" + //
-                    "location.description = Ort der Wetterinformation.\n" + //
-                    "unit.label = Einheit\n" + //
-                    "unit.description = Spezifiziert die Einheit der Daten. Valide Werte sind 'us' und 'metric'\n" + //
-                    "refresh.label = Aktualisierungsintervall\n" + //
-                    "refresh.description = Spezifiziert das Aktualisierungsintervall in Sekunden\n" + //
-                    "question.pattern = Wie ist das Wetter in [\\w]*?\n" + //
-                    "question.options = München, Köln\n" + //
-                    "group.label = Group 1 German Label\n" + //
-                    "group.description = Group 1 German Description";
+            "location.description = Ort der Wetterinformation.\n" + //
+            "unit.label = Einheit\n" + //
+            "unit.description = Spezifiziert die Einheit der Daten. Valide Werte sind 'us' und 'metric'\n" + //
+            "refresh.label = Aktualisierungsintervall\n" + //
+            "refresh.description = Spezifiziert das Aktualisierungsintervall in Sekunden\n" + //
+            "question.pattern = Wie ist das Wetter in [\\w]*?\n" + //
+            "question.options = München, Köln\n" + //
+            "group.label = Group 1 German Label\n" + //
+            "group.description = Group 1 German Description";
 
             assertEquals(expected, asString(config));
-        }
+        });
     }
 
     private static String asString(ConfigDescription description) {

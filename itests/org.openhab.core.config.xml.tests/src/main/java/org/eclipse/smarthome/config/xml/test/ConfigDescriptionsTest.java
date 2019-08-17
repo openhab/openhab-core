@@ -18,6 +18,7 @@ import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -48,28 +49,22 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     private static final String FRAGMENT_TEST_FRAGMENT_NAME = "ConfigDescriptionsFragmentTest.fragment";
 
     private ConfigDescriptionRegistry configDescriptionRegistry;
+    private BindingInstaller bindingInstaller;
 
     @Before
     public void setUp() {
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
         assertThat(configDescriptionRegistry, is(notNullValue()));
+        bindingInstaller = new BindingInstaller(this::waitForAssert, configDescriptionRegistry, bundleContext);
     }
 
     @Test
     public void assertThatConfigDescriptionsAreLoadedProperly() throws Exception {
-        int initialNumberOfConfigDescriptions = configDescriptionRegistry.getConfigDescriptions().size();
-
-        // install test bundle
-        try (BundleCloseable bundle = new BundleCloseable(
-                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
-            assertThat(bundle, is(notNullValue()));
-
+        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
             Collection<ConfigDescription> englishConfigDescriptions = configDescriptionRegistry
                     .getConfigDescriptions(Locale.ENGLISH);
-            assertThat(englishConfigDescriptions.size(), is(initialNumberOfConfigDescriptions + 1));
 
-            ConfigDescription englishDescription = findDescription(englishConfigDescriptions,
-                    new URI("config:dummyConfig"));
+            ConfigDescription englishDescription = findDescription(englishConfigDescriptions, "config:dummyConfig");
             assertThat(englishDescription, is(notNullValue()));
 
             List<ConfigDescriptionParameter> parameters = englishDescription.getParameters();
@@ -210,7 +205,8 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(group2.getContext(), is("Context-Group2"));
 
             ConfigDescription germanDescription = findDescription(
-                    configDescriptionRegistry.getConfigDescriptions(Locale.GERMAN), new URI("config:dummyConfig"));
+                    configDescriptionRegistry.getConfigDescriptions(Locale.GERMAN), "config:dummyConfig");
+            assertThat(germanDescription, is(notNullValue()));
 
             unitSeconds = findParameter(germanDescription, "unit-seconds");
             assertThat(unitSeconds, is(notNullValue()));
@@ -226,38 +222,46 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(unitKph, is(notNullValue()));
             assertThat(unitKph.getUnit(), is("kph"));
             assertThat(unitKph.getUnitLabel(), is("km/h"));
-        }
+        });
     }
 
     @Test
     public void assertThatConfigDescriptionsOfFragmentHostAreLoadedProperly() throws Exception {
-        int initialNumberOfConfigDescriptions = configDescriptionRegistry.getConfigDescriptions().size();
+        bindingInstaller.exec(FRAGMENT_TEST_FRAGMENT_NAME, () -> {
+            try {
+                try (BundleCloseable bundle = new BundleCloseable(
+                        SyntheticBundleInstaller.install(bundleContext, FRAGMENT_TEST_HOST_NAME))) {
+                    assertThat(bundle, is(notNullValue()));
 
-        // install test bundle
-        try (BundleCloseable fragment = new BundleCloseable(
-                SyntheticBundleInstaller.installFragment(bundleContext, FRAGMENT_TEST_FRAGMENT_NAME))) {
-            try (BundleCloseable bundle = new BundleCloseable(
-                    SyntheticBundleInstaller.install(bundleContext, FRAGMENT_TEST_HOST_NAME))) {
-                assertThat(bundle, is(notNullValue()));
+                    Collection<ConfigDescription> configDescriptions = configDescriptionRegistry
+                            .getConfigDescriptions();
 
-                Collection<ConfigDescription> configDescriptions = configDescriptionRegistry.getConfigDescriptions();
-                assertThat(configDescriptions.size(), is(initialNumberOfConfigDescriptions + 1));
+                    ConfigDescription description = findDescription(configDescriptions, "config:fragmentConfig");
+                    assertThat(description, is(notNullValue()));
 
-                ConfigDescription description = findDescription(configDescriptions, new URI("config:fragmentConfig"));
-                assertThat(description, is(notNullValue()));
+                    List<ConfigDescriptionParameter> parameters = description.getParameters();
+                    assertThat(parameters.size(), is(1));
 
-                List<ConfigDescriptionParameter> parameters = description.getParameters();
-                assertThat(parameters.size(), is(1));
-
-                ConfigDescriptionParameter usernameParameter = findParameter(description, "testParam");
-                assertThat(usernameParameter, is(notNullValue()));
-                assertThat(usernameParameter.getType(), is(Type.TEXT));
-                assertThat(usernameParameter.getLabel(), is("Test"));
-                assertThat(usernameParameter.isRequired(), is(false));
-                assertThat(usernameParameter.isMultiple(), is(false));
-                assertThat(usernameParameter.isReadOnly(), is(false));
-                assertThat(usernameParameter.getDescription(), is("Test Parameter."));
+                    ConfigDescriptionParameter usernameParameter = findParameter(description, "testParam");
+                    assertThat(usernameParameter, is(notNullValue()));
+                    assertThat(usernameParameter.getType(), is(Type.TEXT));
+                    assertThat(usernameParameter.getLabel(), is("Test"));
+                    assertThat(usernameParameter.isRequired(), is(false));
+                    assertThat(usernameParameter.isMultiple(), is(false));
+                    assertThat(usernameParameter.isReadOnly(), is(false));
+                    assertThat(usernameParameter.getDescription(), is("Test Parameter."));
+                }
+            } catch (Exception e) {
+                // do nothing: handle exception
             }
+        });
+    }
+
+    private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, String uri) {
+        try {
+            return findDescription(descriptions, new URI(uri));
+        } catch (URISyntaxException e) {
+            return null;
         }
     }
 
