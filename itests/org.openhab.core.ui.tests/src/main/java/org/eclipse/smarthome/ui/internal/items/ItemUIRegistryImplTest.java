@@ -20,6 +20,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.smarthome.core.i18n.UnitProvider;
@@ -56,12 +57,13 @@ import org.mockito.Mock;
  */
 public class ItemUIRegistryImplTest {
 
-    static private ItemUIRegistryImpl uiRegistry;
     // we need to get the decimal separator of the default locale for our tests
-    static private final char sep = (new DecimalFormatSymbols().getDecimalSeparator());
+    private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
+
+    private ItemUIRegistryImpl uiRegistry;
 
     @Mock
-    static private ItemRegistry registry;
+    private ItemRegistry registry;
 
     @Mock
     private Widget widget;
@@ -80,6 +82,9 @@ public class ItemUIRegistryImplTest {
 
         when(widget.getItem()).thenReturn("Item");
         when(registry.getItem("Item")).thenReturn(item);
+
+        // Set default time zone to GMT-6
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT-6"));
     }
 
     @Test
@@ -151,7 +156,7 @@ public class ItemUIRegistryImplTest {
         when(item.getState()).thenReturn(new DecimalType(10f / 3f));
         when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(10f / 3f));
         String label = uiRegistry.getLabel(widget);
-        assertEquals("Label [3" + sep + "333]", label);
+        assertEquals("Label [3" + SEP + "333]", label);
     }
 
     @Test
@@ -161,7 +166,7 @@ public class ItemUIRegistryImplTest {
         when(widget.getLabel()).thenReturn(testLabel);
         when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " °C"));
         String label = uiRegistry.getLabel(widget);
-        assertEquals("Label [3" + sep + "333 °C]", label);
+        assertEquals("Label [3" + SEP + "333 °C]", label);
     }
 
     @Test
@@ -231,7 +236,7 @@ public class ItemUIRegistryImplTest {
         when(widget.getLabel()).thenReturn(testLabel);
         when(item.getState()).thenReturn(new QuantityType<>("22 °C"));
         String label = uiRegistry.getLabel(widget);
-        assertEquals("Label [71" + sep + "60 °F]", label);
+        assertEquals("Label [71" + SEP + "60 °F]", label);
     }
 
     @Test
@@ -242,7 +247,7 @@ public class ItemUIRegistryImplTest {
         when(item.getState()).thenReturn(new DecimalType(10f / 3f));
         when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(10f / 3f));
         String label = uiRegistry.getLabel(widget);
-        assertEquals("Label [3" + sep + "3 %]", label);
+        assertEquals("Label [3" + SEP + "3 %]", label);
     }
 
     @Test
@@ -263,18 +268,43 @@ public class ItemUIRegistryImplTest {
         when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00"));
         String label = uiRegistry.getLabel(widget);
         assertEquals("Label [01.06.2011]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00Z"));
+        label = uiRegistry.getLabel(widget);
+        assertEquals("Label [31.05.2011]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00+02"));
+        label = uiRegistry.getLabel(widget);
+        assertEquals("Label [31.05.2011]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00-06"));
+        label = uiRegistry.getLabel(widget);
+        assertEquals("Label [01.06.2011]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00-07"));
+        label = uiRegistry.getLabel(widget);
+        assertEquals("Label [01.06.2011]", label);
     }
 
     @Test
     public void getLabel_labelWithZonedDate() throws ItemNotFoundException {
         String testLabel = "Label [%1$td.%1$tm.%1$tY]";
+
         Widget w = mock(Widget.class);
         Item item = mock(Item.class);
         when(w.getLabel()).thenReturn(testLabel);
         when(w.getItem()).thenReturn("Item");
         when(registry.getItem("Item")).thenReturn(item);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00Z"));
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00"));
         String label = uiRegistry.getLabel(w);
+        assertEquals("Label [01.06.2011]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00Z"));
+        label = uiRegistry.getLabel(w);
+        assertEquals("Label [31.05.2011]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00+02"));
+        label = uiRegistry.getLabel(w);
+        assertEquals("Label [31.05.2011]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00-06"));
+        label = uiRegistry.getLabel(w);
+        assertEquals("Label [01.06.2011]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00-07"));
+        label = uiRegistry.getLabel(w);
         assertEquals("Label [01.06.2011]", label);
     }
 
@@ -286,20 +316,44 @@ public class ItemUIRegistryImplTest {
         when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59"));
         String label = uiRegistry.getLabel(widget);
         assertEquals("Label [15:30:59]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59Z"));
+        label = uiRegistry.getLabel(widget);
+        assertEquals("Label [09:30:59]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59+02"));
+        label = uiRegistry.getLabel(widget);
+        assertEquals("Label [07:30:59]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59-06"));
+        label = uiRegistry.getLabel(widget);
+        assertEquals("Label [15:30:59]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59-07"));
+        label = uiRegistry.getLabel(widget);
+        assertEquals("Label [16:30:59]", label);
     }
 
     @Test
     public void getLabel_labelWithZonedTime() throws ItemNotFoundException {
         String testLabel = "Label [%1$tT]";
+
         Widget w = mock(Widget.class);
         Item item = mock(Item.class);
         when(w.getLabel()).thenReturn(testLabel);
         when(w.getItem()).thenReturn("Item");
         when(registry.getItem("Item")).thenReturn(item);
-        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59Z"));
-
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59"));
         String label = uiRegistry.getLabel(w);
         assertEquals("Label [15:30:59]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59Z"));
+        label = uiRegistry.getLabel(w);
+        assertEquals("Label [09:30:59]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59+02"));
+        label = uiRegistry.getLabel(w);
+        assertEquals("Label [07:30:59]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59-06"));
+        label = uiRegistry.getLabel(w);
+        assertEquals("Label [15:30:59]", label);
+        when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59-07"));
+        label = uiRegistry.getLabel(w);
+        assertEquals("Label [16:30:59]", label);
     }
 
     @Test
@@ -317,7 +371,6 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getLabel_labelFromUIProvider() {
-
         ItemUIProvider provider = mock(ItemUIProvider.class);
         uiRegistry.addItemUIProvider(provider);
         when(provider.getLabel(anyString())).thenReturn("ProviderLabel");

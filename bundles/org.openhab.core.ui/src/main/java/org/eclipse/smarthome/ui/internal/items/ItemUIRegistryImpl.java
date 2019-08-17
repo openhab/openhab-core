@@ -12,6 +12,7 @@
  */
 package org.eclipse.smarthome.ui.internal.items;
 
+import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -403,6 +404,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         // The widget may define its own unit in the widget label. Convert to this unit:
                         quantityState = convertStateToWidgetUnit(quantityState, w);
                         state = quantityState;
+                    } else if (state instanceof DateTimeType) {
+                        // Translate a DateTimeType state to the local time zone
+                        try {
+                            state = ((DateTimeType) state).toLocaleZone();
+                        } catch (DateTimeException e) {
+                        }
                     }
 
                     // The following exception handling has been added to work around a Java bug with formatting
