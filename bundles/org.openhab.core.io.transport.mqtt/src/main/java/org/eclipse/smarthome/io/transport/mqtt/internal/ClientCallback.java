@@ -73,15 +73,14 @@ public class ClientCallback {
         List<MqttMessageSubscriber> matches = new ArrayList<>();
         synchronized (subscribers) {
             subscribers.values().forEach(subscriberList -> {
-                if (topic.matches(subscriberList.getRegexMatchTopic())) {
-                    logger.trace("Topic match for '{}' using regex {}", message.getTopic(),
-                            subscriberList.getRegexMatchTopic());
+                if (subscriberList.topicMatch(topic)) {
+                    logger.trace("Topic match for '{}' using regex {}", topic, subscriberList.getTopicRegexPattern());
                     subscriberList.forEach(consumer -> matches.add(consumer));
                 } else {
-                    logger.trace("No topic match for '{}' using regex {}", topic, subscriberList.getRegexMatchTopic());
+                    logger.trace("No topic match for '{}' using regex {}", topic,
+                            subscriberList.getTopicRegexPattern());
                 }
             });
-
         }
         try {
             matches.forEach(subscriber -> subscriber.processMessage(topic, payload));
@@ -105,7 +104,6 @@ public class ClientCallback {
                             subscriberList.getTopicRegexPattern());
                 }
             });
-
         }
         try {
             matches.forEach(subscriber -> subscriber.processMessage(topic, payload));
