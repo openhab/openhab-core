@@ -116,6 +116,16 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
+    public void getLabel_labelWithStringValueFunction() {
+        String testLabel = "Label [%s]";
+
+        when(widget.getLabel()).thenReturn(testLabel);
+        when(item.getState()).thenReturn(new StringType("foo(x):y"));
+        String label = uiRegistry.getLabel(widget);
+        assertEquals("Label [foo(x):y]", label);
+    }
+
+    @Test
     public void getLabel_labelWithIntegerValue() {
         String testLabel = "Label [%d]";
 
