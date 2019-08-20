@@ -55,10 +55,18 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
     private final Logger logger = LoggerFactory.getLogger(ChannelStateDescriptionProvider.class);
 
     private final List<DynamicStateDescriptionProvider> dynamicStateDescriptionProviders = new CopyOnWriteArrayList<>();
-    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistry;
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ThingTypeRegistry thingTypeRegistry;
+    private final ThingRegistry thingRegistry;
     private Integer rank = 0;
+
+    @Activate
+    public ChannelStateDescriptionProvider(final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+            final @Reference ThingTypeRegistry thingTypeRegistry, final @Reference ThingRegistry thingRegistry) {
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.thingTypeRegistry = thingTypeRegistry;
+        this.thingRegistry = thingRegistry;
+    }
 
     @Activate
     protected void activate(Map<String, Object> properties) {
@@ -129,33 +137,6 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
             }
         }
         return null;
-    }
-
-    @Reference
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = thingTypeRegistry;
-    }
-
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

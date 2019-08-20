@@ -28,6 +28,7 @@ import org.eclipse.smarthome.core.thing.type.DynamicCommandDescriptionProvider;
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
 import org.eclipse.smarthome.core.types.CommandDescription;
 import org.eclipse.smarthome.core.types.CommandDescriptionProvider;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -39,19 +40,25 @@ import org.slf4j.LoggerFactory;
  * Provides the {@link ChannelType} specific {@link CommandDescription} for the given item name and locale.
  *
  * @author Henning Treu - Initial contribution
- *
  */
-@NonNullByDefault
 @Component
+@NonNullByDefault
 public class ChannelCommandDescriptionProvider implements CommandDescriptionProvider {
 
     private final Logger logger = LoggerFactory.getLogger(ChannelCommandDescriptionProvider.class);
 
-    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistry;
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
-
     private final List<DynamicCommandDescriptionProvider> dynamicCommandDescriptionProviders = new CopyOnWriteArrayList<>();
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ThingTypeRegistry thingTypeRegistry;
+    private final ThingRegistry thingRegistry;
+
+    @Activate
+    public ChannelCommandDescriptionProvider(final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+            final @Reference ThingTypeRegistry thingTypeRegistry, final @Reference ThingRegistry thingRegistry) {
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.thingTypeRegistry = thingTypeRegistry;
+        this.thingRegistry = thingRegistry;
+    }
 
     @Override
     public @Nullable CommandDescription getCommandDescription(String itemName, @Nullable Locale locale) {
@@ -73,7 +80,6 @@ public class ChannelCommandDescriptionProvider implements CommandDescriptionProv
                 return commandDescription;
             }
         }
-
         return null;
     }
 
@@ -91,35 +97,7 @@ public class ChannelCommandDescriptionProvider implements CommandDescriptionProv
                         dynamicCommandDescriptionProvider.getClass(), e.getLocalizedMessage(), e);
             }
         }
-
         return null;
-    }
-
-    @Reference
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = thingTypeRegistry;
-    }
-
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

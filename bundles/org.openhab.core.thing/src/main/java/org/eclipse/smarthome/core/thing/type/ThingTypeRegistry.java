@@ -18,10 +18,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -34,10 +37,16 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Dennis Nobel - Added locale support
  */
 @Component(immediate = true, service = ThingTypeRegistry.class)
+@NonNullByDefault
 public class ThingTypeRegistry {
 
     private final List<ThingTypeProvider> thingTypeProviders = new CopyOnWriteArrayList<>();
-    private ChannelTypeRegistry channelTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
+
+    @Activate
+    public ThingTypeRegistry(final @Reference ChannelTypeRegistry channelTypeRegistry) {
+        this.channelTypeRegistry = channelTypeRegistry;
+    }
 
     /**
      * Returns all thing types.
@@ -45,7 +54,7 @@ public class ThingTypeRegistry {
      * @param locale locale (can be null)
      * @return all thing types
      */
-    public List<ThingType> getThingTypes(Locale locale) {
+    public List<ThingType> getThingTypes(@Nullable Locale locale) {
         List<ThingType> thingTypes = new ArrayList<>();
         for (ThingTypeProvider thingTypeProvider : thingTypeProviders) {
             thingTypes.addAll(thingTypeProvider.getThingTypes(locale));
@@ -69,15 +78,13 @@ public class ThingTypeRegistry {
      * @param locale locale (can be null)
      * @return thing types for given binding id
      */
-    public List<ThingType> getThingTypes(String bindingId, Locale locale) {
+    public List<ThingType> getThingTypes(String bindingId, @Nullable Locale locale) {
         List<ThingType> thingTypesForBinding = new ArrayList<>();
-
         for (ThingType thingType : getThingTypes()) {
             if (thingType.getBindingId().equals(bindingId)) {
                 thingTypesForBinding.add(thingType);
             }
         }
-
         return Collections.unmodifiableList(thingTypesForBinding);
     }
 
@@ -99,14 +106,13 @@ public class ThingTypeRegistry {
      * @return thing type for given UID or null if no thing type with this UID
      *         was found
      */
-    public ThingType getThingType(ThingTypeUID thingTypeUID, Locale locale) {
+    public @Nullable ThingType getThingType(ThingTypeUID thingTypeUID, @Nullable Locale locale) {
         for (ThingTypeProvider thingTypeProvider : thingTypeProviders) {
             ThingType thingType = thingTypeProvider.getThingType(thingTypeUID, locale);
             if (thingType != null) {
                 return thingType;
             }
         }
-
         return null;
     }
 
@@ -117,7 +123,7 @@ public class ThingTypeRegistry {
      * @return thing type for given UID or null if no thing type with this UID
      *         was found
      */
-    public ThingType getThingType(ThingTypeUID thingTypeUID) {
+    public @Nullable ThingType getThingType(ThingTypeUID thingTypeUID) {
         return getThingType(thingTypeUID, null);
     }
 
@@ -133,7 +139,7 @@ public class ThingTypeRegistry {
      * @param channel channel
      * @return channel type or null if no channel type was found
      */
-    public ChannelType getChannelType(Channel channel) {
+    public @Nullable ChannelType getChannelType(Channel channel) {
         return getChannelType(channel, null);
     }
 
@@ -150,7 +156,7 @@ public class ThingTypeRegistry {
      * @param locale locale (can be null)
      * @return channel type or null if no channel type was found
      */
-    public ChannelType getChannelType(Channel channel, Locale locale) {
+    public @Nullable ChannelType getChannelType(Channel channel, @Nullable Locale locale) {
         ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
         if (channelTypeUID != null) {
             return channelTypeRegistry.getChannelType(channelTypeUID, locale);
@@ -160,24 +166,11 @@ public class ThingTypeRegistry {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addThingTypeProvider(ThingTypeProvider thingTypeProvider) {
-        if (thingTypeProvider != null) {
-            this.thingTypeProviders.add(thingTypeProvider);
-        }
+        this.thingTypeProviders.add(thingTypeProvider);
     }
 
     protected void removeThingTypeProvider(ThingTypeProvider thingTypeProvider) {
-        if (thingTypeProvider != null) {
-            this.thingTypeProviders.remove(thingTypeProvider);
-        }
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
+        this.thingTypeProviders.remove(thingTypeProvider);
     }
 
 }

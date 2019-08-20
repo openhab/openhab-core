@@ -25,6 +25,7 @@ import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.UID;
 import org.eclipse.smarthome.core.thing.link.events.LinkEventFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -37,16 +38,19 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Dennis Nobel - Initial contribution
  * @author Markus Rathgeb - Linked items returns only existing items
  * @author Markus Rathgeb - Rewrite collection handling to improve performance
- *
  */
 @Component(immediate = true, service = ItemChannelLinkRegistry.class)
 public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider> {
 
-    private ThingRegistry thingRegistry;
-    private ItemRegistry itemRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ItemRegistry itemRegistry;
 
-    public ItemChannelLinkRegistry() {
+    @Activate
+    public ItemChannelLinkRegistry(final @Reference ThingRegistry thingRegistry,
+            final @Reference ItemRegistry itemRegistry) {
         super(ItemChannelLinkProvider.class);
+        this.thingRegistry = thingRegistry;
+        this.itemRegistry = itemRegistry;
     }
 
     /**
@@ -80,24 +84,6 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         return getBoundChannels(itemName).parallelStream()
                 .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-    }
-
-    @Reference
-    protected void setThingRegistry(final ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(final ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(final ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(final ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
     }
 
     @Reference

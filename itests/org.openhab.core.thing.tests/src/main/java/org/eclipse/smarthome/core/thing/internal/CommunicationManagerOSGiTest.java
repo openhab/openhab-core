@@ -85,6 +85,10 @@ import org.mockito.Mock;
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
+        public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry) {
+            super(thingRegistry, itemRegistry);
+        }
+
         @Override
         protected void addProvider(Provider<ItemChannelLink> provider) {
             super.addProvider(provider);
@@ -201,7 +205,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         manager.addProfileFactory(mockProfileFactory);
         manager.addProfileAdvisor(mockProfileAdvisor);
 
-        ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced();
+        ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistry, itemRegistry);
         iclRegistry.addProvider(new ItemChannelLinkProvider() {
             @Override
             public void addProviderChangeListener(ProviderChangeListener<ItemChannelLink> listener) {
