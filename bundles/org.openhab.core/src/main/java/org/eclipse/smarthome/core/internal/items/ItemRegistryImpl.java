@@ -41,6 +41,7 @@ import org.eclipse.smarthome.core.service.StateDescriptionService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -53,9 +54,8 @@ import org.slf4j.LoggerFactory;
  * current state in memory. This is the central point where states are kept and
  * thus it is a core part for all stateful services.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new event mechanism
- *
  */
 @Component(immediate = true)
 public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvider> implements ItemRegistry {
@@ -65,13 +65,14 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     private final List<RegistryHook<Item>> registryHooks = new CopyOnWriteArrayList<>();
     private StateDescriptionService stateDescriptionService;
     private CommandDescriptionService commandDescriptionService;
-    private MetadataRegistry metadataRegistry;
-
+    private final MetadataRegistry metadataRegistry;
     private UnitProvider unitProvider;
     private ItemStateConverter itemStateConverter;
 
-    public ItemRegistryImpl() {
+    @Activate
+    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry) {
         super(ItemProvider.class);
+        this.metadataRegistry = metadataRegistry;
     }
 
     @Override
@@ -433,6 +434,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     }
 
     @Override
+    @Deactivate
     protected void deactivate() {
         super.deactivate();
     }
@@ -478,15 +480,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     protected void unsetManagedProvider(ManagedItemProvider provider) {
         super.unsetManagedProvider(provider);
-    }
-
-    @Reference
-    protected void setMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = metadataRegistry;
-    }
-
-    protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
     }
 
 }
