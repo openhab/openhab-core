@@ -48,7 +48,9 @@ import org.eclipse.smarthome.core.scheduler.CronScheduler;
 import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -61,63 +63,42 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Separation of persistence core and model, drop Quartz usage.
  */
-@Component(service = PersistenceManager.class, immediate = true)
-public class PersistenceManagerImpl implements PersistenceManager, ItemRegistryChangeListener, StateChangeListener {
+@Component(immediate = true, service = PersistenceManager.class)
+public class PersistenceManagerImpl implements ItemRegistryChangeListener, PersistenceManager, StateChangeListener {
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceManagerImpl.class);
 
     // the scheduler used for timer events
-    private CronScheduler scheduler;
-
-    private ItemRegistry itemRegistry;
-    private SafeCaller safeCaller;
+    private final CronScheduler scheduler;
+    private final ItemRegistry itemRegistry;
+    private final SafeCaller safeCaller;
     private volatile boolean started = false;
 
     final Map<String, PersistenceService> persistenceServices = new HashMap<>();
     final Map<String, PersistenceServiceConfiguration> persistenceServiceConfigs = new HashMap<>();
     private final Map<String, Set<ScheduledCompletableFuture<?>>> persistenceJobs = new HashMap<>();
 
-    public PersistenceManagerImpl() {
+    @Activate
+    public PersistenceManagerImpl(final @Reference CronScheduler scheduler, final @Reference ItemRegistry itemRegistry,
+            final @Reference SafeCaller safeCaller) {
+        this.scheduler = scheduler;
+        this.itemRegistry = itemRegistry;
+        this.safeCaller = safeCaller;
     }
 
+    @Activate
     protected void activate() {
         allItemsChanged(Collections.emptySet());
         started = true;
         itemRegistry.addRegistryChangeListener(this);
     }
 
+    @Deactivate
     protected void deactivate() {
         itemRegistry.removeRegistryChangeListener(this);
         started = false;
         removeTimers();
         removeItemStateChangeListeners();
-    }
-
-    @Reference
-    protected void setCronScheduler(CronScheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    protected void unsetCronScheduler(CronScheduler scheduler) {
-        this.scheduler = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
