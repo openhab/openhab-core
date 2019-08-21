@@ -12,12 +12,15 @@
  */
 package org.eclipse.smarthome.core.persistence;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A persistence manager service which could be used to start event handling or supply configuration for persistence
  * services.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public interface PersistenceManager {
     /**
      * Add a configuration for a persistence service.

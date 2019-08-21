@@ -14,12 +14,15 @@ package org.eclipse.smarthome.core.persistence;
 
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is the interface for a central service that provides access to {@link PersistenceService}s.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface PersistenceServiceRegistry {
 
     /**
@@ -27,6 +30,7 @@ public interface PersistenceServiceRegistry {
      *
      * @return {@link PersistenceService} default service
      */
+    @Nullable
     PersistenceService getDefault();
 
     /**
@@ -35,13 +39,15 @@ public interface PersistenceServiceRegistry {
      * @param serviceId the service id
      * @return {@link PersistenceService} the service with the id or null, if not present
      */
-    PersistenceService get(String serviceId);
+    @Nullable
+    PersistenceService get(@Nullable String serviceId);
 
     /**
      * Get the id of the default persistence service.
      *
      * @return the id of the default persistence service or null, if no default service is defined
      */
+    @Nullable
     String getDefaultId();
 
     /**

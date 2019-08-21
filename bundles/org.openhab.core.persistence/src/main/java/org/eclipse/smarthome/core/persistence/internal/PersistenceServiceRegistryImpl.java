@@ -20,10 +20,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigOptionProvider;
+import org.eclipse.smarthome.config.core.ConfigurableService;
 import org.eclipse.smarthome.config.core.ParameterOption;
 import org.eclipse.smarthome.core.persistence.PersistenceService;
 import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -35,28 +39,30 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * This is a central service for accessing {@link PersistenceService}s. It is registered through DS and also provides
  * config options for the UI.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true, configurationPid = "org.eclipse.smarthome.persistence", property = {
-        "service.pid:String=org.eclipse.smarthome.persistence",
-        "service.config.description.uri:String=system:persistence", "service.config.label:String=Persistence",
-        "service.config.category:String=system" })
+        Constants.SERVICE_PID + "=org.eclipse.smarthome.persistence",
+        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
+        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Persistence",
+        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + PersistenceServiceRegistryImpl.CONFIG_URI })
+@NonNullByDefault
 public class PersistenceServiceRegistryImpl implements ConfigOptionProvider, PersistenceServiceRegistry {
 
-    private final Map<String, PersistenceService> services = new HashMap<String, PersistenceService>();
-    private String defaultServiceId = null;
+    // constants for the configuration properties
+    protected static final String CONFIG_URI = "system:persistence";
+    private static final String CONFIG_DEFAULT = "default";
 
-    public PersistenceServiceRegistryImpl() {
-    }
+    private final Map<String, PersistenceService> persistenceServices = new HashMap<>();
+    private @Nullable String defaultServiceId;
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addPersistenceService(PersistenceService service) {
-        services.put(service.getId(), service);
+    public void addPersistenceService(PersistenceService persistenceService) {
+        persistenceServices.put(persistenceService.getId(), persistenceService);
     }
 
-    public void removePersistenceService(PersistenceService service) {
-        services.remove(service.getId());
+    public void removePersistenceService(PersistenceService persistenceService) {
+        persistenceServices.remove(persistenceService.getId());
     }
 
     @Activate
@@ -66,48 +72,38 @@ public class PersistenceServiceRegistryImpl implements ConfigOptionProvider, Per
 
     @Modified
     protected void modified(Map<String, Object> config) {
-        if (config != null) {
-            defaultServiceId = (String) config.get("default");
-        }
+        defaultServiceId = (String) config.get(CONFIG_DEFAULT);
     }
 
     @Override
-    public PersistenceService getDefault() {
+    public @Nullable PersistenceService getDefault() {
         return get(getDefaultId());
     }
 
     @Override
-    public PersistenceService get(String serviceId) {
-        if (serviceId != null) {
-            return services.get(serviceId);
-        } else {
-            return null;
-        }
+    public @Nullable PersistenceService get(@Nullable String serviceId) {
+        return (serviceId != null) ? persistenceServices.get(serviceId) : null;
     }
 
     @Override
-    public String getDefaultId() {
+    public @Nullable String getDefaultId() {
         if (defaultServiceId != null) {
             return defaultServiceId;
         } else {
             // if there is exactly one service available in the system, we assume that this should be used, if no
             // default is specifically configured.
-            if (services.size() == 1) {
-                return services.keySet().iterator().next();
-            } else {
-                return null;
-            }
+            return (persistenceServices.size() == 1) ? persistenceServices.keySet().iterator().next() : null;
         }
     }
 
     @Override
     public Set<PersistenceService> getAll() {
-        return new HashSet<>(services.values());
+        return new HashSet<>(persistenceServices.values());
     }
 
     @Override
-    public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
-        if (uri.toString().equals("system:persistence") && param.equals("default")) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+        if (CONFIG_URI.equals(uri.toString()) && CONFIG_DEFAULT.equals(param)) {
             Set<ParameterOption> options = new HashSet<>();
             for (PersistenceService service : getAll()) {
                 options.add(new ParameterOption(service.getId(), service.getLabel(locale)));

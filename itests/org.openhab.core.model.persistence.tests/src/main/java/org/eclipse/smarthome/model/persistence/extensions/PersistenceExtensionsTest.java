@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson
  * @author Jan N. Klug
  */
@@ -56,7 +56,7 @@ public class PersistenceExtensionsTest {
 
         @Override
         public Set<PersistenceService> getAll() {
-            return null;
+            return Collections.emptySet();
         }
 
         @Override
