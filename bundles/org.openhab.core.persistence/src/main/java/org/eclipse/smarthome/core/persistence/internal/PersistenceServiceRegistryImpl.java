@@ -54,7 +54,7 @@ public class PersistenceServiceRegistryImpl implements ConfigOptionProvider, Per
     private static final String CONFIG_DEFAULT = "default";
 
     private final Map<String, PersistenceService> persistenceServices = new HashMap<>();
-    private @Nullable String defaultServiceId = null;
+    private @Nullable String defaultServiceId;
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addPersistenceService(PersistenceService persistenceService) {
