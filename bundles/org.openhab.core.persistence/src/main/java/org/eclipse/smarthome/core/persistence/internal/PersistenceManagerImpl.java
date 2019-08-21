@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.SafeCaller;
 import org.eclipse.smarthome.core.items.GenericItem;
 import org.eclipse.smarthome.core.items.GroupItem;
@@ -64,6 +65,7 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Separation of persistence core and model, drop Quartz usage.
  */
 @Component(immediate = true, service = PersistenceManager.class)
+@NonNullByDefault
 public class PersistenceManagerImpl implements ItemRegistryChangeListener, PersistenceManager, StateChangeListener {
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceManagerImpl.class);
@@ -129,7 +131,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
                 final PersistenceServiceConfiguration config = entry.getValue();
                 if (persistenceServices.containsKey(serviceName)) {
                     for (SimpleItemConfiguration itemConfig : config.getConfigs()) {
-                        if (hasStrategy(serviceName, itemConfig,
+                        if (hasStrategy(config, itemConfig,
                                 onlyChanges ? SimpleStrategy.Globals.CHANGE : SimpleStrategy.Globals.UPDATE)) {
                             if (appliesToItem(itemConfig, item)) {
                                 persistenceServices.get(serviceName).store(item, itemConfig.getAlias());
@@ -144,13 +146,13 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     /**
      * Checks if a given persistence configuration entry has a certain strategy for the given service
      *
-     * @param serviceName the service to check the configuration for
+     * @param config the configuration to check for
      * @param itemConfig the persistence configuration entry
      * @param strategy the strategy to check for
      * @return true, if it has the given strategy
      */
-    private boolean hasStrategy(String serviceName, SimpleItemConfiguration itemConfig, SimpleStrategy strategy) {
-        final PersistenceServiceConfiguration config = persistenceServiceConfigs.get(serviceName);
+    private boolean hasStrategy(PersistenceServiceConfiguration config, SimpleItemConfiguration itemConfig,
+            SimpleStrategy strategy) {
         if (config.getDefaults().contains(strategy) && itemConfig.getStrategies().isEmpty()) {
             return true;
         } else {
@@ -182,17 +184,17 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
                 }
             }
             if (itemCfg instanceof SimpleGroupConfig) {
-                SimpleGroupConfig groupItemCfg = (SimpleGroupConfig) itemCfg;
-                String groupName = groupItemCfg.getGroup();
+                SimpleGroupConfig groupItemConfig = (SimpleGroupConfig) itemCfg;
                 try {
-                    Item gItem = itemRegistry.getItem(groupName);
+                    Item gItem = itemRegistry.getItem(groupItemConfig.getGroup());
                     if (gItem instanceof GroupItem) {
                         GroupItem groupItem = (GroupItem) gItem;
                         if (groupItem.getAllMembers().contains(item)) {
                             return true;
                         }
                     }
-                } catch (Exception e) {
+                } catch (ItemNotFoundException e) {
+                    // do nothing
                 }
             }
         }
@@ -214,20 +216,20 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
         }
 
         // otherwise, go through the detailed definitions
-        Set<Item> items = new HashSet<Item>();
+        Set<Item> items = new HashSet<>();
         for (Object itemCfg : config.getItems()) {
             if (itemCfg instanceof SimpleItemConfig) {
                 SimpleItemConfig singleItemConfig = (SimpleItemConfig) itemCfg;
+                String itemName = singleItemConfig.getItem();
                 try {
-                    Item item = itemRegistry.getItem(singleItemConfig.getItem());
-                    items.add(item);
+                    items.add(itemRegistry.getItem(itemName));
                 } catch (ItemNotFoundException e) {
-                    logger.debug("Item '{}' does not exist.", singleItemConfig.getItem());
+                    logger.debug("Item '{}' does not exist.", itemName);
                 }
             }
             if (itemCfg instanceof SimpleGroupConfig) {
-                SimpleGroupConfig groupItemCfg = (SimpleGroupConfig) itemCfg;
-                String groupName = groupItemCfg.getGroup();
+                SimpleGroupConfig groupItemConfig = (SimpleGroupConfig) itemCfg;
+                String groupName = groupItemConfig.getGroup();
                 try {
                     Item gItem = itemRegistry.getItem(groupName);
                     if (gItem instanceof GroupItem) {
@@ -258,7 +260,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
                 final String serviceName = entry.getKey();
                 final PersistenceServiceConfiguration config = entry.getValue();
                 for (SimpleItemConfiguration itemConfig : config.getConfigs()) {
-                    if (hasStrategy(serviceName, itemConfig, SimpleStrategy.Globals.RESTORE)) {
+                    if (hasStrategy(config, itemConfig, SimpleStrategy.Globals.RESTORE)) {
                         if (appliesToItem(itemConfig, item)) {
                             PersistenceService service = persistenceServices.get(serviceName);
                             if (service instanceof QueryablePersistenceService) {
@@ -363,7 +365,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     @Override
     public void addConfig(final String dbId, final PersistenceServiceConfiguration config) {
         synchronized (persistenceServiceConfigs) {
-            this.persistenceServiceConfigs.put(dbId, config);
+            persistenceServiceConfigs.put(dbId, config);
             if (persistenceServices.containsKey(dbId)) {
                 startEventHandling(dbId);
             }
@@ -374,25 +376,23 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     public void removeConfig(final String dbId) {
         synchronized (persistenceServiceConfigs) {
             stopEventHandling(dbId);
-            this.persistenceServiceConfigs.remove(dbId);
+            persistenceServiceConfigs.remove(dbId);
         }
     }
 
-    private void startEventHandling(final String dbId) {
+    private void startEventHandling(final String serviceName) {
         synchronized (persistenceServiceConfigs) {
-            final PersistenceServiceConfiguration config = persistenceServiceConfigs.get(dbId);
-            if (config == null) {
-                return;
-            }
-
-            for (SimpleItemConfiguration itemConfig : config.getConfigs()) {
-                if (hasStrategy(dbId, itemConfig, SimpleStrategy.Globals.RESTORE)) {
-                    for (Item item : getAllItems(itemConfig)) {
-                        initialize(item);
+            if (persistenceServiceConfigs.containsKey(serviceName)) {
+                final PersistenceServiceConfiguration config = persistenceServiceConfigs.get(serviceName);
+                for (SimpleItemConfiguration itemConfig : config.getConfigs()) {
+                    if (hasStrategy(config, itemConfig, SimpleStrategy.Globals.RESTORE)) {
+                        for (Item item : getAllItems(itemConfig)) {
+                            initialize(item);
+                        }
                     }
                 }
+                createTimers(serviceName, config.getStrategies());
             }
-            createTimers(dbId, config.getStrategies());
         }
     }
 
@@ -431,10 +431,6 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
         removed(oldItem);
         added(item);
     }
-
-    /*
-     * StateChangeListener
-     */
 
     @Override
     public void stateChanged(Item item, State oldState, State newState) {
