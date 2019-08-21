@@ -196,7 +196,7 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(BAR, BAR.getSymbol());
         SimpleUnitFormat.getInstance().label(BIT, BIT.getSymbol());
         SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, "bit/s");
-        SimpleUnitFormat.getInstance().label(BYTE, "o");
+        SimpleUnitFormat.getInstance().label(BYTE, "B");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_DAY, "m³/d");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_HOUR, "m³/h");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_MINUTE, "m³/min");
@@ -226,6 +226,7 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MICROWATT_PER_SQUARE_CENTIMETRE, "µW/cm²");
         SimpleUnitFormat.getInstance().label(MILLIBAR, "mbar");
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
+        SimpleUnitFormat.getInstance().label(OCTET, "o");
         SimpleUnitFormat.getInstance().label(PARTS_PER_MILLION, "ppm");
         SimpleUnitFormat.getInstance().label(STANDARD_GRAVITY, "gₙ");
         SimpleUnitFormat.getInstance().label(TERABIT, "Tbit");
