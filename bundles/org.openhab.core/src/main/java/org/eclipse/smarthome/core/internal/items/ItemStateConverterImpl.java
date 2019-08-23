@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.internal.items;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.UnitProvider;
 import org.eclipse.smarthome.core.items.Item;
@@ -27,6 +27,7 @@ import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.eclipse.smarthome.core.types.util.UnitUtils;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -35,18 +36,23 @@ import org.slf4j.LoggerFactory;
 /**
  * Convert a {@link State} to an {@link Item} accepted {@link State}.
  *
- * @author Henning Treu - Initial contribution and API
- *
+ * @author Henning Treu - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class ItemStateConverterImpl implements ItemStateConverter {
 
     private final Logger logger = LoggerFactory.getLogger(ItemStateConverterImpl.class);
 
-    private UnitProvider unitProvider;
+    private final UnitProvider unitProvider;
+
+    @Activate
+    public ItemStateConverterImpl(final @Reference UnitProvider unitProvider) {
+        this.unitProvider = unitProvider;
+    }
 
     @Override
-    public @NonNull State convertToAcceptedState(@Nullable State state, @Nullable Item item) {
+    public State convertToAcceptedState(@Nullable State state, @Nullable Item item) {
         if (state == null) {
             logger.error("A conversion of null was requested:",
                     new IllegalArgumentException("State must not be null."));
@@ -103,7 +109,7 @@ public class ItemStateConverterImpl implements ItemStateConverter {
         return state;
     }
 
-    private @NonNull State convertOrUndef(QuantityType<?> quantityState, Unit<?> targetUnit) {
+    private State convertOrUndef(QuantityType<?> quantityState, Unit<?> targetUnit) {
         QuantityType<?> converted = quantityState.toUnit(targetUnit);
         if (converted != null) {
             return converted;
@@ -111,7 +117,7 @@ public class ItemStateConverterImpl implements ItemStateConverter {
         return UnDefType.UNDEF;
     }
 
-    private Unit<?> parseItemUnit(NumberItem numberItem) {
+    private @Nullable Unit<?> parseItemUnit(NumberItem numberItem) {
         StateDescription stateDescription = numberItem.getStateDescription();
         if (stateDescription == null) {
             return null;
@@ -126,15 +132,6 @@ public class ItemStateConverterImpl implements ItemStateConverter {
 
     private boolean isAccepted(Item item, State state) {
         return item.getAcceptedDataTypes().contains(state.getClass());
-    }
-
-    @Reference
-    public void setUnitProvider(UnitProvider unitProvider) {
-        this.unitProvider = unitProvider;
-    }
-
-    protected void unsetUnitProvider(UnitProvider unitProvider) {
-        this.unitProvider = null;
     }
 
 }

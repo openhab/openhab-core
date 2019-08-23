@@ -116,8 +116,7 @@ public class GroupItemTest extends JavaOSGiTest {
         when(unitProvider.getUnit(Temperature.class)).thenReturn(Units.CELSIUS);
 
         groupFunctionHelper = new GroupFunctionHelper();
-        itemStateConverter = new ItemStateConverterImpl();
-        ((ItemStateConverterImpl) itemStateConverter).setUnitProvider(unitProvider);
+        itemStateConverter = new ItemStateConverterImpl(unitProvider);
     }
 
     @Ignore
