@@ -31,7 +31,7 @@
     <module>org.openhab.core.config.discovery.mdns.tests</module>
     <module>org.openhab.core.config.discovery.tests</module>
     <!-- <module>org.openhab.core.config.discovery.usbserial.tests</module> -->
-    <!-- <module>org.openhab.core.config.dispatch.tests</module> -->
+    <module>org.openhab.core.config.dispatch.tests</module>
     <module>org.openhab.core.config.xml.tests</module>
     <module>org.openhab.core.io.http.tests</module>
     <module>org.openhab.core.io.net.tests</module>
