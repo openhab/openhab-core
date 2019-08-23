@@ -26,7 +26,6 @@ import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.UnDefType;
@@ -45,7 +44,9 @@ public class ItemStateConverterImplTest {
 
     @Before
     public void setup() {
-        itemStateConverter = new ItemStateConverterImpl();
+        UnitProvider unitProvider = mock(UnitProvider.class);
+        when(unitProvider.getUnit(Temperature.class)).thenReturn(ImperialUnits.FAHRENHEIT);
+        itemStateConverter = new ItemStateConverterImpl(unitProvider);
     }
 
     @Test
@@ -101,10 +102,6 @@ public class ItemStateConverterImplTest {
         NumberItem item = mock(NumberItem.class);
         doReturn(Temperature.class).when(item).getDimension();
 
-        UnitProvider unitProvider = mock(UnitProvider.class);
-        when(unitProvider.getUnit(Temperature.class)).thenReturn(ImperialUnits.FAHRENHEIT);
-        itemStateConverter.setUnitProvider(unitProvider);
-
         State originalState = new QuantityType<>("12.34 °C");
         State convertedState = itemStateConverter.convertToAcceptedState(originalState, item);
 
@@ -115,10 +112,6 @@ public class ItemStateConverterImplTest {
     public void numberItemShouldNotConvertUnitsWhereMeasurmentSystemEquals() {
         NumberItem item = mock(NumberItem.class);
         doReturn(Length.class).when(item).getDimension();
-
-        UnitProvider unitProvider = mock(UnitProvider.class);
-        when(unitProvider.getUnit(Length.class)).thenReturn(SIUnits.METRE);
-        itemStateConverter.setUnitProvider(unitProvider);
 
         QuantityType<Length> originalState = new QuantityType<>("100 cm");
 
