@@ -38,8 +38,7 @@ public class ConfigDispatcherFileWatcherTest {
     public void setUp() throws Exception {
         initMocks(this);
 
-        configDispatcherFileWatcher = new TestConfigDispatcherFileWatcher();
-        configDispatcherFileWatcher.setConfigDispatcher(configDispatcher);
+        configDispatcherFileWatcher = new TestConfigDispatcherFileWatcher(configDispatcher);
     }
 
     @Test
@@ -97,6 +96,9 @@ public class ConfigDispatcherFileWatcherTest {
     }
 
     public class TestConfigDispatcherFileWatcher extends ConfigDispatcherFileWatcher {
+        public TestConfigDispatcherFileWatcher(ConfigDispatcher configDispatcher) {
+            super(configDispatcher);
+        }
 
         @Override
         protected void processWatchEvent(WatchEvent<?> event, Kind<?> kind, Path path) {

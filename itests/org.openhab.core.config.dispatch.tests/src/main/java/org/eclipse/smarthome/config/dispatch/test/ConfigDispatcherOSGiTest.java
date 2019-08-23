@@ -69,8 +69,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
 
-        cd = new ConfigDispatcher();
-        cd.setConfigurationAdmin(configAdmin);
+        cd = new ConfigDispatcher(configAdmin);
     }
 
     @After

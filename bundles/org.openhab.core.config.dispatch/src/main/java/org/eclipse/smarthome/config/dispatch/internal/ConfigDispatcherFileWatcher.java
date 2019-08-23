@@ -29,9 +29,8 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * Watches file-system events and passes them to our {@link ConfigDispatcher}
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Stefan Triller - factored out this code from {@link ConfigDispatcher}
- *
  */
 @Component(immediate = true)
 public class ConfigDispatcherFileWatcher extends AbstractWatchService {
@@ -42,10 +41,12 @@ public class ConfigDispatcherFileWatcher extends AbstractWatchService {
     /** The default folder name of the configuration folder of services */
     public static final String SERVICES_FOLDER = "services";
 
-    private ConfigDispatcher configDispatcher;
+    private final ConfigDispatcher configDispatcher;
 
-    public ConfigDispatcherFileWatcher() {
+    @Activate
+    public ConfigDispatcherFileWatcher(final @Reference ConfigDispatcher configDispatcher) {
         super(getPathToWatch());
+        this.configDispatcher = configDispatcher;
     }
 
     private static String getPathToWatch() {
@@ -57,8 +58,8 @@ public class ConfigDispatcherFileWatcher extends AbstractWatchService {
         }
     }
 
-    @Override
     @Activate
+    @Override
     public void activate() {
         super.activate();
         configDispatcher.processConfigFile(getSourcePath().toFile());
@@ -96,15 +97,6 @@ public class ConfigDispatcherFileWatcher extends AbstractWatchService {
             }
             configDispatcher.fileRemoved(configFile.getAbsolutePath());
         }
-    }
-
-    @Reference
-    public void setConfigDispatcher(ConfigDispatcher configDispatcher) {
-        this.configDispatcher = configDispatcher;
-    }
-
-    public void unsetConfigDispatcher(ConfigDispatcher configDispatcher) {
-        this.configDispatcher = null;
     }
 
 }
