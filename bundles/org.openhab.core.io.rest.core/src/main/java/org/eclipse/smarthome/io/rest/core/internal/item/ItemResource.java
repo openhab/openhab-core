@@ -102,7 +102,7 @@ import io.swagger.annotations.ApiResponses;
  * <p>
  * This resource is registered with the Jersey servlet.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Dennis Nobel - Added methods for item management
  * @author Andre Fuechsel - Added tag support
  * @author Chris Jackson - Added method to write complete item bean
@@ -241,7 +241,8 @@ public class ItemResource implements RESTResource {
     @ApiOperation(value = "Gets a single item.", response = EnrichedItemDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = EnrichedItemDTO.class),
             @ApiResponse(code = 404, message = "Item not found") })
-    public Response getItemData(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public Response getItemData(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @QueryParam("metadata") @ApiParam(value = "metadata selector", required = false) @Nullable String namespaceSelector,
             @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname) {
         final Locale locale = localeService.getLocale(language);
