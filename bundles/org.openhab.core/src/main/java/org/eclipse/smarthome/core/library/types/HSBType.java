@@ -335,7 +335,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
             c = 1.0f;
         }
 
-        return c <= 0.0031308f ? 19.92f * c : (1.0f + 0.055f) * (float) Math.pow(c, 1.0f / 2.4f) - 0.055f;
+        return c <= 0.0031308f ? 12.92f * c : (1.0f + 0.055f) * (float) Math.pow(c, 1.0f / 2.4f) - 0.055f;
     }
 
     // Gamma decompression (sRGB) for a single component, in the 0.0 - 1.0 range
@@ -346,7 +346,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
             c = 1.0f;
         }
 
-        return c <= 0.04045f ? c / 19.92f : (float) Math.pow((c + 0.055f) / (1.0f + 0.055f), 2.4f);
+        return c <= 0.04045f ? c / 12.92f : (float) Math.pow((c + 0.055f) / (1.0f + 0.055f), 2.4f);
     }
 
     /**
