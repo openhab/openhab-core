@@ -76,7 +76,7 @@ import com.google.gson.JsonSyntaxException;
  * Last but not least, a pid can be defined in the first line of a cfg file by prefixing it with "pid:", e.g.
  * "pid: com.acme.smarthome.security".
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Petar Valchev - Added sort by modification time, when configuration files are read
  * @author Ana Dimova - Reduce to a single watch thread for all class instances
  * @author Henning Treu - Delete orphan exclusive configuration from configAdmin
@@ -116,9 +116,14 @@ public class ConfigDispatcher {
 
     private ExclusivePIDMap exclusivePIDMap;
 
-    private ConfigurationAdmin configAdmin;
+    private final ConfigurationAdmin configAdmin;
 
     private File exclusivePIDStore;
+
+    @Activate
+    public ConfigDispatcher(final @Reference ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
+    }
 
     @Activate
     public void activate(BundleContext bundleContext) {
@@ -429,15 +434,6 @@ public class ConfigDispatcher {
             logger.warn("Could not parse line '{}'", line);
             return new ParseLineResult();
         }
-    }
-
-    @Reference
-    public void setConfigurationAdmin(ConfigurationAdmin configAdmin) {
-        this.configAdmin = configAdmin;
-    }
-
-    public void unsetConfigurationAdmin(ConfigurationAdmin configAdmin) {
-        this.configAdmin = null;
     }
 
     /**
