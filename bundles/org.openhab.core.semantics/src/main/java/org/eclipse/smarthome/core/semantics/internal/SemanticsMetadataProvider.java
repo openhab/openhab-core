@@ -23,10 +23,10 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.AbstractProvider;
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
 import org.eclipse.smarthome.core.items.GroupItem;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemRegistry;
+import org.eclipse.smarthome.core.items.ItemRegistryChangeListener;
 import org.eclipse.smarthome.core.items.Metadata;
 import org.eclipse.smarthome.core.items.MetadataKey;
 import org.eclipse.smarthome.core.items.MetadataProvider;
@@ -52,10 +52,10 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Component(immediate = true, service = MetadataProvider.class)
 @NonNullByDefault
-@Component(immediate = true)
 public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
-        implements MetadataProvider, RegistryChangeListener<Item> {
+        implements ItemRegistryChangeListener, MetadataProvider {
 
     // the namespace to use for the metadata
     public static final String NAMESPACE = "semantics";
@@ -229,6 +229,13 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         memberRelations.put(Arrays.asList(Equipment.class, Point.class), "hasPoint");
 
         propertyRelations.put(Arrays.asList(Point.class), "relatesTo");
+    }
+
+    @Override
+    public void allItemsChanged(Collection<String> oldItemNames) {
+        for (Item item : itemRegistry.getItems()) {
+            added(item);
+        }
     }
 
     @Override
