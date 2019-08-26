@@ -466,7 +466,7 @@ public class ConfigDispatcher {
      * 2. Map the processed PIDs to the absolute file paths of their config files. This way orphan PIDs from the bundle
      * data file will be recognised and their corresponding configuration will be deleted from configAdmin.
      */
-    private class ExclusivePIDMap {
+    public static class ExclusivePIDMap {
 
         /**
          * The list will be stored in the bundle cache and loaded on bundle start.
@@ -480,6 +480,14 @@ public class ConfigDispatcher {
          * The map will hold a 1:1 relation mapping from an exclusive PID to its absolute path in the file system.
          */
         private transient Map<String, String> processedPIDMapping = new HashMap<>();
+
+        /**
+         * Package protected default constructor to allow reflective instantiation.
+         *
+         * !!! DO NOT REMOVE - Gson needs it !!!
+         */
+        ExclusivePIDMap() {
+        }
 
         public void setProcessedPID(String pid, String pathToFile) {
             processedPIDMapping.put(pid, pathToFile);
