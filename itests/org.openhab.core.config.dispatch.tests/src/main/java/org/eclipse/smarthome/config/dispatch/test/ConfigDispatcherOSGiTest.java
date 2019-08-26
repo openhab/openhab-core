@@ -47,7 +47,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
     private ConfigDispatcher cd;
 
-    private static final String CONFIGURATION_BASE_DIR = "configurations";
+    private static final String CONFIGURATION_BASE_DIR = "../../../../../target/classes/configurations";
     private static final String SEP = File.separator;
 
     private static String defaultConfigFile;
