@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.smarthome.config.core.ConfigurableService;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.items.ItemUtil;
@@ -24,6 +25,7 @@ import org.eclipse.smarthome.core.items.events.ItemEventFactory;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
 import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -38,18 +40,28 @@ import org.slf4j.LoggerFactory;
  * The implicit agreement was an item called "VoiceCommand" to do exactly this; existing apps are using this and hence
  * this service will make this work.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
-@Component(service = HumanLanguageInterpreter.class, immediate = true, property = {
-        "service.pid=org.eclipse.smarthome.rulehli", "service.config.description.uri=voice:rulehli",
-        "service.config.label=Rule Voice Interpreter", "service.config.category=voice" })
+@Component(immediate = true, service = HumanLanguageInterpreter.class, configurationPid = "org.eclipse.smarthome.rulehli", property = {
+        Constants.SERVICE_PID + "=org.eclipse.smarthome.rulehli",
+        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=voice",
+        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Rule Voice Interpreter",
+        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + RuleHumanLanguageInterpreter.CONFIG_URI })
 public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
 
     private final Logger logger = LoggerFactory.getLogger(RuleHumanLanguageInterpreter.class);
 
+    // constants for the configuration properties
+    protected static final String CONFIG_URI = "voice:rulehli";
+
     private String itemName = "VoiceCommand";
-    private EventPublisher eventPublisher;
+
+    private final EventPublisher eventPublisher;
+
+    @Activate
+    public RuleHumanLanguageInterpreter(final @Reference EventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -100,12 +112,4 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
         return Collections.emptySet();
     }
 
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
 }
