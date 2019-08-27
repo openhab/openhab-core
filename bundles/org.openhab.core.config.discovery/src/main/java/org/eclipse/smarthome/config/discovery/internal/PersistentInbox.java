@@ -88,10 +88,9 @@ import org.slf4j.LoggerFactory;
  * @author Dennis Nobel - Added persistence support
  * @author Andre Fuechsel - Added removeOlderResults
  * @author Christoph Knauf - Added removeThingsForBridge and getPropsAndConfigParams
- *
  */
-@NonNullByDefault
 @Component(immediate = true, service = Inbox.class)
+@NonNullByDefault
 public final class PersistentInbox implements Inbox, DiscoveryListener, ThingRegistryChangeListener {
 
     // Internal enumeration to identify the correct type of the event to be fired.
@@ -612,7 +611,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         return getConfigDescParams(thingType);
     }
 
-    private List<ConfigDescriptionParameter> getConfigDescParams(ThingType thingType) {
+    private List<ConfigDescriptionParameter> getConfigDescParams(@Nullable ThingType thingType) {
         if (thingType != null && thingType.getConfigDescriptionURI() != null) {
             URI descURI = thingType.getConfigDescriptionURI();
             ConfigDescription desc = configDescRegistry.getConfigDescription(descURI);
