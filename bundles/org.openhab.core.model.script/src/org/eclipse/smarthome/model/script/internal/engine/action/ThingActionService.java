@@ -15,6 +15,7 @@ package org.eclipse.smarthome.model.script.internal.engine.action;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
@@ -64,6 +65,34 @@ public class ThingActionService implements ActionService {
             return thing.getStatusInfo();
         } else {
             return null;
+        }
+    }
+
+    public static Object getThingConfig(String thingUid, String parameter) {
+        ThingUID uid = new ThingUID(thingUid);
+        Thing thing = thingRegistry.get(uid);
+
+        if (thing != null) {
+            Configuration thingConfig = thing.getConfiguration();
+            Object configParameter = thingConfig.get(parameter);
+
+            return configParameter;
+        } else {
+            return null;
+        }
+    }
+
+    public static void setThingConfig(String thingUid, String parameter, Object value) {
+        ThingUID uid = new ThingUID(thingUid);
+        Thing thing = thingRegistry.get(uid);
+
+        if (thing != null) {
+            Configuration config = thing.getConfiguration();
+            ThingHandler thingHandler = thing.getHandler();
+            if (thingHandler != null) {
+                config.put(parameter, value);
+                thingHandler.handleConfigurationUpdate(config.getProperties());
+            }
         }
     }
 

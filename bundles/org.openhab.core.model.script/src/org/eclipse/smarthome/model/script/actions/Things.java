@@ -22,6 +22,7 @@ import org.eclipse.smarthome.model.script.internal.engine.action.ThingActionServ
  *
  * @author Maoliang Huang - Initial contribution
  * @author Kai Kreuzer - Extended for general thing access
+ * @author Jan N. Klug - Extend to manage thing configuration
  *
  */
 public class Things {
@@ -45,5 +46,27 @@ public class Things {
      */
     public static ThingActions getActions(String scope, String thingUid) {
         return ThingActionService.getActions(scope, thingUid);
+    }
+
+    /**
+     * Get a single configuration parameter of a Thing
+     *
+     * @param thingUid The uid of the thing
+     * @param parameter The parameter
+     * @return The configuration <code>Object</code>
+     */
+    public static Object getThingConfiguration(String thingUid, String parameter) {
+        return ThingActionService.getThingConfig(thingUid, parameter);
+    }
+
+    /**
+     * Set a single configuration parameter of a Thing
+     *
+     * @param thingUid The uid of the thing
+     * @param parameter The parameter
+     * @param value The new configuration value
+     */
+    public static void setThingConfiguration(String thingUid, String parameter, Object value) {
+        ThingActionService.setThingConfig(thingUid, parameter, value);
     }
 }
