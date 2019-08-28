@@ -44,4 +44,4 @@ after_success:
 after_failure:
   - tail -n 2000 .build.log
 script:
-  - mvnp clean verify -B -DskipChecks
+  - mvnp clean verify -B
