@@ -38,6 +38,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
+/**
+ * @author Petar Valchev - Initial contribution
+ */
 public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
     @Rule
