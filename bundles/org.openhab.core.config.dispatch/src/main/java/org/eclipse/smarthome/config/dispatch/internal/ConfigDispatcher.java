@@ -79,9 +79,9 @@ import com.google.gson.JsonSyntaxException;
  * "pid: com.acme.smarthome.security".
  *
  * <p>
- * The value can contain value delimiters and will then be interpreted as a list of tokens. Default value delimiter is
- * the comma ','. So the following property definition "property = This property, has multiple, values" will result in a
- * list with three values.
+ * The value can be surrounded by square brackets ('[' and ']') and optionally contain value delimiters to be
+ * interpreted as a list of tokens. Default value delimiter is the comma ','. So the following property definition
+ * "property = [This property, has multiple, values]" will result in a collection with three values.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Petar Valchev - Added sort by modification time, when configuration files are read
@@ -124,6 +124,8 @@ public class ConfigDispatcher {
 
     private static final String DEFAULT_PID_DELIMITER = ":";
     private static final String DEFAULT_VALUE_DELIMITER = "=";
+    private static final String DEFAULT_LIST_STARTING_CHARACTER = "[";
+    private static final String DEFAULT_LIST_ENDING_CHARACTER = "]";
     private static final String DEFAULT_LIST_DELIMITER = ",";
 
     private ExclusivePIDMap exclusivePIDMap;
@@ -441,10 +443,16 @@ public class ConfigDispatcher {
         if (!trimmedLine.isEmpty() && trimmedLine.substring(1).contains(DEFAULT_VALUE_DELIMITER)) {
             String property = StringUtils.substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER).trim();
             String value = trimmedLine.substring(property.length() + 1).trim();
-            if (value.contains(DEFAULT_LIST_DELIMITER)) {
+            if (value.startsWith(DEFAULT_LIST_STARTING_CHARACTER) && value.endsWith(DEFAULT_LIST_ENDING_CHARACTER)) {
                 logger.debug("Found list in value '{}'", value);
-                List<String> values = Arrays.asList(value.split(DEFAULT_LIST_DELIMITER)).stream().map(v -> v.trim())
-                        .filter(v -> !v.isEmpty()).collect(Collectors.toList());
+                List<String> values = Arrays.asList(value //
+                        .replace(DEFAULT_LIST_STARTING_CHARACTER, "") //
+                        .replace(DEFAULT_LIST_ENDING_CHARACTER, "")//
+                        .split(DEFAULT_LIST_DELIMITER))//
+                        .stream()//
+                        .map(v -> v.trim())//
+                        .filter(v -> !v.isEmpty())//
+                        .collect(Collectors.toList());
                 return new ParseLineResult(pid, property, values);
             } else {
                 return new ParseLineResult(pid, property, value);
