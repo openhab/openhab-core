@@ -67,6 +67,7 @@ import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.transform.TransformationException;
 import org.eclipse.smarthome.core.transform.TransformationHelper;
 import org.eclipse.smarthome.core.transform.TransformationService;
+import org.eclipse.smarthome.core.types.CommandDescription;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.StateOption;
@@ -240,6 +241,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         if (itemType == null) {
             return null;
         }
+        int nbOptions = getNbOptions(itemName);
 
         if (itemType.equals(SwitchItem.class)) {
             return SitemapFactory.eINSTANCE.createSwitch();
@@ -248,7 +250,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return SitemapFactory.eINSTANCE.createGroup();
         }
         if (NumberItem.class.isAssignableFrom(itemType)) {
-            return SitemapFactory.eINSTANCE.createText();
+            return nbOptions > 0 ? SitemapFactory.eINSTANCE.createSelection() : SitemapFactory.eINSTANCE.createText();
         }
         if (itemType.equals(ContactItem.class)) {
             return SitemapFactory.eINSTANCE.createText();
@@ -260,7 +262,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return SitemapFactory.eINSTANCE.createSwitch();
         }
         if (itemType.equals(StringItem.class)) {
-            return SitemapFactory.eINSTANCE.createText();
+            return nbOptions > 0 ? SitemapFactory.eINSTANCE.createSelection() : SitemapFactory.eINSTANCE.createText();
         }
         if (itemType.equals(LocationItem.class)) {
             return SitemapFactory.eINSTANCE.createText();
@@ -767,6 +769,23 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     group.getLabel(), itemName);
         }
         return children;
+    }
+
+    private int getNbOptions(String itemName) {
+        try {
+            Item item = itemRegistry.getItem(itemName);
+            CommandDescription commandDescription = item.getCommandDescription();
+            int nbCommandOptions = (commandDescription != null && commandDescription.getCommandOptions() != null)
+                    ? commandDescription.getCommandOptions().size()
+                    : 0;
+            StateDescription stateDescription = item.getStateDescription();
+            int nbStateOptions = (stateDescription != null && stateDescription.getOptions() != null)
+                    ? stateDescription.getOptions().size()
+                    : 0;
+            return nbCommandOptions > nbStateOptions ? nbCommandOptions : nbStateOptions;
+        } catch (ItemNotFoundException e) {
+        }
+        return 0;
     }
 
     private Class<? extends Item> getItemType(@NonNull String itemName) {
