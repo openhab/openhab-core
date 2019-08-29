@@ -167,7 +167,7 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
                     .orElse(null);
             // @formatter:on
         } catch (CommonNameNotFoundException e) {
-            logger.debug("CN not found", e.getMessage());
+            logger.debug("CN not found", e);
             return null;
         } catch (CertificateParsingException e) {
             logger.debug("Problem while parsing certificate", e);

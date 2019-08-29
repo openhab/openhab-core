@@ -52,7 +52,7 @@ public class AuthenticationHandler implements Handler {
     private static final String DEFAULT_LOGIN_URI = "/login";
     static final String REDIRECT_PARAM_NAME = "redirect";
 
-    private final Logger logger = LoggerFactory.getLogger(AuthenticationManager.class);
+    private final Logger logger = LoggerFactory.getLogger(AuthenticationHandler.class);
 
     private final List<CredentialsExtractor<HttpServletRequest>> extractors = new CopyOnWriteArrayList<>();
 
