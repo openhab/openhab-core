@@ -241,6 +241,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         if (itemType == null) {
             return null;
         }
+        boolean readOnly = isReadOnly(itemName);
         int nbOptions = getNbOptions(itemName);
 
         if (itemType.equals(SwitchItem.class)) {
@@ -250,7 +251,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return SitemapFactory.eINSTANCE.createGroup();
         }
         if (NumberItem.class.isAssignableFrom(itemType)) {
-            return nbOptions > 0 ? SitemapFactory.eINSTANCE.createSelection() : SitemapFactory.eINSTANCE.createText();
+            return (!readOnly && nbOptions > 0) ? SitemapFactory.eINSTANCE.createSelection()
+                    : SitemapFactory.eINSTANCE.createText();
         }
         if (itemType.equals(ContactItem.class)) {
             return SitemapFactory.eINSTANCE.createText();
@@ -262,7 +264,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return SitemapFactory.eINSTANCE.createSwitch();
         }
         if (itemType.equals(StringItem.class)) {
-            return nbOptions > 0 ? SitemapFactory.eINSTANCE.createSelection() : SitemapFactory.eINSTANCE.createText();
+            return (!readOnly && nbOptions > 0) ? SitemapFactory.eINSTANCE.createSelection()
+                    : SitemapFactory.eINSTANCE.createText();
         }
         if (itemType.equals(LocationItem.class)) {
             return SitemapFactory.eINSTANCE.createText();
@@ -769,6 +772,16 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     group.getLabel(), itemName);
         }
         return children;
+    }
+
+    private boolean isReadOnly(String itemName) {
+        try {
+            Item item = itemRegistry.getItem(itemName);
+            StateDescription stateDescription = item.getStateDescription();
+            return stateDescription != null ? stateDescription.isReadOnly() : false;
+        } catch (ItemNotFoundException e) {
+        }
+        return false;
     }
 
     private int getNbOptions(String itemName) {
