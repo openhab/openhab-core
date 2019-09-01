@@ -280,7 +280,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         return interpreter.interpret(localeProvider.getLocale(), text);
     }
 
-    private Voice getVoice(String id) {
+    public Voice getVoice(String id) {
         if (id.contains(":")) {
             // it is a fully qualified unique id
             String[] segments = id.split(":");
