@@ -104,6 +104,14 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- JBBP -->
+    <dependency>
+      <groupId>com.igormaznitsa</groupId>
+      <artifactId>jbbp</artifactId>
+      <version>1.4.1</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- Jackson -->
     <dependency>
       <groupId>org.codehaus.jackson</groupId>

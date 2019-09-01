@@ -92,6 +92,11 @@
     </config>
   </feature>
 
+  <feature name="openhab.tp-jbbp" description="Java Binary Block Parser library" version="${project.version}">
+    <capability>openhab.tp;feature=jbbp;version=1.4.1</capability>
+    <bundle dependency="true">mvn:org.openhab.osgiify/com.igormaznitsa.jbbp/1.4.1</bundle>
+  </feature>
+  
   <feature name="openhab.tp-kat.cpy-jersey-min-2.22.2" version="${project.version}">
     <feature>http</feature>
     <bundle start-level="36">mvn:org.glassfish.jersey.containers/jersey-container-servlet/2.22.2</bundle>

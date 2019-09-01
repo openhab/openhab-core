@@ -125,6 +125,13 @@
     </config>
   </feature>
 
+  <feature name="openhab-core-io-bin2json" description="Binary to JSON converter" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.bin2json/${project.version}</bundle>
+    <requirement>openhab.tp;filter:="(feature=jbbp)"</requirement>
+    <feature dependency="true">openhab.tp-jbbp</feature>
+  </feature>
+  
   <feature name="openhab-core-io-console-karaf" description="Karaf Console support for SmartHome stuff" version="${project.version}">
     <feature>openhab-core-base</feature>
     <feature>shell</feature>
