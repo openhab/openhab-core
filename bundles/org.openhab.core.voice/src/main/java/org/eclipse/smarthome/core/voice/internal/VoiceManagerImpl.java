@@ -206,54 +206,53 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             }
             Set<AudioFormat> audioFormats = tts.getSupportedFormats();
             AudioSink sink = audioManager.getSink(sinkId);
+            if (sink == null) {
+                throw new TTSException("Unable to find the audio sink " + sinkId);
+            }
 
-            if (sink != null) {
-                AudioFormat audioFormat = getBestMatch(audioFormats, sink.getSupportedFormats());
-                if (audioFormat != null) {
-                    AudioStream audioStream = tts.synthesize(text, voice, audioFormat);
+            AudioFormat audioFormat = getBestMatch(audioFormats, sink.getSupportedFormats());
+            if (audioFormat == null) {
+                throw new TTSException("No compatible audio format found for TTS '" + tts.getId() + "' and sink '"
+                        + sink.getId() + "'");
+            }
 
-                    if (sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
-                        PercentType oldVolume = null;
-                        try {
-                            // get current volume
-                            oldVolume = audioManager.getVolume(sinkId);
-                        } catch (IOException e) {
-                            logger.debug("An exception occurred while getting the volume of sink '{}' : {}",
-                                    sink.getId(), e.getMessage(), e);
-                        }
-                        // set notification sound volume
-                        if (volume != null) {
-                            try {
-                                audioManager.setVolume(volume, sinkId);
-                            } catch (IOException e) {
-                                logger.debug("An exception occurred while setting the volume of sink '{}' : {}",
-                                        sink.getId(), e.getMessage(), e);
-                            }
-                        }
-                        try {
-                            sink.process(audioStream);
-                        } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
-                            logger.warn("Error saying '{}': {}", text, e.getMessage(), e);
-                        } finally {
-                            if (volume != null && oldVolume != null) {
-                                // restore volume only if it was set before
-                                try {
-                                    audioManager.setVolume(oldVolume, sinkId);
-                                } catch (IOException e) {
-                                    logger.debug("An exception occurred while setting the volume of sink '{}' : {}",
-                                            sink.getId(), e.getMessage(), e);
-                                }
-                            }
-                        }
-                    } else {
-                        logger.warn("Failed playing audio stream '{}' as audio sink doesn't support it.", audioStream);
-                    }
-                } else {
-                    logger.warn("No compatible audio format found for TTS '{}' and sink '{}'", tts.getId(),
-                            sink.getId());
+            AudioStream audioStream = tts.synthesize(text, voice, audioFormat);
+            if (!sink.getSupportedStreams().stream().anyMatch(clazz -> clazz.isInstance(audioStream))) {
+                throw new TTSException(
+                        "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
+            }
+
+            PercentType oldVolume = null;
+            try {
+                // get current volume
+                oldVolume = audioManager.getVolume(sinkId);
+            } catch (IOException e) {
+                logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
+                        e.getMessage(), e);
+            }
+            // set notification sound volume
+            if (volume != null) {
+                try {
+                    audioManager.setVolume(volume, sinkId);
+                } catch (IOException e) {
+                    logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
+                            e.getMessage(), e);
                 }
             }
-        } catch (TTSException e) {
+            try {
+                sink.process(audioStream);
+            } finally {
+                if (volume != null && oldVolume != null) {
+                    // restore volume only if it was set before
+                    try {
+                        audioManager.setVolume(oldVolume, sinkId);
+                    } catch (IOException e) {
+                        logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
+                                e.getMessage(), e);
+                    }
+                }
+            }
+        } catch (TTSException | UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
             logger.warn("Error saying '{}': {}", text, e.getMessage(), e);
         }
     }
