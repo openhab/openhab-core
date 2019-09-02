@@ -25,6 +25,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -33,6 +34,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.smarthome.core.auth.Role;
+import org.eclipse.smarthome.core.voice.Voice;
 import org.eclipse.smarthome.core.voice.VoiceManager;
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
 import org.eclipse.smarthome.core.voice.text.InterpretationException;
@@ -54,6 +56,7 @@ import io.swagger.annotations.ApiResponses;
  * This class acts as a REST resource for voice features.
  *
  * @author Kai Kreuzer - Initial contribution and API
+ * @author Laurent Garnier - add TTS feature to the REST API
  */
 @Component
 @Path(VoiceResource.PATH_SITEMAPS)
@@ -106,7 +109,7 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/interpreters/{id: [a-zA-Z_0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets a single interpreters.", response = HumanLanguageInterpreterDTO.class)
+    @ApiOperation(value = "Gets a single interpreter.", response = HumanLanguageInterpreterDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Interpreter not found") })
     public Response getInterpreter(
@@ -167,6 +170,48 @@ public class VoiceResource implements RESTResource {
         } else {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
+    }
+
+    @GET
+    @Path("/voices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get the list of all voices.", response = VoiceDTO.class, responseContainer = "List")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    public Response getVoices() {
+        Collection<Voice> voices = voiceManager.getAllVoices();
+        List<VoiceDTO> dtos = new ArrayList<>(voices.size());
+        for (Voice voice : voices) {
+            dtos.add(VoiceMapper.map(voice));
+        }
+        return Response.ok(dtos).build();
+    }
+
+    @GET
+    @Path("/defaultvoice")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Gets the default voice.", response = VoiceDTO.class)
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 404, message = "No default voice was found.") })
+    public Response getDefaultVoice() {
+        Voice voice = voiceManager.getDefaultVoice();
+        if (voice != null) {
+            VoiceDTO dto = VoiceMapper.map(voice);
+            return Response.ok(dto).build();
+        } else {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Default voice not found");
+        }
+    }
+
+    @POST
+    @Path("/say")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = "Speaks a given text with a given voice through the given audio sink.")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    public Response say(@ApiParam(value = "text to speak", required = true) String text,
+            @ApiParam(value = "voice id", required = false) @QueryParam("voiceid") String voiceId,
+            @ApiParam(value = "audio sink id", required = false) @QueryParam("sinkid") String sinkId) {
+        voiceManager.say(text, voiceId, sinkId);
+        return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
     @Override
