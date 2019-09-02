@@ -25,6 +25,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -32,8 +33,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.audio.AudioSink;
 import org.eclipse.smarthome.core.auth.Role;
 import org.eclipse.smarthome.core.voice.Voice;
 import org.eclipse.smarthome.core.voice.VoiceManager;
@@ -71,7 +70,6 @@ public class VoiceResource implements RESTResource {
     UriInfo uriInfo;
 
     private VoiceManager voiceManager;
-    private AudioManager audioManager;
     private LocaleService localeService;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
@@ -81,15 +79,6 @@ public class VoiceResource implements RESTResource {
 
     public void unsetVoiceManager(VoiceManager voiceManager) {
         this.voiceManager = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setAudioManager(AudioManager audioManager) {
-        this.audioManager = audioManager;
-    }
-
-    public void unsetAudioManager(AudioManager audioManager) {
-        this.audioManager = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
@@ -216,56 +205,13 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/say")
     @Consumes(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Speaks a given text with the default voice through the default audio sink.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "No default voice or no default audio sink was found.") })
-    public Response say(@ApiParam(value = "text to speak", required = true) String text) {
-        Voice voice = voiceManager.getDefaultVoice();
-        AudioSink sink = audioManager.getSink();
-        if (voice == null) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Default voice not found");
-        } else if (sink == null) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Default audio sink not found");
-        } else {
-            voiceManager.say(text, voice.getUID(), sink.getId());
-            return Response.ok(null, MediaType.TEXT_PLAIN).build();
-        }
-    }
-
-    @POST
-    @Path("/say/{sinkid: [a-zA-Z_:0-9]*}")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Speaks a given text with the default voice through the given audio sink.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "No default voice was found or audio sink does not exist.") })
-    public Response say(@ApiParam(value = "text to speak", required = true) String text,
-            @PathParam("sinkid") @ApiParam(value = "audio sink id", required = true) String sinkId) {
-        Voice voice = voiceManager.getDefaultVoice();
-        if (voice == null) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Default voice not found");
-        } else if (audioManager.getSink(sinkId) == null) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Undefined audio sink");
-        } else {
-            voiceManager.say(text, voice.getUID(), sinkId);
-            return Response.ok(null, MediaType.TEXT_PLAIN).build();
-        }
-    }
-
-    @POST
-    @Path("/say/{sinkid: [a-zA-Z_:0-9]*}/{voiceid: [a-zA-Z_:0-9]*}")
-    @Consumes(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Speaks a given text with a given voice through the given audio sink.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Audio sink does not exist.") })
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response say(@ApiParam(value = "text to speak", required = true) String text,
-            @PathParam("sinkid") @ApiParam(value = "audio sink id", required = true) String sinkId,
-            @PathParam("voiceid") @ApiParam(value = "voice id", required = true) String voiceId) {
-        if (audioManager.getSink(sinkId) == null) {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Undefined audio sink");
-        } else {
-            voiceManager.say(text, voiceId, sinkId);
-            return Response.ok(null, MediaType.TEXT_PLAIN).build();
-        }
+            @ApiParam(value = "voice id", required = false) @QueryParam("voiceid") String voiceId,
+            @ApiParam(value = "audio sink id", required = false) @QueryParam("sinkid") String sinkId) {
+        voiceManager.say(text, voiceId, sinkId);
+        return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
     @Override
