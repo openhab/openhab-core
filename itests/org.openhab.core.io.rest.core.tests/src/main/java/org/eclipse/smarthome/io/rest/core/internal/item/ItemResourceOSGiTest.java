@@ -165,7 +165,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         Response response = itemResource.getItems(null, null, "MyTag", null, false, "type,name");
 
         JsonElement result = parser.parse(IOUtils.toString((InputStream) response.getEntity()));
-        JsonElement expected = parser.parse("[{editable: true, type: \"Switch\", name: \"Switch\"}]");
+        JsonElement expected = parser.parse("[{type: \"Switch\", name: \"Switch\"}]");
         assertEquals(expected, result);
     }
 
