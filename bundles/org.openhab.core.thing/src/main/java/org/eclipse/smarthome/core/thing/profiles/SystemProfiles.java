@@ -52,7 +52,7 @@ public interface SystemProfiles {
             .build();
 
     TriggerProfileType RAWBUTTON_ON_OFF_SWITCH_TYPE = ProfileTypeBuilder
-            .newTrigger(RAWBUTTON_ON_OFF_SWITCH, "Raw Button On Off Switch")
+            .newTrigger(RAWBUTTON_ON_OFF_SWITCH, "Raw Button To On Off")
             .withSupportedItemTypes(CoreItemFactory.SWITCH, CoreItemFactory.DIMMER, CoreItemFactory.COLOR)
             .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON.getUID()).build();
 
