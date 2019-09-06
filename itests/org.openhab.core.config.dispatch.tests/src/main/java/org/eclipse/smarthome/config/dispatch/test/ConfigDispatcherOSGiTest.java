@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -108,6 +111,58 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         // Assert that more than one file with local pid from the services directory is processed.
         verifyValueOfConfigurationProperty("local.service.second.pid", "service.property", "service.value");
+    }
+
+    @Test
+    public void valueIsValidIfItIsAList() {
+        String configDirectory = configBaseDirectory + SEP + "local_pid_list_conf";
+        String servicesDirectory = "local_pid_list_services";
+
+        String defaultConfigFileName = configDirectory + SEP + "local.pid.list.default.file.cfg";
+
+        initialize(defaultConfigFileName);
+
+        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+
+        /*
+         * Assert that the configuration is updated with a list containing one value for a file in the root directory.
+         */
+        verifyValuesOfConfigurationProperty("local.default.pid", "default.property", 1,
+                Collections.singletonList("default.value"));
+
+        /*
+         * Assert that the configuration is updated with a list containing one value for a file in the services
+         * directory.
+         */
+        verifyValuesOfConfigurationProperty("local.service.first.pid", "service.property", 1,
+                Collections.singletonList("service.value"));
+
+        /*
+         * Assert that the configuration is updated with a list containing more than one values for a file in the
+         * services directory.
+         */
+        verifyValuesOfConfigurationProperty("local.service.second.pid", "service.property", 3,
+                Arrays.asList("first value", "second value", "third value"));
+
+        /*
+         * Assert that the configuration is updated with a list containing trimmed values for a file in the
+         * services directory.
+         */
+        verifyValuesOfConfigurationProperty("local.service.third.pid", "service.property", 3,
+                Arrays.asList("first value", "second value", "third value"));
+
+        /*
+         * Assert that the configuration is updated with an empty list for a file in the services directory.
+         */
+        verifyValuesOfConfigurationProperty("local.service.fourth.pid", "service.property", 0, Collections.emptyList());
+
+        /*
+         * Assert some edge cases containing special chars
+         */
+        verifyValueOfConfigurationProperty("local.service.fifth.pid", "service.property", "[service.value");
+        verifyValueOfConfigurationProperty("local.service.sixth.pid", "service.property", "service.value]");
+        verifyValueOfConfigurationProperty("local.service.seventh.pid", "service.property",
+                "first value,second value,third value");
     }
 
     private String getAbsoluteConfigDirectory(String configDirectory, String servicesDirectory) {
@@ -875,6 +930,25 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
             assertThat(configuration, is(notNullValue()));
             assertThat(configuration.getProperties(), is(notNullValue()));
             assertThat(configuration.getProperties().get(property), is(equalTo(value)));
+        });
+    }
+
+    private void verifyValuesOfConfigurationProperty(String pid, String property, int expectedSize,
+            Collection<String> values) {
+        waitForAssert(() -> {
+            try {
+                configuration = configAdmin.getConfiguration(pid);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("IOException occured while retrieving configuration for pid " + pid,
+                        e);
+            }
+            assertThat(configuration, is(notNullValue()));
+            assertThat(configuration.getProperties(), is(notNullValue()));
+            assertThat(configuration.getProperties().get(property), is(instanceOf(Collection.class)));
+            @SuppressWarnings("unchecked")
+            Collection<String> results = (Collection<String>) configuration.getProperties().get(property);
+            assertThat(results.size(), is(expectedSize));
+            assertThat(results, is(equalTo(values)));
         });
     }
 
