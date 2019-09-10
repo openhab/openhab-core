@@ -22,6 +22,7 @@ import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.internal.BridgeImpl;
@@ -99,6 +100,15 @@ public class BridgeBuilder extends ThingBuilder {
     @Override
     public BridgeBuilder withLocation(@Nullable String location) {
         return (BridgeBuilder) super.withLocation(location);
+    }
+
+    public BridgeBuilder withThings(@Nullable List<Thing> things) {
+        BridgeImpl bridge = ((BridgeImpl) thing);
+        if (things != null) {
+            things.forEach(t -> bridge.addThing(t));
+        }
+
+        return this;
     }
 
 }

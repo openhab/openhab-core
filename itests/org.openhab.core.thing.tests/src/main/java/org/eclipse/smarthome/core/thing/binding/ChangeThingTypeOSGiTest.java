@@ -40,6 +40,7 @@ import org.eclipse.smarthome.core.storage.StorageService;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.ManagedThingProvider;
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
@@ -251,33 +252,36 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
     @Test
     public void assertChangingTheThingTypeWorks() {
         // println "[ChangeThingTypeOSGiTest] ======== assert changing the ThingType works"
-        Thing thing = ThingFactory.createThing(thingTypeGeneric, new ThingUID("testBinding", "testThing"),
+        Thing t = ThingFactory.createThing(thingTypeGeneric, new ThingUID("testBinding", "testThing"),
                 new Configuration(), null, configDescriptionRegistry);
-        thing.setProperty("universal", "survives");
-        managedThingProvider.add(thing);
+        t.setProperty("universal", "survives");
+        managedThingProvider.add(t);
 
         // Pre-flight checks - see below
-        assertThat(thing.getHandler(), instanceOf(GenericThingHandler.class));
-        assertThat(thing.getConfiguration().get("parametergeneric"), is("defaultgeneric"));
-        assertThat(thing.getConfiguration().get("providedspecific"), is(nullValue()));
-        assertThat(thing.getChannels().size(), is(1));
-        assertThat(thing.getChannels().get(0).getUID(), is(CHANNEL_GENERIC_UID));
-        assertThat(thing.getProperties().get("universal"), is("survives"));
-
-        ThingHandlerFactory handlerFactory = getService(ThingHandlerFactory.class, SampleThingHandlerFactory.class);
-        assertThat(handlerFactory, not(nullValue()));
-
-        thing.getHandler().handleCommand(mock(ChannelUID.class), mock(Command.class));
+        ThingUID tUid = t.getUID();
         waitForAssert(() -> {
-            assertThat(thing.getStatus(), is(ThingStatus.ONLINE));
+            Thing thing = managedThingProvider.get(tUid);
+
+            assertThat(thing.getHandler(), instanceOf(GenericThingHandler.class));
+            assertThat(thing.getConfiguration().get("parametergeneric"), is("defaultgeneric"));
+            assertThat(thing.getConfiguration().get("providedspecific"), is(nullValue()));
+            assertThat(thing.getChannels().size(), is(1));
+            assertThat(thing.getChannels().get(0).getUID(), is(CHANNEL_GENERIC_UID));
+            assertThat(thing.getProperties().get("universal"), is("survives"));
+
+            ThingHandlerFactory handlerFactory = getService(ThingHandlerFactory.class, SampleThingHandlerFactory.class);
+            assertThat(handlerFactory, not(nullValue()));
+
+            thing.getHandler().handleCommand(mock(ChannelUID.class), mock(Command.class));
+            assertThat(getService(ThingRegistry.class).get(tUid).getStatus(), is(ThingStatus.ONLINE));
         }, 4000, 100);
 
         // Now do the actual migration
         Map<String, Object> properties = new HashMap<>(1);
         properties.put("providedspecific", "there");
-        ((BaseThingHandler) thing.getHandler()).changeThingType(THING_TYPE_SPECIFIC_UID, new Configuration(properties));
+        ((BaseThingHandler) t.getHandler()).changeThingType(THING_TYPE_SPECIFIC_UID, new Configuration(properties));
 
-        assertThingWasChanged(thing);
+        assertThingWasChanged(t);
     }
 
     @Test
@@ -291,8 +295,11 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         // println "[ChangeThingTypeOSGiTest] Add thing to managed thing provider"
         managedThingProvider.add(thing);
 
-        // println "[ChangeThingTypeOSGiTest] Wait for thing changed"
-        assertThingWasChanged(thing);
+        waitForAssert(() -> {
+            Thing t = managedThingProvider.get(new ThingUID("testBinding", "testThing"));
+            // println "[ChangeThingTypeOSGiTest] Wait for thing changed"
+            assertThingWasChanged(t);
+        }, 4000, 100);
     }
 
     @Test
@@ -358,10 +365,13 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
 
     private void assertThingWasChanged(Thing thing) {
         // Ensure that the ThingHandler has been registered as an OSGi service correctly
+        ThingUID tUid = thing.getUID();
+
         waitForAssert(() -> {
-            assertThat(thing.getHandler(), instanceOf(SpecificThingHandler.class));
+            assertThat(getService(ThingRegistry.class).get(tUid).getHandler(), instanceOf(SpecificThingHandler.class));
         }, 30000, 100);
 
+        thing = getService(ThingRegistry.class).get(thing.getUID());
         ThingHandlerFactory handlerFactory = getService(ThingHandlerFactory.class, SampleThingHandlerFactory.class);
         assertThat(handlerFactory, not(nullValue()));
 

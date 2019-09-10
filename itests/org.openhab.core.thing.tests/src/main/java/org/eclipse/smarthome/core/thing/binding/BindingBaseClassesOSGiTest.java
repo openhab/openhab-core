@@ -192,7 +192,8 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         managedThingProvider.add(thing);
 
         waitForAssert(() -> {
-            ThingHandler handler = thing.getHandler();
+            Thing t = managedThingProvider.get(thingUID);
+            ThingHandler handler = t.getHandler();
             assertThat(handler, is(not(nullValue())));
         });
 
@@ -348,14 +349,18 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         // ThingHandler.initialize() has not been called; thing with status UNINITIALIZED.HANDLER_CONFIGURATION_PENDING
         ThingStatusInfo uninitialized = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING).build();
-        assertThat(thing.getStatusInfo(), is(uninitialized));
+        waitForAssert(() -> {
+            Thing t = managedThingProvider.get(thingUID);
+            assertThat(t.getStatusInfo(), is(uninitialized));
+        });
 
         thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", "value"));
 
         // ThingHandler.initialize() has been called; thing with status ONLINE.NONE
         final ThingStatusInfo online = ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build();
         waitForAssert(() -> {
-            assertThat(thing.getStatusInfo(), is(online));
+            Thing t = thingRegistry.get(thingUID);
+            assertThat(t.getStatusInfo(), is(online));
         }, 4000, DFL_SLEEP_TIME);
     }
 
