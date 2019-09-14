@@ -268,7 +268,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     : SitemapFactory.eINSTANCE.createText();
         }
         if (itemType.equals(LocationItem.class)) {
-            return SitemapFactory.eINSTANCE.createText();
+            return SitemapFactory.eINSTANCE.createMapview();
         }
         if (itemType.equals(CallItem.class)) {
             return SitemapFactory.eINSTANCE.createText();
