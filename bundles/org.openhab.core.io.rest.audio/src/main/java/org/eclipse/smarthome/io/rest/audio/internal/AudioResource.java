@@ -111,7 +111,7 @@ public class AudioResource implements RESTResource {
         if (source != null) {
             return Response.ok(AudioMapper.map(source, locale)).build();
         } else {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "source not found");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Source not found");
         }
     }
 
@@ -144,7 +144,7 @@ public class AudioResource implements RESTResource {
         if (sink != null) {
             return Response.ok(AudioMapper.map(sink, locale)).build();
         } else {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "sink not found");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Sink not found");
         }
     }
 
