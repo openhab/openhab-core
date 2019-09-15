@@ -59,6 +59,7 @@
     <module>org.openhab.core.io.monitor</module>
     <module>org.openhab.core.io.net</module>
     <module>org.openhab.core.io.rest</module>
+    <module>org.openhab.core.io.rest.audio</module>
     <module>org.openhab.core.io.rest.auth</module>
     <module>org.openhab.core.io.rest.core</module>
     <module>org.openhab.core.io.rest.log</module>

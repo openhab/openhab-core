@@ -170,6 +170,11 @@
     <feature dependency="true">openhab-core-model-sitemap</feature>
   </feature>
 
+  <feature name="openhab-core-io-rest-audio" version="${project.version}">
+    <feature>openhab-core-base</feature>
+    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.audio/${project.version}</bundle>
+  </feature>
+
   <feature name="openhab-core-io-rest-voice" version="${project.version}">
     <feature>openhab-core-base</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.voice/${project.version}</bundle>
@@ -427,6 +432,7 @@
     <feature>openhab-core-ephemeris</feature>
     <feature>openhab-core-io-console-karaf</feature>
     <feature>openhab-core-io-rest-sitemap</feature>
+    <feature>openhab-core-io-rest-audio</feature>
     <feature>openhab-core-io-rest-voice</feature>
     <feature>openhab-core-io-rest-mdns</feature>
     <feature>openhab-core-model-lsp</feature>
