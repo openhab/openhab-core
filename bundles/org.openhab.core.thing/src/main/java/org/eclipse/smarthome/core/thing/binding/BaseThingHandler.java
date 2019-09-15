@@ -13,6 +13,7 @@
 package org.eclipse.smarthome.core.thing.binding;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -20,10 +21,12 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
 import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.thing.Bridge;
+import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
@@ -34,6 +37,8 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
+import org.eclipse.smarthome.core.thing.internal.ThingFactoryHelper;
+import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.eclipse.smarthome.core.thing.util.ThingHandlerHelper;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
@@ -633,6 +638,18 @@ public abstract class BaseThingHandler implements ThingHandler {
             logger.warn("Handler {} tried migrating the thing type although the handler was already disposed.",
                     this.getClass().getSimpleName());
         }
+    }
+
+    public void setChannelsFromThingTypeDefinition(ThingType thingType,
+            ConfigDescriptionRegistry configDescriptionRegistry) {
+        logger.info("Synchronizing channels for thing {}", getThing().getUID());
+        List<Channel> channels = ThingFactoryHelper.createChannels(thingType, getThing().getUID(),
+                configDescriptionRegistry);
+
+        ThingBuilder thingBuilder = editThing();
+        thingBuilder.withChannels(channels);
+        Thing editedThing = thingBuilder.build();
+        updateThing(editedThing);
     }
 
 }

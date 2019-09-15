@@ -65,6 +65,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeMigrationService;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.UID;
+import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
@@ -756,6 +757,15 @@ public class ThingManagerImpl
     }
 
     private void doInitializeHandler(final ThingHandler thingHandler) {
+
+        if (thingHandler instanceof BaseThingHandler) {
+            ThingType thingType = getThingType(thingHandler.getThing());
+            if (thingType != null) {
+                ((BaseThingHandler) thingHandler).setChannelsFromThingTypeDefinition(thingType,
+                        configDescriptionRegistry);
+            }
+        }
+
         logger.debug("Calling initialize handler for thing '{}' at '{}'.", thingHandler.getThing().getUID(),
                 thingHandler);
         safeCaller.create(thingHandler, ThingHandler.class).onTimeout(() -> {

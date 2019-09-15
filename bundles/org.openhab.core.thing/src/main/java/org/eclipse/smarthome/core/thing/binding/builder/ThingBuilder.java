@@ -40,7 +40,7 @@ import org.eclipse.smarthome.core.thing.util.ThingHelper;
 public class ThingBuilder {
 
     private final List<Channel> channels = new ArrayList<>();
-    private final ThingImpl thing;
+    protected final ThingImpl thing;
 
     protected ThingBuilder(ThingImpl thing) {
         this.thing = thing;

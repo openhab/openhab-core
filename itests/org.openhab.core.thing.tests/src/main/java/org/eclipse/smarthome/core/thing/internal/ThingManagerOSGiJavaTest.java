@@ -983,7 +983,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(thingRegistry.get(THING.getUID()), is(equalTo(null)));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
-        
+
         assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
     }
 
@@ -1000,8 +1000,9 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         managedThingProvider.add(thing);
 
         waitForAssert(() -> {
-            assertEquals(status, thing.getStatus());
-            assertEquals(statusDetail, thing.getStatusInfo().getStatusDetail());
+            Thing thing1 = managedThingProvider.get(THING_UID);
+            assertEquals(status, thing1.getStatus());
+            assertEquals(statusDetail, thing1.getStatusInfo().getStatusDetail());
         });
 
         managedThingProvider.remove(thing.getUID());
