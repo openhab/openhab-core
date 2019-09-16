@@ -27,6 +27,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+/**
+ * @author Stefan Triller - Initial contribution
+ */
 public class ConfigDispatcherFileWatcherTest {
 
     private TestConfigDispatcherFileWatcher configDispatcherFileWatcher;
