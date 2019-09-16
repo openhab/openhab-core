@@ -12,7 +12,6 @@
  */
 package org.eclipse.smarthome.core.thing.binding.builder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,24 +35,23 @@ import org.eclipse.smarthome.core.thing.internal.BridgeImpl;
 @NonNullByDefault
 public class BridgeBuilder extends ThingBuilder {
 
-    private BridgeBuilder(BridgeImpl thing) {
-        super(thing);
+    private BridgeBuilder(ThingTypeUID thingTypeUID, ThingUID thingUID) {
+        super(thingTypeUID, thingUID);
     }
 
     public static BridgeBuilder create(ThingTypeUID thingTypeUID, String bridgeId) {
-        BridgeImpl bridge = new BridgeImpl(thingTypeUID, bridgeId);
-        bridge.setChannels(new ArrayList<Channel>());
-        return new BridgeBuilder(bridge);
+        return new BridgeBuilder(thingTypeUID,
+                new ThingUID(thingTypeUID.getBindingId(), thingTypeUID.getId(), bridgeId));
     }
 
     public static BridgeBuilder create(ThingTypeUID thingTypeUID, ThingUID thingUID) {
-        BridgeImpl bridge = new BridgeImpl(thingTypeUID, thingUID);
-        return new BridgeBuilder(bridge);
+        return new BridgeBuilder(thingTypeUID, thingUID);
     }
 
     @Override
     public Bridge build() {
-        return (Bridge) super.build();
+        final BridgeImpl bridge = new BridgeImpl(thingTypeUID, thingUID);
+        return (Bridge) super.populate(bridge);
     }
 
     @Override
@@ -79,6 +77,16 @@ public class BridgeBuilder extends ThingBuilder {
     @Override
     public BridgeBuilder withoutChannel(ChannelUID channelUID) {
         return (BridgeBuilder) super.withoutChannel(channelUID);
+    }
+
+    @Override
+    public BridgeBuilder withoutChannels(Channel... channels) {
+        return (BridgeBuilder) super.withoutChannels(channels);
+    }
+
+    @Override
+    public BridgeBuilder withoutChannels(List<Channel> channels) {
+        return (BridgeBuilder) super.withoutChannels(channels);
     }
 
     @Override

@@ -16,34 +16,65 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
+import org.eclipse.smarthome.core.thing.internal.BridgeImpl;
+import org.eclipse.smarthome.core.thing.internal.ThingImpl;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
  *
- * @author Simon Kaufmann - Initial contribution and API
- *
+ * @author Simon Kaufmann - Initial contribution
  */
 public class ThingBuilderTest {
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "test");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "test");
+    private static final String KEY1 = "key1";
+    private static final String KEY2 = "key2";
+    private static final String VALUE1 = "value1";
+    private static final String VALUE2 = "value2";
+    private final Map<String, String> properties = new HashMap<String, String>() {
+        private static final long serialVersionUID = 1L;
+        {
+            put(KEY1, VALUE1);
+            put(KEY2, VALUE2);
+        }
+    };
+    private ThingBuilder thingBuilder;
+
+    @Before
+    public void setup() {
+        thingBuilder = ThingBuilder.create(THING_TYPE_UID, THING_UID);
+    }
+
+    @Test
+    public void testInstance() {
+        assertThat(thingBuilder, is(instanceOf(ThingBuilder.class)));
+        assertThat(thingBuilder.withLabel("TEST"), is(instanceOf(ThingBuilder.class)));
+        assertThat(thingBuilder.build(), is(instanceOf(ThingImpl.class)));
+
+        final BridgeBuilder bridgeBuilder = BridgeBuilder.create(THING_TYPE_UID, THING_UID);
+        assertThat(bridgeBuilder, is(instanceOf(BridgeBuilder.class)));
+        assertThat(bridgeBuilder.withLabel("TEST"), is(instanceOf(BridgeBuilder.class)));
+        assertThat(bridgeBuilder.build(), is(instanceOf(BridgeImpl.class)));
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithChannel_duplicates() {
-        ThingBuilder thingBuilder = ThingBuilder.create(THING_TYPE_UID, THING_UID);
         thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
         thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithChannels_duplicatesCollections() {
-        ThingBuilder thingBuilder = ThingBuilder.create(THING_TYPE_UID, THING_UID);
         thingBuilder.withChannels(Arrays.asList( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build()));
@@ -51,7 +82,6 @@ public class ThingBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithChannels_duplicatesVararg() {
-        ThingBuilder thingBuilder = ThingBuilder.create(THING_TYPE_UID, THING_UID);
         thingBuilder.withChannels( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
@@ -59,18 +89,17 @@ public class ThingBuilderTest {
 
     @Test
     public void testWithoutChannel() {
-        ThingBuilder thingBuilder = ThingBuilder.create(THING_TYPE_UID, THING_UID);
         thingBuilder.withChannels( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build());
         thingBuilder.withoutChannel(new ChannelUID(THING_UID, "channel1"));
-        assertThat(thingBuilder.build().getChannels().size(), is(equalTo(1)));
-        assertThat(thingBuilder.build().getChannels().get(0).getUID().getId(), is(equalTo("channel2")));
+        Thing thing = thingBuilder.build();
+        assertThat(thing.getChannels().size(), is(equalTo(1)));
+        assertThat(thing.getChannels().get(0).getUID().getId(), is(equalTo("channel2")));
     }
 
     @Test
     public void testWithoutChannel_missing() {
-        ThingBuilder thingBuilder = ThingBuilder.create(THING_TYPE_UID, THING_UID);
         thingBuilder.withChannels( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build());
@@ -80,8 +109,18 @@ public class ThingBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithChannel_wrongThing() {
-        ThingBuilder thingBuilder = ThingBuilder.create(THING_TYPE_UID, THING_UID);
         thingBuilder.withChannel(
                 ChannelBuilder.create(new ChannelUID(new ThingUID(THING_TYPE_UID, "wrong"), "channel1"), "").build());
+    }
+
+    @Test
+    public void subsequentBuildsCreateIndependentThings() {
+        Thing thing = thingBuilder.withLabel("Test").withLocation("Some Place").withProperties(properties).build();
+        Thing otherThing = thingBuilder.withLabel("Second Test").withLocation("Other Place")
+                .withProperties(Collections.emptyMap()).build();
+
+        assertThat(otherThing.getLabel(), is(not(thing.getLabel())));
+        assertThat(otherThing.getLocation(), is(not(thing.getLocation())));
+        assertThat(otherThing.getProperties().size(), is(not(thing.getProperties().size())));
     }
 }
