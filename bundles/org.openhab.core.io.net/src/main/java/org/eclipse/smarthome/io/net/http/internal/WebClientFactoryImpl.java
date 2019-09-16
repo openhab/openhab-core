@@ -71,7 +71,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     private static final Pattern CONSUMER_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_\\-]*");
 
     private volatile @Nullable TrustManagerProvider trustmanagerProvider;
-    private @NonNullByDefault({}) ExtensibleTrustManager extensibleTrustManager;
+    private final ExtensibleTrustManager extensibleTrustManager;
 
     private @NonNullByDefault({}) QueuedThreadPool threadPool;
     private @NonNullByDefault({}) HttpClient commonHttpClient;
@@ -83,6 +83,11 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     private int minThreadsCustom;
     private int maxThreadsCustom;
     private int keepAliveTimeoutCustom; // in s
+
+    @Activate
+    public WebClientFactoryImpl(final @Reference ExtensibleTrustManager extensibleTrustManager) {
+        this.extensibleTrustManager = extensibleTrustManager;
+    }
 
     @Activate
     protected void activate(Map<String, Object> parameters) {
@@ -375,22 +380,18 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     private SslContextFactory createSslContextFactoryFromExtensibleTrustManager() {
         SslContextFactory sslContextFactory = new SslContextFactory();
         sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
-        if (extensibleTrustManager != null) {
-            try {
-                logger.debug("Setting up SSLContext for {}", extensibleTrustManager);
-                SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, new TrustManager[] { extensibleTrustManager }, null);
-                sslContextFactory.setSslContext(sslContext);
-            } catch (NoSuchAlgorithmException | KeyManagementException ex) {
-                throw new HttpClientInitializationException("Cannot create an TLS context!", ex);
-            }
+        try {
+            logger.debug("Setting up SSLContext for {}", extensibleTrustManager);
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, new TrustManager[] { extensibleTrustManager }, null);
+            sslContextFactory.setSslContext(sslContext);
+        } catch (NoSuchAlgorithmException | KeyManagementException ex) {
+            throw new HttpClientInitializationException("Cannot create an TLS context!", ex);
         }
-
         // Exclude weak / insecure ciphers
         sslContextFactory.addExcludeCipherSuites("^.*_(MD5|SHA|SHA1)$");
         // Exclude ciphers that don't support forward secrecy
         sslContextFactory.addExcludeCipherSuites("^TLS_RSA_.*$");
-
         return sslContextFactory;
     }
 
@@ -418,17 +419,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         String excludeCipherSuites[] = { "^.*_(MD5)$" };
         sslContextFactory.setExcludeCipherSuites(excludeCipherSuites);
         return sslContextFactory;
-    }
-
-    @Reference
-    protected void setExtensibleTrustManager(ExtensibleTrustManager extensibleTrustManager) {
-        this.extensibleTrustManager = extensibleTrustManager;
-    }
-
-    protected void unsetExtensibleTrustManager(ExtensibleTrustManager extensibleTrustManager) {
-        if (this.extensibleTrustManager == extensibleTrustManager) {
-            this.extensibleTrustManager = null;
-        }
     }
 
     @Reference(service = TrustManagerProvider.class, cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
