@@ -67,11 +67,18 @@ public class ConfigDescriptionResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_CONFIG_DESCRIPTIONS = "config-descriptions";
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    private volatile @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+
+    private @NonNullByDefault({}) LocaleService localeService;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    private volatile @NonNullByDefault({}) LocaleService localeService;
+    protected void setLocaleService(LocaleService localeService) {
+        this.localeService = localeService;
+    }
+
+    protected void unsetLocaleService(LocaleService localeService) {
+        this.localeService = null;
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -102,6 +109,15 @@ public class ConfigDescriptionResource implements RESTResource {
         return configDescription != null
                 ? Response.ok(EnrichedConfigDescriptionDTOMapper.map(configDescription)).build()
                 : JSONResponse.createErrorResponse(Status.NOT_FOUND, "Configuration not found: " + uri);
+    }
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
+        this.configDescriptionRegistry = configDescriptionRegistry;
+    }
+
+    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
+        this.configDescriptionRegistry = null;
     }
 
     @Override

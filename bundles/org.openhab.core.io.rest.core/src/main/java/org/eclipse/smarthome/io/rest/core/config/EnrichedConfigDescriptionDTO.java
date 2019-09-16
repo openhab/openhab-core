@@ -14,6 +14,7 @@ package org.eclipse.smarthome.io.rest.core.config;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
@@ -24,6 +25,7 @@ import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class EnrichedConfigDescriptionDTO extends ConfigDescriptionDTO {
 
     public EnrichedConfigDescriptionDTO(String uri, List<ConfigDescriptionParameterDTO> parameters,

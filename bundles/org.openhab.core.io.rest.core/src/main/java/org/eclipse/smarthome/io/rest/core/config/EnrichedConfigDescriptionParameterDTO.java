@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
@@ -30,6 +31,7 @@ import org.eclipse.smarthome.config.core.dto.ParameterOptionDTO;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionParameterDTO {
 
     private static final String DEFAULT_LIST_DELIMITER = ",";
