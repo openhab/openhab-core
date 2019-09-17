@@ -15,6 +15,7 @@ package org.eclipse.smarthome.io.console.internal.extension;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemNotFoundException;
 import org.eclipse.smarthome.core.items.ItemNotUniqueException;
@@ -22,24 +23,27 @@ import org.eclipse.smarthome.core.items.ItemRegistry;
 import org.eclipse.smarthome.io.console.Console;
 import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
 import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * Console command extension to show the current state of an item
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Create DS for command extension
  * @author Dennis Nobel - Changed service references to be injected via DS
- *
  */
 @Component(service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class StatusConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
-    private ItemRegistry itemRegistry;
+    private final ItemRegistry itemRegistry;
 
-    public StatusConsoleCommandExtension() {
+    @Activate
+    public StatusConsoleCommandExtension(final @Reference ItemRegistry itemRegistry) {
         super("status", "Get the current status of an item.");
+        this.itemRegistry = itemRegistry;
     }
 
     @Override
@@ -52,7 +56,7 @@ public class StatusConsoleCommandExtension extends AbstractConsoleCommandExtensi
         if (args.length > 0) {
             String itemName = args[0];
             try {
-                Item item = this.itemRegistry.getItemByPattern(itemName);
+                Item item = itemRegistry.getItemByPattern(itemName);
                 console.println(item.getState().toString());
             } catch (ItemNotFoundException e) {
                 console.println("Error: Item '" + itemName + "' does not exist.");
@@ -65,15 +69,6 @@ public class StatusConsoleCommandExtension extends AbstractConsoleCommandExtensi
         } else {
             printUsage(console);
         }
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
     }
 
 }

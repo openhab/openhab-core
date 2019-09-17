@@ -31,8 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A simple container for all command extensions.
  *
- * @author Markus Rathgeb - Initial contribution and API
- *
+ * @author Markus Rathgeb - Initial contribution
  */
 @Component(immediate = true)
 public class ConsoleSupportKaraf {
@@ -60,10 +59,10 @@ public class ConsoleSupportKaraf {
     public void unsetSessionFactory(SessionFactory sessionFactory) {
         if (this.sessionFactory == sessionFactory) {
             unregisterCommands();
-            sessionFactory = null;
             if (manager != null) {
                 manager.unregister(CommandWrapper.class);
             }
+            this.sessionFactory = null;
         }
     }
 

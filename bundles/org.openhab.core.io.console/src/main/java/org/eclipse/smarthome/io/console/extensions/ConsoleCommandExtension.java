@@ -20,8 +20,7 @@ import org.eclipse.smarthome.io.console.Console;
 /**
  * Client which provide a console command have to implement this interface
  *
- * @author Oliver Libutzki
- *
+ * @author Oliver Libutzki - Initial contribution
  */
 @NonNullByDefault
 public interface ConsoleCommandExtension {
