@@ -22,31 +22,18 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test class for {@link PeriodicSchedulerImpl}.
  * Because the test run on scheduler all tests are guarded by a timeout to avoid having a test blocking.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  * @author Simon Kaufmann - adapted to Java 8
  * @author Hilbrand Bouwkamp - moved periodic scheduling to it's own interface, rewritten test not to use sleep
  */
 public class PeriodicSchedulerImplTest {
-    private final PeriodicSchedulerImpl periodicScheduler = new PeriodicSchedulerImpl();
-    private final SchedulerImpl scheduler = new SchedulerImpl();
-
-    @Before
-    public void setUp() {
-        periodicScheduler.setScheduler(scheduler);
-    }
-
-    @After
-    public void tearDown() {
-        periodicScheduler.unsetScheduler(scheduler);
-    }
+    private final PeriodicSchedulerImpl periodicScheduler = new PeriodicSchedulerImpl(new SchedulerImpl());
 
     @Test(timeout = 5000)
     public void testSchedule() throws InterruptedException, IOException {

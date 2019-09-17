@@ -21,31 +21,18 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.smarthome.core.scheduler.CronJob;
 import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test class for {@link CronSchedulerImpl}.
  * Because the test run on scheduler all tests are guarded by a timeout to avoid having a test blocking.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  * @author Simon Kaufmann - adapted to Java 8
  * @author Hilbrand Bouwkamp - moved cron scheduling to it's own class
  */
 public class CronSchedulerImplTest {
-    private final CronSchedulerImpl cronScheduler = new CronSchedulerImpl();
-    private final SchedulerImpl scheduler = new SchedulerImpl();
-
-    @Before
-    public void setUp() {
-        cronScheduler.setScheduler(scheduler);
-    }
-
-    @After
-    public void tearDown() {
-        cronScheduler.unsetScheduler(scheduler);
-    }
+    private final CronSchedulerImpl cronScheduler = new CronSchedulerImpl(new SchedulerImpl());
 
     @Test(timeout = 1000)
     public void testCronReboot() throws Exception {

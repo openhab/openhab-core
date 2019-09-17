@@ -23,9 +23,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.scheduler.CronJob;
 import org.eclipse.smarthome.core.scheduler.CronScheduler;
+import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
 import org.eclipse.smarthome.core.scheduler.Scheduler;
 import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of a {@link CronScheduler}.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  * @author Simon Kaufmann - adapted to CompletableFutures
  * @author Hilbrand Bouwkamp - moved cron scheduling to it's own interface
  */
@@ -48,7 +49,12 @@ public class CronSchedulerImpl implements CronScheduler {
 
     private final List<Cron> crons = new ArrayList<>();
 
-    private @NonNullByDefault({}) Scheduler scheduler;
+    private final Scheduler scheduler;
+
+    @Activate
+    public CronSchedulerImpl(final @Reference Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 
     @Override
     public ScheduledCompletableFuture<@Nullable Void> schedule(SchedulerRunnable runnable, String cronExpression) {
@@ -68,15 +74,6 @@ public class CronSchedulerImpl implements CronScheduler {
         } else {
             return scheduler.schedule(runnable, cronAdjuster);
         }
-    }
-
-    @Reference
-    void setScheduler(Scheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    void unsetScheduler(Scheduler scheduler) {
-        this.scheduler = null;
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)

@@ -19,13 +19,14 @@ import org.eclipse.smarthome.core.scheduler.PeriodicScheduler;
 import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
 import org.eclipse.smarthome.core.scheduler.Scheduler;
 import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * Implementation of a {@link PeriodicScheduler}.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  * @author Simon Kaufmann - adapted to CompletableFutures
  * @author Hilbrand Bouwkamp - moved periodic scheduling to it's own interface
  */
@@ -33,19 +34,16 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class PeriodicSchedulerImpl implements PeriodicScheduler {
 
-    private @NonNullByDefault({}) Scheduler scheduler;
+    private final Scheduler scheduler;
+
+    @Activate
+    public PeriodicSchedulerImpl(final @Reference Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 
     @Override
     public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, Duration... delays) {
         return scheduler.schedule(runnable, new PeriodicAdjuster(delays));
     }
 
-    @Reference
-    void setScheduler(Scheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    void unsetScheduler(Scheduler scheduler) {
-        this.scheduler = null;
-    }
 }

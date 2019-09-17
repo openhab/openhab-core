@@ -22,6 +22,7 @@ import org.eclipse.smarthome.core.items.events.AbstractItemEventSubscriber;
 import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
 import org.eclipse.smarthome.core.items.events.ItemStateEvent;
 import org.eclipse.smarthome.core.types.State;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -39,15 +40,11 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
 
     private final Logger logger = LoggerFactory.getLogger(ItemUpdater.class);
 
-    private ItemRegistry itemRegistry;
+    private final ItemRegistry itemRegistry;
 
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
+    @Activate
+    public ItemUpdater(final @Reference ItemRegistry itemRegistry) {
         this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
     }
 
     @Override
