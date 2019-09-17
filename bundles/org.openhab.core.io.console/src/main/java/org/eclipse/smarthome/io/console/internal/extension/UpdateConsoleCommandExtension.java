@@ -15,6 +15,7 @@ package org.eclipse.smarthome.io.console.internal.extension;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemNotFoundException;
@@ -26,26 +27,31 @@ import org.eclipse.smarthome.core.types.TypeParser;
 import org.eclipse.smarthome.io.console.Console;
 import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
 import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * Console command extension to send status update to item
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Create DS for command extension
  * @author Dennis Nobel - Changed service references to be injected via DS
  * @author Stefan Bußweiler - Migration to new ESH event concept
- *
  */
 @Component(service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class UpdateConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
-    private ItemRegistry itemRegistry;
-    private EventPublisher eventPublisher;
+    private final ItemRegistry itemRegistry;
+    private final EventPublisher eventPublisher;
 
-    public UpdateConsoleCommandExtension() {
+    @Activate
+    public UpdateConsoleCommandExtension(final @Reference ItemRegistry itemRegistry,
+            final @Reference EventPublisher eventPublisher) {
         super("update", "Send a state update to an item.");
+        this.itemRegistry = itemRegistry;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -58,7 +64,7 @@ public class UpdateConsoleCommandExtension extends AbstractConsoleCommandExtensi
         if (args.length > 0) {
             String itemName = args[0];
             try {
-                Item item = this.itemRegistry.getItemByPattern(itemName);
+                Item item = itemRegistry.getItemByPattern(itemName);
                 if (args.length > 1) {
                     String stateName = args[1];
                     State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateName);
@@ -89,21 +95,4 @@ public class UpdateConsoleCommandExtension extends AbstractConsoleCommandExtensi
         }
     }
 
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
 }

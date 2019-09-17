@@ -18,8 +18,7 @@ import org.eclipse.smarthome.io.console.Console;
 /**
  * A base class that should be used by console command extension for better inclusion.
  *
- * @author Markus Rathgeb - Initial contribution and API
- *
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public abstract class AbstractConsoleCommandExtension implements ConsoleCommandExtension {

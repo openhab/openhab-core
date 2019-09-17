@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.items.GenericItem;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemRegistry;
@@ -25,20 +26,21 @@ import org.eclipse.smarthome.core.items.ManagedItemProvider;
 import org.eclipse.smarthome.io.console.Console;
 import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
 import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * Console command extension to get item list
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Create DS for command extension
  * @author Dennis Nobel - Changed service references to be injected via DS
  * @author Simon Kaufmann - Added commands to clear and remove items
  * @author Stefan Triller - Added commands for adding and removing tags
- *
  */
 @Component(service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_LIST = "list";
@@ -47,11 +49,15 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_ADDTAG = "addTag";
     private static final String SUBCMD_RMTAG = "rmTag";
 
-    private ItemRegistry itemRegistry;
-    private ManagedItemProvider managedItemProvider;
+    private final ItemRegistry itemRegistry;
+    private final ManagedItemProvider managedItemProvider;
 
-    public ItemConsoleCommandExtension() {
+    @Activate
+    public ItemConsoleCommandExtension(final @Reference ItemRegistry itemRegistry,
+            final @Reference ManagedItemProvider managedItemProvider) {
         super("items", "Access the item registry.");
+        this.itemRegistry = itemRegistry;
+        this.managedItemProvider = managedItemProvider;
     }
 
     @Override
@@ -78,12 +84,15 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                     break;
                 case SUBCMD_REMOVE:
                     if (args.length > 1) {
-                        String name = args[1];
-                        Item item = itemRegistry.get(name);
-                        removeItems(console, Collections.singleton(item));
+                        Item item = itemRegistry.get(args[1]);
+                        if (item != null) {
+                            removeItems(console, Collections.singleton(item));
+                        } else {
+                            console.println("0 item(s) removed.");
+                        }
                     } else {
-                        console.println("Specify the name of the item to remove: " + this.getCommand() + " "
-                                + SUBCMD_REMOVE + " <itemName>");
+                        console.println("Specify the name of the item to remove: " + getCommand() + " " + SUBCMD_REMOVE
+                                + " <itemName>");
                     }
                     break;
                 case SUBCMD_ADDTAG:
@@ -94,7 +103,7 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                             handleTags(gItem::addTag, args[2], gItem, console);
                         }
                     } else {
-                        console.println("Specify the name of the item and the tag: " + this.getCommand() + " "
+                        console.println("Specify the name of the item and the tag: " + getCommand() + " "
                                 + SUBCMD_ADDTAG + " <itemName> <tag>");
                     }
                     break;
@@ -106,8 +115,8 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                             handleTags(gItem::removeTag, args[2], gItem, console);
                         }
                     } else {
-                        console.println("Specify the name of the item and the tag: " + this.getCommand() + " "
-                                + SUBCMD_RMTAG + " <itemName> <tag>");
+                        console.println("Specify the name of the item and the tag: " + getCommand() + " " + SUBCMD_RMTAG
+                                + " <itemName> <tag>");
                     }
                     break;
                 default:
@@ -145,36 +154,18 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
     }
 
     private void listItems(Console console, String pattern) {
-        Collection<Item> items = this.itemRegistry.getItems(pattern);
+        Collection<Item> items = itemRegistry.getItems(pattern);
         if (items.size() > 0) {
             for (Item item : items) {
                 console.println(item.toString());
             }
         } else {
-            if (pattern == null || pattern.isEmpty()) {
+            if (pattern.isEmpty()) {
                 console.println("No item found.");
             } else {
                 console.println("No item found for this pattern.");
             }
         }
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setManagedItemProvider(ManagedItemProvider managedItemProvider) {
-        this.managedItemProvider = managedItemProvider;
-    }
-
-    protected void unsetManagedItemProvider(ManagedItemProvider managedItemProvider) {
-        this.managedItemProvider = null;
     }
 
 }

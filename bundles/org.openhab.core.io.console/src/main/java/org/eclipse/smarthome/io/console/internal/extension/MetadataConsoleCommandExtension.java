@@ -27,6 +27,7 @@ import org.eclipse.smarthome.core.items.MetadataRegistry;
 import org.eclipse.smarthome.io.console.Console;
 import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
 import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -35,10 +36,9 @@ import org.osgi.service.component.annotations.Reference;
  * Console command extension for the {@link MetadataRegistry}.
  *
  * @author Andre Fuechsel - Initial contribution
- *
  */
-@NonNullByDefault
 @Component(service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_LIST = "list";
@@ -46,11 +46,15 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
     private static final String SUBCMD_ADD = "add";
     private static final String SUBCMD_REMOVE = "remove";
 
-    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
-    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private final ItemRegistry itemRegistry;
+    private final MetadataRegistry metadataRegistry;
 
-    public MetadataConsoleCommandExtension() {
+    @Activate
+    public MetadataConsoleCommandExtension(final @Reference ItemRegistry itemRegistry,
+            final @Reference MetadataRegistry metadataRegistry) {
         super("metadata", "Access the metadata registry.");
+        this.itemRegistry = itemRegistry;
+        this.metadataRegistry = metadataRegistry;
     }
 
     @Override
@@ -179,21 +183,4 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
         }
     }
 
-    @Reference
-    protected void setMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = metadataRegistry;
-    }
-
-    protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
 }
