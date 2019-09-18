@@ -50,10 +50,11 @@ public class DateTimeType implements PrimitiveType, State, Command {
     public static final String DATE_PATTERN_WITH_TZ_AND_MS_ISO = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     // internal patterns for parsing
-    private static final String DATE_PARSE_PATTERN_WITHOUT_TZ = "yyyy-MM-dd'T'HH:mm[:ss[.SSSSSSSSS][.SSSSSS][.SSS]]";
-    private static final String DATE_PARSE_PATTERN_WITH_TZ = "yyyy-MM-dd'T'HH:mm[:ss[.SSSSSSSSS][.SSSSSS][.SSS]]z";
-    private static final String DATE_PARSE_PATTERN_WITH_TZ_RFC = "yyyy-MM-dd'T'HH:mm[:ss[.SSSSSSSSS][.SSSSSS][.SSS]]Z";
-    private static final String DATE_PARSE_PATTERN_WITH_TZ_ISO = "yyyy-MM-dd'T'HH:mm[:ss[.SSSSSSSSS][.SSSSSS][.SSS]]X";
+    private static final String DATE_PARSE_PATTERN_WITHOUT_TZ = "yyyy-MM-dd'T'HH:mm"
+            + "[:ss[.SSSSSSSSS][.SSSSSSSS][.SSSSSSS][.SSSSSS][.SSSSS][.SSSS][.SSS][.SS][.S]]";
+    private static final String DATE_PARSE_PATTERN_WITH_TZ = DATE_PARSE_PATTERN_WITHOUT_TZ + "z";
+    private static final String DATE_PARSE_PATTERN_WITH_TZ_RFC = DATE_PARSE_PATTERN_WITHOUT_TZ + "Z";
+    private static final String DATE_PARSE_PATTERN_WITH_TZ_ISO = DATE_PARSE_PATTERN_WITHOUT_TZ + "X";
 
     private static final DateTimeFormatter PARSER = DateTimeFormatter.ofPattern(DATE_PARSE_PATTERN_WITHOUT_TZ);
     private static final DateTimeFormatter PARSER_TZ = DateTimeFormatter.ofPattern(DATE_PARSE_PATTERN_WITH_TZ);
