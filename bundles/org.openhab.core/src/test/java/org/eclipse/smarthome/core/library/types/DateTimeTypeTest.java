@@ -184,6 +184,8 @@ public class DateTimeTypeTest {
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("CET"),
                         "2014-03-30T10:58:47.033+0200", "2014-03-30T08:58:47.033+0000") },
+                { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30T10:58:47.23",
+                        "2014-03-30T10:58:47.230+0000", "2014-03-30T10:58:47.230+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), "2014-03-30T10:58:47UTC",
                         "2014-03-30T10:58:47.000+0000", "2014-03-30T10:58:47.000+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("CET"), initTimeMap(), TimeZone.getTimeZone("UTC"),
