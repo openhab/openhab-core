@@ -26,12 +26,10 @@ import org.eclipse.smarthome.core.common.ThreadPoolManager;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.eclipse.smarthome.core.thing.util.ThingHandlerHelper;
@@ -39,8 +37,6 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,15 +67,9 @@ public abstract class BaseThingHandler implements ThingHandler {
             .getScheduledPool(THING_HANDLER_THREADPOOL_NAME);
 
     @Deprecated // this must not be used by bindings!
-    protected @NonNullByDefault({}) ThingRegistry thingRegistry;
-
-    @Deprecated // this must not be used by bindings!
     protected @NonNullByDefault({}) BundleContext bundleContext;
 
     protected Thing thing;
-
-    @SuppressWarnings("rawtypes")
-    private @NonNullByDefault({}) ServiceTracker thingRegistryServiceTracker;
 
     private @Nullable ThingHandlerCallback callback;
 
@@ -92,28 +82,11 @@ public abstract class BaseThingHandler implements ThingHandler {
         this.thing = thing;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-        thingRegistryServiceTracker = new ServiceTracker(this.bundleContext, ThingRegistry.class.getName(), null) {
-            @Override
-            public Object addingService(final @Nullable ServiceReference reference) {
-                thingRegistry = (ThingRegistry) bundleContext.getService(reference);
-                return thingRegistry;
-            }
-
-            @Override
-            public void removedService(final @Nullable ServiceReference reference, final @Nullable Object service) {
-                synchronized (BaseThingHandler.this) {
-                    thingRegistry = null;
-                }
-            }
-        };
-        thingRegistryServiceTracker.open();
     }
 
     public void unsetBundleContext(final BundleContext bundleContext) {
-        thingRegistryServiceTracker.close();
         this.bundleContext = null;
     }
 
@@ -565,15 +538,16 @@ public abstract class BaseThingHandler implements ThingHandler {
     /**
      * Returns the bridge of the thing.
      *
-     * @return returns the bridge of the thing or null if the thing has no
-     *         bridge
+     * @return returns the bridge of the thing or null if the thing has no bridge
      */
     protected @Nullable Bridge getBridge() {
-        ThingUID bridgeUID = thing.getBridgeUID();
         synchronized (this) {
-            if (bridgeUID != null && thingRegistry != null) {
-                return (Bridge) thingRegistry.get(bridgeUID);
+            if (callback != null) {
+                return callback.getBridge(thing.getBridgeUID());
             } else {
+                logger.warn(
+                        "Handler {} of thing {} tried accessing its bridge although the handler was already disposed.",
+                        getClass().getSimpleName(), thing.getUID());
                 return null;
             }
         }
