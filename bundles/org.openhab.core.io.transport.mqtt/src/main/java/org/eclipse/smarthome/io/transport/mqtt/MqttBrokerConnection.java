@@ -356,17 +356,22 @@ public class MqttBrokerConnection {
     }
 
     /**
+     * use retain flags on message publish instead
+     *
      * @return true if newly messages sent to the broker should be retained by the broker.
      */
+    @Deprecated
     public boolean isRetain() {
         return retain;
     }
 
     /**
      * Set whether newly published messages should be retained by the broker.
+     * use retain flags on message publish instead
      *
      * @param retain true to retain.
      */
+    @Deprecated
     public void setRetain(boolean retain) {
         this.retain = retain;
     }
