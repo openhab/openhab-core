@@ -160,10 +160,10 @@ public interface ThingHandlerCallback {
     /**
      * Returns the bridge of the thing.
      *
-     * @param bridgeUID {@link ThingUID} UID of the bridge
+     * @param bridgeUID {@link ThingUID} UID of the bridge (must not be null)
      * @return returns the bridge of the thing or null if the thing has no bridge
      */
     @Nullable
-    Bridge getBridge(@Nullable ThingUID bridgeUID);
+    Bridge getBridge(ThingUID bridgeUID);
 
 }

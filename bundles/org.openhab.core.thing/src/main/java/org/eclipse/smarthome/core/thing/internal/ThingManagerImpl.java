@@ -336,8 +336,8 @@ public class ThingManagerImpl
         }
 
         @Override
-        public @Nullable Bridge getBridge(@Nullable ThingUID bridgeUID) {
-            return bridgeUID == null ? null : (Bridge) thingRegistry.get(bridgeUID);
+        public @Nullable Bridge getBridge(ThingUID bridgeUID) {
+            return (Bridge) thingRegistry.get(bridgeUID);
         }
     };
 

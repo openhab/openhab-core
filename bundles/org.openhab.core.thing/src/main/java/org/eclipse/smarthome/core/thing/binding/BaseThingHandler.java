@@ -30,6 +30,7 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.eclipse.smarthome.core.thing.util.ThingHandlerHelper;
@@ -541,9 +542,10 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @return returns the bridge of the thing or null if the thing has no bridge
      */
     protected @Nullable Bridge getBridge() {
+        ThingUID bridgeUID = thing.getBridgeUID();
         synchronized (this) {
-            if (callback != null) {
-                return callback.getBridge(thing.getBridgeUID());
+            if (bridgeUID != null && callback != null) {
+                return callback.getBridge(bridgeUID);
             } else {
                 logger.warn(
                         "Handler {} of thing {} tried accessing its bridge although the handler was already disposed.",
