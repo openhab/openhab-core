@@ -544,8 +544,8 @@ public abstract class BaseThingHandler implements ThingHandler {
     protected @Nullable Bridge getBridge() {
         ThingUID bridgeUID = thing.getBridgeUID();
         synchronized (this) {
-            if (bridgeUID != null && callback != null) {
-                return callback.getBridge(bridgeUID);
+            if (callback != null) {
+                return bridgeUID != null ? callback.getBridge(bridgeUID) : null;
             } else {
                 logger.warn(
                         "Handler {} of thing {} tried accessing its bridge although the handler was already disposed.",
