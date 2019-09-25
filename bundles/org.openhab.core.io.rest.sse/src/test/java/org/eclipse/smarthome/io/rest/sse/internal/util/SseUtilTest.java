@@ -10,22 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sse.test;
+package org.eclipse.smarthome.io.rest.sse.internal.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.eclipse.smarthome.io.rest.sse.internal.util.SseUtil;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.Test;
 
 /**
  * @author Dennis Nobel - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
-public class SseResourceOSGiTest extends JavaOSGiTest {
+public class SseUtilTest {
 
     @Test
     public void testValidInvalidFilters() {
@@ -112,4 +110,5 @@ public class SseResourceOSGiTest extends JavaOSGiTest {
         assertThat("smarthome/items/anyitem/added".matches(regexes.get(0)), is(true));
         assertThat("smarthome/items/anyitem/removed".matches(regexes.get(0)), is(false));
     }
+
 }
