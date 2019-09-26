@@ -644,7 +644,7 @@ public abstract class BaseThingHandler implements ThingHandler {
             ConfigDescriptionRegistry configDescriptionRegistry) {
         logger.info("Synchronizing channels for thing {}", getThing().getUID());
         List<Channel> channels = ThingFactoryHelper.createChannels(thingType, getThing().getUID(),
-                configDescriptionRegistry);
+                configDescriptionRegistry, getThing().getChannels());
 
         ThingBuilder thingBuilder = editThing();
         thingBuilder.withChannels(channels);

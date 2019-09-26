@@ -54,6 +54,11 @@ public class ThingFactoryHelper {
 
     private static Logger logger = LoggerFactory.getLogger(ThingFactoryHelper.class);
 
+    public static List<Channel> createChannels(ThingType thingType, ThingUID thingUID,
+            ConfigDescriptionRegistry configDescriptionRegistry) {
+        return createChannels(thingType, thingUID, configDescriptionRegistry, null);
+    }
+
     /**
      * Create {@link Channel} instances for the given Thing.
      *
@@ -64,11 +69,19 @@ public class ThingFactoryHelper {
      * @return a list of {@link Channel}s
      */
     public static List<Channel> createChannels(ThingType thingType, ThingUID thingUID,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
+            ConfigDescriptionRegistry configDescriptionRegistry, List<Channel> currentThingChannels) {
         List<Channel> channels = new ArrayList<>();
         List<ChannelDefinition> channelDefinitions = thingType.getChannelDefinitions();
         for (ChannelDefinition channelDefinition : channelDefinitions) {
-            Channel channel = createChannel(channelDefinition, thingUID, null, configDescriptionRegistry);
+            Configuration currentChannelConfiguration = null;
+
+            if (currentThingChannels != null) {
+                ChannelUID channelUID = new ChannelUID(thingUID, channelDefinition.getId());
+                currentChannelConfiguration = currentThingChannels.stream().filter(ch -> ch.getUID().equals(channelUID))
+                        .findAny().map(Channel::getConfiguration).orElse(new Configuration());
+            }
+            Channel channel = createChannel(channelDefinition, thingUID, null, configDescriptionRegistry,
+                    currentChannelConfiguration);
             if (channel != null) {
                 channels.add(channel);
             }
@@ -84,8 +97,17 @@ public class ThingFactoryHelper {
                 if (channelGroupType != null) {
                     List<ChannelDefinition> channelGroupChannelDefinitions = channelGroupType.getChannelDefinitions();
                     for (ChannelDefinition channelDefinition : channelGroupChannelDefinitions) {
+                        Configuration currentChannelConfiguration = null;
+
+                        if (currentThingChannels != null) {
+                            ChannelUID channelUID = new ChannelUID(thingUID, channelGroupDefinition.getId(),
+                                    channelDefinition.getId());
+                            currentChannelConfiguration = currentThingChannels.stream()
+                                    .filter(ch -> ch.getUID().equals(channelUID)).findAny()
+                                    .map(Channel::getConfiguration).orElse(new Configuration());
+                        }
                         Channel channel = createChannel(channelDefinition, thingUID, channelGroupDefinition.getId(),
-                                configDescriptionRegistry);
+                                configDescriptionRegistry, currentChannelConfiguration);
                         if (channel != null) {
                             channels.add(channel);
                         }
@@ -136,7 +158,7 @@ public class ThingFactoryHelper {
     }
 
     private static Channel createChannel(ChannelDefinition channelDefinition, ThingUID thingUID, String groupId,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
+            ConfigDescriptionRegistry configDescriptionRegistry, Configuration originalConfiguration) {
         ChannelType type = withChannelTypeRegistry(channelTypeRegistry -> {
             return (channelTypeRegistry != null)
                     ? channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID())
@@ -150,7 +172,8 @@ public class ThingFactoryHelper {
         }
 
         ChannelUID channelUID = new ChannelUID(thingUID, groupId, channelDefinition.getId());
-        ChannelBuilder channelBuilder = createChannelBuilder(channelUID, type, configDescriptionRegistry);
+        ChannelBuilder channelBuilder = createChannelBuilder(channelUID, type, configDescriptionRegistry,
+                originalConfiguration);
 
         // If we want to override the label, add it...
         final String label = channelDefinition.getLabel();
@@ -170,6 +193,11 @@ public class ThingFactoryHelper {
 
     static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelType channelType,
             ConfigDescriptionRegistry configDescriptionRegistry) {
+        return createChannelBuilder(channelUID, channelType, configDescriptionRegistry, null);
+    }
+
+    static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelType channelType,
+            ConfigDescriptionRegistry configDescriptionRegistry, Configuration originalConfiguration) {
         ChannelBuilder channelBuilder = ChannelBuilder.create(channelUID, channelType.getItemType()) //
                 .withType(channelType.getUID()) //
                 .withDefaultTags(channelType.getTags()) //
@@ -189,11 +217,19 @@ public class ThingFactoryHelper {
             if (cd != null) {
                 Configuration config = new Configuration();
                 for (ConfigDescriptionParameter param : cd.getParameters()) {
-                    String defaultValue = param.getDefault();
-                    if (defaultValue != null) {
-                        Object value = getDefaultValueAsCorrectType(param.getType(), defaultValue);
-                        if (value != null) {
-                            config.put(param.getName(), value);
+                    Object oldValue = null;
+                    if (originalConfiguration != null) {
+                        oldValue = originalConfiguration.get(param.getName());
+                    }
+                    if (oldValue != null) {
+                        config.put(param.getName(), oldValue);
+                    } else {
+                        String defaultValue = param.getDefault();
+                        if (defaultValue != null) {
+                            Object value = getDefaultValueAsCorrectType(param.getType(), defaultValue);
+                            if (value != null) {
+                                config.put(param.getName(), value);
+                            }
                         }
                     }
                 }
