@@ -25,6 +25,7 @@ import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
 import org.eclipse.smarthome.core.scheduler.Scheduler;
 import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
 import org.eclipse.smarthome.core.scheduler.SchedulerTemporalAdjuster;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -33,14 +34,20 @@ import org.osgi.service.component.annotations.Reference;
  * Wraps the actual Scheduler and keeps track of scheduled jobs.
  * It shuts down jobs in case the service is deactivated.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  */
 @Component(service = Scheduler.class, immediate = true)
 @NonNullByDefault
 public class DelegatedSchedulerImpl implements Scheduler {
 
     private final Set<ScheduledCompletableFuture<?>> scheduledJobs = new HashSet<>();
-    private @NonNullByDefault({}) SchedulerImpl delegate;
+
+    private @NonNullByDefault({}) Scheduler delegate;
+
+    @Activate
+    public DelegatedSchedulerImpl(final @Reference Scheduler scheduler) {
+        this.delegate = scheduler;
+    }
 
     @Deactivate
     void deactivate() {
@@ -103,12 +110,4 @@ public class DelegatedSchedulerImpl implements Scheduler {
         return t;
     }
 
-    @Reference
-    void setDelegate(SchedulerImpl delegate) {
-        this.delegate = delegate;
-    }
-
-    void unsetDelegate(SchedulerImpl delegate) {
-        this.delegate = null;
-    }
 }

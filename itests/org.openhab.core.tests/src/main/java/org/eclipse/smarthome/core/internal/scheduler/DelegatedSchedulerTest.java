@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
 import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
+import org.eclipse.smarthome.core.scheduler.Scheduler;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -36,10 +37,10 @@ import org.mockito.Mock;
  */
 public class DelegatedSchedulerTest {
 
-    private DelegatedSchedulerImpl delegatedscheduler = new DelegatedSchedulerImpl();
+    private DelegatedSchedulerImpl delegatedscheduler;
 
     @Mock
-    private SchedulerImpl scheduler;
+    private Scheduler scheduler;
     @Mock
     private ScheduledCompletableFuture<Instant> temporalScheduledFuture;
     @Mock
@@ -50,7 +51,7 @@ public class DelegatedSchedulerTest {
         initMocks(this);
         when(scheduler.after(any())).thenReturn(temporalScheduledFuture);
         when(temporalScheduledFuture.getPromise()).thenReturn(completableFuture);
-        delegatedscheduler.setDelegate(scheduler);
+        delegatedscheduler = new DelegatedSchedulerImpl(scheduler);
     }
 
     @Test
