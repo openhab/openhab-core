@@ -100,7 +100,6 @@ public class StateDescriptionFragmentBuilderTest {
         assertThat(fragment1.getMaximum(), is(not(fragment2.getMaximum())));
         assertThat(fragment1.getStep(), is(not(fragment2.getStep())));
         assertThat(fragment1.getPattern(), is(not(fragment2.getPattern())));
-        assertThat(fragment1.getPattern(), is(not(fragment2.getPattern())));
         assertThat(fragment1.isReadOnly(), is(not(fragment2.isReadOnly())));
         assertThat(fragment1.getOptions().size(), is(not(fragment2.getOptions().size())));
     }
