@@ -12,14 +12,15 @@
  */
 package org.eclipse.smarthome.core.internal.types;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Collections;
 
 import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.StateDescriptionFragment;
+import org.eclipse.smarthome.core.types.StateOption;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +28,6 @@ import org.junit.Test;
  * Test the {@link StateDescriptionFragmentImpl}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public class StateDescriptionFragmentImplTest {
 
@@ -41,7 +41,7 @@ public class StateDescriptionFragmentImplTest {
         source.setStep(BigDecimal.ONE);
         source.setPattern("pattern");
         source.setReadOnly(Boolean.TRUE);
-        source.setOptions(new ArrayList<>(0));
+        source.setOptions(Collections.emptyList());
     }
 
     @Test
@@ -54,6 +54,21 @@ public class StateDescriptionFragmentImplTest {
         assertThat(fragment.getPattern(), is(source.getPattern()));
         assertThat(fragment.isReadOnly(), is(source.isReadOnly()));
         assertThat(fragment.getOptions(), is(source.getOptions()));
+
+        // fragment with empty options should inherit new options
+        StateDescriptionFragmentImpl sourceWithOptions = new StateDescriptionFragmentImpl();
+        sourceWithOptions.setOptions(Collections.singletonList(new StateOption("value1", "label1")));
+
+        fragment = source.merge(sourceWithOptions);
+
+        assertThat(fragment.getOptions(), is(sourceWithOptions.getOptions()));
+
+        // fragment with options should NOT inherit new options
+        sourceWithOptions.setOptions(Collections.singletonList(new StateOption("value2", "label2")));
+
+        fragment = source.merge(sourceWithOptions);
+
+        assertThat(fragment.getOptions(), is(not(sourceWithOptions.getOptions())));
     }
 
     @Test
