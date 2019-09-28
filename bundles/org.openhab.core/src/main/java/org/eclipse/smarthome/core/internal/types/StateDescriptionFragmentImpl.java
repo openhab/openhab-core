@@ -187,7 +187,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         if (this.readOnly == null) {
             this.readOnly = fragment.isReadOnly();
         }
-        if (this.options == null) {
+        if (this.options == null || this.options.isEmpty()) {
             this.options = fragment.getOptions();
         }
 
