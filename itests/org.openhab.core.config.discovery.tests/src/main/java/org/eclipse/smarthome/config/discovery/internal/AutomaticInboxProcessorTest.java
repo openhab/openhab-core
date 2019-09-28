@@ -160,7 +160,7 @@ public class AutomaticInboxProcessorTest {
         inbox.activate();
 
         automaticInboxProcessor = new AutomaticInboxProcessor(thingTypeRegistry, thingRegistry, inbox);
-        automaticInboxProcessor.activate();
+        automaticInboxProcessor.activate(null);
     }
 
     @After

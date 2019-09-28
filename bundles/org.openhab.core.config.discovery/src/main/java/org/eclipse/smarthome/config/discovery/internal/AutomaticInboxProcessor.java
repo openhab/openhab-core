@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.config.core.ConfigurableService;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
@@ -39,9 +40,11 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.events.ThingStatusInfoChangedEvent;
 import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -83,8 +86,10 @@ import org.slf4j.LoggerFactory;
  * @author Henning Sudbrock - added hook for selectively auto-approving inbox entries
  */
 @Component(immediate = true, configurationPid = "org.eclipse.smarthome.inbox", service = EventSubscriber.class, property = {
-        "service.config.description.uri=system:inbox", "service.config.label=Inbox", "service.config.category=system",
-        "service.pid=org.eclipse.smarthome.inbox" })
+        Constants.SERVICE_PID + "=org.eclipse.smarthome.inbox",
+        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
+        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Inbox",
+        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=system:inbox" })
 @NonNullByDefault
 public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingStatusInfoChangedEvent>
         implements InboxListener, RegistryChangeListener<Thing> {
@@ -92,7 +97,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
     public static final String AUTO_IGNORE_CONFIG_PROPERTY = "autoIgnore";
     public static final String ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY = "autoApprove";
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(AutomaticInboxProcessor.class);
 
     private final ThingRegistry thingRegistry;
     private final ThingTypeRegistry thingTypeRegistry;
@@ -112,9 +117,22 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
     }
 
     @Activate
-    protected void activate() {
+    protected void activate(@Nullable Map<String, @Nullable Object> properties) {
         this.thingRegistry.addRegistryChangeListener(this);
         this.inbox.addInboxListener(this);
+
+        modified(properties);
+    }
+
+    @Modified
+    protected void modified(@Nullable Map<String, @Nullable Object> properties) {
+        if (properties != null) {
+            Object value = properties.get(AUTO_IGNORE_CONFIG_PROPERTY);
+            autoIgnore = value == null || !value.toString().equals("false");
+            value = properties.get(ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY);
+            alwaysAutoApprove = value != null && value.toString().equals("true");
+            autoApproveInboxEntries();
+        }
     }
 
     @Deactivate
@@ -254,16 +272,6 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     private boolean isToBeAutoApproved(DiscoveryResult result) {
         return inboxAutoApprovePredicates.stream().anyMatch(predicate -> predicate.test(result));
-    }
-
-    protected void activate(@Nullable Map<String, @Nullable Object> properties) {
-        if (properties != null) {
-            Object value = properties.get(AUTO_IGNORE_CONFIG_PROPERTY);
-            autoIgnore = value == null || !value.toString().equals("false");
-            value = properties.get(ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY);
-            alwaysAutoApprove = value != null && value.toString().equals("true");
-            autoApproveInboxEntries();
-        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
