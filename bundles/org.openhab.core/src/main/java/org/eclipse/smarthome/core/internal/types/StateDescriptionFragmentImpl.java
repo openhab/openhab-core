@@ -172,24 +172,25 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * @return this instance with the fields merged.
      */
     public StateDescriptionFragment merge(StateDescriptionFragment fragment) {
-        if (minimum == null) {
-            minimum = fragment.getMinimum();
+        if (this.minimum == null) {
+            this.minimum = fragment.getMinimum();
         }
-        if (maximum == null) {
-            maximum = fragment.getMaximum();
+        if (this.maximum == null) {
+            this.maximum = fragment.getMaximum();
         }
-        if (step == null) {
-            step = fragment.getStep();
+        if (this.step == null) {
+            this.step = fragment.getStep();
         }
-        if (pattern == null) {
-            pattern = fragment.getPattern();
+        if (this.pattern == null) {
+            this.pattern = fragment.getPattern();
         }
-        if (readOnly == null) {
-            readOnly = fragment.isReadOnly();
+        if (this.readOnly == null) {
+            this.readOnly = fragment.isReadOnly();
         }
-        if (options == null || options.isEmpty()) {
-            options = fragment.getOptions();
+        if (this.options == null) {
+            this.options = fragment.getOptions();
         }
+
         return this;
     }
 }
