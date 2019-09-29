@@ -30,7 +30,7 @@ import org.glassfish.jersey.media.sse.OutboundEvent;
  * @author Dennis Nobel - Changed EventBean
  */
 public class SseUtil {
-    static final String TOPIC_VALIDATE_PATTERN = "(\\w*\\*?\\/?,?\\s*)*";
+    static final String TOPIC_VALIDATE_PATTERN = "(\\w*\\*?\\/?,?:?-?\\s*)*";
 
     /**
      * Creates a new {@link OutboundEvent} object containing an {@link EventBean} created for the given Eclipse

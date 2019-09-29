@@ -52,6 +52,8 @@ public class SseUtilTest {
         assertThat(SseUtil.isValidTopicFilter("////////////"), is(true));
         assertThat(SseUtil.isValidTopicFilter("*/added"), is(true));
         assertThat(SseUtil.isValidTopicFilter("*added"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("smarthome/test/test:test:123/test"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("smarthome/test/test-test-123-test:test:123/test"), is(true));
     }
 
     @Test
