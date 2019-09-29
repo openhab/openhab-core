@@ -42,10 +42,10 @@ public class DelegatedSchedulerImpl implements Scheduler {
 
     private final Set<ScheduledCompletableFuture<?>> scheduledJobs = new HashSet<>();
 
-    private @NonNullByDefault({}) Scheduler delegate;
+    private @NonNullByDefault({}) SchedulerImpl delegate;
 
     @Activate
-    public DelegatedSchedulerImpl(final @Reference Scheduler scheduler) {
+    public DelegatedSchedulerImpl(final @Reference SchedulerImpl scheduler) {
         this.delegate = scheduler;
     }
 
