@@ -16,14 +16,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelGroupUID;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
@@ -153,5 +156,14 @@ public interface ThingHandlerCallback {
      * @return true if at least one item is linked, false otherwise
      */
     boolean isChannelLinked(ChannelUID channelUID);
+
+    /**
+     * Returns the bridge of the thing.
+     *
+     * @param bridgeUID {@link ThingUID} UID of the bridge (must not be null)
+     * @return returns the bridge of the thing or null if the thing has no bridge
+     */
+    @Nullable
+    Bridge getBridge(ThingUID bridgeUID);
 
 }

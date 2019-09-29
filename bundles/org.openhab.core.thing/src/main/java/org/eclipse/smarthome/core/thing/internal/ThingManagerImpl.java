@@ -34,6 +34,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
@@ -119,7 +120,6 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added preconfigured ChannelGroupBuilder
  * @author Yordan Zhelev - Added thing disabling mechanism
  */
-
 @Component(immediate = true, service = { ThingTypeMigrationService.class, ThingManager.class })
 public class ThingManagerImpl
         implements ThingManager, ThingTracker, ThingTypeMigrationService, ReadyService.ReadyTracker {
@@ -333,6 +333,11 @@ public class ThingManagerImpl
         @Override
         public boolean isChannelLinked(ChannelUID channelUID) {
             return itemChannelLinkRegistry.isLinked(channelUID);
+        }
+
+        @Override
+        public @Nullable Bridge getBridge(ThingUID bridgeUID) {
+            return (Bridge) thingRegistry.get(bridgeUID);
         }
     };
 
