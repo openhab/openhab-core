@@ -488,12 +488,15 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                         val newThingUIDs = model.allThingUIDs
                         val removedThings = oldThings.filter[!newThingUIDs.contains(it.UID)]
                         removedThings.forEach [
+                            logger.debug("Removing thing '{}' from model '{}'.", it.UID, modelName)
                             notifyListenersAboutRemovedElement
                         ]
                         createThingsFromModel(modelName)
+                        thingsMap.get(modelName).removeAll(removedThings)
                     }
                 }
                 case org.eclipse.smarthome.model.core.EventType.REMOVED: {
+                    logger.debug("Removing all things from model '{}'.", modelName)
                     val things = thingsMap.remove(modelName) ?: newArrayList
                     things.forEach [
                         notifyListenersAboutRemovedElement
