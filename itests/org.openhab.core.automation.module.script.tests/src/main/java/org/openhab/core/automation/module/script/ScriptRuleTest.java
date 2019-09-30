@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFilter;
@@ -56,30 +56,32 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  *
  */
+
 public class ScriptRuleTest extends JavaOSGiTest {
 
-    final Logger logger = LoggerFactory.getLogger(ScriptRuleTest.class);
-    VolatileStorageService volatileStorageService = new VolatileStorageService();
+    private final Logger logger = LoggerFactory.getLogger(ScriptRuleTest.class);
+    private VolatileStorageService volatileStorageService = new VolatileStorageService();
 
-    ItemCommandEvent receivedEvent;
+    private ItemCommandEvent receivedEvent;
 
     public ScriptRuleTest() {
     }
 
     @Before
     public void before() {
+        @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {
             @Override
-            public void addProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
 
             @Override
-            public @NonNull Collection<@NonNull Item> getAll() {
+            public Collection<Item> getAll() {
                 return Arrays.asList(new Item[] { new SwitchItem("MyTrigger"), new SwitchItem("ScriptItem") });
             }
 
             @Override
-            public void removeProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
         };
         registerService(itemProvider);
