@@ -350,8 +350,6 @@ public class ThingManagerImpl
 
     private final Set<Thing> things = new CopyOnWriteArraySet<>();
 
-    private final Set<ThingUID> registerHandlerLock = new HashSet<>();
-
     private final Set<ThingUID> thingUpdatedLock = new HashSet<>();
 
     @Override
@@ -366,11 +364,10 @@ public class ThingManagerImpl
         scheduler.schedule(new Runnable() {
             @Override
             public void run() {
-                Lock lock = getLockForThing(thing.getUID());
+                ThingUID thingUID = thing.getUID();
+                Lock lock = getLockForThing(thingUID);
                 try {
                     lock.lock();
-                    ThingUID thingUID = thing.getUID();
-                    waitForRunningHandlerRegistrations(thingUID);
 
                     // Remove the ThingHandler, if any
                     final ThingHandlerFactory oldThingHandlerFactory = findThingHandlerFactory(thing.getThingTypeUID());
@@ -403,12 +400,8 @@ public class ThingManagerImpl
                     thingRegistry.update(thing);
 
                     ThingHandler handler = thing.getHandler();
-                    String handlerString = "NO HANDLER";
-                    if (handler != null) {
-                        handlerString = handler.toString();
-                    }
-                    logger.debug("Changed ThingType of Thing {} to {}. New ThingHandler is {}.",
-                            thing.getUID().toString(), thing.getThingTypeUID(), handlerString);
+                    logger.debug("Changed ThingType of Thing {} to {}. New ThingHandler is {}.", thingUID,
+                            thing.getThingTypeUID(), handler == null ? "NO HANDLER" : handler);
                 } finally {
                     lock.unlock();
                 }
@@ -430,25 +423,6 @@ public class ThingManagerImpl
                 String message = MessageFormat.format(
                         "Thing type migration failed for {0}. The handler deregistration did not complete within {1}ms.",
                         thing.getUID().getAsString(), timeout);
-                logger.error(message);
-                throw new IllegalStateException(message);
-            }
-
-            private void waitForRunningHandlerRegistrations(ThingUID thingUID) {
-                for (int i = 0; i < 10 * 10; i++) {
-                    if (!registerHandlerLock.contains(thingUID)) {
-                        return;
-                    }
-                    try {
-                        // Wait a little to give running handler registrations a chance to complete...
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        return;
-                    }
-                }
-                String message = MessageFormat.format(
-                        "Thing type migration failed for {0}. Could not obtain lock for hander registration.",
-                        thingUID.getAsString());
                 logger.error(message);
                 throw new IllegalStateException(message);
             }
