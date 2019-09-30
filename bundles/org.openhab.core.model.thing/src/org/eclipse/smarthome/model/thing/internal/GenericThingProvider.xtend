@@ -56,7 +56,6 @@ import org.eclipse.smarthome.model.thing.thing.ModelPropertyContainer
 import org.eclipse.smarthome.model.thing.thing.ModelThing
 import org.eclipse.smarthome.model.thing.thing.ThingModel
 import org.eclipse.xtend.lib.annotations.Data
-import org.osgi.framework.FrameworkUtil
 import org.osgi.service.component.annotations.Component
 import org.osgi.service.component.annotations.Reference
 import org.slf4j.Logger
@@ -74,7 +73,6 @@ import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
  *         factory cannot load a thing yet (bug 470368), 
  *         added delay until ThingTypes are fully loaded
  * @author Markus Rathgeb - Add locale provider support
- * 
  */
 @Component(immediate=true, service=ThingProvider)
 class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
@@ -386,8 +384,8 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                 val channelType = it.channelTypeUID.channelType
                 if (channelType !== null) {
                     channels +=
-                        ChannelBuilder.create(new ChannelUID(thingTypeUID, thingUID, id), channelType.itemType).
-                            withType(it.channelTypeUID).withAutoUpdatePolicy(channelType.autoUpdatePolicy).build
+                        ChannelBuilder.create(new ChannelUID(thingUID, id), channelType.itemType).withType(
+                            it.channelTypeUID).withAutoUpdatePolicy(channelType.autoUpdatePolicy).build
                 } else {
                     logger.warn(
                         "Could not create channel '{}' for thing '{}', because channel type '{}' could not be found.",
