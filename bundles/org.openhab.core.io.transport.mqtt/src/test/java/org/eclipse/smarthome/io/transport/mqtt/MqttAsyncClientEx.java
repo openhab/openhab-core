@@ -107,10 +107,12 @@ public class MqttAsyncClientEx extends MqttAsyncClient {
     public IMqttToken disconnect(long quiesceTimeout, Object userContext, IMqttActionListener callback)
             throws MqttException {
         connection.connectionStateOverwrite = MqttConnectionState.DISCONNECTED;
-        if (connection.disconnectSuccess) {
-            callback.onSuccess(getToken(userContext, callback, null));
-        } else {
-            callback.onFailure(getToken(userContext, callback, null), new MqttException(0));
+        if (callback != null) {
+            if (connection.disconnectSuccess) {
+                callback.onSuccess(getToken(userContext, callback, null));
+            } else {
+                callback.onFailure(getToken(userContext, callback, null), new MqttException(0));
+            }
         }
         return getToken(userContext, callback, null);
     }

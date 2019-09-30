@@ -343,11 +343,14 @@ public class MqttBrokerConnectionTests {
         MqttAsyncClientEx client = (MqttAsyncClientEx) connection.client;
 
         // Stop
-        connection.stop();
+        CompletableFuture<Boolean> future = connection.stop();
 
         // Restart strategy must be stopped
         PeriodicReconnectStrategy p = (PeriodicReconnectStrategy) connection.getReconnectStrategy();
         assertThat(p.isStarted(), is(false));
+
+        // Wait to complete stop
+        future.get(1000, TimeUnit.MILLISECONDS);
 
         verify(connection).unsubscribeAll();
         verify(client).disconnect(anyLong(), any(), any());
