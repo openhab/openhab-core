@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.events.Event;
@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
-    final Logger logger = LoggerFactory.getLogger(AutomationIntegrationJsonTest.class);
+    private final Logger logger = LoggerFactory.getLogger(AutomationIntegrationJsonTest.class);
     private EventPublisher eventPublisher;
     private ItemRegistry itemRegistry;
     private RuleRegistry ruleRegistry;
@@ -92,14 +92,15 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
         getService(ItemRegistry.class);
 
+        @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {
 
             @Override
-            public void addProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
 
             @Override
-            public @NonNull Collection<@NonNull Item> getAll() {
+            public Collection<Item> getAll() {
                 HashSet<Item> items = new HashSet<>();
                 items.add(new SwitchItem("myMotionItem"));
                 items.add(new SwitchItem("myPresenceItem"));
@@ -117,17 +118,18 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             }
 
             @Override
-            public void removeProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
         };
 
         registerService(itemProvider);
         registerVolatileStorageService();
 
+        @NonNullByDefault
         EventSubscriber ruleEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(RuleStatusInfoEvent.TYPE);
             }
 
@@ -137,9 +139,8 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
-                logger.info("RuleEvent: " + e.getTopic() + " --> " + e.getPayload());
-                System.out.println("RuleEvent: " + e.getTopic() + " --> " + e.getPayload());
+            public void receive(Event e) {
+                logger.info("RuleEvent: {} --> {}", e.getTopic(), e.getPayload());
                 if (e.getPayload().contains("RUNNING")) {
                     ruleEvent = e;
                 }
@@ -251,11 +252,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         assertThat(trigger.get().getConfiguration().get("eventSource"), is("myMotionItem"));
         assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/*"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
-        // def condition1 = rule.conditions.find{it.id.equals("ItemStateConditionID")} as Condition
-        // assertThat(condition1, is(notNullValue())
-        // assertThat(condition1.typeUID, is("core.GenericEventCondition")
-        // assertThat(condition1.configuration.get("topic"), is("smarthome/items/myMotionItem/state")
-        // assertThat(condition1.configuration.get("payload"), is(".*ON.*")
         Optional<? extends Action> action = rule.getActions().stream()
                 .filter(a -> a.getId().equals("ItemPostCommandActionID")).findFirst();
         assertThat(action.isPresent(), is(true));
@@ -310,10 +306,11 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         // run the rule to check if the runtime rule has resolved module references and is executed successfully
         EventPublisher eventPublisher = getService(EventPublisher.class);
 
+        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -323,7 +320,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().contains("myLampItem")) {
                     itemEvent = e;
@@ -357,10 +354,12 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
         assertThat(myLampItem.getState(), is(UnDefType.NULL));
         SwitchItem myMotionItem = (SwitchItem) itemRegistry.getItem("myMotionItem");
+
+        @NonNullByDefault
         EventSubscriber eventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -370,7 +369,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().equals("smarthome/items/myLampItem/command")) {
                     itemEvent = e;
