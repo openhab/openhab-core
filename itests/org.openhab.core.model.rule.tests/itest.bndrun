@@ -7,6 +7,11 @@ Fragment-Host: org.openhab.core.model.rule.runtime
     bnd.identity;id='org.openhab.core.model.rule.tests',\
     bnd.identity;id='org.openhab.core.model.rule.runtime'
 
+# We would like to use the "volatile" storage only
+-runblacklist: \
+    bnd.identity;id='org.openhab.core.storage.json',\
+    bnd.identity;id='org.openhab.core.storage.mapdb'
+
 #
 # done
 #
@@ -90,11 +95,11 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	org.openhab.core.model.script.runtime;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.sitemap;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.thing;version='[2.5.0,2.5.1)',\
-	org.openhab.core.storage.json;version='[2.5.0,2.5.1)',\
 	org.ops4j.pax.swissbox.optional.jcl;version='[1.8.2,1.8.3)',\
 	org.ops4j.pax.web.pax-web-jetty;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-spi;version='[7.2.3,7.2.4)',\
 	org.threeten.extra;version='[1.4.0,1.4.1)',\
 	tec.uom.lib.uom-lib-common;version='[1.0.3,1.0.4)',\
-	tec.uom.se;version='[1.0.10,1.0.11)'
+	tec.uom.se;version='[1.0.10,1.0.11)',\
+	org.openhab.core.model.item.runtime;version='[2.5.0,2.5.1)'
