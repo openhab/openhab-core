@@ -41,7 +41,7 @@ public class ScriptExecutionTest {
     @BeforeClass
     public static void setUp() throws SchedulerException {
         scheduler = new MockScheduler();
-        System.setProperty(StdSchedulerFactory.PROPERTIES_FILE, "quartz-test.properties");
+        System.setProperty(StdSchedulerFactory.PROPERTIES_FILE, "../../../../../target/classes/quartz-test.properties");
         SchedulerRepository.getInstance().bind(scheduler);
 
         assertThat(StdSchedulerFactory.getDefaultScheduler(), sameInstance(scheduler));
