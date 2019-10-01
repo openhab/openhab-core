@@ -38,7 +38,7 @@ public class ExpiringCacheAsyncTest extends JavaTest {
 
     @Test
     public void testFetchValue() throws InterruptedException, ExecutionException {
-        ExpiringCacheAsync<Double> t = new ExpiringCacheAsync<Double>(100);
+        ExpiringCacheAsync<Double> t = new ExpiringCacheAsync<Double>(500);
         assertTrue(t.isExpired());
         // We should always be able to get the raw value, expired or not
         assertNull(t.getLastKnownValue());
