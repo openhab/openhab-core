@@ -46,16 +46,16 @@ import org.junit.Test;
 /**
  *
  * @author Alex Tugarev - Initial contribution
- * @author Andre Fuechsel
- * @author Michael Grammling
- * @author Simon Kaufmann
+ * @author Andre Fuechsel - Added some tests
+ * @author Michael Grammling - Added some tests
+ * @author Simon Kaufmann - Added some tests
  * @author Stefan Triller - Added test for ItemAddedEvents with multiple model files
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 public class GenericItemProviderTest extends JavaOSGiTest {
 
-    private final static String TESTMODEL_NAME = "testModel.items";
-    private final static String TESTMODEL_NAME2 = "testModel2.items";
+    private static final String TESTMODEL_NAME = "testModel.items";
+    private static final String TESTMODEL_NAME2 = "testModel2.items";
 
     private ModelRepository modelRepository;
     private ItemRegistry itemRegistry;

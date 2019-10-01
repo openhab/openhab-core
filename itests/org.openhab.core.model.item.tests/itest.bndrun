@@ -7,6 +7,11 @@ Fragment-Host: org.openhab.core.model.item
     bnd.identity;id='org.openhab.core.model.item.tests',\
     bnd.identity;id='org.openhab.core.model.item.runtime'
 
+# We would like to use the "volatile" storage only
+-runblacklist: \
+    bnd.identity;id='org.openhab.core.storage.json',\
+    bnd.identity;id='org.openhab.core.storage.mapdb'
+
 #
 # done
 #
@@ -88,7 +93,6 @@ Fragment-Host: org.openhab.core.model.item
 	org.openhab.core.model.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.persistence;version='[2.5.0,2.5.1)',\
 	org.openhab.core.scheduler;version='[2.5.0,2.5.1)',\
-	org.openhab.core.storage.json;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
 	org.ops4j.pax.swissbox.optional.jcl;version='[1.8.2,1.8.3)',\

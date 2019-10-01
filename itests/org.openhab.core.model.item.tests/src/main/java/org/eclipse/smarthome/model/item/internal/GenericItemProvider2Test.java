@@ -21,6 +21,7 @@ import java.util.Iterator;
 import org.eclipse.smarthome.core.items.GenericItem;
 import org.eclipse.smarthome.core.items.GroupItem;
 import org.eclipse.smarthome.core.items.Item;
+import org.eclipse.smarthome.core.items.ItemProvider;
 import org.eclipse.smarthome.core.items.ItemRegistry;
 import org.eclipse.smarthome.core.items.Metadata;
 import org.eclipse.smarthome.core.items.MetadataKey;
@@ -166,7 +167,7 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
 
     @Test
     public void testGroupItemIsSame() {
-        GenericItemProvider gip = getService(GenericItemProvider.class);
+        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
         assertNotNull(gip);
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -179,7 +180,7 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItem() {
-        GenericItemProvider gip = getService(GenericItemProvider.class);
+        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
         assertNotNull(gip);
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -192,7 +193,7 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesFunctionParameters() {
-        GenericItemProvider gip = getService(GenericItemProvider.class);
+        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
         assertNotNull(gip);
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
@@ -205,7 +206,7 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItemAndFunction() {
-        GenericItemProvider gip = getService(GenericItemProvider.class);
+        GenericItemProvider gip = (GenericItemProvider) getService(ItemProvider.class);
         assertNotNull(gip);
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
