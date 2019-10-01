@@ -45,7 +45,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Alex Tugarev - Initial Contribution
+ * @author Alex Tugarev - Initial contribution
  * @author Andre Fuechsel
  * @author Michael Grammling
  * @author Simon Kaufmann

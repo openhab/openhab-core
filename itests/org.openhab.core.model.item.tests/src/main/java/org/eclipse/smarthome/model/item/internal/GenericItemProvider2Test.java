@@ -29,6 +29,7 @@ import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.eclipse.smarthome.core.library.items.SwitchItem;
 import org.eclipse.smarthome.core.library.types.ArithmeticGroupFunction;
 import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.eclipse.smarthome.model.core.ModelRepository;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
@@ -38,8 +39,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Simon Kaufmann - Initial contribution and API.
- *
+ * @author Simon Kaufmann - Initial contribution
  */
 public class GenericItemProvider2Test extends JavaOSGiTest {
 
@@ -157,14 +157,17 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
 
         GenericItem item = (GenericItem) itemRegistry.get("number2");
+        assertNotNull(item);
         assertTrue(item.getGroupNames().contains("testGroup"));
         GroupItem groupItem = (GroupItem) itemRegistry.get("testGroup");
+        assertNotNull(groupItem);
         assertTrue(groupItem.getAllMembers().contains(item));
     }
 
     @Test
     public void testGroupItemIsSame() {
-        GenericItemProvider gip = new GenericItemProvider();
+        GenericItemProvider gip = getService(GenericItemProvider.class);
+        assertNotNull(gip);
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
                 new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
@@ -176,7 +179,8 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItem() {
-        GenericItemProvider gip = new GenericItemProvider();
+        GenericItemProvider gip = getService(GenericItemProvider.class);
+        assertNotNull(gip);
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
                 new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
@@ -188,7 +192,8 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesFunctionParameters() {
-        GenericItemProvider gip = new GenericItemProvider();
+        GenericItemProvider gip = getService(GenericItemProvider.class);
+        assertNotNull(gip);
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
                 new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
@@ -200,7 +205,8 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
 
     @Test
     public void testGroupItemChangesBaseItemAndFunction() {
-        GenericItemProvider gip = new GenericItemProvider();
+        GenericItemProvider gip = getService(GenericItemProvider.class);
+        assertNotNull(gip);
 
         GroupItem g1 = new GroupItem("testGroup", new SwitchItem("test"),
                 new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
@@ -289,7 +295,9 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Item item = itemRegistry.get("s");
         assertNotNull(item);
-        assertEquals("XPATH(/*[name()='liveStreams']/*[name()='stream']):%s", item.getStateDescription().getPattern());
+        StateDescription stateDescription = item.getStateDescription();
+        assertNotNull(stateDescription);
+        assertEquals("XPATH(/*[name()='liveStreams']/*[name()='stream']):%s", stateDescription.getPattern());
     }
 
 }
