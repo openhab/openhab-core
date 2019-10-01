@@ -41,7 +41,7 @@
     <module>org.openhab.core.model.item.tests</module>
     <module>org.openhab.core.model.lsp.tests</module>
     <module>org.openhab.core.model.persistence.tests</module>
-    <!-- <module>org.openhab.core.model.rule.tests</module> -->
+    <module>org.openhab.core.model.rule.tests</module>
     <!-- <module>org.openhab.core.model.script.tests</module> -->
     <module>org.openhab.core.model.thing.testsupport</module>
     <module>org.openhab.core.model.thing.tests</module>

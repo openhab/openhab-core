@@ -31,11 +31,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  */
 public class RuleTriggerTest extends JavaOSGiTest {
 
-    private final static String TESTMODEL_NAME = "testModel.rules";
+    private static final String TESTMODEL_NAME = "testModel.rules";
     private ModelRepository modelRepository;
 
     @Before
@@ -126,7 +126,9 @@ public class RuleTriggerTest extends JavaOSGiTest {
             Function<T, String> valueFunction) {
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
 
-        RuleTriggerManager triggerManager = ((RuleEngineImpl) getService(RuleEngine.class)).getTriggerManager();
+        RuleEngineImpl ruleEngine = (RuleEngineImpl) getService(RuleEngine.class);
+        assertNotNull(ruleEngine);
+        RuleTriggerManager triggerManager = ruleEngine.getTriggerManager();
         waitForAssert(() -> {
             Iterable<Rule> rules = triggerManager.getRules(triggerType);
             Iterator<Rule> iterator = rules.iterator();
