@@ -18,7 +18,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -148,8 +148,7 @@ public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
         assertThat(actualDiscoveryResultA.getProperties(),
                 is(createUsbPropertiesMap(discoveryResultA.getProperties(), deviceInfoA)));
         reset(discoveryListener);
-        
-        
+
         // when only the second discovery participant supports a newly discovered device, the device is also discovered
         UsbSerialDeviceInformation deviceInfoB = generateDeviceInfo();
         DiscoveryResult discoveryResultB = mock(DiscoveryResult.class);

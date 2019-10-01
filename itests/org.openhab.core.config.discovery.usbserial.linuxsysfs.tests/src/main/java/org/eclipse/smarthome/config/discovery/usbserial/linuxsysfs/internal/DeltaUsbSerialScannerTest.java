@@ -26,7 +26,7 @@ import java.util.HashSet;
 
 import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
-import org.eclipse.smarthome.config.discovery.usbserial.testutil.UsbSerialDeviceInformationGenerator;
+import org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +37,7 @@ import org.junit.Test;
  */
 public class DeltaUsbSerialScannerTest {
 
-    UsbSerialDeviceInformationGenerator usbDeviceInfoGenerator = new UsbSerialDeviceInformationGenerator();
+    private UsbSerialDeviceInformationGenerator usbDeviceInfoGenerator = new UsbSerialDeviceInformationGenerator();
 
     private UsbSerialScanner usbSerialScanner;
     private DeltaUsbSerialScanner deltaUsbSerialScanner;
