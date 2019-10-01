@@ -25,6 +25,7 @@ import javax.net.ssl.X509ExtendedTrustManager;
  * @author Matthew Bowman - Initial contribution
  */
 public final class TrustAllTrustMananger extends X509ExtendedTrustManager {
+
     private static TrustAllTrustMananger instance = new TrustAllTrustMananger();
 
     public static TrustAllTrustMananger getInstance() {

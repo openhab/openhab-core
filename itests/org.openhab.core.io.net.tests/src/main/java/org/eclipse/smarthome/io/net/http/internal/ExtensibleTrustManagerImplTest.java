@@ -189,7 +189,6 @@ public class ExtensibleTrustManagerImplTest {
 
     private void mockSubjectForCertificate(X509Certificate certificate, String principal) {
         when(certificate.getSubjectX500Principal()).thenReturn(new X500Principal(principal));
-
     }
 
     private void mockIssuerForCertificate(X509Certificate certificate, String principal) {

@@ -49,7 +49,7 @@ import org.mockito.Mock;
 /**
  * @author Kai Kreuzer - Initial contribution
  */
-public class WebClientFactoryTest {
+public class WebClientFactoryImplTest {
 
     private WebClientFactoryImpl webClientFactory;
 
@@ -64,9 +64,8 @@ public class WebClientFactoryTest {
     @Before
     public void setup() {
         initMocks(this);
-        webClientFactory = new WebClientFactoryImpl();
+        webClientFactory = new WebClientFactoryImpl(extensibleTrustManager);
         webClientFactory.setTrustmanagerProvider(trustmanagerProvider);
-        webClientFactory.setExtensibleTrustManager(extensibleTrustManager);
 
         webClientFactory.activate(createConfigMap(4, 200, 60, 2, 10, 60));
     }
@@ -146,21 +145,21 @@ public class WebClientFactoryTest {
     @Test
     public void testMultiThreadedShared() throws Exception {
         ThreadPoolExecutor workers = new ThreadPoolExecutor(20, 80, 60, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(50 * 50));
+                new ArrayBlockingQueue<>(50 * 50));
 
-        List<HttpClient> clients = new ArrayList<>();
+        final List<HttpClient> clients = new ArrayList<>();
 
-        final int CLIENTS = 2;
-        final int REQUESTS = 2;
+        final int maxClients = 2;
+        final int maxRequests = 2;
 
-        for (int i = 0; i < CLIENTS; i++) {
+        for (int i = 0; i < maxClients; i++) {
             HttpClient httpClient = webClientFactory.getCommonHttpClient();
             clients.add(httpClient);
         }
 
         final List<String> failures = new ArrayList<>();
 
-        for (int i = 0; i < REQUESTS; i++) {
+        for (int i = 0; i < maxRequests; i++) {
             for (final HttpClient client : clients) {
                 workers.execute(new Runnable() {
                     @Override
@@ -189,21 +188,21 @@ public class WebClientFactoryTest {
     @Test
     public void testMultiThreadedCustom() throws Exception {
         ThreadPoolExecutor workers = new ThreadPoolExecutor(20, 80, 60, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(50 * 50));
+                new ArrayBlockingQueue<>(50 * 50));
 
-        List<HttpClient> clients = new ArrayList<>();
+        final List<HttpClient> clients = new ArrayList<>();
 
-        final int CLIENTS = 2;
-        final int REQUESTS = 2;
+        final int maxClients = 2;
+        final int maxRequests = 2;
 
-        for (int i = 0; i < CLIENTS; i++) {
+        for (int i = 0; i < maxClients; i++) {
             HttpClient httpClient = webClientFactory.createHttpClient("consumer" + i, "https://www.heise.de");
             clients.add(httpClient);
         }
 
         final List<String> failures = new ArrayList<>();
 
-        for (int i = 0; i < REQUESTS; i++) {
+        for (int i = 0; i < maxRequests; i++) {
             for (final HttpClient client : clients) {
                 workers.execute(new Runnable() {
                     @Override
