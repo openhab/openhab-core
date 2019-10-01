@@ -40,12 +40,12 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("deprecation")
 public class HostFragmentSupportTest extends JavaOSGiTest {
 
-    final Logger logger = LoggerFactory.getLogger(HostFragmentSupportTest.class);
+    private final Logger logger = LoggerFactory.getLogger(HostFragmentSupportTest.class);
     private ModuleTypeRegistry moduleTypeRegistry;
     private PackageAdmin pkgAdmin;
 
     private final String EXT = ".jar";
-    private final String PATH = "src/test/resources/";
+    private final String PATH = "/";
     private final String RESOURCES_TEST_BUNDLE_1 = "host-tb1";
     private final String RESOURCES_TEST_BUNDLE_2 = "host-tb2";
     private final String RESOURCES_TEST_BUNDLE_3 = "fragment-tb1";
@@ -113,6 +113,7 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         registerService(AutomationIntegrationJsonTest.VOLATILE_STORAGE_SERVICE);
     }
 
+    @SuppressWarnings("null")
     @Test
     public void assertThatTheInstallationOfTheFragmentHostProvidesTheResourcesCorrectly() throws BundleException {
         logger.info("asserting that the installation of the fragment-host provides the resources correctly");
@@ -219,6 +220,7 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
 
     }
 
+    @SuppressWarnings("null")
     @Test
     public void assertThatTheUpdateOfTheFragmentHostProvidesTheResourcesCorrectly() throws BundleException {
         logger.info("asserting that the update of the fragment-host provides the resources correctly");

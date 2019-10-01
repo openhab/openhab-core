@@ -29,7 +29,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.Configuration;
@@ -50,7 +50,6 @@ import org.eclipse.smarthome.core.storage.StorageService;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
@@ -66,7 +65,6 @@ import org.openhab.core.automation.events.RuleAddedEvent;
 import org.openhab.core.automation.events.RuleRemovedEvent;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
 import org.openhab.core.automation.events.RuleUpdatedEvent;
-import org.openhab.core.automation.internal.module.handler.GenericEventTriggerHandler;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.automation.template.Template;
@@ -78,9 +76,6 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.TriggerType;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +88,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AutomationIntegrationTest extends JavaOSGiTest {
 
-    final Logger logger = LoggerFactory.getLogger(AutomationIntegrationTest.class);
+    private final Logger logger = LoggerFactory.getLogger(AutomationIntegrationTest.class);
     private EventPublisher eventPublisher;
     private ItemRegistry itemRegistry;
     private RuleRegistry ruleRegistry;
@@ -113,11 +108,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         ItemProvider itemProvider = new ItemProvider() {
 
             @Override
-            public void addProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
 
             @Override
-            public @NonNull Collection<@NonNull Item> getAll() {
+            public Collection<Item> getAll() {
                 Set<Item> items = new HashSet<>();
                 items.add(new SwitchItem("myMotionItem"));
                 items.add(new SwitchItem("myPresenceItem"));
@@ -143,7 +138,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void removeProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
         };
 
@@ -185,10 +180,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     public void assertThatARuleCanBeAddedUpdatedAndRemovedByTheApi() {
         logger.info("assert that a rule can be added, updated and removed by the api");
 
+        @NonNullByDefault
         EventSubscriber ruleEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Stream.of(RuleAddedEvent.TYPE, RuleRemovedEvent.TYPE, RuleUpdatedEvent.TYPE).collect(toSet());
             }
 
@@ -198,7 +194,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("RuleEvent: {}", e.getTopic());
                 ruleEvent = e;
             }
@@ -221,7 +217,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         // UPDATE
         ruleEvent = null;
         if (ruleAdded == null) {
-            throw new NullPointerException();
+            throw new AssertionError("ruleAdded is null");
         }
         Rule updatedRule = RuleBuilder.create(ruleAdded).withDescription("TestDescription").build();
         Rule oldRule = ruleRegistry.update(updatedRule);
@@ -289,10 +285,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         List<RuleStatusInfoEvent> ruleEvents = new ArrayList<>();
 
+        @NonNullByDefault
         EventSubscriber ruleEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(RuleStatusInfoEvent.TYPE);
             }
 
@@ -302,7 +299,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("RuleEvent: {}", e.getTopic());
                 ruleEvents.add((RuleStatusInfoEvent) e);
             }
@@ -357,60 +354,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatARuleSwitchesFromIDLEtoUNINITIALIZEDifAModuleHandlerDisappearsAndBackToIDLEifItAppearsAgain()
-            throws BundleException {
-        logger.info(
-                "assert that a rule switches from IDLE to UNINITIALIZED if a moduleHanlder disappears and back to IDLE if it appears again");
-        Rule rule = createSimpleRule();
-        ruleRegistry.add(rule);
-        assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE));
-
-        Bundle moduleBundle = FrameworkUtil.getBundle(GenericEventTriggerHandler.class);
-        moduleBundle.stop();
-        waitForAssert(() -> {
-            logger.info("RuleStatus: {}", ruleEngine.getStatusInfo(rule.getUID()).getStatus());
-            assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.UNINITIALIZED));
-        }, 3000, 100);
-
-        moduleBundle.start();
-        ruleEngine.setEnabled(rule.getUID(), true);
-        waitForAssert(() -> {
-            logger.info("RuleStatus: {}", ruleEngine.getStatusInfo(rule.getUID()));
-            assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE));
-        }, 3000, 100);
-    }
-
-    @Test
-    @Ignore // this assumes that the sample.json bundle is started as part of the test, which is usually not the case
-            // (and we should not have a fixed dependency on it
-    public void assertThatAModuleTypesAndTemplatesAreDisappearedWhenTheProviderWasUninstalled() throws BundleException {
-        logger.info("assert that a module types and templates are disappeared when the provider was uninstalled");
-
-        waitForAssert(() -> {
-            logger.info("RuleStatus: {}", moduleTypeRegistry.get("SampleTrigger"));
-            assertThat(moduleTypeRegistry.get("SampleTrigger"), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get("SampleCondition"), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get("SampleAction"), is(notNullValue()));
-            assertThat(templateRegistry.get("SampleRuleTemplate"), is(notNullValue()));
-        }, 3000, 100);
-
-        for (Bundle bundle : bundleContext.getBundles()) {
-            if (bundle.getSymbolicName().equals("org.openhab.core.automation.sample.extension.json")) {
-                bundle.uninstall();
-                break;
-            }
-        }
-
-        waitForAssert(() -> {
-            logger.info("RuleStatus: {}", moduleTypeRegistry.get("SampleTrigger"));
-            assertThat(moduleTypeRegistry.get("SampleTrigger"), is(nullValue()));
-            assertThat(moduleTypeRegistry.get("SampleCondition"), is(nullValue()));
-            assertThat(moduleTypeRegistry.get("SampleAction"), is(nullValue()));
-            assertThat(templateRegistry.get("SampleRuleTemplate"), is(nullValue()));
-        }, 3000, 100);
-    }
-
-    @Test
     public void assertThatARuleBasedOnACompositeModuleIsInitializedAndExecutedCorrectly() {
         Map<String, Object> params = new HashMap<>();
         params.put("itemName", "myMotionItem3");
@@ -451,10 +394,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         EventPublisher eventPublisher = getService(EventPublisher.class);
         eventPublisher.post(ItemEventFactory.createStateEvent("myPresenceItem3", OnOffType.ON));
 
+        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -464,7 +408,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().contains("myLampItem3")) {
                     itemEvent = e;
@@ -519,10 +463,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         Item myLampItem3 = itemRegistry.getItem("myLampItem3");
 
+        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -532,7 +477,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().contains("myLampItem3")) {
                     itemEvent = e;
@@ -576,10 +521,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE));
         }, 3000, 100);
 
+        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -589,7 +535,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().contains("myLampItem3")) {
                     itemEvent = e;
@@ -647,7 +593,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         Rule rule = RuleBuilder.create("myRule21" + new Random().nextInt() + "_COMPOSITE").withTriggers(triggers)
                 .withActions(actions).withName("RuleByJAVA_API_ChainedComposite").build();
-        logger.info("Rule created: " + rule.getUID());
+        logger.info("Rule created: {}", rule.getUID());
 
         RuleRegistry ruleRegistry = getService(RuleRegistry.class);
         ruleRegistry.add(rule);
@@ -663,9 +609,10 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         // prepare the presenceItems state to be on to match the second condition of the rule
         eventPublisher.post(ItemEventFactory.createStateEvent("myPresenceItem4", OnOffType.ON));
 
+        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -675,7 +622,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().contains("myLampItem4")) {
                     itemEvent = e;
@@ -714,7 +661,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         Rule rule = RuleBuilder.create("myRule21").withTriggers(triggers).withActions(actions)
                 .withName("RuleByJAVA_API").withTags("myRule21").build();
-        logger.info("Rule created: " + rule.getUID());
+        logger.info("Rule created: {}", rule.getUID());
 
         ruleRegistry.add(rule);
         ruleEngine.setEnabled(rule.getUID(), true);
@@ -725,18 +672,20 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     public void assertThatARuleCanBeAddedByARuleProvider() {
         logger.info("assert that a rule can be added by a ruleProvider");
         Rule rule = createSimpleRule();
+
+        @NonNullByDefault
         RuleProvider ruleProvider = new RuleProvider() {
             @Override
-            public void addProviderChangeListener(@NonNull ProviderChangeListener<Rule> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<Rule> listener) {
             }
 
             @Override
-            public @NonNull Collection<Rule> getAll() {
+            public Collection<Rule> getAll() {
                 return Collections.singleton(rule);
             }
 
             @Override
-            public void removeProviderChangeListener(@NonNull ProviderChangeListener<Rule> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<Rule> listener) {
             }
         };
 
@@ -776,10 +725,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         ruleRegistry.add(templateRule);
         assertThat(ruleRegistry.get(templateRule.getUID()), is(notNullValue()));
 
+        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -789,7 +739,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().contains("templ_LampItem")) {
                     itemEvent = e;
@@ -836,10 +786,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             assertThat(ruleEngine.getStatus(templateRule.getUID()), is(RuleStatus.IDLE));
         });
 
+        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -849,7 +800,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().contains("xtempl_LampItem")) {
                     itemEvent = e;
@@ -906,32 +857,32 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void addProviderChangeListener(@NonNull ProviderChangeListener<RuleTemplate> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<RuleTemplate> listener) {
             }
 
             @Override
-            public @NonNull Collection<RuleTemplate> getAll() {
+            public Collection<RuleTemplate> getAll() {
                 return Collections.singleton(template);
             }
 
             @Override
-            public void removeProviderChangeListener(@NonNull ProviderChangeListener<RuleTemplate> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<RuleTemplate> listener) {
             }
         };
 
         ModuleTypeProvider moduleTypeProvider = new ModuleTypeProvider() {
 
             @Override
-            public void addProviderChangeListener(@NonNull ProviderChangeListener<ModuleType> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
             }
 
             @Override
-            public @NonNull Collection<ModuleType> getAll() {
+            public Collection<ModuleType> getAll() {
                 return Stream.of(triggerType, actionType).collect(toSet());
             }
 
             @Override
-            public void removeProviderChangeListener(@NonNull ProviderChangeListener<ModuleType> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
             }
 
             @Override
@@ -1035,7 +986,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         Rule rule = RuleBuilder.create("myRule_" + random).withTriggers(triggers).withConditions(conditions)
                 .withActions(actions).withName("RuleByJAVA_API" + random).withTags("myRule_" + random).build();
-        logger.info("Rule created: " + rule.getUID());
+        logger.info("Rule created: {}", rule.getUID());
 
         ruleRegistry.add(rule);
         ruleEngine.setEnabled(rule.getUID(), true);
@@ -1056,10 +1007,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         SwitchItem myMotionItem = (SwitchItem) itemRegistry.getItem("myPresenceItem5");
         myMotionItem.setState(OnOffType.ON);
 
+        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
             }
 
@@ -1069,7 +1021,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public void receive(@NonNull Event e) {
+            public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
                 if (e.getTopic().contains("myLampItem5")) {
                     itemEvent = e;
