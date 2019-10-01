@@ -15,12 +15,12 @@ package org.eclipse.smarthome.model.script.engine;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.items.Item;
@@ -41,8 +41,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
-
+/**
+ *
+ * @author Henning Treu - Initial contribution
+ */
 public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "Switch1";
@@ -76,7 +78,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                return Lists.newArrayList(new SwitchItem(ITEM_NAME),
+                return Arrays.asList(new SwitchItem(ITEM_NAME),
                         createNumberItem(NUMBER_ITEM_TEMPERATURE, Temperature.class),
                         createNumberItem(NUMBER_ITEM_LENGTH, Length.class), new NumberItem(NUMBER_ITEM_DECIMAL));
             }
@@ -345,7 +347,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         assertEquals("\\", runScript("return \"\\\\\""));
     }
 
-    private Item createNumberItem(String numberItemName, Class<@NonNull ?> dimension) {
+    private Item createNumberItem(String numberItemName, Class<?> dimension) {
         return new NumberItem("Number:" + dimension.getSimpleName(), numberItemName);
     }
 
