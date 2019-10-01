@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.events.Event;
@@ -62,10 +62,10 @@ import org.slf4j.LoggerFactory;
  */
 public class RuntimeRuleTest extends JavaOSGiTest {
 
-    final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
-    VolatileStorageService volatileStorageService = new VolatileStorageService();
-    RuleRegistry ruleRegistry;
-    RuleManager ruleEngine;
+    private final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
+    private VolatileStorageService volatileStorageService = new VolatileStorageService();
+    private RuleRegistry ruleRegistry;
+    private RuleManager ruleEngine;
 
     public RuntimeRuleTest() {
     }
@@ -206,6 +206,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         });
     }
 
+    @NonNullByDefault
     class TestItemProvider implements ItemProvider {
         private final Collection<Item> items;
 
@@ -219,11 +220,11 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         }
 
         @Override
-        public void addProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+        public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
         }
 
         @Override
-        public void removeProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+        public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
         }
     }
 

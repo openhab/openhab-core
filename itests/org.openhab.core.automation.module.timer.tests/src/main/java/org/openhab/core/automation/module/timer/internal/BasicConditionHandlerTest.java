@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.events.Event;
@@ -66,11 +66,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
-    final Logger logger = LoggerFactory.getLogger(TimeOfDayConditionHandlerTest.class);
-    VolatileStorageService volatileStorageService = new VolatileStorageService();
-    RuleRegistry ruleRegistry;
-    RuleManager ruleEngine;
-    Event itemEvent = null;
+    private final Logger logger = LoggerFactory.getLogger(BasicConditionHandlerTest.class);
+    private VolatileStorageService volatileStorageService = new VolatileStorageService();
+    private RuleRegistry ruleRegistry;
+    private RuleManager ruleEngine;
+    private Event itemEvent = null;
 
     /**
      * This executes before every test and before the
@@ -79,13 +79,14 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
      */
     @Before
     public void beforeBase() {
+        @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {
             @Override
-            public void addProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
 
             @Override
-            public @NonNull Collection<@NonNull Item> getAll() {
+            public Collection<Item> getAll() {
                 List<Item> items = new ArrayList<>();
                 items.add(new SwitchItem("TriggeredItem"));
                 items.add(new SwitchItem("SwitchedItem"));
@@ -93,7 +94,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
             }
 
             @Override
-            public void removeProviderChangeListener(@NonNull ProviderChangeListener<@NonNull Item> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
 
         };

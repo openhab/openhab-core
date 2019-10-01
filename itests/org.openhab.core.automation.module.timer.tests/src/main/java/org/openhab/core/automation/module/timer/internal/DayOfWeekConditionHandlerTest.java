@@ -27,6 +27,8 @@ import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ModuleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This tests the dayOfWeek Condition.
@@ -36,9 +38,11 @@ import org.openhab.core.automation.util.ModuleBuilder;
  *
  */
 public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
-    Calendar cal = Calendar.getInstance();
-    SimpleDateFormat sdf = new SimpleDateFormat("EEE", Locale.ENGLISH);
-    String dayOfWeek = sdf.format(cal.getTime()).toUpperCase();
+
+    private final Logger logger = LoggerFactory.getLogger(DayOfWeekConditionHandlerTest.class);
+    private Calendar cal = Calendar.getInstance();
+    private SimpleDateFormat sdf = new SimpleDateFormat("EEE", Locale.ENGLISH);
+    private String dayOfWeek = sdf.format(cal.getTime()).toUpperCase();
 
     public DayOfWeekConditionHandlerTest() {
         logger.info("Today is {}", dayOfWeek);

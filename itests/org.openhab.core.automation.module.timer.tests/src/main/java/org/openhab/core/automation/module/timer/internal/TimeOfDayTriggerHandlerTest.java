@@ -22,8 +22,6 @@ import org.junit.Test;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * this tests the timeOfDay trigger
@@ -33,9 +31,8 @@ import org.slf4j.LoggerFactory;
  */
 public class TimeOfDayTriggerHandlerTest extends JavaOSGiTest {
 
-    final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
-    VolatileStorageService volatileStorageService = new VolatileStorageService();
-    RuleRegistry ruleRegistry;
+    private VolatileStorageService volatileStorageService = new VolatileStorageService();
+    private RuleRegistry ruleRegistry;
 
     public TimeOfDayTriggerHandlerTest() {
     }

@@ -20,10 +20,10 @@
     <module>org.openhab.core.audio.tests</module>
     <module>org.openhab.core.auth.oauth2client.tests</module>
     <module>org.openhab.core.automation.tests</module>
-    <!-- <module>org.openhab.core.automation.module.core.tests</module> -->
-    <!-- <module>org.openhab.core.automation.module.timer.tests</module> -->
-    <!-- <module>org.openhab.core.automation.module.script.defaultscope.tests</module> -->
-    <!-- <module>org.openhab.core.automation.module.script.tests</module> -->
+    <module>org.openhab.core.automation.module.core.tests</module>
+    <module>org.openhab.core.automation.module.timer.tests</module>
+    <module>org.openhab.core.automation.module.script.defaultscope.tests</module>
+    <module>org.openhab.core.automation.module.script.tests</module>
     <!-- <module>org.openhab.core.automation.integration.tests</module> -->
     <module>org.openhab.core.binding.xml.tests</module>
     <module>org.openhab.core.compat1x.tests</module>
