@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventFilter;
@@ -41,25 +41,26 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author Kai Kreuzer - Initial contribution and API.
+ * @author Kai Kreuzer - Initial contribution
  */
 public class RuleExecutionTest extends JavaOSGiTest {
 
-    private final static String TESTMODEL_NAME = "testModel.rules";
+    private static final String TESTMODEL_NAME = "testModel.rules";
     private ModelRepository modelRepository;
     private ItemRegistry itemRegistry;
     private EventPublisher eventPublisher;
     private Event resultEvent;
 
+    @NonNullByDefault
     private final EventSubscriber eventSubscriber = new EventSubscriber() {
 
         @Override
-        public void receive(@NonNull Event e) {
+        public void receive(Event e) {
             resultEvent = e;
         }
 
         @Override
-        public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+        public Set<String> getSubscribedEventTypes() {
             return Collections.singleton(ItemCommandEvent.TYPE);
         }
 
@@ -85,7 +86,7 @@ public class RuleExecutionTest extends JavaOSGiTest {
         GenericItem resultItem = factory.createItem("Switch", "TestResult");
         GenericItem groupItem = new GroupItem("TestGroup");
         if (switchItem == null || resultItem == null) {
-            throw new NullPointerException();
+            throw new AssertionError("switchItem or resultItem is null");
         }
         switchItem.addGroupName(groupItem.getName());
         itemRegistry.add(switchItem);
@@ -146,6 +147,7 @@ public class RuleExecutionTest extends JavaOSGiTest {
             throws InterruptedException {
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         RuleEngineImpl ruleEngine = (RuleEngineImpl) getService(RuleEngine.class);
+        assertNotNull(ruleEngine);
         waitForAssert(() -> {
             assertFalse(ruleEngine.starting);
             Iterable<Rule> rules = ruleEngine.getTriggerManager().getRules(triggerType);
