@@ -11,6 +11,14 @@
 
   <artifactId>org.openhab.core.model.item.tests</artifactId>
 
-  <name>openHAB Core :: Integration Tests :: Model Items Tests</name>
+  <name>openHAB Core :: Integration Tests :: Model Item Tests</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.compile-model</artifactId>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
 
 </project>
