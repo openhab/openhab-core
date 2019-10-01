@@ -65,17 +65,17 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
 
     private final ChannelTypeRegistry channelTypeRegistry;
 
-    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream
-            .of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
-                    RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE, RAWROCKER_NEXT_PREVIOUS_TYPE,
-                    RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE, RAWROCKER_REWIND_FASTFORWARD_TYPE,
-                    RAWROCKER_STOP_MOVE_TYPE, RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE)
-            .collect(Collectors.toSet());
+    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream.of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE,
+            RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_SWITCH_TYPE,
+            RAWROCKER_DIMMER_TYPE, RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE,
+            RAWROCKER_REWIND_FASTFORWARD_TYPE, RAWROCKER_STOP_MOVE_TYPE, RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_CHANGE_TYPE,
+            TIMESTAMP_UPDATE_TYPE, FACE_RECOGNITION_TYPE).collect(Collectors.toSet());
 
     private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream.of(DEFAULT, FOLLOW, OFFSET,
             RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER,
             RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD,
-            RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE).collect(Collectors.toSet());
+            RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE, FACE_RECOGNITION)
+            .collect(Collectors.toSet());
 
     private final Map<LocalizedKey, @Nullable ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
 
@@ -124,6 +124,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new TimestampChangeProfile(callback);
         } else if (TIMESTAMP_UPDATE.equals(profileTypeUID)) {
             return new TimestampUpdateProfile(callback);
+        } else if (FACE_RECOGNITION.equals(profileTypeUID)) {
+            return new FaceRecognitionProfile(callback);
         } else {
             return null;
         }
@@ -207,18 +209,12 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         }
 
         ProfileType localizedProfileType = localize(bundle, profileType, locale);
-        if (localizedProfileType != null) {
-            localizedProfileTypeCache.put(localizedKey, localizedProfileType);
-            return localizedProfileType;
-        } else {
-            return profileType;
-        }
+
+        localizedProfileTypeCache.put(localizedKey, localizedProfileType);
+        return localizedProfileType;
     }
 
-    private @Nullable ProfileType localize(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
-        if (profileTypeI18nLocalizationService == null) {
-            return null;
-        }
+    private ProfileType localize(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
         return profileTypeI18nLocalizationService.createLocalizedProfileType(bundle, profileType, locale);
     }
 
