@@ -186,8 +186,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public AccessTokenResponse getAccessTokenResponseByAuthorizationCode(String authorizationCode, String redirectURI)
-            throws OAuthException, IOException, OAuthResponseException {
+    public AccessTokenResponse getAccessTokenResponseByAuthorizationCode(String authorizationCode,
+            @Nullable String redirectURI) throws OAuthException, IOException, OAuthResponseException {
 
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
