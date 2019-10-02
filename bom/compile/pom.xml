@@ -16,7 +16,7 @@
   <description>The dependencies that are used to compile the core bundles</description>
 
   <properties>
-    <jetty.version>9.3.25.v20180904</jetty.version>
+    <jetty.version>9.4.11.v20180605</jetty.version>
   </properties>
 
   <dependencies>
