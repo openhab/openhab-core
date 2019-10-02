@@ -12,7 +12,6 @@
  */
 package org.eclipse.smarthome.core.thing.internal.firmware;
 
-import static org.eclipse.smarthome.core.thing.firmware.Constants.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +50,11 @@ import org.osgi.framework.Bundle;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 public final class ProgressCallbackTest {
+
+    private static final String BINDING_ID = "simpleBinding";
+    private static final String THING_TYPE_ID1 = "simpleThingType1";
+    private static final ThingTypeUID THING_TYPE_UID1 = new ThingTypeUID(BINDING_ID, THING_TYPE_ID1);
+    private static final String THING1_ID = "simpleThing1";
 
     private ProgressCallbackImpl sut;
     private List<Event> postedEvents;
