@@ -68,7 +68,7 @@ import tec.uom.se.unit.Units;
 /**
  * @author Stefan Triller - Initial contribution
  */
-public class GroupItemTest extends JavaOSGiTest {
+public class GroupItemOSGiTest extends JavaOSGiTest {
 
     /** Time to sleep when a file is created/modified/deleted, so the event can be handled */
     private final static int WAIT_EVENT_TO_BE_HANDLED = 1000;
