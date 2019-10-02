@@ -12,7 +12,6 @@
  */
 package org.eclipse.smarthome.core.thing.xml.test;
 
-import java.io.File;
 import java.net.URL;
 
 import org.eclipse.smarthome.core.thing.xml.internal.ThingDescriptionList;
@@ -31,8 +30,7 @@ public class Example {
     @SuppressWarnings("unchecked")
     @Test
     public void test() throws Exception {
-        File file = new File("./example/example.xml");
-        URL channelsURL = file.toURI().toURL();
+        URL channelsURL = Example.class.getClassLoader().getResource("/example/example.xml");
 
         ThingDescriptionReader reader = new ThingDescriptionReader();
         ThingDescriptionList thingList = (ThingDescriptionList) reader.readFromXML(channelsURL);
