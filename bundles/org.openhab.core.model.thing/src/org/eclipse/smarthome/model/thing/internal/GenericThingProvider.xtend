@@ -13,8 +13,8 @@
 package org.eclipse.smarthome.model.thing.internal
 
 import java.util.ArrayList
+import java.util.Arrays
 import java.util.Collection
-import java.util.Collections
 import java.util.HashSet
 import java.util.List
 import java.util.Map
@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry
+import org.eclipse.smarthome.config.core.ConfigUtil
 import org.eclipse.smarthome.config.core.Configuration
 import org.eclipse.smarthome.core.common.registry.AbstractProvider
 import org.eclipse.smarthome.core.i18n.LocaleProvider
@@ -39,6 +40,7 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory
 import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder
 import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder
+import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
 import org.eclipse.smarthome.core.thing.type.ChannelDefinition
 import org.eclipse.smarthome.core.thing.type.ChannelKind
 import org.eclipse.smarthome.core.thing.type.ChannelType
@@ -59,8 +61,6 @@ import org.osgi.service.component.annotations.Component
 import org.osgi.service.component.annotations.Reference
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
-import org.eclipse.smarthome.config.core.ConfigUtil
 
 /**
  * {@link ThingProvider} implementation which computes *.things files.
@@ -411,19 +411,19 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                             ]?.filter [ v |
                                 !v.isEmpty
                             ]?.map [ v |
-                                ConfigUtil.normalizeType(v, it)
+                                ConfigUtil.normalizeDefaultType(it.type, v)
                             ]?.filter [ v |
                                 v !== null
                             ]
                             configuration.put(name, values)
                         } else {
-                            val value = ConfigUtil.normalizeType(^default, it)
+                            val value = ConfigUtil.normalizeDefaultType(it.type, ^default)
                             if (value !== null) {
-                                configuration.put(name, Collections.singletonList(value))
+                                configuration.put(name, Arrays.asList(value))
                             }
                         }
                     } else {
-                        val value = ConfigUtil.normalizeType(^default, it)
+                        val value = ConfigUtil.normalizeDefaultType(it.type, ^default)
                         if (value !== null) {
                             configuration.put(name, value);
                         }

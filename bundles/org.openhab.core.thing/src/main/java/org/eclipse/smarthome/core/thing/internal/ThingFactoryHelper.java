@@ -15,7 +15,6 @@ package org.eclipse.smarthome.core.thing.internal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -239,18 +238,18 @@ public class ThingFactoryHelper {
                                         .stream()//
                                         .map(v -> v.trim())//
                                         .filter(v -> !v.isEmpty())//
-                                        .map(v -> ConfigUtil.normalizeType(v, parameter))//
+                                        .map(v -> ConfigUtil.normalizeDefaultType(parameter.getType(), v))//
                                         .filter(v -> v != null)//
                                         .collect(Collectors.toList());
                                 configuration.put(parameter.getName(), values);
                             } else {
-                                Object value = ConfigUtil.normalizeType(defaultValue, parameter);
+                                Object value = ConfigUtil.normalizeDefaultType(parameter.getType(), defaultValue);
                                 if (value != null) {
-                                    configuration.put(parameter.getName(), Collections.singletonList(value));
+                                    configuration.put(parameter.getName(), Arrays.asList(value));
                                 }
                             }
                         } else {
-                            Object value = ConfigUtil.normalizeType(defaultValue, parameter);
+                            Object value = ConfigUtil.normalizeDefaultType(parameter.getType(), defaultValue);
                             if (value != null) {
                                 configuration.put(parameter.getName(), value);
                             }

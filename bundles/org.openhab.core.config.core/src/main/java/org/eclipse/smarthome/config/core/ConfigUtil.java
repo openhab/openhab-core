@@ -22,9 +22,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.eclipse.smarthome.config.core.internal.normalization.Normalizer;
 import org.eclipse.smarthome.config.core.internal.normalization.NormalizerFactory;
 import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
+import org.slf4j.LoggerFactory;
 
 /**
  * The configuration admin service provides us with a map of key->values. Values can be any
@@ -39,6 +41,37 @@ import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
  * @author Thomas Höfer - Minor changes for type normalization based on config description
  */
 public class ConfigUtil {
+    /**
+     * Maps the provided (default) value of the given {@link Type} to the corresponding Java type.
+     *
+     * In case the provided value is supposed to be a number and cannot be converted into the target type correctly,
+     * this method will return <code>null</code> while logging a warning.
+     *
+     * @param parameterType the {@link Type} of the value
+     * @param defaultValue the value that should be converted
+     * @return the given value as the corresponding Java type or <code>null</code> if the value could not be converted
+     */
+    public static @Nullable Object normalizeDefaultType(Type parameterType, String defaultValue) {
+        try {
+            switch (parameterType) {
+                case TEXT:
+                    return defaultValue;
+                case BOOLEAN:
+                    return Boolean.parseBoolean(defaultValue);
+                case INTEGER:
+                    return new BigDecimal(defaultValue);
+                case DECIMAL:
+                    return new BigDecimal(defaultValue);
+                default:
+                    return null;
+            }
+        } catch (NumberFormatException e) {
+            LoggerFactory.getLogger(ConfigUtil.class).warn("Could not parse default value '{}' as type '{}': {}",
+                    defaultValue, parameterType, e.getMessage(), e);
+            return null;
+        }
+    }
+
     /**
      * Normalizes the types to the ones allowed for configurations.
      *
