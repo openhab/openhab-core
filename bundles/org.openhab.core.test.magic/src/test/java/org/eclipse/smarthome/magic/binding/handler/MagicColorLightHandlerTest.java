@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding;
+package org.eclipse.smarthome.magic.binding.handler;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.magic.binding.handler.MagicDimmableLightHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +33,7 @@ import org.mockito.Mock;
  *
  * @author Henning Treu - Initial contribution
  */
-public class MagicDimmableLightHandlerTest {
+public class MagicColorLightHandlerTest {
 
     private ThingHandler handler;
 
@@ -47,7 +46,7 @@ public class MagicDimmableLightHandlerTest {
     @Before
     public void setUp() {
         initMocks(this);
-        handler = new MagicDimmableLightHandler(thing);
+        handler = new MagicColorLightHandler(thing);
         handler.setCallback(callback);
     }
 
