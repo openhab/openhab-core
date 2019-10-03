@@ -14,13 +14,10 @@ package org.eclipse.smarthome.core.thing.internal;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.config.core.ConfigUtil;
 import org.eclipse.smarthome.config.core.Configuration;
@@ -53,8 +50,6 @@ import org.slf4j.LoggerFactory;
 public class ThingFactoryHelper {
 
     private static Logger logger = LoggerFactory.getLogger(ThingFactoryHelper.class);
-
-    private static final String DEFAULT_LIST_DELIMITER = ",";
 
     /**
      * Create {@link Channel} instances for the given Thing.
@@ -196,67 +191,36 @@ public class ThingFactoryHelper {
     /**
      * Apply the {@link ThingType}'s default values to the given {@link Configuration}.
      *
-     * @param configuration the {@link Configuration} where the default values should be added (may be null,
-     *            but method won't have any effect then)
+     * @param configuration the {@link Configuration} where the default values should be added (must not be null)
      * @param thingType the {@link ThingType} where to look for the default values (must not be null)
      * @param configDescriptionRegistry the {@link ConfigDescriptionRegistry} to use (may be null, but method won't have
      *            any effect then)
      */
     public static void applyDefaultConfiguration(Configuration configuration, ThingType thingType,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
-        // Set default values to thing configuration
-        applyDefaultConfiguration(configDescriptionRegistry, thingType.getConfigDescriptionURI(), configuration);
+            @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
+        URI configDescriptionURI = thingType.getConfigDescriptionURI();
+        if (configDescriptionURI != null && configDescriptionRegistry != null) {
+            // Set default values to thing configuration
+            ConfigUtil.applyDefaultConfiguration(configuration,
+                    configDescriptionRegistry.getConfigDescription(configDescriptionURI));
+        }
     }
 
     /**
      * Apply the {@link ChannelType}'s default values to the given {@link Configuration}.
      *
-     * @param configuration the {@link Configuration} where the default values should be added (may be null,
-     *            but method won't have any effect then)
+     * @param configuration the {@link Configuration} where the default values should be added (must not be null)
      * @param channelType the {@link ChannelType} where to look for the default values (must not be null)
      * @param configDescriptionRegistry the {@link ConfigDescriptionRegistry} to use (may be null, but method won't have
      *            any effect then)
      */
     public static void applyDefaultConfiguration(Configuration configuration, ChannelType channelType,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
-        // Set default values to channel configuration
-        applyDefaultConfiguration(configDescriptionRegistry, channelType.getConfigDescriptionURI(), configuration);
-    }
-
-    private static void applyDefaultConfiguration(ConfigDescriptionRegistry configDescriptionRegistry,
-            URI configDescriptionURI, Configuration configuration) {
-        if (configDescriptionRegistry != null && configDescriptionURI != null && configuration != null) {
-            ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
-            if (configDescription != null) {
-                for (ConfigDescriptionParameter parameter : configDescription.getParameters()) {
-                    String defaultValue = parameter.getDefault();
-                    if (defaultValue != null && configuration.get(parameter.getName()) == null) {
-                        if (parameter.isMultiple()) {
-                            if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                                List<Object> values = Arrays.asList(defaultValue //
-                                        .split(DEFAULT_LIST_DELIMITER))//
-                                        .stream()//
-                                        .map(v -> v.trim())//
-                                        .filter(v -> !v.isEmpty())//
-                                        .map(v -> ConfigUtil.normalizeDefaultType(parameter.getType(), v))//
-                                        .filter(v -> v != null)//
-                                        .collect(Collectors.toList());
-                                configuration.put(parameter.getName(), values);
-                            } else {
-                                Object value = ConfigUtil.normalizeDefaultType(parameter.getType(), defaultValue);
-                                if (value != null) {
-                                    configuration.put(parameter.getName(), Arrays.asList(value));
-                                }
-                            }
-                        } else {
-                            Object value = ConfigUtil.normalizeDefaultType(parameter.getType(), defaultValue);
-                            if (value != null) {
-                                configuration.put(parameter.getName(), value);
-                            }
-                        }
-                    }
-                }
-            }
+            @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
+        URI configDescriptionURI = channelType.getConfigDescriptionURI();
+        if (configDescriptionURI != null && configDescriptionRegistry != null) {
+            // Set default values to channel configuration
+            ConfigUtil.applyDefaultConfiguration(configuration,
+                    configDescriptionRegistry.getConfigDescription(configDescriptionURI));
         }
     }
 }

@@ -391,8 +391,10 @@ public class ThingManagerImpl
                     ((ThingImpl) thing).setChannels(channels);
 
                     // Set the given configuration
-                    ThingFactoryHelper.applyDefaultConfiguration(configuration, thingType, configDescriptionRegistry);
-                    ((ThingImpl) thing).setConfiguration(configuration);
+                    Configuration editConfiguration = configuration != null ? configuration : new Configuration();
+                    ThingFactoryHelper.applyDefaultConfiguration(editConfiguration, thingType,
+                            configDescriptionRegistry);
+                    ((ThingImpl) thing).setConfiguration(editConfiguration);
 
                     // Set the new properties (keeping old properties, unless they have the same name as a new property)
                     for (Entry<String, String> entry : thingType.getProperties().entrySet()) {
@@ -540,7 +542,7 @@ public class ThingManagerImpl
         return null;
     }
 
-    private ThingType getThingType(Thing thing) {
+    private @Nullable ThingType getThingType(Thing thing) {
         return thingTypeRegistry.getThingType(thing.getThingTypeUID());
     }
 
@@ -650,7 +652,10 @@ public class ThingManagerImpl
                 }
             }
             ThingType thingType = getThingType(thing);
-            applyDefaultConfiguration(thing, thingType);
+            if (thingType != null) {
+                ThingFactoryHelper.applyDefaultConfiguration(thing.getConfiguration(), thingType,
+                        configDescriptionRegistry);
+            }
 
             if (isInitializable(thing, thingType)) {
                 setThingStatus(thing, buildStatusInfo(ThingStatus.INITIALIZING, ThingStatusDetail.NONE));
@@ -662,13 +667,6 @@ public class ThingManagerImpl
             }
         } finally {
             lock.unlock();
-        }
-    }
-
-    private void applyDefaultConfiguration(Thing thing, ThingType thingType) {
-        if (thingType != null) {
-            ThingFactoryHelper.applyDefaultConfiguration(thing.getConfiguration(), thingType,
-                    configDescriptionRegistry);
         }
     }
 

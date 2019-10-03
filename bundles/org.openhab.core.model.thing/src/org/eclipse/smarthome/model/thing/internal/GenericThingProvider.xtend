@@ -13,7 +13,6 @@
 package org.eclipse.smarthome.model.thing.internal
 
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.Collection
 import java.util.HashSet
 import java.util.List
@@ -43,7 +42,6 @@ import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder
 import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
 import org.eclipse.smarthome.core.thing.type.ChannelDefinition
 import org.eclipse.smarthome.core.thing.type.ChannelKind
-import org.eclipse.smarthome.core.thing.type.ChannelType
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry
 import org.eclipse.smarthome.core.thing.type.ChannelTypeUID
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry
@@ -77,7 +75,6 @@ import org.slf4j.LoggerFactory
 @Component(immediate=true, service=ThingProvider)
 class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
 
-    private static final String DEFAULT_LIST_DELIMITER = ",";
     private static final String XML_THING_TYPE = "esh.xmlThingTypes";
 
     private LocaleProvider localeProvider
@@ -362,7 +359,11 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                             label = resolvedChannelType.label
                         }
                         autoUpdatePolicy = resolvedChannelType.autoUpdatePolicy
-                        applyDefaultConfiguration(configuration, resolvedChannelType)
+                        if (resolvedChannelType.configDescriptionURI !== null) {
+                            ConfigUtil.applyDefaultConfiguration(configuration,
+                                configDescriptionRegistry.getConfigDescription(
+                                resolvedChannelType.configDescriptionURI))
+                        }
                     } else {
                         logger.error("Channel type {} could not be resolved.", channelTypeUID.asString)
                     }
@@ -394,43 +395,6 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
             }
         ]
         channels
-    }
-
-    def private applyDefaultConfiguration(Configuration configuration, ChannelType channelType) {
-        // Set default values to channel configuration
-        if (configDescriptionRegistry !== null && configuration !== null && channelType.configDescriptionURI !== null) {
-            val configDescription = configDescriptionRegistry.getConfigDescription(channelType.configDescriptionURI)
-            if (configDescription !== null) {
-                configDescription.parameters.filter [
-                    ^default !== null && configuration.get(name) === null
-                ].forEach [
-                    if (it.isMultiple) {
-                        if (^default.contains(DEFAULT_LIST_DELIMITER)) {
-                            val Iterable<Object> values = ^default.split(DEFAULT_LIST_DELIMITER).map [ v |
-                                v.trim
-                            ]?.filter [ v |
-                                !v.isEmpty
-                            ]?.map [ v |
-                                ConfigUtil.normalizeDefaultType(it.type, v)
-                            ]?.filter [ v |
-                                v !== null
-                            ]
-                            configuration.put(name, values)
-                        } else {
-                            val value = ConfigUtil.normalizeDefaultType(it.type, ^default)
-                            if (value !== null) {
-                                configuration.put(name, Arrays.asList(value))
-                            }
-                        }
-                    } else {
-                        val value = ConfigUtil.normalizeDefaultType(it.type, ^default)
-                        if (value !== null) {
-                            configuration.put(name, value);
-                        }
-                    }
-                ]
-            }
-        }
     }
 
     def private createConfiguration(ModelPropertyContainer propertyContainer) {
