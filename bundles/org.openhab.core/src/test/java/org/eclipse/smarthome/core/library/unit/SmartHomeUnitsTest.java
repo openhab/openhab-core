@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.types;
+package org.eclipse.smarthome.core.library.unit;
 
 import static org.eclipse.smarthome.core.library.unit.MetricPrefix.HECTO;
 import static org.hamcrest.CoreMatchers.is;
@@ -30,10 +30,6 @@ import org.eclipse.smarthome.core.library.dimension.ArealDensity;
 import org.eclipse.smarthome.core.library.dimension.Density;
 import org.eclipse.smarthome.core.library.dimension.Intensity;
 import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.junit.Test;
 
 import tec.uom.se.quantity.Quantities;

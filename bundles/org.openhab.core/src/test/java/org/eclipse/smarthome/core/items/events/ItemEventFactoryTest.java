@@ -10,19 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.events;
+package org.eclipse.smarthome.core.items.events;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
+import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.dto.ItemDTOMapper;
-import org.eclipse.smarthome.core.items.events.GroupItemStateChangedEvent;
-import org.eclipse.smarthome.core.items.events.ItemAddedEvent;
-import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.items.events.ItemStateEvent;
-import org.eclipse.smarthome.core.items.events.ItemStatePredictedEvent;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.library.items.SwitchItem;
 import org.eclipse.smarthome.core.library.types.OnOffType;
