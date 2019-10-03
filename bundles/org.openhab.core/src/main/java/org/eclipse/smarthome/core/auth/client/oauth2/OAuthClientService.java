@@ -152,8 +152,8 @@ public interface OAuthClientService extends AutoCloseable {
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.3">Access Token Request - rfc6749 section-4.1.3</a>
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2">Error Response - rfc6749 section-5.2</a>
      */
-    AccessTokenResponse getAccessTokenResponseByAuthorizationCode(String authorizationCode, String redirectURI)
-            throws OAuthException, IOException, OAuthResponseException;
+    AccessTokenResponse getAccessTokenResponseByAuthorizationCode(String authorizationCode,
+            @Nullable String redirectURI) throws OAuthException, IOException, OAuthResponseException;
 
     /**
      * Use case 2 - Resource Owner Password Credentials

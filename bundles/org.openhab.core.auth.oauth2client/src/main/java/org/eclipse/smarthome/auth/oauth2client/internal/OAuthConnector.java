@@ -207,7 +207,7 @@ public class OAuthConnector {
      *             Response
      */
     public AccessTokenResponse grantTypeAuthorizationCode(String tokenUrl, String authorizationCode, String clientId,
-            @Nullable String clientSecret, String redirectUrl, boolean supportsBasicAuth)
+            @Nullable String clientSecret, @Nullable String redirectUrl, boolean supportsBasicAuth)
             throws OAuthResponseException, OAuthException, IOException {
         HttpClient httpClient = null;
         try {
