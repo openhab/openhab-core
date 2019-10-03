@@ -10,12 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.test;
+package org.eclipse.smarthome.core.thing.xml.internal;
 
 import java.net.URL;
 
-import org.eclipse.smarthome.core.thing.xml.internal.ThingDescriptionList;
-import org.eclipse.smarthome.core.thing.xml.internal.ThingDescriptionReader;
 import org.junit.Test;
 
 /**
