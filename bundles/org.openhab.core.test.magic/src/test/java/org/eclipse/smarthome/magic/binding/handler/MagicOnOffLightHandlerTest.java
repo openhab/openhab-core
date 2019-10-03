@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding;
+package org.eclipse.smarthome.magic.binding.handler;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.eclipse.smarthome.magic.binding.handler.MagicOnOffLightHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +29,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 /**
- * Tests cases for {@link MagicONOffLightHandler}. The tests provide mocks for supporting entities using Mockito.
+ * Tests cases for {@link MagicOnOffLightHandler}. The tests provide mocks for supporting entities using Mockito.
  *
  * @author Henning Treu - Initial contribution
  */

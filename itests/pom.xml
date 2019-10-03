@@ -35,7 +35,6 @@
     <module>org.openhab.core.io.http.tests</module>
     <module>org.openhab.core.io.net.tests</module>
     <module>org.openhab.core.io.rest.core.tests</module>
-    <module>org.openhab.core.magic.tests</module>
     <module>org.openhab.core.model.core.tests</module>
     <module>org.openhab.core.model.item.tests</module>
     <module>org.openhab.core.model.persistence.tests</module>
