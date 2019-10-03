@@ -37,40 +37,40 @@ public class ThingStatusInfoBuilderTest {
 
     @Test
     public void testThingStatusInfoBuilderStatus() {
-        ThingStatusInfo thigStatusInfo = builder.build();
+        ThingStatusInfo thingStatusInfo = builder.build();
 
-        assertThat(thigStatusInfo.getStatus(), is(ThingStatus.ONLINE));
-        assertThat(thigStatusInfo.getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(thigStatusInfo.getDescription(), is(nullValue()));
+        assertThat(thingStatusInfo.getStatus(), is(ThingStatus.ONLINE));
+        assertThat(thingStatusInfo.getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(thingStatusInfo.getDescription(), is(nullValue()));
     }
 
     @Test
     public void testThingStatusInfoBuilderStatusDetails() {
-        ThingStatusInfo thigStatusInfo = builder.withStatusDetail(ThingStatusDetail.DISABLED).build();
+        ThingStatusInfo thingStatusInfo = builder.withStatusDetail(ThingStatusDetail.DISABLED).build();
 
-        assertThat(thigStatusInfo.getStatus(), is(ThingStatus.ONLINE));
-        assertThat(thigStatusInfo.getStatusDetail(), is(ThingStatusDetail.DISABLED));
-        assertThat(thigStatusInfo.getDescription(), is(nullValue()));
+        assertThat(thingStatusInfo.getStatus(), is(ThingStatus.ONLINE));
+        assertThat(thingStatusInfo.getStatusDetail(), is(ThingStatusDetail.DISABLED));
+        assertThat(thingStatusInfo.getDescription(), is(nullValue()));
     }
 
     @Test
     public void testThingStatusInfoBuilderStatusDescription() {
-        ThingStatusInfo thigStatusInfo = builder.withDescription("My test description").build();
+        ThingStatusInfo thingStatusInfo = builder.withDescription("My test description").build();
 
-        assertThat(thigStatusInfo.getStatus(), is(ThingStatus.ONLINE));
-        assertThat(thigStatusInfo.getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(thigStatusInfo.getDescription(), is("My test description"));
+        assertThat(thingStatusInfo.getStatus(), is(ThingStatus.ONLINE));
+        assertThat(thingStatusInfo.getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(thingStatusInfo.getDescription(), is("My test description"));
     }
 
     @Test
     public void subsequentBuildsCreateIndependentThingStatusInfos() {
-        ThingStatusInfo thigStatusInfo1 = builder.build();
-        ThingStatusInfo thigStatusInfo2 = builder.withStatusDetail(ThingStatusDetail.DISABLED)
+        ThingStatusInfo thingStatusInfo1 = builder.build();
+        ThingStatusInfo thingStatusInfo2 = builder.withStatusDetail(ThingStatusDetail.DISABLED)
                 .withDescription("My test description").build();
 
-        assertThat(thigStatusInfo2.getStatus(), is(thigStatusInfo1.getStatus()));
-        assertThat(thigStatusInfo2.getStatusDetail(), is(not(thigStatusInfo1.getStatusDetail())));
-        assertThat(thigStatusInfo2.getDescription(), is(not(thigStatusInfo1.getDescription())));
+        assertThat(thingStatusInfo2.getStatus(), is(thingStatusInfo1.getStatus()));
+        assertThat(thingStatusInfo2.getStatusDetail(), is(not(thingStatusInfo1.getStatusDetail())));
+        assertThat(thingStatusInfo2.getDescription(), is(not(thingStatusInfo1.getDescription())));
     }
 
 }
