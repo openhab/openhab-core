@@ -10,14 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.types;
+package org.eclipse.smarthome.core.library.dimension;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import javax.measure.Unit;
 
-import org.eclipse.smarthome.core.library.dimension.VolumetricFlowRate;
 import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.eclipse.smarthome.core.types.util.UnitUtils;
 import org.junit.Test;

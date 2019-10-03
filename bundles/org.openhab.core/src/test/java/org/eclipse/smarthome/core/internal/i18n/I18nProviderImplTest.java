@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -59,11 +58,8 @@ public class I18nProviderImplTest {
 
     private static final String TIMEZONE_GMT9 = "Etc/GMT-9";
 
-    // LocationProvider translationProvider;
-    I18nProviderImpl i18nProviderImpl;
-    ConfigurationAdmin configAdmin;
-
-    Dictionary<String, Object> initialConfig = new Hashtable<>();
+    private I18nProviderImpl i18nProviderImpl;
+    private Dictionary<String, Object> initialConfig = new Hashtable<>();
 
     @Mock
     private ComponentContext componentContext;
