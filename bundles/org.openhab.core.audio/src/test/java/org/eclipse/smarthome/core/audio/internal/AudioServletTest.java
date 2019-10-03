@@ -33,7 +33,7 @@ import org.junit.Test;
  * @author Petar Valchev - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
-public class AudioServletTest extends AbstractAudioServeltTest {
+public class AudioServletTest extends AbstractAudioServletTest {
 
     private final String MEDIA_TYPE_AUDIO_WAV = "audio/wav";
     private final String MEDIA_TYPE_AUDIO_OGG = "audio/ogg";

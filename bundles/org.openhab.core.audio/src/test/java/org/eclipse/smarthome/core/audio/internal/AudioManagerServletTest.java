@@ -31,7 +31,7 @@ import org.junit.Test;
  * @author Wouter Born - Migrate tests from Groovy to Java
  * @author Henning Treu - extract servlet tests
  */
-public class AudioManagerServletTest extends AbstractAudioServeltTest {
+public class AudioManagerServletTest extends AbstractAudioServletTest {
 
     private AudioManagerImpl audioManager;
 

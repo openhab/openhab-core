@@ -41,7 +41,7 @@ import org.junit.Test;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
-public class AudioConsoleTest extends AbstractAudioServeltTest {
+public class AudioConsoleTest extends AbstractAudioServletTest {
 
     private BundledSoundFileHandler fileHandler;
 

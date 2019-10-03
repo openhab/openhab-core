@@ -37,7 +37,7 @@ import org.junit.Before;
  * @author Henning Treu - Initial contribution
  *
  */
-public abstract class AbstractAudioServeltTest extends JavaTest {
+public abstract class AbstractAudioServletTest extends JavaTest {
 
     protected AudioServlet audioServlet;
 
