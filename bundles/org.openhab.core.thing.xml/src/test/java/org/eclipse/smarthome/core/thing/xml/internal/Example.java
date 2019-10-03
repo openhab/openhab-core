@@ -10,13 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.test;
+package org.eclipse.smarthome.core.thing.xml.internal;
 
-import java.io.File;
 import java.net.URL;
 
-import org.eclipse.smarthome.core.thing.xml.internal.ThingDescriptionList;
-import org.eclipse.smarthome.core.thing.xml.internal.ThingDescriptionReader;
 import org.junit.Test;
 
 /**
@@ -31,8 +28,7 @@ public class Example {
     @SuppressWarnings("unchecked")
     @Test
     public void test() throws Exception {
-        File file = new File("./example/example.xml");
-        URL channelsURL = file.toURI().toURL();
+        URL channelsURL = Example.class.getClassLoader().getResource("/example/example.xml");
 
         ThingDescriptionReader reader = new ThingDescriptionReader();
         ThingDescriptionList thingList = (ThingDescriptionList) reader.readFromXML(channelsURL);
