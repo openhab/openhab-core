@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.icon.internal;
+package org.eclipse.smarthome.ui.icon;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -24,9 +24,6 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.ui.icon.AbstractResourceIconProvider;
-import org.eclipse.smarthome.ui.icon.IconProvider;
-import org.eclipse.smarthome.ui.icon.IconSet;
 import org.eclipse.smarthome.ui.icon.IconSet.Format;
 import org.junit.Before;
 import org.junit.Test;
