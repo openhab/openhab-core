@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * This implementation does neither handle memory leaks (orphaned listener instances) nor blocked listeners. No
  * performance optimizations have been done (synchronization).
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Kai Kreuzer - Refactored API
  * @author Andre Fuechsel - Added removeOlderResults
  * @author Ivaylo Ivanov - Added getMaxScanTimeout
@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * @see DiscoveryServiceRegistry
  * @see DiscoveryListener
  */
-@Component(immediate = true, service = org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry.class)
+@Component(immediate = true, service = DiscoveryServiceRegistry.class)
 @NonNullByDefault
 public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegistry, DiscoveryListener {
 
