@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.util.StringUtil;
@@ -159,7 +158,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public String extractAuthCodeFromAuthResponse(@NonNull String redirectURLwithParams) throws OAuthException {
+    public String extractAuthCodeFromAuthResponse(String redirectURLwithParams) throws OAuthException {
         // parse the redirectURL
         try {
             URL redirectURLObject = new URL(redirectURLwithParams);
