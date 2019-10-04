@@ -34,7 +34,7 @@ import org.openhab.core.automation.RuleRegistry;
  */
 public class RuleRegistryTest extends JavaOSGiTest {
 
-    RuleRegistry ruleRegistry;
+    private RuleRegistry ruleRegistry;
 
     @Before
     public void setup() {
