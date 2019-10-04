@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -76,11 +78,17 @@ import com.google.gson.JsonSyntaxException;
  * Last but not least, a pid can be defined in the first line of a cfg file by prefixing it with "pid:", e.g.
  * "pid: com.acme.smarthome.security".
  *
+ * <p>
+ * The value can be surrounded by square brackets ('[' and ']') and optionally contain value delimiters to be
+ * interpreted as a list of tokens. Default value delimiter is the comma ','. So the following property definition
+ * "property = [This property, has multiple, values]" will result in a collection with three values.
+ *
  * @author Kai Kreuzer - Initial contribution
  * @author Petar Valchev - Added sort by modification time, when configuration files are read
  * @author Ana Dimova - Reduce to a single watch thread for all class instances
  * @author Henning Treu - Delete orphan exclusive configuration from configAdmin
  * @author Stefan Triller - Add support for service contexts
+ * @author Christoph Weitkamp - Added support for value containing a list of configuration options
  */
 @Component(immediate = true, service = ConfigDispatcher.class)
 public class ConfigDispatcher {
@@ -113,6 +121,12 @@ public class ConfigDispatcher {
     private static final String PID_MARKER = "pid:";
 
     private static final String EXCLUSIVE_PID_STORE_FILE = "configdispatcher_pid_list.json";
+
+    private static final String DEFAULT_PID_DELIMITER = ":";
+    private static final String DEFAULT_VALUE_DELIMITER = "=";
+    private static final String DEFAULT_LIST_STARTING_CHARACTER = "[";
+    private static final String DEFAULT_LIST_ENDING_CHARACTER = "]";
+    private static final String DEFAULT_LIST_DELIMITER = ",";
 
     private ExclusivePIDMap exclusivePIDMap;
 
@@ -382,7 +396,7 @@ public class ConfigDispatcher {
                         : new Properties();
                 configMap.put(configuration, configProperties);
             }
-            if (!parsedLine.value.equals(configProperties.get(parsedLine.property))) {
+            if (parsedLine.value != null && !parsedLine.value.equals(configProperties.get(parsedLine.property))) {
                 configProperties.put(parsedLine.property, parsedLine.value);
                 configsToUpdate.put(configuration, configProperties);
             }
@@ -416,9 +430,9 @@ public class ConfigDispatcher {
         }
 
         String pid = null; // no override of the pid is default
-        String key = StringUtils.substringBefore(trimmedLine, "=");
-        if (key.contains(":")) {
-            pid = StringUtils.substringBefore(key, ":");
+        String key = StringUtils.substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER);
+        if (key.contains(DEFAULT_PID_DELIMITER)) {
+            pid = StringUtils.substringBefore(key, DEFAULT_PID_DELIMITER);
             trimmedLine = trimmedLine.substring(pid.length() + 1);
             pid = pid.trim();
             // PID is not fully qualified, so prefix with namespace
@@ -426,10 +440,23 @@ public class ConfigDispatcher {
                 pid = getServicePidNamespace() + "." + pid;
             }
         }
-        if (!trimmedLine.isEmpty() && trimmedLine.substring(1).contains("=")) {
-            String property = StringUtils.substringBefore(trimmedLine, "=");
-            String value = trimmedLine.substring(property.length() + 1);
-            return new ParseLineResult(pid, property.trim(), value.trim());
+        if (!trimmedLine.isEmpty() && trimmedLine.substring(1).contains(DEFAULT_VALUE_DELIMITER)) {
+            String property = StringUtils.substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER).trim();
+            String value = trimmedLine.substring(property.length() + 1).trim();
+            if (value.startsWith(DEFAULT_LIST_STARTING_CHARACTER) && value.endsWith(DEFAULT_LIST_ENDING_CHARACTER)) {
+                logger.debug("Found list in value '{}'", value);
+                List<String> values = Arrays.asList(value //
+                        .replace(DEFAULT_LIST_STARTING_CHARACTER, "") //
+                        .replace(DEFAULT_LIST_ENDING_CHARACTER, "")//
+                        .split(DEFAULT_LIST_DELIMITER))//
+                        .stream()//
+                        .map(v -> v.trim())//
+                        .filter(v -> !v.isEmpty())//
+                        .collect(Collectors.toList());
+                return new ParseLineResult(pid, property, values);
+            } else {
+                return new ParseLineResult(pid, property, value);
+            }
         } else {
             logger.warn("Could not parse line '{}'", line);
             return new ParseLineResult();
@@ -439,16 +466,17 @@ public class ConfigDispatcher {
     /**
      * Represents a result of parseLine().
      */
+    @NonNullByDefault
     private class ParseLineResult {
-        public String pid;
-        public String property;
-        public String value;
+        public @Nullable String pid;
+        public @Nullable String property;
+        public @Nullable Object value;
 
         public ParseLineResult() {
             this(null, null, null);
         }
 
-        public ParseLineResult(String pid, String property, String value) {
+        public ParseLineResult(@Nullable String pid, @Nullable String property, @Nullable Object value) {
             this.pid = pid;
             this.property = property;
             this.value = value;
