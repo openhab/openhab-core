@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -29,6 +30,13 @@ import org.junit.Test;
  * @author Simon Kaufmann - Initial contribution
  */
 public class ConfigUtilTest {
+
+    private final URI configUri = URI.create("system:ephemeris");
+
+    private final ConfigDescriptionParameterBuilder configDescriptionParameterBuilder1 = ConfigDescriptionParameterBuilder
+            .create("p1", DECIMAL).withMultiple(true).withMultipleLimit(7);
+    private final ConfigDescriptionParameterBuilder configDescriptionParameterBuilder2 = ConfigDescriptionParameterBuilder
+            .create("p2", TEXT).withMultiple(true).withMultipleLimit(7);
 
     @Test
     public void verifyNormalizeDefaultTypeForTextReturnsString() {
@@ -54,6 +62,74 @@ public class ConfigUtilTest {
         assertThat(ConfigUtil.normalizeDefaultType(DECIMAL, "1"), is(BigDecimal.ONE));
         assertThat(ConfigUtil.normalizeDefaultType(DECIMAL, "1.2"), is(new BigDecimal("1.2")));
         assertThat(ConfigUtil.normalizeDefaultType(DECIMAL, "foo"), is(nullValue()));
+    }
+
+    @Test
+    public void verifyApplyDefaultConfigurationReturnsNullIfNotSet() {
+        Configuration configuration = new Configuration();
+        ConfigDescription configDescription = new ConfigDescription(configUri,
+                Collections.singletonList(configDescriptionParameterBuilder2.build()));
+
+        ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
+        assertThat(configuration.get("p2"), is(nullValue()));
+    }
+
+    @Test
+    public void verifyApplyDefaultConfigurationReturnsAListWithASingleValues() {
+        configDescriptionParameterBuilder1.withDefault("2.5");
+
+        Configuration configuration = new Configuration();
+        ConfigDescription configDescription = new ConfigDescription(configUri,
+                Collections.singletonList(configDescriptionParameterBuilder1.build()));
+
+        ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
+        verifyValuesOfConfiguration(configuration.get("p1"), 1, Collections.singletonList(new BigDecimal("2.5")));
+    }
+
+    @Test
+    public void verifyApplyDefaultConfigurationReturnsAListWithMultipleValues() {
+        configDescriptionParameterBuilder1.withDefault("2.3,2.4,2.5");
+
+        Configuration configuration = new Configuration();
+        ConfigDescription configDescription = new ConfigDescription(configUri,
+                Collections.singletonList(configDescriptionParameterBuilder1.build()));
+
+        ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
+        verifyValuesOfConfiguration(configuration.get("p1"), 3,
+                Arrays.asList(new BigDecimal("2.3"), new BigDecimal("2.4"), new BigDecimal("2.5")));
+    }
+
+    @Test
+    public void verifyApplyDefaultConfigurationIgnoresWrongTypes() {
+        configDescriptionParameterBuilder1.withDefault("2.3,2.4,foo,2.5");
+
+        Configuration configuration = new Configuration();
+        ConfigDescription configDescription = new ConfigDescription(configUri,
+                Collections.singletonList(configDescriptionParameterBuilder1.build()));
+
+        ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
+        verifyValuesOfConfiguration(configuration.get("p1"), 3,
+                Arrays.asList(new BigDecimal("2.3"), new BigDecimal("2.4"), new BigDecimal("2.5")));
+    }
+
+    @Test
+    public void verifyApplyDefaultConfigurationReturnsAListWithTrimmedValues() {
+        configDescriptionParameterBuilder2.withDefault("first value,  second value  ,third value,,,");
+
+        Configuration configuration = new Configuration();
+        ConfigDescription configDescription = new ConfigDescription(configUri,
+                Collections.singletonList(configDescriptionParameterBuilder2.build()));
+
+        ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
+        verifyValuesOfConfiguration(configuration.get("p2"), 3,
+                Arrays.asList("first value", "second value", "third value"));
+    }
+
+    private void verifyValuesOfConfiguration(Object subject, int expectedSize, List<?> expectedValues) {
+        assertThat(subject, is(notNullValue()));
+        assertThat(subject, is(instanceOf(List.class)));
+        assertThat(((List<?>) subject).size(), is(expectedSize));
+        assertThat(((List<?>) subject), is(expectedValues));
     }
 
     @Test
