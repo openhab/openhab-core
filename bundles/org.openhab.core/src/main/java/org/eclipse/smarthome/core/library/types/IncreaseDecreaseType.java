@@ -23,7 +23,8 @@ import org.eclipse.smarthome.core.types.PrimitiveType;
 @NonNullByDefault
 public enum IncreaseDecreaseType implements PrimitiveType, Command {
     INCREASE,
-    DECREASE;
+    DECREASE,
+    STOP;
 
     @Override
     public String format(String pattern) {
