@@ -18,13 +18,14 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
+import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
 
 /**
- * The {@link EnrichedConfigDescriptionDTOMapper} is a utility class to map config descriptions into enriched config
- * descriptions data transform objects (DTOs).
+ * The {@link EnrichedConfigDescriptionDTOMapper} is a utility class to map config descriptions into config
+ * descriptions data transform objects (DTOs) containing enriched config descriptions parameters.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
@@ -32,17 +33,16 @@ import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
 public class EnrichedConfigDescriptionDTOMapper extends ConfigDescriptionDTOMapper {
 
     /**
-     * Maps configuration description into enriched configuration description DTO object.
+     * Maps configuration description into configuration description DTO object.
      *
      * @param configDescription the configuration description (not null)
      * @return enriched configuration description DTO object
      */
-    public static EnrichedConfigDescriptionDTO map(ConfigDescription configDescription) {
+    public static ConfigDescriptionDTO map(ConfigDescription configDescription) {
         List<ConfigDescriptionParameterGroupDTO> parameterGroups = mapParameterGroups(
                 configDescription.getParameterGroups());
         List<ConfigDescriptionParameterDTO> parameters = mapEnrichedParameters(configDescription.getParameters());
-        return new EnrichedConfigDescriptionDTO(toDecodedString(configDescription.getUID()), parameters,
-                parameterGroups);
+        return new ConfigDescriptionDTO(toDecodedString(configDescription.getUID()), parameters, parameterGroups);
     }
 
     public static List<ConfigDescriptionParameterDTO> mapEnrichedParameters(

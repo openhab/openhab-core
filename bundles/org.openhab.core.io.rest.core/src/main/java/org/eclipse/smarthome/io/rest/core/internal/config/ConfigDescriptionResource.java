@@ -32,12 +32,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
+import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
 import org.eclipse.smarthome.core.auth.Role;
 import org.eclipse.smarthome.io.rest.JSONResponse;
 import org.eclipse.smarthome.io.rest.LocaleService;
 import org.eclipse.smarthome.io.rest.RESTResource;
 import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
-import org.eclipse.smarthome.io.rest.core.config.EnrichedConfigDescriptionDTO;
 import org.eclipse.smarthome.io.rest.core.config.EnrichedConfigDescriptionDTOMapper;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -82,8 +82,8 @@ public class ConfigDescriptionResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all available config descriptions.", response = EnrichedConfigDescriptionDTO.class, responseContainer = "List")
-    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = EnrichedConfigDescriptionDTO.class, responseContainer = "List"))
+    @ApiOperation(value = "Gets all available config descriptions.", response = ConfigDescriptionDTO.class, responseContainer = "List")
+    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ConfigDescriptionDTO.class, responseContainer = "List"))
     public Response getAll(
             @HeaderParam("Accept-Language") @ApiParam(value = "Accept-Language") @Nullable String language, //
             @QueryParam("scheme") @ApiParam(value = "scheme filter", required = false) @Nullable String scheme) {
@@ -97,8 +97,8 @@ public class ConfigDescriptionResource implements RESTResource {
     @GET
     @Path("/{uri}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets a config description by URI.", response = EnrichedConfigDescriptionDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = EnrichedConfigDescriptionDTO.class),
+    @ApiOperation(value = "Gets a config description by URI.", response = ConfigDescriptionDTO.class)
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ConfigDescriptionDTO.class),
             @ApiResponse(code = 400, message = "Invalid URI syntax"), @ApiResponse(code = 404, message = "Not found") })
     public Response getByURI(
             @HeaderParam("Accept-Language") @ApiParam(value = "Accept-Language") @Nullable String language,

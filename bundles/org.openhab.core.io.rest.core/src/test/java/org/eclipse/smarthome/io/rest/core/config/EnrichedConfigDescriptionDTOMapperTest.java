@@ -22,6 +22,7 @@ import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
+import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
 import org.junit.Test;
 
@@ -41,7 +42,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescription configDescription = new ConfigDescription(CONFIG_URI,
                 Arrays.asList(configDescriptionParameter));
 
-        EnrichedConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
+        ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters.size(), is(1));
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.get(0);
@@ -60,7 +61,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescription configDescription = new ConfigDescription(CONFIG_URI,
                 Arrays.asList(configDescriptionParameter));
 
-        EnrichedConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
+        ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters.size(), is(1));
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.get(0);
