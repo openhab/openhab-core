@@ -5,9 +5,22 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="system:ephemeris">
-		<parameter name="weekendDays" type="text" required="true" multiple="true">
+		<parameter name="dayset-weekend" type="text" required="true" multiple="true">
 			<label>Weekend Days</label>
 			<description>List of usual non workable days.</description>
-		 </parameter>
+			<default>SATURDAY,SUNDAY</default>
+		</parameter>
+		<parameter name="country" type="text">
+			<label>Country</label>
+			<description>Get the holidays for a specific country (e.g. United States of America = "us").</description>
+		</parameter>
+		<parameter name="region" type="text">
+			<label>Region</label>
+			<description>Get the holidays for a specific state (e.g. New York = "ny").</description>
+		</parameter>
+		<parameter name="city" type="text">
+			<label>City</label>
+			<description>Get the holidays for a specific city (e.g. New York City = "nyc").</description>
+		</parameter>
 	</config-description>
 </config-description:config-descriptions>
