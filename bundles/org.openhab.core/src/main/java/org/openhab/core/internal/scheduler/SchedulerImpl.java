@@ -12,10 +12,11 @@
  */
 package org.openhab.core.internal.scheduler;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 import java.util.concurrent.Callable;
@@ -52,10 +53,10 @@ import org.slf4j.LoggerFactory;
 public class SchedulerImpl implements Scheduler {
 
     private static final String SCHEDULER_THREAD_POOL = "scheduler";
+    private static final int ALLOWED_DEVIATION_MILLISECONDS = 2000;
 
     private final Logger logger = LoggerFactory.getLogger(SchedulerImpl.class);
 
-    private final Clock clock = Clock.systemDefaultZone();
     private final ScheduledExecutorService executor = ThreadPoolManager.getScheduledPool(SCHEDULER_THREAD_POOL);
 
     @Override
@@ -66,23 +67,37 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public <T> ScheduledCompletableFuture<T> after(Callable<T> callable, Duration duration) {
-        return afterInternal(new ScheduledCompletableFutureOnce<>(), callable, duration);
+        return afterInternal(new ScheduledCompletableFutureOnce<>(duration), callable);
     }
 
     private <T> ScheduledCompletableFutureOnce<T> afterInternal(ScheduledCompletableFutureOnce<T> deferred,
-            Callable<T> callable, Duration duration) {
+            Callable<T> callable) {
+        final long duration = Math.max(100,
+                deferred.getScheduledTime().minus(currentTimeMillis(), ChronoUnit.MILLIS).toInstant().toEpochMilli());
         final ScheduledFuture<?> future = executor.schedule(() -> {
             try {
-                deferred.complete(callable.call());
+                final long timeLeft = deferred.getDelay(TimeUnit.MILLISECONDS);
+
+                if (timeLeft > ALLOWED_DEVIATION_MILLISECONDS) {
+                    logger.trace("Scheduled task is re-scheduled because the scheduler ran {} milliseconds to early.",
+                            timeLeft);
+                    afterInternal(deferred, callable);
+                } else {
+                    logger.trace("Scheduled task is run now.");
+                    deferred.complete(callable.call());
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
                 logger.warn("Scheduled job failed and stopped", e);
                 deferred.completeExceptionally(e);
             }
-        }, Math.max(0, duration.toMillis()), TimeUnit.MILLISECONDS);
-        deferred.setInstant(duration);
+        }, duration, TimeUnit.MILLISECONDS);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Scheduled a task to run in {} seconds.", TimeUnit.MILLISECONDS.toSeconds(duration));
+        }
         deferred.exceptionally(e -> {
+            logger.trace("Scheduled task stopped with exception ", e);
             if (e instanceof CancellationException) {
                 future.cancel(true);
             }
@@ -99,12 +114,12 @@ public class SchedulerImpl implements Scheduler {
                 runnable.run();
             }
         };
-        final ScheduledCompletableFutureOnce<T> wrappedPromise = new ScheduledCompletableFutureOnce<>();
+        final ScheduledCompletableFutureOnce<T> wrappedPromise = new ScheduledCompletableFutureOnce<>(timeout);
         Callable<T> callable = () -> {
             wrappedPromise.completeExceptionally(new TimeoutException());
             return null;
         };
-        final ScheduledCompletableFutureOnce<T> afterPromise = afterInternal(wrappedPromise, callable, timeout);
+        final ScheduledCompletableFutureOnce<T> afterPromise = afterInternal(wrappedPromise, callable);
         wrappedPromise.exceptionally(e -> {
             if (e instanceof CancellationException) {
                 // Also cancel the scheduled timer if returned completable future is cancelled.
@@ -128,44 +143,47 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public <T> ScheduledCompletableFuture<T> at(Callable<T> callable, Instant instant) {
-        return atInternal(new ScheduledCompletableFutureOnce<>(), callable, instant);
+        return atInternal(
+                new ScheduledCompletableFutureOnce<>(ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())),
+                callable);
     }
 
     private <T> ScheduledCompletableFuture<T> atInternal(ScheduledCompletableFutureOnce<T> deferred,
-            Callable<T> callable, Instant instant) {
-        final long delay = instant.toEpochMilli() - System.currentTimeMillis();
-
-        return afterInternal(deferred, callable, Duration.ofMillis(delay));
+            Callable<T> callable) {
+        return afterInternal(deferred, callable);
     }
 
     @Override
     public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, TemporalAdjuster temporalAdjuster) {
-        final ScheduledCompletableFutureRecurring<T> schedule = new ScheduledCompletableFutureRecurring<>();
+        final ScheduledCompletableFutureRecurring<T> schedule = new ScheduledCompletableFutureRecurring<>(
+                ZonedDateTime.now());
 
         schedule(schedule, runnable, temporalAdjuster);
         return schedule;
     }
 
-    private <T> void schedule(ScheduledCompletableFutureRecurring<T> schedule, SchedulerRunnable runnable,
+    private <T> void schedule(ScheduledCompletableFutureRecurring<T> recurringSchedule, SchedulerRunnable runnable,
             TemporalAdjuster temporalAdjuster) {
-        final Temporal newTime = ZonedDateTime.now(clock).with(temporalAdjuster);
-        final ScheduledCompletableFutureOnce<T> deferred = new ScheduledCompletableFutureOnce<>();
+        final Temporal newTime = recurringSchedule.getScheduledTime().with(temporalAdjuster);
+        final ScheduledCompletableFutureOnce<T> deferred = new ScheduledCompletableFutureOnce<>(
+                ZonedDateTime.from(newTime));
 
         deferred.thenAccept(v -> {
             if (temporalAdjuster instanceof SchedulerTemporalAdjuster) {
-                SchedulerTemporalAdjuster schedulerTemporalAdjuster = (SchedulerTemporalAdjuster) temporalAdjuster;
+                final SchedulerTemporalAdjuster schedulerTemporalAdjuster = (SchedulerTemporalAdjuster) temporalAdjuster;
+
                 if (!schedulerTemporalAdjuster.isDone(newTime)) {
-                    schedule(schedule, runnable, temporalAdjuster);
+                    schedule(recurringSchedule, runnable, temporalAdjuster);
                     return;
                 }
             }
-            schedule.complete(v);
+            recurringSchedule.complete(v);
         });
-        schedule.setScheduledPromise(deferred);
+        recurringSchedule.setScheduledPromise(deferred);
         atInternal(deferred, () -> {
             runnable.run();
             return null;
-        }, Instant.from(newTime));
+        });
     }
 
     /**
@@ -178,7 +196,8 @@ public class SchedulerImpl implements Scheduler {
     private static class ScheduledCompletableFutureRecurring<T> extends ScheduledCompletableFutureOnce<T> {
         private @Nullable volatile ScheduledCompletableFuture<T> scheduledPromise;
 
-        public ScheduledCompletableFutureRecurring() {
+        public ScheduledCompletableFutureRecurring(ZonedDateTime scheduledTime) {
+            super(scheduledTime);
             exceptionally(e -> {
                 synchronized (this) {
                     if (e instanceof CancellationException) {
@@ -209,7 +228,12 @@ public class SchedulerImpl implements Scheduler {
 
         @Override
         public long getDelay(@Nullable TimeUnit timeUnit) {
-            return scheduledPromise == null ? 0 : scheduledPromise.getDelay(timeUnit);
+            return scheduledPromise != null ? scheduledPromise.getDelay(timeUnit) : 0;
+        }
+
+        @Override
+        public ZonedDateTime getScheduledTime() {
+            return scheduledPromise != null ? scheduledPromise.getScheduledTime() : super.getScheduledTime();
         }
     }
 
@@ -220,7 +244,15 @@ public class SchedulerImpl implements Scheduler {
      */
     private static class ScheduledCompletableFutureOnce<T> extends CompletableFuture<T>
             implements ScheduledCompletableFuture<T> {
-        private @Nullable Instant instant;
+        private ZonedDateTime scheduledTime;
+
+        public ScheduledCompletableFutureOnce(Duration duration) {
+            this(ZonedDateTime.now().plusNanos(duration.toNanos()));
+        }
+
+        public ScheduledCompletableFutureOnce(ZonedDateTime scheduledTime) {
+            this.scheduledTime = scheduledTime;
+        }
 
         @Override
         public CompletableFuture<T> getPromise() {
@@ -229,21 +261,31 @@ public class SchedulerImpl implements Scheduler {
 
         @Override
         public long getDelay(@Nullable TimeUnit timeUnit) {
-            if (timeUnit == null || instant == null) {
+            ZonedDateTime scheduledTime = this.scheduledTime;
+            if (timeUnit == null) {
                 return 0;
             }
-            long remaining = instant.toEpochMilli() - System.currentTimeMillis();
+            long remaining = scheduledTime.toInstant().toEpochMilli() - System.currentTimeMillis();
 
             return timeUnit.convert(remaining, TimeUnit.MILLISECONDS);
         }
 
         @Override
         public int compareTo(@Nullable Delayed timeUnit) {
-            return Long.compare(getDelay(TimeUnit.MILLISECONDS), timeUnit.getDelay(TimeUnit.MILLISECONDS));
+            return timeUnit == null ? -1
+                    : Long.compare(getDelay(TimeUnit.MILLISECONDS), timeUnit.getDelay(TimeUnit.MILLISECONDS));
         }
 
-        protected void setInstant(Duration duration) {
-            this.instant = Instant.now().plusMillis(duration.toMillis());
+        @Override
+        public ZonedDateTime getScheduledTime() {
+            return scheduledTime;
         }
+    }
+
+    /**
+     * Wraps the system call to get the current time to be able to manipulate it in a unit test.
+     */
+    protected long currentTimeMillis() {
+        return System.currentTimeMillis();
     }
 }

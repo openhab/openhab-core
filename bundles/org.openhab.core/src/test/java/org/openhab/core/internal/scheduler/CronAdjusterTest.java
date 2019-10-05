@@ -183,7 +183,7 @@ public class CronAdjusterTest {
 
     @ParameterizedTest
     @MethodSource("arguments")
-    @Timeout(value = 1, unit = TimeUnit.SECONDS)
+    @Timeout(value = 2, unit = TimeUnit.SECONDS)
     public void testCronExpression(String in, String cron, String[] outs) {
         final CronAdjuster cronAdjuster = new CronAdjuster(cron);
         Temporal ldt = LocalDateTime.parse(in);
