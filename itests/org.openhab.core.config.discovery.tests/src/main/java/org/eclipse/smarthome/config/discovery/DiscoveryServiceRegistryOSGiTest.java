@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.smarthome.config.discovery.inbox.Inbox;
-import org.eclipse.smarthome.config.setup.test.discovery.DiscoveryServiceMock;
-import org.eclipse.smarthome.config.setup.test.discovery.DiscoveryServiceMockOfBridge;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
@@ -35,7 +33,7 @@ import org.mockito.Mock;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * The {@link DiscoveryServiceRegistryOSGITest} test checks if the concrete
+ * The {@link DiscoveryServiceRegistryOSGiTest} test checks if the concrete
  * {@link DiscoveryServiceRegistry} implementation tracks all registered
  * {@link DiscoveryService}s and if a registered listener is notified
  * about the events fired by the according{@link DiscoveryService}.

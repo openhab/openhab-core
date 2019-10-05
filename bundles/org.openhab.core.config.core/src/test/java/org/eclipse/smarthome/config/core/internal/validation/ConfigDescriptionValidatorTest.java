@@ -88,9 +88,6 @@ public class ConfigDescriptionValidatorTest {
     private static final String DECIMAL_MIN_PARAM_NAME = "decimal-min-name";
     private static final String DECIMAL_MAX_PARAM_NAME = "decimal-max-name";
 
-    // ConfigDescriptionParameterBuilder.create(name,
-    // type).withRequired(required).withMaximum(max).withMinimum(min).withPattern(pattern).build();
-
     private static final ConfigDescriptionParameter BOOL_PARAM = ConfigDescriptionParameterBuilder
             .create(BOOL_PARAM_NAME, ConfigDescriptionParameter.Type.BOOLEAN).build();
     private static final ConfigDescriptionParameter BOOL_REQUIRED_PARAM = ConfigDescriptionParameterBuilder

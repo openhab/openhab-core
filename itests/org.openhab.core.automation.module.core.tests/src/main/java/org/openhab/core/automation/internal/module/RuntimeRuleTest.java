@@ -100,10 +100,6 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     @Ignore
     public void testPredefinedRule() throws ItemNotFoundException, InterruptedException {
         final EventPublisher eventPublisher = getService(EventPublisher.class);
-        // final ItemRegistry itemRegistry = getService(ItemRegistry.class);
-        // final SwitchItem myMotionItem = (SwitchItem) itemRegistry.getItem("myMotionItem");
-        // eventPublisher.post(ItemEventFactory.createStateEvent("myPresenceItem", OnOffType.ON));
-
         final Queue<Event> events = new LinkedList<>();
 
         registerService(new EventSubscriber() {

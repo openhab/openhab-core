@@ -49,8 +49,8 @@ import org.openhab.core.automation.util.RuleBuilder;
  */
 public class RuleEngineTest extends JavaOSGiTest {
 
-    RuleEngineImpl ruleEngine;
-    RuleRegistry ruleRegistry;
+    private RuleEngineImpl ruleEngine;
+    private RuleRegistry ruleRegistry;
 
     @Before
     public void setup() {
