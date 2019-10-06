@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.openhab</groupId>
     <artifactId>openhab-super-pom</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.1</version>
   </parent>
 
   <groupId>org.openhab.core</groupId>
@@ -74,6 +75,8 @@
     <sat.version>0.7.0</sat.version>
     <slf4j.version>1.7.21</slf4j.version>
     <xtext.version>2.17.0</xtext.version>
+    <spotless.version>1.24.3</spotless.version>
+    <spotless.check.skip>true</spotless.check.skip> <!-- Spotless disabled for now -->
   </properties>
 
   <dependencyManagement>
@@ -579,6 +582,75 @@ Import-Package: \\
               <configuration>
                 <verifyFail>Stop</verifyFail>
               </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless.version}</version>
+          <configuration>
+            <java>
+              <eclipse>
+                <file>openhab_codestyle.xml</file>
+                <version>4.11.0</version>
+              </eclipse>
+              <removeUnusedImports></removeUnusedImports>
+              <importOrder>
+                <file>openhab.importorder</file>
+              </importOrder>
+              <endWithNewline />
+            </java>
+            <formats>
+              <format>
+                <!-- pom.xml -->
+                <includes>
+                  <include>pom.xml</include>
+                </includes>
+                <eclipseWtp>
+                  <type>XML</type>
+                  <files>
+                    <file>openhab_wst_pom_file.prefs</file>
+                  </files>
+                  <version>4.12.0</version>
+                </eclipseWtp>
+                <trimTrailingWhitespace />
+                <endWithNewline />
+              </format>
+              <format>
+                <!-- *.xml -->
+                <includes>
+                  <include>src/**/*.xml</include>
+                </includes>
+                <excludes>
+                  <exclude>pom.xml</exclude>
+                </excludes>
+                <eclipseWtp>
+                  <type>XML</type>
+                  <files>
+                    <file>openhab_wst_xml_files.prefs</file>
+                  </files>
+                  <version>4.12.0</version>
+                </eclipseWtp>
+                <trimTrailingWhitespace />
+                <endWithNewline />
+              </format>
+            </formats>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.openhab.core.tools.codestyle</groupId>
+              <artifactId>org.openhab.core.reactor.tools.codestyle</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>codestyle_check</id>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <phase>initialize</phase>
             </execution>
           </executions>
         </plugin>

@@ -17,6 +17,7 @@
 
   <modules>
     <module>archetype</module>
+    <module>codestyle</module>
   </modules>
 
 </project>
