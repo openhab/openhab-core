@@ -603,6 +603,24 @@ Import-Package: \\
             </java>
             <formats>
               <format>
+                <!-- *.xml -->
+                <includes>
+                  <include>src/**/*.xml</include>
+                </includes>
+                <excludes>
+                  <exclude>**/pom.xml</exclude>
+                </excludes>
+                <eclipseWtp>
+                  <type>XML</type>
+                  <files>
+                    <file>openhab_wst_xml_files.prefs</file>
+                  </files>
+                  <version>4.12.0</version>
+                </eclipseWtp>
+                <trimTrailingWhitespace />
+                <endWithNewline />
+              </format>
+              <format>
                 <!-- pom.xml -->
                 <includes>
                   <include>pom.xml</include>
@@ -611,24 +629,6 @@ Import-Package: \\
                   <type>XML</type>
                   <files>
                     <file>openhab_wst_pom_file.prefs</file>
-                  </files>
-                  <version>4.12.0</version>
-                </eclipseWtp>
-                <trimTrailingWhitespace />
-                <endWithNewline />
-              </format>
-              <format>
-                <!-- *.xml -->
-                <includes>
-                  <include>src/**/*.xml</include>
-                </includes>
-                <excludes>
-                  <exclude>pom.xml</exclude>
-                </excludes>
-                <eclipseWtp>
-                  <type>XML</type>
-                  <files>
-                    <file>openhab_wst_xml_files.prefs</file>
                   </files>
                   <version>4.12.0</version>
                 </eclipseWtp>
