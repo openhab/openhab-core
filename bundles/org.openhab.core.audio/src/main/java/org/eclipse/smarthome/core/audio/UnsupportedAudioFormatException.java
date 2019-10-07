@@ -16,7 +16,7 @@ package org.eclipse.smarthome.core.audio;
  * Thrown when a requested format is not supported by an {@link AudioSource}
  * or {@link AudioSink} implementation
  * 
- * @author Harald Kuhn - Initial API
+ * @author Harald Kuhn - Initial contribution
  * @author Kelly Davis - Modified to match discussion in #584
  */
 public class UnsupportedAudioFormatException extends AudioException {

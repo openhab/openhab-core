@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
 /**
  * The {@link DiscoveryResultBuilder} helps creating a {@link DiscoveryResult} through the builder pattern.
  *
- * @author Kai Kreuzer - Initial API
+ * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - added support for time to live
  * @author Thomas Höfer - Added representation
  *
