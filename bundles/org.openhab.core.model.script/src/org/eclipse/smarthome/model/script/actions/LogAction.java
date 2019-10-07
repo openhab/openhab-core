@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LogAction {
 
-    private final static String LOGGER_NAME_PREFIX = "org.eclipse.smarthome.model.script.";
+    private static final String LOGGER_NAME_PREFIX = "org.eclipse.smarthome.model.script.";
 
     /**
      * Creates the Log-Entry <code>format</code> with level <code>DEBUG</code> and logs under the loggers name

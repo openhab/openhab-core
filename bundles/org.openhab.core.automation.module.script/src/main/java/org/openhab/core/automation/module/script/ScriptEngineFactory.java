@@ -32,7 +32,7 @@ import org.openhab.core.automation.module.script.internal.provider.ScriptModuleT
 @NonNullByDefault
 public interface ScriptEngineFactory {
 
-    final static ScriptEngineManager engineManager = new ScriptEngineManager();
+    static final ScriptEngineManager engineManager = new ScriptEngineManager();
 
     /**
      * This method returns a list of file extensions and MimeTypes that are supported by the ScriptEngine, e.g. py,

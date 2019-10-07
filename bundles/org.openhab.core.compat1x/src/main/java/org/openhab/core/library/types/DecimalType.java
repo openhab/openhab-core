@@ -29,7 +29,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
 
     private static final long serialVersionUID = 4226845847123464690L;
 
-    final static public DecimalType ZERO = new DecimalType(0);
+    public static final DecimalType ZERO = new DecimalType(0);
 
     protected BigDecimal value;
 

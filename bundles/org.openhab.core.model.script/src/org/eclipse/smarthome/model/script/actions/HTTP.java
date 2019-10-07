@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class HTTP {
 
     /** Constant which represents the content type <code>application/json</code> */
-    public final static String CONTENT_TYPE_JSON = "application/json";
+    public static final String CONTENT_TYPE_JSON = "application/json";
 
     private static Logger logger = LoggerFactory.getLogger(HTTP.class);
 

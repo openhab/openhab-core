@@ -35,7 +35,7 @@ import org.osgi.service.component.ComponentContext;
  */
 public class GenericThingProviderTest2 extends JavaOSGiTest {
 
-    private final static String TESTMODEL_NAME = "testModelX.things";
+    private static final String TESTMODEL_NAME = "testModelX.things";
 
     private ModelRepository modelRepository;
     private ThingRegistry thingRegistry;

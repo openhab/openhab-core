@@ -56,16 +56,16 @@ public class InboxPredicatesTest {
     private static final String PROP_VAL1 = "propVal1";
     private static final String PROP_VAL2 = "propVal2";
 
-    private final static ThingTypeUID THING_TYPE_UID11 = new ThingTypeUID(BINDING_ID1, THING_TYPE_ID1);
-    private final static ThingTypeUID THING_TYPE_UID12 = new ThingTypeUID(BINDING_ID1, THING_TYPE_ID2);
-    private final static ThingTypeUID THING_TYPE_UID21 = new ThingTypeUID(BINDING_ID2, THING_TYPE_ID1);
+    private static final ThingTypeUID THING_TYPE_UID11 = new ThingTypeUID(BINDING_ID1, THING_TYPE_ID1);
+    private static final ThingTypeUID THING_TYPE_UID12 = new ThingTypeUID(BINDING_ID1, THING_TYPE_ID2);
+    private static final ThingTypeUID THING_TYPE_UID21 = new ThingTypeUID(BINDING_ID2, THING_TYPE_ID1);
 
-    private final static Map<String, Object> PROPS1 = Collections
+    private static final Map<String, Object> PROPS1 = Collections
             .unmodifiableMap(Stream.of(new SimpleEntry<>(PROP1, PROP_VAL1), new SimpleEntry<>(PROP2, PROP_VAL2))
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
-    private final static Map<String, Object> PROPS2 = Collections.singletonMap(PROP2, PROP_VAL2);
+    private static final Map<String, Object> PROPS2 = Collections.singletonMap(PROP2, PROP_VAL2);
 
-    private final static List<DiscoveryResultImpl> results = Arrays.asList(
+    private static final List<DiscoveryResultImpl> results = Arrays.asList(
             new DiscoveryResultImpl(THING_TYPE_UID11, THING_UID11, null, PROPS1, PROP1, "label",
                     DiscoveryResult.TTL_UNLIMITED),
             new DiscoveryResultImpl(THING_TYPE_UID11, THING_UID12, null, PROPS1, null, "label",

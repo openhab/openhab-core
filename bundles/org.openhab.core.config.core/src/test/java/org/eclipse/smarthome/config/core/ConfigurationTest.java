@@ -34,7 +34,7 @@ import org.junit.Test;
  */
 public class ConfigurationTest {
 
-    public final static class ConfigClass {
+    public static final class ConfigClass {
         public enum MyEnum {
             ON,
             OFF,

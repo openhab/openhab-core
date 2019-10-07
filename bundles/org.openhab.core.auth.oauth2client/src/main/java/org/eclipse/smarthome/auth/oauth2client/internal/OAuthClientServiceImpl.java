@@ -59,7 +59,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private static final String EXCEPTION_MESSAGE_CLOSED = "Client service is closed";
 
-    private transient final Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
+    private final transient Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
 
     private @NonNullByDefault({}) OAuthStoreHandler storeHandler;
 

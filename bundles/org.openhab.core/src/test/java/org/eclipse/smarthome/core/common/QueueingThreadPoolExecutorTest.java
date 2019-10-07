@@ -34,7 +34,7 @@ public class QueueingThreadPoolExecutorTest {
      * we know that the QueuingTPE uses a core pool timeout of 10 seconds. Will
      * be needed to check if all threads are down after this timeout.
      */
-    private final static int CORE_POOL_TIMEOUT = 10000;
+    private static final int CORE_POOL_TIMEOUT = 10000;
 
     /**
      * We can enable logging for all test cases.
