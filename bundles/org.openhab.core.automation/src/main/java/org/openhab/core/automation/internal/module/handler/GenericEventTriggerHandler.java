@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * EventSubscriber, so the dispose method must be called for unregistering the
  * service.
  *
- * @author Benedikt Niehues - Initial contribution and API
+ * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
  *
  */

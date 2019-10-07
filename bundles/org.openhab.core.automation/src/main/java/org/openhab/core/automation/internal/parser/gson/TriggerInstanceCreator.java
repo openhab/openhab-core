@@ -22,7 +22,7 @@ import com.google.gson.InstanceCreator;
 /**
  * This class creates {@link TriggerType} instances.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public class TriggerInstanceCreator implements InstanceCreator<CompositeTriggerType> {

@@ -22,7 +22,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * Group functions are used by active group items to calculate a state for the group
  * out of the states of all its member items.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public interface GroupFunction {
@@ -55,7 +55,7 @@ public interface GroupFunction {
      * This is the default group function that does nothing else than to check if all member items
      * have the same state. If this is the case, this state is returned, otherwise UNDEF is returned.
      *
-     * @author Kai Kreuzer - Initial contribution and API
+     * @author Kai Kreuzer - Initial contribution
      *
      */
     static class Equality implements GroupFunction {

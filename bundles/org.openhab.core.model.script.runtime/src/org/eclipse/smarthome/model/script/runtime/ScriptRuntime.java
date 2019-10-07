@@ -15,7 +15,7 @@ package org.eclipse.smarthome.model.script.runtime;
 /**
  * This is a marker interface for Script Runtimes.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  *
  */
 public interface ScriptRuntime {

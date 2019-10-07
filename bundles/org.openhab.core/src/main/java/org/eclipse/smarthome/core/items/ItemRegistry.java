@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * Items are registered by {@link ItemProvider}s, which can provision them from any source
  * they like and also dynamically remove or add items.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public interface ItemRegistry extends Registry<Item, String> {

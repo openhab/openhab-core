@@ -28,7 +28,7 @@ import org.openhab.core.automation.parser.Parser;
  * <li>{@link AutomationCommands#EXPORT_RULES}
  * </ul>
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public class AutomationCommandExport extends AutomationCommand {

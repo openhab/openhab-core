@@ -19,7 +19,7 @@ import java.util.List;
  * This is a java bean that is used to define the root entry
  * page of the REST interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class RootBean {

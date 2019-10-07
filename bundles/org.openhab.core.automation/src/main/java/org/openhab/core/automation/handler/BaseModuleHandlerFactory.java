@@ -28,7 +28,7 @@ import org.openhab.core.automation.Rule;
  * {@link #internalCreate(Module, String)} method for creating concrete instances needed for the operation of the
  * {@link Module}s.
  *
- * @author Kai Kreuzer - Initial Contribution
+ * @author Kai Kreuzer - Initial contribution
  * @author Benedikt Niehues - change behavior for unregistering ModuleHandler
  */
 @NonNullByDefault

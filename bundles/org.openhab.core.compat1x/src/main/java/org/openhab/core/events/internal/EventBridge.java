@@ -40,7 +40,7 @@ import org.osgi.service.event.EventHandler;
  * openHAB (using "smarthome" as a topic prefix).
  * It simply duplicates events with an updated topic prefix and works both ways.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @Component(immediate = true, property = "event.topics=smarthome/*")

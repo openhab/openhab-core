@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * if an item state event occurs. The eventType and state value can be set with the
  * configuration.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann
  *
  */

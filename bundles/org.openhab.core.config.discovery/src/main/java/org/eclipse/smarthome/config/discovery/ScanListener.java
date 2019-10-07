@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * <p>
  * A class that is interested in errors and termination of an active scan has to implement this interface.
  *
- * @author Kai Kreuzer - Initial Contribution.
+ * @author Kai Kreuzer - Initial contribution
  *
  * @see DiscoveryService
  */

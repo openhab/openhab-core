@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.audio.internal.AudioServlet;
  * HTTP.
  * Streams are only served a single time and then discarded.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public interface AudioHTTPServer {

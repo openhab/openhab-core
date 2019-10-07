@@ -17,7 +17,7 @@ import org.eclipse.smarthome.io.console.Console;
 
 /**
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split to separate file
  *
  */

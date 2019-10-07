@@ -32,7 +32,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * This converter converts {@code channel-group-type} XML tags. It uses the {@link AbstractDescriptionTypeConverter}
  * which offers base functionality for each type definition.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Chris Jackson - Modified to support channel properties
  */
 public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<ChannelGroupTypeXmlResult> {

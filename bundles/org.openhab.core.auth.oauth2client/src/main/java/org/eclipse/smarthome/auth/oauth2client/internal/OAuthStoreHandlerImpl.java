@@ -67,7 +67,7 @@ import com.google.gson.JsonSerializer;
  * All entries are subject to removal if they have not been used for 183 days or more (half year).
  * The recycle is performed when then instance is deactivated
  *
- * @author Gary Tse - Initial Contribution
+ * @author Gary Tse - Initial contribution
  *
  */
 @NonNullByDefault

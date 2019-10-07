@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * A tagging interface for keyword spotting events.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public interface KSEvent {
 }

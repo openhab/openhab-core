@@ -20,7 +20,7 @@ import org.openhab.core.automation.Trigger;
 /**
  * This class is implementation of {@link Trigger} modules used in the {@link RuleEngine}s.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 @NonNullByDefault
 public class TriggerImpl extends ModuleImpl implements Trigger {

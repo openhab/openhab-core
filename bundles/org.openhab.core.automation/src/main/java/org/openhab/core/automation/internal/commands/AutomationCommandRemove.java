@@ -27,7 +27,7 @@ import org.openhab.core.automation.Rule;
  * <li>{@link AutomationCommands#REMOVE_RULE}
  * </ul>
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - fixed feedback when deleting non-existent rule
  * @author Marin Mitev - removed prefixes in the output
  *

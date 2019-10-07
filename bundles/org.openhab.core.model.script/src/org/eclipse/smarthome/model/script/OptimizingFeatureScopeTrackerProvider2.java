@@ -22,7 +22,7 @@ import org.eclipse.xtext.xbase.typesystem.internal.OptimizingFeatureScopeTracker
  *
  * ...with a workaround for https://github.com/eclipse/xtext-extras/issues/144
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 public class OptimizingFeatureScopeTrackerProvider2 extends OptimizingFeatureScopeTrackerProvider {

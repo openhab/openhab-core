@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * A helper to parse a sequence of tokens. This class is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  *
  */
 public class TokenList {

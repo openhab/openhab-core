@@ -18,7 +18,7 @@ import org.junit.Test;
 /**
  * Test SpeechRecognitionErrorEvent event
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public class SpeechRecognitionErrorEventTest {
 

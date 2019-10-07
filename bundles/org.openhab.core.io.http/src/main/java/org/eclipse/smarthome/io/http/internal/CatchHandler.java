@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * Each exception is set back on HandlerContext allowing HandlerChain to process it. When there is already error set in
  * current processing pipeline thrown exception is logged and ignored.
  *
- * @author Łukasz Dywicki - Initial contribution and API.
+ * @author Łukasz Dywicki - Initial contribution
  */
 public class CatchHandler implements Handler {
 

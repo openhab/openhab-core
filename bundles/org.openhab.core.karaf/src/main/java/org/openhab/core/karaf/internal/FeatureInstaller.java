@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * It furthermore allows configuration of the base package through the Paper UI as well as administrating Karaf to
  * access remote repos and certain feature repos like for legacy or experimental features.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(name = "org.openhab.addons", service = { FeatureInstaller.class, ConfigurationListener.class }, property = {
         "service.config.description.uri:String=system:addons", //

@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
 /**
  * ItemProvider implementation which computes *.items file based item configurations.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Thomas.Eichstaedt-Engelen
  */
 @Component(service = { ItemProvider.class, StateDescriptionFragmentProvider.class }, immediate = true)

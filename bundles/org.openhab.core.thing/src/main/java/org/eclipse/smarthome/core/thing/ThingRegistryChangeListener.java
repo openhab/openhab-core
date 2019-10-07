@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
  * {@link ThingRegistry#addRegistryChangeListener(ThingRegistryChangeListener)} and
  * {@link ThingRegistry#removeRegistryChangeListener(ThingRegistryChangeListener)}.
  *
- * @author Dennis Nobel - Initial Contribution
+ * @author Dennis Nobel - Initial contribution
  * @author Michael Grammling - Added dynamic configuration update
  *
  * @see ThingRegistry

@@ -16,7 +16,7 @@ package org.eclipse.smarthome.core.auth;
  * Authentication manager is main entry point for all places which are interested in securing requests and verifying
  * their originator.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  */
 public interface AuthenticationManager {
 

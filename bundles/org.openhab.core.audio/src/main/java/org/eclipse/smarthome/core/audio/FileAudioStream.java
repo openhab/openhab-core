@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.audio.utils.AudioStreamUtils;
 /**
  * This is an AudioStream from an audio file
  *
- * @author Karel Goderis - Initial contribution and API
+ * @author Karel Goderis - Initial contribution
  * @author Kai Kreuzer - Refactored to take a file as input
  * @author Christoph Weitkamp - Refactored use of filename extension
  *

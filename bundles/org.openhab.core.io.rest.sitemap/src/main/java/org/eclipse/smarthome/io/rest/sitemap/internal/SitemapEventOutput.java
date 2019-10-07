@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * Should only be used when the {@link OutboundEvent}s sent through this {@link EventOutput} contain a data object of
  * type {@link SitemapEvent}
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class SitemapEventOutput extends EventOutput {

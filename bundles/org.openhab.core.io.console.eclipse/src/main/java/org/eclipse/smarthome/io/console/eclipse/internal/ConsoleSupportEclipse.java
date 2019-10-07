@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * of Equinox. Unfortunately, there these command providers are not standardized
  * for OSGi, so we need different implementations for different OSGi containers.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split console interface and specific implementation
  *
  */

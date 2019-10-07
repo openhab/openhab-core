@@ -20,7 +20,7 @@ import org.osgi.service.http.HttpContext;
 /**
  * Base class for servlets which host resources using framework bundles.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  */
 public abstract class SmartHomeBundleServlet extends BaseSmartHomeServlet {
 

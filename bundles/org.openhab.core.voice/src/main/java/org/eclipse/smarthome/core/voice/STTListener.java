@@ -20,7 +20,7 @@ package org.eclipse.smarthome.core.voice;
  * Such instances are then targeted for various {@link STTEvent} events corresponding
  * to the speech recognition process.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public interface STTListener {
 

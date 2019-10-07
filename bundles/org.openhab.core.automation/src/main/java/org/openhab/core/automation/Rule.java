@@ -39,7 +39,7 @@ import org.openhab.core.automation.template.RuleTemplate;
  * Additionally, Rules can have <code><b>tags</b></code> - non-hierarchical keywords or terms for describing them.
  * They can help the user to classify or label the Rules, and to filter and search them.
  *
- * @author Kai Kreuzer - Initial Contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public interface Rule extends Identifiable<String> {

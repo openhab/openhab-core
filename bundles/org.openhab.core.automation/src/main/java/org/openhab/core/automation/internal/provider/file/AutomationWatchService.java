@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.service.AbstractWatchService;
  * <p>
  * It provides functionality for tracking {@link #watchingDir} changes to import or remove the automation objects.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 @SuppressWarnings("rawtypes")

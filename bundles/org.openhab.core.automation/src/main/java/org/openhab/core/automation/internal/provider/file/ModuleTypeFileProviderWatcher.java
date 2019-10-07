@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 /**
  * This class is a wrapper of {@link ModuleTypeProvider}, responsible for initializing the WatchService.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 @Component(immediate = true, service = ModuleTypeProvider.class)

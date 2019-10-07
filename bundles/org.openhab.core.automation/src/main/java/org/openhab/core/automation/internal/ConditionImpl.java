@@ -26,7 +26,7 @@ import org.openhab.core.automation.type.Output;
 /**
  * This class is implementation of {@link Condition} modules used in the {@link RuleEngineImpl}s.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 @NonNullByDefault
 public class ConditionImpl extends ModuleImpl implements Condition {

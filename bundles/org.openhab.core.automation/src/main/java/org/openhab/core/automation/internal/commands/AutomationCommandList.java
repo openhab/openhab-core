@@ -33,7 +33,7 @@ import org.openhab.core.automation.type.ModuleType;
  * <li>{@link AutomationCommands#LIST_RULES}
  * </ul>
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public class AutomationCommandList extends AutomationCommand {

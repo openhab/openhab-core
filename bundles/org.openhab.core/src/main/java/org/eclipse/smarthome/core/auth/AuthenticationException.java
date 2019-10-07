@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.auth;
 /**
  * Base type for exceptions thrown by authentication layer.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Added JavaDoc and serial id
  *
  */

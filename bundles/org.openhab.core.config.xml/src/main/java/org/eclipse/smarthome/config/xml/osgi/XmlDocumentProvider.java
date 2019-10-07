@@ -20,7 +20,7 @@ import org.eclipse.smarthome.config.xml.internal.ConfigDescriptionReader;
  * <p>
  * Each instance of this class is assigned to exactly one module.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @param <T> the result type of the conversion
  */

@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * on embedded devices without a high throughput. If you intend to use it for mass data processing on a server, you
  * should definitely tweak those settings.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {

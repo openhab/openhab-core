@@ -51,7 +51,7 @@ import org.mockito.Mock;
 
 /**
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Kai Kreuzer - added tests with multiple links
  *
  */

@@ -24,7 +24,7 @@ import org.openhab.ui.chart.ChartProvider;
  * namespace for the action service. It wraps an instance with the old interface
  * into a class with the new interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class ChartProviderDelegate implements org.eclipse.smarthome.ui.chart.ChartProvider {
 

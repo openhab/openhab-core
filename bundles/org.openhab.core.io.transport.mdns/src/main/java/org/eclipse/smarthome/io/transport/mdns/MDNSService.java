@@ -17,7 +17,7 @@ package org.eclipse.smarthome.io.transport.mdns;
  * to register and unregister services on Bonjour/MDNS
  *
  * @author Victor Belov
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface MDNSService {
 

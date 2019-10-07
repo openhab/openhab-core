@@ -19,7 +19,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * This class registers an OSGi service for the Persistence action.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component
 public class PersistenceActionService implements ActionService {

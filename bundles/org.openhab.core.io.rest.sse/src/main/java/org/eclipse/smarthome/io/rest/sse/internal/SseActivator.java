@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Bundle activator for openHAB SSE bundle.
  *
- * @author Ivan Iliev - Initial Contribution and API
+ * @author Ivan Iliev - Initial contribution
  *
  */
 public class SseActivator implements BundleActivator {

@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.Component;
  * {@link SatisfiableRESTResource#isSatisfied()} returns false then the request will be aborted with HTTP Status Code
  * 503 - Service Unavailable.
  *
- * @author Ivan Iliev - Initial contribution and API
+ * @author Ivan Iliev - Initial contribution
  *
  */
 @Provider

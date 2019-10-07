@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * This interface describes a provider for time zone.
  *
- * @author Erdoan Hadzhiyusein - Initial contribution and API
+ * @author Erdoan Hadzhiyusein - Initial contribution
  */
 @NonNullByDefault
 public interface TimeZoneProvider {

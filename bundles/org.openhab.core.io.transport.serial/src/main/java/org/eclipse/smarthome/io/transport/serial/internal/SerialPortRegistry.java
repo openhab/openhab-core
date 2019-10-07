@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 /**
  * Registers all {@link SerialPortProvider}s which can be accessed here.
  *
- * @author Matthias Steigenberger - Initial Contribution
+ * @author Matthias Steigenberger - Initial contribution
  * @author Markus Rathgeb - Respect the possible failure of port identifier creation
  *
  */

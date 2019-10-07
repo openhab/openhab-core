@@ -22,7 +22,7 @@ import org.eclipse.xtext.validation.Issue;
 /**
  * Exception that is thrown on errors during script execution.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ScriptParsingException extends ScriptException {

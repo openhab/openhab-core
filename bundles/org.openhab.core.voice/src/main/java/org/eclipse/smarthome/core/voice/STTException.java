@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * General purpose STT exception
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public class STTException extends Exception {
 

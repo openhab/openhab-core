@@ -26,7 +26,7 @@ import org.osgi.service.http.HttpService;
  * {@link HttpService#registerServlet} and corresponding methods.
  * The resulting {@link HttpContext} complies with the OSGi specification when it comes to resource resolving.
  *
- * @author Henning Treu - Initial contribution and API
+ * @author Henning Treu - Initial contribution
  *
  */
 @Component(service = HttpContextFactoryService.class)

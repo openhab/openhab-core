@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Extension of the default OSGi bundle activator
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true, service = { ModelParser.class, RuleRuntimeActivator.class })
 public class RuleRuntimeActivator implements ModelParser {

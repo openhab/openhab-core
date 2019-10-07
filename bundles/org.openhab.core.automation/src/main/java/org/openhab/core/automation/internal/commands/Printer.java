@@ -42,7 +42,7 @@ import org.openhab.core.automation.type.TriggerType;
 /**
  * This class provides the functionality responsible for printing the automation objects as a result of commands.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Yordan Mihaylov - updates related to api changes
  *
  */

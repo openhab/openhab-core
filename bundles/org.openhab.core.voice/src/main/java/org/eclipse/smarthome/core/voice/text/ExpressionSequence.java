@@ -21,7 +21,7 @@ import java.util.ResourceBundle;
 /**
  * Expression that successfully parses, if a sequence of given expressions is matching. This class is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  *
  */
 public final class ExpressionSequence extends Expression {

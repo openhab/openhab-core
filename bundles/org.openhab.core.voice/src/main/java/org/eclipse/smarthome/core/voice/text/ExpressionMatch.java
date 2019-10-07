@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
 /**
  * Expression that successfully parses, if a given string constant is found. This class is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  *
  */
 public final class ExpressionMatch extends Expression {

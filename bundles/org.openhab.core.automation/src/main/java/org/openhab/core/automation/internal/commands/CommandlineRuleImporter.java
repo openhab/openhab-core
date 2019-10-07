@@ -39,7 +39,7 @@ import org.osgi.framework.ServiceReference;
  * <li>lists the {@link Rule}s and their details
  * </ul>
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  *
  */

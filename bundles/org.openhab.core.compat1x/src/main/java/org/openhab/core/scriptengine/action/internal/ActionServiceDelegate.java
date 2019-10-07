@@ -19,7 +19,7 @@ import org.eclipse.smarthome.model.script.engine.action.ActionService;
  * namespace for the action service. It wraps an instance with the old interface
  * into a class with the new interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class ActionServiceDelegate implements ActionService {
 

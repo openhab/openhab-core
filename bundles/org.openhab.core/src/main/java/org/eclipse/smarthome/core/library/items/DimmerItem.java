@@ -30,7 +30,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * A DimmerItem can be used as a switch (ON/OFF), but it also accepts percent values
  * to reflect the dimmed state.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Support more types for getStateAs
  *
  */

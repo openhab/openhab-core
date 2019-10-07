@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Contains configuration for a MqttBrokerConnection. Necessary to add a new broker connection the {@link MqttService}.
  *
- * @author David Graeff - Initial contribution and API
+ * @author David Graeff - Initial contribution
  */
 @NonNullByDefault
 public class MqttBrokerConnectionConfig {

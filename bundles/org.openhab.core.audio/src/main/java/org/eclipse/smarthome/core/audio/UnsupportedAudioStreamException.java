@@ -16,7 +16,7 @@ package org.eclipse.smarthome.core.audio;
  * Thrown when a requested {@link AudioStream} is not supported by an {@link AudioSource} or {@link AudioSink}
  * implementation
  * 
- * @author Christoph Weitkamp - Initial contribution and API
+ * @author Christoph Weitkamp - Initial contribution
  * 
  */
 public class UnsupportedAudioStreamException extends AudioException {

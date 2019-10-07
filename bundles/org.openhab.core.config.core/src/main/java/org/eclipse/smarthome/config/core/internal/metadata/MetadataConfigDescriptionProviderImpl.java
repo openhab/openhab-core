@@ -58,7 +58,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * depending on which main value was chosen. Implementations of course are free to ignore the {@code value} parameter
  * and always return the same set of config descriptions.
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 @Component

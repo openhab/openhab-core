@@ -39,7 +39,7 @@ import org.openhab.core.automation.Rule;
  * <li>required (optional) - defines if the {@link Input} is required or optional. The default value is false.</li>
  * </ul>
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 public class Input {
 

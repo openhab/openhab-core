@@ -53,7 +53,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * This class is able to observe multiple folders for changes and notifies the
  * model repository about every change, so that it can update itself.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Fabio Marini - Refactoring to use WatchService
  * @author Ana Dimova - reduce to a single watch thread for all class instances
  *

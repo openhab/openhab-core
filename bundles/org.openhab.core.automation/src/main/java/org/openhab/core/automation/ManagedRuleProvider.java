@@ -23,7 +23,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * Implementation of a rule provider that uses the storage service for persistence
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - Persistence implementation
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Markus Rathgeb - fix mapping between element and persistable element

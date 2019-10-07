@@ -40,7 +40,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
  * namespace for the auto update provider. It gathers all services that implement the old interface
  * and makes them available as single provider of the new interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 @Component(service = MetadataProvider.class)

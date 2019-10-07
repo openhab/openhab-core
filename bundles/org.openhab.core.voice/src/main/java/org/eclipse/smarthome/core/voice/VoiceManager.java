@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.voice.text.InterpretationException;
 /**
  * This service provides functionality around voice services and is the central service to be used directly by others.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  *
  */

@@ -20,7 +20,7 @@ import org.osgi.service.http.HttpService;
  * Create {@link HttpContext} instances when registering servlets, resources or filters using the
  * {@link HttpService#registerServlet} and corresponding methods.
  *
- * @author Henning Treu - Initial contribution and API
+ * @author Henning Treu - Initial contribution
  *
  */
 public interface HttpContextFactoryService {

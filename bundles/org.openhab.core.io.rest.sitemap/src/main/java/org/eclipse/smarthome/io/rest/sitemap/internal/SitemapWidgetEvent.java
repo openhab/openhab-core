@@ -17,7 +17,7 @@ import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTO;
 /**
  * A sitemap event, which provides details about a widget that has changed.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class SitemapWidgetEvent extends SitemapEvent {
 

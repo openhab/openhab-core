@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.Reference;
  * This class provides functionality for defining and executing automation commands for importing, exporting, removing
  * and listing the automation objects.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
 @Component

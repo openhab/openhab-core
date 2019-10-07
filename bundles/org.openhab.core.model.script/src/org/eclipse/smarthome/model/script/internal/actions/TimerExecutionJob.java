@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * This is a Quartz {@link Job} which executes the code of a closure that is passed
  * to the createTimer() extension method.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class TimerExecutionJob implements Job {

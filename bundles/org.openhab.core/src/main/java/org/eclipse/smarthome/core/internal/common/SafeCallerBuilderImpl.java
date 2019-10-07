@@ -28,7 +28,7 @@ import org.eclipse.smarthome.core.common.SafeCallerBuilder;
 /**
  * Builder implementation to create safe-call wrapper objects.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  * @param <T>
  */

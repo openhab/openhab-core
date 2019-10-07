@@ -27,7 +27,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * This class should be used for nodes whose children elements <i>only</i> contain simple values (without children) and
  * whose order is unpredictable. There must be only one children with the same name.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Alex Tugarev - Extended for options and filter criteria
  */
 public class ConverterValueMap {

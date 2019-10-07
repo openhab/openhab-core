@@ -22,7 +22,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * The {@link ConverterAttributeMapValidator} class reads any attributes of a node, validates
  * if they appear or not, and returns the validated key-value pair map.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class ConverterAttributeMapValidator {
 

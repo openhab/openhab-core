@@ -18,7 +18,7 @@ import org.openhab.core.automation.type.ModuleType;
 /**
  * Defines visibility values of {@link Rule}s, {@link ModuleType}s and {@link Template}s.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  *
  */
 public enum Visibility {

@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.types;
 /**
  * Describes one possible value an event might have.
  *
- * @author Moritz Kammerer - Initial contribution and API
+ * @author Moritz Kammerer - Initial contribution
  */
 public final class EventOption {
 

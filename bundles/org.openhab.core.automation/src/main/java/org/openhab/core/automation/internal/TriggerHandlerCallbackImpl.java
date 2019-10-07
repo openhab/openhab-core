@@ -32,7 +32,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
  * all
  * rule's {@link Trigger}s.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - improved stability
  */
 public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {

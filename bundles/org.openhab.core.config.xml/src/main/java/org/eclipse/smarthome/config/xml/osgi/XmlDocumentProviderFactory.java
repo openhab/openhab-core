@@ -22,7 +22,7 @@ import org.osgi.framework.Bundle;
  * The {@link XmlDocumentProviderFactory} is used by the {@link XmlDocumentBundleTracker} to create for each module an
  * own {@link XmlDocumentProvider} instance to process any result objects from the XML conversion.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @param <T> the result type of the conversion
  * @see XmlDocumentProvider

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of a persistence job that could be executed e.g. for specific cron expressions.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Separation of persistence core and model, drop Quartz usage.
  */
 public class PersistItemsJob implements SchedulerRunnable {

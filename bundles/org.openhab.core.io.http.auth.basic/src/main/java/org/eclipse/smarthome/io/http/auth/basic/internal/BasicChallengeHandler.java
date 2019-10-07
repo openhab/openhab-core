@@ -23,7 +23,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * A handler which forces basic auth when authentication fails.
  *
- * @author Łukasz Dywicki - Initial contribution and API.
+ * @author Łukasz Dywicki - Initial contribution
  */
 @Component
 public class BasicChallengeHandler implements Handler {

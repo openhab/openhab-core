@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * A {@link KSEvent} fired when the {@link KSService} spots a keyword.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  * @author Yannick Schaus - Removed AudioSource information
  */
 public class KSpottedEvent implements KSEvent {

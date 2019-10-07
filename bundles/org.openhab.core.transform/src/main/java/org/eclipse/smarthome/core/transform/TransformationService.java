@@ -27,7 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * Interface.
  *
  * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

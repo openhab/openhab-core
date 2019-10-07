@@ -16,7 +16,7 @@ package org.eclipse.smarthome.core.items;
  * This exception is thrown by the {@link ItemRegistry} if an item could
  * not be found.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ItemNotFoundException extends ItemLookupException {

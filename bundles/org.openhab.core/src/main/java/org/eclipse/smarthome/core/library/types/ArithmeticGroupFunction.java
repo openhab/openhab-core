@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * This interface is only a container for functions that require the core type library
  * for its calculations.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Thomas Eichstädt-Engelen - Added "N" functions
  * @author Gaël L'hopital - Added count function
  *

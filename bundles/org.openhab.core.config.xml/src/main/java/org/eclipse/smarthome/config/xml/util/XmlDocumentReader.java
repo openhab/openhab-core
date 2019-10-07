@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
  * <p>
  * This class uses {@code XStream} and {@code StAX} to parse and convert the XML document.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @param <T> the result type of the conversion
  */

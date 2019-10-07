@@ -21,7 +21,7 @@ import java.util.Locale;
  * managing extensions, such as listing, installing and uninstalling them.
  * The REST API offers an uri that exposes this functionality.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public interface ExtensionService {

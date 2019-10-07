@@ -17,7 +17,7 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 
 /**
  *
- * @author Holger Schill, Simon Kaufmann - Initial contribution and API
+ * @author Holger Schill, Simon Kaufmann - Initial contribution
  *
  */
 public class GlobalResourceSet {

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * This class is responsible for tracking the bundles providing automation resources and delegating the processing to
  * the responsible providers in separate thread.
  *
- * @author Ana Dimova - Initial Contribution, host-fragment support
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @param <E>
  *

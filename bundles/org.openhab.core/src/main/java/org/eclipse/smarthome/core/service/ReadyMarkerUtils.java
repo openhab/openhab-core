@@ -19,7 +19,7 @@ import org.osgi.framework.Bundle;
 /**
  * Utilities for the ready maker usage.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class ReadyMarkerUtils {
 

@@ -19,7 +19,7 @@ package org.eclipse.smarthome.config.core;
  * The {@link FilterCriteria} and its name is related to the context of the containing
  * {@link ConfigDescriptionParameter}.
  *
- * @author Alex Tugarev - Initial Contribution
+ * @author Alex Tugarev - Initial contribution
  * @author Markus Rathgeb - Add default constructor for deserialization
  *
  */

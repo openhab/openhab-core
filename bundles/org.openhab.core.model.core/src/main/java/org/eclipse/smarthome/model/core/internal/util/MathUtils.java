@@ -16,7 +16,7 @@ package org.eclipse.smarthome.model.core.internal.util;
  * This class provides a few mathematical helper functions that are required by
  * code of this bundle.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class MathUtils {

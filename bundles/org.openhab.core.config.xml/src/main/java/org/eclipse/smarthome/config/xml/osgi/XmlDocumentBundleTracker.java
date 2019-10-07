@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * processing. For each module an own {@link XmlDocumentProvider} is created by
  * using the specified {@link XmlDocumentProviderFactory}.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Benedikt Niehues - Changed resource handling so that resources can be
  *         patched by fragments.
  * @author Simon Kaufmann - Tracking of remaining bundles

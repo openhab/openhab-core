@@ -55,7 +55,7 @@ import io.swagger.annotations.ApiResponses;
 /**
  * This class acts as a REST resource for voice features.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - add TTS feature to the REST API
  */
 @Component

@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.library.types.PointType;
 /**
  * This interface describes a provider for a location.
  *
- * @author Stefan Triller - Initial contribution and API
+ * @author Stefan Triller - Initial contribution
  */
 @NonNullByDefault
 public interface LocationProvider {

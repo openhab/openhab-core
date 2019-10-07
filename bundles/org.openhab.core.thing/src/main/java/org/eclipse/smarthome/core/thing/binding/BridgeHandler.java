@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.thing.Thing;
  * A {@link BridgeHandler} is a {@link ThingHandler} as well.
  * <p>
  *
- * @author Stefan Bußweiler - Initial contribution and API
+ * @author Stefan Bußweiler - Initial contribution
  */
 @NonNullByDefault
 public interface BridgeHandler extends ThingHandler {

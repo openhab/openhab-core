@@ -15,7 +15,7 @@ package org.eclipse.smarthome.model.script.engine;
 /**
  * Exception that is thrown on errors during script execution.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ScriptExecutionException extends ScriptException {

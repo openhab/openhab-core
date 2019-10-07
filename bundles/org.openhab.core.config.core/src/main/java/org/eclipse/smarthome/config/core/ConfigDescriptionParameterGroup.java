@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * {@link ConfigDescriptionParameterGroup} - in this way the UI can group the parameters together, but doesn't have the
  * group information.
  *
- * @author Chris Jackson - Initial Contribution
+ * @author Chris Jackson - Initial contribution
  *
  */
 @NonNullByDefault

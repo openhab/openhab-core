@@ -23,7 +23,7 @@ import org.eclipse.smarthome.model.script.internal.engine.action.VoiceActionServ
  * The static methods of this class are made available as functions in the scripts.
  * This allows a script to use voice features.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  */
 public class Voice {

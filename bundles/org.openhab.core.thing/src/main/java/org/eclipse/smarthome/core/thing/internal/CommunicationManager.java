@@ -85,7 +85,7 @@ import org.slf4j.LoggerFactory;
  *
  * It mainly mediates commands, state updates and triggers from ThingHandlers to the framework and vice versa.
  *
- * @author Simon Kaufmann - Initial contribution and API, factored out of ThingManger
+ * @author Simon Kaufmann - Initial contribution factored out of ThingManger
  *
  */
 @NonNullByDefault

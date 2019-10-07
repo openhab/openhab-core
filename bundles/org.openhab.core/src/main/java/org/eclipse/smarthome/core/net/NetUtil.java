@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Some utility functions related to network interfaces etc.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  * @author Mark Herwege - Added methods to find broadcast address(es)
  * @author Stefan Triller - Converted to OSGi service with primary ipv4 conf
  * @author Gary Tse - Network address change listener

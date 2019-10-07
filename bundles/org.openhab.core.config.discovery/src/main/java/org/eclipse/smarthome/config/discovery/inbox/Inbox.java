@@ -35,7 +35,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
  * This container offers a listener registry for {@link InboxListener}s which are notified if a {@link DiscoveryResult}
  * is added, updated or removed.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @see InboxListener
  */

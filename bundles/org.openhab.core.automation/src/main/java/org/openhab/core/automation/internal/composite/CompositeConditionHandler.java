@@ -26,7 +26,7 @@ import org.openhab.core.automation.type.CompositeConditionType;
  * {@link CompositeConditionType} module type will be satisfied only when all child conditions (defined
  * by its {@link CompositeConditionType}) are satisfied.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  *
  */
 public class CompositeConditionHandler

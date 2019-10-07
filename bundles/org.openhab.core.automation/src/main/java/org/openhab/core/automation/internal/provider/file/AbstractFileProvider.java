@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * It provides functionality for tracking {@link Parser} services and provides common functionality for notifying the
  * {@link ProviderChangeListener}s for adding, updating and removing the {@link ModuleType}s or {@link Template}s.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public abstract class AbstractFileProvider<E> implements Provider<E> {

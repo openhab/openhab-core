@@ -37,7 +37,7 @@ import org.osgi.framework.BundleContext;
  * This class provides mechanism to separate the Automation Commands implementation from the Automation Core
  * implementation.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  *
  */

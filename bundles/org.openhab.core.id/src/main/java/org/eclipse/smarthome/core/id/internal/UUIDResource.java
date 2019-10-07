@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiResponses;
 /**
  * This class acts as a REST resource for accessing the UUID of the instance
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component
 @Path(UUIDResource.PATH_UUID)

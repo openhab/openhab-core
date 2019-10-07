@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.auth.client.oauth2.AccessTokenResponse;
 /**
  * This is for OAuth client internal use.
  *
- * @author Gary Tse - Initial Contribution
+ * @author Gary Tse - Initial contribution
  *
  */
 @NonNullByDefault

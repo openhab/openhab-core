@@ -34,7 +34,7 @@ import org.osgi.framework.Bundle;
  * implementation only supports the method {@link #getResource(String)} for
  * mappings.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Martin Herbst - UTF-8 replaced by ISO-8859-1 to follow Java standards
  * 
  */

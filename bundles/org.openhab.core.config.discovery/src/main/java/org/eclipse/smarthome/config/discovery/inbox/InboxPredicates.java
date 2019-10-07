@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
 /**
  * Implements static factory methods for {@link Predicate}s to filter in streams of {@link DiscoveryResult}s.
  *
- * @author Andre Fuechsel - Initial Contribution
+ * @author Andre Fuechsel - Initial contribution
  */
 @NonNullByDefault
 public class InboxPredicates {

@@ -19,7 +19,7 @@ import org.joda.time.base.AbstractInstant;
  * can be canceled or rescheduled.
  * The script action "createTimer" returns a {@link Timer} instance.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public interface Timer {

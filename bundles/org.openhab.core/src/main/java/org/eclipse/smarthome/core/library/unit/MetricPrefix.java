@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * The metric prefixes used to derive units by specific powers of 10. This delegates to the enum instances of
  * {@link tec.uom.se.unit.MetricPrefix}.
  *
- * @author Henning Treu - Initial contribution and API
+ * @author Henning Treu - Initial contribution
  *
  */
 @NonNullByDefault

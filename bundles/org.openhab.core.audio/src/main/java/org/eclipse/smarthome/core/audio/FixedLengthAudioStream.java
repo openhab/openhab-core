@@ -18,7 +18,7 @@ import java.io.InputStream;
  * This is an {@link AudioStream}, which can provide information about its absolute length and is able to provide
  * cloned streams.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public abstract class FixedLengthAudioStream extends AudioStream {

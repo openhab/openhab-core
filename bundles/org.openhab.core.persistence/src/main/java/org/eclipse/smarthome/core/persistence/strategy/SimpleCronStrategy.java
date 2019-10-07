@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.persistence.strategy;
 /**
  * This class holds a cron expression based strategy to persist items.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class SimpleCronStrategy extends SimpleStrategy {
 

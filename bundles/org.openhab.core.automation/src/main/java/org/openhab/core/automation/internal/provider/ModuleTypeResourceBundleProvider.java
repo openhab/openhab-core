@@ -47,7 +47,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * <li>tracking the managing service of the {@link ModuleType}s.
  * </ul>
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Yordan Mihaylov - updates related to api changes
  */

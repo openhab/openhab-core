@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * The OAuth Factory interface
  *
- * @author Michael Bock - Initial Contribution
+ * @author Michael Bock - Initial contribution
  * @author Gary Tse - ESH Adaptation
  * @author Hilbrand Bouwkamp - Change create to have a handle as parameter.
  */

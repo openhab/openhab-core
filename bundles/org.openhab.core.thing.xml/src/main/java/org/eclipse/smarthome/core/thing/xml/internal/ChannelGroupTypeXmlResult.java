@@ -29,7 +29,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * <p>
  * To create a concrete {@link ChannelGroupType} object, the method {@link #toChannelGroupType(Map)} must be called.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Chris Jackson - Updated to support channel properties
  */
 public class ChannelGroupTypeXmlResult {

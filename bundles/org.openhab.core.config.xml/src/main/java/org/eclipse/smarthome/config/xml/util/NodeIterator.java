@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * This iterator offers a simple mechanism iterating through {@code Node}* objects by considering the required or
  * optional occurrences of attributes, values or list of values.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class NodeIterator implements Iterator<Object> {
 

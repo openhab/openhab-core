@@ -37,7 +37,7 @@ import org.openhab.core.automation.type.Output;
  * Condition modules are placed in <b>conditions</b> section of the {@link Rule} definition.
  *
  * @see Module
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 @NonNullByDefault
 public interface Condition extends Module {

@@ -29,7 +29,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * A SwitchItem represents a normal switch that can be ON or OFF.
  * Useful for normal lights, presence detection etc.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

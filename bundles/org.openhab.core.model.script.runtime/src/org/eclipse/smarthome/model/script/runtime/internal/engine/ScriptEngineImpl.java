@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the implementation of a {@link ScriptEngine} which is made available as an OSGi service.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Reorganization of Guice injection
  *
  */

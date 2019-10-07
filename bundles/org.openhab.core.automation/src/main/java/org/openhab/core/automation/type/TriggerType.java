@@ -28,7 +28,7 @@ import org.openhab.core.automation.Visibility;
  * {@link ConfigDescriptionParameter}s that are meta-information for configuration of the future {@link Trigger}
  * instances and meta-information for {@link Output}s used from these {@link Trigger} instances.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 @NonNullByDefault
 public class TriggerType extends ModuleType {

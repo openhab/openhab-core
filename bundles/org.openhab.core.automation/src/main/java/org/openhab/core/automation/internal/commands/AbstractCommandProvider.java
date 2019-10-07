@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * It provides functionality for tracking {@link Parser} services by implementing {@link ServiceTrackerCustomizer} and
  * provides common functionality for exporting automation objects.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  *
  */

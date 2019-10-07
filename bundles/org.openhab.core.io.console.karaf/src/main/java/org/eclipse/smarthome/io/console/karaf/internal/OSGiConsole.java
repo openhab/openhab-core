@@ -16,7 +16,7 @@ import org.eclipse.smarthome.io.console.Console;
 
 /**
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  *
  */
 public class OSGiConsole implements Console {

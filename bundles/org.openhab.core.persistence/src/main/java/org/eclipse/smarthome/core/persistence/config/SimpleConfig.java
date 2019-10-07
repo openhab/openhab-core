@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.persistence.config;
 /**
  * This class is a base class that needs to be used by every item configuration.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public abstract class SimpleConfig {
 

@@ -21,7 +21,7 @@ import java.util.ResourceBundle;
 /**
  * Expression that successfully parses, if one of the given alternative expressions matches. This class is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  *
  */
 final class ExpressionAlternatives extends Expression {

@@ -17,7 +17,7 @@ import org.openhab.core.automation.RuleStatus;
 /**
  * This class provides functionality of command {@link AutomationCommands#ENABLE_RULE}.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public class AutomationCommandEnableRule extends AutomationCommand {

@@ -41,7 +41,7 @@ import org.osgi.service.component.annotations.Reference;
  * This class dynamically provides the Play action type.
  * This is necessary since there is no other way to provide dynamic config param options for module types.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Simon Kaufmann - added "say" action
  *
  */

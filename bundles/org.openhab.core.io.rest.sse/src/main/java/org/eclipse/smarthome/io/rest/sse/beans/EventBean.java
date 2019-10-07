@@ -15,7 +15,7 @@ package org.eclipse.smarthome.io.rest.sse.beans;
 /**
  * Event bean for broadcasted events.
  *
- * @author Ivan Iliev - Initial Contribution and API
+ * @author Ivan Iliev - Initial contribution
  * @author Dennis Nobel - Added event type and renamed object to payload
  */
 public class EventBean {

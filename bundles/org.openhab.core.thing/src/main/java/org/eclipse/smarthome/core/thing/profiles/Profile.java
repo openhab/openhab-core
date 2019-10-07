@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.types.State;
  * Profiles are allowed to maintain some transient state internally, i.e. the same instance of a profile will be used
  * per link for all communication so that the temporal dimension can be taken in account.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 @NonNullByDefault

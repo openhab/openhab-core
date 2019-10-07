@@ -19,7 +19,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * This class registers an OSGi service for the Transformation action.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true)
 public class TransformationActionService implements ActionService {

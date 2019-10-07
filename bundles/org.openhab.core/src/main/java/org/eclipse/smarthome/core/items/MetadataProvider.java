@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.common.registry.Provider;
  * This is a marker interface for metadata provider implementations that should be used to register those as an OSGi
  * service.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

@@ -20,7 +20,7 @@ import java.util.Set;
  * Its main use is for microphones and other "line-in" sources and it can be registered as a service in order to make
  * it available throughout the system.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface AudioSource {
 

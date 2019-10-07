@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * OSGi test for {@link AudioManagerImpl}
  *
- * @author Petar Valchev - Initial contribution and API
+ * @author Petar Valchev - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Migrate tests from Groovy to Java
  * @author Henning Treu - extract servlet tests

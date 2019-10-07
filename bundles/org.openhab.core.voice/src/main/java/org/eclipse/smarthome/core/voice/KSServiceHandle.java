@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * An handle to a {@link KSService}
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public interface KSServiceHandle {
    /**

@@ -26,7 +26,7 @@ import org.glassfish.jersey.media.sse.OutboundEvent;
 /**
  * Utility class containing helper methods for the SSE implementation.
  *
- * @author Ivan Iliev - Initial Contribution and API
+ * @author Ivan Iliev - Initial contribution
  * @author Dennis Nobel - Changed EventBean
  */
 public class SseUtil {

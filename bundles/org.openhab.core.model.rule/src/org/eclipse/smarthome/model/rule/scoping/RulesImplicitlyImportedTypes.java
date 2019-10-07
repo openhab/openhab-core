@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
  * extensions for specific jvm types, which should only be available in rules,
  * but not in scripts
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Xtext 2.5.0 migration
  *
  */

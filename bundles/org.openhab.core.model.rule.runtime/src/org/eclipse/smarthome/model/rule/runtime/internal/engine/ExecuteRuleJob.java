@@ -32,7 +32,7 @@ import com.google.inject.Injector;
  * Implementation of Quartz {@link Job}-Interface. It takes a rule
  * and simply executes it.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class ExecuteRuleJob implements Job {
 

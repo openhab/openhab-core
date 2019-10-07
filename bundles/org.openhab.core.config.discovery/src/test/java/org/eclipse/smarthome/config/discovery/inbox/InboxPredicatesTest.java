@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Tests for {@link InboxPredicates}.
  *
- * @author Andre Fuechsel - Initial Contribution
+ * @author Andre Fuechsel - Initial contribution
  */
 public class InboxPredicatesTest {
 

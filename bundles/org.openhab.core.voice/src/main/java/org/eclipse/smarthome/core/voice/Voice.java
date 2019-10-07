@@ -17,7 +17,7 @@ import java.util.Locale;
 /**
  * This is the interface that a text-to-speech voice has to implement.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public interface Voice {
 

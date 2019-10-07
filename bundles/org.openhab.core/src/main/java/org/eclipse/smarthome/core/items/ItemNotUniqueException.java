@@ -18,7 +18,7 @@ import java.util.Collection;
  * This exception can be thrown whenever a search pattern does not uniquely identify
  * an item. The list of matching items must be made available through this exception.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ItemNotUniqueException extends ItemLookupException {

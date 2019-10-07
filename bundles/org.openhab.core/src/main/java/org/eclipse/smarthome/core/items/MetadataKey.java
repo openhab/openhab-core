@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.common.AbstractUID;
  * This class represents the key of a {@link Metadata} entity.
  * It is a simple combination of a namespace and an item name.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

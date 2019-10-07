@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.Component;
  * {@link MetadataProvider} interface as it already implements {@link ItemProvider}, which would lead to duplicate
  * methods.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

@@ -24,7 +24,7 @@ import org.openhab.core.automation.type.ModuleTypeProvider;
  * This class is implementation of {@link ModuleTypeProvider}. It extends functionality of {@link AbstractFileProvider}
  * for importing the {@link ModuleType}s from local files.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public abstract class ModuleTypeFileProvider extends AbstractFileProvider<ModuleType> implements ModuleTypeProvider {

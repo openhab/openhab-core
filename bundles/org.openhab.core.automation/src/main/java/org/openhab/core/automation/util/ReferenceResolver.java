@@ -58,7 +58,7 @@ import org.slf4j.Logger;
  * 'childInput' : '${compositeModuleConfiguration}'</li>
  * </ul>
  *
- * @author Vasil Ilchev - Initial Contribution
+ * @author Vasil Ilchev - Initial contribution
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
  */
 public class ReferenceResolver {

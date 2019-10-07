@@ -31,7 +31,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * This converter converts {@code command} XML tags.
  *
- * @author Henning Treu - Initial Contribution
+ * @author Henning Treu - Initial contribution
  */
 public class CommandDescriptionConverter extends GenericUnmarshaller<CommandDescription> {
 

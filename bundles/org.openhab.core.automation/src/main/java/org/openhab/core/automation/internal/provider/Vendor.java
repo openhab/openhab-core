@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * for automation objects - bundle ID and bundle version. These two features of the bundle, define it uniquely and
  * determine if the bundle was updated, which needs to be checked after the system has been restarted.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public class Vendor {

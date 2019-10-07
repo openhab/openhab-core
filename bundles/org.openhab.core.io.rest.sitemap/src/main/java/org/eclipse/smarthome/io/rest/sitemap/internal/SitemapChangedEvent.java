@@ -15,7 +15,7 @@ package org.eclipse.smarthome.io.rest.sitemap.internal;
 /**
  * Event to notify the browser that the sitemap has been changed
  *
- * @author Stefan Triller - Initial Contribution
+ * @author Stefan Triller - Initial contribution
  *
  */
 public class SitemapChangedEvent extends SitemapEvent {

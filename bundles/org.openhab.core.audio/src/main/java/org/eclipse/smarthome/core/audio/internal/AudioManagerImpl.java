@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This service provides functionality around audio services and is the central service to be used directly by others.
  *
- * @author Karel Goderis - Initial contribution and API
+ * @author Karel Goderis - Initial contribution
  * @author Kai Kreuzer - removed unwanted dependencies
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  * @author Christoph Weitkamp - Added parameter to adjust the volume

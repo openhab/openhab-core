@@ -39,7 +39,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * This converter converts {@code parameter} XML tags.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Alex Tugarev - Extended for options and filter criteria
  * @author Chris Jackson - Modified to use config parameter builder. Added
  *         parameters.

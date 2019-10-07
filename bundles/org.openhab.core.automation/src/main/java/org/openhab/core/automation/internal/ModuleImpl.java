@@ -32,7 +32,7 @@ import org.openhab.core.automation.type.Output;
  * changes, they should be set on the {@link Rule} and the Rule has to be
  * updated by RuleManager
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  *
  */
 public abstract class ModuleImpl implements Module {

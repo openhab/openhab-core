@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * This is an ModuleHandler implementation for Triggers which trigger the rule
  * at a specific time (format 'hh:mm').
  *
- * @author Kai Kreuzer - Initial Contribution
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler implements SchedulerRunnable {

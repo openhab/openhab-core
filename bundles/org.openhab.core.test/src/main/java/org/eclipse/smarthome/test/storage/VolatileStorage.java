@@ -23,7 +23,7 @@ import org.eclipse.smarthome.core.storage.Storage;
 /**
  * A {@link Storage} implementation which stores it's data in-memory.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial Contribution and API
+ * @author Thomas.Eichstaedt-Engelen - Initial contribution
  * @author Kai Kreuzer - improved return values
  */
 @NonNullByDefault

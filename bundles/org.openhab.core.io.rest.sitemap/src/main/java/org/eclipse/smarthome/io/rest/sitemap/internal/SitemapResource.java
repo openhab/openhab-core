@@ -109,7 +109,7 @@ import io.swagger.annotations.ApiResponses;
  * This class acts as a REST resource for sitemaps and provides different methods to interact with them, like retrieving
  * a list of all available sitemaps or just getting the widgets of a single page.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson
  * @author Yordan Zhelev - Added Swagger annotations
  */
@@ -772,7 +772,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      * This is a state change listener, which is merely used to determine, if a
      * state change has occurred on one of a list of items.
      *
-     * @author Kai Kreuzer - Initial contribution and API
+     * @author Kai Kreuzer - Initial contribution
      *
      */
     private static class BlockingStateChangeListener implements StateChangeListener {

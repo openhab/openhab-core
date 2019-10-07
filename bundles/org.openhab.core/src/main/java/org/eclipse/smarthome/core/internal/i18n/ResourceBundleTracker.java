@@ -32,7 +32,7 @@ import org.osgi.util.tracker.BundleTracker;
  * <p>
  * This tracker must be started by calling {@link #open()} and stopped by calling {@link #close()}.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Markus Rathgeb - Add locale provider support
  * @author Ana Dimova - fragments support
  */

@@ -29,7 +29,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 /**
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 @RunWith(Parameterized.class)

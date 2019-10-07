@@ -17,7 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Creates a new {@link ItemBuilder} which is based on all available {@link ItemFactory}s.
  *
- * @author Henning Treu - Initial contribution and API
+ * @author Henning Treu - Initial contribution
  *
  */
 @NonNullByDefault

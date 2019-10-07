@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * Register this observer at {@see MqttBrokerConnection}.
  *
  * @author David Graeff - Rewritten
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public interface MqttConnectionObserver {

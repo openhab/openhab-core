@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.persistence.config;
 /**
  * This class represents the configuration that is used for group items.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class SimpleGroupConfig extends SimpleConfig {
 

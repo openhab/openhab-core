@@ -38,8 +38,8 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
- * @author Dennis Nobel - Initial Contribution
+ * @author Michael Grammling - Initial contribution
+ * @author Dennis Nobel - Initial contribution
  * @author Chris Jackson - Added parameter groups
  * @author Thomas Höfer - Added convenient operation to get config description parameters in a map
  */

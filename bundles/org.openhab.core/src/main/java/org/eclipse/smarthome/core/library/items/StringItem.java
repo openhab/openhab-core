@@ -32,7 +32,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * A StringItem can be used for any kind of string to either send or receive
  * from a device.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

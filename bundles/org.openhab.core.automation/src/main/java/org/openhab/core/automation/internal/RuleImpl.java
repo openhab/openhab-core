@@ -35,9 +35,9 @@ import org.openhab.core.automation.template.RuleTemplate;
 /**
  * This is the internal implementation of a {@link Rule}, which comes with full getters and setters.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  * @author Kai Kreuzer - Introduced transient status and made it implement the Rule interface
  */
 @NonNullByDefault

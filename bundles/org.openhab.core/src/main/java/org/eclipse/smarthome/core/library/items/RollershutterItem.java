@@ -31,7 +31,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * A RollershutterItem allows the control of roller shutters, i.e.
  * moving them up, down, stopping or setting it to close to a certain percentage.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Support more types for getStateAs
  *
  */

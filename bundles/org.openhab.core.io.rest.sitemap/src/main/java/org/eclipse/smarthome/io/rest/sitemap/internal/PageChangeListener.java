@@ -42,7 +42,7 @@ import org.eclipse.smarthome.ui.items.ItemUIRegistry;
 /**
  * This is a class that listens on item state change events and creates sitemap events for a dedicated sitemap page.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class PageChangeListener implements StateChangeListener {

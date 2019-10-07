@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Default implementation of authentication manager.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  *
  */
 @Component

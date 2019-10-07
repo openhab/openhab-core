@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see ConfigDescriptionProvider
  *
- * @author Dennis Nobel - Initial contribution, added locale support
+ * @author Dennis Nobel - Initial contribution
  * @author Michael Grammling - Initial contribution
  * @author Chris Jackson - Added compatibility with multiple ConfigDescriptionProviders. Added Config OptionProvider.
  * @author Thomas Höfer - Added unit

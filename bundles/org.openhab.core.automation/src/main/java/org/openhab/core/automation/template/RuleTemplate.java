@@ -37,9 +37,9 @@ import org.openhab.core.automation.Visibility;
  * <p>
  * Templates can have {@code tags} - non-hierarchical keywords or terms for describing them.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  * @author Markus Rathgeb - Add default constructor for deserialization
  */
 @NonNullByDefault
