@@ -23,7 +23,7 @@ import org.eclipse.smarthome.test.SyntheticBundleInstaller;
 import org.osgi.framework.BundleContext;
 
 /**
- * @author Markus Rathgeb - Initial Contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class BindingInstaller {
 

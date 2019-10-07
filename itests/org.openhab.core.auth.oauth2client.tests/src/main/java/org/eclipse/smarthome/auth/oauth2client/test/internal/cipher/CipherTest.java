@@ -32,7 +32,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Verify that the SymmetricKeyCipher is working properly.
  *
- * @author Gary Tse - Initial Contribution
+ * @author Gary Tse - Initial contribution
  */
 public class CipherTest {
 

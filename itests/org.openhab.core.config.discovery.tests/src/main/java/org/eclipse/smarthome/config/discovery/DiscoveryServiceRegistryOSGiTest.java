@@ -43,7 +43,7 @@ import org.osgi.framework.ServiceRegistration;
  * {@link DiscoveryResult}s which are added to the {@link Inbox},
  * the {@link Inbox} is cleared again after this test returns.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Simon Kaufmann - added tests for ExtendedDiscoveryService, ported to Java
  * @author Andre Fuechsel - added tests for removeOlderResults for a specific bridge only
  */

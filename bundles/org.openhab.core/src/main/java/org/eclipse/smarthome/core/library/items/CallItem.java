@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * This item identifies a telephone call by its origin and destination.
  *
- * @author Thomas.Eichstaedt-Engelen / Initially CallItem
+ * @author Thomas.Eichstaedt-Engelen - Initial contribution
  * @author Gaël L'hopital - port to Eclipse SmartHome
  */
 @NonNullByDefault

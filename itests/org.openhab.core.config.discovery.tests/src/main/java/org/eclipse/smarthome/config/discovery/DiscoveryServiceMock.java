@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
  * If this mock is configured to be faulty, an exception is thrown if the
  * discovery is enforced or aborted.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
  */
 public class DiscoveryServiceMock extends AbstractDiscoveryService {

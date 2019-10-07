@@ -52,7 +52,7 @@ import org.mockito.ArgumentCaptor;
  * chain to update the {@link Thing} at the according {@link ThingHandler} if needed.
  * A dummy {@link ThingHandler} and {@link ThingHandlerFactory} is used to detect an updated event.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
  * @author Andre Fuechsel - Added tests for device id
  * @author Simon Kaufmann - ported to Java
