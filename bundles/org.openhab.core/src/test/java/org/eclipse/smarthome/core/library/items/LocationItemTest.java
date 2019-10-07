@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.library.types.PointType;
 import org.junit.Test;
 
 /**
- * @author Gaël L'hopital - Initial version
+ * @author Gaël L'hopital - Initial contribution
  * @author Stefan Triller - tests for undef and illegal states
  */
 public class LocationItemTest {

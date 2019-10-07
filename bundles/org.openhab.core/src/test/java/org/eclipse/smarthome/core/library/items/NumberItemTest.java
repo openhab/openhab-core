@@ -37,7 +37,7 @@ import org.mockito.Mock;
 
 /**
  *
- * @author Stefan Triller - Initial version
+ * @author Stefan Triller - Initial contribution
  *
  */
 public class NumberItemTest {

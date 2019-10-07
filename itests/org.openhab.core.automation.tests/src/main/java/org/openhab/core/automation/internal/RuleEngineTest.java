@@ -44,7 +44,7 @@ import org.openhab.core.automation.util.RuleBuilder;
 /**
  * Test adding, retrieving and updating rules from the RuleEngineImpl
  *
- * @author Marin Mitev - initial version
+ * @author Marin Mitev - Initial contribution
  * @author Thomas Höfer - Added config description parameter unit
  */
 public class RuleEngineTest extends JavaOSGiTest {
