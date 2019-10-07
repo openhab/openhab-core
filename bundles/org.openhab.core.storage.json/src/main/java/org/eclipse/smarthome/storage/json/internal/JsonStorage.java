@@ -47,7 +47,7 @@ import com.google.gson.JsonSyntaxException;
  * performance. The service keeps backups in a /backup folder, and maintains a
  * maximum of MAX_FILES at any time
  *
- * @author Chris Jackson - Initial Contribution
+ * @author Chris Jackson - Initial contribution
  * @author Stefan Triller - Removed dependency to internal GSon packages
  * @author Simon Kaufmann - Distinguish between inner and outer
  *         de-/serialization, keep json structures in map
@@ -63,24 +63,25 @@ public class JsonStorage<T> implements Storage<T> {
 
     static final String CLASS = "class";
     static final String VALUE = "value";
-    private final String BACKUP_EXTENSION = "backup";
-    private final String SEPARATOR = "--";
+    private static final String BACKUP_EXTENSION = "backup";
+    private static final String SEPARATOR = "--";
 
     private final Timer commitTimer;
-    private @Nullable TimerTask commitTimerTask = null;
+    private @Nullable TimerTask commitTimerTask;
 
     private long deferredSince = 0;
 
     private final File file;
-    private final ClassLoader classLoader;
-    private final Map<String, StorageEntry> map = new ConcurrentHashMap<String, StorageEntry>();
+    private final @Nullable ClassLoader classLoader;
+    private final Map<String, StorageEntry> map = new ConcurrentHashMap<>();
 
     private transient Gson internalMapper;
     private transient Gson entityMapper;
 
-    private boolean dirty = false;
+    private boolean dirty;
 
-    public JsonStorage(File file, ClassLoader classLoader, int maxBackupFiles, int writeDelay, int maxDeferredPeriod) {
+    public JsonStorage(File file, @Nullable ClassLoader classLoader, int maxBackupFiles, int writeDelay,
+            int maxDeferredPeriod) {
         this.file = file;
         this.classLoader = classLoader;
         this.maxBackupFiles = maxBackupFiles;
@@ -139,11 +140,9 @@ public class JsonStorage<T> implements Storage<T> {
         StorageEntry val = new StorageEntry(value.getClass().getName(), entityMapper.toJsonTree(value));
         StorageEntry previousValue = map.put(key, val);
         deferredCommit();
-
         if (previousValue == null) {
             return null;
         }
-
         return deserialize(previousValue);
     }
 
@@ -187,7 +186,7 @@ public class JsonStorage<T> implements Storage<T> {
 
     /**
      * Deserializes and instantiates an object of type {@code T} out of the given
-     * JSON String. A special classloader (other than the one of the Json bundle) is
+     * JSON String. A special classloader (other than the one of the JSON bundle) is
      * used in order to load the classes in the context of the calling bundle.
      */
     @SuppressWarnings("unchecked")
@@ -197,24 +196,22 @@ public class JsonStorage<T> implements Storage<T> {
             return null;
         }
 
-        @Nullable
-        T value = null;
         try {
             // load required class within the given bundle context
-            Class<T> loadedValueType = null;
-            if (classLoader == null) {
-                loadedValueType = (Class<T>) Class.forName(entry.getEntityClassName());
-            } else {
+            Class<T> loadedValueType;
+            if (classLoader != null) {
                 loadedValueType = (Class<T>) classLoader.loadClass(entry.getEntityClassName());
+            } else {
+                loadedValueType = (Class<T>) Class.forName(entry.getEntityClassName());
             }
 
-            value = entityMapper.fromJson((JsonElement) entry.getValue(), loadedValueType);
+            T value = entityMapper.fromJson((JsonElement) entry.getValue(), loadedValueType);
             logger.trace("deserialized value '{}' from Json", value);
-        } catch (Exception e) {
+            return value;
+        } catch (JsonSyntaxException | JsonIOException | ClassNotFoundException e) {
             logger.error("Couldn't deserialize value '{}'. Root cause is: {}", entry, e.getMessage());
+            return null;
         }
-
-        return value;
     }
 
     @SuppressWarnings("unchecked")
@@ -250,7 +247,7 @@ public class JsonStorage<T> implements Storage<T> {
         if (!folder.isDirectory()) {
             return Collections.emptyList();
         }
-        List<Long> fileTimes = new ArrayList<Long>();
+        List<Long> fileTimes = new ArrayList<>();
         File[] files = folder.listFiles();
         if (files != null) {
             int count = files.length;

@@ -13,13 +13,8 @@
 package org.eclipse.smarthome.core.thing.internal;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.eclipse.smarthome.core.service.ReadyService;
@@ -36,11 +31,9 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 
 /**
- *
- * @author Simon Kaufmann - Initial contribution and API
- *
+ * @author Simon Kaufmann - Initial contribution
  */
-public class ThingManagerTest {
+public class ThingManagerImplTest {
 
     private @Mock BundleResolver mockBundleResolver;
     private @Mock Bundle mockBundle;
@@ -102,7 +95,7 @@ public class ThingManagerTest {
         ThingUID unknownUID = new ThingUID("someBundle", "someType", "someID");
         ThingManagerImpl thingManager = new ThingManagerImpl();
 
-        when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(null);
+        when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(mockStorage);
         thingManager.setStorageService(mockStorageService);
         assertEquals(thingManager.isEnabled(unknownUID), true);
 

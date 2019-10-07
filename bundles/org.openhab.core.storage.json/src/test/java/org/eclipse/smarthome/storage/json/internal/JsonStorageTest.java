@@ -28,11 +28,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * This test makes sure that the JSonStorage loads all stored numbers as BigDecimal
+ * This test makes sure that the JsonStorage loads all stored numbers as BigDecimal
  *
- * @author Stefan Triller - Initial Contribution
+ * @author Stefan Triller - Initial contribution
  */
-public class JSonStorageTest extends JavaTest {
+public class JsonStorageTest extends JavaTest {
 
     private JsonStorage<DummyObject> objectStorage;
     private File tmpFile;
@@ -59,6 +59,7 @@ public class JSonStorageTest extends JavaTest {
         objectStorage.put("DummyObject", new DummyObject());
         DummyObject dummy = objectStorage.get("DummyObject");
 
+        assertNotNull(dummy);
         assertTrue(dummy.configuration.get("testShort") instanceof BigDecimal);
         assertTrue(dummy.configuration.get("testInt") instanceof BigDecimal);
         assertTrue(dummy.configuration.get("testLong") instanceof BigDecimal);
@@ -75,6 +76,7 @@ public class JSonStorageTest extends JavaTest {
         persistAndReadAgain();
         DummyObject dummy = objectStorage.get("DummyObject");
 
+        assertNotNull(dummy);
         assertTrue(dummy.configuration.get("testShort") instanceof BigDecimal);
         assertTrue(dummy.configuration.get("testInt") instanceof BigDecimal);
         assertTrue(dummy.configuration.get("testLong") instanceof BigDecimal);
@@ -90,6 +92,7 @@ public class JSonStorageTest extends JavaTest {
         objectStorage.put("DummyObject", new DummyObject());
         DummyObject dummy = objectStorage.get("DummyObject");
 
+        assertNotNull(dummy);
         assertEquals(((BigDecimal) dummy.configuration.get("testShort")).scale(), 0);
         assertEquals(((BigDecimal) dummy.configuration.get("testInt")).scale(), 0);
         assertEquals(((BigDecimal) dummy.configuration.get("testLong")).scale(), 0);
@@ -103,6 +106,7 @@ public class JSonStorageTest extends JavaTest {
         persistAndReadAgain();
         DummyObject dummy = objectStorage.get("DummyObject");
 
+        assertNotNull(dummy);
         assertEquals(((BigDecimal) dummy.configuration.get("testShort")).scale(), 0);
         assertEquals(((BigDecimal) dummy.configuration.get("testInt")).scale(), 0);
         assertEquals(((BigDecimal) dummy.configuration.get("testLong")).scale(), 0);

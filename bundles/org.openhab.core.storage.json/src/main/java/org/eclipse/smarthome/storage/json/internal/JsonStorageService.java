@@ -15,13 +15,17 @@ package org.eclipse.smarthome.storage.json.internal;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.eclipse.smarthome.config.core.ConfigurableService;
 import org.eclipse.smarthome.core.storage.Storage;
 import org.eclipse.smarthome.core.storage.StorageService;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -30,16 +34,17 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This implementation of {@link StorageService} provides a mechanism to store
- * data in Json files.
+ * data in JSON files.
  *
- * @author Chris Jackson - Initial Contribution
+ * @author Chris Jackson - Initial contribution
  */
 @Component(name = "org.eclipse.smarthome.storage.json", property = { //
-        "service.pid=org.eclipse.smarthome.storage.json", //
-        "service.config.description.uri=system:json_storage", //
-        "service.config.label=Json Storage", //
-        "service.config.category=system", //
+        Constants.SERVICE_PID + "=org.eclipse.smarthome.storage.json", //
+        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Json Storage", //
+        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
+        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=system:json_storage", //
         "storage.format=json" })
+@NonNullByDefault
 public class JsonStorageService implements StorageService {
 
     private static final int MAX_FILENAME_LENGTH = 127;
@@ -49,18 +54,18 @@ public class JsonStorageService implements StorageService {
     /** the folder name to store database ({@code jsondb} by default) */
     private String dbFolderName = "jsondb";
 
-    private final String CFG_MAX_BACKUP_FILES = "backup_files";
-    private final String CFG_WRITE_DELAY = "write_delay";
-    private final String CFG_MAX_DEFER_DELAY = "max_defer_delay";
+    private static final String CFG_MAX_BACKUP_FILES = "backup_files";
+    private static final String CFG_WRITE_DELAY = "write_delay";
+    private static final String CFG_MAX_DEFER_DELAY = "max_defer_delay";
 
     private int maxBackupFiles = 5;
     private int writeDelay = 500;
     private int maxDeferredPeriod = 60000;
 
-    private final Map<String, JsonStorage<Object>> storageList = new HashMap<String, JsonStorage<Object>>();
+    private final Map<String, JsonStorage<Object>> storageList = new HashMap<>();
 
     @Activate
-    protected void activate(ComponentContext cContext, Map<String, Object> properties) {
+    protected void activate(@Nullable Map<String, Object> properties) {
         dbFolderName = ConfigConstants.getUserDataFolder() + File.separator + dbFolderName;
         File folder = new File(dbFolderName);
         if (!folder.exists()) {
@@ -111,9 +116,9 @@ public class JsonStorageService implements StorageService {
         logger.debug("Json Storage Service: Deactivated.");
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     @Override
-    public <T> Storage<T> getStorage(String name, ClassLoader classLoader) {
+    public <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader) {
         File legacyFile = new File(dbFolderName, name + ".json");
         File escapedFile = new File(dbFolderName, urlEscapeUnwantedChars(name) + ".json");
 
@@ -146,7 +151,7 @@ public class JsonStorageService implements StorageService {
     protected String urlEscapeUnwantedChars(String s) {
         String result;
         try {
-            result = URLEncoder.encode(s, "UTF-8");
+            result = URLEncoder.encode(s, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             logger.warn("Encoding UTF-8 is not supported, might generate invalid filenames.");
             result = s;

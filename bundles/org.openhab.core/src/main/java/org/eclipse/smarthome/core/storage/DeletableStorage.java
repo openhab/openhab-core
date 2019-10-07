@@ -12,11 +12,14 @@
  */
 package org.eclipse.smarthome.core.storage;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A {@code Storage} that could be disposed.
  *
- * @author Markus Rathgeb - Initial Contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public interface DeletableStorage<T> extends Storage<T> {
 
     /**
