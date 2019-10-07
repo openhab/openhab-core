@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.gson.Gson;
 import com.google.gson.InstanceCreator;
 import com.google.gson.JsonSyntaxException;
@@ -34,8 +36,7 @@ import com.google.gson.stream.JsonWriter;
  * Type adapter that makes sure that all Numeric values in Maps of type Map&lt;String, Object&gt; are deserialized as
  * BigDecimal instances instead of doubles.
  *
- * @author Ivan Iliev
- *
+ * @author Ivan Iliev - Initial contribution
  */
 public class PropertiesTypeAdapter extends TypeAdapter<Map<String, Object>> {
 
@@ -52,9 +53,9 @@ public class PropertiesTypeAdapter extends TypeAdapter<Map<String, Object>> {
     private final TypeAdapter<Object> valueAdapter;
 
     /**
-     * Constructor.
+     * Constructor
      *
-     * @param gson the gson reference
+     * @param gson the Gson reference
      */
     public PropertiesTypeAdapter(final Gson gson) {
         // obtain the default type adapters for String and Object classes
@@ -67,13 +68,13 @@ public class PropertiesTypeAdapter extends TypeAdapter<Map<String, Object>> {
     }
 
     @Override
-    public void write(JsonWriter out, Map<String, Object> value) throws IOException {
+    public void write(JsonWriter out, @Nullable Map<String, Object> value) throws IOException {
         // write remains unchanged
         delegate.write(out, value);
     }
 
     @Override
-    public Map<String, Object> read(JsonReader in) throws IOException {
+    public @Nullable Map<String, Object> read(JsonReader in) throws IOException {
         // gson implementation code is modified when deserializing numbers
         JsonToken peek = in.peek();
         if (peek == JsonToken.NULL) {

@@ -37,7 +37,7 @@ import com.google.gson.JsonSyntaxException;
  * This transformation should help maintaining version compatibility of the stored
  * data.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial Contribution and API
+ * @author Thomas.Eichstaedt-Engelen - Initial contribution
  * @author Alex Tugarev - Loading with Class.forName() if classLoader is null
  * @author Markus Rathgeb - Made the MapDB storage a disposable one
  */

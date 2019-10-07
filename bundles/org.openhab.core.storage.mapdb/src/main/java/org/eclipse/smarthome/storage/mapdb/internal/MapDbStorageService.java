@@ -14,6 +14,8 @@ package org.eclipse.smarthome.storage.mapdb.internal;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.storage.DeletableStorage;
 import org.eclipse.smarthome.core.storage.DeletableStorageService;
@@ -30,12 +32,13 @@ import org.slf4j.LoggerFactory;
  * This implementation of {@link StorageService} provides abilities to store
  * data in the lightweight key-value-store <a href="http://www.mapdb.org">MapDB</a>.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial Contribution and API
+ * @author Thomas.Eichstaedt-Engelen - Initial contribution
  * @author Alex Tugarev - Added getStorage for name only
  * @author Markus Rathgeb - Use {@link DeletableStorageService}
  */
 @Component(name = "org.eclipse.smarthome.storage.mapdb", immediate = true, service = { StorageService.class,
         DeletableStorageService.class }, property = "storage.format=mapdb")
+@NonNullByDefault
 public class MapDbStorageService implements DeletableStorageService {
 
     private final Logger logger = LoggerFactory.getLogger(MapDbStorageService.class);
@@ -44,7 +47,7 @@ public class MapDbStorageService implements DeletableStorageService {
     private static final String DB_FILE_NAME = "storage.mapdb";
 
     /* holds the local instance of the MapDB database */
-    private DB db;
+    private @NonNullByDefault({}) DB db;
 
     /* the folder name to store mapdb databases ({@code mapdb} by default) */
     private String dbFolderName = "mapdb";
@@ -70,7 +73,7 @@ public class MapDbStorageService implements DeletableStorageService {
     }
 
     @Override
-    public <T> DeletableStorage<T> getStorage(String name, ClassLoader classLoader) {
+    public <T> DeletableStorage<T> getStorage(String name, @Nullable ClassLoader classLoader) {
         return new MapDbStorage<>(db, name, classLoader);
     }
 
