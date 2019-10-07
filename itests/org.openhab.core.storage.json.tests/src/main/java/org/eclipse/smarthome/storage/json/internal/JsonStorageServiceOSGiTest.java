@@ -26,20 +26,22 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.config.core.Configuration;
+import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.storage.Storage;
 import org.eclipse.smarthome.core.storage.StorageService;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- *
- * @author Simon Kaufmann - Initial implementation
+ * @author Simon Kaufmann - Initial contribution
  */
 public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
+
+    private static final String KEY1 = "Key1";
+    private static final String KEY2 = "Key2";
 
     private StorageService storageService;
     private Storage<PersistedItem> storage;
@@ -85,12 +87,12 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     public void testSerialization() {
         assertThat(storage.getKeys().size(), is(0));
 
-        storage.put("Key1", new PersistedItem("String", Arrays.asList("LIGHT", "GROUND_FLOOR")));
-        storage.put("Key2", new PersistedItem("Number", Arrays.asList("TEMPERATURE", "OUTSIDE")));
+        storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, Arrays.asList("LIGHT", "GROUND_FLOOR")));
+        storage.put(KEY2, new PersistedItem(CoreItemFactory.NUMBER, Arrays.asList("TEMPERATURE", "OUTSIDE")));
         assertThat(storage.getKeys().size(), is(2));
 
-        storage.remove("Key1");
-        storage.remove("Key2");
+        storage.remove(KEY1);
+        storage.remove(KEY2);
         assertThat(storage.getKeys().size(), is(0));
     }
 
@@ -100,30 +102,32 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
 
         assertThat(storage.getKeys().size(), is(0));
 
-        pItem = storage.put("Key1", new PersistedItem("String", Arrays.asList("LIGHT", "GROUND_FLOOR")));
+        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, Arrays.asList("LIGHT", "GROUND_FLOOR")));
         assertThat(storage.getKeys().size(), is(1));
         assertThat(pItem, is(nullValue()));
 
-        pItem = storage.get("Key1");
+        pItem = storage.get(KEY1);
         assertThat(pItem, is(notNullValue()));
-        assertThat(pItem.itemType, is("String"));
+        assertThat(pItem.itemType, is(CoreItemFactory.STRING));
 
-        pItem = storage.put("Key1", new PersistedItem("Number", Arrays.asList("TEMPERATURE")));
-        Assert.assertNotNull(pItem);
+        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.NUMBER, Arrays.asList("TEMPERATURE")));
+        assertThat(pItem, is(notNullValue()));
         assertThat(storage.getKeys().size(), is(1));
-        assertThat(pItem.itemType, is("String"));
-        assertThat(storage.get("Key1").itemType, is("Number"));
+        assertThat(pItem.itemType, is(CoreItemFactory.STRING));
+        pItem = storage.get(KEY1);
+        assertThat(pItem, is(notNullValue()));
+        assertThat(pItem.itemType, is(CoreItemFactory.NUMBER));
 
-        storage.remove("Key1");
+        storage.remove(KEY1);
         assertThat(storage.getKeys().size(), is(0));
     }
 
     @Test
     public void testClassloader() {
         Storage<String> storageWithoutClassloader = storageService.getStorage("storageWithoutClassloader");
-        storageWithoutClassloader.put("Key1", "Value");
+        storageWithoutClassloader.put(KEY1, "Value");
 
-        assertThat(storageWithoutClassloader.get("Key1"), is(equalTo("Value")));
+        assertThat(storageWithoutClassloader.get(KEY1), is(equalTo("Value")));
     }
 
     @Test
@@ -135,6 +139,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
 
         storageWithoutClassloader.put("configuration", dummy);
 
+        @SuppressWarnings("null")
         Object bigDecimal = storageWithoutClassloader.get("configuration").configuration.get("bigDecimal");
         assertThat(bigDecimal instanceof BigDecimal, is(true));
     }

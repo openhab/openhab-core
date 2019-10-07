@@ -25,8 +25,7 @@ import com.google.gson.reflect.TypeToken;
  * TypeAdapterFactory responsible for returning a new instance of {@link PropertiesTypeAdapter} if the given type
  * matches Map&lt;String, Object&gt; or null otherwise.
  *
- * @author Ivan Iliev
- *
+ * @author Ivan Iliev - Initial contribution
  */
 public class PropertiesTypeAdapterFactory implements TypeAdapterFactory {
 

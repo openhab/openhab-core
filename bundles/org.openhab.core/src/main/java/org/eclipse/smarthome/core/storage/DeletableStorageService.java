@@ -12,17 +12,21 @@
  */
 package org.eclipse.smarthome.core.storage;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link DeletableStorageService} extends the normal {@link StorageService} and provides instances of
  * {@link DeletableStorage}s.
  *
- * @author Markus Rathgeb - Initial Contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public interface DeletableStorageService extends StorageService {
 
     @Override
     <T> DeletableStorage<T> getStorage(String name);
 
     @Override
-    <T> DeletableStorage<T> getStorage(String name, ClassLoader classLoader);
+    <T> DeletableStorage<T> getStorage(String name, @Nullable ClassLoader classLoader);
 }

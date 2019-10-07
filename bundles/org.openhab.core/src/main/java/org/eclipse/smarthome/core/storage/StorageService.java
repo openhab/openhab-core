@@ -12,6 +12,9 @@
  */
 package org.eclipse.smarthome.core.storage;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link StorageService} provides instances of {@link Storage}s which are
  * meant as a means for generic storage of key-value pairs. You can think of
@@ -21,14 +24,15 @@ package org.eclipse.smarthome.core.storage;
  * to be injected into service consumers with the need for storing generic key-value pairs like the
  * ManagedXXXProviders.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial Contribution and API
+ * @author Thomas.Eichstaedt-Engelen - Initial contribution
  * @author Dennis Nobel - Added second method with ClassLoader
  */
+@NonNullByDefault
 public interface StorageService {
 
     /**
      * Returns the {@link Storage} with the given {@code name}. If no {@link Storage} with this name exists a new
-     * initialised instance is returned.
+     * initialized instance is returned.
      *
      * @param name the name of the {@link StorageService} to return
      * @return a ready to use {@link Storage}, never {@code null}
@@ -37,12 +41,12 @@ public interface StorageService {
 
     /**
      * Returns the {@link Storage} with the given {@code name} and a given {@link ClassLoader}. If no {@link Storage}
-     * with this name exists a new initialised instance is returned.
+     * with this name exists a new initialized instance is returned.
      *
      * @param name the name of the {@link StorageService} to return
      * @param classLoader the class loader which should be used by the {@link Storage}
      * @param <T> The type of the storage service
      * @return a ready to use {@link Storage}, never {@code null}
      */
-    <T> Storage<T> getStorage(String name, ClassLoader classLoader);
+    <T> Storage<T> getStorage(String name, @Nullable ClassLoader classLoader);
 }

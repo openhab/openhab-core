@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.storage.json.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Internal data structure of the {@link JsonStorage}
  *
- * @author Simon Kaufmann - Initial contribution and API
- *
+ * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class StorageEntry {
 
     @SerializedName("class") // in order to stay backwards compatible

@@ -28,10 +28,9 @@ import com.google.gson.JsonParseException;
 /**
  * Deserializes the internal data structure of the {@link JsonStorage})
  *
- * The contained entities remain json objects and won't me deserialized to their corresponding types at this point.
+ * The contained entities remain JSON objects and won't be deserialized to their corresponding types at this point.
  *
- * @author Simon Kaufmann - Initial contribution and API
- *
+ * @author Simon Kaufmann - Initial contribution
  */
 public class StorageEntryMapDeserializer implements JsonDeserializer<Map<String, StorageEntry>> {
 

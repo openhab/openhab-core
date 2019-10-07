@@ -11,6 +11,6 @@
 
   <artifactId>org.openhab.core.storage.json.tests</artifactId>
 
-  <name>openHAB Core :: Integration Tests :: Storage JSON Tests</name>
+  <name>openHAB Core :: Integration Tests :: JSON Storage Tests</name>
 
 </project>
