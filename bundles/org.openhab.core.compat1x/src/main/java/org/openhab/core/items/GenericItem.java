@@ -30,7 +30,6 @@ import org.openhab.core.types.UnDefType;
  * or notifying listeners.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 abstract public class GenericItem implements Item {

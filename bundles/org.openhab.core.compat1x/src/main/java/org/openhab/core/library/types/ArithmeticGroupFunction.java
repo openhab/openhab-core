@@ -26,7 +26,6 @@ import org.openhab.core.types.UnDefType;
  * for its calculations.
  *
  * @author Kai Kreuzer
- * @since 0.7.0
  *
  */
 public interface ArithmeticGroupFunction extends GroupFunction {
@@ -39,7 +38,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * items actually are not in the 'activeState'.
      *
      * @author Kai Kreuzer
-     * @since 0.7.0
      *
      */
     static class And implements GroupFunction {
@@ -116,7 +114,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * items actually are in the 'activeState'.
      *
      * @author Kai Kreuzer
-     * @since 0.7.0
      *
      */
     static class Or implements GroupFunction {
@@ -184,7 +181,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * passiveValue will be returned and vice versa.
      *
      * @author Thomas.Eichstaedt-Engelen
-     * @since 1.0.0
      */
     static class NAnd extends And {
 
@@ -208,7 +204,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * passiveValue will be returned and vice versa.
      *
      * @author Thomas.Eichstaedt-Engelen
-     * @since 1.0.0
      */
     static class NOr extends Or {
 
@@ -229,7 +224,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * This calculates the numeric average over all item states of decimal type.
      *
      * @author Kai Kreuzer
-     * @since 0.7.0
      *
      */
     static class Avg implements GroupFunction {
@@ -278,7 +272,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * This calculates the numeric sum over all item states of decimal type.
      *
      * @author Thomas.Eichstaedt-Engelen
-     * @since 1.1.0
      *
      */
     static class Sum implements GroupFunction {
@@ -321,7 +314,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * This calculates the minimum value of all item states of decimal type.
      *
      * @author Kai Kreuzer
-     * @since 0.7.0
      *
      */
     static class Min implements GroupFunction {
@@ -369,7 +361,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * This calculates the maximum value of all item states of decimal type.
      *
      * @author Kai Kreuzer
-     * @since 0.7.0
      *
      */
     static class Max implements GroupFunction {

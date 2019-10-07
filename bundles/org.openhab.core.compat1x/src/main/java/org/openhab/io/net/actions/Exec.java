@@ -23,7 +23,6 @@ import org.openhab.io.net.exec.ExecUtil;
  * executing commands on command line.
  *
  * @author Pauli Anttila
- * @since 1.3.0
  *
  */
 public class Exec {

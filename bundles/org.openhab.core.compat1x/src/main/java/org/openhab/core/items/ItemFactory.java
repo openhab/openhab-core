@@ -16,7 +16,6 @@ package org.openhab.core.items;
  * This Factory creates concrete instances of the known ItemTypes.
  *
  * @author Thomas.Eichstaedt-Engelen
- * @since 0.9.0
  */
 public interface ItemFactory {
 

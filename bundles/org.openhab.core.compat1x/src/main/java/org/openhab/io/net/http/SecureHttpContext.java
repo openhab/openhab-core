@@ -25,7 +25,6 @@ import org.osgi.service.http.HttpContext;
  * functionality to openHAB.
  *
  * @author Thomas.Eichstaedt-Engelen
- * @since 0.9.0
  */
 public class SecureHttpContext implements HttpContext {
 

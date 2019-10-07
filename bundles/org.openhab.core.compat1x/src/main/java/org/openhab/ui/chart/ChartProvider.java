@@ -23,7 +23,6 @@ import org.openhab.core.items.ItemNotFoundException;
  * chart servlet and returns a chart image object (PNG).
  *
  * @author Chris Jackson
- * @since 1.4.0
  *
  *
  */

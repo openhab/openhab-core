@@ -17,7 +17,6 @@ package org.openhab.core.binding;
  * used as binding configurations.
  *
  * @author Kai Kreuzer
- * @since 0.6.0
  *
  */
 public interface BindingConfig {

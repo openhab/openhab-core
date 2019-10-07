@@ -28,7 +28,6 @@ import org.openhab.core.types.UnDefType;
  * This is useful for doors, windows, etc.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public class ContactItem extends GenericItem {

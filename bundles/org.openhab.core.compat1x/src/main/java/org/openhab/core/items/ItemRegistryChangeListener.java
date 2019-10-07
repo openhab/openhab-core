@@ -19,7 +19,6 @@ import java.util.Collection;
  * used in order to be notified of any dynamic changes in the provided items.
  *
  * @author Kai Kreuzer
- * @since 0.4.0
  *
  */
 public interface ItemRegistryChangeListener {

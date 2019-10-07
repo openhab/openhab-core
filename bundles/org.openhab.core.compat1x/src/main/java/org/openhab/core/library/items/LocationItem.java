@@ -27,7 +27,6 @@ import org.openhab.core.types.UnDefType;
  * This is useful for location awareness related functions
  *
  * @author Gaël L'hopital
- * @since 1.7.0
  */
 public class LocationItem extends GenericItem {
     private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();

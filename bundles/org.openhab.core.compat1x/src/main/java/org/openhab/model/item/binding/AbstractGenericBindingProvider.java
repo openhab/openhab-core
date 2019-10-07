@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
  * <p>
  *
  * @author Kai Kreuzer
- * @since 0.6.0
  *
  */
 public abstract class AbstractGenericBindingProvider implements BindingConfigReader, BindingProvider {

@@ -19,7 +19,6 @@ import java.util.Collection;
  * an item. The list of matching items must be made available through this exception.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public class ItemNotUniqueException extends ItemLookupException {

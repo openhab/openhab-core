@@ -20,7 +20,6 @@ import org.openhab.io.net.http.HttpUtil;
  * for sending HTTP requests
  *
  * @author Kai Kreuzer
- * @since 0.9.0
  *
  */
 public class HTTP {

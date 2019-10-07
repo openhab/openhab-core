@@ -17,7 +17,6 @@ import java.util.Collection;
 /**
  * @author Thomas.Eichstaedt-Engelen
  * @author Kai Kreuzer
- * @since 0.6.0
  */
 public interface BindingProvider {
 

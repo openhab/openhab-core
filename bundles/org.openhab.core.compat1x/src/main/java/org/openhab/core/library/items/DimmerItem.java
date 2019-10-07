@@ -30,7 +30,6 @@ import org.openhab.core.types.UnDefType;
  * to reflect the dimmed state.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public class DimmerItem extends SwitchItem {

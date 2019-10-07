@@ -27,7 +27,6 @@ import org.openhab.core.types.State;
  * brightness and can be used for color items.
  *
  * @author Kai Kreuzer
- * @since 1.2.0
  *
  */
 public class HSBType extends PercentType implements ComplexType, State, Command {

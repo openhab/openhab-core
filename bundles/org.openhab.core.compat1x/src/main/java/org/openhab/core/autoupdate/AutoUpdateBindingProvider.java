@@ -22,7 +22,6 @@ import org.openhab.core.binding.BindingProvider;
  * taken into account.
  *
  * @author Thomas.Eichstaedt-Engelen
- * @since 0.9.1
  */
 public interface AutoUpdateBindingProvider extends BindingProvider {
 

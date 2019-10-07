@@ -28,7 +28,6 @@ import org.openhab.core.types.UnDefType;
  * Useful for normal lights, presence detection etc.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public class SwitchItem extends GenericItem {

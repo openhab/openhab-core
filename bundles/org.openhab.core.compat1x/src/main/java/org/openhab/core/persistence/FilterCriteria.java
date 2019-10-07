@@ -35,7 +35,6 @@ import org.openhab.core.types.State;
  * easily chained in order to define a filter.
  *
  * @author Kai Kreuzer
- * @since 1.0.0
  */
 public class FilterCriteria {
 

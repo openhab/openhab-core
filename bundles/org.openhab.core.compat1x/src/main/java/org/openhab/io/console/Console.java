@@ -18,7 +18,6 @@ package org.openhab.io.console;
  * It allows basic output commands.
  *
  * @author Kai Kreuzer
- * @since 0.4.0
  *
  */
 public interface Console {

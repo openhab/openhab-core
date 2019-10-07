@@ -28,7 +28,6 @@ import org.openhab.core.types.UnDefType;
  * from a device.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public class StringItem extends GenericItem {

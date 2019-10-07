@@ -25,7 +25,6 @@ import org.openhab.core.types.State;
  *
  * @author Thomas.Eichstaedt-Engelen
  * @author Kai Kreuzer
- * @since 1.0.0
  */
 public abstract class AbstractBinding<P extends BindingProvider> extends AbstractEventSubscriber
         implements BindingChangeListener {

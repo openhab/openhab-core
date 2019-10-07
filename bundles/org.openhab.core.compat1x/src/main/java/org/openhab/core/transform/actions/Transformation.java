@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  * transformations.
  *
  * @author Kai Kreuzer
- * @since 0.8.0
  *
  */
 public class Transformation {

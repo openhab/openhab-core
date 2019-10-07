@@ -20,7 +20,6 @@ package org.openhab.core.types;
  * type as an additional information on the event bus for each message.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public enum EventType {
