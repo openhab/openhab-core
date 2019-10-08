@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Matthias Steigenberger - Initial Contribution
+ * @author Matthias Steigenberger - Initial contribution
  *
  */
 @NonNullByDefault

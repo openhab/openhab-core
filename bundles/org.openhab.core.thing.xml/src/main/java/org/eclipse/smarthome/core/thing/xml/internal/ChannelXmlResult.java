@@ -28,7 +28,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
 /**
  * The {@link ChannelXmlResult} is an intermediate XML conversion result object.
  *
- * @author Chris Jackson - Initial Contribution
+ * @author Chris Jackson - Initial contribution
  */
 public class ChannelXmlResult {
 

@@ -21,7 +21,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * <b>Hint:</b> This class cannot be instantiated, it contains only static methods.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class ConverterAssertion {
 

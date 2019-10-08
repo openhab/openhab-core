@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * This class holds static "action" methods that can be used from within rules to execute
  * transformations.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

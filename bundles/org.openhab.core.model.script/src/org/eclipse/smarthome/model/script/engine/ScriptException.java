@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Abstract class for exceptions thrown by the script engine.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public abstract class ScriptException extends Exception {

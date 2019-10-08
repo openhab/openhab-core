@@ -35,7 +35,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * This converter converts {@code binding} XML tags.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Andre Fuechsel - Made author tag optional
  */
 public class BindingInfoConverter extends GenericUnmarshaller<BindingInfoXmlResult> {

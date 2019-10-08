@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * This service provides serial port names as options for configuration parameters.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @Component

@@ -21,7 +21,7 @@ import org.eclipse.smarthome.model.sitemap.Widget;
  * This interface describes the methods that need to be implemented by a provider that
  * wants to define the appearance of an item in the UI.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public interface ItemUIProvider {

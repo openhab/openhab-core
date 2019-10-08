@@ -19,7 +19,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
  * definition of a config description parameter. As an example a boolean normalizer would convert a given numeric value
  * 0 to false and a given numeric value 1 to true.
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - renamed from INormalizer and minor javadoc changes
  */
 public interface Normalizer {

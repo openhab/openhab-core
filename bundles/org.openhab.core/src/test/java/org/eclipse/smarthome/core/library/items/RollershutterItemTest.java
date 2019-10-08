@@ -22,7 +22,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Hans Hazelius - Initial version
+ * @author Hans Hazelius - Initial contribution
  * @author Stefan Triller - Tests for type conversions
  *
  */

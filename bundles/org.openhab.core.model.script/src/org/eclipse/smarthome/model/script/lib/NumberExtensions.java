@@ -26,7 +26,7 @@ import org.eclipse.smarthome.core.types.Type;
  * This class contains all kinds of extensions to be used by scripts and not
  * provided by Xbase. These include things like number handling and comparisons.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class NumberExtensions {

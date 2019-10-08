@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * {@link DTOMapper} implementation.
  *
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 @Component

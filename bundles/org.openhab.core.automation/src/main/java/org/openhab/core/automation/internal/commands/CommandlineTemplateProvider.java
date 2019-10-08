@@ -49,7 +49,7 @@ import org.osgi.framework.ServiceRegistration;
  * <li>removes the {@link RuleTemplate}s and their persistence
  * </ul>
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  *
  */

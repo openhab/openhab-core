@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Some utility functions related to the http service
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class HttpServiceUtil {
 

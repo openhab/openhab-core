@@ -36,7 +36,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * The implementation of {@link ModuleTypeRegistry} that is registered as a service.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
 @Component(service = ModuleTypeRegistry.class, immediate = true)

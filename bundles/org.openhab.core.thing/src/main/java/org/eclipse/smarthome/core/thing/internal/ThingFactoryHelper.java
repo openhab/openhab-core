@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * It is supposed to contain methods that are commonly shared between {@link ThingManagerImpl} and {@link ThingFactory}.
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Kai Kreuzer - Changed creation of channels to not require a thing type
  *
  */

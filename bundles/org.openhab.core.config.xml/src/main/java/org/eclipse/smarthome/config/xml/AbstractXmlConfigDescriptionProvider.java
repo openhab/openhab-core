@@ -29,7 +29,7 @@ import org.osgi.framework.Bundle;
  * This implementation manages any {@link ConfigDescription} objects associated to specific modules. If a specific
  * module disappears, any registered {@link ConfigDescription} objects associated with that module are released.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Dennis Nobel - Added locale support
  * @author Alex Tugarev - Extended for pattern and options
  * @author Chris Jackson - Modify to use config parameter builder

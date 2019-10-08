@@ -42,7 +42,7 @@ import com.google.inject.Injector;
 /**
  * A service component exposing a Language Server via sockets.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 @Component(immediate = true, service = ModelServer.class, configurationPid = ModelServer.CONFIG_PID, property = {

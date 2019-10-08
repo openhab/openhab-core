@@ -82,7 +82,7 @@ import org.slf4j.LoggerFactory;
  * This implementation does neither handle memory leaks (orphaned listener instances) nor blocked listeners. No
  * performance optimizations have been done (synchronization).
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Dennis Nobel - Added automated removing of entries
  * @author Michael Grammling - Added dynamic configuration updates
  * @author Dennis Nobel - Added persistence support

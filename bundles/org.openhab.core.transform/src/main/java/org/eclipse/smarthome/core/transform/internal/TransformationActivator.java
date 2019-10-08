@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * Extension of the default OSGi bundle activator
  *
  * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public final class TransformationActivator implements BundleActivator {

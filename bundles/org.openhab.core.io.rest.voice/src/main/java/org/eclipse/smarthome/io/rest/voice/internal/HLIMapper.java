@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
 /**
  * Mapper class that maps {@link HumanLanguageInterpreter} instanced to their respective DTOs.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class HLIMapper {

@@ -48,7 +48,7 @@ import org.eclipse.smarthome.core.common.registry.Registry;
  * {@link RuleStatus#DISABLED}.</li>
  * </ul>
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 public interface RuleRegistry extends Registry<Rule, String> {
 

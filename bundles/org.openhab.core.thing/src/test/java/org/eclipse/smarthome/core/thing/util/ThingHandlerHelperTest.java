@@ -34,7 +34,7 @@ import org.mockito.junit.MockitoRule;
 /**
  * Test for the ThingHandlerHelper
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 public class ThingHandlerHelperTest {

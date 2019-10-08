@@ -29,7 +29,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * This converter converts {@code thing-descriptions} XML tags.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class ThingDescriptionConverter extends GenericUnmarshaller<ThingDescriptionList> {
 

@@ -38,7 +38,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * This converter converts {@code config-description} XML tags.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Chris Jackson - Added configuration groups
  */
 public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescription> {

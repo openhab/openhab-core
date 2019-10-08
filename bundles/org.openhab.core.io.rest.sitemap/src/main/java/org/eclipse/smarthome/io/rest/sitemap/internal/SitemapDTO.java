@@ -15,7 +15,7 @@ package org.eclipse.smarthome.io.rest.sitemap.internal;
 /**
  * This is a data transfer object that is used to serialize sitemaps.
  * 
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson
  *
  */

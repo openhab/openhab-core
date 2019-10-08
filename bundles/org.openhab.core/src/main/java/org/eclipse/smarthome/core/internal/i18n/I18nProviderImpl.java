@@ -69,10 +69,10 @@ import org.slf4j.LoggerFactory;
  * <p>
  * It reads a user defined configuration to set a locale and a location for this installation.
  *
- * @author Michael Grammling - Initial Contribution of TranslationProvider
+ * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added getText operation with arguments
- * @author Markus Rathgeb - Initial contribution and API of LocaleProvider
- * @author Stefan Triller - Initial contribution and API of LocationProvider
+ * @author Markus Rathgeb - Initial contribution
+ * @author Stefan Triller - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone
  *
  */

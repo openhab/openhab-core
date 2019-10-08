@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * Provider of the config description for the auto update policy metadata.
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 @NonNullByDefault

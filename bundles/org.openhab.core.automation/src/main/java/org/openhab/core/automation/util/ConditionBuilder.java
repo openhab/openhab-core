@@ -24,7 +24,7 @@ import org.openhab.core.automation.internal.ConditionImpl;
 /**
  * This class allows the easy construction of a {@link Condition} instance using the builder pattern.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public class ConditionBuilder extends ModuleBuilder<ConditionBuilder, Condition> {

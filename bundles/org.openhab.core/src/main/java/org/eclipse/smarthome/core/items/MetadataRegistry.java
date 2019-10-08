@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.common.registry.Registry;
  * Metadata can be supplied by {@link MetadataProvider}s, which can provision them from any source
  * they like and also dynamically remove or add data.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

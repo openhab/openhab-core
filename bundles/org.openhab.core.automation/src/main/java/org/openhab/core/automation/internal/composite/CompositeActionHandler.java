@@ -32,7 +32,7 @@ import org.openhab.core.automation.util.ReferenceResolver;
  * action, base on the outputs of the child actions, into rule context. The outputs of the child actions are not
  * visible out of the context of the action.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  *
  */
 public class CompositeActionHandler extends AbstractCompositeModuleHandler<Action, CompositeActionType, ActionHandler>

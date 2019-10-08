@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.auth;
 /**
  * Base type for exceptions reporting security concerns.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  *
  */
 public class SecurityException extends Exception {

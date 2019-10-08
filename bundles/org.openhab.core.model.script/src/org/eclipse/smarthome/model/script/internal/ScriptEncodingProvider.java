@@ -24,7 +24,7 @@ import org.eclipse.xtext.parser.IEncodingProvider;
  * It makes sure that synthetic resources are interpreted as UTF-8 because they will be handed in as strings and turned
  * into UTF-8 encoded streams by the script engine.
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  */
 public class ScriptEncodingProvider implements IEncodingProvider {
 

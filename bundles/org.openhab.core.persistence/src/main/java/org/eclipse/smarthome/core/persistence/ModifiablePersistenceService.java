@@ -23,7 +23,7 @@ import org.eclipse.smarthome.core.types.State;
  * at a specific time. This allows bindings that interface to devices that store data internally,
  * and then periodically provide it to the server to be accommodated.
  *
- * @author Chris Jackson - Initial implementation and API
+ * @author Chris Jackson - Initial contribution
  *
  */
 @NonNullByDefault

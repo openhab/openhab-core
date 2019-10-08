@@ -26,7 +26,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class NodeList implements NodeName {
 

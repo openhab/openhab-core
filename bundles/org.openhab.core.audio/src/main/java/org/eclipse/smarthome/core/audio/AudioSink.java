@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.library.types.PercentType;
  * Definition of an audio output like headphones, a speaker or for writing to
  * a file / clip.
  *
- * @author Harald Kuhn - Initial API
+ * @author Harald Kuhn - Initial contribution
  * @author Kelly Davis - Modified to match discussion in #584
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  *

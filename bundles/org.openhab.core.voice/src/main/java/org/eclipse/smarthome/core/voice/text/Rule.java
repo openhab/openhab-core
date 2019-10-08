@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
  * Represents an expression plus action code that will be executed after successful parsing. This class is immutable and
  * deriving classes should conform to this principle.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  *
  */
 public abstract class Rule {

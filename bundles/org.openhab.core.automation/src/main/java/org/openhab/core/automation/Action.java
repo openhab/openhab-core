@@ -34,9 +34,9 @@ import org.openhab.core.automation.type.Output;
  * <p>
  * Action modules are placed in the <b>actions</b> section of the {@link Rule} definition.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  */
 @NonNullByDefault
 public interface Action extends Module {

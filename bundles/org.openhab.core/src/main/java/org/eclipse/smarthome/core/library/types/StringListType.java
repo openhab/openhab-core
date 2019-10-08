@@ -26,7 +26,7 @@ import org.eclipse.smarthome.core.types.State;
 /**
  * This type can be used for items that are dealing with telephony functionality.
  *
- * @author Thomas.Eichstaedt-Engelen / Initially CallType
+ * @author Thomas.Eichstaedt-Engelen - Initial contribution
  * @author Gaël L'hopital - port to Eclipse SmartHome
  *
  */

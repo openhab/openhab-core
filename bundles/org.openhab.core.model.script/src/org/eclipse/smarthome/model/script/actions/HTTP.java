@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * This class provides static methods that can be used in automation rules
  * for sending HTTP requests
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Jan N. Klug - add timeout methods
  *
  */

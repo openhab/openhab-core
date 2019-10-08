@@ -46,7 +46,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * This converter converts {@code channel-type} XML tags. It uses the {@link AbstractDescriptionTypeConverter} which
  * offers base functionality for each type definition.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Ivan Iliev - Added support for system wide channel types
  */
 public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<ChannelTypeXmlResult> {

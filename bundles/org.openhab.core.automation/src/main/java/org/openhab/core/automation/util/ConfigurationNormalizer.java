@@ -29,7 +29,7 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
  * This class provides utility methods used by {@link RuleRegistry} to resolve and normalize the {@link RuleImpl}s
  * configuration values.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public class ConfigurationNormalizer {

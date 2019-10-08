@@ -52,7 +52,7 @@ import org.osgi.framework.ServiceRegistration;
  * <p>
  * accordingly to the used command.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  *
  */

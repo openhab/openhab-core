@@ -17,7 +17,7 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
 /**
  * A listener to be informed before entities are added respectively after they are removed.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  */
 public interface RegistryHook<E extends Identifiable<?>> {
 

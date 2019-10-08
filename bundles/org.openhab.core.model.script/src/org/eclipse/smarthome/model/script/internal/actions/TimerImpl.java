@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * This is an implementation of the {@link Timer} interface using the Quartz
  * library for scheduling.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class TimerImpl implements Timer {

@@ -27,7 +27,7 @@ import org.osgi.framework.ServiceReference;
  * <p>
  * This class cannot be instantiated, it only contains static methods.
  *
- * @author Michael Grammling - Initial contribution and API
+ * @author Michael Grammling - Initial contribution
  * @author Simon Kaufmann - added type conversion
  * @author Martin van Wingerden - when converting types convert null to UnDefType.NULL
  */

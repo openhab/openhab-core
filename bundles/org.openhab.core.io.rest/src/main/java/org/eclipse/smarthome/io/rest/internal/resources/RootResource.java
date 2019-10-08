@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The result is returned as JSON
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Path("/")
 @Component(service = RootResource.class, configurationPid = "org.eclipse.smarthome.io.rest.root")

@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * This is the main implementing class of the {@link MetadataRegistry} interface. It
  * keeps track of all declared metadata of all metadata providers.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @Component(immediate = true, service = { MetadataRegistry.class })

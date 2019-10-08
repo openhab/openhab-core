@@ -37,7 +37,7 @@ import org.openhab.core.automation.type.TriggerType;
  * ModuleTypeManagerMockup is a ModuleTypeManager which returns mockup module types for the following predefined module
  * types: triggerTypeUID, conditionTypeUID and actionTypeUID. The types have preset tags of their input and outputs.
  *
- * @author Yordan Mihaylov - initial version
+ * @author Yordan Mihaylov - Initial contribution
  */
 public class TestModuleTypeProvider implements ModuleTypeProvider {
 

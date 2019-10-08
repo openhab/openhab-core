@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
  * Expression that successfully parses, if a given expression occurs or repeats with a specified cardinality. This class
  * is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  *
  */
 public final class ExpressionCardinality extends Expression {

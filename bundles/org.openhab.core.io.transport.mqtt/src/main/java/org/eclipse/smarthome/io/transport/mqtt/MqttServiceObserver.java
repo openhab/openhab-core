@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Implement this interface to get notified of new and removed MQTT broker.
  * Register this observer at {@see MqttService}.
  *
- * @author David Graeff - Initial contribution and API
+ * @author David Graeff - Initial contribution
  */
 @NonNullByDefault
 public interface MqttServiceObserver {

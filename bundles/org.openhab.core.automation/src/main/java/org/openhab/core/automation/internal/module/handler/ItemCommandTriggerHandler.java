@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * if an item receives a command. The eventType and command value can be set with the
  * configuration.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {

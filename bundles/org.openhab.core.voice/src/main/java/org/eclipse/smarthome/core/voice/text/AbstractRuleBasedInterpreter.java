@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A human language command interpretation service.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  * @author Kai Kreuzer - Improved error handling
  *
  */
@@ -619,7 +619,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     /**
      * Helper class to generate a JSGF grammar from the rules of the interpreter.
      *
-     * @author Tilman Kamp - Initial contribution and API
+     * @author Tilman Kamp - Initial contribution
      *
      */
     private class JSGFGenerator {

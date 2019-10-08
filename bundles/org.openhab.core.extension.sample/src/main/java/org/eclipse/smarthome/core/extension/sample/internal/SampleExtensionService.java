@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.Reference;
  * functionality.
  * It is not meant to be used anywhere productively.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @Component

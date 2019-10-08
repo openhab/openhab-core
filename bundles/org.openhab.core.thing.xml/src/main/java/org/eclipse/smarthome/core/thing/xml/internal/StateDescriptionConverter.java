@@ -38,7 +38,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * This converter converts {@code state} XML tags.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class StateDescriptionConverter extends GenericUnmarshaller<StateDescription> {
 

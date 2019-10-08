@@ -22,7 +22,7 @@ import org.eclipse.smarthome.core.thing.profiles.ProfileContext;
 /**
  * {@link ProfileContext} implementation.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 @NonNullByDefault

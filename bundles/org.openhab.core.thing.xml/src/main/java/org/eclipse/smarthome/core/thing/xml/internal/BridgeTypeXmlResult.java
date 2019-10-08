@@ -28,7 +28,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * <p>
  * If a {@link ConfigDescription} object exists, it must be added to the according {@link ConfigDescriptionProvider}.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Andre Fuechsel - Added representationProperty
  */

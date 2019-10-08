@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * A complex type consists out of a sorted list of primitive constituents.
  * Each constituent can be referred to by a unique name.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

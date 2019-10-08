@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * Note: This class is a copy from the {@link BusEvent} class, which resides in the model.script bundle.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ScriptBusEvent {

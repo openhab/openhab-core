@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.items.Item;
  * can also be cloud-based or a simply data-export facility (e.g.
  * for sending data to an IoT (Internet of Things) service.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public interface PersistenceService {

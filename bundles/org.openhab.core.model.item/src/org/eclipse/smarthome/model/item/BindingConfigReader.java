@@ -20,7 +20,7 @@ import org.eclipse.smarthome.model.item.internal.GenericItemProvider;
  * This interface must be implemented by services, which can parse the generic
  * binding configuration string used in the {@link GenericItemProvider}.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

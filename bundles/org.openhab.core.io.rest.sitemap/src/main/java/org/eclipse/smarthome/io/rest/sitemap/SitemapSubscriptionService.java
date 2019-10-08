@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * For this to work correctly, the subscriber needs to make sure that setPageId is called whenever it switches to a new
  * page.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(service = { SitemapSubscriptionService.class,
         EventSubscriber.class }, configurationPid = "org.eclipse.smarthome.sitemapsubscription")

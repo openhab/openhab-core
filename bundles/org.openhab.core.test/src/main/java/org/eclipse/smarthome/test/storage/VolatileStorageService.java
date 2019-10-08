@@ -22,7 +22,7 @@ import org.eclipse.smarthome.core.storage.StorageService;
  * The {@link VolatileStorageService} returns {@link VolatileStorage}s
  * which stores their data in-memory.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial Contribution and API
+ * @author Thomas.Eichstaedt-Engelen - Initial contribution
  */
 public class VolatileStorageService implements StorageService {
 

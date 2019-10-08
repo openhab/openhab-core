@@ -35,8 +35,8 @@ import org.openhab.core.automation.Visibility;
  * Whether the {@link ModuleType}s can be used by anyone, depends from their {@link Visibility} value, but they can be
  * modified only by their creator.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 @NonNullByDefault

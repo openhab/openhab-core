@@ -31,7 +31,7 @@ import org.eclipse.smarthome.core.types.State;
  * The HSBType is a complex type with constituents for hue, saturation and
  * brightness and can be used for color items.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Added fromRGB
  *
  */

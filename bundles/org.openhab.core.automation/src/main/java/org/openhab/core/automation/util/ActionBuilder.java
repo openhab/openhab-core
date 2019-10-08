@@ -24,7 +24,7 @@ import org.openhab.core.automation.internal.ActionImpl;
 /**
  * This class allows the easy construction of an {@link Action} instance using the builder pattern.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public class ActionBuilder extends ModuleBuilder<ActionBuilder, Action> {

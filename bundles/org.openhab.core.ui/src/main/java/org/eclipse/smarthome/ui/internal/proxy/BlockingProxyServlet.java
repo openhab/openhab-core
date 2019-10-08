@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A blocking version of the proxy servlet that complies with Servlet API 2.4.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Svilen Valkanov - Replaced Apache HttpClient with Jetty
  * @author John Cocula - refactored to support alternate implementation
  */

@@ -33,7 +33,7 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
  * of it. Therefore {@link Item}s can be linked a to a channel. The channel only
  * accepts a specific item type which is specified by {@link Channel#getAcceptedItemType()} methods.
  *
- * @author Dennis Nobel - Initial contribution and API
+ * @author Dennis Nobel - Initial contribution
  * @author Alex Tugarev - Extended about default tags
  * @author Benedikt Niehues - fix for Bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=445137 considering default
  *         values

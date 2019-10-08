@@ -40,7 +40,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * This class can parse and serialize sets of {@link ModuleType}.
  *
- * @author Kai Kreuzer - Initial Contribution
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @Component(immediate = true, service = Parser.class, property = { "parser.type=parser.module.type", "format=json" })

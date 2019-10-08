@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Synchronous invocation handler implementation.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  * @param <T>
  */

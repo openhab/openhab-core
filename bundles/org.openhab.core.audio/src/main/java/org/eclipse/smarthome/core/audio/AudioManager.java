@@ -22,7 +22,7 @@ import org.eclipse.smarthome.core.library.types.PercentType;
 /**
  * This service provides functionality around audio services and is the central service to be used directly by others.
  *
- * @author Karel Goderis - Initial contribution and API
+ * @author Karel Goderis - Initial contribution
  * @author Kai Kreuzer - removed unwanted dependencies
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Added methods for getting all sinks and sources

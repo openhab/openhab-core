@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * Note: This class is a copy from the {@link ThingActions} class, which resides in the model.script bundle.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ScriptThingActions {

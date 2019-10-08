@@ -26,9 +26,9 @@ import org.openhab.core.automation.Visibility;
  * This class is as {@link TriggerType} which logically combines {@link Trigger} modules. The composite trigger hides
  * internal logic between participating {@link Trigger}s and it can be used as a regular {@link Trigger} module.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  */
 @NonNullByDefault
 public class CompositeTriggerType extends TriggerType {

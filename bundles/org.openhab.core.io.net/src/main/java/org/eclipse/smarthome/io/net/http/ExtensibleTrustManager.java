@@ -22,7 +22,7 @@ import javax.net.ssl.TrustManager;
  * - {@code TlsTrustManagerProvider}
  * - {@code TlsCertificateProvider}
  *
- * @author Martin van Wingerden - Initial Contribution
+ * @author Martin van Wingerden - Initial contribution
  */
 public interface ExtensibleTrustManager extends TrustManager {
 

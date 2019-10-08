@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for HTTP servlets.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  */
 public abstract class BaseSmartHomeServlet extends HttpServlet {
 

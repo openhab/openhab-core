@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * Console command extension for all audio features.
  *
- * @author Karel Goderis - Initial contribution and API
+ * @author Karel Goderis - Initial contribution
  * @author Kai Kreuzer - refactored to match AudioManager implementation
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort audio sink and source options

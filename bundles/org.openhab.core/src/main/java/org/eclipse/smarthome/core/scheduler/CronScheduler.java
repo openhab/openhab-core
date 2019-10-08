@@ -87,7 +87,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Major difference is the day number. In Quartz this is 0-6 for SAT-SUN while
  * here it is 1-7 for MON-SUN.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  * @author Simon Kaufmann - adapted to CompletableFutures
  * @author Hilbrand Bouwkamp - Moved Cron scheduling to it's own interface
  */

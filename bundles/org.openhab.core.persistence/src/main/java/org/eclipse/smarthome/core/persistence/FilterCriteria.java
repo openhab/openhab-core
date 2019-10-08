@@ -34,7 +34,7 @@ import org.eclipse.smarthome.core.types.State;
  * All setter methods return the filter criteria instance, so that the methods can be easily chained in order to define
  * a filter.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Lyubomir Papazov - Deprecate methods using java.util and add methods
  *         that use Java8's ZonedDateTime
  */

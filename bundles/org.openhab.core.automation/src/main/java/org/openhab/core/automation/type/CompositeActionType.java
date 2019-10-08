@@ -27,9 +27,9 @@ import org.openhab.core.automation.Visibility;
  * internal logic and inner connections between participating {@link Action}s and it can be used as a regular
  * {@link Action} module.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  */
 @NonNullByDefault
 public class CompositeActionType extends ActionType {

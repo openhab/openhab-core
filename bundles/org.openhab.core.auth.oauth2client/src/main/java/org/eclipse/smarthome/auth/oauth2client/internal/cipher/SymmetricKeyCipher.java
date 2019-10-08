@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a symmetric key encryption service for encrypting the OAuth tokens.
  *
- * @author Gary Tse - Initial Contribution
+ * @author Gary Tse - Initial contribution
  *
  */
 @NonNullByDefault

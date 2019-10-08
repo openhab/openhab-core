@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * A {@link STTEvent} fired when the {@link STTService} encounters an error.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public class SpeechRecognitionErrorEvent implements STTEvent {
    /**

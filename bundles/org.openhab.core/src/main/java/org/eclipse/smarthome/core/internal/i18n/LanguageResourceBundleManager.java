@@ -34,7 +34,7 @@ import org.osgi.framework.Bundle;
  * This implementation uses the user defined {@link ResourceBundleClassLoader} to map the bundle resource files to usual
  * URLs which the Java {@link ResourceBundle} can handle.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Markus Rathgeb - Add locale provider support
  */
 public class LanguageResourceBundleManager {

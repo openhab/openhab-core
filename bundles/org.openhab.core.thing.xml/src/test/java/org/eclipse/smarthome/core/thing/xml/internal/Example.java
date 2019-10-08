@@ -21,7 +21,7 @@ import org.junit.Test;
  * can be used. This example can also be used for manual tests when the schema is extended or
  * changed.
  *
- * @author Michael Grammling - Initial Contribution.
+ * @author Michael Grammling - Initial contribution
  */
 public class Example {
 

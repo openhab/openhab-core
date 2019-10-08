@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Static utility methods that are helpful when dealing with hex data and byte arrays.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Martin van Wingerden - Implemented the reverse operation
  */
 @NonNullByDefault

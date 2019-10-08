@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * This class provides static methods that can be used in automation rules
  * for using persistence services
  *
- * @author Kai Kreuzer - Initial contribution and API and refactoring for PersistenceServiceRegistryImpl
+ * @author Kai Kreuzer - Initial contributionand refactoring for PersistenceServiceRegistryImpl
  * @author Thomas Eichstaedt-Engelen
  * @author Chris Jackson
  * @author Gaël L'hopital

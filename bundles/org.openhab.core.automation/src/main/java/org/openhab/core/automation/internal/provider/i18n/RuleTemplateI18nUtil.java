@@ -23,7 +23,7 @@ import org.osgi.framework.Bundle;
  * This class is used as utility for resolving the localized {@link RuleTemplate}s. It automatically infers the key if
  * the default text is not a constant with the assistance of {@link TranslationProvider}.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public class RuleTemplateI18nUtil {

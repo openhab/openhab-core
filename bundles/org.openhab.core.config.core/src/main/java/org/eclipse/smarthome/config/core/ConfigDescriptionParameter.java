@@ -32,7 +32,7 @@ import com.google.gson.annotations.SerializedName;
  * it defines available unit types in {@link ConfigDescriptionParameter#UNITS} and available
  * contexts (see {@link ConfigDescriptionParameter#getContext()}).
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Alex Tugarev - Added options, filter criteria, and more parameter
  *         attributes
  * @author Chris Jackson - Added groupId, limitToOptions, advanced,
@@ -47,7 +47,7 @@ public class ConfigDescriptionParameter {
      * The {@link Type} defines an enumeration of all supported data types a
      * configuration parameter can take.
      *
-     * @author Michael Grammling - Initial Contribution
+     * @author Michael Grammling - Initial contribution
      */
     public enum Type {
 

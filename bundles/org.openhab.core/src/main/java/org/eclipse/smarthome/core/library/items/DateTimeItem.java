@@ -29,7 +29,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * A DateTimeItem stores a timestamp including a valid time zone.
  *
  * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

@@ -34,7 +34,7 @@ import gnu.io.NoSuchPortException;
 
 /**
  *
- * @author Matthias Steigenberger - Initial Contribution
+ * @author Matthias Steigenberger - Initial contribution
  * @author Wouter Born - Fix serial ports missing when ports are added to system property
  */
 @NonNullByDefault

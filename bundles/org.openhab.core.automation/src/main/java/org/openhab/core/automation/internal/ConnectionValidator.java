@@ -38,7 +38,7 @@ import org.openhab.core.automation.type.TriggerType;
  * This class contains utility methods for comparison of data types between connected inputs and outputs of modules
  * participating in a rule.
  *
- * @author Ana Dimova - Initial contribution and API
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Benedikt Niehues - validation of connection-types respects inheriting types
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field

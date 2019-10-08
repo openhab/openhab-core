@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.persistence.strategy.SimpleStrategy;
 /**
  * This class represents the configuration for a persistence service.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class PersistenceServiceConfiguration {
     private final List<SimpleItemConfiguration> configs;

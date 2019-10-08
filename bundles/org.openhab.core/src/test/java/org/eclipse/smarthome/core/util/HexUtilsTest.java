@@ -19,7 +19,7 @@ import org.junit.Test;
 /**
  * Test for {@link HexUtils}.
  *
- * @author Kai Kreuzer - Initial implementation
+ * @author Kai Kreuzer - Initial contribution
  * @author Martin van Wingerden - Implemented the reverse operation
  */
 public class HexUtilsTest {

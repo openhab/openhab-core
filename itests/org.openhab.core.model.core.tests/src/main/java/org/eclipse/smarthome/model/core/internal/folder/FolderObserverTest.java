@@ -62,7 +62,7 @@ import org.osgi.service.component.ComponentContext;
  * Since the assertions in the tests depend on handling the events,
  * putting the current Thread to sleep after the file operations is also necessary.
  *
- * @author Mihaela Memova - Initial Contribution
+ * @author Mihaela Memova - Initial contribution
  * @author Stefan Triller - added hidden file test
  * @author Simon Kaufmann - ported to Java
  *

@@ -17,7 +17,7 @@ package org.openhab.core.automation.internal.commands;
  * of commands is responsible for a group of commands, that are equivalent but each of them is related to a different
  * provider.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  *
  */
 public abstract class AutomationCommand {

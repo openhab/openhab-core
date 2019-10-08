@@ -28,9 +28,9 @@ import org.openhab.core.automation.Visibility;
  * {@link ConfigDescriptionParameter}s that are meta-information for configuration of the future {@link Action}
  * instances and meta-information for {@link Input}s and {@link Output}s used from these {@link Action} instances.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  */
 public class ActionType extends ModuleType {
 

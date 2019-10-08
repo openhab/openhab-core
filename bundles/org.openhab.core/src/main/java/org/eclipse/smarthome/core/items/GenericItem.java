@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * for the infrastructure, such as publishing updates to the event bus
  * or notifying listeners.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - Added tags
  * @author Stefan Bußweiler - Migration to new ESH event concept
  *

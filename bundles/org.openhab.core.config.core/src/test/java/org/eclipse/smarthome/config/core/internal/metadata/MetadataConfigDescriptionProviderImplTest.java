@@ -36,7 +36,7 @@ import org.mockito.Mock;
 
 /**
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 public class MetadataConfigDescriptionProviderImplTest extends JavaTest {

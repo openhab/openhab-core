@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * {@link AutomationResourceBundlesTracker} by implementing a {@link BundleTrackerCustomizer} but the functionality for
  * processing them, comes from this class.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
 @SuppressWarnings("rawtypes")

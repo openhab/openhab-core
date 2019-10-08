@@ -30,8 +30,8 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
- * @author Dennis Nobel - Initial Contribution
+ * @author Michael Grammling - Initial contribution
+ * @author Dennis Nobel - Initial contribution
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Simon Kaufmann - Added listed field
  * @author Andre Fuechsel - Added representationProperty field

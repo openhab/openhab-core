@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * {@link AbstractXmlConfigDescriptionProvider} which is itself registered as <i>OSGi</i> service at the service
  * registry.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @see BindingInfoXmlProviderFactory
  */

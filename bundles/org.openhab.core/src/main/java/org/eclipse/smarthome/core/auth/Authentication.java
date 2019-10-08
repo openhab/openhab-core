@@ -21,7 +21,7 @@ import java.util.Set;
  *
  * Each authentication must at least point to some identity (username) and roles.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Added JavaDoc and switched from array to Set
  *
  */

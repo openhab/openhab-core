@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * Provides an {@link ItemBuilder} with all available {@link ItemFactory}s set. The {@link CoreItemFactory} will always
  * be present.
  *
- * @author Henning Treu - Initial contribution and API
+ * @author Henning Treu - Initial contribution
  *
  */
 @NonNullByDefault

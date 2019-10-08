@@ -26,7 +26,7 @@ import org.openhab.core.automation.Rule;
  * <p>
  * {@link ModuleHandlerFactory} implementations must be registered as services in the OSGi framework.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Benedikt Niehues - change behavior for unregistering ModuleHandler
  */
 @NonNullByDefault

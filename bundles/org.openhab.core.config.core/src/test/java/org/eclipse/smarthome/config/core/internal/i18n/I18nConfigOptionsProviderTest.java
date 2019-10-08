@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * Tests for {@link I18nConfigOptionsProvider}
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 public class I18nConfigOptionsProviderTest {

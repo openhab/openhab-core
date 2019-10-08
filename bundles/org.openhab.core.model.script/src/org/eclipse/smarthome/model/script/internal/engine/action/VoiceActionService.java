@@ -21,7 +21,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * This class registers an OSGi service for the voice action.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true)
 public class VoiceActionService implements ActionService {

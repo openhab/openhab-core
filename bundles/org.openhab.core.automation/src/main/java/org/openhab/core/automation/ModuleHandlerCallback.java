@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
  * disabled or removed and to involve Rule Engine to process these changes. Also to send a {@code run} command
  * for a single {@link Rule} to the Rule Engine.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

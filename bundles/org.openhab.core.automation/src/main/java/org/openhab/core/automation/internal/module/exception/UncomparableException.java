@@ -15,7 +15,7 @@ package org.openhab.core.automation.internal.module.exception;
 /**
  * This Exception is used as an indicator for not matching types during comparation
  *
- * @author Benedikt Niehues - Initial contribution and API
+ * @author Benedikt Niehues - Initial contribution
  *
  */
 public class UncomparableException extends Exception {

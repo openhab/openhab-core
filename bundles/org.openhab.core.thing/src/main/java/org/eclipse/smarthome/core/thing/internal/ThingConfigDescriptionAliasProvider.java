@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.Reference;
  * to get the configURI and the config description for it. If there is a corresponding {@link ConfigOptionProvider}, it
  * will be used to get updated options.
  *
- * @author Chris Jackson - Initial Implementation
+ * @author Chris Jackson - Initial contribution
  * @author Chris Jackson - Updated to separate thing type from thing name
  * @author Simon Kaufmann - Added support for channel config descriptions, turned into alias handler
  *

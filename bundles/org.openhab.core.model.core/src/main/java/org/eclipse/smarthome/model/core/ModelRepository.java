@@ -23,7 +23,7 @@ import org.eclipse.emf.ecore.EObject;
  * By this abstraction, the clients do not need to know where the models
  * come from.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public interface ModelRepository {

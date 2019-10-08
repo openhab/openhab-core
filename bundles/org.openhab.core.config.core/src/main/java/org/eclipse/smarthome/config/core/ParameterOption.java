@@ -18,7 +18,7 @@ package org.eclipse.smarthome.config.core;
  * A {@link ConfigDescriptionParameter} instance can contain a list of {@link ParameterOption}s to define a static
  * selection list for the parameter value.
  *
- * @author Alex Tugarev - Initial Contribution
+ * @author Alex Tugarev - Initial contribution
  *
  */
 public class ParameterOption {

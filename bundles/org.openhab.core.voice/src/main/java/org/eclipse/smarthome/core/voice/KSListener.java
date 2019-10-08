@@ -20,7 +20,7 @@ package org.eclipse.smarthome.core.voice;
  * Such instances are then targeted for various {@link KSEvent} events corresponding
  * to the keyword spotting process.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public interface KSListener {
     /**

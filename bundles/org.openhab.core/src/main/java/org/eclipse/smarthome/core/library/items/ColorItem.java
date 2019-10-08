@@ -32,7 +32,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * A ColorItem can be used for color values, e.g. for LED lights
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

@@ -26,9 +26,9 @@ import org.openhab.core.automation.type.Output;
 /**
  * This class is implementation of {@link Action} modules used in the {@link RuleEngineImpl}s.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  */
 @NonNullByDefault
 public class ActionImpl extends ModuleImpl implements Action {

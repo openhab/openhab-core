@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.items.Item;
  * A queryable persistence service which can be used to store and retrieve
  * data from openHAB. This is most likely some kind of database system.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Added getItems method
  */
 @NonNullByDefault

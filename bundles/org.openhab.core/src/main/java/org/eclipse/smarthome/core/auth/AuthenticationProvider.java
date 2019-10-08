@@ -16,7 +16,7 @@ package org.eclipse.smarthome.core.auth;
  * Realizations of this type are responsible for checking validity of various credentials and giving back authentication
  * which defines access scope for authenticated user or system.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  *
  */
 public interface AuthenticationProvider {

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * It takes into account the fact that although language server and client both operate on the same set of files, their
  * file system location might be different due to remote access via SMB, SSH and the like.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 public class MappingUriExtensions extends UriExtensions {

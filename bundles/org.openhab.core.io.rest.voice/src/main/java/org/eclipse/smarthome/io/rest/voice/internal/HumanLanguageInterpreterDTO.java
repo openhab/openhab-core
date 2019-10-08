@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
 /**
  * A DTO that is used on the REST API to provide infos about {@link HumanLanguageInterpreter} to UIs.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class HumanLanguageInterpreterDTO {

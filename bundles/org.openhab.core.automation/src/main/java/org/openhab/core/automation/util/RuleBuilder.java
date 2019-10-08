@@ -35,7 +35,7 @@ import org.openhab.core.automation.template.RuleTemplate;
 /**
  * This class allows the easy construction of a {@link Rule} instance using the builder pattern.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

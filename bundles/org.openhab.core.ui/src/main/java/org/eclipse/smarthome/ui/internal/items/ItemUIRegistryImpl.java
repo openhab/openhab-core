@@ -100,7 +100,7 @@ import org.slf4j.LoggerFactory;
  * single method call, i.e. the consumer does not need to iterate over all
  * registered providers as this is done inside this class.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson
  * @author Stefan Triller - Method to convert a state into something a sitemap entity can understand
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType

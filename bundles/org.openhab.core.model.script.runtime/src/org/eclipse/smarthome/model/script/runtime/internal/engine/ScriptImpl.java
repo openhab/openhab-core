@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 /**
  * This is the default implementation of a {@link Script}.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @SuppressWarnings("restriction")

@@ -30,7 +30,7 @@ import org.openhab.core.automation.handler.ModuleHandler;
 /**
  * This class holds the information that is necessary for the rule engine.
  *
- * @author Markus Rathgeb - Initial Contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public class WrappedRule {

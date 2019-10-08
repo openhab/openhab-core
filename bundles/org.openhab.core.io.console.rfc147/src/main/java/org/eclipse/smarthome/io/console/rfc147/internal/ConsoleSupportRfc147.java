@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * Read this link to get a short overview about the way to implement commands for RFC 147:
  * https://felix.apache.org/site/rfc-147-overview.html
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  *
  */
 @Component(immediate = true, service = {})

@@ -17,7 +17,7 @@ import org.eclipse.jdt.annotation.NonNull;
 /**
  * Enum of types being used in the store
  *
- * @author Gary Tse - Initial Contribution
+ * @author Gary Tse - Initial contribution
  *
  */
 public enum StorageRecordType {

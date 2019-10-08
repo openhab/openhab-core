@@ -20,7 +20,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Stefan Triller - Initial version
+ * @author Stefan Triller - Initial contribution
  *
  */
 public class PlayerItemTest {

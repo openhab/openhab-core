@@ -42,7 +42,7 @@ import org.eclipse.smarthome.core.types.util.UnitUtils;
  * It can also be used as a counter or as any other thing that can be expressed
  * as a number.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * The implementation of {@link TemplateRegistry} that is registered as a service.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - TemplateRegistry extends AbstractRegistry
  */
 @Component(service = { TemplateRegistry.class, RuleTemplateRegistry.class }, immediate = true)

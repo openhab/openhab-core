@@ -31,7 +31,7 @@ import org.eclipse.smarthome.core.types.StateDescription;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Henning Treu - add command options
  */
 public class ChannelType extends AbstractDescriptionType {

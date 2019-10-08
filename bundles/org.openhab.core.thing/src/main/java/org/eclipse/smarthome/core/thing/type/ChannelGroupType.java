@@ -22,8 +22,8 @@ import java.util.List;
  * <p>
  * This type can be used for Things which offers multiple functionalities which belong all together.
  *
- * @author Dennis Nobel - Initial Contribution
- * @author Michael Grammling - Initial Contribution
+ * @author Dennis Nobel - Initial contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class ChannelGroupType extends AbstractDescriptionType {
 

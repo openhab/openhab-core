@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * to convert the value of an XML tag within an XML
  * document into a {@link NodeValue} object.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class NodeValueConverter extends GenericUnmarshaller<NodeValue> {
 

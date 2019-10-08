@@ -17,7 +17,7 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 /**
  * This interface is implemented by openHAB scripts.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @SuppressWarnings("restriction")

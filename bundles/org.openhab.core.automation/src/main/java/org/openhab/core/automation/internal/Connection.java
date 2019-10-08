@@ -28,7 +28,7 @@ import org.openhab.core.automation.type.Output;
  * The input of the current module is defined by name of the {@link Input}. The {@link Output} of the external module is
  * defined by id of the module and name of the output.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
  */
 @NonNullByDefault

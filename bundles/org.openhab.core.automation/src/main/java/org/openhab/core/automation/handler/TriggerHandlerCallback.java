@@ -25,7 +25,7 @@ import org.openhab.core.automation.type.Output;
  * and applied to the RuleAngine in order of their appearance. Each {@link Rule} has to create its own instance of
  * {@link TriggerHandlerCallback}.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - made it a sub-interface of ModuleHandlerCallback
  */
 public interface TriggerHandlerCallback extends ModuleHandlerCallback {

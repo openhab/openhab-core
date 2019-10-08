@@ -94,7 +94,7 @@ import org.slf4j.LoggerFactory;
  * <LI><b>running</b> - the rule is enabled and initialized and it is executing at the moment. When the execution is
  * finished, it goes to the <b>idle</b> state.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider, registry implementation and customized modules
  * @author Benedikt Niehues - change behavior for unregistering ModuleHandler
  * @author Markus Rathgeb - use a managed rule

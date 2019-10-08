@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * based on a cron expression. The cron expression can be set with the
  * configuration.
  *
- * @author Christoph Knauf - Initial Contribution
+ * @author Christoph Knauf - Initial contribution
  * @author Yordan Mihaylov - Remove Quarz lib dependency
  *
  */

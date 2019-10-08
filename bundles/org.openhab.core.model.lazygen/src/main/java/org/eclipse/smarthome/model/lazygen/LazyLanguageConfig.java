@@ -29,7 +29,7 @@ import org.eclipse.xtext.resource.XtextResource;
 
 /**
  *
- * @author Holger Schill, Simon Kaufmann - Initial contribution and API
+ * @author Holger Schill, Simon Kaufmann - Initial contribution
  *
  */
 public class LazyLanguageConfig extends LanguageConfig {

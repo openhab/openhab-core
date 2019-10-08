@@ -15,7 +15,7 @@ package org.openhab.core.automation.dto;
 /**
  * This is a data transfer object that is used to serialize the respective class.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class TriggerDTO extends ModuleDTO {
 

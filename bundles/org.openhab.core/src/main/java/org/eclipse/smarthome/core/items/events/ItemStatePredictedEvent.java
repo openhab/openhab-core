@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.types.State;
  * will not be successfully executed and therefore presumably will not result in a state change (e.g. because no handler
  * currently is capable of delivering such an event to its device).
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 public class ItemStatePredictedEvent extends AbstractEvent {

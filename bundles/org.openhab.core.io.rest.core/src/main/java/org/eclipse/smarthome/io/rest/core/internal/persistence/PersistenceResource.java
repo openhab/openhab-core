@@ -74,7 +74,7 @@ import io.swagger.annotations.ApiResponses;
  * This class acts as a REST resource for history data and provides different methods to interact with the persistence
  * store
  *
- * @author Chris Jackson - Initial Contribution and add support for ModifiablePersistenceService
+ * @author Chris Jackson - Initial contribution
  * @author Kai Kreuzer - Refactored to use PersistenceServiceRegistryImpl
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Erdoan Hadzhiyusein - Adapted the convertTime() method to work with the new DateTimeType

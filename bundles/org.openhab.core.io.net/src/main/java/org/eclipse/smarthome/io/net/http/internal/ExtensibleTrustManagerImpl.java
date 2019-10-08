@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * - {@code TlsTrustManagerProvider}
  * - {@code TlsCertificateProvider}
  *
- * @author Martin van Wingerden - Initial Contribution
+ * @author Martin van Wingerden - Initial contribution
  */
 @Component(service = ExtensibleTrustManager.class, immediate = true)
 public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager implements ExtensibleTrustManager {

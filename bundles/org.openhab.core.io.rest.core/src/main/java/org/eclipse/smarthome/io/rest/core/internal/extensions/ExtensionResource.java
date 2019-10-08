@@ -64,7 +64,7 @@ import io.swagger.annotations.ApiResponses;
 /**
  * This class acts as a REST resource for extensions and provides methods to install and uninstall them.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  */
 @Path(ExtensionResource.PATH_EXTENSIONS)

@@ -17,7 +17,7 @@ import java.util.Hashtable;
 /**
  * This is a simple data container to keep all details of a service description together.
  * 
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ServiceDescription {

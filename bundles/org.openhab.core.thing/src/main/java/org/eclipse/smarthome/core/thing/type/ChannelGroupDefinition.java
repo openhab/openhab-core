@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.thing.Thing;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Dennis Nobel - Introduced ChannelTypeRegistry and channel type references
  */
 public class ChannelGroupDefinition {

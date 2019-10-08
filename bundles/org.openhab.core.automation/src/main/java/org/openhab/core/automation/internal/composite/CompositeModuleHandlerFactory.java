@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * framework, but it will be used by the rule engine to serve composite module types without any action of the user.
  *
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory implements ModuleHandlerFactory {
 

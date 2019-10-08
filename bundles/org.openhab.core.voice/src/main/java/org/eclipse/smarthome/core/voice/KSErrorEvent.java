@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * A {@link KSEvent} fired when the {@link KSService} encounters an error.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public class KSErrorEvent implements KSEvent {
    /**

@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
  * {@link #execute(HttpServletRequest, HttpServletResponse)} nor {@link #error(Exception)} then chain is stopped.
  * By this simple way handlers can decide to hold processing and generate own response.
  *
- * @author Łukasz Dywicki - Initial contribution and API.
+ * @author Łukasz Dywicki - Initial contribution
  */
 public interface HandlerContext {
 

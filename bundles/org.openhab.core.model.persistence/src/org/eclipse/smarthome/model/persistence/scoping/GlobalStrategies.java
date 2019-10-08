@@ -19,7 +19,7 @@ import org.eclipse.smarthome.model.persistence.persistence.impl.StrategyImpl;
  * This class defines a few persistence strategies that are globally available to
  * all persistence models.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class GlobalStrategies {

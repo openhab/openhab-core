@@ -22,7 +22,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
  * The {@link ConfigDescriptionParameterBuilder} class provides a builder for the {@link ConfigDescriptionParameter}
  * class.
  *
- * @author Chris Jackson - Initial Contribution
+ * @author Chris Jackson - Initial contribution
  * @author Thomas Höfer - Added unit
  *
  */

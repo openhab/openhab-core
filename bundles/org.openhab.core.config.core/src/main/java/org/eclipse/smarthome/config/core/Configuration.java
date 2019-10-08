@@ -29,7 +29,7 @@ import org.eclipse.smarthome.config.core.internal.ConfigMapper;
 /**
  * This class is a wrapper for configuration settings of {@link Thing}s.
  *
- * @author Dennis Nobel - Initial API and contribution, Changed Logging
+ * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - added constructors and normalization
  * @author Gerhard Riegler - added converting BigDecimal values to the type of the configuration class field
  * @author Chris Jackson - fix concurrent modification exception when removing properties

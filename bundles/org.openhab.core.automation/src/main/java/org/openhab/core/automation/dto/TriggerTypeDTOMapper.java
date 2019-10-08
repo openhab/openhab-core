@@ -25,7 +25,7 @@ import org.openhab.core.automation.type.TriggerType;
 /**
  * This is a utility class to convert between the respective object and its DTO.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  * @author Ana Dimova - extends Trigger Module type DTOs with composites
  */
 public class TriggerTypeDTOMapper extends ModuleTypeDTOMapper {

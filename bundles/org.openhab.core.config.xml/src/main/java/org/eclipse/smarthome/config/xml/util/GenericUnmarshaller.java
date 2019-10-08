@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * <p>
  * <b>Hint:</b> This class only supports unmarshalling functionality.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @param <T> the result type of the conversion
  */

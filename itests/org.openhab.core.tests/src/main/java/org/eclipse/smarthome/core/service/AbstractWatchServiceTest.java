@@ -37,7 +37,7 @@ import org.junit.Test;
 /**
  * Test for {@link AbstractWatchService}.
  *
- * @author Dimitar Ivanov - Initial implementation
+ * @author Dimitar Ivanov - Initial contribution
  * @author Svilen Valkanov - Tests are modified to run on different Operating Systems
  * @author Ana Dimova - reduce to a single watch thread for all class instances
  * @author Simon Kaufmann - ported it from Groovy to Java

@@ -93,7 +93,7 @@ import org.slf4j.LoggerFactory;
  * {@link RuleStatus#DISABLED}.</li>
  * </ul>
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - Persistence implementation & updating rules from providers
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation and other fixes
  * @author Benedikt Niehues - added events for rules

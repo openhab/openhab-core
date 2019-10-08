@@ -15,7 +15,7 @@ package org.eclipse.smarthome.model.core;
 /**
  * This interface has to be implemented by services that register an EMF model parser
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public interface ModelParser {

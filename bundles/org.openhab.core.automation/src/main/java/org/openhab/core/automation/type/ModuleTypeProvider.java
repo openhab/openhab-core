@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.common.registry.Provider;
  * This interface has to be implemented by all providers of {@link ModuleType}s.
  * The {@link ModuleTypeRegistry} uses it to get access to available {@link ModuleType}s.
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Ana Dimova - add registration property - module.types
  */

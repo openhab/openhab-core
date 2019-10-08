@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.audio.utils;
 /**
  * Some general filename and extension utilities.
  * 
- * @author Christoph Weitkamp - Initial contribution and API
+ * @author Christoph Weitkamp - Initial contribution
  * 
  */
 public class AudioStreamUtils {

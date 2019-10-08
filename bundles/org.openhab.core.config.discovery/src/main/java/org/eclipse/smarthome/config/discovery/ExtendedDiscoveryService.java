@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *             future versions. Please see the deprecation documentation on {@link DiscoveryServiceCallback} for more
  *             details.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  * @author Henning Treu - deprecation.
  *
  */

@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * a {@code option} XML
  * node.
  *
- * @author Chris Jackson - Initial Contribution
+ * @author Chris Jackson - Initial contribution
  */
 public class ConfigDescriptionParameterGroupConverter extends GenericUnmarshaller<ConfigDescriptionParameterGroup> {
 

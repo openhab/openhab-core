@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * The static methods of this class are made available as functions in the scripts.
  * This allows a script to call another script, which is available as a file.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 public class ScriptExecution {

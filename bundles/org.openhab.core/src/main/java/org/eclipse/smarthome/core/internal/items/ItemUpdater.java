@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * The ItemUpdater listens on the event bus and passes any received status update
  * to the item registry.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new ESH event concept
  */
 @Component(immediate = true, service = EventSubscriber.class)

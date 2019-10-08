@@ -31,7 +31,7 @@ import com.google.gson.JsonPrimitive;
  *
  * As opposed to Gson's default behavior, it ensures that all numbers are represented as {@link BigDecimal}s.
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Ana Dimova - added a deserializer for the configuration, conforming to the automation json format
  *
  */

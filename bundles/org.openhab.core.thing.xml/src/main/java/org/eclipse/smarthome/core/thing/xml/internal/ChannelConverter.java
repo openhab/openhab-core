@@ -34,7 +34,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * This converter converts {@code channel} XML tags.
  *
- * @author Chris Jackson - Initial Contribution
+ * @author Chris Jackson - Initial contribution
  * @author Simon Kaufmann - Fixing wrong inheritance
  * @author Chris Jackson - Added label and description
  */

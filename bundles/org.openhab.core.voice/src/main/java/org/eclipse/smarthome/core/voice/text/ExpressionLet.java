@@ -22,7 +22,7 @@ import java.util.ResourceBundle;
  * Expression that decorates the resulting (proxied) AST node of a given expression by a name, value and tag.
  * This class is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  *
  */
 public final class ExpressionLet extends Expression {

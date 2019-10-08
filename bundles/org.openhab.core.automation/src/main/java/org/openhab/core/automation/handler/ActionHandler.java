@@ -26,7 +26,7 @@ import org.openhab.core.automation.Trigger;
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - Initial contribution
- * @author Vasil Ilchev - Initial ontribution
+ * @author Vasil Ilchev - Initial contribution
  * @see ModuleHandler
  */
 @NonNullByDefault

@@ -48,7 +48,7 @@ import io.swagger.annotations.ApiResponses;
 /**
  * SSE Resource for pushing events to currently listening clients.
  *
- * @author Ivan Iliev - Initial Contribution and API
+ * @author Ivan Iliev - Initial contribution
  * @author Yordan Zhelev - Added Swagger annotations
  *
  */

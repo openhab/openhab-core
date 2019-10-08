@@ -47,7 +47,7 @@ import org.osgi.service.component.annotations.Reference;
  * This implementation manages any {@link ThingType} objects associated to specific modules. If a specific module
  * disappears, any registered {@link ThingType} objects associated with that module are released.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Dennis Nobel - Added locale support, Added cache for localized thing types
  * @author Ivan Iliev - Added support for system wide channel types
  * @author Kai Kreuzer - fixed concurrency issues

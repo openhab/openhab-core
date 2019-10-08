@@ -44,7 +44,7 @@ import org.osgi.service.component.annotations.Reference;
  * This implementation manages any {@link BindingInfo} objects associated to specific modules. If a specific module
  * disappears, any registered {@link BindingInfo} objects associated with that module are released.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Michael Grammling - Refactoring: Provider/Registry pattern is used, added locale support
  * @author Simon Kaufmann - factored out common aspects into {@link AbstractXmlBasedProvider}
  */

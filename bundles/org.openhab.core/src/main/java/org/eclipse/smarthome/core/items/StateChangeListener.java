@@ -22,7 +22,7 @@ import org.eclipse.smarthome.core.types.State;
  * <p>
  * The {@link GenericItem} class provides the possibility to register such listeners.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.internal.common;
 /**
  * Denotes that there already is a thread occupied by the same context.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  *
  */
 class DuplicateExecutionException extends RuntimeException {

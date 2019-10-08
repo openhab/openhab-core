@@ -20,7 +20,7 @@ import org.eclipse.smarthome.core.common.registry.Provider;
  * items can be constructed from some static configuration files or
  * they can be derived from some dynamic logic.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  *
  */
 @NonNullByDefault

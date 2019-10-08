@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * This class announces the REST API through mDNS for clients to automatically
  * discover it.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Use HTTP service utility functions
  */
 @Component(immediate = true, configurationPid = "org.eclipse.smarthome.mdns", property = {

@@ -27,7 +27,7 @@ import org.junit.Test;
  * The {@link DiscoveryResultImplTest} checks if any invalid input parameters
  * and the synchronization of {@link DiscoveryResult}s work in a correct way.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
