@@ -47,7 +47,6 @@ public class CipherTest {
 
     @Test
     public void testEncDec() throws GeneralSecurityException {
-
         String cipherText = spySymmetricKeyCipher.encrypt(PLAIN_TEXT);
         assertNotNull("Cipher text should not be null", cipherText);
         assertNotEquals("Cipher text should not be the same as plaintext", PLAIN_TEXT, cipherText);

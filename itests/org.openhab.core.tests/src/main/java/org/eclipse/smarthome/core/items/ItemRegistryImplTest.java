@@ -161,7 +161,6 @@ public class ItemRegistryImplTest extends JavaTest {
         List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
-
     }
 
     @Test

@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
 
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
+import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
+import org.eclipse.smarthome.config.core.Configuration;
+import org.eclipse.smarthome.config.core.ParameterOption;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
@@ -37,9 +40,6 @@ import org.openhab.core.automation.annotation.RuleAction;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.ParameterOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -218,7 +218,6 @@ public class AnnotationActionModuleTypeHelper {
         if (mis.size() == 1 && config == null) {
             finalMI = (ModuleInformation) mis.toArray()[0];
         } else {
-
             for (ModuleInformation mi : mis) {
                 if (thing) {
                     if (Objects.equals(mi.getThingUID(), config)) {

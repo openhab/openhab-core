@@ -193,6 +193,5 @@ public class UsbSerialDiscoveryService extends AbstractDiscoveryService implemen
         return DiscoveryResultBuilder.create(result.getThingUID()).withProperties(resultProperties)
                 .withBridge(result.getBridgeUID()).withTTL(result.getTimeToLive()).withLabel(result.getLabel())
                 .withRepresentationProperty(result.getRepresentationProperty()).build();
-
     }
 }

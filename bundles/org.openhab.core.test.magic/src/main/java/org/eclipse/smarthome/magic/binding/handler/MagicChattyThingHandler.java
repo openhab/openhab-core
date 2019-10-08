@@ -115,7 +115,6 @@ public class MagicChattyThingHandler extends BaseThingHandler {
                 }
             }
         };
-
     }
 
     @Override

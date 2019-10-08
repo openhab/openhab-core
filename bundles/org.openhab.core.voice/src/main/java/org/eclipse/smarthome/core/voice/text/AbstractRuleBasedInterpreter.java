@@ -318,7 +318,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 return InterpretationResult.SEMANTIC_ERROR;
             }
         };
-
     }
 
     /**

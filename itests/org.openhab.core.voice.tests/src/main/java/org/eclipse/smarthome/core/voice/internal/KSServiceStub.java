@@ -70,7 +70,6 @@ public class KSServiceStub implements KSService {
     @Override
     public KSServiceHandle spot(KSListener ksListener, AudioStream audioStream, Locale locale, String keyword)
             throws KSException {
-
         if (isKSExceptionExpected) {
             throw new KSException("Expected KSException");
         } else {

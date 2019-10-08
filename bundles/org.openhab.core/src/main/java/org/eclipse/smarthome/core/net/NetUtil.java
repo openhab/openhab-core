@@ -557,7 +557,6 @@ public class NetUtil implements NetworkAddressService {
     }
 
     private void scheduleToPollNetworkInterface(int intervalInSeconds) {
-
         if (networkInterfacePollFuture != null) {
             networkInterfacePollFuture.cancel(true);
             networkInterfacePollFuture = null;

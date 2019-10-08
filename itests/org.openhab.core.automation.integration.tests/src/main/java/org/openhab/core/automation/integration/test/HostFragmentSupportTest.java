@@ -217,7 +217,6 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
             assertThat(moduleTypeRegistry.get(condition1), is(nullValue()));
             assertThat(moduleTypeRegistry.get(action1), is(nullValue()));
         }, 3000, 200);
-
     }
 
     @SuppressWarnings("null")

@@ -284,7 +284,6 @@ public class RuleRegistryTest extends JavaOSGiTest {
                 ruleRegistry.stream().filter(hasAllTags(tags)).collect(Collectors.toList()).size());
         Assert.assertEquals("RuleImpl list size", 1,
                 ruleRegistry.stream().filter(hasAllTags(tag1, tag2, tag3)).collect(Collectors.toList()).size());
-
     }
 
 }

@@ -106,7 +106,6 @@ public class RuleEngineTest extends JavaOSGiTest {
                 "triggerId.out3", actionInputs.get("in5"));
         Assert.assertEquals("Auto map action input in5[tagD, tagE] to action output out5[tagD, tagE]", "actionId.out5",
                 actionInputs.get("in4"));
-
     }
 
     /**

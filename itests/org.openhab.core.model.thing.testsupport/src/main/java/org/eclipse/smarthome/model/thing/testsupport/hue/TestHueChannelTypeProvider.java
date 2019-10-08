@@ -80,7 +80,6 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
                                     .build()))
                     .build();
             channelGroupTypes = Arrays.asList(groupX);
-
         } catch (Exception willNeverBeThrown) {
         }
     }

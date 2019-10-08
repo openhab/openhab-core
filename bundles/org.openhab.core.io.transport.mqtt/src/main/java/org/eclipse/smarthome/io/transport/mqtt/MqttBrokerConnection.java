@@ -538,7 +538,6 @@ public class MqttBrokerConnection {
      */
     @SuppressWarnings({ "null", "unused" })
     public CompletableFuture<Boolean> unsubscribe(String topic, MqttMessageSubscriber subscriber) {
-
         synchronized (subscribers) {
             final @Nullable List<MqttMessageSubscriber> list = subscribers.get(topic);
             if (list == null) {

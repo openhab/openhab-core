@@ -137,7 +137,6 @@ public class TestHueThingHandlerFactory extends BaseThingHandlerFactory {
                 }
             };
         }
-
     }
 
     @Override

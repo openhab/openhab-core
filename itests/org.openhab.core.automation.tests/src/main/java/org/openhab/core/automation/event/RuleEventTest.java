@@ -104,7 +104,6 @@ public class RuleEventTest extends JavaOSGiTest {
 
     @Test
     public void testRuleEvents() throws ItemNotFoundException {
-
         // Registering eventSubscriber
         List<Event> ruleEvents = new ArrayList<>();
 

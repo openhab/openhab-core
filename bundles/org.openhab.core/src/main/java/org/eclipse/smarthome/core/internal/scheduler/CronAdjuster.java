@@ -465,7 +465,6 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
 
     @Override
     public Temporal adjustInto(@Nullable Temporal temporal) {
-
         // Never match the actual time, so since our basic
         // unit is seconds, we add one second.
         Temporal ret = temporal.plus(1, ChronoUnit.SECONDS);

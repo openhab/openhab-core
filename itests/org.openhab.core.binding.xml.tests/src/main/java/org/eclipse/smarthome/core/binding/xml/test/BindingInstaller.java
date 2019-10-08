@@ -56,7 +56,6 @@ public class BindingInstaller {
         // Wait for correctly uninstalled bundle.
         waitForAssert.accept(
                 () -> assertThat(bindingInfoRegistry.getBindingInfos().size(), is(initialNumberOfBindingInfos)));
-
     }
 
 }

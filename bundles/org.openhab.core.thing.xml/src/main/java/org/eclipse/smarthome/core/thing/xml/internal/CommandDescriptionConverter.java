@@ -47,7 +47,6 @@ public class CommandDescriptionConverter extends GenericUnmarshaller<CommandDesc
         NodeList commandOptionsNode = (NodeList) nodeIterator.next();
         if (commandOptionsNode != null) {
             if ("options".equals(commandOptionsNode.getNodeName())) {
-
                 CommandDescriptionBuilder commandDescriptionBuilder = CommandDescriptionBuilder.create();
                 for (Object coNodeObject : commandOptionsNode.getList()) {
                     NodeValue optionsNode = (NodeValue) coNodeObject;

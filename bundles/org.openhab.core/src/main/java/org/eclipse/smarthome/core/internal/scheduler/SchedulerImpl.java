@@ -140,7 +140,6 @@ public class SchedulerImpl implements Scheduler {
     @Override
     public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable,
             SchedulerTemporalAdjuster temporalAdjuster) {
-
         final ScheduledCompletableFutureRecurring<T> schedule = new ScheduledCompletableFutureRecurring<T>();
 
         schedule(schedule, runnable, temporalAdjuster);

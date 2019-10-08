@@ -112,7 +112,6 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
     @Test
     public void assertThatConditionWorksInRule() throws ItemNotFoundException {
-
         String testItemName1 = "TriggeredItem";
         String testItemName2 = "SwitchedItem";
 

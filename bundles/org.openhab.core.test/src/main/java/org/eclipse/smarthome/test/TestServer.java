@@ -93,7 +93,6 @@ public class TestServer {
                     serverStarted.completeExceptionally(e);
                     return;
                 }
-
             }
         });
 

@@ -197,7 +197,6 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void addMultipleItems() throws IOException {
-
         List<GroupItemDTO> itemList = new ArrayList<>();
         GroupItemDTO[] items = new GroupItemDTO[] {};
 

@@ -102,7 +102,6 @@ public class ConnectionValidator {
      */
     private static void validateActionConnections(ModuleTypeRegistry mtRegistry, Action action,
             @NonNull List<? extends @NonNull Trigger> triggers, @NonNull List<? extends @NonNull Action> actions) {
-
         ActionType type = (ActionType) mtRegistry.get(action.getTypeUID()); // get module type of the condition
         if (type == null) {
             // if module type not exists in the system - throws exception
@@ -179,7 +178,6 @@ public class ConnectionValidator {
      */
     private static void validateConditionConnections(ModuleTypeRegistry mtRegistry, @NonNull Condition condition,
             @NonNull List<? extends @NonNull Trigger> triggers) {
-
         ConditionType type = (ConditionType) mtRegistry.get(condition.getTypeUID()); // get module type of the condition
         if (type == null) {
             // if module type not exists in the system - throws exception
@@ -225,7 +223,6 @@ public class ConnectionValidator {
      */
     private static void checkConnection(ModuleTypeRegistry mtRegistry, Connection connection, Input input,
             @NonNull List<? extends @NonNull Trigger> triggers) {
-
         Map<String, Trigger> triggersMap = new HashMap<>();
         for (Trigger trigger : triggers) {
             triggersMap.put(trigger.getId(), trigger);

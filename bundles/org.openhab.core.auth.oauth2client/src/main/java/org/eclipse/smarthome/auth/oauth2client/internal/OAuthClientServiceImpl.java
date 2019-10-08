@@ -187,7 +187,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     @Override
     public AccessTokenResponse getAccessTokenResponseByAuthorizationCode(String authorizationCode,
             @Nullable String redirectURI) throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -231,7 +230,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     @Override
     public AccessTokenResponse getAccessTokenByResourceOwnerPasswordCredentials(String username, String password,
             @Nullable String scope) throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -253,7 +251,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     @Override
     public AccessTokenResponse getAccessTokenByClientCredentials(@Nullable String scope)
             throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -278,7 +275,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     @Override
     public AccessTokenResponse refreshToken() throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -319,7 +315,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     @Override
     public @Nullable AccessTokenResponse getAccessTokenResponse()
             throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -366,7 +361,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     @Override
     public void remove() throws OAuthException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }

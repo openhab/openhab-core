@@ -195,6 +195,5 @@ public class RunRuleModuleTest extends JavaOSGiTest {
             assertEquals("smarthome/items/switch3/command", event.getTopic());
             assertEquals(OnOffType.ON, event.getItemCommand());
         });
-
     }
 }

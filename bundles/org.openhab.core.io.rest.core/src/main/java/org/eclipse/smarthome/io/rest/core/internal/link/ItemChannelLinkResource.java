@@ -100,7 +100,6 @@ public class ItemChannelLinkResource implements RESTResource {
             @ApiResponse(code = 404, message = "Content does not match the path") })
     public Response getLink(@PathParam("itemName") @ApiParam(value = "itemName") String itemName,
             @PathParam("channelUID") @ApiParam(value = "channelUID") String channelUid) {
-
         List<ItemChannelLinkDTO> links = itemChannelLinkRegistry.getAll().stream()
                 .filter(link -> channelUid.equals(link.getLinkedUID().getAsString()))
                 .filter(link -> itemName.equals(link.getItemName())).map(this::toBeans).collect(Collectors.toList());

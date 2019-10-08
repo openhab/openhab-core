@@ -43,7 +43,6 @@ abstract class AbstractChannelTypeBuilder<T extends ChannelTypeBuilder<T>> imple
     protected @Nullable URI configDescriptionURI;
 
     public AbstractChannelTypeBuilder(ChannelTypeUID channelTypeUID, String label) {
-
         if (channelTypeUID == null) {
             throw new IllegalArgumentException("ChannelTypeUID must be set.");
         }

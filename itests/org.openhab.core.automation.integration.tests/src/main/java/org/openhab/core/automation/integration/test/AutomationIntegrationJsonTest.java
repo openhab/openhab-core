@@ -101,7 +101,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                HashSet<Item> items = new HashSet<>();
+                Set<Item> items = new HashSet<>();
                 items.add(new SwitchItem("myMotionItem"));
                 items.add(new SwitchItem("myPresenceItem"));
                 items.add(new SwitchItem("myLampItem"));
@@ -168,7 +168,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             assertThat(moduleTypeRegistry, is(notNullValue()));
         }, 9000, 1000);
         logger.info("@Before.finish");
-
     }
 
     @After
@@ -219,7 +218,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             assertThat(output3.isPresent(), is(true));
             assertThat(output3.get().getDefaultValue(), is("{\"command\":\"OFF\"}"));
         }, 10000, 200);
-
     }
 
     @Test

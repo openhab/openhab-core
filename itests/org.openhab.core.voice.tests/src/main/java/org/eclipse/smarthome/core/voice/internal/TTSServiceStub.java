@@ -50,7 +50,6 @@ public class TTSServiceStub implements TTSService {
     }
 
     public TTSServiceStub() {
-
     }
 
     @Override

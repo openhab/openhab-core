@@ -76,7 +76,6 @@ public class OAuthFactoryImpl implements OAuthFactory {
             oauthClientServiceCache.put(handle, clientImpl);
         }
         return clientImpl;
-
     }
 
     @Override
