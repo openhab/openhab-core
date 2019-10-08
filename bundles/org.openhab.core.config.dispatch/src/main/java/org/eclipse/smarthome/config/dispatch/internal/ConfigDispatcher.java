@@ -441,7 +441,7 @@ public class ConfigDispatcher {
             }
         }
         if (!trimmedLine.isEmpty() && trimmedLine.substring(1).contains(DEFAULT_VALUE_DELIMITER)) {
-            String property = StringUtils.substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER).trim();
+            String property = StringUtils.substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER);
             String value = trimmedLine.substring(property.length() + 1).trim();
             if (value.startsWith(DEFAULT_LIST_STARTING_CHARACTER) && value.endsWith(DEFAULT_LIST_ENDING_CHARACTER)) {
                 logger.debug("Found list in value '{}'", value);
@@ -453,9 +453,9 @@ public class ConfigDispatcher {
                         .map(v -> v.trim())//
                         .filter(v -> !v.isEmpty())//
                         .collect(Collectors.toList());
-                return new ParseLineResult(pid, property, values);
+                return new ParseLineResult(pid, property.trim(), values);
             } else {
-                return new ParseLineResult(pid, property, value);
+                return new ParseLineResult(pid, property.trim(), value);
             }
         } else {
             logger.warn("Could not parse line '{}'", line);

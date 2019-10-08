@@ -113,6 +113,24 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Test
+    public void allConfigurationFilesWithLocalPIDsAndWhitespacesAreProcessedAndConfigurationIsUpdated() {
+        String configDirectory = configBaseDirectory + SEP + "local_pid_whitespaces_conf";
+        String servicesDirectory = "local_pid_services";
+
+        String defaultConfigFileName = configDirectory + SEP + "local.pid.default.file.cfg";
+
+        initialize(defaultConfigFileName);
+
+        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+
+        // Assert that a file with local pid from the root configuration directory is processed.
+        verifyValueOfConfigurationProperty("local.default.pid", "default.property", "default.value");
+
+        // Assert that a file with local pid from the services directory is processed.
+        verifyValueOfConfigurationProperty("local.service.pid", "service.property", "service.value");
+    }
+
+    @Test
     public void valueIsValidIfItIsAList() {
         String configDirectory = configBaseDirectory + SEP + "local_pid_list_conf";
         String servicesDirectory = "local_pid_list_services";
