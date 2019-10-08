@@ -28,7 +28,6 @@ import org.openhab.core.types.UnDefType;
  * as a number.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public class NumberItem extends GenericItem {

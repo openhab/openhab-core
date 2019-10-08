@@ -17,7 +17,6 @@ package org.openhab.core.transform;
  * wrong. The originating exception should be attached to increase traceability.
  *
  * @author Thomas.Eichstaedt-Engelen
- * @since 0.7.0
  */
 public class TransformationException extends Exception {
 

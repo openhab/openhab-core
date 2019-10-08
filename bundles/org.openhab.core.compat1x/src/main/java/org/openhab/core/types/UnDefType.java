@@ -20,7 +20,6 @@ package org.openhab.core.types;
  * an undefined state if it is dimmed to 50%).
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public enum UnDefType implements PrimitiveType, State {

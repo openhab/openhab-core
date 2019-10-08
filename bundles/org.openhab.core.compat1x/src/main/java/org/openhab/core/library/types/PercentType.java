@@ -18,7 +18,6 @@ import java.math.BigDecimal;
  * The PercentType extends the {@link DecimalType} by putting constraints for its value on top (0-100).
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public class PercentType extends DecimalType {

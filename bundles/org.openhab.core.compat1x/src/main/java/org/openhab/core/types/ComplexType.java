@@ -19,7 +19,6 @@ import java.util.SortedMap;
  * Each constituent can be referred to by a unique name.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public interface ComplexType extends Type {

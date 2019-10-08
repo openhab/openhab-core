@@ -21,7 +21,6 @@ import org.openhab.core.items.Item;
  * for sending data to an IoT (Internet of Things) service.
  *
  * @author Kai Kreuzer
- * @since 1.0.0
  */
 public interface PersistenceService {
 

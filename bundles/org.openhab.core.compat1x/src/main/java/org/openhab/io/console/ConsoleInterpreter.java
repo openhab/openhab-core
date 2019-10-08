@@ -19,7 +19,6 @@ package org.openhab.io.console;
  * It must not be used productively!
  *
  * @author Kai Kreuzer
- * @since 0.4.0
  *
  */
 public class ConsoleInterpreter {

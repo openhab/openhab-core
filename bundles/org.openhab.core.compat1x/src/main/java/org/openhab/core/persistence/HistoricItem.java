@@ -27,7 +27,6 @@ import org.openhab.core.types.State;
  * </p>
  *
  * @author Kai Kreuzer
- * @since 1.0.0
  */
 public interface HistoricItem {
 

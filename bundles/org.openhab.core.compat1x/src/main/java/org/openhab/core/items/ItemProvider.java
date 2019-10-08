@@ -20,7 +20,6 @@ import java.util.Collection;
  * they can be derived from some dynamic logic.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public interface ItemProvider {

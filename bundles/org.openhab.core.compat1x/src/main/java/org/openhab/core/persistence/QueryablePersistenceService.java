@@ -17,7 +17,6 @@ package org.openhab.core.persistence;
  * data from openHAB. This is most likely some kind of database system.
  *
  * @author Kai Kreuzer
- * @since 1.0.0
  */
 public interface QueryablePersistenceService extends PersistenceService {
 

@@ -19,7 +19,6 @@ import org.openhab.core.items.Item;
  * binding configuration string used in the {@link GenericItemProvider}.
  *
  * @author Kai Kreuzer
- * @since 0.3.0
  *
  */
 public interface BindingConfigReader {

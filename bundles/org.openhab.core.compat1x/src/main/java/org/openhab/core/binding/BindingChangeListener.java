@@ -17,7 +17,6 @@ package org.openhab.core.binding;
  * {@link BindingProvider} about changes in the binding configuration.
  *
  * @author Kai Kreuzer
- * @since 0.3.0
  */
 public interface BindingChangeListener {
 

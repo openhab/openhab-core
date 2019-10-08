@@ -26,7 +26,6 @@ import org.openhab.model.sitemap.Widget;
  *
  * @author Kai Kreuzer
  * @author Chris Jackson
- * @since 0.8.0
  *
  */
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {

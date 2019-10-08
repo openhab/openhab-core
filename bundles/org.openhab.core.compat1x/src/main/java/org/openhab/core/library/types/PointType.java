@@ -27,7 +27,6 @@ import org.openhab.core.types.State;
  * This type can be used for items that are dealing with GPS functionality.
  *
  * @author Gaël L'hopital
- * @since 1.7.0
  */
 public class PointType implements ComplexType, Command, State {
 

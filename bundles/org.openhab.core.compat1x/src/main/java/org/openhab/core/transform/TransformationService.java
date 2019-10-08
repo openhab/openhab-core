@@ -26,7 +26,6 @@ package org.openhab.core.transform;
  * @author Thomas.Eichstaedt-Engelen
  *         œauthor Kai Kreuzer
  *
- * @since 0.7.0
  */
 public interface TransformationService {
 

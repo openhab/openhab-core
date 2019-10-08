@@ -23,7 +23,6 @@ import java.util.Collection;
  * they like and also dynamically remove or add items.
  *
  * @author Kai Kreuzer
- * @since 0.1.0
  *
  */
 public interface ItemRegistry {

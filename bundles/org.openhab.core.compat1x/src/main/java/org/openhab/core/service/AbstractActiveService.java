@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
  * background.
  *
  * @author Kai Kreuzer
- * @since 0.7.0
  */
 public abstract class AbstractActiveService {
 

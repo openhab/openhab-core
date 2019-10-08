@@ -27,7 +27,6 @@ import org.openhab.core.types.UnDefType;
  * @author Thomas.Eichstaedt-Engelen
  * @author Kai Kreuzer
  *
- * @since 0.8.0
  */
 public class DateTimeItem extends GenericItem {
 

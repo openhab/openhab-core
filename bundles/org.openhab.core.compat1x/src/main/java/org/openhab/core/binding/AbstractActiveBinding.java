@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
  * @author Thomas.Eichstaedt-Engelen
  * @author Kai Kreuzer
  *
- * @since 0.6.0
  */
 public abstract class AbstractActiveBinding<P extends BindingProvider> extends AbstractBinding<P> {
 

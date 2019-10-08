@@ -22,7 +22,6 @@ import org.openhab.core.types.UnDefType;
  * out of the states of all its member items.
  *
  * @author Kai Kreuzer
- * @since 0.7.0
  *
  */
 abstract public interface GroupFunction {
@@ -49,7 +48,6 @@ abstract public interface GroupFunction {
      * have the same state. If this is the case, this state is returned, otherwise UNDEF is returned.
      *
      * @author Kai Kreuzer
-     * @since 0.7.0
      *
      */
     static class Equality implements GroupFunction {
