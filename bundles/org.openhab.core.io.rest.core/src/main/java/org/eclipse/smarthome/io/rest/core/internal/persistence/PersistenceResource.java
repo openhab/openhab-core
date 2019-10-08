@@ -88,9 +88,9 @@ public class PersistenceResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceResource.class);
 
-    private final String MODIFYABLE = "Modifiable";
-    private final String QUERYABLE = "Queryable";
-    private final String STANDARD = "Standard";
+    private static final String MODIFYABLE = "Modifiable";
+    private static final String QUERYABLE = "Queryable";
+    private static final String STANDARD = "Standard";
 
     // The URI path to this resource
     public static final String PATH = "persistence";

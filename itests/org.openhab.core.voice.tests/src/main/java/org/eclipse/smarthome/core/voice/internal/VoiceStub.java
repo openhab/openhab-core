@@ -28,8 +28,8 @@ public class VoiceStub implements Voice {
 
     private TTSServiceStub ttsService = new TTSServiceStub();
 
-    private final String VOICE_STUB_ID = "voiceStubID";
-    private final String VOICE_STUB_LABEL = "voiceStubLabel";
+    private static final String VOICE_STUB_ID = "voiceStubID";
+    private static final String VOICE_STUB_LABEL = "voiceStubLabel";
 
     @Override
     public String getUID() {

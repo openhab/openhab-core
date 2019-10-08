@@ -49,20 +49,20 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
-    private final String ANY_BINDING_ID_1 = "any2BindingId1";
-    private final String ANY_THING_TYPE_1 = "any2ThingType1";
+    private static final String ANY_BINDING_ID_1 = "any2BindingId1";
+    private static final String ANY_THING_TYPE_1 = "any2ThingType1";
 
-    private final String ANY_BINDING_ID_2 = "any2BindingId2";
-    private final String ANY_THING_TYPE_2 = "any2ThingType2";
+    private static final String ANY_BINDING_ID_2 = "any2BindingId2";
+    private static final String ANY_THING_TYPE_2 = "any2ThingType2";
 
-    private final String ANY_BINDING_ID_3 = "any2BindingId3";
-    private final String ANY_THING_TYPE_3 = "any2ThingType3";
+    private static final String ANY_BINDING_ID_3 = "any2BindingId3";
+    private static final String ANY_THING_TYPE_3 = "any2ThingType3";
 
-    private final ThingUID BRIDGE_UID_1 = new ThingUID("binding:bridge:1");
-    private final ThingUID BRIDGE_UID_2 = new ThingUID("binding:bridge:2");
+    private static final ThingUID BRIDGE_UID_1 = new ThingUID("binding:bridge:1");
+    private static final ThingUID BRIDGE_UID_2 = new ThingUID("binding:bridge:2");
 
-    private final String FAULTY_BINDING_ID = "faulty2BindingId";
-    private final String FAULTY_THING_TYPE = "faulty2ThingType";
+    private static final String FAULTY_BINDING_ID = "faulty2BindingId";
+    private static final String FAULTY_THING_TYPE = "faulty2ThingType";
 
     private static class AnotherDiscoveryService extends DiscoveryServiceMock {
         public AnotherDiscoveryService(ThingTypeUID thingType, int timeout) {

@@ -82,9 +82,8 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     private Event ruleEvent;
     public Event itemEvent;
 
-    public static VolatileStorageService VOLATILE_STORAGE_SERVICE = new VolatileStorageService(); // keep storage with
-                                                                                                  // rules imported from
-                                                                                                  // json files
+    // keep storage rules imported from json files
+    public static final VolatileStorageService VOLATILE_STORAGE_SERVICE = new VolatileStorageService();
 
     @Before
     public void before() {

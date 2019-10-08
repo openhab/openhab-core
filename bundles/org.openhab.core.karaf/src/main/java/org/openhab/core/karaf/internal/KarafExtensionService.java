@@ -72,7 +72,7 @@ public class KarafExtensionService implements ExtensionService {
         try {
             for (Feature feature : featuresService.listFeatures()) {
                 if (feature.getName().startsWith(FeatureInstaller.PREFIX)
-                        && Arrays.asList(FeatureInstaller.addonTypes).contains(getType(feature.getName()))) {
+                        && Arrays.asList(FeatureInstaller.ADDON_TYPES).contains(getType(feature.getName()))) {
                     Extension extension = getExtension(feature);
                     // for simple packaging, we filter out all openHAB 1 add-ons as they cannot be used through the UI
                     if (!"simple".equals(featureInstaller.getCurrentPackage())

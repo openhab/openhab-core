@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
 
     /** {@link Pattern} which matches the credentials out of an URL */
     private static final Pattern URL_CREDENTIALS_PATTERN = Pattern.compile("http://(.*?):(.*?)@.*");
@@ -122,7 +122,7 @@ public class HttpUtil {
                 try {
                     proxyPort = Integer.valueOf(proxyPortString);
                 } catch (NumberFormatException e) {
-                    logger.warn("'{}' is not a valid proxy port - using port 80 instead");
+                    LOGGER.warn("'{}' is not a valid proxy port - using port 80 instead");
                 }
             }
             proxyUser = System.getProperty("http.proxyUser");
@@ -187,11 +187,11 @@ public class HttpUtil {
             client.getState().setCredentials(AuthScope.ANY, credentials);
         }
 
-        if (logger.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             try {
-                logger.debug("About to execute '{}'", method.getURI());
+                LOGGER.debug("About to execute '{}'", method.getURI());
             } catch (URIException e) {
-                logger.debug("{}", e.getMessage());
+                LOGGER.debug("{}", e.getMessage());
             }
         }
 
@@ -199,19 +199,19 @@ public class HttpUtil {
 
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
-                logger.debug("Method failed: {}", method.getStatusLine());
+                LOGGER.debug("Method failed: {}", method.getStatusLine());
             }
 
             String responseBody = IOUtils.toString(method.getResponseBodyAsStream());
             if (!responseBody.isEmpty()) {
-                logger.debug("{}", responseBody);
+                LOGGER.debug("{}", responseBody);
             }
 
             return responseBody;
         } catch (HttpException he) {
-            logger.error("Fatal protocol violation: {}", he.toString());
+            LOGGER.error("Fatal protocol violation: {}", he.toString());
         } catch (IOException ioe) {
-            logger.error("Fatal transport error: {}", ioe.toString());
+            LOGGER.error("Fatal transport error: {}", ioe.toString());
         } finally {
             method.releaseConnection();
         }
@@ -239,7 +239,7 @@ public class HttpUtil {
                 URL url = new URL(urlString);
                 givenHost = url.getHost();
             } catch (MalformedURLException e) {
-                logger.error("the given url {} is malformed", urlString);
+                LOGGER.error("the given url {} is malformed", urlString);
             }
 
             String[] hosts = nonProxyHosts.split("\\|");
@@ -301,13 +301,13 @@ public class HttpUtil {
 
     /**
      * Factory method to create a {@link HttpMethod}-object according to the
-     * given String <code>httpMethod</codde>
+     * given String <code>httpMethod</code>
      *
-     * &#64;param httpMethodString the name of the {@link HttpMethod} to create
-     * &#64;param url
+     * @param httpMethodString the name of the {@link HttpMethod} to create
+     * @param url
      *
-     * &#64;return an object of type {@link GetMethod}, {@link PutMethod},
-     * {@link PostMethod} or {@link DeleteMethod}
+     * @return an object of type {@link GetMethod}, {@link PutMethod},
+     *         {@link PostMethod} or {@link DeleteMethod}
      * @throws IllegalArgumentException if <code>httpMethod</code> is none of
      *             <code>GET</code>, <code>PUT</code>, <code>POST</POST> or <code>DELETE</code>
      */

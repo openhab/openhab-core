@@ -36,12 +36,12 @@ import org.osgi.service.cm.ConfigurationAdmin;
  *
  */
 public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
-    private final String CONFIG_DEFAULT_HLI = "defaultHLI";
-    private final String CONFIG_DEFAULT_TTS = "defaultTTS";
-    private final String CONFIG_DEFAULT_VOICE = "defaultVoice";
-    private final String SUBCMD_INTERPRET = "interpret";
-    private final String INTERPRETED_TEXT = "Interpreted text";
-    private final String EXCEPTION_MESSAGE = "Exception message";
+    private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
+    private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
+    private static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
+    private static final String SUBCMD_INTERPRET = "interpret";
+    private static final String INTERPRETED_TEXT = "Interpreted text";
+    private static final String EXCEPTION_MESSAGE = "Exception message";
 
     private HumanLanguageInterpreterStub hliStub;
     private VoiceStub voice;

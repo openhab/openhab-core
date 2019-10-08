@@ -699,27 +699,27 @@ public class MqttBrokerConnection {
             future.completeExceptionally(new MqttException(e));
             return future;
         }
-        MqttDefaultFilePersistence _dataStore = new MqttDefaultFilePersistence(persistencePath.toString());
+        MqttDefaultFilePersistence localDataStore = new MqttDefaultFilePersistence(persistencePath.toString());
 
         // Create the client
-        MqttAsyncClient _client;
+        MqttAsyncClient localClient;
         try {
-            _client = createClient(serverURI.toString(), clientId, _dataStore);
+            localClient = createClient(serverURI.toString(), clientId, localDataStore);
         } catch (org.eclipse.paho.client.mqttv3.MqttException e) {
             future.completeExceptionally(new MqttException(e));
             return future;
         }
 
         // Assign to object
-        this.client = _client;
-        this.dataStore = _dataStore;
+        this.client = localClient;
+        this.dataStore = localDataStore;
 
         // Connect
-        _client.setCallback(clientCallback);
+        localClient.setCallback(clientCallback);
         try {
             MqttConnectOptions mqttConnectOptions = createMqttOptions();
             mqttConnectOptions.setMaxInflight(16384); // 1/4 of available message ids
-            _client.connect(mqttConnectOptions, null, connectionCallback);
+            localClient.connect(mqttConnectOptions, null, connectionCallback);
             logger.info("Starting MQTT broker connection to '{}' with clientid {} and file store '{}'", host,
                     getClientId(), persistencePath);
         } catch (org.eclipse.paho.client.mqttv3.MqttException | ConfigurationException e) {
@@ -857,13 +857,14 @@ public class MqttBrokerConnection {
      * @param listener A listener to be notified of success or failure of the delivery.
      */
     public void publish(String topic, byte[] payload, int qos, boolean retain, MqttActionCallback listener) {
-        MqttAsyncClient client_ = client;
-        if (client_ == null) {
+        MqttAsyncClient localClient = client;
+        if (localClient == null) {
             listener.onFailure(topic, new MqttException(0));
             return;
         }
         try {
-            IMqttDeliveryToken deliveryToken = client_.publish(topic, payload, qos, retain, listener, actionCallback);
+            IMqttDeliveryToken deliveryToken = localClient.publish(topic, payload, qos, retain, listener,
+                    actionCallback);
             logger.debug("Publishing message {} to topic '{}'", deliveryToken.getMessageId(), topic);
         } catch (org.eclipse.paho.client.mqttv3.MqttException e) {
             listener.onFailure(topic, new MqttException(e));

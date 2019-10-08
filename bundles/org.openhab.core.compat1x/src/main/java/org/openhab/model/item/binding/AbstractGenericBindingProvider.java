@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractGenericBindingProvider implements BindingConfigReader, BindingProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractGenericBindingProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(AbstractGenericBindingProvider.class);
 
     private Set<BindingChangeListener> listeners = new CopyOnWriteArraySet<>();
 

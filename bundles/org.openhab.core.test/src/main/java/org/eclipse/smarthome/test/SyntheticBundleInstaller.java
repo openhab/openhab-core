@@ -73,7 +73,7 @@ public class SyntheticBundleInstaller {
     /**
      * A list of default extensions to be included in the synthetic bundle.
      */
-    private static Set<String> DEFAULT_EXTENSIONS = Collections
+    private static final Set<String> DEFAULT_EXTENSIONS = Collections
             .unmodifiableSet(Stream.of("*.xml", "*.properties", "*.json", ".keep").collect(Collectors.toSet()));
 
     /**

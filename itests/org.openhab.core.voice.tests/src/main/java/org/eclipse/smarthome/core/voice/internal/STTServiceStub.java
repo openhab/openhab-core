@@ -12,9 +12,10 @@
  */
 package org.eclipse.smarthome.core.voice.internal;
 
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioStream;
@@ -33,10 +34,11 @@ import org.eclipse.smarthome.core.voice.STTServiceHandle;
  */
 public class STTServiceStub implements STTService {
 
-    private Set<AudioFormat> supportedFormats;
+    private static final Set<AudioFormat> SUPPORTED_FORMATS = Stream.of(AudioFormat.MP3, AudioFormat.WAV)
+            .collect(Collectors.toSet());
 
-    private final String STTSERVICE_STUB_ID = "sttServiceStubID";
-    private final String STTSERVICE_STUB_LABEL = "sttServiceStubLabel";
+    private static final String STTSERVICE_STUB_ID = "sttServiceStubID";
+    private static final String STTSERVICE_STUB_LABEL = "sttServiceStubLabel";
 
     @Override
     public String getId() {
@@ -55,10 +57,7 @@ public class STTServiceStub implements STTService {
 
     @Override
     public Set<AudioFormat> getSupportedFormats() {
-        supportedFormats = new HashSet<AudioFormat>();
-        supportedFormats.add(AudioFormat.MP3);
-        supportedFormats.add(AudioFormat.WAV);
-        return supportedFormats;
+        return SUPPORTED_FORMATS;
     }
 
     @Override

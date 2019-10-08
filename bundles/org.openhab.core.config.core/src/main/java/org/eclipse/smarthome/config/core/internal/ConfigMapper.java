@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ConfigMapper {
-    private static final transient Logger logger = LoggerFactory.getLogger(ConfigMapper.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigMapper.class);
 
     /**
      * Use this method to automatically map a configuration collection to a Configuration holder object. A common
@@ -78,7 +78,7 @@ public class ConfigMapper {
 
             // Consider RequiredField annotations
             if (value == null) {
-                logger.trace("Skipping field '{}', because config has no entry for {}", fieldName, configKey);
+                LOGGER.trace("Skipping field '{}', because config has no entry for {}", fieldName, configKey);
                 continue;
             }
 
@@ -97,12 +97,12 @@ public class ConfigMapper {
 
             try {
                 value = objectConvert(value, type);
-                logger.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
+                LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
                         value, fieldName, configurationClass.getName());
                 FieldUtils.writeField(configuration, fieldName, value, true);
 
             } catch (Exception ex) {
-                logger.warn("Could not set field value for field '{}': {}", fieldName, ex.getMessage(), ex);
+                LOGGER.warn("Could not set field value for field '{}': {}", fieldName, ex.getMessage(), ex);
             }
         }
 

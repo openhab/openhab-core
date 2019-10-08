@@ -127,17 +127,17 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     private static final ChannelGroupUID CHANNEL_GROUP_UID = new ChannelGroupUID(THING_UID, CHANNEL_GROUP_ID);
 
-    private Thing THING;
-    private URI CONFIG_DESCRIPTION_THING;
-    private URI CONFIG_DESCRIPTION_CHANNEL;
+    private Thing thing;
+    private URI configDescriptionThing;
+    private URI configDescriptionChannel;
 
     private Storage<Boolean> storage;
 
     @Before
     public void setUp() throws Exception {
-        CONFIG_DESCRIPTION_THING = new URI("test:test");
-        CONFIG_DESCRIPTION_CHANNEL = new URI("test:channel");
-        THING = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(Collections.singletonList( //
+        configDescriptionThing = new URI("test:test");
+        configDescriptionChannel = new URI("test:channel");
+        thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(Collections.singletonList( //
                 ChannelBuilder.create(CHANNEL_UID, "Switch").withLabel("Test Label").withDescription("Test Description")
                         .withType(CHANNEL_TYPE_UID).withDefaultTags(Collections.singleton("Test Tag")).build() //
         )).build();
@@ -211,7 +211,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 initializeRunning.set(true);
 
                 // call thingUpdated() from within initialize()
-                thc.get().thingUpdated(THING);
+                thc.get().thingUpdated(thing);
 
                 // hang on a little to provoke a potential dead-lock
                 Thread.sleep(1000);
@@ -219,14 +219,14 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 initializeRunning.set(false);
                 return null;
             }).when(mockHandler).initialize();
-            when(mockHandler.getThing()).thenReturn(THING);
+            when(mockHandler.getThing()).thenReturn(thing);
             return mockHandler;
         });
 
-        new Thread((Runnable) () -> managedThingProvider.add(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.add(thing)).start();
 
         waitForAssert(() -> {
-            assertThat(THING.getStatus(), is(ThingStatus.INITIALIZING));
+            assertThat(thing.getStatus(), is(ThingStatus.INITIALIZING));
         });
 
         // ensure it didn't run into a dead-lock which gets resolved by the SafeCaller.
@@ -275,14 +275,14 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     public void testEditChannelBuilderThrowsIllegalArgumentException() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = initializeThingHandlerCallback();
 
-        thc.get().editChannel(THING, new ChannelUID(THING_UID, "invalid-channel"));
+        thc.get().editChannel(thing, new ChannelUID(THING_UID, "invalid-channel"));
     }
 
     @Test
     public void testEditChannelBuilder() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = initializeThingHandlerCallback();
 
-        ChannelBuilder channelBuilder = thc.get().editChannel(THING, CHANNEL_UID);
+        ChannelBuilder channelBuilder = thc.get().editChannel(thing, CHANNEL_UID);
         assertNotNull(channelBuilder);
         validateChannel(channelBuilder.build());
     }
@@ -338,14 +338,14 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         registerService(mockConfigDescriptionProvider, ConfigDescriptionProvider.class.getName());
 
         // verify a missing mandatory thing config prevents it from getting initialized
-        when(mockConfigDescriptionProvider.getConfigDescription(eq(CONFIG_DESCRIPTION_THING), any()))
-                .thenReturn(new ConfigDescription(CONFIG_DESCRIPTION_THING, parameters));
+        when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionThing), any()))
+                .thenReturn(new ConfigDescription(configDescriptionThing, parameters));
         assertThingStatus(Collections.emptyMap(), Collections.emptyMap(), ThingStatus.UNINITIALIZED,
                 ThingStatusDetail.HANDLER_CONFIGURATION_PENDING);
 
         // verify a missing mandatory channel config prevents it from getting initialized
-        when(mockConfigDescriptionProvider.getConfigDescription(eq(CONFIG_DESCRIPTION_CHANNEL), any()))
-                .thenReturn(new ConfigDescription(CONFIG_DESCRIPTION_CHANNEL, parameters));
+        when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionChannel), any()))
+                .thenReturn(new ConfigDescription(configDescriptionChannel, parameters));
         assertThingStatus(Collections.singletonMap(CONFIG_PARAM_NAME, "value"), Collections.emptyMap(),
                 ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING);
 
@@ -598,7 +598,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 initializeInvoked.set(true);
 
                 // call thingUpdated() from within initialize()
-                thingHandlerCallback.get().thingUpdated(THING);
+                thingHandlerCallback.get().thingUpdated(thing);
 
                 // hang on a little to provoke a potential dead-lock
                 Thread.sleep(1000);
@@ -615,19 +615,19 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 return null;
             }).when(mockHandler).dispose();
 
-            when(mockHandler.getThing()).thenReturn(THING);
+            when(mockHandler.getThing()).thenReturn(thing);
             return mockHandler;
         });
 
         ThingStatusInfo thingStatusInfo = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
-        THING.setStatusInfo(thingStatusInfo);
+        thing.setStatusInfo(thingStatusInfo);
 
-        new Thread((Runnable) () -> managedThingProvider.add(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.add(thing)).start();
 
         waitForAssert(() -> {
             assertThat(initializeInvoked.get(), is(true));
-            assertThat(THING.getStatus(), is(ThingStatus.INITIALIZING));
+            assertThat(thing.getStatus(), is(ThingStatus.INITIALIZING));
         });
 
         // Reset the flag
@@ -639,8 +639,8 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
             assertThat(disposeInvoked.get(), is(true));
-            assertThat(THING.getStatus(), is(ThingStatus.UNINITIALIZED));
-            assertThat(THING.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
+            assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
+            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
 
         // Reset the flag
@@ -650,7 +650,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         thingManager.setEnabled(THING_UID, true);
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(false));
-            assertThat(THING.getStatus(), is(ThingStatus.ONLINE));
+            assertThat(thing.getStatus(), is(ThingStatus.ONLINE));
         });
     }
 
@@ -660,13 +660,13 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
         ThingStatusInfo thingStatusInfo = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
-        THING.setStatusInfo(thingStatusInfo);
+        thing.setStatusInfo(thingStatusInfo);
 
-        new Thread((Runnable) () -> managedThingProvider.add(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.add(thing)).start();
 
         waitForAssert(() -> {
             assertThat(thingRegistry.get(THING_UID), is(notNullValue()));
-            assertThat(THING.getStatus(), is(ThingStatus.UNINITIALIZED));
+            assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
         });
 
         Thread.sleep(1000);
@@ -674,16 +674,16 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
-            assertThat(THING.getStatus(), is(ThingStatus.UNINITIALIZED));
-            assertThat(THING.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
+            assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
+            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
 
         thingManager.setEnabled(THING_UID, true);
 
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(false));
-            assertThat(THING.getStatus(), is(ThingStatus.UNINITIALIZED));
-            assertThat(THING.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
+            assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
+            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
     }
 
@@ -705,7 +705,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 initializeInvoked.set(true);
 
                 // call thingUpdated() from within initialize()
-                thingHandlerCallback.get().thingUpdated(THING);
+                thingHandlerCallback.get().thingUpdated(thing);
 
                 // hang on a little to provoke a potential dead-lock
                 Thread.sleep(1000);
@@ -722,27 +722,27 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 return null;
             }).when(mockHandler).dispose();
 
-            when(mockHandler.getThing()).thenReturn(THING);
+            when(mockHandler.getThing()).thenReturn(thing);
             return mockHandler;
         });
 
         ThingStatusInfo enabledStatusInfo = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
-        THING.setStatusInfo(enabledStatusInfo);
-        new Thread((Runnable) () -> managedThingProvider.add(THING)).start();
+        thing.setStatusInfo(enabledStatusInfo);
+        new Thread((Runnable) () -> managedThingProvider.add(thing)).start();
 
         waitForAssert(() -> {
             assertThat(initializeInvoked.get(), is(true));
-            assertThat(THING.getStatus(), is(ThingStatus.INITIALIZING));
+            assertThat(thing.getStatus(), is(ThingStatus.INITIALIZING));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
 
         initializeInvoked.set(false);
 
         // enable the thing
-        new Thread((Runnable) () -> thingManager.setEnabled(THING.getUID(), true)).start();
+        new Thread((Runnable) () -> thingManager.setEnabled(thing.getUID(), true)).start();
 
         waitForAssert(() -> {
-            assertThat(THING.getStatus(), is(ThingStatus.ONLINE));
+            assertThat(thing.getStatus(), is(ThingStatus.ONLINE));
             assertThat(initializeInvoked.get(), is(false));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
     }
@@ -767,7 +767,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 initializeInvoked.set(true);
 
                 // call thingUpdated() from within initialize()
-                thingHandlerCallback.get().thingUpdated(THING);
+                thingHandlerCallback.get().thingUpdated(thing);
 
                 // hang on a little to provoke a potential dead-lock
                 Thread.sleep(1000);
@@ -784,18 +784,18 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 return null;
             }).when(mockHandler).dispose();
 
-            when(mockHandler.getThing()).thenReturn(THING);
+            when(mockHandler.getThing()).thenReturn(thing);
             return mockHandler;
         });
 
         ThingStatusInfo thingStatusInfo = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
-        THING.setStatusInfo(thingStatusInfo);
+        thing.setStatusInfo(thingStatusInfo);
 
-        new Thread((Runnable) () -> managedThingProvider.add(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.add(thing)).start();
 
         waitForAssert(() -> {
-            assertThat(THING.getStatus(), is(ThingStatus.INITIALIZING));
+            assertThat(thing.getStatus(), is(ThingStatus.INITIALIZING));
         });
 
         // ensure it didn't run into a dead-lock which gets resolved by the SafeCaller.
@@ -808,8 +808,8 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
             assertThat(disposeInvoked.get(), is(true));
-            assertThat(THING.getStatus(), is(ThingStatus.UNINITIALIZED));
-            assertThat(THING.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
+            assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
+            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
 
         disposeInvoked.set(false);
@@ -819,8 +819,8 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
             assertThat(disposeInvoked.get(), is(false));
-            assertThat(THING.getStatus(), is(ThingStatus.UNINITIALIZED));
-            assertThat(THING.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
+            assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
+            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
     }
 
@@ -846,7 +846,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 initializeInvoked.set(true);
 
                 // call thingUpdated() from within initialize()
-                thingHandlerCallback.get().thingUpdated(THING);
+                thingHandlerCallback.get().thingUpdated(thing);
 
                 // hang on a little to provoke a potential dead-lock
                 Thread.sleep(1000);
@@ -868,25 +868,25 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 return null;
             }).when(mockHandler).thingUpdated(any());
 
-            when(mockHandler.getThing()).thenReturn(THING);
+            when(mockHandler.getThing()).thenReturn(thing);
             return mockHandler;
         });
 
         ThingStatusInfo thingStatusInfo = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
-        THING.setStatusInfo(thingStatusInfo);
+        thing.setStatusInfo(thingStatusInfo);
 
-        new Thread((Runnable) () -> managedThingProvider.add(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.add(thing)).start();
 
         waitForAssert(() -> {
-            assertThat(THING.getStatus(), is(ThingStatus.INITIALIZING));
+            assertThat(thing.getStatus(), is(ThingStatus.INITIALIZING));
         });
 
         waitForAssert(() -> {
             assertThat(initializeInvoked.get(), is(true));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
 
-        new Thread((Runnable) () -> managedThingProvider.update(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.update(thing)).start();
 
         waitForAssert(() -> {
             assertThat(updatedInvoked.get(), is(true));
@@ -899,13 +899,13 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
             assertThat(disposeInvoked.get(), is(true));
-            assertThat(THING.getStatus(), is(ThingStatus.UNINITIALIZED));
-            assertThat(THING.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
+            assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
+            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
 
         disposeInvoked.set(false);
 
-        new Thread((Runnable) () -> managedThingProvider.update(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.update(thing)).start();
 
         waitForAssert(() -> {
             assertThat(updatedInvoked.get(), is(false));
@@ -933,7 +933,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 initializeInvoked.set(true);
 
                 // call thingUpdated() from within initialize()
-                thingHandlerCallback.get().thingUpdated(THING);
+                thingHandlerCallback.get().thingUpdated(thing);
 
                 // hang on a little to provoke a potential dead-lock
                 Thread.sleep(1000);
@@ -950,19 +950,19 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 return null;
             }).when(mockHandler).dispose();
 
-            when(mockHandler.getThing()).thenReturn(THING);
+            when(mockHandler.getThing()).thenReturn(thing);
             return mockHandler;
         });
 
         ThingStatusInfo thingStatusInfo = ThingStatusInfoBuilder
                 .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
-        THING.setStatusInfo(thingStatusInfo);
+        thing.setStatusInfo(thingStatusInfo);
 
-        new Thread((Runnable) () -> managedThingProvider.add(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.add(thing)).start();
 
         waitForAssert(() -> {
             assertThat(initializeInvoked.get(), is(true));
-            assertThat(THING.getStatus(), is(ThingStatus.INITIALIZING));
+            assertThat(thing.getStatus(), is(ThingStatus.INITIALIZING));
         });
 
         initializeInvoked.set(false);
@@ -972,18 +972,18 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
             assertThat(disposeInvoked.get(), is(true));
-            assertThat(THING.getStatus(), is(ThingStatus.UNINITIALIZED));
-            assertThat(THING.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
+            assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
+            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
 
         disposeInvoked.set(false);
 
-        new Thread((Runnable) () -> managedThingProvider.remove(THING.getUID())).start();
+        new Thread((Runnable) () -> managedThingProvider.remove(thing.getUID())).start();
 
         waitForAssert(() -> {
-            assertThat(thingRegistry.get(THING.getUID()), is(equalTo(null)));
+            assertThat(thingRegistry.get(thing.getUID()), is(equalTo(null)));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
-        
+
         assertThat(storage.containsKey(THING_UID.getAsString()), is(true));
     }
 
@@ -1020,7 +1020,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     private void registerThingTypeProvider() throws Exception {
         ThingType thingType = ThingTypeBuilder.instance(THING_TYPE_UID, "label")
-                .withConfigDescriptionURI(CONFIG_DESCRIPTION_THING)
+                .withConfigDescriptionURI(configDescriptionThing)
                 .withChannelDefinitions(
                         Collections.singletonList(new ChannelDefinitionBuilder(CHANNEL_ID, CHANNEL_TYPE_UID).build()))
                 .build();
@@ -1108,12 +1108,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                     thc.set((ThingHandlerCallback) a.getArguments()[0]);
                     return null;
                 }).when(mockHandler).setCallback(any(ThingHandlerCallback.class));
-                when(mockHandler.getThing()).thenReturn(THING);
+                when(mockHandler.getThing()).thenReturn(thing);
                 return mockHandler;
             }
         };
         registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
-        new Thread((Runnable) () -> managedThingProvider.add(THING)).start();
+        new Thread((Runnable) () -> managedThingProvider.add(thing)).start();
 
         waitForAssert(() -> {
             assertNotNull(thc.get());

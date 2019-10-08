@@ -33,6 +33,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.smarthome.io.rest.RESTResource;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.osgi.service.component.annotations.Component;
 
 /**
  *
@@ -62,7 +62,7 @@ public class LogHandler implements RESTResource {
      * Rolling array to store the last LOG_BUFFER_LIMIT messages. Those can be fetched e.g. by a
      * diagnostic UI to display errors of other clients, where e.g. the logs are not easily accessible.
      */
-    private final ConcurrentLinkedDeque<LogMessage> LOG_BUFFER = new ConcurrentLinkedDeque<>();
+    private final ConcurrentLinkedDeque<LogMessage> logBuffer = new ConcurrentLinkedDeque<>();
 
     /**
      * Container for a log message
@@ -86,22 +86,22 @@ public class LogHandler implements RESTResource {
             + LogConstants.LOG_BUFFER_LIMIT + " last entries.")
     @ApiParam(name = "limit", allowableValues = "range[1, " + LogConstants.LOG_BUFFER_LIMIT + "]")
     public Response getLastLogs(@DefaultValue(LogConstants.LOG_BUFFER_LIMIT + "") @QueryParam("limit") Integer limit) {
-        if (LOG_BUFFER.size() <= 0) {
+        if (logBuffer.size() <= 0) {
             return Response.ok("[]").build();
         }
 
         int effectiveLimit;
         if (limit == null || limit <= 0 || limit > LogConstants.LOG_BUFFER_LIMIT) {
-            effectiveLimit = LOG_BUFFER.size();
+            effectiveLimit = logBuffer.size();
         } else {
             effectiveLimit = limit;
         }
 
-        if (effectiveLimit >= LOG_BUFFER.size()) {
-            return Response.ok(LOG_BUFFER.toArray()).build();
+        if (effectiveLimit >= logBuffer.size()) {
+            return Response.ok(logBuffer.toArray()).build();
         } else {
             final List<LogMessage> result = new ArrayList<>();
-            Iterator<LogMessage> iter = LOG_BUFFER.descendingIterator();
+            Iterator<LogMessage> iter = logBuffer.descendingIterator();
             do {
                 result.add(iter.next());
             } while (iter.hasNext() && result.size() < effectiveLimit);
@@ -129,9 +129,9 @@ public class LogHandler implements RESTResource {
                     LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED, logMessage.severity)).build();
         }
 
-        LOG_BUFFER.add(logMessage);
-        if (LOG_BUFFER.size() > LogConstants.LOG_BUFFER_LIMIT) {
-            LOG_BUFFER.pollLast(); // Remove last element of Deque
+        logBuffer.add(logMessage);
+        if (logBuffer.size() > LogConstants.LOG_BUFFER_LIMIT) {
+            logBuffer.pollLast(); // Remove last element of Deque
         }
 
         return Response.ok(null, MediaType.TEXT_PLAIN).build();

@@ -47,7 +47,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     private static final String WATCHED_DIRECTORY = "watchDirectory";
 
     // Fail if no event has been received within the given timeout
-    private static int NO_EVENT_TIMEOUT_IN_SECONDS;
+    private static int noEventTimeoutInSeconds;
 
     private RelativeWatchService watchService;
 
@@ -55,9 +55,9 @@ public class AbstractWatchServiceTest extends JavaTest {
     public static void setUpBeforeClass() {
         // set the NO_EVENT_TIMEOUT_IN_SECONDS according to the operating system used
         if (SystemUtils.IS_OS_MAC_OSX) {
-            NO_EVENT_TIMEOUT_IN_SECONDS = 15;
+            noEventTimeoutInSeconds = 15;
         } else {
-            NO_EVENT_TIMEOUT_IN_SECONDS = 3;
+            noEventTimeoutInSeconds = 3;
         }
     }
 
@@ -132,7 +132,7 @@ public class AbstractWatchServiceTest extends JavaTest {
         innerfile.createNewFile();
 
         // Assure that the ordering of the events will be always the same
-        Thread.sleep(NO_EVENT_TIMEOUT_IN_SECONDS * 1000);
+        Thread.sleep(noEventTimeoutInSeconds * 1000);
 
         new File(WATCHED_DIRECTORY + File.separatorChar + fileName).createNewFile();
 
@@ -187,7 +187,7 @@ public class AbstractWatchServiceTest extends JavaTest {
 
     private void assertNoEventsAreProcessed() throws Exception {
         // Wait for a possible event for the maximum timeout
-        Thread.sleep(NO_EVENT_TIMEOUT_IN_SECONDS * 1000);
+        Thread.sleep(noEventTimeoutInSeconds * 1000);
 
         assertEventCount(0);
     }

@@ -53,11 +53,11 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     public static final HSBType BLUE = new HSBType("240,100,100");
 
     // 1931 CIE XYZ to sRGB (D65 reference white)
-    private static float Xy2Rgb[][] = { { 3.2406f, -1.5372f, -0.4986f }, { -0.9689f, 1.8758f, 0.0415f },
+    private static final float XY2RGB[][] = { { 3.2406f, -1.5372f, -0.4986f }, { -0.9689f, 1.8758f, 0.0415f },
             { 0.0557f, -0.2040f, 1.0570f } };
 
     // sRGB to 1931 CIE XYZ (D65 reference white)
-    private static float Rgb2Xy[][] = { { 0.4124f, 0.3576f, 0.1805f }, { 0.2126f, 0.7152f, 0.0722f },
+    private static final float RGB2XY[][] = { { 0.4124f, 0.3576f, 0.1805f }, { 0.2126f, 0.7152f, 0.0722f },
             { 0.0193f, 0.1192f, 0.9505f } };
 
     protected BigDecimal hue;
@@ -169,13 +169,13 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      * @return new HSBType object representing the given CIE XY color, full brightness
      */
     public static HSBType fromXY(float x, float y) {
-        float Yo = 1.0f;
-        float X = (Yo / y) * x;
-        float Z = (Yo / y) * (1.0f - x - y);
+        float tmpY = 1.0f;
+        float tmpX = (tmpY / y) * x;
+        float tmpZ = (tmpY / y) * (1.0f - x - y);
 
-        float r = X * Xy2Rgb[0][0] + Yo * Xy2Rgb[0][1] + Z * Xy2Rgb[0][2];
-        float g = X * Xy2Rgb[1][0] + Yo * Xy2Rgb[1][1] + Z * Xy2Rgb[1][2];
-        float b = X * Xy2Rgb[2][0] + Yo * Xy2Rgb[2][1] + Z * Xy2Rgb[2][2];
+        float r = tmpX * XY2RGB[0][0] + tmpY * XY2RGB[0][1] + tmpZ * XY2RGB[0][2];
+        float g = tmpX * XY2RGB[1][0] + tmpY * XY2RGB[1][1] + tmpZ * XY2RGB[1][2];
+        float b = tmpX * XY2RGB[2][0] + tmpY * XY2RGB[2][1] + tmpZ * XY2RGB[2][2];
 
         float max = r > g ? r : g;
         if (b > max) {
@@ -366,16 +366,16 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
         float g = gammaDecompress(sRGB[1].floatValue() / 100.0f);
         float b = gammaDecompress(sRGB[2].floatValue() / 100.0f);
 
-        float X = r * Rgb2Xy[0][0] + g * Rgb2Xy[0][1] + b * Rgb2Xy[0][2];
-        float Y = r * Rgb2Xy[1][0] + g * Rgb2Xy[1][1] + b * Rgb2Xy[1][2];
-        float Z = r * Rgb2Xy[2][0] + g * Rgb2Xy[2][1] + b * Rgb2Xy[2][2];
+        float tmpX = r * RGB2XY[0][0] + g * RGB2XY[0][1] + b * RGB2XY[0][2];
+        float tmpY = r * RGB2XY[1][0] + g * RGB2XY[1][1] + b * RGB2XY[1][2];
+        float tmpZ = r * RGB2XY[2][0] + g * RGB2XY[2][1] + b * RGB2XY[2][2];
 
-        float x = X / (X + Y + Z);
-        float y = Y / (X + Y + Z);
+        float x = tmpX / (tmpX + tmpY + tmpZ);
+        float y = tmpY / (tmpX + tmpY + tmpZ);
 
         return new PercentType[] { new PercentType(Float.valueOf(x * 100.0f).toString()),
                 new PercentType(Float.valueOf(y * 100.0f).toString()),
-                new PercentType(Float.valueOf(Y * getBrightness().floatValue()).toString()) };
+                new PercentType(Float.valueOf(tmpY * getBrightness().floatValue()).toString()) };
     }
 
     private int convertPercentToByte(PercentType percent) {
