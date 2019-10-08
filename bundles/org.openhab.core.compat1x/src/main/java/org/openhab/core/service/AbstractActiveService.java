@@ -100,7 +100,7 @@ public abstract class AbstractActiveService {
      * @return <code>true</code> if this binding is configured properly which means
      *         that all necessary data is available
      */
-    final public boolean isProperlyConfigured() {
+    public final boolean isProperlyConfigured() {
         return properlyConfigured;
     }
 

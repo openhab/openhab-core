@@ -46,7 +46,7 @@ public class Exec {
      * @see http://www.peterfriese.de/running-applescript-from-java/
      */
     @ActionDoc(text = "Executes <code>commandLine</code>.")
-    static public void executeCommandLine(@ParamDoc(name = "commandLine") String commandLine) {
+    public static void executeCommandLine(@ParamDoc(name = "commandLine") String commandLine) {
         ExecUtil.executeCommandLine(commandLine);
     }
 
@@ -71,7 +71,7 @@ public class Exec {
      * @return response data from executed command line
      */
     @ActionDoc(text = "Executes <code>commandLine</code>.")
-    static public String executeCommandLine(@ParamDoc(name = "commandLine") String commandLine,
+    public static String executeCommandLine(@ParamDoc(name = "commandLine") String commandLine,
             @ParamDoc(name = "timeout", text = "timeout for execution in milliseconds") int timeout) {
         return ExecUtil.executeCommandLineAndWaitResponse(commandLine, timeout);
     }

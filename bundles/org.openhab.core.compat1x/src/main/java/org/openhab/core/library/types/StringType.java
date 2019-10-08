@@ -22,7 +22,7 @@ import org.openhab.core.types.State;
  */
 public class StringType implements PrimitiveType, State, Command {
 
-    public final static StringType EMPTY = new StringType("");
+    public static final StringType EMPTY = new StringType("");
 
     private final String value;
 

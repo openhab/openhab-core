@@ -72,21 +72,21 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
     private SampleThingHandlerFactory thingHandlerFactory;
     private boolean selfChanging = false;
 
-    private final static String BINDING_ID = "testBinding";
-    private final static String THING_TYPE_GENERIC_ID = "generic";
-    private final static String THING_TYPE_SPECIFIC_ID = "specific";
-    private final static ThingTypeUID THING_TYPE_GENERIC_UID = new ThingTypeUID(BINDING_ID, THING_TYPE_GENERIC_ID);
-    private final static ThingTypeUID THING_TYPE_SPECIFIC_UID = new ThingTypeUID(BINDING_ID, THING_TYPE_SPECIFIC_ID);
-    private final static String THING_ID = "testThing";
-    private final static ChannelUID CHANNEL_GENERIC_UID = new ChannelUID(
+    private static final String BINDING_ID = "testBinding";
+    private static final String THING_TYPE_GENERIC_ID = "generic";
+    private static final String THING_TYPE_SPECIFIC_ID = "specific";
+    private static final ThingTypeUID THING_TYPE_GENERIC_UID = new ThingTypeUID(BINDING_ID, THING_TYPE_GENERIC_ID);
+    private static final ThingTypeUID THING_TYPE_SPECIFIC_UID = new ThingTypeUID(BINDING_ID, THING_TYPE_SPECIFIC_ID);
+    private static final String THING_ID = "testThing";
+    private static final ChannelUID CHANNEL_GENERIC_UID = new ChannelUID(
             BINDING_ID + "::" + THING_ID + ":" + "channel" + THING_TYPE_GENERIC_ID);
-    private final static ChannelUID CHANNEL_SPECIFIC_UID = new ChannelUID(
+    private static final ChannelUID CHANNEL_SPECIFIC_UID = new ChannelUID(
             BINDING_ID + "::" + THING_ID + ":" + "channel" + THING_TYPE_SPECIFIC_ID);
-    private final static String ITEM_GENERIC = "item" + THING_TYPE_GENERIC_ID;
-    private final static String ITEM_SPECIFIC = "item" + THING_TYPE_SPECIFIC_ID;
-    private final static ItemChannelLink ITEM_CHANNEL_LINK_GENERIC = new ItemChannelLink(ITEM_GENERIC,
+    private static final String ITEM_GENERIC = "item" + THING_TYPE_GENERIC_ID;
+    private static final String ITEM_SPECIFIC = "item" + THING_TYPE_SPECIFIC_ID;
+    private static final ItemChannelLink ITEM_CHANNEL_LINK_GENERIC = new ItemChannelLink(ITEM_GENERIC,
             CHANNEL_GENERIC_UID);
-    private final static ItemChannelLink ITEM_CHANNEL_LINK_SPECIFIC = new ItemChannelLink(ITEM_SPECIFIC,
+    private static final ItemChannelLink ITEM_CHANNEL_LINK_SPECIFIC = new ItemChannelLink(ITEM_SPECIFIC,
             CHANNEL_SPECIFIC_UID);
 
     private static final String PROPERTY_ON_GENERIC_THING_TYPE = "onlyGeneric";

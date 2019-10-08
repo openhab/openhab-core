@@ -34,9 +34,9 @@ public class IconForwarder extends HttpServlet {
 
     private static final long serialVersionUID = 5220836868829415723L;
 
-    final static private Logger logger = LoggerFactory.getLogger(IconForwarder.class);
-
     private static final String IMAGES_ALIAS = "/images";
+
+    private Logger logger = LoggerFactory.getLogger(IconForwarder.class);
 
     @Reference
     protected void setHttpService(HttpService httpService) {

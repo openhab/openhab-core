@@ -39,7 +39,7 @@ import org.junit.Test;
  */
 public class PersistenceResourceTest {
 
-    private final static String PERSISTENCE_SERVICE_ID = "TestServiceID";
+    private static final String PERSISTENCE_SERVICE_ID = "TestServiceID";
 
     private PersistenceResource pResource;
     private ArrayList<HistoricItem> items;

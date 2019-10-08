@@ -24,7 +24,7 @@ import org.openhab.core.types.UnDefType;
  * @author Kai Kreuzer
  *
  */
-abstract public interface GroupFunction {
+public abstract interface GroupFunction {
 
     /**
      * Determines the current state of a group based on a list of items

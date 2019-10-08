@@ -32,7 +32,7 @@ import org.openhab.core.types.UnDefType;
  * @author Kai Kreuzer
  *
  */
-abstract public class GenericItem implements Item {
+public abstract class GenericItem implements Item {
 
     protected EventPublisher eventPublisher;
 
@@ -41,7 +41,7 @@ abstract public class GenericItem implements Item {
 
     protected List<String> groupNames = new ArrayList<>();
 
-    final protected String name;
+    protected final String name;
 
     protected State state = UnDefType.NULL;
 

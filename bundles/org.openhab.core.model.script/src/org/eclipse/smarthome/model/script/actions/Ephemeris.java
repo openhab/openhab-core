@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author Gaël L'hopital - Initial contribution
  */
 public class Ephemeris {
-    private final static Logger logger = LoggerFactory.getLogger(Ephemeris.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Ephemeris.class);
 
     @ActionDoc(text = "checks if today is a weekend day")
     public static boolean isWeekend() {
@@ -63,7 +63,7 @@ public class Ephemeris {
         try {
             return EphemerisActionService.ephemerisManager.isBankHoliday(offset, filename);
         } catch (FileNotFoundException e) {
-            logger.error("Error reading holiday user file {} : {}", filename, e.getMessage());
+            LOGGER.error("Error reading holiday user file {} : {}", filename, e.getMessage());
             return false;
         }
     }
@@ -88,7 +88,7 @@ public class Ephemeris {
         try {
             return EphemerisActionService.ephemerisManager.getBankHolidayName(offset, filename);
         } catch (FileNotFoundException e) {
-            logger.error("Error reading holiday user file {} : {}", filename, e.getMessage());
+            LOGGER.error("Error reading holiday user file {} : {}", filename, e.getMessage());
             return null;
         }
     }

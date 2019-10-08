@@ -37,11 +37,11 @@ import org.junit.Test;
  */
 public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
 
-    private final static String BINDIND_ID = "testBinding";
-    private final static String THING_TYPE_ID = "testThingType";
-    private final static ThingTypeUID THING_TYPE_UID = new ThingTypeUID(BINDIND_ID, THING_TYPE_ID);
-    private final static String THING1_ID = "testThing1";
-    private final static String THING2_ID = "testThing2";
+    private static final String BINDIND_ID = "testBinding";
+    private static final String THING_TYPE_ID = "testThingType";
+    private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID(BINDIND_ID, THING_TYPE_ID);
+    private static final String THING1_ID = "testThing1";
+    private static final String THING2_ID = "testThing2";
 
     private ManagedThingProvider managedThingProvider;
     private ProviderChangeListener<Thing> thingChangeListener;

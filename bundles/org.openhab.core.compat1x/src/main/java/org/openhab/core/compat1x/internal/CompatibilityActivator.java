@@ -31,7 +31,7 @@ public class CompatibilityActivator implements BundleActivator {
     public static ServiceTracker<EventPublisher, EventPublisher> eventPublisherTracker;
     public static ServiceTracker<ScriptEngine, ScriptEngine> scriptEngineTracker;
 
-    static public BundleContext getContext() {
+    public static BundleContext getContext() {
         return context;
     }
 

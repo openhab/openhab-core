@@ -82,10 +82,10 @@ public class AutomaticInboxProcessorTest {
     private static final ThingType THING_TYPE3 = ThingTypeBuilder.instance(THING_TYPE_UID3, "label").isListed(true)
             .withRepresentationProperty(OTHER_KEY).build();
 
-    private final static Map<String, String> THING_PROPERTIES = Collections.singletonMap(DEVICE_ID_KEY, DEVICE_ID);
-    private final static Map<String, String> OTHER_THING_PROPERTIES = Collections.singletonMap(OTHER_KEY, OTHER_VALUE);
+    private static final Map<String, String> THING_PROPERTIES = Collections.singletonMap(DEVICE_ID_KEY, DEVICE_ID);
+    private static final Map<String, String> OTHER_THING_PROPERTIES = Collections.singletonMap(OTHER_KEY, OTHER_VALUE);
 
-    private final static Configuration CONFIG = new Configuration(Collections.singletonMap(CONFIG_KEY, CONFIG_VALUE));
+    private static final Configuration CONFIG = new Configuration(Collections.singletonMap(CONFIG_KEY, CONFIG_VALUE));
 
     private AutomaticInboxProcessor automaticInboxProcessor;
     private PersistentInbox inbox;

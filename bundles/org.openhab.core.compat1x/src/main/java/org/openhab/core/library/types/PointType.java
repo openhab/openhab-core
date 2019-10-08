@@ -38,9 +38,9 @@ public class PointType implements ComplexType, Command, State {
     private BigDecimal longitude = BigDecimal.ZERO; // in decimal degrees
     private BigDecimal altitude = BigDecimal.ZERO; // in decimal meters
     // constants for the constituents
-    static final public String KEY_LATITUDE = "lat";
-    static final public String KEY_LONGITUDE = "long";
-    static final public String KEY_ALTITUDE = "alt";
+    public static final String KEY_LATITUDE = "lat";
+    public static final String KEY_LONGITUDE = "long";
+    public static final String KEY_ALTITUDE = "alt";
     private static final BigDecimal circle = new BigDecimal(360);
     private static final BigDecimal flat = new BigDecimal(180);
     private static final BigDecimal right = new BigDecimal(90);

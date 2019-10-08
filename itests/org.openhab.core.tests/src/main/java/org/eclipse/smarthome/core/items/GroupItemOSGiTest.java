@@ -71,7 +71,7 @@ import tec.uom.se.unit.Units;
 public class GroupItemOSGiTest extends JavaOSGiTest {
 
     /** Time to sleep when a file is created/modified/deleted, so the event can be handled */
-    private final static int WAIT_EVENT_TO_BE_HANDLED = 1000;
+    private static final int WAIT_EVENT_TO_BE_HANDLED = 1000;
 
     List<Event> events = new LinkedList<>();
     EventPublisher publisher;

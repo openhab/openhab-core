@@ -44,20 +44,20 @@ public class TestHueThingHandlerFactory extends BaseThingHandlerFactory {
 
     public static final String BINDING_ID = "hue";
 
-    public final static ThingTypeUID THING_TYPE_BRIDGE = new ThingTypeUID(BINDING_ID, "bridge");
-    public final static ThingTypeUID THING_TYPE_LCT001 = new ThingTypeUID(BINDING_ID, "LCT001");
-    public final static ThingTypeUID THING_TYPE_SENSOR = new ThingTypeUID(BINDING_ID, "SENSOR");
-    public final static ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "TEST");
-    public final static ThingTypeUID THING_TYPE_GROUPED = new ThingTypeUID(BINDING_ID, "grouped");
-    public final static ThingTypeUID THING_TYPE_LONG_NAME = new ThingTypeUID(BINDING_ID,
+    public static final ThingTypeUID THING_TYPE_BRIDGE = new ThingTypeUID(BINDING_ID, "bridge");
+    public static final ThingTypeUID THING_TYPE_LCT001 = new ThingTypeUID(BINDING_ID, "LCT001");
+    public static final ThingTypeUID THING_TYPE_SENSOR = new ThingTypeUID(BINDING_ID, "SENSOR");
+    public static final ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "TEST");
+    public static final ThingTypeUID THING_TYPE_GROUPED = new ThingTypeUID(BINDING_ID, "grouped");
+    public static final ThingTypeUID THING_TYPE_LONG_NAME = new ThingTypeUID(BINDING_ID,
             "1-thing-id-with-5-dashes_and_3_underscores");
 
-    public final static Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Stream.of(THING_TYPE_BRIDGE)
+    public static final Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Stream.of(THING_TYPE_BRIDGE)
             .collect(Collectors.toSet());
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = Stream
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Stream
             .of(THING_TYPE_LCT001, THING_TYPE_SENSOR, THING_TYPE_TEST, THING_TYPE_LONG_NAME, THING_TYPE_GROUPED)
             .collect(Collectors.toSet());
-    public final static Set<ThingTypeUID> SUPPORTED_TYPES = Stream
+    public static final Set<ThingTypeUID> SUPPORTED_TYPES = Stream
             .concat(SUPPORTED_BRIDGE_TYPES.stream(), SUPPORTED_THING_TYPES.stream()).collect(Collectors.toSet());
 
     // List all channels

@@ -57,15 +57,15 @@ import org.mockito.Mock;
 @SuppressWarnings("null")
 public class ItemRegistryImplTest extends JavaTest {
 
-    private final static String ITEM_NAME = "switchItem";
-    private final static String CAMERA_ITEM_NAME1 = "cameraItem1";
-    private final static String CAMERA_ITEM_NAME2 = "cameraItem2";
-    private final static String CAMERA_ITEM_NAME3 = "cameraItem3";
-    private final static String CAMERA_ITEM_NAME4 = "cameraItem4";
-    private final static String CAMERA_TAG = "camera";
-    private final static String CAMERA_TAG_UPPERCASE = "CAMERA";
-    private final static String SENSOR_TAG = "sensor";
-    private final static String OTHER_TAG = "other";
+    private static final String ITEM_NAME = "switchItem";
+    private static final String CAMERA_ITEM_NAME1 = "cameraItem1";
+    private static final String CAMERA_ITEM_NAME2 = "cameraItem2";
+    private static final String CAMERA_ITEM_NAME3 = "cameraItem3";
+    private static final String CAMERA_ITEM_NAME4 = "cameraItem4";
+    private static final String CAMERA_TAG = "camera";
+    private static final String CAMERA_TAG_UPPERCASE = "CAMERA";
+    private static final String SENSOR_TAG = "sensor";
+    private static final String OTHER_TAG = "other";
 
     private ItemRegistry itemRegistry;
     private ManagedItemProvider itemProvider;

@@ -38,7 +38,7 @@ public class VolumetricFlowRateTest {
     /**
      * While its not SI base unit it produces nice and fairly rounded numbers (si base is m3/s).
      */
-    private final static Unit<VolumetricFlowRate> BASE_UNIT = SmartHomeUnits.CUBICMETRE_PER_HOUR;
+    private static final Unit<VolumetricFlowRate> BASE_UNIT = SmartHomeUnits.CUBICMETRE_PER_HOUR;
 
     private final Unit<VolumetricFlowRate> unit;
     private final String symbol;

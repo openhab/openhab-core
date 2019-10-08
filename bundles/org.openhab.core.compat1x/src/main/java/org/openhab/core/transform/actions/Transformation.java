@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Transformation {
 
-    static private final Logger logger = LoggerFactory.getLogger(Transformation.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Transformation.class);
 
     /**
      * Applies a transformation of a given type with some function to a value.
@@ -48,11 +48,11 @@ public class Transformation {
             try {
                 result = service.transform(function, value);
             } catch (TransformationException e) {
-                logger.error("Error executing the transformation '{}': {}", type, e.getMessage());
+                LOGGER.error("Error executing the transformation '{}': {}", type, e.getMessage());
                 result = value;
             }
         } else {
-            logger.warn("No transformation service '{}' could be found.", type);
+            LOGGER.warn("No transformation service '{}' could be found.", type);
             result = value;
         }
         return result;

@@ -34,16 +34,16 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     private static final long serialVersionUID = 322902950356613226L;
 
     // constants for the constituents
-    static final public String KEY_HUE = "h";
-    static final public String KEY_SATURATION = "s";
-    static final public String KEY_BRIGHTNESS = "b";
+    public static final String KEY_HUE = "h";
+    public static final String KEY_SATURATION = "s";
+    public static final String KEY_BRIGHTNESS = "b";
 
     // constants for colors
-    static final public HSBType BLACK = new HSBType(Color.BLACK);
-    static final public HSBType WHITE = new HSBType(Color.WHITE);
-    static final public HSBType RED = new HSBType(Color.RED);
-    static final public HSBType GREEN = new HSBType(Color.GREEN);
-    static final public HSBType BLUE = new HSBType(Color.BLUE);
+    public static final HSBType BLACK = new HSBType(Color.BLACK);
+    public static final HSBType WHITE = new HSBType(Color.WHITE);
+    public static final HSBType RED = new HSBType(Color.RED);
+    public static final HSBType GREEN = new HSBType(Color.GREEN);
+    public static final HSBType BLUE = new HSBType(Color.BLUE);
 
     protected BigDecimal hue;
     protected BigDecimal saturation;

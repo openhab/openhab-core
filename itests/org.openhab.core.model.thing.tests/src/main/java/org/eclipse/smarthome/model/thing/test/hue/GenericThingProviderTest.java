@@ -50,7 +50,7 @@ import org.junit.Test;
  */
 public class GenericThingProviderTest extends JavaOSGiTest {
 
-    private final static String TESTMODEL_NAME = "testModel.things";
+    private static final String TESTMODEL_NAME = "testModel.things";
 
     private ModelRepository modelRepository;
     private ThingRegistry thingRegistry;

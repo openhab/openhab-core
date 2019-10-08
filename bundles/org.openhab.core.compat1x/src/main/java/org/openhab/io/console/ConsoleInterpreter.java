@@ -32,7 +32,7 @@ public class ConsoleInterpreter {
      * @param args array which contains the console command and all its arguments
      * @param console the console for printing messages for the user
      */
-    static public void handleRequest(String[] args, Console console) {
+    public static void handleRequest(String[] args, Console console) {
     }
 
     /**
@@ -41,7 +41,7 @@ public class ConsoleInterpreter {
      * @param args array which contains the arguments for the update command
      * @param console the console for printing messages for the user
      */
-    static public void handleUpdate(String[] args, Console console) {
+    public static void handleUpdate(String[] args, Console console) {
     }
 
     /**
@@ -50,7 +50,7 @@ public class ConsoleInterpreter {
      * @param args array which contains the arguments for the send command
      * @param console the console for printing messages for the user
      */
-    static public void handleSend(String[] args, Console console) {
+    public static void handleSend(String[] args, Console console) {
     }
 
     /**
@@ -59,7 +59,7 @@ public class ConsoleInterpreter {
      * @param args array which contains the arguments for the items command
      * @param console the console for printing messages for the user
      */
-    static public void handleItems(String[] args, Console console) {
+    public static void handleItems(String[] args, Console console) {
     }
 
     /**
@@ -68,7 +68,7 @@ public class ConsoleInterpreter {
      * @param args array which contains the arguments for the status command
      * @param console the console for printing messages for the user
      */
-    static public void handleStatus(String[] args, Console console) {
+    public static void handleStatus(String[] args, Console console) {
     }
 
     /**
@@ -77,7 +77,7 @@ public class ConsoleInterpreter {
      * @param args array which contains the arguments for the status command
      * @param console the console for printing messages for the user
      */
-    static public void handleSay(String[] args, Console console) {
+    public static void handleSay(String[] args, Console console) {
     }
 
     public static void handleScript(String[] args, Console console) {
@@ -93,24 +93,24 @@ public class ConsoleInterpreter {
     }
 
     /** returns an array of the usage texts for all available commands */
-    static public String[] getUsages() {
+    public static String[] getUsages() {
         return new String[] { getUpdateUsage(), getCommandUsage(), getStatusUsage(), getItemsUsage(), getSayUsage(),
                 getScriptUsage() };
     }
 
-    static public String getUpdateUsage() {
+    public static String getUpdateUsage() {
         return "update <item> <state> - sends a status update for an item";
     }
 
-    static public String getCommandUsage() {
+    public static String getCommandUsage() {
         return "send <item> <command> - sends a command for an item";
     }
 
-    static public String getStatusUsage() {
+    public static String getStatusUsage() {
         return "status <item> - shows the current status of an item";
     }
 
-    static public String getItemsUsage() {
+    public static String getItemsUsage() {
         return "items [<pattern>] - lists names and types of all items matching the pattern";
     }
 

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TransformationHelper {
 
-    private static Logger logger = LoggerFactory.getLogger(TransformationHelper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransformationHelper.class);
 
     /**
      * Queries the OSGi service registry for a service that provides a transformation service of
@@ -35,7 +35,7 @@ public class TransformationHelper {
      * @param transformationType the desired transformation type
      * @return a service instance or null, if none could be found
      */
-    static public TransformationService getTransformationService(BundleContext context, String transformationType) {
+    public static TransformationService getTransformationService(BundleContext context, String transformationType) {
         if (context != null) {
             String filter = "(smarthome.transform=" + transformationType + ")";
             try {
@@ -44,18 +44,18 @@ public class TransformationHelper {
                 if (refs != null && refs.size() > 0) {
                     return new TransformationServiceDelegate(context.getService(refs.iterator().next()));
                 } else {
-                    logger.warn("Cannot get service reference for transformation service of type {}",
+                    LOGGER.warn("Cannot get service reference for transformation service of type {}",
                             transformationType);
                 }
             } catch (InvalidSyntaxException e) {
-                logger.warn("Cannot get service reference for transformation service of type {}", transformationType,
+                LOGGER.warn("Cannot get service reference for transformation service of type {}", transformationType,
                         e);
             }
         }
         return null;
     }
 
-    static private class TransformationServiceDelegate implements TransformationService {
+    private static class TransformationServiceDelegate implements TransformationService {
 
         org.eclipse.smarthome.core.transform.TransformationService delegate;
 
