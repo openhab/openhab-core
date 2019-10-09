@@ -81,13 +81,13 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String PREFIX = "openhab-";
     public static final String PREFIX_PACKAGE = "package-";
 
-    public static final String[] addonTypes = new String[] { "binding", "ui", "persistence", "action", "voice",
+    public static final String[] ADDON_TYPES = new String[] { "binding", "ui", "persistence", "action", "voice",
             "transformation", "misc" };
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
-    private String online_repo_url = null;
-    private URI legacy_addons_url = null;
+    private String onlineRepoUrl = null;
+    private URI legacyAddonsUrl = null;
 
     private FeaturesService featuresService;
     private ConfigurationAdmin configurationAdmin;
@@ -264,7 +264,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
         String repo = prop.getProperty("online-repo");
         if (repo != null && !repo.trim().isEmpty()) {
-            this.online_repo_url = repo.trim() + "@id=openhab@snapshots";
+            this.onlineRepoUrl = repo.trim() + "@id=openhab@snapshots";
         } else {
             logger.warn("Cannot determine online repo url - online repo support will be disabled.");
         }
@@ -283,7 +283,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
         String version = prop.getProperty("openhab-distro");
         if (version != null && !version.trim().isEmpty()) {
-            this.legacy_addons_url = URI
+            this.legacyAddonsUrl = URI
                     .create("mvn:org.openhab.distro/openhab-addons-legacy/" + version.trim() + "/xml/features");
         } else {
             logger.warn("Cannot determine distro version - legacy addon support will be disabled.");
@@ -291,17 +291,17 @@ public class FeatureInstaller implements ConfigurationListener {
     }
 
     private void setLegacyExtensions(FeaturesService service, Map<String, Object> config) {
-        if (legacy_addons_url != null) {
+        if (legacyAddonsUrl != null) {
             if (config.get(CFG_LEGACY) != null && "true".equals(config.get(CFG_LEGACY).toString())) {
                 try {
-                    service.addRepository(legacy_addons_url);
+                    service.addRepository(legacyAddonsUrl);
                 } catch (Exception e) {
                     logger.debug("Failed adding feature repo for legacy features - we might be offline: {}",
                             e.getMessage());
                 }
             } else {
                 try {
-                    service.removeRepository(legacy_addons_url);
+                    service.removeRepository(legacyAddonsUrl);
                 } catch (Exception e) {
                     // This usually throws an error like
                     // "Feature named 'openhab-binding-homematic1/1.9.0.SNAPSHOT' is not installed"
@@ -314,7 +314,7 @@ public class FeatureInstaller implements ConfigurationListener {
     }
 
     private boolean getOnlineStatus() {
-        if (online_repo_url != null) {
+        if (onlineRepoUrl != null) {
             try {
                 Configuration paxCfg = configurationAdmin.getConfiguration(PAX_URL_PID, null);
                 Dictionary<String, Object> properties = paxCfg.getProperties();
@@ -325,7 +325,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 List<String> repoCfg;
                 if (repos instanceof String) {
                     repoCfg = Arrays.asList(((String) repos).split(","));
-                    return repoCfg.contains(online_repo_url);
+                    return repoCfg.contains(onlineRepoUrl);
                 }
             } catch (IOException e) {
                 logger.error("Failed getting the add-on management online/offline mode: {}", e.getMessage());
@@ -336,7 +336,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private boolean setOnlineStatus(boolean status) {
         boolean changed = false;
-        if (online_repo_url != null) {
+        if (onlineRepoUrl != null) {
             try {
                 Configuration paxCfg = configurationAdmin.getConfiguration(PAX_URL_PID, null);
                 paxCfg.setBundleLocation("?");
@@ -351,16 +351,16 @@ public class FeatureInstaller implements ConfigurationListener {
                     repoCfg.remove("");
                 }
                 if (status) {
-                    if (!repoCfg.contains(online_repo_url)) {
-                        repoCfg.add(online_repo_url);
+                    if (!repoCfg.contains(onlineRepoUrl)) {
+                        repoCfg.add(onlineRepoUrl);
                         changed = true;
-                        logger.debug("Added repo '{}' to feature repo list.", online_repo_url);
+                        logger.debug("Added repo '{}' to feature repo list.", onlineRepoUrl);
                     }
                 } else {
-                    if (repoCfg.contains(online_repo_url)) {
-                        repoCfg.remove(online_repo_url);
+                    if (repoCfg.contains(onlineRepoUrl)) {
+                        repoCfg.remove(onlineRepoUrl);
                         changed = true;
-                        logger.debug("Removed repo '{}' from feature repo list.", online_repo_url);
+                        logger.debug("Removed repo '{}' from feature repo list.", onlineRepoUrl);
                     }
                 }
                 if (changed) {
@@ -380,7 +380,7 @@ public class FeatureInstaller implements ConfigurationListener {
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)
 
-        for (String type : addonTypes) {
+        for (String type : ADDON_TYPES) {
             Object install = config.get(type);
             if (install instanceof String) {
                 String[] entries = ((String) install).split(",");

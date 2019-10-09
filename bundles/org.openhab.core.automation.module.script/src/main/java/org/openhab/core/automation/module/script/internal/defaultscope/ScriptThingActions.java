@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  */
 public class ScriptThingActions {
 
-    private static final Map<String, ThingActions> thingActionsMap = new HashMap<>();
+    private static final Map<String, ThingActions> THING_ACTIONS_MAP = new HashMap<>();
 
     ScriptThingActions(ThingRegistry thingRegistry) {
         this.thingRegistry = thingRegistry;
@@ -61,7 +61,7 @@ public class ScriptThingActions {
         if (thing != null) {
             ThingHandler handler = thing.getHandler();
             if (handler != null) {
-                ThingActions thingActions = thingActionsMap.get(getKey(scope, thingUid));
+                ThingActions thingActions = THING_ACTIONS_MAP.get(getKey(scope, thingUid));
                 return thingActions;
             }
         }
@@ -71,12 +71,12 @@ public class ScriptThingActions {
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     void addThingActions(ThingActions thingActions) {
         String key = getKey(thingActions);
-        thingActionsMap.put(key, thingActions);
+        THING_ACTIONS_MAP.put(key, thingActions);
     }
 
     void removeThingActions(ThingActions thingActions) {
         String key = getKey(thingActions);
-        thingActionsMap.remove(key);
+        THING_ACTIONS_MAP.remove(key);
     }
 
     private static String getKey(ThingActions thingActions) {

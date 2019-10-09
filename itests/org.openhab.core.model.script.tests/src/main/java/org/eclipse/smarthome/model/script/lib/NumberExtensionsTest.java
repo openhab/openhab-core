@@ -39,8 +39,8 @@ public class NumberExtensionsTest {
     private static final QuantityType<Temperature> Q_CELSIUS_1 = new QuantityType<Temperature>("1 °C");
     private static final QuantityType<Temperature> Q_CELSIUS_2 = new QuantityType<Temperature>("2 °C");
 
-    private static final QuantityType<Length> Q_LENGTH_1m = new QuantityType<Length>("1 m");
-    private static final QuantityType<Length> Q_LENGTH_2cm = new QuantityType<Length>("2 cm");
+    private static final QuantityType<Length> Q_LENGTH_1_M = new QuantityType<Length>("1 m");
+    private static final QuantityType<Length> Q_LENGTH_2_CM = new QuantityType<Length>("2 cm");
 
     private static final QuantityType<Dimensionless> Q_ONE_1 = new QuantityType<>(1, SmartHomeUnits.ONE);
     private static final QuantityType<Dimensionless> Q_ONE_2 = new QuantityType<>(2, SmartHomeUnits.ONE);
@@ -82,92 +82,92 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorMinus_Quantity_Quantity() {
-        assertThat(NumberExtensions.operator_minus(Q_LENGTH_1m, Q_LENGTH_2cm), is(QuantityType.valueOf("0.98 m")));
+        assertThat(NumberExtensions.operator_minus(Q_LENGTH_1_M, Q_LENGTH_2_CM), is(QuantityType.valueOf("0.98 m")));
     }
 
     @Test
     public void operatorMultiply_Number_Quantity() {
-        assertThat(NumberExtensions.operator_multiply(DECIMAL2, Q_LENGTH_2cm), is(QuantityType.valueOf("4 cm")));
+        assertThat(NumberExtensions.operator_multiply(DECIMAL2, Q_LENGTH_2_CM), is(QuantityType.valueOf("4 cm")));
     }
 
     @Test
     public void operatorMultiply_Quantity_Quantity() {
-        assertThat(NumberExtensions.operator_multiply(Q_LENGTH_1m, Q_LENGTH_2cm), is(QuantityType.valueOf("2 m·cm")));
+        assertThat(NumberExtensions.operator_multiply(Q_LENGTH_1_M, Q_LENGTH_2_CM), is(QuantityType.valueOf("2 m·cm")));
     }
 
     @Test
     public void operatorDivide_Quantity_Number() {
-        assertThat(NumberExtensions.operator_divide(Q_LENGTH_1m, DECIMAL2), is(QuantityType.valueOf("0.5 m")));
+        assertThat(NumberExtensions.operator_divide(Q_LENGTH_1_M, DECIMAL2), is(QuantityType.valueOf("0.5 m")));
     }
 
     @Test
     public void operatorDivide_Quantity_Quantity() {
-        assertThat(NumberExtensions.operator_divide(Q_LENGTH_1m, Q_LENGTH_2cm), is(QuantityType.valueOf("0.5 m/cm")));
+        assertThat(NumberExtensions.operator_divide(Q_LENGTH_1_M, Q_LENGTH_2_CM), is(QuantityType.valueOf("0.5 m/cm")));
     }
 
     @Test
     public void operatorDivide_Numer_Quantity() {
-        assertThat(NumberExtensions.operator_divide(DECIMAL1, Q_LENGTH_2cm), is(QuantityType.valueOf("0.5 one/cm")));
+        assertThat(NumberExtensions.operator_divide(DECIMAL1, Q_LENGTH_2_CM), is(QuantityType.valueOf("0.5 one/cm")));
     }
 
     @Test
     public void operatorEquals_Numer_Quantity() {
-        assertFalse(NumberExtensions.operator_equals((Number) DECIMAL1, Q_LENGTH_2cm));
+        assertFalse(NumberExtensions.operator_equals((Number) DECIMAL1, Q_LENGTH_2_CM));
     }
 
     @Test
     public void operatorEquals_Quantity_Number() {
-        assertFalse(NumberExtensions.operator_equals((Number) Q_LENGTH_2cm, DECIMAL1));
+        assertFalse(NumberExtensions.operator_equals((Number) Q_LENGTH_2_CM, DECIMAL1));
     }
 
     @Test
     public void operatorEquals_Quantity_Quantity_False() {
-        assertFalse(NumberExtensions.operator_equals(Q_LENGTH_1m, Q_LENGTH_2cm));
+        assertFalse(NumberExtensions.operator_equals(Q_LENGTH_1_M, Q_LENGTH_2_CM));
     }
 
     @Test
     public void operatorEquals_Quantity_Quantity_True() {
-        assertTrue(NumberExtensions.operator_equals(Q_LENGTH_1m, new QuantityType<Length>("100 cm")));
+        assertTrue(NumberExtensions.operator_equals(Q_LENGTH_1_M, new QuantityType<Length>("100 cm")));
     }
 
     @Test
     public void operatorLessThan_Number_Quantity() {
-        assertFalse(NumberExtensions.operator_lessThan((Number) Q_LENGTH_1m, Q_LENGTH_1m));
+        assertFalse(NumberExtensions.operator_lessThan((Number) Q_LENGTH_1_M, Q_LENGTH_1_M));
     }
 
     @Test
     public void operatorLessThan_Type_Quantity() {
-        assertFalse(NumberExtensions.operator_lessThan((Type) Q_LENGTH_1m, Q_LENGTH_1m));
+        assertFalse(NumberExtensions.operator_lessThan((Type) Q_LENGTH_1_M, Q_LENGTH_1_M));
     }
 
     @Test
     public void operatorLessThan_Quantity_Quantity_False() {
-        assertFalse(NumberExtensions.operator_lessThan(Q_LENGTH_1m, Q_LENGTH_2cm));
+        assertFalse(NumberExtensions.operator_lessThan(Q_LENGTH_1_M, Q_LENGTH_2_CM));
     }
 
     @Test
     public void operatorLessThan_Quantity_Quantity_True() {
-        assertTrue(NumberExtensions.operator_lessThan(Q_LENGTH_2cm, Q_LENGTH_1m));
+        assertTrue(NumberExtensions.operator_lessThan(Q_LENGTH_2_CM, Q_LENGTH_1_M));
     }
 
     @Test
     public void operatorGreaterThan_Number_Quantity() {
-        assertFalse(NumberExtensions.operator_greaterThan((Number) Q_LENGTH_1m, Q_LENGTH_1m));
+        assertFalse(NumberExtensions.operator_greaterThan((Number) Q_LENGTH_1_M, Q_LENGTH_1_M));
     }
 
     @Test
     public void operatorGreaterThan_Type_Quantity() {
-        assertFalse(NumberExtensions.operator_greaterThan((Type) Q_LENGTH_1m, Q_LENGTH_1m));
+        assertFalse(NumberExtensions.operator_greaterThan((Type) Q_LENGTH_1_M, Q_LENGTH_1_M));
     }
 
     @Test
     public void operatorGreaterThan_Quantity_Quantity_False() {
-        assertFalse(NumberExtensions.operator_greaterThan(Q_LENGTH_2cm, Q_LENGTH_1m));
+        assertFalse(NumberExtensions.operator_greaterThan(Q_LENGTH_2_CM, Q_LENGTH_1_M));
     }
 
     @Test
     public void operatorGreaterThan_Quantity_Quantity_True() {
-        assertTrue(NumberExtensions.operator_greaterThan(Q_LENGTH_1m, Q_LENGTH_2cm));
+        assertTrue(NumberExtensions.operator_greaterThan(Q_LENGTH_1_M, Q_LENGTH_2_CM));
     }
 
     @Test
@@ -178,17 +178,17 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorLessEqualsThan_Type_Quantity() {
-        assertTrue(NumberExtensions.operator_lessEqualsThan((Type) Q_LENGTH_1m, Q_LENGTH_1m));
+        assertTrue(NumberExtensions.operator_lessEqualsThan((Type) Q_LENGTH_1_M, Q_LENGTH_1_M));
     }
 
     @Test
     public void operatorLessEqualsThan_Quantity_Quantity_False() {
-        assertFalse(NumberExtensions.operator_lessEqualsThan(Q_LENGTH_1m, Q_LENGTH_2cm));
+        assertFalse(NumberExtensions.operator_lessEqualsThan(Q_LENGTH_1_M, Q_LENGTH_2_CM));
     }
 
     @Test
     public void operatorLessEqualsThan_Quantity_Quantity_True() {
-        assertTrue(NumberExtensions.operator_lessEqualsThan(Q_LENGTH_2cm, Q_LENGTH_1m));
+        assertTrue(NumberExtensions.operator_lessEqualsThan(Q_LENGTH_2_CM, Q_LENGTH_1_M));
     }
 
     @Test
@@ -199,17 +199,18 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorGreaterEqualsThan_Type_Quantity() {
-        assertTrue(NumberExtensions.operator_greaterEqualsThan((Type) Q_LENGTH_1m, new QuantityType<Length>("100 cm")));
+        assertTrue(
+                NumberExtensions.operator_greaterEqualsThan((Type) Q_LENGTH_1_M, new QuantityType<Length>("100 cm")));
     }
 
     @Test
     public void operatorGreaterEqualsThan_Quantity_Quantity_False() {
-        assertFalse(NumberExtensions.operator_greaterEqualsThan(Q_LENGTH_2cm, Q_LENGTH_1m));
+        assertFalse(NumberExtensions.operator_greaterEqualsThan(Q_LENGTH_2_CM, Q_LENGTH_1_M));
     }
 
     @Test
     public void operatorGreaterEqualsThan_Quantity_Quantity_True() {
-        assertTrue(NumberExtensions.operator_greaterEqualsThan(Q_LENGTH_1m, Q_LENGTH_2cm));
+        assertTrue(NumberExtensions.operator_greaterEqualsThan(Q_LENGTH_1_M, Q_LENGTH_2_CM));
     }
 
     @Test

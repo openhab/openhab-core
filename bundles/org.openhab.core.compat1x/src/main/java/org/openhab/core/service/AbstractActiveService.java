@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractActiveService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractActiveService.class);
+    private final Logger logger = LoggerFactory.getLogger(AbstractActiveService.class);
 
     /** <code>true</code> if this binding is configured properly which means that all necessary data is available */
     private boolean properlyConfigured = false;

@@ -72,7 +72,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(POOL_NAME);
 
-    private final int DEFAULT_POLLING_INTERVAL = 60;
+    private static final int DEFAULT_POLLING_INTERVAL = 60;
     private static final String POOL_NAME = "upnp-io";
 
     private UpnpService upnpService;

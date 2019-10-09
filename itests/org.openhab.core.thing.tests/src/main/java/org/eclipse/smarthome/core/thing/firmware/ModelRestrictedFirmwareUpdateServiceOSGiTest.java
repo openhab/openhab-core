@@ -60,7 +60,7 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
     private static final String VERSION_1_0_3 = "1.0.3";
 
     /** The thing type for all things used in this test class */
-    private static final ThingType thingType = ThingTypeBuilder
+    private static final ThingType THING_TYPE = ThingTypeBuilder
             .instance(new ThingTypeUID("bindingId", "thingTypeId"), "label").build();
 
     private ThingRegistry thingRegistry;
@@ -168,7 +168,7 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
      * Creates a thing, adds it to the thing registry, and registers a {@link FirmwareUpdateHandler} for the thing.
      */
     private Thing createAndRegisterThing(String thingUID, String modelId, String firmwareVersion) {
-        Thing thing = ThingBuilder.create(thingType.getUID(), thingUID).build();
+        Thing thing = ThingBuilder.create(THING_TYPE.getUID(), thingUID).build();
         thing.setProperty(PROPERTY_MODEL_ID, modelId);
         thing.setProperty(PROPERTY_FIRMWARE_VERSION, firmwareVersion);
 
@@ -220,7 +220,7 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<Firmware> getFirmwares(Thing thing, Locale locale) {
-                if (thing.getThingTypeUID().equals(thingType.getUID())) {
+                if (thing.getThingTypeUID().equals(THING_TYPE.getUID())) {
                     return new HashSet<>(Arrays.asList(firmwares));
                 } else {
                     return Collections.emptySet();
@@ -250,7 +250,7 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
     }
 
     private Firmware createModelRestrictedFirmware(String model, String version) {
-        return FirmwareBuilder.create(thingType.getUID(), version).withModel(model).withModelRestricted(true).build();
+        return FirmwareBuilder.create(THING_TYPE.getUID(), version).withModel(model).withModelRestricted(true).build();
     }
 
     private void assertThatThingHasFirmware(ThingUID thingUID, String firmwareVersion) {

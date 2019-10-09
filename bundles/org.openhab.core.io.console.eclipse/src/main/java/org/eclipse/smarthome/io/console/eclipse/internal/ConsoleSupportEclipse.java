@@ -44,7 +44,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class ConsoleSupportEclipse implements CommandProvider {
 
-    private final String BASE = "smarthome";
+    private static final String BASE = "smarthome";
 
     private final SortedMap<String, ConsoleCommandExtension> consoleCommandExtensions = Collections
             .synchronizedSortedMap(new TreeMap<String, ConsoleCommandExtension>());

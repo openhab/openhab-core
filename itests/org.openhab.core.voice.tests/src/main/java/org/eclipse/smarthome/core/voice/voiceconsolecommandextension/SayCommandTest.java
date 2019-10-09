@@ -50,8 +50,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 @RunWith(Parameterized.class)
 public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
-    private final String CONFIG_DEFAULT_TTS = "defaultTTS";
-    private final String SUBCMD_SAY = "say";
+    private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
+    private static final String SUBCMD_SAY = "say";
     private boolean shouldItemsBePassed;
     private boolean shouldItemsBeRegistered;
     private boolean shouldMultipleItemsBeRegistered;

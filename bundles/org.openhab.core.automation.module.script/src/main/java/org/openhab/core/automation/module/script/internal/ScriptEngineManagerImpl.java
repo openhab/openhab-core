@@ -70,7 +70,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             }
         }
         logger.debug("Added {}", engineFactory.getClass().getSimpleName());
-        for (javax.script.ScriptEngineFactory f : ScriptEngineFactory.engineManager.getEngineFactories()) {
+        for (javax.script.ScriptEngineFactory f : ScriptEngineFactory.ENGINE_MANAGER.getEngineFactories()) {
             logger.debug(
                     "ScriptEngineFactory details for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
                     f.getEngineName(), f.getEngineVersion(), f.getLanguageName(), f.getLanguageVersion(),

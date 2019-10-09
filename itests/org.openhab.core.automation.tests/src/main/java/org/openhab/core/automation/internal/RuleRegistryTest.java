@@ -67,9 +67,9 @@ public class RuleRegistryTest extends JavaOSGiTest {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         name = "rule_without_tag";
-        final RuleImpl rule_without_tag = new RuleImpl(name);
+        final RuleImpl ruleWithoutTag = new RuleImpl(name);
 
-        addedRule = ruleRegistry.add(rule_without_tag);
+        addedRule = ruleRegistry.add(ruleWithoutTag);
         Assert.assertNotNull("RuleImpl for:" + name, addedRule);
 
         getRule = ruleRegistry.get(name);
@@ -96,10 +96,10 @@ public class RuleRegistryTest extends JavaOSGiTest {
         tags = new HashSet<>();
         tags.add(tag1);
 
-        final RuleImpl rule_with_tag1 = new RuleImpl(name);
-        rule_with_tag1.setTags(tags);
+        final RuleImpl ruleWithTag1 = new RuleImpl(name);
+        ruleWithTag1.setTags(tags);
 
-        addedRule = ruleRegistry.add(rule_with_tag1);
+        addedRule = ruleRegistry.add(ruleWithTag1);
         Assert.assertNotNull("RuleImpl for:" + name, addedRule);
 
         getRule = ruleRegistry.get(name);
@@ -112,8 +112,8 @@ public class RuleRegistryTest extends JavaOSGiTest {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         Assert.assertEquals("RuleImpl list size", 2, ruleRegistry.stream().collect(Collectors.toList()).size());
 
-        Collection<Rule> rules_with_tag1 = ruleRegistry.getByTags(tag1);
-        Assert.assertEquals("RuleImpl list size", 1, rules_with_tag1.size());
+        Collection<Rule> rulesWithTag1 = ruleRegistry.getByTags(tag1);
+        Assert.assertEquals("RuleImpl list size", 1, rulesWithTag1.size());
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // checking predicates
@@ -140,10 +140,10 @@ public class RuleRegistryTest extends JavaOSGiTest {
         tags.add(tag1);
         tags.add(tag2);
 
-        final RuleImpl rule_with_tag1_tag2 = new RuleImpl(name);
-        rule_with_tag1_tag2.setTags(tags);
+        final RuleImpl ruleWithTag1Tag2 = new RuleImpl(name);
+        ruleWithTag1Tag2.setTags(tags);
 
-        addedRule = ruleRegistry.add(rule_with_tag1_tag2);
+        addedRule = ruleRegistry.add(ruleWithTag1Tag2);
         Assert.assertNotNull("RuleImpl for:" + name, addedRule);
 
         getRule = ruleRegistry.get(name);
@@ -156,14 +156,14 @@ public class RuleRegistryTest extends JavaOSGiTest {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         Assert.assertEquals("RuleImpl list size", 3, ruleRegistry.stream().collect(Collectors.toList()).size());
 
-        rules_with_tag1 = ruleRegistry.getByTags(tag1);
-        Assert.assertEquals("RuleImpl list size", 2, rules_with_tag1.size());
+        rulesWithTag1 = ruleRegistry.getByTags(tag1);
+        Assert.assertEquals("RuleImpl list size", 2, rulesWithTag1.size());
 
-        Collection<Rule> rules_with_tag2 = ruleRegistry.getByTags(tag2);
-        Assert.assertEquals("RuleImpl list size", 1, rules_with_tag2.size());
+        Collection<Rule> rulesWithTag2 = ruleRegistry.getByTags(tag2);
+        Assert.assertEquals("RuleImpl list size", 1, rulesWithTag2.size());
 
-        Collection<Rule> rules_with_all_of_tag1_tag2 = ruleRegistry.getByTags(tag1, tag2);
-        Assert.assertEquals("RuleImpl list size", 1, rules_with_all_of_tag1_tag2.size());
+        Collection<Rule> rulesWithAllOfTag1Tag2 = ruleRegistry.getByTags(tag1, tag2);
+        Assert.assertEquals("RuleImpl list size", 1, rulesWithAllOfTag1Tag2.size());
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // checking predicates
@@ -207,10 +207,10 @@ public class RuleRegistryTest extends JavaOSGiTest {
         tags.add(tag2);
         tags.add(tag3);
 
-        final RuleImpl rule_with_tag1_tag2_tag3 = new RuleImpl("rule_with_tag1_tag2_tag3");
-        rule_with_tag1_tag2_tag3.setTags(tags);
+        final RuleImpl ruleWithTag1Tag2Tag3 = new RuleImpl("rule_with_tag1_tag2_tag3");
+        ruleWithTag1Tag2Tag3.setTags(tags);
 
-        addedRule = ruleRegistry.add(rule_with_tag1_tag2_tag3);
+        addedRule = ruleRegistry.add(ruleWithTag1Tag2Tag3);
         Assert.assertNotNull("RuleImpl for:" + name, addedRule);
 
         getRule = ruleRegistry.get(name);
@@ -223,23 +223,23 @@ public class RuleRegistryTest extends JavaOSGiTest {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         Assert.assertEquals("RuleImpl list size", 4, ruleRegistry.stream().collect(Collectors.toList()).size());
 
-        rules_with_tag1 = ruleRegistry.getByTags(tag1);
-        Assert.assertEquals("RuleImpl list size", 3, rules_with_tag1.size());
+        rulesWithTag1 = ruleRegistry.getByTags(tag1);
+        Assert.assertEquals("RuleImpl list size", 3, rulesWithTag1.size());
 
-        rules_with_tag2 = ruleRegistry.getByTags(tag2);
-        Assert.assertEquals("RuleImpl list size", 2, rules_with_tag2.size());
+        rulesWithTag2 = ruleRegistry.getByTags(tag2);
+        Assert.assertEquals("RuleImpl list size", 2, rulesWithTag2.size());
 
-        Collection<Rule> rules_with_tag3 = ruleRegistry.getByTags(tag3);
-        Assert.assertEquals("RuleImpl list size", 1, rules_with_tag3.size());
+        Collection<Rule> rulesWithTag3 = ruleRegistry.getByTags(tag3);
+        Assert.assertEquals("RuleImpl list size", 1, rulesWithTag3.size());
 
-        rules_with_all_of_tag1_tag2 = ruleRegistry.getByTags(tag1, tag2);
-        Assert.assertEquals("RuleImpl list size", 2, rules_with_all_of_tag1_tag2.size());
+        rulesWithAllOfTag1Tag2 = ruleRegistry.getByTags(tag1, tag2);
+        Assert.assertEquals("RuleImpl list size", 2, rulesWithAllOfTag1Tag2.size());
 
-        Collection<Rule> rules_with_all_tag1_tag3 = ruleRegistry.getByTags(tag1, tag3);
-        Assert.assertEquals("RuleImpl list size", 1, rules_with_all_tag1_tag3.size());
+        Collection<Rule> rulesWithAllTag1Tag3 = ruleRegistry.getByTags(tag1, tag3);
+        Assert.assertEquals("RuleImpl list size", 1, rulesWithAllTag1Tag3.size());
 
-        Collection<Rule> rules_with_all_of_tag1_tag2_tag3 = ruleRegistry.getByTags(tag1, tag2, tag3);
-        Assert.assertEquals("RuleImpl list size", 1, rules_with_all_of_tag1_tag2_tag3.size());
+        Collection<Rule> rulesWithAllOfTag1Tag2Tag3 = ruleRegistry.getByTags(tag1, tag2, tag3);
+        Assert.assertEquals("RuleImpl list size", 1, rulesWithAllOfTag1Tag2Tag3.size());
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // checking predicates

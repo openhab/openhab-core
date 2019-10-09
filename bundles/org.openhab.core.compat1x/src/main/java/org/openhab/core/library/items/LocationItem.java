@@ -73,7 +73,7 @@ public class LocationItem extends GenericItem {
             double a = dLat + Math.cos(Math.toRadians(me.getLatitude().doubleValue()))
                     * Math.cos(Math.toRadians(away.getLatitude().doubleValue())) * dLng;
 
-            dist = PointType.WGS84_a * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            dist = PointType.WGS84_A * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
         return new DecimalType(dist);

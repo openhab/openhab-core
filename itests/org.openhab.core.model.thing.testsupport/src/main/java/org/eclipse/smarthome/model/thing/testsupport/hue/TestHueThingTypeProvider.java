@@ -43,12 +43,12 @@ import org.slf4j.LoggerFactory;
 public class TestHueThingTypeProvider implements ThingTypeProvider {
 
     private final Logger logger = LoggerFactory.getLogger(TestHueThingTypeProvider.class);
-    private static final Map<ThingTypeUID, ThingType> thingTypes = new HashMap<ThingTypeUID, ThingType>();
+    private static final Map<ThingTypeUID, ThingType> THING_TYPES = new HashMap<ThingTypeUID, ThingType>();
 
     public TestHueThingTypeProvider() {
         logger.debug("TestHueThingTypeProvider created");
         try {
-            thingTypes.put(TestHueThingHandlerFactory.THING_TYPE_BRIDGE,
+            THING_TYPES.put(TestHueThingHandlerFactory.THING_TYPE_BRIDGE,
                     ThingTypeBuilder.instance(TestHueThingHandlerFactory.THING_TYPE_BRIDGE, "HueBridge")
                             .withDescription("HueBridge").isListed(false).buildBridge());
 
@@ -57,13 +57,13 @@ public class TestHueThingTypeProvider implements ThingTypeProvider {
 
             ChannelDefinition colorTemp = new ChannelDefinitionBuilder("color_temperature",
                     TestHueChannelTypeProvider.COLOR_TEMP_CHANNEL_TYPE_UID).build();
-            thingTypes.put(TestHueThingHandlerFactory.THING_TYPE_LCT001, ThingTypeBuilder
+            THING_TYPES.put(TestHueThingHandlerFactory.THING_TYPE_LCT001, ThingTypeBuilder
                     .instance(TestHueThingHandlerFactory.THING_TYPE_LCT001, "LCT001")
                     .withSupportedBridgeTypeUIDs(Arrays.asList(TestHueThingHandlerFactory.THING_TYPE_BRIDGE.toString()))
                     .withDescription("Hue LAMP").isListed(false).withChannelDefinitions(Arrays.asList(color, colorTemp))
                     .withConfigDescriptionURI(new URI("hue", "LCT001", null)).build());
 
-            thingTypes.put(TestHueThingHandlerFactoryX.THING_TYPE_BRIDGE,
+            THING_TYPES.put(TestHueThingHandlerFactoryX.THING_TYPE_BRIDGE,
                     ThingTypeBuilder.instance(TestHueThingHandlerFactoryX.THING_TYPE_BRIDGE, "HueBridge")
                             .withDescription("HueBridge").isListed(false).buildBridge());
 
@@ -72,7 +72,7 @@ public class TestHueThingTypeProvider implements ThingTypeProvider {
 
             ChannelDefinition colorTempX = new ChannelDefinitionBuilder("Xcolor_temperature",
                     TestHueChannelTypeProvider.COLORX_TEMP_CHANNEL_TYPE_UID).build();
-            thingTypes.put(TestHueThingHandlerFactoryX.THING_TYPE_LCT001,
+            THING_TYPES.put(TestHueThingHandlerFactoryX.THING_TYPE_LCT001,
                     ThingTypeBuilder.instance(TestHueThingHandlerFactoryX.THING_TYPE_LCT001, "XLCT001")
                             .withSupportedBridgeTypeUIDs(
                                     Arrays.asList(TestHueThingHandlerFactoryX.THING_TYPE_BRIDGE.toString()))
@@ -82,7 +82,7 @@ public class TestHueThingTypeProvider implements ThingTypeProvider {
 
             ChannelGroupDefinition groupDefinition = new ChannelGroupDefinition("group",
                     TestHueChannelTypeProvider.GROUP_CHANNEL_GROUP_TYPE_UID);
-            thingTypes.put(TestHueThingHandlerFactory.THING_TYPE_GROUPED, ThingTypeBuilder
+            THING_TYPES.put(TestHueThingHandlerFactory.THING_TYPE_GROUPED, ThingTypeBuilder
                     .instance(TestHueThingHandlerFactory.THING_TYPE_GROUPED, "grouped")
                     .withSupportedBridgeTypeUIDs(Arrays.asList(TestHueThingHandlerFactory.THING_TYPE_BRIDGE.toString()))
                     .withDescription("Grouped Lamp").withChannelGroupDefinitions(Arrays.asList(groupDefinition))
@@ -95,12 +95,12 @@ public class TestHueThingTypeProvider implements ThingTypeProvider {
 
     @Override
     public Collection<ThingType> getThingTypes(Locale locale) {
-        return thingTypes.values();
+        return THING_TYPES.values();
     }
 
     @Override
     public ThingType getThingType(ThingTypeUID thingTypeUID, Locale locale) {
-        return thingTypes.get(thingTypeUID);
+        return THING_TYPES.get(thingTypeUID);
     }
 
 }

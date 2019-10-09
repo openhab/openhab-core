@@ -44,12 +44,12 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
     private ModuleTypeRegistry moduleTypeRegistry;
     private PackageAdmin pkgAdmin;
 
-    private final String EXT = ".jar";
-    private final String PATH = "/";
-    private final String RESOURCES_TEST_BUNDLE_1 = "host-tb1";
-    private final String RESOURCES_TEST_BUNDLE_2 = "host-tb2";
-    private final String RESOURCES_TEST_BUNDLE_3 = "fragment-tb1";
-    private final String RESOURCES_TEST_BUNDLE_4 = "fragment-tb2";
+    private static final String EXT = ".jar";
+    private static final String PATH = "/";
+    private static final String RESOURCES_TEST_BUNDLE_1 = "host-tb1";
+    private static final String RESOURCES_TEST_BUNDLE_2 = "host-tb2";
+    private static final String RESOURCES_TEST_BUNDLE_3 = "fragment-tb1";
+    private static final String RESOURCES_TEST_BUNDLE_4 = "fragment-tb2";
 
     private final String trigger1 = "Trigger1";
     private final String trigger2 = "Trigger2";

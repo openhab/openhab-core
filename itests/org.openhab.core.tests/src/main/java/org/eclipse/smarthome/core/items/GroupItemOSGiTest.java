@@ -379,7 +379,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGroupItemPostsEventsForChangesCorrectly() {
         // from ItemEventFactory.GROUPITEM_STATE_CHANGED_EVENT_TOPIC
-        String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "smarthome/items/{itemName}/{memberName}/statechanged";
+        String groupitemStateChangedEventTopic = "smarthome/items/{itemName}/{memberName}/statechanged";
 
         events.clear();
         GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), new GroupFunction.Equality());
@@ -402,8 +402,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
         assertTrue(change.getItemName().equals(groupItem.getName()));
         assertTrue(change.getMemberName().equals(member.getName()));
-        assertTrue(change.getTopic().equals(GROUPITEM_STATE_CHANGED_EVENT_TOPIC
-                .replace("{memberName}", member.getName()).replace("{itemName}", groupItem.getName())));
+        assertTrue(change.getTopic().equals(groupitemStateChangedEventTopic.replace("{memberName}", member.getName())
+                .replace("{itemName}", groupItem.getName())));
         assertTrue(change.getItemState().equals(groupItem.getState()));
         assertTrue(change.getOldItemState().equals(oldGroupState));
 

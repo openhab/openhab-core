@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractActiveBinding<P extends BindingProvider> extends AbstractBinding<P> {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractActiveBinding.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractActiveBinding.class);
 
     /** embedded active service to allow the binding to have some code executed in a given interval. */
     protected AbstractActiveService activeService = new BindingActiveService();
@@ -138,7 +138,7 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
             if (!bindingsExist()) {
                 super.interrupt();
             } else {
-                logger.trace("{} won't be interrupted because bindings exist.", getName());
+                LOGGER.trace("{} won't be interrupted because bindings exist.", getName());
             }
         }
 

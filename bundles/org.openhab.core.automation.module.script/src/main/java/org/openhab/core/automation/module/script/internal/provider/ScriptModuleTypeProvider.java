@@ -134,7 +134,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
         parameterOptions.clear();
-        for (javax.script.ScriptEngineFactory f : ScriptEngineFactory.engineManager.getEngineFactories()) {
+        for (javax.script.ScriptEngineFactory f : ScriptEngineFactory.ENGINE_MANAGER.getEngineFactories()) {
             String languageName = String.format("%s (%s)", StringUtils.capitalize(f.getLanguageName()),
                     f.getLanguageVersion());
             List<String> mimeTypes = new ArrayList<>();

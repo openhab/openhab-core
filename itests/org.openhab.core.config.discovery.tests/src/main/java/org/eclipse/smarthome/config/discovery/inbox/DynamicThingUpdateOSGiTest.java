@@ -125,11 +125,11 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertUpdateWithDifferentConfig() {
-        final String CFG_IP_ADDRESS_KEY = "ipAddress";
-        final String CFG_IP_ADDRESS_VALUE = "127.0.0.1";
+        final String cfgIpAddressKey = "ipAddress";
+        final String cfgIpAddressValue = "127.0.0.1";
 
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_ID).build();
-        thing.getConfiguration().put(CFG_IP_ADDRESS_KEY, null);
+        thing.getConfiguration().put(cfgIpAddressKey, null);
         managedThingProvider.add(thing);
         waitForAssert(() -> {
             assertNotNull(callback);
@@ -137,8 +137,7 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
         callback.statusUpdated(thing, ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build());
 
         DiscoveryResult discoveryResult = new DiscoveryResultImpl(THING_TYPE_UID, THING_UID, null,
-                Collections.singletonMap(CFG_IP_ADDRESS_KEY, CFG_IP_ADDRESS_VALUE), "DummyRepr", "DummyLabel1",
-                DEFAULT_TTL);
+                Collections.singletonMap(cfgIpAddressKey, cfgIpAddressValue), "DummyRepr", "DummyLabel1", DEFAULT_TTL);
 
         inbox.add(discoveryResult);
 
@@ -147,7 +146,7 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
 
         Thing updatedThing = captor.getValue();
         assertNotNull(updatedThing);
-        assertEquals(CFG_IP_ADDRESS_VALUE, updatedThing.getConfiguration().get(CFG_IP_ADDRESS_KEY));
+        assertEquals(cfgIpAddressValue, updatedThing.getConfiguration().get(cfgIpAddressKey));
 
         assertEquals(0, inbox.getAll().size());
     }

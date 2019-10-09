@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class DumbThingTypeProvider implements ThingTypeProvider {
 
     private final Logger logger = LoggerFactory.getLogger(DumbThingTypeProvider.class);
-    private static final Map<ThingTypeUID, ThingType> thingTypes = new HashMap<ThingTypeUID, ThingType>();
+    private static final Map<ThingTypeUID, ThingType> THING_TYPES = new HashMap<ThingTypeUID, ThingType>();
 
     public DumbThingTypeProvider() {
         logger.debug("DumbThingTypeProvider created");
@@ -47,7 +47,7 @@ public class DumbThingTypeProvider implements ThingTypeProvider {
                     new ChannelTypeUID(DumbThingHandlerFactory.BINDING_ID, "channel1")).build();
             List<ChannelDefinition> channelDefinitions = Collections.singletonList(channel1);
 
-            thingTypes.put(DumbThingHandlerFactory.THING_TYPE_TEST,
+            THING_TYPES.put(DumbThingHandlerFactory.THING_TYPE_TEST,
                     ThingTypeBuilder.instance(DumbThingHandlerFactory.THING_TYPE_TEST, "DUMB")
                             .withDescription("Funky Thing").isListed(false).withChannelDefinitions(channelDefinitions)
                             .withConfigDescriptionURI(new URI("dumb:DUMB")).build());
@@ -58,12 +58,12 @@ public class DumbThingTypeProvider implements ThingTypeProvider {
 
     @Override
     public Collection<ThingType> getThingTypes(Locale locale) {
-        return thingTypes.values();
+        return THING_TYPES.values();
     }
 
     @Override
     public ThingType getThingType(ThingTypeUID thingTypeUID, Locale locale) {
-        return thingTypes.get(thingTypeUID);
+        return THING_TYPES.get(thingTypeUID);
     }
 
 }

@@ -43,14 +43,14 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
 
     public static final String MODULE_TYPE_ID = "core.ChannelEventTrigger";
 
+    private static final String CFG_CHANNEL_EVENT = "event";
+    private static final String CFG_CHANNEL = "channelUID";
+    private static final String TOPIC = "smarthome/channels/*/triggered";
+
     private final String eventOnChannel;
     private final String channelUID;
-    private final String TOPIC = "smarthome/channels/*/triggered";
-    private final Set<String> types = new HashSet<String>();
+    private final Set<String> types = new HashSet<>();
     private final BundleContext bundleContext;
-
-    private final String CFG_CHANNEL_EVENT = "event";
-    private final String CFG_CHANNEL = "channelUID";
 
     @SuppressWarnings("rawtypes")
     private ServiceRegistration eventSubscriberRegistration;
@@ -63,7 +63,7 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
         this.bundleContext = bundleContext;
         this.types.add("ChannelTriggeredEvent");
 
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", TOPIC);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);

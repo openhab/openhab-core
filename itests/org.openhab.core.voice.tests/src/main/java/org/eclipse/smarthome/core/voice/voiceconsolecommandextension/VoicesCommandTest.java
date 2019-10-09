@@ -33,7 +33,7 @@ import org.osgi.framework.BundleContext;
  *
  */
 public class VoicesCommandTest extends VoiceConsoleCommandExtensionTest {
-    private final String SUBCMD_VOICES = "voices";
+    private static final String SUBCMD_VOICES = "voices";
     private TTSServiceStub ttsService;
     private SinkStub sink;
     private VoiceStub voice;
