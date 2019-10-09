@@ -93,7 +93,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     @Test
-    public void test_inRoot() throws Exception {
+    public void testInRoot() throws Exception {
         watchService = new RelativeWatchService(WATCHED_DIRECTORY, true);
 
         // File created in the watched directory
@@ -101,7 +101,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     @Test
-    public void test_inSub() throws Exception {
+    public void testInSub() throws Exception {
         watchService = new RelativeWatchService(WATCHED_DIRECTORY, true);
 
         // File created in a subdirectory of the watched directory
@@ -109,7 +109,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     @Test
-    public void test_inSubSub() throws Exception {
+    public void testInSubSub() throws Exception {
         watchService = new RelativeWatchService(WATCHED_DIRECTORY, true);
 
         // File created in a sub sub directory of the watched directory
@@ -117,7 +117,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     @Test
-    public void test_identicalNames() throws Exception {
+    public void testIdenticalNames() throws Exception {
         watchService = new RelativeWatchService(WATCHED_DIRECTORY, true);
 
         String fileName = "duplicateFile";
@@ -148,7 +148,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     @Test
-    public void test_excludeSubdirs() throws Exception {
+    public void testExcludeSubdirs() throws Exception {
         // Do not watch the subdirectories of the root directory
         watchService = new RelativeWatchService(WATCHED_DIRECTORY, false);
 
@@ -167,7 +167,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     }
 
     @Test
-    public void test_includeSubdirs() throws Exception {
+    public void testIncludeSubdirs() throws Exception {
         // Do watch the subdirectories of the root directory
         watchService = new RelativeWatchService(WATCHED_DIRECTORY, true);
 

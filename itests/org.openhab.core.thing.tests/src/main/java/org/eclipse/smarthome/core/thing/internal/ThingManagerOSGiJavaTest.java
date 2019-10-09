@@ -355,7 +355,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChildHandlerInitialized_replacedUnitializedThing() {
+    public void testChildHandlerInitializedReplacedUnitializedThing() {
         Semaphore childHandlerInitializedSemaphore = new Semaphore(1);
         Semaphore thingUpdatedSemapthore = new Semaphore(1);
 
@@ -431,7 +431,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChildHandlerInitialized_modifiedUninitializedThing() {
+    public void testChildHandlerInitializedModifiedUninitializedThing() {
         Semaphore childHandlerInitializedSemaphore = new Semaphore(1);
         Semaphore thingUpdatedSemapthore = new Semaphore(1);
 
@@ -507,7 +507,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChildHandlerInitialized_replacedInitializedThing() {
+    public void testChildHandlerInitializedReplacedInitializedThing() {
         Semaphore childHandlerInitializedSemaphore = new Semaphore(1);
         Semaphore thingUpdatedSemapthore = new Semaphore(1);
 

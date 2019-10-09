@@ -249,7 +249,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testStateUpdated_singleLink() {
+    public void testStateUpdatedSingleLink() {
         manager.stateUpdated(STATE_CHANNEL_UID_1, OnOffType.ON);
         waitForAssert(() -> {
             verify(stateProfile).onStateUpdateFromHandler(eq(OnOffType.ON));
@@ -259,7 +259,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testStateUpdated_multiLink() {
+    public void testStateUpdatedMultiLink() {
         manager.stateUpdated(STATE_CHANNEL_UID_2, OnOffType.ON);
         waitForAssert(() -> {
             verify(stateProfile, times(2)).onStateUpdateFromHandler(eq(OnOffType.ON));
@@ -269,7 +269,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testPostCommand_singleLink() {
+    public void testPostCommandSingleLink() {
         manager.postCommand(STATE_CHANNEL_UID_1, OnOffType.ON);
         waitForAssert(() -> {
             verify(stateProfile).onCommandFromHandler(eq(OnOffType.ON));
@@ -279,7 +279,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testPostCommand_multiLink() {
+    public void testPostCommandMultiLink() {
         manager.postCommand(STATE_CHANNEL_UID_2, OnOffType.ON);
         waitForAssert(() -> {
             verify(stateProfile, times(2)).onCommandFromHandler(eq(OnOffType.ON));
@@ -289,7 +289,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEvent_singleLink() {
+    public void testItemCommandEventSingleLink() {
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_2, OnOffType.ON));
         waitForAssert(() -> {
             verify(stateProfile).onCommandFromItem(eq(OnOffType.ON));
@@ -300,7 +300,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEvent_Decimal2Quantity() {
+    public void testItemCommandEventDecimal2Quantity() {
         // Take unit from accepted item type (see channel built from STATE_CHANNEL_UID_3)
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_3, DecimalType.valueOf("20")));
         waitForAssert(() -> {
@@ -311,7 +311,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEvent_Decimal2Quantity_2() {
+    public void testItemCommandEventDecimal2Quantity2() {
         // Take unit from state description
         StateDescriptionService stateDescriptionService = mock(StateDescriptionService.class);
         when(stateDescriptionService.getStateDescription(ITEM_NAME_3, null)).thenReturn(
@@ -329,7 +329,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEvent_Decimal2Quantity_ChannelType() {
+    public void testItemCommandEventDecimal2QuantityChannelType() {
         // The command is sent to an item w/o dimension defined and the channel is legacy (created from a ThingType
         // definition before UoM was introduced to the binding). The dimension information might now be defined on the
         // current ThingType.
@@ -342,7 +342,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEvent_multiLink() {
+    public void testItemCommandEventMultiLink() {
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_1, OnOffType.ON));
         waitForAssert(() -> {
             verify(stateProfile, times(2)).onCommandFromItem(eq(OnOffType.ON));
@@ -353,7 +353,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEvent_notToSource() {
+    public void testItemCommandEventNotToSource() {
         manager.receive(
                 ItemEventFactory.createCommandEvent(ITEM_NAME_1, OnOffType.ON, STATE_CHANNEL_UID_2.getAsString()));
         waitForAssert(() -> {
@@ -365,7 +365,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemStateEvent_singleLink() {
+    public void testItemStateEventSingleLink() {
         manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_2, OnOffType.ON));
         waitForAssert(() -> {
             verify(stateProfile).onStateUpdateFromItem(eq(OnOffType.ON));
@@ -376,7 +376,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemStateEvent_multiLink() {
+    public void testItemStateEventMultiLink() {
         manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_1, OnOffType.ON));
         waitForAssert(() -> {
             verify(stateProfile, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
@@ -387,7 +387,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemStateEvent_notToSource() {
+    public void testItemStateEventNotToSource() {
         manager.receive(
                 ItemEventFactory.createStateEvent(ITEM_NAME_1, OnOffType.ON, STATE_CHANNEL_UID_2.getAsString()));
         waitForAssert(() -> {
@@ -399,7 +399,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChannelTriggeredEvent_singleLink() {
+    public void testChannelTriggeredEventSingleLink() {
         manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_1));
         waitForAssert(() -> {
             verify(triggerProfile).onTriggerFromHandler(eq(EVENT));
@@ -409,7 +409,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChannelTriggeredEvent_multiLink() {
+    public void testChannelTriggeredEventMultiLink() {
         manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
         waitForAssert(() -> {
             verify(triggerProfile, times(2)).onTriggerFromHandler(eq(EVENT));
@@ -534,7 +534,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEvent_typeDowncast() {
+    public void testItemCommandEventTypeDowncast() {
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
                 .withChannels(ChannelBuilder.create(STATE_CHANNEL_UID_2, "Dimmer").withKind(ChannelKind.STATE).build())
                 .build();
@@ -554,7 +554,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemStateEvent_typeDowncast() {
+    public void testItemStateEventTypeDowncast() {
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
                 .withChannels(ChannelBuilder.create(STATE_CHANNEL_UID_2, "Dimmer").withKind(ChannelKind.STATE).build())
                 .build();

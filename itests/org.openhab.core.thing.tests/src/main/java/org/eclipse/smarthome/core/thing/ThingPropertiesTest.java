@@ -57,7 +57,7 @@ public class ThingPropertiesTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testSetProperty_newKey() {
+    public void testSetPropertyNewKey() {
         thing.setProperty("key3", "value3");
 
         assertEquals(3, thing.getProperties().size());
@@ -67,7 +67,7 @@ public class ThingPropertiesTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testSetProperty_newValue() {
+    public void testSetPropertyNewValue() {
         String value = thing.setProperty("key2", "value3");
 
         assertEquals("value2", value);
@@ -86,12 +86,12 @@ public class ThingPropertiesTest extends JavaOSGiTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetProperty_nullKey() {
+    public void testSetPropertyNullKey() {
         thing.setProperty(nullString, "");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetProperty_emptyName() {
+    public void testSetPropertyEmptyName() {
         thing.setProperty("", "");
     }
 }

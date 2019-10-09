@@ -252,7 +252,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testAddMetadata_nonExistingItem() {
+    public void testAddMetadataNonExistingItem() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "some value";
         Response response = itemResource.addMetadata("nonExisting", "foo", dto);
@@ -260,7 +260,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testAddMetadata_ValueEmtpy() {
+    public void testAddMetadataValueEmpty() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "";
         Response response = itemResource.addMetadata(ITEM_NAME1, "foo", dto);
@@ -268,7 +268,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testAddMetadata_ValueNull() {
+    public void testAddMetadataValueNull() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = null;
         Response response = itemResource.addMetadata(ITEM_NAME1, "foo", dto);
@@ -276,7 +276,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testAddMetadata_update() {
+    public void testAddMetadataUpdate() {
         MetadataDTO dto = new MetadataDTO();
         dto.value = "some value";
         assertEquals(201, itemResource.addMetadata(ITEM_NAME1, "namespace", dto).getStatus());
@@ -286,19 +286,19 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveMetadata_nonExistingItem() {
+    public void testRemoveMetadataNonExistingItem() {
         Response response = itemResource.removeMetadata("nonExisting", "anything");
         assertEquals(404, response.getStatus());
     }
 
     @Test
-    public void testRemoveMetadata_nonExistingNamespace() {
+    public void testRemoveMetadataNonExistingNamespace() {
         Response response = itemResource.removeMetadata(ITEM_NAME1, "anything");
         assertEquals(404, response.getStatus());
     }
 
     @Test
-    public void testRemoveMetadata_unmanagedMetadata() {
+    public void testRemoveMetadataUnmanagedMetadata() {
         MetadataProvider provider = mock(MetadataProvider.class);
         when(provider.getAll()).thenReturn(
                 Collections.singleton(new Metadata(new MetadataKey("namespace", ITEM_NAME1), "some value", null)));

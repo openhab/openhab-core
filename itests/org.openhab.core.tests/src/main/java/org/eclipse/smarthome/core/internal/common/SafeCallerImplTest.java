@@ -160,7 +160,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testMultiThread_sync() {
+    public void testMultiThreadSync() {
         Runnable mock = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock).run();
 
@@ -181,7 +181,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testSingleThread_sync_secondCallWhileInTimeout() throws Exception {
+    public void testSingleThreadSyncSecondCallWhileInTimeout() throws Exception {
         Runnable mock = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock).run();
         configureSingleThread();
@@ -200,7 +200,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testSingleThread_sync_parallel() throws Exception {
+    public void testSingleThreadSyncParallel() throws Exception {
         Runnable mock = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock).run();
         configureSingleThread();
@@ -224,7 +224,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testMultiThread_async() throws Exception {
+    public void testMultiThreadAsync() throws Exception {
         Runnable mock = mock(Runnable.class);
         doAnswer(a -> sleep(TIMEOUT)).when(mock).run();
 
@@ -240,7 +240,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testSingleThread_async() throws Exception {
+    public void testSingleThreadAsync() throws Exception {
         Runnable mock = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock).run();
         configureSingleThread();
@@ -257,7 +257,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testSecondCallGetsRefused_sameIdentifier() throws Exception {
+    public void testSecondCallGetsRefusedSameIdentifier() throws Exception {
         Runnable mock1 = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock1).run();
         Runnable mock2 = mock(Runnable.class);
@@ -271,7 +271,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testSecondCallGetsAccepted_differentIdentifier() throws Exception {
+    public void testSecondCallGetsAcceptedDifferentIdentifier() throws Exception {
         Runnable mock1 = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock1).run();
         Runnable mock2 = mock(Runnable.class);
@@ -298,7 +298,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testCall_wrapped() throws Exception {
+    public void testCallWrapped() throws Exception {
         AtomicReference<String> outerThreadName = new AtomicReference<>();
         AtomicReference<String> middleThreadName = new AtomicReference<>();
         AtomicReference<String> innerThreadName = new AtomicReference<>();
@@ -409,7 +409,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testAsyncDoesNotTimeout_differentIdentifiers() throws Exception {
+    public void testAsyncDoesNotTimeoutDifferentIdentifiers() throws Exception {
         Runnable mock1 = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock1).run();
         Runnable mock2 = mock(Runnable.class);
@@ -427,7 +427,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testAsyncDoesNotTimeout_defaultIdentifiers() throws Exception {
+    public void testAsyncDoesNotTimeoutDefaultIdentifiers() throws Exception {
         Runnable mock1 = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock1).run();
         Runnable mock2 = mock(Runnable.class);
@@ -443,7 +443,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testAsyncRunsSubsequentAndDoesNotTimeout_sameIdentifier() throws Exception {
+    public void testAsyncRunsSubsequentAndDoesNotTimeoutSameIdentifier() throws Exception {
         Object identifier = new Object();
         Runnable mock1 = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock1).run();
@@ -462,7 +462,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testAsyncSequential_sameIdentifier() throws Exception {
+    public void testAsyncSequentialSameIdentifier() throws Exception {
         Runnable mock = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock).run();
 
@@ -480,7 +480,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     @Test
-    public void testAsyncExceedingThreadPool_differentIdentifier() throws Exception {
+    public void testAsyncExceedingThreadPoolDifferentIdentifier() throws Exception {
         Runnable mock = mock(Runnable.class);
         doAnswer(a -> sleep(BLOCK)).when(mock).run();
 
