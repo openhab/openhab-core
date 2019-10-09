@@ -50,7 +50,6 @@ public interface ItemUIProvider {
      *
      * @param itemType the class of the item
      * @param itemName the item name to get the default widget for
-     *
      * @return a widget implementation that can be used for the given item
      */
     public Widget getDefaultWidget(Class<? extends Item> itemType, String itemName);

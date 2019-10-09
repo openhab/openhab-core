@@ -41,7 +41,6 @@ public interface BindingProvider {
      * <code>itemName</code>
      *
      * @param itemName the itemName to check
-     *
      * @return <code>true</code> if this provider contains an adequate mapping
      *         for <code>itemName</code> and <code>false</code> otherwise.
      */

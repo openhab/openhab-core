@@ -37,7 +37,6 @@ public interface ActionHandler extends ModuleHandler {
      *
      * @param context an unmodifiable map containing the outputs of the {@link Trigger} that triggered the {@link Rule},
      *            the outputs of all preceding {@link Action}s, and the inputs for this {@link Action}.
-     *
      * @return a map with the {@code outputs} which are the result of the {@link Action}'s execution (may be null).
      */
     @Nullable

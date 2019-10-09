@@ -36,38 +36,21 @@ public interface ChartProvider {
      * Creates a chart object. This sets the initial parameters for the chart
      * before the items are added
      *
-     * @param service
-     *            A string containing the name of the persistence service. May
-     *            be null in which case the chart provider can decide itself
-     *            which store to use.
-     * @param widget
-     *            The widget ID. This allows the chart provider to look up the
-     *            widget and get the items directly from the sitemap definition.
-     *            May be null.
-     * @param theme
-     *            A string containing a theme name for the chart. The provider
-     *            should store its own themes. May be null to use a default
-     *            theme.
-     * @param height
-     *            The height of the chart.
-     * @param width
-     *            The width of the chart.
-     * @param startTime
-     *            The start time of the chart
-     * @param endTime
-     *            The end time of the chart
-     * @param height
-     *            The height of the chart
-     * @param width
-     *            The width of the chart
-     * @param items
-     *            The items to display on the chart
-     * @param groups
-     *            The groups to display on the chart
-     *
-     * @return BufferedImage object if the chart is rendered correctly,
-     *         otherwise null.
-     *
+     * @param service A string containing the name of the persistence service. May be null in which case the chart
+     *            provider can decide itself which store to use.
+     * @param widget The widget ID. This allows the chart provider to look up the widget and get the items directly from
+     *            the sitemap definition. May be null.
+     * @param theme A string containing a theme name for the chart. The provider should store its own themes. May be
+     *            null to use a default theme.
+     * @param height The height of the chart.
+     * @param width The width of the chart.
+     * @param startTime The start time of the chart
+     * @param endTime The end time of the chart
+     * @param height The height of the chart
+     * @param width The width of the chart
+     * @param items The items to display on the chart
+     * @param groups The groups to display on the chart
+     * @return BufferedImage object if the chart is rendered correctly, otherwise null.
      * @throws ItemNotFoundException if an item or group is not found
      * @throws IllegalArgumentException if an invalid argument is passed
      */

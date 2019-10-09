@@ -32,7 +32,6 @@ public interface StateDescriptionFragmentProvider {
      *
      * @param itemName item name (must not be null)
      * @param locale locale (can be null)
-     *
      * @return a {@link StateDescriptionFragment} with only the parts known by this
      *         {@link StateDescriptionFragmentProvider}.
      */

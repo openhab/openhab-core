@@ -63,7 +63,6 @@ public class HttpUtil {
      * @param httpMethod the HTTP method to use
      * @param url the url to execute (in milliseconds)
      * @param timeout the socket timeout to wait for data
-     *
      * @return the response body or <code>NULL</code> when the request went wrong
      */
     public static String executeUrl(String httpMethod, String url, int timeout) {
@@ -81,7 +80,6 @@ public class HttpUtil {
      *            <code>null</code> if no content should be send.
      * @param contentType the content type of the given <code>content</code>
      * @param timeout the socket timeout to wait for data
-     *
      * @return the response body or <code>NULL</code> when the request went wrong
      */
     public static String executeUrl(String httpMethod, String url, InputStream content, String contentType,
@@ -101,7 +99,6 @@ public class HttpUtil {
      *            <code>null</code> if no content should be send.
      * @param contentType the content type of the given <code>content</code>
      * @param timeout the socket timeout to wait for data
-     *
      * @return the response body or <code>NULL</code> when the request went wrong
      */
     public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
@@ -221,7 +218,6 @@ public class HttpUtil {
      *
      * @param urlString
      * @param nonProxyHosts
-     *
      * @return <code>false</code> if the host of the given <code>urlString</code>
      *         is contained in <code>nonProxyHosts</code>-list and <code>true</code>
      *         otherwise
@@ -267,7 +263,6 @@ public class HttpUtil {
      * </pre>
      *
      * @param url the URL to extract {@link Credentials} from
-     *
      * @return the exracted Credentials or <code>null</code> if the given
      *         <code>url</code> does not contain credentials
      */
@@ -298,7 +293,6 @@ public class HttpUtil {
      *
      * @param httpMethodString the name of the {@link HttpMethod} to create
      * @param url
-     *
      * @return an object of type {@link GetMethod}, {@link PutMethod},
      *         {@link PostMethod} or {@link DeleteMethod}
      * @throws IllegalArgumentException if <code>httpMethod</code> is none of
