@@ -19,8 +19,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Stefan Triller
- *
+ * @author Stefan Triller - Initial contribution
  */
 public class DateTimeItemTest {
 

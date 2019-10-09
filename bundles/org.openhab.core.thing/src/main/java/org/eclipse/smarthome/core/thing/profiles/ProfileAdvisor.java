@@ -21,7 +21,6 @@ import org.eclipse.smarthome.core.thing.type.ChannelType;
  * Implementors can give advice which {@link Profile}s can/should be used for a given link.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ProfileAdvisor {

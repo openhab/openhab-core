@@ -24,7 +24,6 @@ import org.osgi.framework.Bundle;
  * the default text is not a constant with the assistance of {@link TranslationProvider}.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class RuleTemplateI18nUtil {
 

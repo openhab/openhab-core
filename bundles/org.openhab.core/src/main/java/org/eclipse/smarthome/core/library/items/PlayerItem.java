@@ -30,7 +30,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * An {@link PlayerItem} allows to control a player, e.g. an audio player.
  *
- * @author Alex Tugarev
+ * @author Alex Tugarev - Initial contribution
  */
 @NonNullByDefault
 public class PlayerItem extends GenericItem {

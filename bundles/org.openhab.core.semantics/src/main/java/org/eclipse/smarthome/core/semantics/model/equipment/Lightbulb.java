@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Lightbulb.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_Lightbulb", label = "Lightbulb", synonyms = "Lightbulbs, Bulb, Bulbs, Lamp, Lamps, Lights, Lighting", description = "")
 public interface Lightbulb extends Equipment {

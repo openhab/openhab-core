@@ -29,7 +29,6 @@ import org.eclipse.smarthome.core.thing.ThingUID;
  * mDNS scans.
  *
  * @author Tobias Bräutigam - Initial contribution
- *
  */
 @NonNullByDefault
 public interface MDNSDiscoveryParticipant {

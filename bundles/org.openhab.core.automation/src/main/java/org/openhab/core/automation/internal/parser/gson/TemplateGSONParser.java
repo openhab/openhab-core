@@ -35,7 +35,6 @@ import com.google.gson.stream.JsonToken;
  * This class can parse and serialize sets of {@link Template}s.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Component(immediate = true, service = Parser.class, property = { "parser.type=parser.template", "format=json" })
 public class TemplateGSONParser extends AbstractGSONParser<Template> {

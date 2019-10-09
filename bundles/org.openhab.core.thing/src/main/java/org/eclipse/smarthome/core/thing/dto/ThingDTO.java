@@ -22,7 +22,6 @@ import java.util.Map;
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Stefan Bußweiler - Added new thing status handling
  * @author Simon Kaufmann - Added label
- *
  */
 public class ThingDTO {
 

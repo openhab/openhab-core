@@ -21,7 +21,6 @@ import org.eclipse.smarthome.model.item.internal.GenericItemProvider;
  * binding configuration string used in the {@link GenericItemProvider}.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface BindingConfigReader {

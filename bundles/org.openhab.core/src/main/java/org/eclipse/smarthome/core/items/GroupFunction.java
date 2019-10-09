@@ -23,7 +23,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * out of the states of all its member items.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface GroupFunction {
 

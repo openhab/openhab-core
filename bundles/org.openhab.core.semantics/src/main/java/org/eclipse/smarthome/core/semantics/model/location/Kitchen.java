@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Kitchen.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Location_Indoor_Room_Kitchen", label = "Kitchen", synonyms = "Kitchens", description = "")
 public interface Kitchen extends Room {

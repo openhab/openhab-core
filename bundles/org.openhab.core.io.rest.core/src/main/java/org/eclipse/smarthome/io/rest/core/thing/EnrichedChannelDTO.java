@@ -20,7 +20,6 @@ import org.eclipse.smarthome.core.thing.dto.ChannelDTO;
  * This is a data transfer object that is used to serialize channels with dynamic data like linked items.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class EnrichedChannelDTO extends ChannelDTO {
 

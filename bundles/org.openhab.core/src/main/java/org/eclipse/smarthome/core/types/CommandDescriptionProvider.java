@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * Implementations provide an item specific, localized {@link CommandDescription}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public interface CommandDescriptionProvider {

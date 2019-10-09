@@ -45,7 +45,7 @@ import org.osgi.framework.ServiceRegistration;
  * {@link JavaOSGiTest#registerService}
  * methods, are unregistered automatically in the tear down of the test.
  *
- * @author Markus Rathgeb - Create a pure Java implementation based on the Groovy {@code OSGiTest} class
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public class JavaOSGiTest extends JavaTest {

@@ -32,7 +32,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * This class provides the script engine as a console command
  *
  * @author Oliver Libutzki - Initial contribution
- *
  */
 @Component(service = ConsoleCommandExtension.class)
 public class ScriptEngineConsoleCommandExtension extends AbstractConsoleCommandExtension {

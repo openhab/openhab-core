@@ -34,7 +34,7 @@ import org.openhab.core.types.State;
  * All setter methods return the filter criteria instance, so that the methods can be
  * easily chained in order to define a filter.
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  */
 public class FilterCriteria {
 

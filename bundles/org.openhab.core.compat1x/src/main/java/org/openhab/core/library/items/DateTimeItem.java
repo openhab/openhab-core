@@ -24,9 +24,8 @@ import org.openhab.core.types.UnDefType;
 /**
  * A DateTimeItem stores a timestamp including a valid time zone.
  *
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
- *
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public class DateTimeItem extends GenericItem {
 

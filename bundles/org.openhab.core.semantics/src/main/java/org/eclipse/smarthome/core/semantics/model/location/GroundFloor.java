@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Ground Floor.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Location_Indoor_Floor_GroundFloor", label = "Ground Floor", synonyms = "Ground Floors, Downstairs", description = "")
 public interface GroundFloor extends Floor {

@@ -23,7 +23,6 @@ import org.eclipse.smarthome.core.thing.profiles.StateProfileType;
  * Default implementation of a {@link StateProfileType}.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public class StateProfileTypeImpl implements StateProfileType {

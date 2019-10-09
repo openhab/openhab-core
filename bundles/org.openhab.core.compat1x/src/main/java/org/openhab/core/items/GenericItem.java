@@ -29,8 +29,7 @@ import org.openhab.core.types.UnDefType;
  * for the infrastructure, such as publishing updates to the event bus
  * or notifying listeners.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class GenericItem implements Item {
 

@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Christoph Knauf - Initial contribution
  * @author Kai Kreuzer - added new module types
- *
  */
 @Component(immediate = true, service = ModuleHandlerFactory.class)
 public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {

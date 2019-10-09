@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.semantics.model;
  * This is a marker interface for all semantic tag classes.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface Tag {
 }

@@ -23,8 +23,8 @@ import org.openhab.core.types.State;
 /**
  * Base class for bindings which send events.
  *
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class AbstractBinding<P extends BindingProvider> extends AbstractEventSubscriber
         implements BindingChangeListener {

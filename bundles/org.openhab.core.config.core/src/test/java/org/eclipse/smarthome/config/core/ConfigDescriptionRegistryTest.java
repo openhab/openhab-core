@@ -32,7 +32,6 @@ import org.mockito.Mock;
 /**
  *
  * @author Simon Kaufmann - converted to Java
- *
  */
 public class ConfigDescriptionRegistryTest extends JavaTest {
 

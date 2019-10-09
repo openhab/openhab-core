@@ -52,7 +52,6 @@ import com.thoughtworks.xstream.converters.ConversionException;
  *
  * @author Michael Grammling - Initial contribution
  * @author Ivan Iliev - Added support for system wide channel types
- *
  */
 public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
 

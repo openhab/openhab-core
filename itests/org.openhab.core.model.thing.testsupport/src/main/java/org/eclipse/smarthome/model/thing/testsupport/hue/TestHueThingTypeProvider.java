@@ -11,7 +11,6 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 /**
- *
  */
 package org.eclipse.smarthome.model.thing.testsupport.hue;
 
@@ -34,10 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Benedikt Niehues - Fix ESH Bug 450236
- *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=450236 - Considering
- *         ThingType Description
- *
+ * @author Benedikt Niehues - Initial contribution
  */
 @Component
 public class TestHueThingTypeProvider implements ThingTypeProvider {

@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tilman Kamp - Initial contribution
  * @author Kai Kreuzer - Improved error handling
- *
  */
 public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInterpreter {
 

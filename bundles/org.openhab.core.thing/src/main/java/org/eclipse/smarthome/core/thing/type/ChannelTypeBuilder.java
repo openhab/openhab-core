@@ -23,7 +23,6 @@ import org.eclipse.smarthome.core.thing.internal.type.TriggerChannelTypeBuilderI
  * Interface for ChannelTypeBuilder
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ChannelTypeBuilder<T extends ChannelTypeBuilder<T>> {

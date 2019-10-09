@@ -17,7 +17,6 @@ package org.eclipse.smarthome.core.auth;
  * which defines access scope for authenticated user or system.
  *
  * @author Łukasz Dywicki - Initial contribution
- *
  */
 public interface AuthenticationProvider {
 

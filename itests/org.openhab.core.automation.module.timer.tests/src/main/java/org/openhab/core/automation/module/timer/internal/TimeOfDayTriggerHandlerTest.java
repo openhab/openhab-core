@@ -27,7 +27,6 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
  * this tests the timeOfDay trigger
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class TimeOfDayTriggerHandlerTest extends JavaOSGiTest {
 

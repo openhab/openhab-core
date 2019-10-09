@@ -68,7 +68,6 @@ import com.google.gson.JsonSerializer;
  * The recycle is performed when then instance is deactivated
  *
  * @author Gary Tse - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(property = "CIPHER_TARGET=SymmetricKeyCipher")

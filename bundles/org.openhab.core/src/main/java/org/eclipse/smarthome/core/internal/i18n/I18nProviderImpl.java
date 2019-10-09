@@ -74,7 +74,6 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Initial contribution
  * @author Stefan Triller - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone
- *
  */
 
 @NonNullByDefault

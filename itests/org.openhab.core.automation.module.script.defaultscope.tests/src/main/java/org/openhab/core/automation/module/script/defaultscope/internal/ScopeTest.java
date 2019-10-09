@@ -30,7 +30,6 @@ import org.openhab.core.automation.module.script.ScriptEngineManager;
  * This tests the script modules
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ScopeTest extends JavaOSGiTest {
 

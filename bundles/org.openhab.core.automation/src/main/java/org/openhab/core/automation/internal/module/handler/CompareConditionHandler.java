@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
  * Generic Comparation Condition
  *
  * @author Benedikt Niehues - Initial contribution
- *
  */
 public class CompareConditionHandler extends BaseConditionModuleHandler {
 

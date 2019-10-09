@@ -25,7 +25,6 @@ import org.openhab.core.automation.Trigger;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split implementation for different module types in sub classes
- *
  */
 @NonNullByDefault
 public abstract class ModuleBuilder<B extends ModuleBuilder<B, T>, T extends Module> {

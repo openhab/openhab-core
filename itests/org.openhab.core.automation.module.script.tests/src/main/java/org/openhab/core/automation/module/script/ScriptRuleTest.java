@@ -54,7 +54,6 @@ import org.slf4j.LoggerFactory;
  * This tests the script modules
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 
 public class ScriptRuleTest extends JavaOSGiTest {

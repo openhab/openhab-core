@@ -19,9 +19,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for active bindings which polls something and sends events frequently.
  *
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
- *
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class AbstractActiveBinding<P extends BindingProvider> extends AbstractBinding<P> {
 

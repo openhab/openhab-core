@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
  * @author Andre Fuechsel - Added call of removeOlderResults
  * @author Gary Tse - Add NetworkAddressChangeListener to handle interface changes
  * @author Tim Roberts - Added primary address change
- *
  */
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.upnp")
 public class UpnpDiscoveryService extends AbstractDiscoveryService

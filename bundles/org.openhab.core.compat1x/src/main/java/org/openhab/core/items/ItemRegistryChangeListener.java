@@ -18,8 +18,7 @@ import java.util.Collection;
  * This is a listener interface which should be implemented where ever the item registry is
  * used in order to be notified of any dynamic changes in the provided items.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ItemRegistryChangeListener {
 

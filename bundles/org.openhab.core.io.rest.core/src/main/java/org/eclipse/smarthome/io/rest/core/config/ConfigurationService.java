@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * equivalent to the {@link Constants#SERVICE_PID}.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 @Component(service = ConfigurationService.class)
 public class ConfigurationService {

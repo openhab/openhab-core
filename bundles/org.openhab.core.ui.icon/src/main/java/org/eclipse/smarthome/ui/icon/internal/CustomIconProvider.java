@@ -31,7 +31,6 @@ import org.osgi.service.component.annotations.Component;
  * folder. If a custom icon is found, it will be used over the standard system icon.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Component(immediate = true, service = {IconProvider.class} )
 public class CustomIconProvider extends AbstractResourceIconProvider {

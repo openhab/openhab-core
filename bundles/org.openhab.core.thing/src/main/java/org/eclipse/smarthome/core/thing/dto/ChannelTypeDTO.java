@@ -25,7 +25,6 @@ import org.eclipse.smarthome.core.types.StateDescription;
  * This is a data transfer object that is used with to serialize channel types.
  *
  * @author Chris Jackson - Initial contribution
- *
  */
 public class ChannelTypeDTO {
 

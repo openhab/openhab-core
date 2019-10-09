@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * It is used to return information about the item to the system
  *
  * @author Chris Jackson - Initial contribution
- *
  */
 @NonNullByDefault
 public interface PersistenceItemInfo {

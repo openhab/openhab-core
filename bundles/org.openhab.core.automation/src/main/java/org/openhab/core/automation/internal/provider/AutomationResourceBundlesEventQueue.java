@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @param <E>
- *
  */
 public class AutomationResourceBundlesEventQueue<E> implements Runnable {
 

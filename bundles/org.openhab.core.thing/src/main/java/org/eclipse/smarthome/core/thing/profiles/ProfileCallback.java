@@ -20,7 +20,6 @@ import org.eclipse.smarthome.core.types.State;
  * Gives access to the framework features for continuing the communication flow.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ProfileCallback {

@@ -39,7 +39,6 @@ import org.quartz.spi.TriggerFiredBundle;
  * for jobs to execute
  *
  * @author Jon Evans - Initial contribution
- *
  */
 public class MockScheduler extends AbstractScheduler {
     private final List<JobExecutionContext> currentlyExecutingJobs = new ArrayList<>();

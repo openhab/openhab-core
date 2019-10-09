@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * Provides helper method for working with locales.
  *
  * @author Lyubomir Papazov - Initial contribution
- *
  */
 @NonNullByDefault
 public interface LocaleService {

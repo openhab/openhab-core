@@ -59,7 +59,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * and always return the same set of config descriptions.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @Component
 @NonNullByDefault

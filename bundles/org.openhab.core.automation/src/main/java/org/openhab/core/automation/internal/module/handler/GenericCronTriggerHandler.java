@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Christoph Knauf - Initial contribution
  * @author Yordan Mihaylov - Remove Quarz lib dependency
- *
  */
 public class GenericCronTriggerHandler extends BaseTriggerModuleHandler implements SchedulerRunnable {
 

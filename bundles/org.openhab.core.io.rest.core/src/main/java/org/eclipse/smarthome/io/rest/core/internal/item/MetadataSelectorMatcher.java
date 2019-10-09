@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.Reference;
  * Matches available metadata namespaces against the given namespace list or regular expression.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @Component(service = MetadataSelectorMatcher.class)
 public class MetadataSelectorMatcher {

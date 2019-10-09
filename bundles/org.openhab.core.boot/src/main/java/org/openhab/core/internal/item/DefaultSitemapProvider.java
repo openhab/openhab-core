@@ -34,8 +34,7 @@ import org.osgi.service.component.annotations.Reference;
  * This class dynamically provides a default sitemap which comprises
  * all group items that do not have any parent group.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(name = "org.openhab.defaultsitemapprovider")
 public class DefaultSitemapProvider implements SitemapProvider {

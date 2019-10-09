@@ -33,7 +33,6 @@ import com.google.gson.JsonPrimitive;
  *
  * @author Simon Kaufmann - Initial contribution
  * @author Ana Dimova - added a deserializer for the configuration, conforming to the automation json format
- *
  */
 public class ConfigurationDeserializer implements JsonDeserializer<Configuration> {
 

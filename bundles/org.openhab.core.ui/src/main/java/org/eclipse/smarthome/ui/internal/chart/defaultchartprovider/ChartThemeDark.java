@@ -19,7 +19,6 @@ import java.awt.Font;
  * Implementation of the dark {@link ChartTheme chart theme}.
  *
  * @author Holger Reichert - Initial contribution
- *
  */
 public class ChartThemeDark implements ChartTheme {
 

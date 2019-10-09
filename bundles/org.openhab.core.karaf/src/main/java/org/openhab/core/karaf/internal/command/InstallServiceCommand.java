@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * karaf.home rather than karaf.base, which means the service can only support a
  * single Karaf instance.
  *
- * @author Davy Vanherbergen
+ * @author Davy Vanherbergen - Initial contribution
  */
 @Command(scope = "openhab", name = "install-service", description = "Install openHAB as a system service.")
 @Service

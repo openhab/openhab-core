@@ -18,8 +18,7 @@ package org.openhab.io.console;
  * NOTE: This class is only kept for backward compatibility so that openHAB 1 Add-ons still compile.
  * It must not be used productively!
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class ConsoleInterpreter {
 

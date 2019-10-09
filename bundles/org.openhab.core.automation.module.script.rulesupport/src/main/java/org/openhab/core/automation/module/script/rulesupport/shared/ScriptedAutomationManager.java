@@ -41,8 +41,7 @@ import org.slf4j.LoggerFactory;
  * This Registry is used for a single ScriptEngine instance. It allows the adding and removing of handlers.
  * It allows the removal of previously added modules on unload.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 public class ScriptedAutomationManager {
     private final Logger logger = LoggerFactory.getLogger(ScriptedAutomationManager.class);

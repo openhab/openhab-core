@@ -19,8 +19,7 @@ package org.openhab.core.types;
  * (e.g. a dimmed light that is treated as a switch (ON/OFF) will have
  * an undefined state if it is dimmed to 50%).
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public enum UnDefType implements PrimitiveType, State {
     UNDEF,

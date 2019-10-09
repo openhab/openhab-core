@@ -16,7 +16,6 @@ package org.eclipse.smarthome.io.rest;
  * Public constants for the REST API
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class RESTConstants {
 

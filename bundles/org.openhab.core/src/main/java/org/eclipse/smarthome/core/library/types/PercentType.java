@@ -24,7 +24,6 @@ import org.eclipse.smarthome.core.types.State;
  * The PercentType extends the {@link DecimalType} by putting constraints for its value on top (0-100).
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public class PercentType extends DecimalType {

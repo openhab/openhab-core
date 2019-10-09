@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.audio.AudioSource;
  * Mapper class that maps {@link AudioSink} and {@link AudioSource} instanced to their respective DTOs.
  *
  * @author Laurent Garnier - Initial contribution
- *
  */
 @NonNullByDefault
 public class AudioMapper {

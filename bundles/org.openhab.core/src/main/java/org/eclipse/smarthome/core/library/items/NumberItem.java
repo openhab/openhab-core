@@ -43,7 +43,6 @@ import org.eclipse.smarthome.core.types.util.UnitUtils;
  * as a number.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public class NumberItem extends GenericItem {

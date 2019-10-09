@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.common.registry.Registry;
  * they like and also dynamically remove or add data.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {

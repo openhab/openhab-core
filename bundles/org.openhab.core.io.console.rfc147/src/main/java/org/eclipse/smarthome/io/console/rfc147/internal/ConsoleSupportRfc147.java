@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
  * https://felix.apache.org/site/rfc-147-overview.html
  *
  * @author Markus Rathgeb - Initial contribution
- *
  */
 @Component(immediate = true, service = {})
 public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {

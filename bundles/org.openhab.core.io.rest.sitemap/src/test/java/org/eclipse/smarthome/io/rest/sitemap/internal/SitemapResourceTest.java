@@ -57,7 +57,6 @@ import org.mockito.Mock;
  * Test aspects of the {@link SitemapResource}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public class SitemapResourceTest extends JavaTest {
 

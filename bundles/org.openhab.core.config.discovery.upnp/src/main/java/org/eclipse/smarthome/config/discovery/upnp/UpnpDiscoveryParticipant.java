@@ -27,7 +27,6 @@ import org.jupnp.model.meta.RemoteDevice;
  * UPnP scans.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface UpnpDiscoveryParticipant {

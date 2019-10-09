@@ -33,7 +33,6 @@ import org.openhab.core.automation.type.Output;
  * updated by RuleManager
  *
  * @author Yordan Mihaylov - Initial contribution
- *
  */
 public abstract class ModuleImpl implements Module {
 

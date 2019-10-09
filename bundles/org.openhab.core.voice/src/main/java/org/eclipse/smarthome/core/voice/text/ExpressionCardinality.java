@@ -24,7 +24,6 @@ import java.util.ResourceBundle;
  * is immutable.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public final class ExpressionCardinality extends Expression {
 

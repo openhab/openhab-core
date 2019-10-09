@@ -41,8 +41,7 @@ import org.slf4j.LoggerFactory;
  * configuration.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
     private final Logger logger = LoggerFactory.getLogger(ItemStateTriggerHandler.class);

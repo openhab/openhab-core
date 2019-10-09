@@ -39,7 +39,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split console interface and specific implementation
- *
  */
 @Component
 public class ConsoleSupportEclipse implements CommandProvider {

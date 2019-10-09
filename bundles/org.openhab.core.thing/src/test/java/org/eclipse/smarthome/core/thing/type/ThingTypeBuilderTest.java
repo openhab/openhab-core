@@ -33,7 +33,6 @@ import org.junit.Test;
  * Tests the {@link ThingTypeBuilder}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public class ThingTypeBuilderTest {
 

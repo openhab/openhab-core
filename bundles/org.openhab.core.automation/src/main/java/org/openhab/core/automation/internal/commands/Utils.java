@@ -22,7 +22,6 @@ import java.util.Map.Entry;
  * This class contains methods for facilitating sorting and filtering lists stored in {@link Hashtable}s.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class Utils {
 

@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * state.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface TriggerProfile extends Profile {

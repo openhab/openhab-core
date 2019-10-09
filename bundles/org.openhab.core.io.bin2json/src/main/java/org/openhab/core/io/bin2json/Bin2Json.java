@@ -69,7 +69,6 @@ import com.igormaznitsa.jbbp.model.JBBPFieldUShort;
  * </pre>
  *
  * @author Pauli Anttila - Initial contribution
- *
  */
 @NonNullByDefault
 public class Bin2Json {

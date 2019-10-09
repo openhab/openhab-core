@@ -27,7 +27,6 @@ import org.openhab.core.automation.type.CompositeConditionType;
  * by its {@link CompositeConditionType}) are satisfied.
  *
  * @author Yordan Mihaylov - Initial contribution
- *
  */
 public class CompositeConditionHandler
         extends AbstractCompositeModuleHandler<Condition, CompositeConditionType, ConditionHandler>

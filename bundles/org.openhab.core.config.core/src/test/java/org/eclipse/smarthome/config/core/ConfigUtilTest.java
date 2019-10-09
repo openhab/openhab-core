@@ -27,7 +27,6 @@ import org.junit.Test;
 /**
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public class ConfigUtilTest {
 

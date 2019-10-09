@@ -26,7 +26,7 @@ import org.eclipse.xtext.util.Strings;
  * representations from an input string and vice versa. If a segment of the
  * parsed {@link UID} string doesn't match the ID rule, it will be escaped.
  *
- * @author Alex Tugarev
+ * @author Alex Tugarev - Initial contribution
  */
 public class UIDtoStringConverter implements IValueConverter<String> {
 

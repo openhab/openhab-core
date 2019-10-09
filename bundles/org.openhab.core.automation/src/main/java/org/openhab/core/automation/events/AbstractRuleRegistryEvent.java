@@ -20,7 +20,6 @@ import org.openhab.core.automation.dto.RuleDTO;
  *
  * @author Benedikt Niehues - Initial contribution
  * @author Markus Rathgeb - Use the DTO for the Rule representation
- *
  */
 public abstract class AbstractRuleRegistryEvent extends AbstractEvent {
 

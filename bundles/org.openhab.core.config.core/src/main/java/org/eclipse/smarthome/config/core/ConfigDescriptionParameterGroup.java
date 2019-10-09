@@ -26,7 +26,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * group information.
  *
  * @author Chris Jackson - Initial contribution
- *
  */
 @NonNullByDefault
 public class ConfigDescriptionParameterGroup {

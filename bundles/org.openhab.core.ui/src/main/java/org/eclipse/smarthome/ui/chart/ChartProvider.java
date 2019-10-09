@@ -22,9 +22,8 @@ import org.eclipse.smarthome.core.items.ItemNotFoundException;
  * the persistence store to get the data and receives parameters from the UI
  * chart servlet and returns a chart image object (PNG).
  *
- * @author Chris Jackson
+ * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
- *
  */
 public interface ChartProvider {
     /**

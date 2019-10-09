@@ -29,7 +29,7 @@ import org.osgi.service.component.annotations.Component;
 
 /**
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 @Component

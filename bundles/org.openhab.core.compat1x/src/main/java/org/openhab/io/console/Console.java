@@ -17,8 +17,7 @@ package org.openhab.io.console;
  * {@link ConsoleInterpreter}.
  * It allows basic output commands.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Console {
 

@@ -41,8 +41,7 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
  * This class is responsible for tracking the bundles - suppliers of automation resources. It implements
  * {@link BundleTrackerCustomizer} and is notified for events for adding, modifying or removing the bundles.
  *
- * @author Ana Dimova
- *
+ * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("deprecation")
 @Component(immediate = true)

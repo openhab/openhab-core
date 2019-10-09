@@ -26,7 +26,6 @@ import org.eclipse.smarthome.core.voice.text.InterpretationException;
  * @author Mihaela Memova - Initial contribution
  *
  * @author Velin Yordanov - migrated from groovy to java
- *
  */
 public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
 

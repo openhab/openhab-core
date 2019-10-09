@@ -30,7 +30,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * original references, but new instances can be used for calls to the {@link ReadyService} every time.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public final class ReadyMarker {

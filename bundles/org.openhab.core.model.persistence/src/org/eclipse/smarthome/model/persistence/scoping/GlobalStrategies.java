@@ -20,7 +20,6 @@ import org.eclipse.smarthome.model.persistence.persistence.impl.StrategyImpl;
  * all persistence models.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class GlobalStrategies {
 

@@ -19,8 +19,7 @@ import org.openhab.io.net.http.HttpUtil;
  * This class provides static methods that can be used in automation rules
  * for sending HTTP requests
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class HTTP {
 

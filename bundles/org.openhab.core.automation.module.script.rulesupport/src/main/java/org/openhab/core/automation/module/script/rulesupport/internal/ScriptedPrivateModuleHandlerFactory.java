@@ -31,8 +31,7 @@ import org.slf4j.LoggerFactory;
  * This class provides the handlers from the script to the RuleManager. As Jsr223 languages have different needs, it
  * allows these handlers to be defined in different ways.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 @Component(immediate = true, service = { ScriptedPrivateModuleHandlerFactory.class, ModuleHandlerFactory.class })
 public class ScriptedPrivateModuleHandlerFactory extends AbstractScriptedModuleHandlerFactory {

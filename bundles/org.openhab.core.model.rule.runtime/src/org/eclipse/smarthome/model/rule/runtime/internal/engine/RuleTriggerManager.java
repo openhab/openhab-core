@@ -69,7 +69,6 @@ import com.google.inject.Injector;
  * over the evaluation of states and trigger conditions for the rule engine.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class RuleTriggerManager {
 

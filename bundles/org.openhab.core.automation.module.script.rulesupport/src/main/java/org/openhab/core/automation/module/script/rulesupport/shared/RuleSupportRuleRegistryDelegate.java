@@ -25,8 +25,7 @@ import org.openhab.core.automation.RuleRegistry;
  * rules to the RuleManager without worrying about the need to remove rules again. Nonetheless, using the addPermanent
  * method it is still possible to add rules permanently.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 public class RuleSupportRuleRegistryDelegate implements RuleRegistry {
     private final RuleRegistry ruleRegistry;

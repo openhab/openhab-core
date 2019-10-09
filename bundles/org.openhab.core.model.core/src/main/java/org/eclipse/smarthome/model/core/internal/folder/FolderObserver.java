@@ -56,7 +56,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Kai Kreuzer - Initial contribution
  * @author Fabio Marini - Refactoring to use WatchService
  * @author Ana Dimova - reduce to a single watch thread for all class instances
- *
  */
 @Component(name = "org.eclipse.smarthome.folder", immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class FolderObserver extends AbstractWatchService {

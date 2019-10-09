@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
- *
  */
 public class GenericEventTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 

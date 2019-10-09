@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * A TransformationException is thrown when any step of a transformation went
  * wrong. The originating exception should be attached to increase traceability.
  *
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 @NonNullByDefault
 public class TransformationException extends Exception {

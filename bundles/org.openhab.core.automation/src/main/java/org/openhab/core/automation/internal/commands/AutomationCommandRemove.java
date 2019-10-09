@@ -30,7 +30,6 @@ import org.openhab.core.automation.Rule;
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - fixed feedback when deleting non-existent rule
  * @author Marin Mitev - removed prefixes in the output
- *
  */
 public class AutomationCommandRemove extends AutomationCommand {
 

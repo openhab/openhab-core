@@ -66,7 +66,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - ported test to Java
- *
  */
 public class RuleEventTest extends JavaOSGiTest {
 

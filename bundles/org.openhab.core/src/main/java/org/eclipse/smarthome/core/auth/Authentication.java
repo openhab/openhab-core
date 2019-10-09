@@ -23,7 +23,6 @@ import java.util.Set;
  *
  * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Added JavaDoc and switched from array to Set
- *
  */
 public class Authentication {
 

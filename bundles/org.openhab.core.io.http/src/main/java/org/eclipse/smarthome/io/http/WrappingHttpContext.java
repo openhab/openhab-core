@@ -22,7 +22,7 @@ import org.osgi.service.http.HttpContext;
  * {@link #handleSecurity(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)} and
  * {@link #getMimeType(String)}.
  *
- * @author Łukasz Dywicki
+ * @author Łukasz Dywicki - Initial contribution
  */
 public interface WrappingHttpContext extends HttpContext {
 

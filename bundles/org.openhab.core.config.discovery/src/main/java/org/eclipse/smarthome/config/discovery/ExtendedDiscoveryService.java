@@ -27,7 +27,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * @author Simon Kaufmann - Initial contribution
  * @author Henning Treu - deprecation.
- *
  */
 @Deprecated
 @NonNullByDefault

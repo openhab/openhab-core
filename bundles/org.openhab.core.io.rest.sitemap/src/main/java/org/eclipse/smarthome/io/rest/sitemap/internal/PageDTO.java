@@ -19,7 +19,6 @@ import java.util.List;
  * This is a data transfer object that is used to serialize page content.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class PageDTO {
 

@@ -19,7 +19,6 @@ import java.util.ResourceBundle;
  * Expression that successfully parses, if a thing identifier token is found. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public final class ExpressionIdentifier extends Expression {
 

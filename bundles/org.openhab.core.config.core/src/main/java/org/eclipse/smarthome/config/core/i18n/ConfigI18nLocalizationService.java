@@ -33,8 +33,7 @@ import org.osgi.service.component.annotations.Reference;
  * This OSGi service could be used to localize a config description using the I18N mechanism of the openHAB
  * framework.
  *
- * @author Markus Rathgeb - Move code from XML config description provider to separate service
- *
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ConfigI18nLocalizationService.class })

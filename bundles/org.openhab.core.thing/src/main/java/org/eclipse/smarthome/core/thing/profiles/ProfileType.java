@@ -21,7 +21,6 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  * Describes a profile type.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ProfileType extends Identifiable<ProfileTypeUID> {

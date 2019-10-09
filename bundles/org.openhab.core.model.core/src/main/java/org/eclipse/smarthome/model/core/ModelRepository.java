@@ -24,7 +24,6 @@ import org.eclipse.emf.ecore.EObject;
  * come from.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface ModelRepository {
 

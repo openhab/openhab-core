@@ -25,7 +25,6 @@ import org.eclipse.smarthome.core.types.Command;
  * Handler for thing with a configuration parameter
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @NonNullByDefault
 public class MagicConfigurableThingHandler extends BaseThingHandler {

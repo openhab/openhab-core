@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.Reference;
  * Command for testing in the OSGI console
  *
  * @author Gary Tse - Initial contribution
- *
  */
 @Component(immediate = true, name = "ConsoleOAuthCommandExtension")
 public class ConsoleOAuthCommandExtension extends AbstractConsoleCommandExtension implements ConsoleCommandExtension {

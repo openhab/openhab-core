@@ -81,7 +81,7 @@ import org.osgi.service.component.ComponentContext;
 /**
  * Tests for {@link ManagedThingProvider}.
  *
- * @author Oliver Libutzki - Initital contribution
+ * @author Oliver Libutzki - Initial contribution
  * @author Dennis Nobel - Added test for bridgeInitialized and bridgeDisposed callbacks
  * @auther Thomas Höfer - Added config status tests
  * @author Wouter Born - Migrate tests from Groovy to Java

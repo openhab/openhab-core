@@ -22,8 +22,7 @@ import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTO;
  * This is a data transfer object that is used to serialize widgets.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Chris Jackson
- *
+ * @author Chris Jackson - Initial contribution
  */
 public class WidgetDTO {
 

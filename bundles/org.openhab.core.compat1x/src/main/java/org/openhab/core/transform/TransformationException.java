@@ -16,7 +16,7 @@ package org.openhab.core.transform;
  * A TransformationException is thrown when any step of a transformation went
  * wrong. The originating exception should be attached to increase traceability.
  *
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public class TransformationException extends Exception {
 

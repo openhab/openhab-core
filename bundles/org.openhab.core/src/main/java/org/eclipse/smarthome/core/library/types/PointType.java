@@ -31,9 +31,8 @@ import org.eclipse.smarthome.core.types.State;
  * This type can be used for items that are dealing with GPS or
  * location awareness functionality.
  *
- * @author Gaël L'hopital
- * @author John Cocula
- *
+ * @author Gaël L'hopital - Initial contribution
+ * @author John Cocula - Initial contribution
  */
 @NonNullByDefault
 public class PointType implements ComplexType, Command, State {

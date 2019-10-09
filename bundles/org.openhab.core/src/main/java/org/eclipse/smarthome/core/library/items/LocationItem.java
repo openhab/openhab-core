@@ -31,8 +31,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * A LocationItem can be used to store GPS related informations, addresses...
  * This is useful for location awareness related functions
  *
- * @author Gaël L'hopital
- *
+ * @author Gaël L'hopital - Initial contribution
  */
 @NonNullByDefault
 public class LocationItem extends GenericItem {

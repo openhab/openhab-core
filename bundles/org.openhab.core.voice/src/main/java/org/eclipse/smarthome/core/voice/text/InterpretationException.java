@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.voice.text;
  * An exception used by {@link HumanLanguageInterpreter}s, if an error occurs.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public class InterpretationException extends Exception {
 

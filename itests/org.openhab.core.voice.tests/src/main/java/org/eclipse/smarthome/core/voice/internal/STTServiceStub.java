@@ -28,9 +28,7 @@ import org.eclipse.smarthome.core.voice.STTServiceHandle;
  * A {@link STTService} stub used for the tests.
  *
  * @author Mihaela Memova - Initial contribution
- *
  * @author Velin Yordanov - migrated from groovy to java
- *
  */
 public class STTServiceStub implements STTService {
 

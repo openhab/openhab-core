@@ -30,7 +30,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * registered {@link ChannelGroupTypeProvider}s.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(service = ChannelGroupTypeRegistry.class)

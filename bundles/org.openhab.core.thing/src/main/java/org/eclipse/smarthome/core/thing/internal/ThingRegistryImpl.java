@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Default implementation of {@link ThingRegistry}.
  *
- * @author Michael Grammling - Added dynamic configuration update
+ * @author Michael Grammling - Initial contribution
  * @author Simon Kaufmann - Added forceRemove
  * @author Chris Jackson - ensure thing added event is sent before linked events
  * @auther Thomas Höfer - Added config description validation exception to updateConfiguration operation

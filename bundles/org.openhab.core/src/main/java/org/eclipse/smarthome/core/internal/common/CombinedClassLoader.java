@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * Combines multiple class loaders into one.
  *
  * @author Markus Rathgeb - Initial contribution
- *
  */
 public class CombinedClassLoader extends ClassLoader {
 

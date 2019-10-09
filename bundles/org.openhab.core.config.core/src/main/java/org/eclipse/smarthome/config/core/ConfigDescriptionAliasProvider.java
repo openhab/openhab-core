@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * Can be implemented to point one config description URI to another.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ConfigDescriptionAliasProvider {

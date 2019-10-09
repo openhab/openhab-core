@@ -19,7 +19,6 @@ import org.openhab.core.automation.dto.RuleDTO;
  * This is a data transfer object that is used to serialize rules with dynamic data like the status.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class EnrichedRuleDTO extends RuleDTO {
 

@@ -17,7 +17,6 @@ package org.eclipse.smarthome.core.items;
  * related to item lookups in the item registry.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public abstract class ItemLookupException extends Exception {
 

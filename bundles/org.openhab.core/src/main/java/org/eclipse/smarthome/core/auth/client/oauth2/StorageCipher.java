@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * This allows the encryption and decryption to be performed before saving to storage.
  *
  * @author Gary Tse - Initial contribution
- *
  */
 @NonNullByDefault
 public interface StorageCipher {

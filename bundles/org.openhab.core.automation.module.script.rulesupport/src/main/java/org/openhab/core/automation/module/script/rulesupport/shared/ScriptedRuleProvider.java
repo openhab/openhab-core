@@ -25,8 +25,7 @@ import org.osgi.service.component.annotations.Component;
  * This RuleProvider keeps Rules at added by scripts during the runtime. This ensures that Rules are not kept on reboot,
  * but have to be added by the scripts again.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 @Component(immediate = true, service = { ScriptedRuleProvider.class, RuleProvider.class })
 public class ScriptedRuleProvider implements RuleProvider {

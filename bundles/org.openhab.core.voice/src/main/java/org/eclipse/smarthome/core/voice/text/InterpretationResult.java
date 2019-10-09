@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.voice.text;
  * Bundles results of an interpretation. Represents final outcome and user feedback. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public final class InterpretationResult {
 

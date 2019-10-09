@@ -23,7 +23,6 @@ import org.eclipse.smarthome.core.thing.profiles.ProfileContext;
  * {@link ProfileContext} implementation.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public class ProfileContextImpl implements ProfileContext {

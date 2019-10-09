@@ -22,7 +22,6 @@ import org.eclipse.smarthome.model.sitemap.Widget;
  * wants to define the appearance of an item in the UI.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface ItemUIProvider {
 

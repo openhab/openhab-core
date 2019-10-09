@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Velin Yordanov - Initial contribution
  * @author Henning Treu - provide in base test bundle
- *
  */
 public class TestServer {
     private final Logger logger = LoggerFactory.getLogger(TestServer.class);

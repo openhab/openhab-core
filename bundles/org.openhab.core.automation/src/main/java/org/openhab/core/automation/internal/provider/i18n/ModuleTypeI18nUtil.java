@@ -28,7 +28,6 @@ import org.osgi.framework.Bundle;
  *
  * @author Ana Dimova - Initial contribution
  * @author Yordan Mihaylov - updates related to api changes
- *
  */
 public class ModuleTypeI18nUtil {
 

@@ -22,8 +22,7 @@ import org.openhab.io.net.exec.ExecUtil;
  * This class provides static methods that can be used in automation rules for
  * executing commands on command line.
  *
- * @author Pauli Anttila
- *
+ * @author Pauli Anttila - Initial contribution
  */
 public class Exec {
 

@@ -50,7 +50,6 @@ import io.swagger.annotations.ApiResponses;
  *
  * @author Ivan Iliev - Initial contribution
  * @author Yordan Zhelev - Added Swagger annotations
- *
  */
 @Component(immediate = true, service = SseResource.class)
 @Path(SseResource.PATH_EVENTS)

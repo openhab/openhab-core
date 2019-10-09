@@ -56,7 +56,6 @@ import com.google.gson.JsonSyntaxException;
  *
  * @author Michael Bock - Initial contribution
  * @author Gary Tse - ESH adaptation
- *
  */
 @NonNullByDefault
 public class OAuthConnector {

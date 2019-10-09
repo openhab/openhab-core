@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * The timestamp updates to now each time the channel or item state is updated.
  *
  * @author Gaël L'hopital - Initial contribution
- *
  */
 
 @NonNullByDefault

@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - Added tags
  * @author Stefan Bußweiler - Migration to new ESH event concept
- *
  */
 @NonNullByDefault
 public abstract class GenericItem implements ActiveItem {

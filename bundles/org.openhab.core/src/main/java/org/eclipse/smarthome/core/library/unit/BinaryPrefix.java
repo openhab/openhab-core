@@ -28,7 +28,6 @@ import tec.uom.se.function.RationalConverter;
  * The binary prefixes used to derive units by specific powers of 2.
  *
  * @author Gaël L'hopital - Initial contribution
- *
  */
 @NonNullByDefault
 public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {

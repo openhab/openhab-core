@@ -39,7 +39,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * of the providers.
  *
  * @author Lyubomir Papazov - Initial contribution
- *
  */
 @NonNullByDefault
 @Component

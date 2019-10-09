@@ -17,7 +17,6 @@ package org.eclipse.smarthome.core.semantics.model;
  * The interface describes the relations to other entity types.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @TagInfo(id = "Location")
 public interface Location extends Tag {

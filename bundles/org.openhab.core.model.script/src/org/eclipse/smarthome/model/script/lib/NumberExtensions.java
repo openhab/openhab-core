@@ -27,7 +27,6 @@ import org.eclipse.smarthome.core.types.Type;
  * provided by Xbase. These include things like number handling and comparisons.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class NumberExtensions {
 

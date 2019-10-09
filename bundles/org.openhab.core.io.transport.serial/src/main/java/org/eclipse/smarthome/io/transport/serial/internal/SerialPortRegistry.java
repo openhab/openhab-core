@@ -33,7 +33,6 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
  *
  * @author Matthias Steigenberger - Initial contribution
  * @author Markus Rathgeb - Respect the possible failure of port identifier creation
- *
  */
 @Component(service = SerialPortRegistry.class)
 @NonNullByDefault

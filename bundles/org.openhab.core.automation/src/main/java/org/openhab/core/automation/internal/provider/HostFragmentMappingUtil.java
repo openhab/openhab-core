@@ -24,8 +24,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
- * @author Ana Dimova
- *
+ * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("deprecation")
 public class HostFragmentMappingUtil {

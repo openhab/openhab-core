@@ -32,7 +32,7 @@ import org.junit.Test;
 /**
  * Tests for {@link ManagedThingProvider}.
  *
- * @author Oliver Libutzki - Initital contribution
+ * @author Oliver Libutzki - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 public class ManagedThingProviderOSGiTest extends JavaOSGiTest {

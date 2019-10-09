@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * {@link tec.uom.se.unit.MetricPrefix}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public class MetricPrefix {

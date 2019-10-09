@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Projector.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_Projector", label = "Projector", synonyms = "Projectors, Beamer, Beamers", description = "")
 public interface Projector extends Equipment {

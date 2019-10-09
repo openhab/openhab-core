@@ -43,7 +43,6 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Kaufmann - added "say" action
- *
  */
 @Component(immediate = true)
 public class MediaActionTypeProvider implements ModuleTypeProvider {

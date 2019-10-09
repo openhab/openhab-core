@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
  * Testing service for multi-context configurations.
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MagicMultiInstanceService.class, configurationPid = "org.eclipse.smarthome.magicMultiInstance")
 public class MagicMultiInstanceService {

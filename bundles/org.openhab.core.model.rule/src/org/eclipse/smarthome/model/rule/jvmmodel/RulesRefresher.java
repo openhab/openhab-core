@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * @author Oliver Libutzki - Initial contribution
  * @author Kai Kreuzer - added delayed execution
  * @author Maoliang Huang - refactor
- *
  */
 public class RulesRefresher {
 

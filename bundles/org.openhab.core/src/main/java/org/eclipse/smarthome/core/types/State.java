@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * This is a marker interface for all state types.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface State extends Type {

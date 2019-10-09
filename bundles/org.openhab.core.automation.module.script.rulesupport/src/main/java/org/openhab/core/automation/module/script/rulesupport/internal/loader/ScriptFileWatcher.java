@@ -48,7 +48,6 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - improved logging and removed thread pool
- *
  */
 @Component(immediate = true)
 public class ScriptFileWatcher extends AbstractWatchService {

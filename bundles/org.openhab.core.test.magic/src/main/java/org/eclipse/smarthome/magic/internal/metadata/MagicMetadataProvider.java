@@ -31,7 +31,6 @@ import org.osgi.service.component.annotations.Component;
  * Describes the metadata for the "magic" namespace.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @Component
 @NonNullByDefault

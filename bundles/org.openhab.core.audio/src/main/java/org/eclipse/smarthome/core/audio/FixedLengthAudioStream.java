@@ -19,7 +19,6 @@ import java.io.InputStream;
  * cloned streams.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public abstract class FixedLengthAudioStream extends AudioStream {
 

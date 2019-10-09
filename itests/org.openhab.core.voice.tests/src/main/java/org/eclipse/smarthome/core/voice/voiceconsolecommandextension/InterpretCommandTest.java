@@ -33,7 +33,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Mihaela Memova - Initial contribution
  *
  * @author Velin Yordanov - Migrated tests from groovy to java
- *
  */
 public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";

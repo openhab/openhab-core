@@ -24,7 +24,6 @@ import org.eclipse.smarthome.io.console.rfc147.internal.ConsoleSupportRfc147;
 /**
  *
  * @author Markus Rathgeb - Initial contribution
- *
  */
 public class HelpConsoleCommandExtension extends AbstractConsoleCommandExtension {
 

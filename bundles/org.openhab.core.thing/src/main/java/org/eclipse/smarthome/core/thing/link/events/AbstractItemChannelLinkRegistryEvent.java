@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.thing.link.dto.ItemChannelLinkDTO;
  * {@link AbstractItemChannelLinkRegistryEvent} is an abstract class for item channel link events.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 public abstract class AbstractItemChannelLinkRegistryEvent extends AbstractEvent {
 

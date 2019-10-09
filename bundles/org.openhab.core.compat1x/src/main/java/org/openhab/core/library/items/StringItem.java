@@ -27,8 +27,7 @@ import org.openhab.core.types.UnDefType;
  * A StringItem can be used for any kind of string to either send or receive
  * from a device.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class StringItem extends GenericItem {
 

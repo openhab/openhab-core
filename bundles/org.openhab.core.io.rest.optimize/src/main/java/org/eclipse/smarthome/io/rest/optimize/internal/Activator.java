@@ -26,7 +26,6 @@ import com.eclipsesource.jaxrs.publisher.ResourceFilter;
  * enforce starting all services once they are registered.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public class Activator implements BundleActivator {
 

@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
  * Helper methods for annotated ActionModuleType provider
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class AnnotationActionModuleTypeHelper {
 

@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.types.State;
 /**
  * This type is used by the {@link PlayerItem}.
  *
- * @author Alex Tugarev
+ * @author Alex Tugarev - Initial contribution
  */
 @NonNullByDefault
 public enum RewindFastforwardType implements PrimitiveType, State, Command {

@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a LowBattery.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Point_Status_LowBattery", label = "LowBattery", synonyms = "", description = "")
 public interface LowBattery extends Status {

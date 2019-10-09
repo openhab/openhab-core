@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class dynamically provides items for all links that point to non-existing items.
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Add locale provider support
  * @author Thomas Höfer - Added modified operation
  */

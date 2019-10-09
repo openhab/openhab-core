@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Inverter.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_Inverter", label = "Inverter", synonyms = "Inverters", description = "")
 public interface Inverter extends Equipment {

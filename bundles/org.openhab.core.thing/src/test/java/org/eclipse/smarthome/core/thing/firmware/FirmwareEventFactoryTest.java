@@ -30,7 +30,6 @@ import org.junit.Test;
 /**
  *
  * @author Dimitar Ivanov - Initial contribution
- *
  */
 public class FirmwareEventFactoryTest extends JavaTest {
 

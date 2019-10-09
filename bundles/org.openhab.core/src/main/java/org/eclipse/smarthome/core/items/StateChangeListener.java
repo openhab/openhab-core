@@ -23,7 +23,6 @@ import org.eclipse.smarthome.core.types.State;
  * The {@link GenericItem} class provides the possibility to register such listeners.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface StateChangeListener {

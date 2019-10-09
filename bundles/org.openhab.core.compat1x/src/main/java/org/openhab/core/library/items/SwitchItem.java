@@ -27,8 +27,7 @@ import org.openhab.core.types.UnDefType;
  * A SwitchItem represents a normal switch that can be ON or OFF.
  * Useful for normal lights, presence detection etc.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class SwitchItem extends GenericItem {
 

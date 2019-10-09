@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * This handler can execute script actions.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Simon Merschjohann
+ * @author Simon Merschjohann - Initial contribution
  */
 @NonNullByDefault
 public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> implements ActionHandler {

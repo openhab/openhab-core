@@ -23,7 +23,6 @@ import org.osgi.service.component.annotations.Reference;
  * Provides {@link ConfigDescription}s for things which are read from XML files.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @Component(service = ConfigDescriptionProvider.class, immediate = true, property = { "esh.scope=core.xml.thing" })
 public class ThingXmlConfigDescriptionProvider extends AbstractXmlConfigDescriptionProvider {

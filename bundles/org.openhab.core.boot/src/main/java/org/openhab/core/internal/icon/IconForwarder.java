@@ -26,8 +26,7 @@ import org.slf4j.LoggerFactory;
  * This servlet answers requests to /images (which was the openHAB 1 location for icons)
  * with HTTP 301 (permanently moved) with the new location /icon
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(name = "org.openhab.ui.iconforwarder", immediate = true)
 public class IconForwarder extends HttpServlet {

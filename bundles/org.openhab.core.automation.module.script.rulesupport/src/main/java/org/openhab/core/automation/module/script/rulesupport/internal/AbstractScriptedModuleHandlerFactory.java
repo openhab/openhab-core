@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The {@link AbstractScriptedModuleHandlerFactory} wrappes the ScriptedHandler based on the underlying type.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 public abstract class AbstractScriptedModuleHandlerFactory extends BaseModuleHandlerFactory {
     Logger logger = LoggerFactory.getLogger(AbstractScriptedModuleHandlerFactory.class);

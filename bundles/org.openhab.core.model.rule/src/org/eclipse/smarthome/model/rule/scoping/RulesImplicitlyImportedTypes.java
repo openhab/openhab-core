@@ -23,7 +23,6 @@ import com.google.inject.Singleton;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Xtext 2.5.0 migration
- *
  */
 
 @Singleton

@@ -30,8 +30,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 /**
  * This manager allows a script import extension providers
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 @Component(service = ScriptExtensionManager.class)
 public class ScriptExtensionManager {

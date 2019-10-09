@@ -24,8 +24,7 @@ import org.osgi.framework.FrameworkUtil;
 /**
  * Some core static methods that provide information about the running openHAB instance.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class OpenHAB {
 

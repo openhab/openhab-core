@@ -32,7 +32,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Support more types for getStateAs
- *
  */
 @NonNullByDefault
 public class DimmerItem extends SwitchItem {

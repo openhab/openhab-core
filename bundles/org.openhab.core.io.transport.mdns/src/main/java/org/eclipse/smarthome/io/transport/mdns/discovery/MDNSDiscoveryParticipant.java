@@ -27,7 +27,6 @@ import org.eclipse.smarthome.core.thing.ThingUID;
  *
  * @author Tobias Bräutigam - Initial contribution
  * @deprecated use org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant instead.
- *
  */
 @Deprecated
 public interface MDNSDiscoveryParticipant {

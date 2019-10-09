@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * {@link ProfileTypeProvider}s.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ProfileTypeRegistry {

@@ -20,7 +20,6 @@ import java.util.StringTokenizer;
  * determine if the bundle was updated, which needs to be checked after the system has been restarted.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class Vendor {
     

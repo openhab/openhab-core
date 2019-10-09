@@ -84,7 +84,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Benedikt Niehues - Initial contribution
  * @author Marin Mitev - various fixes and extracted JSON parser test to separate file
- *
  */
 public class AutomationIntegrationTest extends JavaOSGiTest {
 

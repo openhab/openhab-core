@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.extension;
  * This class defines an extension type.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ExtensionType {
 

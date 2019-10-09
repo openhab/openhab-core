@@ -26,7 +26,7 @@ import org.openhab.core.types.UnDefType;
  * A LocationItem can be used to store GPS related informations, addresses...
  * This is useful for location awareness related functions
  *
- * @author Gaël L'hopital
+ * @author Gaël L'hopital - Initial contribution
  */
 public class LocationItem extends GenericItem {
     private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();

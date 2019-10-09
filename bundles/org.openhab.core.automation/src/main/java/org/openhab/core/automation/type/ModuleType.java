@@ -37,7 +37,6 @@ import org.openhab.core.automation.Visibility;
  *
  * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - Initial contribution
- *
  */
 @NonNullByDefault
 public abstract class ModuleType implements Identifiable<String> {

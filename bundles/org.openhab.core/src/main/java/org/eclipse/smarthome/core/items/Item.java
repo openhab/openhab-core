@@ -37,7 +37,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * Item instances are used for all stateful services and are especially important for the {@link ItemRegistry}.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface Item extends Identifiable<String> {

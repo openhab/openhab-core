@@ -16,8 +16,7 @@ package org.openhab.core.items;
  * This is an abstract parent exception to be extended by any exceptions
  * related to item lookups in the item registry.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class ItemLookupException extends Exception {
 

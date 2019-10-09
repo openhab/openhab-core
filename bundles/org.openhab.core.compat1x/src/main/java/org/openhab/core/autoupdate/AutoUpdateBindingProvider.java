@@ -21,7 +21,7 @@ import org.openhab.core.binding.BindingProvider;
  * Implementing classes should register themselves as a service in order to be
  * taken into account.
  *
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public interface AutoUpdateBindingProvider extends BindingProvider {
 

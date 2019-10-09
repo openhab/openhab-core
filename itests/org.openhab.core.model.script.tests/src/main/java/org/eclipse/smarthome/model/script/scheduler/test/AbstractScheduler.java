@@ -41,7 +41,6 @@ import org.quartz.spi.JobFactory;
  * to make the {@see MockScheduler} class easier to read.
  *
  * @author Jon Evans - Initial contribution
- *
  */
 public abstract class AbstractScheduler implements Scheduler {
 

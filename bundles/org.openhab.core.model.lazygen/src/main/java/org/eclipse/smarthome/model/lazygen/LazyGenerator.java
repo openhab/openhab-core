@@ -20,7 +20,6 @@ import org.eclipse.xtext.generator.Generator;
 /**
  *
  * @author Holger Schill, Simon Kaufmann - Initial contribution
- *
  */
 public class LazyGenerator extends Generator {
 

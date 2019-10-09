@@ -23,7 +23,6 @@ import org.junit.Test;
  *
  * @author Chris Jackson - added fromRGB() test
  * @author Stefan Triller - more tests for type conversions
- *
  */
 public class HSBTypeTest {
 

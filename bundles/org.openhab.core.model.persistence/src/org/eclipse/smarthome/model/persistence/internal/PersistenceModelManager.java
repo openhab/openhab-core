@@ -47,7 +47,6 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Move non-model logic to core.persistence
- *
  */
 @Component(immediate = true)
 public class PersistenceModelManager implements ModelRepositoryChangeListener {

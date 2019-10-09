@@ -26,8 +26,7 @@ import org.openhab.core.types.State;
  * important for the {@link ItemRegistry}.
  * </p>
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Item {
 

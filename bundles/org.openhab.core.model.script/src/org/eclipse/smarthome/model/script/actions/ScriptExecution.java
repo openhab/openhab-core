@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
  * This allows a script to call another script, which is available as a file.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ScriptExecution {
 

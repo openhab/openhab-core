@@ -24,7 +24,6 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
  * Default implementation of a {@link TriggerProfileTypeImpl}.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public class TriggerProfileTypeImpl implements TriggerProfileType {

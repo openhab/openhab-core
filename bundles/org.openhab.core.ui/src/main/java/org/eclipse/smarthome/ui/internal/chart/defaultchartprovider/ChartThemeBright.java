@@ -19,7 +19,6 @@ import java.awt.Font;
  * Implementation of the default bright {@link ChartTheme chart theme}.
  *
  * @author Holger Reichert - Initial contribution
- *
  */
 public class ChartThemeBright implements ChartTheme {
 

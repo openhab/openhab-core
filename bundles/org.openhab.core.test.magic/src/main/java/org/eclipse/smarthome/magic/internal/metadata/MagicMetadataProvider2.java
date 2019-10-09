@@ -26,7 +26,6 @@ import org.osgi.service.component.annotations.Component;
  * Describes the metadata for the "metamagic" namespace.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @Component
 @NonNullByDefault

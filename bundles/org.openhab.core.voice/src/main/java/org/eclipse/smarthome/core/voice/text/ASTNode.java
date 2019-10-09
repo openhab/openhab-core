@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.voice.text;
  * Abstract syntax tree node. Result of parsing an expression.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public class ASTNode {
 

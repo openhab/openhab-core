@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Kaufmann - Initial contribution
  * @author Kai Kreuzer - fixed issues if a linked thing is OFFLINE
- *
  */
 @NonNullByDefault
 @Component(immediate = true, service = {

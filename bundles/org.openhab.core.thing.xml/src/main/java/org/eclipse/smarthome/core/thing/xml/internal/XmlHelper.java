@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.thing.xml.internal;
  * Utility class containing helper methods to be used in XML generation.
  *
  * @author Ivan Iliev - Initial contribution
- *
  */
 public class XmlHelper {
 

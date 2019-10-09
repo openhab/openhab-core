@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * For testing
  *
  * @author Gary Tse - Initial contribution
- *
  */
 public abstract class AbstractTestAgent implements TestAgent {
 

@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * @author Simon Kaufmann - Initial contribution
  * @author Stefan Triller - added getSupportedItemTypesOfChannel method
- *
  */
 @NonNullByDefault
 public interface StateProfileType extends ProfileType {

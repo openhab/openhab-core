@@ -58,7 +58,6 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Knauf - Initial contribution
  * @author Markus Rathgeb - fix module timer test
  * @author Kai Kreuzer - migrated to Java
- *
  */
 public class RuntimeRuleTest extends JavaOSGiTest {
 

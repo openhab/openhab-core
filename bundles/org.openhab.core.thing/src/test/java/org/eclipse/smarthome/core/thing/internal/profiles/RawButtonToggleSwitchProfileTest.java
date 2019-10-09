@@ -31,7 +31,6 @@ import org.mockito.Mock;
 /**
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public class RawButtonToggleSwitchProfileTest {
 

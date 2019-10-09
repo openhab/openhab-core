@@ -20,7 +20,6 @@ import org.eclipse.smarthome.core.common.registry.Provider;
  * service.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface MetadataProvider extends Provider<Metadata> {

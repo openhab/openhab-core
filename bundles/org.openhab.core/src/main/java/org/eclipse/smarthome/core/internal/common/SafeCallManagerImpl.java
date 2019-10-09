@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
  * invocation handlers.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public class SafeCallManagerImpl implements SafeCallManager {

@@ -42,7 +42,6 @@ import org.openhab.core.automation.type.TriggerType;
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Benedikt Niehues - validation of connection-types respects inheriting types
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
- *
  */
 public class ConnectionValidator {
 

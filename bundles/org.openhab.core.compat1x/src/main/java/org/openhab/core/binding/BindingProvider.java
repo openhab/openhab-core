@@ -15,8 +15,8 @@ package org.openhab.core.binding;
 import java.util.Collection;
 
 /**
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface BindingProvider {
 

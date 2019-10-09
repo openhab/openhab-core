@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Matthias Steigenberger - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(service = SerialPortProvider.class)

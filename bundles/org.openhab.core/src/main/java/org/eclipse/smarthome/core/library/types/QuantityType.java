@@ -45,7 +45,6 @@ import tec.uom.se.quantity.Quantities;
  * The measure type extends DecimalType to handle physical unit measurement
  *
  * @author Gaël L'hopital - Initial contribution
- *
  */
 @NonNullByDefault({ PARAMETER, RETURN_TYPE, FIELD, TYPE_ARGUMENT }) // TYPE_BOUNDS can not be used here since
                                                                     // javax.measure.quantity.* interfaces are not
