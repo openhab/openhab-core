@@ -315,7 +315,6 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         assertThat(inbox.getAll().size(), is(2));
         assertThat(inbox.getAll().stream().filter(r -> BRIDGE_UID_1.equals(r.getBridgeUID())).count(), is(1L));
         assertThat(inbox.getAll().stream().filter(r -> BRIDGE_UID_2.equals(r.getBridgeUID())).count(), is(1L));
-
     }
 
     @Test

@@ -67,7 +67,6 @@ class PersistedParams {
         this.scope = scope;
         this.supportsBasicAuth = supportsBasicAuth;
         this.tokenExpiresInSeconds = tokenExpiresInSeconds;
-
     }
 
     @Override

@@ -70,9 +70,7 @@ public class EventBridge implements EventHandler, EventSubscriber {
 
     @Override
     public void handleEvent(Event event) {
-
         if (!Boolean.TRUE.equals(event.getProperty(BRIDGEMARKER))) {
-
             // map event from openHAB to ESH
             if (event.getTopic().startsWith(org.openhab.core.events.EventConstants.TOPIC_PREFIX)) {
                 if (event.getTopic().endsWith(EventType.COMMAND.name())) {

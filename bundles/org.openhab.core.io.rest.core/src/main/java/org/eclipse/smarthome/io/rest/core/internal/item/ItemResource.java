@@ -542,7 +542,6 @@ public class ItemResource implements RESTResource {
     public Response addMetadata(@PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
             @PathParam("namespace") @ApiParam(value = "namespace", required = true) String namespace,
             @ApiParam(value = "metadata", required = true) MetadataDTO metadata) {
-
         Item item = getItem(itemname);
 
         if (item == null) {
@@ -579,7 +578,6 @@ public class ItemResource implements RESTResource {
     public Response removeMetadata(
             @PathParam("itemname") @ApiParam(value = "item name", required = true) String itemname,
             @PathParam("namespace") @ApiParam(value = "namespace", required = true) String namespace) {
-
         Item item = getItem(itemname);
 
         if (item == null) {

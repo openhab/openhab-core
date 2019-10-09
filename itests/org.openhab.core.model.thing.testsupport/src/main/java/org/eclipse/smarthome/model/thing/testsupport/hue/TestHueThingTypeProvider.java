@@ -87,7 +87,6 @@ public class TestHueThingTypeProvider implements ThingTypeProvider {
                     .withSupportedBridgeTypeUIDs(Arrays.asList(TestHueThingHandlerFactory.THING_TYPE_BRIDGE.toString()))
                     .withDescription("Grouped Lamp").withChannelGroupDefinitions(Arrays.asList(groupDefinition))
                     .withConfigDescriptionURI(new URI("hue", "grouped", null)).build());
-
         } catch (Exception e) {
             logger.error("{}", e.getMessage());
         }

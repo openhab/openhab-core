@@ -55,47 +55,38 @@ public class AudioManagerStub implements AudioManager {
 
     @Override
     public void play(AudioStream audioStream) {
-
     }
 
     @Override
     public void play(AudioStream audioStream, String sinkId) {
-
     }
 
     @Override
     public void play(AudioStream audioStream, String sinkId, PercentType volume) {
-
     }
 
     @Override
     public void playFile(String fileName) throws AudioException {
-
     }
 
     @Override
     public void playFile(String fileName, PercentType volume) throws AudioException {
-
     }
 
     @Override
     public void playFile(String fileName, String sinkId) throws AudioException {
-
     }
 
     @Override
     public void playFile(String fileName, String sinkId, PercentType volume) throws AudioException {
-
     }
 
     @Override
     public void stream(String url) throws AudioException {
-
     }
 
     @Override
     public void stream(String url, String sinkId) throws AudioException {
-
     }
 
     @Override
@@ -105,7 +96,6 @@ public class AudioManagerStub implements AudioManager {
 
     @Override
     public void setVolume(PercentType volume, String sinkId) {
-
     }
 
     @Override

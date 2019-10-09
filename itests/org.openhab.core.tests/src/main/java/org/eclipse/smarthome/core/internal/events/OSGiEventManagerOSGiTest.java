@@ -188,7 +188,6 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         } catch (IllegalArgumentException e) {
             assertEquals("Argument 'event' must not be null.", e.getMessage());
         }
-
     }
 
     @Test

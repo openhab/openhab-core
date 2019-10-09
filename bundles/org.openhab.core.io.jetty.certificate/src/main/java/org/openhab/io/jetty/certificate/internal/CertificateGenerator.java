@@ -204,7 +204,6 @@ public class CertificateGenerator implements BundleActivator {
             logger.debug("Save the keystore into {}.", keystoreFile.getAbsolutePath());
 
             keystore.store(new FileOutputStream(keystoreFile), KEYSTORE_PASSWORD.toCharArray());
-
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException | OperatorCreationException
                 | InvalidAlgorithmParameterException e) {
             throw new CertificateException("Failed to generate the new certificate.", e);

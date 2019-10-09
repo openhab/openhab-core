@@ -58,11 +58,9 @@ public class LocationItem extends GenericItem {
      * @return distance between the two points in meters
      */
     public DecimalType distanceFrom(PointType away) {
-
         double dist = -1;
 
         if ((away != null) && (this.state instanceof PointType)) {
-
             PointType me = (PointType) this.state;
 
             double dLat = Math.pow(

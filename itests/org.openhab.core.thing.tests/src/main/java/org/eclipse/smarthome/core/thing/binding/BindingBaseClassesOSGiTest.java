@@ -433,7 +433,6 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         @Override
         public void handleCommand(ChannelUID channelUID, Command command) {
-
         }
 
         public void updateConfig() {

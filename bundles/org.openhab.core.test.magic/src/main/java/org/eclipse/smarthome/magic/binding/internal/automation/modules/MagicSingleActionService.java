@@ -60,7 +60,6 @@ public class MagicSingleActionService implements AnnotatedActions {
     public @ActionOutput(name = "output1", type = "java.lang.Integer") @ActionOutput(name = "output2", type = "java.lang.String") Map<String, Object> singleServiceAction(
             @ActionInput(name = "input1") String input1, @ActionInput(name = "input2") String input2, String input3,
             @ActionInput(name = "someNameForInput4") String input4) {
-
         // do some calculation stuff here and place the outputs into the result map
         Map<String, Object> result = new HashMap<>();
         result.put("output1", 42);

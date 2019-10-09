@@ -99,12 +99,9 @@ public class DefaultSitemapProvider implements SitemapProvider {
             if (!thingFrame.getChildren().isEmpty()) {
                 sitemap.getChildren().add(thingFrame);
             }
-
             return sitemap;
-
         }
         return null;
-
     }
 
     @Override

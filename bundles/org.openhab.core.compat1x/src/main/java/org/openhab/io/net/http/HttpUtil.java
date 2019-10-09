@@ -86,7 +86,6 @@ public class HttpUtil {
      */
     public static String executeUrl(String httpMethod, String url, InputStream content, String contentType,
             int timeout) {
-
         return executeUrl(httpMethod, url, null, content, contentType, timeout);
     }
 
@@ -132,7 +131,6 @@ public class HttpUtil {
 
         return executeUrl(httpMethod, url, httpHeaders, content, contentType, timeout, proxyHost, proxyPort, proxyUser,
                 proxyPassword, nonProxyHosts);
-
     }
 
     /**
@@ -155,7 +153,6 @@ public class HttpUtil {
     public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
             String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
             String proxyPassword, String nonProxyHosts) {
-
         HttpClient client = new HttpClient();
 
         // only configure a proxy if a host is provided
@@ -196,7 +193,6 @@ public class HttpUtil {
         }
 
         try {
-
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
                 LOGGER.debug("Method failed: {}", method.getStatusLine());
@@ -231,7 +227,6 @@ public class HttpUtil {
      *         otherwise
      */
     private static boolean shouldUseProxy(String urlString, String nonProxyHosts) {
-
         if (StringUtils.isNotBlank(nonProxyHosts)) {
             String givenHost = urlString;
 
@@ -277,11 +272,9 @@ public class HttpUtil {
      *         <code>url</code> does not contain credentials
      */
     protected static Credentials extractCredentials(String url) {
-
         Matcher matcher = URL_CREDENTIALS_PATTERN.matcher(url);
 
         if (matcher.matches()) {
-
             matcher.reset();
 
             String username = "";
@@ -312,7 +305,6 @@ public class HttpUtil {
      *             <code>GET</code>, <code>PUT</code>, <code>POST</POST> or <code>DELETE</code>
      */
     public static HttpMethod createHttpMethod(String httpMethodString, String url) {
-
         if ("GET".equals(httpMethodString)) {
             return new GetMethod(url);
         } else if ("PUT".equals(httpMethodString)) {

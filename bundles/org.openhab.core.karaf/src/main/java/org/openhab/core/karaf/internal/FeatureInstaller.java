@@ -375,7 +375,6 @@ public class FeatureInstaller implements ConfigurationListener {
     }
 
     private synchronized void installAddons(final FeaturesService service, final Map<String, Object> config) {
-
         final Set<String> currentAddons = new HashSet<>(); // the currently installed ones
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)

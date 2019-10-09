@@ -330,7 +330,6 @@ public class ProxyServletService extends HttpServlet {
      * @return true if the request is relative to a video widget
      */
     boolean proxyingVideoWidget(HttpServletRequest request) {
-
         boolean proxyingVideo = false;
 
         try {

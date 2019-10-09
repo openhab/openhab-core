@@ -230,7 +230,6 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
     @Test
     public void assertThatThingIdCanContainAllCharactersAllowedInConfigDescriptionXSD() {
-
         Collection<Thing> things = thingRegistry.getAll();
         assertThat(things.size(), is(0));
 

@@ -837,7 +837,6 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
 
     @Test
     public void testBackgroundTransfer() throws Exception {
-
         Map<String, String> props = new HashMap<>();
         props.put(Thing.PROPERTY_FIRMWARE_VERSION, V111);
         props.put(Thing.PROPERTY_VENDOR, VENDOR1);

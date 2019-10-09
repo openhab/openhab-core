@@ -245,7 +245,6 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                 logger.error("Could not restart UPnP network components.", e);
             }
         });
-
     }
 
     @Override

@@ -66,6 +66,5 @@ public class OpenHAB {
             // ignore if the file is not there or not readable
         }
         return "Unknown Build No.";
-
     }
 }

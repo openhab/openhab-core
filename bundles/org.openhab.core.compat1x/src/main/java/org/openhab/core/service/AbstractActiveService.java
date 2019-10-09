@@ -184,7 +184,6 @@ public abstract class AbstractActiveService {
          * @param refreshInterval
          */
         protected void pause(long refreshInterval) {
-
             try {
                 Thread.sleep(refreshInterval);
             } catch (InterruptedException e) {

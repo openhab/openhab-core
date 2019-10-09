@@ -59,7 +59,6 @@ public class TimeOfDayConditionHandler extends BaseConditionModuleHandler {
 
     @Override
     public boolean isSatisfied(Map<String, Object> inputs) {
-
         if (startTime == null || endTime == null) {
             logger.warn("Time condition with id {} is not well configured: startTime={}  endTime = {}", module.getId(),
                     startTime, endTime);

@@ -53,7 +53,6 @@ public class JavaCommPortProvider implements SerialPortProvider {
             return null;
         }
         return new SerialPortIdentifierImpl(ident);
-
     }
 
     @Override

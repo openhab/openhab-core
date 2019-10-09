@@ -173,7 +173,6 @@ public class ThreadFactoryBuilder {
     private static ThreadFactory build(ThreadFactory wrappedThreadFactory, @Nullable String namePrefix,
             @Nullable String name, boolean daemonThreads, @Nullable UncaughtExceptionHandler uncaughtExceptionHandler,
             @Nullable Integer priority) {
-
         return new ThreadFactory() {
             AtomicInteger threadCounter = new AtomicInteger(1);
 

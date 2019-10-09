@@ -41,7 +41,6 @@ public class MagicThingActionsService implements ThingActions {
     @RuleAction(label = "Magic thingHandlerAction", description = "Action that calls some logic in a thing handler")
     public @ActionOutput(name = "output1", type = "java.lang.String") @ActionOutput(name = "output2", type = "java.lang.String") Map<String, Object> thingHandlerAction(
             @ActionInput(name = "input1") String input1, @ActionInput(name = "input2") String input2) {
-
         logger.debug("thingHandlerAction called with inputs: {} {}", input1, input2);
 
         // one can pass any data to the handler of the selected thing, here we are passing the first input parameter

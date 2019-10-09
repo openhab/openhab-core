@@ -100,7 +100,6 @@ public class SendConsoleCommandExtension extends AbstractConsoleCommandExtension
         } else {
             printUsage(console);
         }
-
     }
 
 }

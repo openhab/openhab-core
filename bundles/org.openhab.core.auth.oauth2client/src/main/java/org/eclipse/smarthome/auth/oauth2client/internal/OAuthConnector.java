@@ -138,7 +138,6 @@ public class OAuthConnector {
     public AccessTokenResponse grantTypePassword(String tokenUrl, String username, String password,
             @Nullable String clientId, @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
             throws OAuthResponseException, OAuthException, IOException {
-
         HttpClient httpClient = null;
         try {
             httpClient = createHttpClient(tokenUrl);
@@ -173,7 +172,6 @@ public class OAuthConnector {
     public AccessTokenResponse grantTypeRefreshToken(String tokenUrl, String refreshToken, @Nullable String clientId,
             @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
             throws OAuthResponseException, OAuthException, IOException {
-
         HttpClient httpClient = null;
         try {
             httpClient = createHttpClient(tokenUrl);
@@ -243,7 +241,6 @@ public class OAuthConnector {
     public AccessTokenResponse grantTypeClientCredentials(String tokenUrl, String clientId,
             @Nullable String clientSecret, @Nullable String scope, boolean supportsBasicAuth)
             throws OAuthResponseException, OAuthException, IOException {
-
         HttpClient httpClient = null;
         try {
             httpClient = createHttpClient(tokenUrl);
@@ -295,7 +292,6 @@ public class OAuthConnector {
 
     private AccessTokenResponse doRequest(final String grantType, HttpClient httpClient, final Request request,
             Fields fields) throws OAuthResponseException, OAuthException, IOException {
-
         int statusCode = 0;
         String content = "";
         try {
@@ -342,7 +338,7 @@ public class OAuthConnector {
 
     /**
      * This is a special case where the httpClient (jetty) is created due to the need for certificate pinning.
-     * If ceritificate pinning is needed, please refer to {@code TrustManagerProvider}. The http client is
+     * If certificate pinning is needed, please refer to {@code TrustManagerProvider}. The http client is
      * created, used and then shutdown immediately after use. There is little reason to cache the client/ connections
      * because oauth requests are short; and it may take hours/ days before the next request is needed.
      *

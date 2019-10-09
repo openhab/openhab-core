@@ -62,7 +62,6 @@ public class BindingConfigReaderDelegate implements BindingConfigReader {
 
     private org.openhab.core.items.Item getOpenHABItem(String itemType, String itemName)
             throws BindingConfigParseException {
-
         String mainType = ItemUtil.getMainItemType(itemType);
 
         switch (mainType) {

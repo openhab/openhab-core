@@ -59,7 +59,6 @@ public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory impleme
     public static final String LIGHT_ID = "XlightId";
 
     public TestHueThingHandlerFactoryX(ComponentContext componentContext) {
-
         super.activate(componentContext);
     }
 
