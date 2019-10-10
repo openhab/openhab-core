@@ -75,7 +75,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     private final Logger logger = LoggerFactory.getLogger(GenericItemProvider.class);
 
     /** to keep track of all binding config readers */
-    private final Map<String, BindingConfigReader> bindingConfigReaders = new HashMap<String, BindingConfigReader>();
+    private final Map<String, BindingConfigReader> bindingConfigReaders = new HashMap<>();
 
     private final ModelRepository modelRepository;
 
@@ -83,7 +83,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private final Map<String, Collection<Item>> itemsMap = new ConcurrentHashMap<>();
 
-    private final Collection<ItemFactory> itemFactorys = new ArrayList<ItemFactory>();
+    private final Collection<ItemFactory> itemFactorys = new ArrayList<>();
 
     private final Map<String, StateDescriptionFragment> stateDescriptionFragments = new ConcurrentHashMap<>();
 
@@ -160,7 +160,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     @Override
     public Collection<Item> getAll() {
-        List<Item> items = new ArrayList<Item>();
+        List<Item> items = new ArrayList<>();
         stateDescriptionFragments.clear();
         for (String name : modelRepository.getAllModelNamesOfType("items")) {
             items.addAll(getItemsFromModel(name));
@@ -171,7 +171,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     private Collection<Item> getItemsFromModel(String modelName) {
         logger.debug("Read items from model '{}'", modelName);
 
-        List<Item> items = new ArrayList<Item>();
+        List<Item> items = new ArrayList<>();
         ItemModel model = (ItemModel) modelRepository.getModel(modelName);
         if (model != null) {
             for (ModelItem modelItem : model.getItems()) {

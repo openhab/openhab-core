@@ -268,7 +268,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     private EList<Widget> collectWidgets(String sitemapName, String pageId) {
-        EList<Widget> widgets = new BasicEList<Widget>();
+        EList<Widget> widgets = new BasicEList<>();
 
         Sitemap sitemap = getSitemap(sitemapName);
         if (sitemap != null) {

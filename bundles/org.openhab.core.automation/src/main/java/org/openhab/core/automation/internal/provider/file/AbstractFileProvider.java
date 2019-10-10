@@ -62,25 +62,25 @@ public abstract class AbstractFileProvider<E> implements Provider<E> {
      * <p>
      * The Map has for keys URLs of the files containing automation objects and for values - parsed objects.
      */
-    protected Map<String, E> providedObjectsHolder = new ConcurrentHashMap<String, E>();
+    protected Map<String, E> providedObjectsHolder = new ConcurrentHashMap<>();
 
     /**
      * This Map provides structure for fast access to the {@link Parser}s. This provides opportunity for high
      * performance at runtime of the system.
      */
-    private final Map<String, Parser<E>> parsers = new ConcurrentHashMap<String, Parser<E>>();
+    private final Map<String, Parser<E>> parsers = new ConcurrentHashMap<>();
 
     /**
      * This map is used for mapping the imported automation objects to the file that contains them. This provides
      * opportunity when an event for deletion of the file is received, how to recognize which objects are removed.
      */
-    private final Map<URL, List<String>> providerPortfolio = new ConcurrentHashMap<URL, List<String>>();
+    private final Map<URL, List<String>> providerPortfolio = new ConcurrentHashMap<>();
 
     /**
      * This Map holds URL resources that waiting for a parser to be loaded.
      */
-    private final Map<String, List<URL>> urls = new ConcurrentHashMap<String, List<URL>>();
-    private final List<ProviderChangeListener<E>> listeners = new ArrayList<ProviderChangeListener<E>>();
+    private final Map<String, List<URL>> urls = new ConcurrentHashMap<>();
+    private final List<ProviderChangeListener<E>> listeners = new ArrayList<>();
 
     public AbstractFileProvider(String root) {
         this.rootSubdirectory = root;
@@ -250,7 +250,7 @@ public abstract class AbstractFileProvider<E> implements Provider<E> {
             synchronized (urls) {
                 List<URL> value = urls.get(parserType);
                 if (value == null) {
-                    value = new ArrayList<URL>();
+                    value = new ArrayList<>();
                     urls.put(parserType, value);
                 }
                 value.add(url);
@@ -261,7 +261,7 @@ public abstract class AbstractFileProvider<E> implements Provider<E> {
 
     protected void updateProvidedObjectsHolder(URL url, Set<E> providedObjects) {
         if (providedObjects != null && !providedObjects.isEmpty()) {
-            List<String> uids = new ArrayList<String>();
+            List<String> uids = new ArrayList<>();
             for (E providedObject : providedObjects) {
                 String uid = getUID(providedObject);
                 uids.add(uid);

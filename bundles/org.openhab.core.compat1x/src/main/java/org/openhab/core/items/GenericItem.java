@@ -36,7 +36,7 @@ public abstract class GenericItem implements Item {
     protected EventPublisher eventPublisher;
 
     protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<>(
-            Collections.newSetFromMap(new WeakHashMap<StateChangeListener, Boolean>()));
+            Collections.newSetFromMap(new WeakHashMap<>()));
 
     protected List<String> groupNames = new ArrayList<>();
 

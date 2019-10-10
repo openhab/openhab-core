@@ -36,11 +36,11 @@ public class NumberExtensionsTest {
     private static final DecimalType DECIMAL1 = new DecimalType(1);
     private static final DecimalType DECIMAL2 = new DecimalType(2);
 
-    private static final QuantityType<Temperature> Q_CELSIUS_1 = new QuantityType<Temperature>("1 °C");
-    private static final QuantityType<Temperature> Q_CELSIUS_2 = new QuantityType<Temperature>("2 °C");
+    private static final QuantityType<Temperature> Q_CELSIUS_1 = new QuantityType<>("1 °C");
+    private static final QuantityType<Temperature> Q_CELSIUS_2 = new QuantityType<>("2 °C");
 
-    private static final QuantityType<Length> Q_LENGTH_1_M = new QuantityType<Length>("1 m");
-    private static final QuantityType<Length> Q_LENGTH_2_CM = new QuantityType<Length>("2 cm");
+    private static final QuantityType<Length> Q_LENGTH_1_M = new QuantityType<>("1 m");
+    private static final QuantityType<Length> Q_LENGTH_2_CM = new QuantityType<>("2 cm");
 
     private static final QuantityType<Dimensionless> Q_ONE_1 = new QuantityType<>(1, SmartHomeUnits.ONE);
     private static final QuantityType<Dimensionless> Q_ONE_2 = new QuantityType<>(2, SmartHomeUnits.ONE);
@@ -127,7 +127,7 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorEqualsQuantityQuantityTrue() {
-        assertTrue(NumberExtensions.operator_equals(Q_LENGTH_1_M, new QuantityType<Length>("100 cm")));
+        assertTrue(NumberExtensions.operator_equals(Q_LENGTH_1_M, new QuantityType<>("100 cm")));
     }
 
     @Test
@@ -172,8 +172,7 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorLessEqualsThanNumberQuantity() {
-        assertFalse(
-                NumberExtensions.operator_lessEqualsThan(BigDecimal.valueOf(100), new QuantityType<Length>("100 cm")));
+        assertFalse(NumberExtensions.operator_lessEqualsThan(BigDecimal.valueOf(100), new QuantityType<>("100 cm")));
     }
 
     @Test
@@ -193,14 +192,12 @@ public class NumberExtensionsTest {
 
     @Test
     public void operatorGreaterEqualsThanNumberQuantity() {
-        assertFalse(
-                NumberExtensions.operator_greaterEqualsThan(BigDecimal.valueOf(1), new QuantityType<Length>("1 km")));
+        assertFalse(NumberExtensions.operator_greaterEqualsThan(BigDecimal.valueOf(1), new QuantityType<>("1 km")));
     }
 
     @Test
     public void operatorGreaterEqualsThanTypeQuantity() {
-        assertTrue(
-                NumberExtensions.operator_greaterEqualsThan((Type) Q_LENGTH_1_M, new QuantityType<Length>("100 cm")));
+        assertTrue(NumberExtensions.operator_greaterEqualsThan((Type) Q_LENGTH_1_M, new QuantityType<>("100 cm")));
     }
 
     @Test

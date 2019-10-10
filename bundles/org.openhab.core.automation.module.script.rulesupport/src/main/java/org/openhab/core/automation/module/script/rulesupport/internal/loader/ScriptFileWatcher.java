@@ -58,7 +58,7 @@ public class ScriptFileWatcher extends AbstractWatchService {
     private final long earliestStart = System.currentTimeMillis() + INITIAL_DELAY * 1000;
 
     private ScriptEngineManager manager;
-    ScheduledExecutorService scheduler;
+    private ScheduledExecutorService scheduler;
 
     private final Map<String, Set<URL>> urlsByScriptExtension = new ConcurrentHashMap<>();
     private final Set<URL> loaded = new HashSet<>();
@@ -204,7 +204,7 @@ public class ScriptFileWatcher extends AbstractWatchService {
         synchronized (urlsByScriptExtension) {
             Set<URL> set = urlsByScriptExtension.get(scriptType);
             if (set == null) {
-                set = new HashSet<URL>();
+                set = new HashSet<>();
                 urlsByScriptExtension.put(scriptType, set);
             }
             set.add(url);
@@ -267,7 +267,7 @@ public class ScriptFileWatcher extends AbstractWatchService {
         });
 
         synchronized (urlsByScriptExtension) {
-            HashSet<String> newlySupported = new HashSet<>();
+            Set<String> newlySupported = new HashSet<>();
             for (String key : urlsByScriptExtension.keySet()) {
                 if (manager.isSupported(key)) {
                     newlySupported.add(key);

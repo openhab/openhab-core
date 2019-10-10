@@ -68,7 +68,7 @@ public class FolderObserver extends AbstractWatchService {
     private ModelRepository modelRepo = null;
 
     /* map that stores a list of valid file extensions for each folder */
-    private final Map<String, String[]> folderFileExtMap = new ConcurrentHashMap<String, String[]>();
+    private final Map<String, String[]> folderFileExtMap = new ConcurrentHashMap<>();
 
     /* set of file extensions for which we have parsers already registered */
     private final Set<String> parsers = new HashSet<>();
@@ -144,7 +144,7 @@ public class FolderObserver extends AbstractWatchService {
     }
 
     private void processIgnoredFiles(String extension) {
-        HashSet<File> clonedSet = new HashSet<>(this.ignoredFiles);
+        Set<File> clonedSet = new HashSet<>(this.ignoredFiles);
         for (File file : clonedSet) {
             if (extension.equals(getExtension(file.getPath()))) {
                 checkFile(modelRepo, file, ENTRY_CREATE);

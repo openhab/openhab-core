@@ -84,7 +84,7 @@ public class ReferenceResolver {
                 Object result = resolveProperty(config, context, logger, configKey, (String) o);
                 config.put(configKey, result);
             } else if (o instanceof List) {
-                ArrayList<Object> resultList = new ArrayList<>();
+                List<Object> resultList = new ArrayList<>();
                 List<?> list = (List<?>) o;
                 for (Object obj : list) {
                     if (obj instanceof String) {

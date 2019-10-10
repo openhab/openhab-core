@@ -31,7 +31,7 @@ public final class NormalizerFactory {
     private static final Map<Type, Normalizer> NORMALIZERS;
 
     static {
-        Map<Type, Normalizer> map = new HashMap<Type, Normalizer>(11);
+        Map<Type, Normalizer> map = new HashMap<>(11);
         map.put(Type.BOOLEAN, new BooleanNormalizer());
         map.put(Type.TEXT, new TextNormalizer());
         map.put(Type.INTEGER, new IntNormalizer());

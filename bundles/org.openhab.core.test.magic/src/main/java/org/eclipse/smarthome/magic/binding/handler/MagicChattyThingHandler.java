@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.Configuration;
@@ -98,7 +96,7 @@ public class MagicChattyThingHandler extends BaseThingHandler {
                     int intValue = (int) randomValue;
                     State cmd;
                     if (intValue % 2 == 0) {
-                        cmd = new QuantityType<Temperature>(randomValue + "°C");
+                        cmd = new QuantityType<>(randomValue + "°C");
                     } else {
                         cmd = new DecimalType(randomValue);
                     }

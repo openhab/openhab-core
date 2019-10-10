@@ -17,8 +17,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
-import org.openhab.core.automation.dto.CompositeTriggerTypeDTO;
-import org.openhab.core.automation.dto.TriggerTypeDTO;
 import org.openhab.core.automation.type.CompositeTriggerType;
 import org.openhab.core.automation.type.TriggerType;
 
@@ -57,7 +55,7 @@ public class TriggerTypeDTOMapper extends ModuleTypeDTOMapper {
         if (types == null) {
             return null;
         }
-        final List<TriggerTypeDTO> dtos = new ArrayList<TriggerTypeDTO>(types.size());
+        final List<TriggerTypeDTO> dtos = new ArrayList<>(types.size());
         for (final TriggerType type : types) {
             if (type instanceof CompositeTriggerType) {
                 dtos.add(map((CompositeTriggerType) type));

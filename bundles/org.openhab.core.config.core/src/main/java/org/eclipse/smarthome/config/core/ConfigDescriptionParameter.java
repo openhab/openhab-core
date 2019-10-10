@@ -97,17 +97,17 @@ public class ConfigDescriptionParameter {
     private String label;
     private String description;
 
-    private List<ParameterOption> options = new ArrayList<ParameterOption>();
-    private List<FilterCriteria> filterCriteria = new ArrayList<FilterCriteria>();
+    private List<ParameterOption> options = new ArrayList<>();
+    private List<FilterCriteria> filterCriteria = new ArrayList<>();
 
     private boolean limitToOptions = true;
     private boolean advanced = false;
     private boolean verify = false;
 
     private static final Set<String> UNITS = Collections
-            .unmodifiableSet(new HashSet<String>(Arrays.asList("A", "cd", "K", "kg", "m", "mol", "s", "g", "rad", "sr",
-                    "Hz", "N", "Pa", "J", "W", "C", "V", "F", "Ω", "S", "Wb", "T", "H", "Cel", "lm", "lx", "Bq", "Gy",
-                    "Sv", "kat", "m/s2", "m2v", "m3", "kph", "%", "l", "ms", "min", "h", "d", "week", "y")));
+            .unmodifiableSet(new HashSet<>(Arrays.asList("A", "cd", "K", "kg", "m", "mol", "s", "g", "rad", "sr", "Hz",
+                    "N", "Pa", "J", "W", "C", "V", "F", "Ω", "S", "Wb", "T", "H", "Cel", "lm", "lx", "Bq", "Gy", "Sv",
+                    "kat", "m/s2", "m2v", "m3", "kph", "%", "l", "ms", "min", "h", "d", "week", "y")));
 
     /**
      * Default constructor.
@@ -239,12 +239,12 @@ public class ConfigDescriptionParameter {
         if (options != null) {
             this.options = Collections.unmodifiableList(options);
         } else {
-            this.options = Collections.unmodifiableList(new LinkedList<ParameterOption>());
+            this.options = Collections.unmodifiableList(new LinkedList<>());
         }
         if (filterCriteria != null) {
             this.filterCriteria = Collections.unmodifiableList(filterCriteria);
         } else {
-            this.filterCriteria = Collections.unmodifiableList(new LinkedList<FilterCriteria>());
+            this.filterCriteria = Collections.unmodifiableList(new LinkedList<>());
         }
     }
 
@@ -320,23 +320,29 @@ public class ConfigDescriptionParameter {
 
     /**
      * Returns the context of the configuration parameter.
-     * <p>A context is a hint for user interfaces and input validators.<p>
-     * <p>Any string can be used, but the following have a special meaning:</p>
-     * 
+     * <p>
+     * A context is a hint for user interfaces and input validators.
+     * <p>
+     * <p>
+     * Any string can be used, but the following have a special meaning:
+     * </p>
+     *
      * - network-address: The configuration value represents an IPv4 or IPv6 address.
      * - password: A password value (a user-interface might obscure the visible value)
      * - password-create: A passwort generator widget might be shown
      * - color: This value represents an RGB color value like #ffffff or 12,12,12.
      * - date: A date string
      * - time: A time string
-     * - cronexpression: A cron expression like "* * * * *". A user interface would probably show a cron expression generator.
+     * - cronexpression: A cron expression like "* * * * *". A user interface would probably show a cron expression
+     * generator.
      * - datetime: A date and time string
      * - email: The configuration value represents an email address
      * - month: A number [1-12]
-     * - week: A week [0-52] 
+     * - week: A week [0-52]
      * - tel: A tel no
      * - url: A web address
-     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably render a multi line editor.
+     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably
+     * render a multi line editor.
      * - location: A lat,long,alt GPS location. A user-interface would probably render a world map for selection.
      * - tag: One tag or multiple tags separated by comma.
      * - item: A valid item "name". A user-interface would probably show an item selection widget.

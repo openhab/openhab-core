@@ -274,7 +274,7 @@ public class NetUtil implements NetworkAddressService {
      * @return list of broadcast addresses, empty list if no broadcast addresses found
      */
     public static List<String> getAllBroadcastAddresses() {
-        List<String> broadcastAddresses = new LinkedList<String>();
+        List<String> broadcastAddresses = new LinkedList<>();
         try {
             final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {

@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 public class TestHueThingTypeProvider implements ThingTypeProvider {
 
     private final Logger logger = LoggerFactory.getLogger(TestHueThingTypeProvider.class);
-    private static final Map<ThingTypeUID, ThingType> THING_TYPES = new HashMap<ThingTypeUID, ThingType>();
+    private static final Map<ThingTypeUID, ThingType> THING_TYPES = new HashMap<>();
 
     public TestHueThingTypeProvider() {
         logger.debug("TestHueThingTypeProvider created");

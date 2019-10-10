@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.script.rulesupport.shared;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.core.automation.Action;
@@ -48,9 +50,9 @@ public class ScriptedAutomationManager {
 
     private final RuleSupportRuleRegistryDelegate ruleRegistryDelegate;
 
-    private final HashSet<String> modules = new HashSet<>();
-    private final HashSet<String> moduleHandlers = new HashSet<>();
-    private final HashSet<String> privateHandlers = new HashSet<>();
+    private final Set<String> modules = new HashSet<>();
+    private final Set<String> moduleHandlers = new HashSet<>();
+    private final Set<String> privateHandlers = new HashSet<>();
 
     private final ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory;
     private final ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider;
@@ -88,17 +90,17 @@ public class ScriptedAutomationManager {
     public void removeAll() {
         logger.info("removeAll added handlers");
 
-        HashSet<String> types = new HashSet<>(modules);
+        Set<String> types = new HashSet<>(modules);
         for (String moduleType : types) {
             removeModuleType(moduleType);
         }
 
-        HashSet<String> moduleHandlers = new HashSet<>(this.moduleHandlers);
+        Set<String> moduleHandlers = new HashSet<>(this.moduleHandlers);
         for (String uid : moduleHandlers) {
             removeHandler(uid);
         }
 
-        HashSet<String> privateHandlers = new HashSet<>(this.privateHandlers);
+        Set<String> privateHandlers = new HashSet<>(this.privateHandlers);
         for (String privId : privateHandlers) {
             removePrivateHandler(privId);
         }
@@ -123,7 +125,7 @@ public class ScriptedAutomationManager {
         int moduleIndex = 1;
 
         try {
-            ArrayList<Condition> conditions = new ArrayList<>();
+            List<Condition> conditions = new ArrayList<>();
             for (Condition cond : element.getConditions()) {
                 Condition toAdd = cond;
                 if (cond.getId().isEmpty()) {
@@ -141,7 +143,7 @@ public class ScriptedAutomationManager {
         }
 
         try {
-            ArrayList<Trigger> triggers = new ArrayList<>();
+            List<Trigger> triggers = new ArrayList<>();
             for (Trigger trigger : element.getTriggers()) {
                 Trigger toAdd = trigger;
                 if (trigger.getId().isEmpty()) {
@@ -157,7 +159,7 @@ public class ScriptedAutomationManager {
             // triggers are optional
         }
 
-        ArrayList<Action> actions = new ArrayList<>();
+        List<Action> actions = new ArrayList<>();
         actions.addAll(element.getActions());
 
         if (element instanceof SimpleRuleActionHandler) {

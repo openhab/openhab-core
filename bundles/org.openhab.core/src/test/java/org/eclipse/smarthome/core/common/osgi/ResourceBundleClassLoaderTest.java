@@ -21,9 +21,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -58,7 +58,7 @@ public class ResourceBundleClassLoaderTest {
         ResourceBundleClassLoader classloader = new ResourceBundleClassLoader(bundleMock, "/ESH-INF/i18n",
                 "*.properties");
 
-        ArrayList<URL> propertiesURLs = Collections.list(bundleMock.findEntries("/ESH-INF/i18n", "*.properties", true));
+        List<URL> propertiesURLs = Collections.list(bundleMock.findEntries("/ESH-INF/i18n", "*.properties", true));
 
         assertEquals(2, propertiesURLs.size());
         assertTrue(propertiesURLs.contains(hostPropertiesURL));

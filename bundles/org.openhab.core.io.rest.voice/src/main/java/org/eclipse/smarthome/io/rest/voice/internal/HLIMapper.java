@@ -39,7 +39,7 @@ public class HLIMapper {
         dto.label = hli.getLabel(locale);
         final Set<Locale> supportedLocales = hli.getSupportedLocales();
         if (supportedLocales != null) {
-            dto.locales = new HashSet<String>(supportedLocales.size());
+            dto.locales = new HashSet<>(supportedLocales.size());
             for (final Locale supportedLocale : supportedLocales) {
                 dto.locales.add(supportedLocale.toString());
             }

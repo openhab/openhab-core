@@ -70,7 +70,7 @@ public class Channel {
     Channel() {
         this.kind = ChannelKind.STATE;
         this.configuration = new Configuration();
-        this.properties = Collections.unmodifiableMap(new HashMap<String, String>(0));
+        this.properties = Collections.unmodifiableMap(new HashMap<>(0));
     }
 
     /**
@@ -82,7 +82,7 @@ public class Channel {
         this.acceptedItemType = acceptedItemType;
         this.kind = ChannelKind.STATE;
         this.configuration = new Configuration();
-        this.properties = Collections.unmodifiableMap(new HashMap<String, String>(0));
+        this.properties = Collections.unmodifiableMap(new HashMap<>(0));
     }
 
     /**
@@ -90,8 +90,7 @@ public class Channel {
      */
     @Deprecated
     public Channel(ChannelUID uid, String acceptedItemType, Configuration configuration) {
-        this(uid, null, acceptedItemType, ChannelKind.STATE, configuration, new HashSet<String>(0), null, null, null,
-                null);
+        this(uid, null, acceptedItemType, ChannelKind.STATE, configuration, new HashSet<>(0), null, null, null, null);
     }
 
     /**
@@ -126,14 +125,14 @@ public class Channel {
         this.label = label;
         this.description = description;
         this.autoUpdatePolicy = autoUpdatePolicy;
-        this.defaultTags = Collections.<String> unmodifiableSet(new HashSet<String>(defaultTags));
+        this.defaultTags = Collections.<String> unmodifiableSet(new HashSet<>(defaultTags));
         if (configuration == null) {
             this.configuration = new Configuration();
         } else {
             this.configuration = configuration;
         }
         if (properties == null) {
-            this.properties = Collections.unmodifiableMap(new HashMap<String, String>(0));
+            this.properties = Collections.unmodifiableMap(new HashMap<>(0));
         } else {
             this.properties = properties;
         }

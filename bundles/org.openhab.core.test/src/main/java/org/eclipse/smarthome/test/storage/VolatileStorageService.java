@@ -27,13 +27,13 @@ import org.eclipse.smarthome.core.storage.StorageService;
 public class VolatileStorageService implements StorageService {
 
     @SuppressWarnings("rawtypes")
-    Map<String, Storage> storages = new ConcurrentHashMap<String, Storage>();
+    Map<String, Storage> storages = new ConcurrentHashMap<>();
 
     @Override
     @SuppressWarnings("unchecked")
     public synchronized <T> Storage<T> getStorage(String name) {
         if (!storages.containsKey(name)) {
-            storages.put(name, new VolatileStorage<T>());
+            storages.put(name, new VolatileStorage<>());
         }
         return storages.get(name);
     }

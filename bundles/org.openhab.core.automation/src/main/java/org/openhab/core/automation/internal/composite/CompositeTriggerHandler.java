@@ -70,7 +70,7 @@ public class CompositeTriggerHandler
     public void triggered(Trigger trigger, Map<String, ?> context) {
         if (callback != null) {
             List<Output> outputs = moduleType.getOutputs();
-            Map<String, Object> result = new HashMap<String, Object>(11);
+            Map<String, Object> result = new HashMap<>(11);
             for (Output output : outputs) {
                 String refs = output.getReference();
                 if (refs != null) {

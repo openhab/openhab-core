@@ -201,7 +201,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         ThingUID expectedBridgeUID = new ThingUID(THING_TYPE_UID, THING2_ID);
         String expectedLabel = "Test Thing";
 
-        AtomicReference<Thing> thingResultWrapper = new AtomicReference<Thing>();
+        AtomicReference<Thing> thingResultWrapper = new AtomicReference<>();
 
         ThingRegistry thingRegistry = getService(ThingRegistry.class);
 

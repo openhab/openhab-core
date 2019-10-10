@@ -46,7 +46,7 @@ public class ConsoleSupportEclipse implements CommandProvider {
     private static final String BASE = "smarthome";
 
     private final SortedMap<String, ConsoleCommandExtension> consoleCommandExtensions = Collections
-            .synchronizedSortedMap(new TreeMap<String, ConsoleCommandExtension>());
+            .synchronizedSortedMap(new TreeMap<>());
 
     public ConsoleSupportEclipse() {
     }
@@ -90,7 +90,7 @@ public class ConsoleSupportEclipse implements CommandProvider {
                 console.println(String.format("No handler for command '%s' was found.", cmd));
             } else {
                 // Build argument list
-                final List<String> argsList = new ArrayList<String>();
+                final List<String> argsList = new ArrayList<>();
                 while (true) {
                     final String narg = interpreter.nextArgument();
                     if (!StringUtils.isEmpty(narg)) {

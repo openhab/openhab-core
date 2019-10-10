@@ -71,7 +71,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
     private final Map<K, E> identifierToElement = new HashMap<>();
     private final Set<E> elements = new HashSet<>();
 
-    private final Collection<RegistryChangeListener<E>> listeners = new CopyOnWriteArraySet<RegistryChangeListener<E>>();
+    private final Collection<RegistryChangeListener<E>> listeners = new CopyOnWriteArraySet<>();
 
     private Optional<ManagedProvider<E, K>> managedProvider = Optional.empty();
 
@@ -311,7 +311,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
             if (element == null) {
                 return null;
             }
-            return new SimpleEntry<Provider<E>, E>(elementToProvider.get(element), element);
+            return new SimpleEntry<>(elementToProvider.get(element), element);
         } finally {
             elementReadLock.unlock();
         }

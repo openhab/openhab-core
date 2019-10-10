@@ -68,7 +68,7 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
      * known). Otherwise it stores the registered service reference, so we could unregister the command extension later.
      */
     private final Map<ConsoleCommandExtension, ServiceRegistration<?>> commands = Collections
-            .synchronizedMap(new HashMap<ConsoleCommandExtension, ServiceRegistration<?>>());
+            .synchronizedMap(new HashMap<>());
 
     public ConsoleSupportRfc147() {
         // Add our custom help console command extensions.

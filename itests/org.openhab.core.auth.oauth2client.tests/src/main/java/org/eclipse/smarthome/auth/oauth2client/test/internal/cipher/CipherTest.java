@@ -72,7 +72,7 @@ public class CipherTest {
     }
 
     private Configuration mockConfiguration() {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         Configuration configurationMock = mock(Configuration.class);
         when(configurationMock.getPid()).thenReturn("PID");
         when(configurationMock.getProperties()).thenReturn(properties);

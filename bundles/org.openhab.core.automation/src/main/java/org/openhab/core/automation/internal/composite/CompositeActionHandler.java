@@ -62,7 +62,7 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
      */
     @Override
     public Map<String, Object> execute(Map<String, Object> context) {
-        final Map<String, Object> result = new HashMap<String, Object>();
+        final Map<String, Object> result = new HashMap<>();
         final List<Action> children = getChildren();
         final Map<String, Object> compositeContext = getCompositeContext(context);
         for (Action child : children) {
@@ -98,7 +98,7 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
      * @return map of links between child action outputs and parent output
      */
     protected Map<String, Output> getCompositeOutputMap(List<Output> outputs) {
-        Map<String, Output> result = new HashMap<String, Output>(11);
+        Map<String, Output> result = new HashMap<>(11);
         if (outputs != null) {
             for (Output output : outputs) {
                 String refs = output.getReference();

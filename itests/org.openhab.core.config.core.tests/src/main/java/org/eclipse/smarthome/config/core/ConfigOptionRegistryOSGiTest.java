@@ -46,7 +46,7 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
         ConfigDescriptionParameter parm1 = new ConfigDescriptionParameter("Parm1",
                 ConfigDescriptionParameter.Type.INTEGER);
-        List<ConfigDescriptionParameter> pList1 = new ArrayList<ConfigDescriptionParameter>();
+        List<ConfigDescriptionParameter> pList1 = new ArrayList<>();
         pList1.add(parm1);
         configDescription = new ConfigDescription(new URI("config:Dummy"), pList1);
 

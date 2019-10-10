@@ -17,8 +17,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
-import org.openhab.core.automation.dto.ActionTypeDTO;
-import org.openhab.core.automation.dto.CompositeActionTypeDTO;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.CompositeActionType;
 
@@ -57,7 +55,7 @@ public class ActionTypeDTOMapper extends ModuleTypeDTOMapper {
         if (types == null) {
             return null;
         }
-        final List<ActionTypeDTO> dtos = new ArrayList<ActionTypeDTO>(types.size());
+        final List<ActionTypeDTO> dtos = new ArrayList<>(types.size());
         for (final ActionType type : types) {
             if (type instanceof CompositeActionType) {
                 dtos.add(map((CompositeActionType) type));

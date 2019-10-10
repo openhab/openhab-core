@@ -15,6 +15,7 @@ package org.eclipse.smarthome.model.persistence.tests;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -64,7 +65,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
             return Collections.emptyList();
         }
 
-        ArrayList<HistoricItem> results = new ArrayList<HistoricItem>(endValue - startValue);
+        List<HistoricItem> results = new ArrayList<>(endValue - startValue);
         for (int i = startValue; i <= endValue; i++) {
             final int year = i;
             results.add(new HistoricItem() {

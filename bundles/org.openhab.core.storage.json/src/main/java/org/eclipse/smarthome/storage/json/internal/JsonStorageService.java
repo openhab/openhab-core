@@ -127,8 +127,7 @@ public class JsonStorageService implements StorageService {
             file = legacyFile;
         }
 
-        JsonStorage<T> newStorage = new JsonStorage<T>(file, classLoader, maxBackupFiles, writeDelay,
-                maxDeferredPeriod);
+        JsonStorage<T> newStorage = new JsonStorage<>(file, classLoader, maxBackupFiles, writeDelay, maxDeferredPeriod);
 
         JsonStorage<Object> oldStorage = storageList.put(name, (JsonStorage<Object>) newStorage);
         if (oldStorage != null) {

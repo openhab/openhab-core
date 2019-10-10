@@ -469,9 +469,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
                 "DummyLabel1", DEFAULT_TTL);
 
-        AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
-        AsyncResultWrapper<DiscoveryResult> updatedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
-        AsyncResultWrapper<DiscoveryResult> removedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
+        AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<>();
+        AsyncResultWrapper<DiscoveryResult> updatedDiscoveryResultWrapper = new AsyncResultWrapper<>();
+        AsyncResultWrapper<DiscoveryResult> removedDiscoveryResultWrapper = new AsyncResultWrapper<>();
 
         @NonNullByDefault
         InboxListener inboxListener = new InboxListener() {
@@ -542,9 +542,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property3", "DummyLabel2",
                 DEFAULT_TTL);
 
-        AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
-        AsyncResultWrapper<DiscoveryResult> updatedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
-        AsyncResultWrapper<DiscoveryResult> removedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
+        AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<>();
+        AsyncResultWrapper<DiscoveryResult> updatedDiscoveryResultWrapper = new AsyncResultWrapper<>();
+        AsyncResultWrapper<DiscoveryResult> removedDiscoveryResultWrapper = new AsyncResultWrapper<>();
 
         @NonNullByDefault
         InboxListener inboxListener = new InboxListener() {
@@ -607,9 +607,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
                 "DummyLabel1", DEFAULT_TTL);
         assertTrue(addDiscoveryResult(discoveryResult));
 
-        AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
-        AsyncResultWrapper<DiscoveryResult> updatedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
-        AsyncResultWrapper<DiscoveryResult> removedDiscoveryResultWrapper = new AsyncResultWrapper<DiscoveryResult>();
+        AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<>();
+        AsyncResultWrapper<DiscoveryResult> updatedDiscoveryResultWrapper = new AsyncResultWrapper<>();
+        AsyncResultWrapper<DiscoveryResult> removedDiscoveryResultWrapper = new AsyncResultWrapper<>();
 
         @NonNullByDefault
         InboxListener inboxListener = new InboxListener() {

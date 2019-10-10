@@ -302,7 +302,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     @Override
     public @Nullable Collection<ThingUID> removeOlderResults(final DiscoveryService source, final long timestamp,
             final @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
-        HashSet<ThingUID> removedResults = new HashSet<>();
+        Set<ThingUID> removedResults = new HashSet<>();
         for (final DiscoveryListener listener : this.listeners) {
             try {
                 Collection<ThingUID> olderResults = AccessController

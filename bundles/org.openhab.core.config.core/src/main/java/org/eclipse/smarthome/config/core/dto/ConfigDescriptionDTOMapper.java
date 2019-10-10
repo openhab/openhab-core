@@ -75,7 +75,7 @@ public class ConfigDescriptionDTOMapper {
         if (filterCriteria == null) {
             return null;
         }
-        List<FilterCriteria> result = new LinkedList<FilterCriteria>();
+        List<FilterCriteria> result = new LinkedList<>();
         for (FilterCriteriaDTO criteria : filterCriteria) {
             result.add(new FilterCriteria(criteria.name, criteria.value));
         }
@@ -86,7 +86,7 @@ public class ConfigDescriptionDTOMapper {
         if (options == null) {
             return null;
         }
-        List<ParameterOption> result = new LinkedList<ParameterOption>();
+        List<ParameterOption> result = new LinkedList<>();
         for (ParameterOptionDTO option : options) {
             result.add(new ParameterOption(option.value, option.label));
         }
@@ -143,7 +143,7 @@ public class ConfigDescriptionDTOMapper {
         if (filterCriteria == null) {
             return null;
         }
-        List<FilterCriteriaDTO> result = new LinkedList<FilterCriteriaDTO>();
+        List<FilterCriteriaDTO> result = new LinkedList<>();
         for (FilterCriteria criteria : filterCriteria) {
             result.add(new FilterCriteriaDTO(criteria.getName(), criteria.getValue()));
         }
@@ -154,7 +154,7 @@ public class ConfigDescriptionDTOMapper {
         if (options == null) {
             return null;
         }
-        List<ParameterOptionDTO> result = new LinkedList<ParameterOptionDTO>();
+        List<ParameterOptionDTO> result = new LinkedList<>();
         for (ParameterOption option : options) {
             result.add(new ParameterOptionDTO(option.getValue(), option.getLabel()));
         }

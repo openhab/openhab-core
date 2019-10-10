@@ -117,8 +117,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
     }
 
     protected List<Class<?>> getActionClasses() {
-
-        List<Class<?>> localActionClasses = new ArrayList<Class<?>>();
+        List<Class<?>> localActionClasses = new ArrayList<>();
 
         List<ActionService> services = actionServiceProvider.get();
         if (services != null) {

@@ -71,11 +71,11 @@ public abstract class AbstractResourceBundleProvider<E> {
 
     public AbstractResourceBundleProvider() {
         logger = LoggerFactory.getLogger(this.getClass());
-        providedObjectsHolder = new ConcurrentHashMap<String, E>();
-        providerPortfolio = new ConcurrentHashMap<Vendor, List<String>>();
-        queue = new AutomationResourceBundlesEventQueue<E>(this);
-        parsers = new ConcurrentHashMap<String, Parser<E>>();
-        waitingProviders = new ConcurrentHashMap<Bundle, List<URL>>();
+        providedObjectsHolder = new ConcurrentHashMap<>();
+        providerPortfolio = new ConcurrentHashMap<>();
+        queue = new AutomationResourceBundlesEventQueue<>(this);
+        parsers = new ConcurrentHashMap<>();
+        waitingProviders = new ConcurrentHashMap<>();
     }
 
     /**
@@ -259,7 +259,7 @@ public abstract class AbstractResourceBundleProvider<E> {
         }
         Vendor vendor = new Vendor(bundle.getSymbolicName(), bundle.getVersion().toString());
         List<String> previousPortfolio = getPreviousPortfolio(vendor);
-        List<String> newPortfolio = new LinkedList<String>();
+        List<String> newPortfolio = new LinkedList<>();
         if (urlEnum != null) {
             while (urlEnum.hasMoreElements()) {
                 URL url = urlEnum.nextElement();
@@ -290,7 +290,7 @@ public abstract class AbstractResourceBundleProvider<E> {
                     if (listeners != null) {
                         List<ProviderChangeListener<E>> snapshot = null;
                         synchronized (listeners) {
-                            snapshot = new LinkedList<ProviderChangeListener<E>>(listeners);
+                            snapshot = new LinkedList<>(listeners);
                         }
                         for (ProviderChangeListener<E> listener : snapshot) {
                             listener.removed((Provider<E>) this, removedObject);
@@ -359,7 +359,7 @@ public abstract class AbstractResourceBundleProvider<E> {
                 if (listeners != null) {
                     List<ProviderChangeListener<E>> snapshot = null;
                     synchronized (listeners) {
-                        snapshot = new LinkedList<ProviderChangeListener<E>>(listeners);
+                        snapshot = new LinkedList<>(listeners);
                     }
                     for (ProviderChangeListener<E> listener : snapshot) {
                         listener.removed((Provider<E>) this, removedObject);
@@ -397,7 +397,7 @@ public abstract class AbstractResourceBundleProvider<E> {
 
     protected List<ConfigDescriptionParameter> getLocalizedConfigurationDescription(TranslationProvider i18nProvider,
             List<ConfigDescriptionParameter> config, Bundle bundle, String uid, String prefix, Locale locale) {
-        List<ConfigDescriptionParameter> configDescriptions = new ArrayList<ConfigDescriptionParameter>();
+        List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
         if (config != null) {
             ConfigDescriptionI18nUtil util = new ConfigDescriptionI18nUtil(i18nProvider);
             for (ConfigDescriptionParameter parameter : config) {
@@ -494,7 +494,7 @@ public abstract class AbstractResourceBundleProvider<E> {
             Set<E> parsedObjects) {
         List<ProviderChangeListener<E>> snapshot = null;
         synchronized (listeners) {
-            snapshot = new LinkedList<ProviderChangeListener<E>>(listeners);
+            snapshot = new LinkedList<>(listeners);
         }
         for (E parsedObject : parsedObjects) {
             String uid = getUID(parsedObject);
@@ -521,7 +521,7 @@ public abstract class AbstractResourceBundleProvider<E> {
         List<URL> urlList = waitingProviders.get(bundle);
         if (parser == null) {
             if (urlList == null) {
-                urlList = new ArrayList<URL>();
+                urlList = new ArrayList<>();
             }
             urlList.add(url);
             waitingProviders.put(bundle, urlList);

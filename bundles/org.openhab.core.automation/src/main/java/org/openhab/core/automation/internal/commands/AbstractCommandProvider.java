@@ -59,7 +59,7 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
      * <p>
      * The Map has for keys - {@link URL} resource provider and for values - Lists with UIDs of the objects.
      */
-    Map<URL, List<String>> providerPortfolio = new HashMap<URL, List<String>>();
+    Map<URL, List<String>> providerPortfolio = new HashMap<>();
 
     /**
      * This field is a {@link ServiceTracker} for {@link Parser} services.
@@ -70,7 +70,7 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
      * This Map provides structure for fast access to the {@link Parser}s. This provides opportunity for high
      * performance at runtime of the system.
      */
-    protected Map<String, Parser<E>> parsers = new HashMap<String, Parser<E>>();
+    protected Map<String, Parser<E>> parsers = new HashMap<>();
 
     /**
      * This Map provides structure for fast access to the provided automation objects. This provides opportunity for
@@ -79,7 +79,7 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
      * <p>
      * The Map has for keys UIDs of the objects and for values {@link Localizer}s of the objects.
      */
-    protected Map<String, E> providedObjectsHolder = new HashMap<String, E>();
+    protected Map<String, E> providedObjectsHolder = new HashMap<>();
 
     protected List<ProviderChangeListener<E>> listeners;
 

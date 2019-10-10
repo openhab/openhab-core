@@ -300,10 +300,10 @@ public class ConfigDispatcher {
 
         // we need to remember which configuration needs to be updated
         // because values have changed.
-        Map<Configuration, Dictionary> configsToUpdate = new HashMap<Configuration, Dictionary>();
+        Map<Configuration, Dictionary> configsToUpdate = new HashMap<>();
 
         // also cache the already retrieved configurations for each pid
-        Map<Configuration, Dictionary> configMap = new HashMap<Configuration, Dictionary>();
+        Map<Configuration, Dictionary> configMap = new HashMap<>();
 
         String pid = pidFromFilename(configFile);
         String context = null;

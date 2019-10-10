@@ -74,7 +74,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
      */
     public CommandlineModuleTypeProvider(BundleContext context, ModuleTypeRegistry moduleTypeRegistry) {
         super(context);
-        listeners = new LinkedList<ProviderChangeListener<ModuleType>>();
+        listeners = new LinkedList<>();
         mtpReg = bc.registerService(ModuleTypeProvider.class.getName(), this, null);
         this.moduleTypeRegistry = moduleTypeRegistry;
     }
@@ -188,13 +188,13 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
         Set<ModuleType> providedObjects = parser.parse(inputStreamReader);
         if (providedObjects != null && !providedObjects.isEmpty()) {
             String uid = null;
-            List<String> portfolio = new ArrayList<String>();
+            List<String> portfolio = new ArrayList<>();
             synchronized (providerPortfolio) {
                 providerPortfolio.put(url, portfolio);
             }
-            List<ParsingNestedException> importDataExceptions = new ArrayList<ParsingNestedException>();
+            List<ParsingNestedException> importDataExceptions = new ArrayList<>();
             for (ModuleType providedObject : providedObjects) {
-                List<ParsingNestedException> exceptions = new ArrayList<ParsingNestedException>();
+                List<ParsingNestedException> exceptions = new ArrayList<>();
                 uid = providedObject.getUID();
                 checkExistence(uid, exceptions);
                 if (exceptions.isEmpty()) {
@@ -235,7 +235,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
 
     @Override
     public Collection<ModuleType> getAll() {
-        return new LinkedList<ModuleType>(providedObjectsHolder.values());
+        return new LinkedList<>(providedObjectsHolder.values());
     }
 
     @Override

@@ -172,7 +172,7 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
     @SuppressWarnings("unchecked")
     private <T extends Module, MT extends ModuleHandler> LinkedHashMap<T, MT> getChildHandlers(String compositeModuleId,
             Configuration compositeConfig, List<T> childModules, String childModulePrefix) {
-        LinkedHashMap<T, MT> mapModuleToHandler = new LinkedHashMap<T, MT>();
+        LinkedHashMap<T, MT> mapModuleToHandler = new LinkedHashMap<>();
         for (T child : childModules) {
             String ruleId = getRuleId(childModulePrefix);
             ruleEngine.updateMapModuleTypeToRule(ruleId, child.getTypeUID());

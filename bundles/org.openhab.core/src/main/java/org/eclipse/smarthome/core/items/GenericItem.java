@@ -62,12 +62,12 @@ public abstract class GenericItem implements ActiveItem {
 
     protected @Nullable EventPublisher eventPublisher;
 
-    protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<StateChangeListener>(
-            Collections.newSetFromMap(new WeakHashMap<StateChangeListener, Boolean>()));
+    protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<>(
+            Collections.newSetFromMap(new WeakHashMap<>()));
 
-    protected List<String> groupNames = new ArrayList<String>();
+    protected List<String> groupNames = new ArrayList<>();
 
-    protected Set<String> tags = new HashSet<String>();
+    protected Set<String> tags = new HashSet<>();
 
     protected final String name;
 
@@ -249,7 +249,7 @@ public abstract class GenericItem implements ActiveItem {
     protected void notifyListeners(final State oldState, final State newState) {
         // if nothing has changed, we send update notifications
         Set<StateChangeListener> clonedListeners = null;
-        clonedListeners = new CopyOnWriteArraySet<StateChangeListener>(listeners);
+        clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         for (final StateChangeListener listener : clonedListeners) {
             pool.execute(new Runnable() {

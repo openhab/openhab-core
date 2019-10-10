@@ -59,7 +59,7 @@ public class RootResource {
 
     private final transient Logger logger = LoggerFactory.getLogger(RootResource.class);
 
-    private List<RESTResource> restResources = new ArrayList<RESTResource>();
+    private final List<RESTResource> restResources = new ArrayList<>();
 
     private ConfigurationAdmin configurationAdmin;
 

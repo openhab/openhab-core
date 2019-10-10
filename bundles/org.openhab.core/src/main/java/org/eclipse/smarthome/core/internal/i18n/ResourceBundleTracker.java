@@ -49,7 +49,7 @@ public class ResourceBundleTracker extends BundleTracker {
         this.localeProvider = localeProvider;
         pkgAdmin = (PackageAdmin) bundleContext
                 .getService(bundleContext.getServiceReference(PackageAdmin.class.getName()));
-        this.bundleLanguageResourceMap = new LinkedHashMap<Bundle, LanguageResourceBundleManager>();
+        this.bundleLanguageResourceMap = new LinkedHashMap<>();
     }
 
     @Override
@@ -124,7 +124,7 @@ public class ResourceBundleTracker extends BundleTracker {
      * @return a list with the hosts of the <code>fragment</code> parameter.
      */
     private List<Bundle> returnHostBundles(Bundle fragment) {
-        List<Bundle> hosts = new ArrayList<Bundle>();
+        List<Bundle> hosts = new ArrayList<>();
         Bundle[] bundles = pkgAdmin.getHosts(fragment);
         if (bundles != null) {
             for (int i = 0; i < bundles.length; i++) {

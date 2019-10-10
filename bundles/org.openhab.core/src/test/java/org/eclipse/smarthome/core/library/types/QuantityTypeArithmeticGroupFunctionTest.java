@@ -60,189 +60,189 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @Test
     public void testSumFunctionQuantityType() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("23.54 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<Temperature>("89 °C")));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("89 °C")));
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<Temperature>("122.41 °C")));
+        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("122.41 °C")));
 
         function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("234.95 °C"), state);
+        assertEquals(new QuantityType<>("234.95 °C"), state);
     }
 
     @Test
     public void testSumFunctionQuantityTypeDifferentUnits() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("23.54 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<Temperature>("192.2 °F")));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("192.2 °F")));
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<Temperature>("395.56 K")));
+        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("395.56 K")));
 
         function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("234.95 °C"), state);
+        assertEquals(new QuantityType<>("234.95 °C"), state);
     }
 
     @Test
     public void testSumFunctionQuantityTypeIncompatibleUnits() {
-        items = new LinkedHashSet<Item>(); // we need an ordered set to guarantee the Unit of the first entry
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("23.54 °C")));
+        items = new LinkedHashSet<>(); // we need an ordered set to guarantee the Unit of the first entry
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<Temperature>("192.2 hPa")));
+        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
 
         function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("23.54 °C"), state);
+        assertEquals(new QuantityType<>("23.54 °C"), state);
     }
 
     @Test
     public void testAvgFunctionQuantityType() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("100 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<Temperature>("200 °C")));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("200 °C")));
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<Temperature>("300 °C")));
+        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
 
         function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("200 °C"), state);
+        assertEquals(new QuantityType<>("200 °C"), state);
     }
 
     @Test
     public void testAvgFunctionQuantityTypeDifferentUnits() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("100 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<Temperature>("113 °F")));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("113 °F")));
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<Temperature>("294.15 K")));
+        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
 
         function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("55.33 °C"), state);
+        assertEquals(new QuantityType<>("55.33 °C"), state);
     }
 
     @Test
     public void testAvgFunctionQuantityTypeIncompatibleUnits() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("23.54 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<Temperature>("192.2 hPa")));
+        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
 
         function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("23.54 °C"), state);
+        assertEquals(new QuantityType<>("23.54 °C"), state);
     }
 
     @Test
     public void testMaxFunctionQuantityType() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("100 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<Temperature>("200 °C")));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("200 °C")));
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<Temperature>("300 °C")));
+        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
 
         function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("300 °C"), state);
+        assertEquals(new QuantityType<>("300 °C"), state);
     }
 
     @Test
     public void testMaxFunctionQuantityTypeDifferentUnits() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("100 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<Temperature>("113 °F")));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("113 °F")));
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<Temperature>("294.15 K")));
+        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
 
         function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("100 °C"), state);
+        assertEquals(new QuantityType<>("100 °C"), state);
     }
 
     @Test
     public void testMaxFunctionQuantityTypeIncompatibleUnits() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("23.54 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<Pressure>("192.2 hPa")));
+        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
 
         function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("23.54 °C"), state);
+        assertEquals(new QuantityType<>("23.54 °C"), state);
     }
 
     @Test
     public void testMinFunctionQuantityType() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("100 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<Temperature>("200 °C")));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("200 °C")));
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<Temperature>("300 °C")));
+        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
 
         function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("100 °C"), state);
+        assertEquals(new QuantityType<>("100 °C"), state);
     }
 
     @Test
     public void testMaxFunctionQuantityTypeOnDimensionless() {
-        items.add(createNumberItem("TestItem1", Dimensionless.class, new QuantityType<Temperature>("48 %")));
-        items.add(createNumberItem("TestItem2", Dimensionless.class, new QuantityType<Temperature>("36 %")));
-        items.add(createNumberItem("TestItem3", Dimensionless.class, new QuantityType<Temperature>("0 %")));
-        items.add(createNumberItem("TestItem4", Dimensionless.class, new QuantityType<Temperature>("48 %")));
-        items.add(createNumberItem("TestItem5", Dimensionless.class, new QuantityType<Temperature>("0 %")));
-        items.add(createNumberItem("TestItem6", Dimensionless.class, new QuantityType<Temperature>("0 %")));
+        items.add(createNumberItem("TestItem1", Dimensionless.class, new QuantityType<>("48 %")));
+        items.add(createNumberItem("TestItem2", Dimensionless.class, new QuantityType<>("36 %")));
+        items.add(createNumberItem("TestItem3", Dimensionless.class, new QuantityType<>("0 %")));
+        items.add(createNumberItem("TestItem4", Dimensionless.class, new QuantityType<>("48 %")));
+        items.add(createNumberItem("TestItem5", Dimensionless.class, new QuantityType<>("0 %")));
+        items.add(createNumberItem("TestItem6", Dimensionless.class, new QuantityType<>("0 %")));
 
         function = new QuantityTypeArithmeticGroupFunction.Max(Dimensionless.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Dimensionless>("48 %"), state);
+        assertEquals(new QuantityType<>("48 %"), state);
     }
 
     @Test
     public void testMinFunctionQuantityTypeDifferentUnits() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("100 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<Temperature>("113 °F")));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("113 °F")));
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
-        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<Temperature>("294.15 K")));
+        items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
 
         function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("294.15 K"), state);
+        assertEquals(new QuantityType<>("294.15 K"), state);
     }
 
     @Test
     public void testMinFunctionQuantityTypeIncompatibleUnits() {
-        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<Temperature>("23.54 °C")));
+        items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("23.54 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
-        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<Pressure>("192.2 hPa")));
+        items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
 
         function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Temperature>("23.54 °C"), state);
+        assertEquals(new QuantityType<>("23.54 °C"), state);
     }
 
     @Test
     public void testSumFunctionQuantityTypeWithGroups() {
-        items.add(createNumberItem("TestItem1", Power.class, new QuantityType<Power>("5 W")));
-        items.add(createGroupItem("TestGroup1", Power.class, new QuantityType<Power>("5 W")));
+        items.add(createNumberItem("TestItem1", Power.class, new QuantityType<>("5 W")));
+        items.add(createGroupItem("TestGroup1", Power.class, new QuantityType<>("5 W")));
 
         function = new QuantityTypeArithmeticGroupFunction.Sum(Power.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<Power>("10 W"), state);
+        assertEquals(new QuantityType<>("10 W"), state);
     }
 
     private NumberItem createNumberItem(String name, Class<? extends Quantity<?>> dimension, State state) {

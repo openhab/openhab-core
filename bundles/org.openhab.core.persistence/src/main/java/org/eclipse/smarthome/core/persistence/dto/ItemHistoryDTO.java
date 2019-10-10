@@ -28,7 +28,7 @@ public class ItemHistoryDTO {
     public String totalrecords;
     public String datapoints;
 
-    public List<HistoryDataBean> data = new ArrayList<HistoryDataBean>();
+    public List<HistoryDataBean> data = new ArrayList<>();
 
     public ItemHistoryDTO() {
     };

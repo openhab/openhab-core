@@ -50,7 +50,7 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     }
 
     private TriggerType createTriggerType() {
-        List<Output> outputs = new ArrayList<Output>(3);
+        List<Output> outputs = new ArrayList<>(3);
         outputs.add(createOutput("out1", new String[] { "tagA" }));
         outputs.add(createOutput("out2", new String[] { "tagB", "tagC" }));
         outputs.add(createOutput("out3", new String[] { "tagA", "tagB", "tagC" }));
@@ -59,7 +59,7 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     }
 
     private ConditionType createConditionType() {
-        List<Input> inputs = new ArrayList<Input>(3);
+        List<Input> inputs = new ArrayList<>(3);
         inputs.add(createInput("in0", new String[] { "tagE" })); // no connection, missing condition tag
         inputs.add(createInput("in1", new String[] { "tagA" })); // conflict in2 -> out1 or in2 -> out3
         inputs.add(createInput("in2", new String[] { "tagA", "tagB" })); // in2 -> out3
@@ -68,13 +68,13 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     }
 
     private ActionType createActionType() {
-        List<Input> inputs = new ArrayList<Input>(3);
+        List<Input> inputs = new ArrayList<>(3);
         inputs.add(createInput("in3", new String[] { "tagD" })); // conflict in3 -> out4 or in3 -> out5
         inputs.add(createInput("in4", new String[] { "tagD", "tagE" })); // in4 -> out5
         inputs.add(createInput("in5", new String[] { "tagA", "tagB", "tagC" })); // in5 -> out3
         inputs.add(createInput("in6", new String[] { "tagA", "tagB" })); // conflict in6 has user defined connection
 
-        List<Output> outputs = new ArrayList<Output>(3);
+        List<Output> outputs = new ArrayList<>(3);
         outputs.add(createOutput("out4", new String[] { "tagD" }));
         outputs.add(createOutput("out5", new String[] { "tagD", "tagE" }));
         ActionType t = new ActionType(ACTION_TYPE, null, inputs, outputs);
@@ -82,12 +82,12 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     }
 
     private Output createOutput(String name, String[] tags) {
-        Set<String> tagSet = new HashSet<String>(Arrays.asList(tags));
+        Set<String> tagSet = new HashSet<>(Arrays.asList(tags));
         return new Output(name, String.class.getName(), null, null, tagSet, null, null);
     }
 
     private Input createInput(String name, String[] tags) {
-        Set<String> tagSet = new HashSet<String>(Arrays.asList(tags));
+        Set<String> tagSet = new HashSet<>(Arrays.asList(tags));
         return new Input(name, String.class.getName(), null, null, tagSet, false, null, null);
     }
 

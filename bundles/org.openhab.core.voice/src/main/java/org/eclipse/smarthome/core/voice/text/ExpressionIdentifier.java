@@ -14,6 +14,7 @@ package org.eclipse.smarthome.core.voice.text;
 
 import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Expression that successfully parses, if a thing identifier token is found. This class is immutable.
@@ -60,8 +61,8 @@ public final class ExpressionIdentifier extends Expression {
     }
 
     @Override
-    boolean collectFirsts(ResourceBundle language, HashSet<String> firsts) {
-        HashSet<String> f = new HashSet<String>(interpreter.getAllItemTokens(language.getLocale()));
+    boolean collectFirsts(ResourceBundle language, Set<String> firsts) {
+        Set<String> f = new HashSet<>(interpreter.getAllItemTokens(language.getLocale()));
         if (stopper != null) {
             f.removeAll(stopper.getFirsts(language));
         }

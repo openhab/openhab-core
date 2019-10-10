@@ -106,7 +106,7 @@ public class ConfigDescriptionRegistry {
      *         description exists
      */
     public Collection<ConfigDescription> getConfigDescriptions(Locale locale) {
-        Map<URI, ConfigDescription> configMap = new HashMap<URI, ConfigDescription>();
+        Map<URI, ConfigDescription> configMap = new HashMap<>();
 
         // Loop over all providers
         for (ConfigDescriptionProvider configDescriptionProvider : this.configDescriptionProviders) {
@@ -116,11 +116,11 @@ public class ConfigDescriptionRegistry {
                 ConfigDescription configFromMap = configMap.get(configDescription.getUID());
                 if (configFromMap != null) {
                     // Yes - Merge the groups and parameters
-                    List<ConfigDescriptionParameter> parameters = new ArrayList<ConfigDescriptionParameter>();
+                    List<ConfigDescriptionParameter> parameters = new ArrayList<>();
                     parameters.addAll(configFromMap.getParameters());
                     parameters.addAll(configDescription.getParameters());
 
-                    List<ConfigDescriptionParameterGroup> parameterGroups = new ArrayList<ConfigDescriptionParameterGroup>();
+                    List<ConfigDescriptionParameterGroup> parameterGroups = new ArrayList<>();
                     parameterGroups.addAll(configFromMap.getParameterGroups());
                     parameterGroups.addAll(configDescription.getParameterGroups());
 
@@ -135,7 +135,7 @@ public class ConfigDescriptionRegistry {
         }
 
         // Now convert the map into the collection
-        Collection<ConfigDescription> configDescriptions = new ArrayList<ConfigDescription>(configMap.size());
+        Collection<ConfigDescription> configDescriptions = new ArrayList<>(configMap.size());
         for (ConfigDescription configDescription : configMap.values()) {
             configDescriptions.add(configDescription);
         }
@@ -170,8 +170,8 @@ public class ConfigDescriptionRegistry {
      *         the given name
      */
     public @Nullable ConfigDescription getConfigDescription(URI uri, Locale locale) {
-        List<ConfigDescriptionParameter> parameters = new ArrayList<ConfigDescriptionParameter>();
-        List<ConfigDescriptionParameterGroup> parameterGroups = new ArrayList<ConfigDescriptionParameterGroup>();
+        List<ConfigDescriptionParameter> parameters = new ArrayList<>();
+        List<ConfigDescriptionParameterGroup> parameterGroups = new ArrayList<>();
 
         boolean found = false;
         Set<URI> aliases = getAliases(uri);
@@ -183,8 +183,7 @@ public class ConfigDescriptionRegistry {
         found |= fillFromProviders(uri, locale, parameters, parameterGroups);
 
         if (found) {
-            List<ConfigDescriptionParameter> parametersWithOptions = new ArrayList<ConfigDescriptionParameter>(
-                    parameters.size());
+            List<ConfigDescriptionParameter> parametersWithOptions = new ArrayList<>(parameters.size());
             for (ConfigDescriptionParameter parameter : parameters) {
                 parametersWithOptions.add(getConfigOptions(uri, aliases, parameter, locale));
             }
@@ -254,7 +253,7 @@ public class ConfigDescriptionRegistry {
      */
     private ConfigDescriptionParameter getConfigOptions(URI uri, Set<URI> aliases, ConfigDescriptionParameter parameter,
             Locale locale) {
-        List<ParameterOption> options = new ArrayList<ParameterOption>();
+        List<ParameterOption> options = new ArrayList<>();
 
         // Add all the existing options that may be provided by the initial config description provider
         options.addAll(parameter.getOptions());

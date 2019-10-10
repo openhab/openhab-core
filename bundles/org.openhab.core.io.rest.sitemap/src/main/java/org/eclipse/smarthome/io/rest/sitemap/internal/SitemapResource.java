@@ -400,7 +400,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     public Collection<SitemapDTO> getSitemapBeans(URI uri) {
-        Collection<SitemapDTO> beans = new LinkedList<SitemapDTO>();
+        Collection<SitemapDTO> beans = new LinkedList<>();
         Set<String> names = new HashSet<>();
         logger.debug("Received HTTP GET request at '{}'.", UriBuilder.fromUri(uri).build().toASCIIString());
         for (SitemapProvider provider : sitemapProviders) {
@@ -699,7 +699,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      * @return all items that are represented by the list of widgets
      */
     private Set<GenericItem> getAllItems(EList<Widget> widgets) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
+        Set<GenericItem> items = new HashSet<>();
         if (itemUIRegistry != null) {
             for (Widget widget : widgets) {
                 // We skip the chart widgets having a refresh argument
@@ -733,7 +733,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     private Set<GenericItem> getItemsInVisibilityCond(EList<VisibilityRule> ruleList) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
+        Set<GenericItem> items = new HashSet<>();
         for (VisibilityRule rule : ruleList) {
             String itemName = rule.getItem();
             if (itemName != null) {
@@ -751,7 +751,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     private Set<GenericItem> getItemsInColorCond(EList<ColorArray> colorList) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
+        Set<GenericItem> items = new HashSet<>();
         for (ColorArray color : colorList) {
             String itemName = color.getItem();
             if (itemName != null) {

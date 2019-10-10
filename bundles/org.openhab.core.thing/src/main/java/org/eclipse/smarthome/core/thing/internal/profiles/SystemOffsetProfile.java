@@ -15,7 +15,6 @@ package org.eclipse.smarthome.core.thing.internal.profiles;
 import java.math.BigDecimal;
 
 import javax.measure.UnconvertibleException;
-import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -115,7 +114,7 @@ public class SystemOffsetProfile implements StateProfile {
         if (finalOffset == null) {
             logger.warn(
                     "Offset not configured correctly, please make sure it is of type QuantityType, e.g. \"3\", \"-1.4\", \"3.2°C\". Using offset 0 now.");
-            finalOffset = new QuantityType<Dimensionless>("0");
+            finalOffset = new QuantityType<>("0");
         }
 
         if (!towardsItem) {

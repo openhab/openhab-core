@@ -13,9 +13,10 @@
 package org.eclipse.smarthome.core.voice.internal;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.smarthome.core.audio.AudioException;
 import org.eclipse.smarthome.core.audio.AudioFormat;
@@ -30,7 +31,8 @@ import org.eclipse.smarthome.core.audio.AudioStream;
  */
 public class AudioSourceStub implements AudioSource {
 
-    private Set<AudioFormat> supportedFormats = new HashSet<AudioFormat>();
+    private static final Set<AudioFormat> SUPPORTED_FORMATS = Stream.of(AudioFormat.MP3, AudioFormat.WAV)
+            .collect(Collectors.toSet());
 
     private static final String AUDIOSOURCE_STUB_ID = "audioSouceID";
     private static final String AUDIOSOURCE_STUB_LABEL = "audioSouceLabel";
@@ -47,9 +49,7 @@ public class AudioSourceStub implements AudioSource {
 
     @Override
     public Set<AudioFormat> getSupportedFormats() {
-        supportedFormats.add(AudioFormat.MP3);
-        supportedFormats.add(AudioFormat.WAV);
-        return supportedFormats;
+        return SUPPORTED_FORMATS;
     }
 
     @Override

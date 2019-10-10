@@ -147,9 +147,9 @@ public class ChannelType extends AbstractDescriptionType {
         this.configDescriptionURI = configDescriptionURI;
 
         if (tags != null) {
-            this.tags = Collections.unmodifiableSet(new HashSet<String>(tags));
+            this.tags = Collections.unmodifiableSet(new HashSet<>(tags));
         } else {
-            this.tags = Collections.unmodifiableSet(new HashSet<String>(0));
+            this.tags = Collections.unmodifiableSet(new HashSet<>(0));
         }
 
         this.advanced = advanced;

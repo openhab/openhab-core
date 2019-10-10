@@ -14,9 +14,9 @@ package org.eclipse.smarthome.core.voice.text;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Expression that successfully parses, if one of the given alternative expressions matches. This class is immutable.
@@ -61,7 +61,7 @@ final class ExpressionAlternatives extends Expression {
     }
 
     @Override
-    boolean collectFirsts(ResourceBundle language, HashSet<String> firsts) {
+    boolean collectFirsts(ResourceBundle language, Set<String> firsts) {
         boolean blocking = true;
         for (Expression e : subExpressions) {
             blocking = blocking && e.collectFirsts(language, firsts);

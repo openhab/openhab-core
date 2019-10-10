@@ -99,7 +99,7 @@ public class I18nProviderImplTest {
 
     @Test
     public void assertThatDefaultLocaleWillBeUsed() {
-        i18nProviderImpl.modified(new Hashtable<String, Object>());
+        i18nProviderImpl.modified(new Hashtable<>());
 
         PointType location = i18nProviderImpl.getLocation();
         Locale setLocale = i18nProviderImpl.getLocale();

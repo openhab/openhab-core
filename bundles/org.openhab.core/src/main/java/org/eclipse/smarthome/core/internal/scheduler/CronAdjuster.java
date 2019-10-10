@@ -59,11 +59,10 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     private static final String[] MONTHS2 = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT",
             "NOV", "DEC" };
     private static final Map<String, Integer> MONTHS = IntStream.range(0, MONTHS2.length)
-            .mapToObj(i -> new SimpleEntry<String, Integer>(MONTHS2[i], i))
-            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+            .mapToObj(i -> new SimpleEntry<>(MONTHS2[i], i)).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     private static final String[] WEEK_DAYS_STRINGS = { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" };
     private static final Map<String, Integer> WEEK_DAYS = IntStream.range(0, WEEK_DAYS_STRINGS.length)
-            .mapToObj(i -> new SimpleEntry<String, Integer>(WEEK_DAYS_STRINGS[i], i))
+            .mapToObj(i -> new SimpleEntry<>(WEEK_DAYS_STRINGS[i], i))
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
     private final List<Field> fields = new ArrayList<>(7);
@@ -131,10 +130,10 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @return Map with environment variables
      */
     private Map<String, String> parseEnvironment(String[] entries) {
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
 
         if (entries.length > 1) {
-            // Skip the last entry it contains the cron expression no varables.
+            // Skip the last entry it contains the cron expression no variables.
             for (int i = 0; i < entries.length - 1; i++) {
                 final String entry = entries[i];
 

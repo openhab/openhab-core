@@ -29,7 +29,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 @SuppressWarnings("deprecation")
 public class HostFragmentMappingUtil {
 
-    private static Map<Bundle, List<Bundle>> hostFragmentMapping = new HashMap<Bundle, List<Bundle>>();
+    private static Map<Bundle, List<Bundle>> hostFragmentMapping = new HashMap<>();
 
     static PackageAdmin pkgAdmin;
 
@@ -49,7 +49,7 @@ public class HostFragmentMappingUtil {
      * @return a list with the hosts of the <code>fragment</code> parameter.
      */
     static List<Bundle> returnHostBundles(Bundle fragment) {
-        List<Bundle> hosts = new ArrayList<Bundle>();
+        List<Bundle> hosts = new ArrayList<>();
         Bundle[] bundles = pkgAdmin.getHosts(fragment);
         if (bundles != null) {
             hosts = Arrays.asList(bundles);
@@ -64,7 +64,7 @@ public class HostFragmentMappingUtil {
     }
 
     static List<Bundle> fillHostFragmentMapping(Bundle host) {
-        List<Bundle> fragments = new ArrayList<Bundle>();
+        List<Bundle> fragments = new ArrayList<>();
         Bundle[] bundles = pkgAdmin.getFragments(host);
         if (bundles != null) {
             fragments = Arrays.asList(bundles);

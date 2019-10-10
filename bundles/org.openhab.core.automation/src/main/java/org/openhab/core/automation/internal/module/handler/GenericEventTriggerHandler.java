@@ -73,7 +73,7 @@ public class GenericEventTriggerHandler extends BaseTriggerModuleHandler impleme
             this.types = Collections.emptySet();
         }
         this.bundleContext = bundleContext;
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", topic);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);

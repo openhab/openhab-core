@@ -56,7 +56,7 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
         registerService(hliStub);
         registerService(ttsService);
 
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(CONFIG_DEFAULT_TTS, ttsService.getId());
         config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());

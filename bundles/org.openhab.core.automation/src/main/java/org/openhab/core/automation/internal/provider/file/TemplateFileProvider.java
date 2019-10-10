@@ -54,7 +54,7 @@ public abstract class TemplateFileProvider extends AbstractFileProvider<RuleTemp
         if (values.isEmpty()) {
             return Collections.<RuleTemplate> emptyList();
         }
-        return new LinkedList<RuleTemplate>(values);
+        return new LinkedList<>(values);
     }
 
 }

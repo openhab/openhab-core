@@ -91,7 +91,7 @@ public abstract class AbstractXmlBasedProvider<T_ID, T_OBJECT extends Identifiab
         }
         List<T_OBJECT> objects = bundleObjectMap.get(bundle);
         if (objects == null) {
-            objects = new CopyOnWriteArrayList<T_OBJECT>();
+            objects = new CopyOnWriteArrayList<>();
             bundleObjectMap.put(bundle, objects);
         }
         return objects;

@@ -99,7 +99,7 @@ public class ModuleTypeResource implements RESTResource {
             @QueryParam("type") @ApiParam(value = "filtering by action, condition or trigger", required = false) String type) {
         final Locale locale = localeService.getLocale(language);
         final String[] tags = tagList != null ? tagList.split(",") : null;
-        final List<ModuleTypeDTO> modules = new ArrayList<ModuleTypeDTO>();
+        final List<ModuleTypeDTO> modules = new ArrayList<>();
 
         if (type == null || type.equals("trigger")) {
             modules.addAll(TriggerTypeDTOMapper.map(moduleTypeRegistry.getTriggers(locale, tags)));

@@ -115,7 +115,7 @@ public class MqttBrokerConnection {
     public class ConnectionCallback implements IMqttActionListener {
         private final MqttBrokerConnection connection;
         private final Runnable cancelTimeoutFuture;
-        private CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        private CompletableFuture<Boolean> future = new CompletableFuture<>();
 
         public ConnectionCallback(MqttBrokerConnection mqttBrokerConnectionImpl) {
             this.connection = mqttBrokerConnectionImpl;
@@ -163,7 +163,7 @@ public class MqttBrokerConnection {
         }
 
         public CompletableFuture<Boolean> createFuture() {
-            future = new CompletableFuture<Boolean>();
+            future = new CompletableFuture<>();
             return future;
         }
     }
@@ -481,7 +481,7 @@ public class MqttBrokerConnection {
      * @return Completes with true if successful. Completes with false if not connected yet. Exceptionally otherwise.
      */
     public CompletableFuture<Boolean> subscribe(String topic, MqttMessageSubscriber subscriber) {
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
         synchronized (subscribers) {
             TopicSubscribers subscriberList = subscribers.getOrDefault(topic, new TopicSubscribers(topic));
             subscribers.put(topic, subscriberList);
@@ -513,7 +513,7 @@ public class MqttBrokerConnection {
      */
     protected CompletableFuture<Boolean> subscribeRaw(String topic) {
         logger.trace("subscribeRaw message consumer for topic '{}' from broker '{}'", topic, host);
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
         try {
             MqttAsyncClient client = this.client;
             if (client != null && client.isConnected()) {
@@ -569,7 +569,7 @@ public class MqttBrokerConnection {
      */
     protected CompletableFuture<Boolean> unsubscribeRaw(MqttAsyncClient client, String topic) {
         logger.trace("Unsubscribing message consumer for topic '{}' from broker '{}'", topic, host);
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
         try {
             if (client.isConnected()) {
                 client.unsubscribe(topic, future, actionCallback);
@@ -823,7 +823,7 @@ public class MqttBrokerConnection {
             reconnectStrategy.stop();
         }
 
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
         // Close connection
         if (client.isConnected()) {
             // We need to thread change here. Because paho does not allow to disconnect within a callback method
@@ -910,7 +910,7 @@ public class MqttBrokerConnection {
             return CompletableFuture.completedFuture(false);
         }
         // publish message asynchronously
-        CompletableFuture<Boolean> f = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> f = new CompletableFuture<>();
         try {
             client.publish(topic, payload, qos, retain, f, actionCallback);
         } catch (org.eclipse.paho.client.mqttv3.MqttException e) {

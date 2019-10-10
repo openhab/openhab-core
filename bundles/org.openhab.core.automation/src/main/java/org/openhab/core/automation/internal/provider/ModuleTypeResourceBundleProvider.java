@@ -64,7 +64,7 @@ public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProv
      * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      */
     public ModuleTypeResourceBundleProvider() {
-        listeners = new LinkedList<ProviderChangeListener<ModuleType>>();
+        listeners = new LinkedList<>();
         path = ROOT_DIRECTORY + "/moduletypes/";
     }
 
@@ -135,7 +135,7 @@ public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProv
      */
     @Override
     public Collection<ModuleType> getModuleTypes(Locale locale) {
-        List<ModuleType> moduleTypesList = new ArrayList<ModuleType>();
+        List<ModuleType> moduleTypesList = new ArrayList<>();
         for (ModuleType mt : providedObjectsHolder.values()) {
             moduleTypesList.add(getPerLocale(mt, locale));
         }

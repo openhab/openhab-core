@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class MqttServiceImpl implements MqttService {
     private final Logger logger = LoggerFactory.getLogger(MqttServiceImpl.class);
-    private final Map<String, MqttBrokerConnection> brokerConnections = new ConcurrentHashMap<String, MqttBrokerConnection>();
+    private final Map<String, MqttBrokerConnection> brokerConnections = new ConcurrentHashMap<>();
     private final List<MqttServiceObserver> brokersObservers = new CopyOnWriteArrayList<>();
 
     @Override
