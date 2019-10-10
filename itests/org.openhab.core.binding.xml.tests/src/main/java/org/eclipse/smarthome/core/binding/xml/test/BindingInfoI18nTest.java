@@ -89,7 +89,7 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
     public void assertUsingDefaultLocale() throws Exception {
         // Set german locale
         ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
-        Configuration config = configAdmin.getConfiguration("org.eclipse.smarthome.core.i18nprovider", null);
+        Configuration config = configAdmin.getConfiguration("org.eclipse.smarthome.i18n", null);
         Dictionary<String, String> localeCfg = new Hashtable<>();
         localeCfg.put("language", "de");
         localeCfg.put("country", "DE");

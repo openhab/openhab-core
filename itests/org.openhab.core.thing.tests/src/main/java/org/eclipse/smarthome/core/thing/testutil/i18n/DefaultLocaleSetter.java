@@ -39,16 +39,16 @@ public class DefaultLocaleSetter {
     }
 
     /**
-     * Configures the org.eclipse.smarthome.core.i18nprovider based on the provided locale. Note that the configuration
-     * is not necessarily effective yet when this method returns, as the configuration admin might configure the
-     * i18nprovider in another thread.
+     * Configures the i18n provider based on the provided locale. Note that the configuration is not necessarily
+     * effective yet when this method returns, as the configuration admin might configure the i18n provider in another
+     * thread.
      *
      * @param locale the locale to use, must not be null.
      */
     public void setDefaultLocale(Locale locale) throws IOException {
         assertThat(locale, is(notNullValue()));
 
-        Configuration config = configAdmin.getConfiguration("org.eclipse.smarthome.core.i18nprovider", null);
+        Configuration config = configAdmin.getConfiguration("org.eclipse.smarthome.i18n", null);
         assertThat(config, is(notNullValue()));
 
         Dictionary<String, Object> properties = config.getProperties();

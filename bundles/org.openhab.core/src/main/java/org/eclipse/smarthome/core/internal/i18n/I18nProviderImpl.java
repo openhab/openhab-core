@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The {@link I18nProviderImpl} is a concrete implementation of the {@link TranslationProvider}, {@link LocaleProvider},
  * and {@link LocationProvider} service interfaces.
- * *
+ *
  * <p>
  * This implementation uses the i18n mechanism of Java ({@link ResourceBundle}) to translate a given key into text. The
  * resources must be placed under the specific directory {@link LanguageResourceBundleManager#RESOURCE_DIRECTORY} within
