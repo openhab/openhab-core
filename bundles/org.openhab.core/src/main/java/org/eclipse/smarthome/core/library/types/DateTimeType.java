@@ -149,6 +149,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
      *
      * @return a {@link DateTimeType} translated to the locale time zone
      * @throws DateTimeException if the converted zone ID has an invalid format or the result exceeds the supported date
+     *             range
      * @throws ZoneRulesException if the converted zone region ID cannot be found
      */
     public DateTimeType toLocaleZone() throws DateTimeException, ZoneRulesException {
