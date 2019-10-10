@@ -142,8 +142,7 @@ public class PointType implements ComplexType, Command, State {
      * (alphabetical) order of their keys.
      * </p>
      *
-     * @param pattern
-     *            the pattern to use containing indexes to reference the single
+     * @param pattern the pattern to use containing indexes to reference the single
      *            elements of this type.
      */
     @Override

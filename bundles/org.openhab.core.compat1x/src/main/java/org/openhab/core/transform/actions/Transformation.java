@@ -35,8 +35,7 @@ public class Transformation {
      * @param type the transformation type, e.g. REGEX or MAP
      * @param function the function to call, this value depends on the transformation type
      * @param value the value to apply the transformation to
-     * @return
-     *         the transformed value or the original one, if there was no service registered for the
+     * @return the transformed value or the original one, if there was no service registered for the
      *         given type or a transformation exception occurred.
      */
     public static String transform(String type, String function, String value) {

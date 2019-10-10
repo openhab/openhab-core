@@ -35,11 +35,9 @@ public class Ping {
      * @param host
      * @param port
      * @param timeout
-     *
      * @return <code>true</code> when <code>host</code> is reachable on <code>port</code>
      *         within the given <code>timeout</code> and <code>false</code> in all other
      *         cases.
-     *
      * @throws IOException
      * @throws SocketTimeoutException
      */

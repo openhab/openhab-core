@@ -309,7 +309,6 @@ public class ReferenceResolver {
      * @param tokens a sequence of field names, indexes, or keys that represent the hierarchical path to the required
      *            object
      * @return the value of the object to witch the hierarchical path is pointing.
-     *
      * @throws IllegalArgumentException if one of the tokens point to field that is not existing or the object is null
      * @throws SecurityException If a security manager, <i>s</i>, is present and any of the following
      *             conditions is met:

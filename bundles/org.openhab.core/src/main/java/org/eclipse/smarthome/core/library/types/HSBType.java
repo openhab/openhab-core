@@ -164,7 +164,6 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      * Returned color is set to full brightness
      *
      * @param x, y color information 0.0 - 1.0
-     *
      * @return new HSBType object representing the given CIE XY color, full brightness
      */
     public static HSBType fromXY(float x, float y) {

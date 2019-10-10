@@ -110,7 +110,6 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
      * @param tokenExpiresInBuffer A positive integer in seconds to act as additional buffer to the calculation.
      *            This causes the OAuthToken to expire earlier then the stated expiry-time given
      *            by the authorization server.
-     *
      * @return true if object is not-initialized, or expired, or expired early due to buffer
      */
     public boolean isExpired(@NonNull LocalDateTime givenTime, int tokenExpiresInBuffer) {

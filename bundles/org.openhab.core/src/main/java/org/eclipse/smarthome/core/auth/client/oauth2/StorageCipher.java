@@ -39,7 +39,7 @@ public interface StorageCipher {
      * Encrypt the plainText, then produce a base64 encoded cipher text
      *
      * @param plainText
-     * @return base64-encoded( encrypted( text ) )
+     * @return base64 encoded( encrypted( text ) )
      * @throws GeneralSecurityException all security-related exception
      */
     @Nullable

@@ -12,6 +12,7 @@
  */
 package org.openhab.model.item.binding;
 
+import org.eclipse.smarthome.model.item.internal.GenericItemProvider;
 import org.openhab.core.items.Item;
 
 /**
@@ -35,7 +36,6 @@ public interface BindingConfigReader {
      * @param item the item whose type is validated
      * @param bindingConfig the config string which could be used to refine the
      *            validation
-     *
      * @throws BindingConfigParseException if the type of <code>item</code> is
      *             invalid for this binding
      */
@@ -48,7 +48,6 @@ public interface BindingConfigReader {
      * @param context a string of the context from where this item comes from. Usually the file name of the config file
      * @param item the item for which the binding is defined
      * @param bindingConfig the configuration string that must be processed
-     *
      * @throws BindingConfigParseException if the configuration string is not valid
      */
     public void processBindingConfiguration(String context, Item item, String bindingConfig)

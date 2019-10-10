@@ -99,7 +99,6 @@ public class SyntheticBundleInstaller {
      *            for the synthetic bundle
      * @param extensionsToInclude a list of extension to be included into the synthetic bundle. In order to use the list
      *            of default extensions ({@link #DEFAULT_EXTENSIONS})
-     *
      * @return the synthetic bundle representation
      * @throws Exception thrown when error occurs while installing or starting the synthetic bundle
      */
@@ -123,7 +122,6 @@ public class SyntheticBundleInstaller {
      * @param testBundleName the symbolic name of the sub-directory of {@value #BUNDLE_POOL_PATH}, which contains the
      *            files for the synthetic bundle
      * @param extensionsToInclude a list of extension to be included into the synthetic bundle
-     *
      * @return the synthetic bundle representation
      * @throws Exception thrown when error occurs while installing or starting the synthetic bundle
      */
@@ -211,8 +209,7 @@ public class SyntheticBundleInstaller {
      *
      * @param bundleContext the bundle context of the test runtime
      * @param testBundleName the name of the sub-directory of {@value #BUNDLE_POOL_PATH}, which contains the files for
-     *            the
-     *            synthetic bundle
+     *            the synthetic bundle
      * @param extensionsToInclude a list of extension to be included into the synthetic bundle fragment. In order to use
      *            the list of default extensions ({@link #DEFAULT_EXTENSIONS})
      * @return the synthetic bundle representation
@@ -229,8 +226,7 @@ public class SyntheticBundleInstaller {
      *
      * @param bundleContext the bundle context of the test runtime
      * @param testBundleName the name of the sub-directory of {@value #BUNDLE_POOL_PATH}, which contains the files for
-     *            the
-     *            synthetic bundle
+     *            the synthetic bundle
      * @return the synthetic bundle representation
      * @throws Exception thrown when error occurs while installing or starting the synthetic bundle fragment
      */
