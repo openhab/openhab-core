@@ -212,7 +212,7 @@ public class ThingTypesTest extends JavaOSGiTest {
     }
 
     @Test
-    public void thingTypesShouldBeRemoved_whenBundleIsUninstalled() throws Exception {
+    public void thingTypesShouldBeRemovedWhenBundleIsUninstalled() throws Exception {
         try (final AutoCloseable unused = loadedTestBundle()) {
         }
     }

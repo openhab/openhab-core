@@ -294,7 +294,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testGetStateAs_shouldEqualStateUpdate() {
+    public void testGetStateAsShouldEqualStateUpdate() {
         // Main group uses AND function
         GroupItem rootGroupItem = new GroupItem("root", new SwitchItem("baseItem"),
                 new ArithmeticGroupFunction.And(OnOffType.ON, OnOffType.OFF));

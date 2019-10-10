@@ -226,7 +226,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testGetFirmwareStatusInfo_noFirmwareProvider() {
+    public void testGetFirmwareStatusInfoNoFirmwareProvider() {
         final FirmwareStatusInfo unknownInfo = createUnknownInfo(thing3.getUID());
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING3_UID), is(unknownInfo));
 
@@ -237,7 +237,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testGetFirmwareStatusInfo_firmwareProviderAddedLate() {
+    public void testGetFirmwareStatusInfoFirmwareProviderAddedLate() {
         final FirmwareStatusInfo unknownInfo = createUnknownInfo(thing3.getUID());
         final FirmwareStatusInfo upToDateInfo = createUpToDateInfo(thing3.getUID());
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING3_UID), is(unknownInfo));
@@ -263,7 +263,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testGetFirmwareStatusInfo_eventsOnlySentOnce() {
+    public void testGetFirmwareStatusInfoEventsOnlySentOnce() {
         final FirmwareStatusInfo updateExecutableInfoFw112 = createUpdateExecutableInfo(thing1.getUID(), V112);
 
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING1_UID), is(updateExecutableInfoFw112));
@@ -405,22 +405,22 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void cancelFirmwareUpdate_noFirmwareUpdateHandler() {
+    public void cancelFirmwareUpdateNoFirmwareUpdateHandler() {
         firmwareUpdateService.cancelFirmwareUpdate(new ThingUID("dummy:thing:withoutHandler"));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void cancelFirmwareUpdate_thingIdIdNull() {
+    public void cancelFirmwareUpdateThingIdIdNull() {
         firmwareUpdateService.cancelFirmwareUpdate(giveNull());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void cancelFirmwareUpdate_updateNotStarted() {
+    public void cancelFirmwareUpdateUpdateNotStarted() {
         firmwareUpdateService.cancelFirmwareUpdate(THING3_UID);
     }
 
     @Test
-    public void testCancelFirmwareUpdate_unexpectedFailure() {
+    public void testCancelFirmwareUpdateUnexpectedFailure() {
         FirmwareUpdateHandler firmwareUpdateHandler = mock(FirmwareUpdateHandler.class);
         doThrow(new RuntimeException()).when(firmwareUpdateHandler).cancel();
         doReturn(true).when(firmwareUpdateHandler).isUpdateExecutable();
@@ -447,7 +447,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testCancelFirmwareUpdate_takesLong() {
+    public void testCancelFirmwareUpdateTakesLong() {
         firmwareUpdateService.timeout = 50;
         FirmwareUpdateHandler firmwareUpdateHandler = mock(FirmwareUpdateHandler.class);
         doAnswer(invocation -> {
@@ -478,7 +478,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testUpdateFirmware_downgrade() {
+    public void testUpdateFirmwareDowngrade() {
         final FirmwareStatusInfo upToDateInfo = createUpToDateInfo(thing2.getUID());
         final FirmwareStatusInfo updateExecutableInfoFw112 = createUpdateExecutableInfo(thing2.getUID(), V112);
 
@@ -500,27 +500,27 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetFirmwareStatusInfo_null() {
+    public void testGetFirmwareStatusInfoNull() {
         firmwareUpdateService.getFirmwareStatusInfo(giveNull());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetFirmwareStatusInfo_null2() {
+    public void testGetFirmwareStatusInfoNull2() {
         firmwareUpdateService.updateFirmware(giveNull(), V009, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetFirmwareStatusInfo_null3() {
+    public void testGetFirmwareStatusInfoNull3() {
         firmwareUpdateService.updateFirmware(THING1_UID, giveNull(), null);
     }
 
     @Test
-    public void testGetFirmwareStatusInfo_notFirmwareUpdateHandler() {
+    public void testGetFirmwareStatusInfoNotFirmwareUpdateHandler() {
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(UNKNOWN_THING_UID), is(nullValue()));
     }
 
     @Test
-    public void testUpdateFirmware_unknownFirmware() {
+    public void testUpdateFirmwareUnknownFirmware() {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(equalTo(String.format("Firmware with version %s for thing with UID %s was not found.",
                 UNKNOWN_FIRMWARE_VERSION, THING1_UID)));
@@ -529,7 +529,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testUpdateFirmware_noFirmwareUpdateHandler() {
+    public void testUpdateFirmwareNoFirmwareUpdateHandler() {
         Thing thing4 = ThingBuilder.create(THING_TYPE_UID_WITHOUT_FW, THING5_ID).build();
 
         thrown.expect(IllegalArgumentException.class);
@@ -540,7 +540,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testUpdateFirmware_notExecutable() {
+    public void testUpdateFirmwareNotExecutable() {
         doReturn(false).when(handler1).isUpdateExecutable();
 
         thrown.expect(IllegalStateException.class);
@@ -551,7 +551,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testPrerequisiteVersionCheck_illegalVersion() {
+    public void testPrerequisiteVersionCheckIllegalVersion() {
         when(mockFirmwareRegistry.getFirmware(any(Thing.class), any(String.class))).thenAnswer(invocation -> {
             String firmwareVersion = (String) invocation.getArguments()[1];
             if (V111_FIX.equals(firmwareVersion)) {
@@ -649,7 +649,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testFirmwareStatus_updateIsNotExecutable() {
+    public void testFirmwareStatusUpdateIsNotExecutable() {
         final FirmwareStatusInfo updateExecutableInfoFw112 = createUpdateExecutableInfo(thing1.getUID(), V112);
 
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING1_UID), is(updateExecutableInfoFw112));
@@ -673,7 +673,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testUpdateFirmware_wrongModel() {
+    public void testUpdateFirmwareWrongModel() {
         when(mockFirmwareRegistry.getFirmware(any(Thing.class), eq(FWALPHA_RESTRICTED_TO_MODEL2.getVersion()), any()))
                 .thenReturn(FWALPHA_RESTRICTED_TO_MODEL2);
         when(mockFirmwareRegistry.getFirmwares(any(Thing.class), any())).thenAnswer(invocation -> {
@@ -738,7 +738,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testUpdateFirmware_timeOut() {
+    public void testUpdateFirmwareTimeOut() {
         firmwareUpdateService.timeout = 50;
 
         final FirmwareStatusInfo updateExecutableInfoFw112 = createUpdateExecutableInfo(thing1.getUID(), V112);
@@ -760,7 +760,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testUpdateFirmware_error() {
+    public void testUpdateFirmwareError() {
         doAnswer(invocation -> {
             ProgressCallback progressCallback = (ProgressCallback) invocation.getArguments()[1];
             progressCallback.defineSequence(SEQUENCE);
@@ -789,7 +789,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testUpdateFirmware_customError() {
+    public void testUpdateFirmwareCustomError() {
         doAnswer(invocation -> {
             ProgressCallback progressCallback = (ProgressCallback) invocation.getArguments()[1];
             progressCallback.failed("test-error");

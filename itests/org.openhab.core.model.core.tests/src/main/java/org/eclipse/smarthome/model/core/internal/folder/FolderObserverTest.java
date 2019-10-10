@@ -240,7 +240,7 @@ public class FolderObserverTest extends JavaOSGiTest {
      * @throws Exception
      */
     @Test
-    public void testCreation_untrackedExtension() throws Exception {
+    public void testCreationUntrackedExtension() throws Exception {
         String noParserExtension = "jpg";
 
         configProps.put(EXISTING_SUBDIR_NAME, "java,txt," + noParserExtension);
@@ -263,7 +263,7 @@ public class FolderObserverTest extends JavaOSGiTest {
      * @throws Exception
      */
     @Test
-    public void testCreation_untrackedDirectory() throws Exception {
+    public void testCreationUntrackedDirectory() throws Exception {
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg");
         folderObserver.activate(context);
 
@@ -317,7 +317,7 @@ public class FolderObserverTest extends JavaOSGiTest {
      * @throws Exception
      */
     @Test
-    public void testCreation_noExtensions() throws Exception {
+    public void testCreationNoExtensions() throws Exception {
         String subdir = "noExtensionsSubdir";
         new File(WATCHED_DIRECTORY, subdir).mkdirs();
 

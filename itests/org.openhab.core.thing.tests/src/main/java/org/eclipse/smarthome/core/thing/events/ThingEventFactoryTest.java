@@ -64,7 +64,7 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
             .toJson(new TriggerEventPayloadBean(CommonTriggerEvents.PRESSED, CHANNEL_UID.getAsString()));
 
     @Test
-    public void testCreateEvent_ThingStatusInfoEvent() throws Exception {
+    public void testCreateEventThingStatusInfoEvent() throws Exception {
         Event event = factory.createEvent(ThingStatusInfoEvent.TYPE, THING_STATUS_EVENT_TOPIC,
                 THING_STATUS_EVENT_PAYLOAD, null);
 
@@ -89,7 +89,7 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testCreateEvent_ThingAddedEvent() throws Exception {
+    public void testCreateEventThingAddedEvent() throws Exception {
         Event event = factory.createEvent(ThingAddedEvent.TYPE, THING_ADDED_EVENT_TOPIC, THING_ADDED_EVENT_PAYLOAD,
                 null);
 
@@ -125,7 +125,7 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testCreateEvent_ChannelTriggeredEvent() throws Exception {
+    public void testCreateEventChannelTriggeredEvent() throws Exception {
         Event event = factory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
                 CHANNEL_TRIGGERED_EVENT_PAYLOAD, null);
 

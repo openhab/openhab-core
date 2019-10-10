@@ -51,13 +51,13 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testGetSuggestedProfileTypeUID_nullChannelType1() {
+    public void testGetSuggestedProfileTypeUIDNullChannelType1() {
         assertThat(profileFactory.getSuggestedProfileTypeUID((ChannelType) null, CoreItemFactory.SWITCH),
                 is(nullValue()));
     }
 
     @Test
-    public void testGetSuggestedProfileTypeUID_nullChannelType2() {
+    public void testGetSuggestedProfileTypeUIDNullChannelType2() {
         Channel channel = ChannelBuilder.create(new ChannelUID("test:test:test:test"), CoreItemFactory.SWITCH).build();
         assertThat(profileFactory.getSuggestedProfileTypeUID(channel, CoreItemFactory.SWITCH),
                 is(SystemProfiles.DEFAULT));

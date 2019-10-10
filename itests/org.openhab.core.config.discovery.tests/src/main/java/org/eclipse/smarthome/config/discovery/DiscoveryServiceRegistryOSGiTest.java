@@ -138,27 +138,27 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testStartScan_nonExisting() {
+    public void testStartScanNonExisting() {
         assertFalse(discoveryServiceRegistry.startScan(new ThingTypeUID("bindingId", "thingType"), null));
     }
 
     @Test
-    public void testStartScan_existing() {
+    public void testStartScanExisting() {
         assertTrue(discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), null));
     }
 
     @Test
-    public void testStan_faulty() {
+    public void testScanFaulty() {
         assertFalse(discoveryServiceRegistry.startScan(new ThingTypeUID(FAULTY_BINDING_ID, FAULTY_THING_TYPE), null));
     }
 
     @Test
-    public void testAbortScan_nonExisting() {
+    public void testAbortScanNonExisting() {
         assertFalse(discoveryServiceRegistry.abortScan(new ThingTypeUID("bindingId", "thingType")));
     }
 
     @Test
-    public void testAbortScan_known() {
+    public void testAbortScanKnown() {
         ScanListener mockScanListener = mock(ScanListener.class);
 
         assertTrue(discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1),
@@ -195,7 +195,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveOlderResults_works() {
+    public void testRemoveOlderResultsWorks() {
         ScanListener mockScanListener1 = mock(ScanListener.class);
         ScanListener mockScanListener2 = mock(ScanListener.class);
 
@@ -224,7 +224,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveOlderResults_onlySameService() {
+    public void testRemoveOlderResultsOnlySameService() {
         mockDiscoveryListener = mock(DiscoveryListener.class);
         ScanListener mockScanListener1 = mock(ScanListener.class);
 
@@ -262,7 +262,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveOlderResults_onlyOfSpecificBridge() {
+    public void testRemoveOlderResultsOnlyOfSpecificBridge() {
         mockDiscoveryListener = mock(DiscoveryListener.class);
         ScanListener mockScanListener1 = mock(ScanListener.class);
 
@@ -318,7 +318,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testThingDiscovered_removedListener() {
+    public void testThingDiscoveredRemovedListener() {
         ScanListener mockScanListener1 = mock(ScanListener.class);
         discoveryServiceRegistry.addDiscoveryListener(mockDiscoveryListener);
         discoveryServiceRegistry.removeDiscoveryListener(mockDiscoveryListener);
@@ -329,7 +329,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testStartScan_twoDiscoveryServices() {
+    public void testStartScanTwoDiscoveryServices() {
         ScanListener mockScanListener1 = mock(ScanListener.class);
         DiscoveryService anotherDiscoveryServiceMock = new DiscoveryServiceMock(
                 new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), 1);
@@ -343,7 +343,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testStartScan_bindingId() {
+    public void testStartScanBindingId() {
         ScanListener mockScanListener1 = mock(ScanListener.class);
         discoveryServiceRegistry.startScan(ANY_BINDING_ID_1, mockScanListener1);
 
