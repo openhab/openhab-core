@@ -11,7 +11,6 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 /**
- *
  */
 package org.eclipse.smarthome.model.script.tests.lib;
 

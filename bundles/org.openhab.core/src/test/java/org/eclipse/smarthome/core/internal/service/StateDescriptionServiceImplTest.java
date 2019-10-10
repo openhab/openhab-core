@@ -37,7 +37,6 @@ import org.junit.Test;
  * Tests for the StateDescriptionService implementation
  *
  * @author Lyubomir Papazov
- *
  */
 @SuppressWarnings({ "deprecation", "null" })
 public class StateDescriptionServiceImplTest {

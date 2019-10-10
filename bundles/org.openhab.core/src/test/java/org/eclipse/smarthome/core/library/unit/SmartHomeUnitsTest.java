@@ -39,7 +39,6 @@ import tec.uom.se.unit.Units;
  * Test for the framework defined {@link SmartHomeUnits}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public class SmartHomeUnitsTest {
 

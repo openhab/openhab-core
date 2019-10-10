@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.types.CommandDescription;
  * An implementation of this service provides locale specific {@link CommandDescription}s for the given item.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public interface CommandDescriptionService {

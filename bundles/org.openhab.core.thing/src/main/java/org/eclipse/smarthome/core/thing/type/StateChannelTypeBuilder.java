@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.types.StateDescription;
  * Interface for builders for {@link ChannelType}s of kind STATE
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @NonNullByDefault
 public interface StateChannelTypeBuilder extends ChannelTypeBuilder<StateChannelTypeBuilder> {

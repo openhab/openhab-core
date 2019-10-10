@@ -43,7 +43,6 @@ import org.osgi.service.component.annotations.Reference;
  * Provider for framework config parameters on {@link ItemChannelLink}s.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @Component
 public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescriptionProvider {

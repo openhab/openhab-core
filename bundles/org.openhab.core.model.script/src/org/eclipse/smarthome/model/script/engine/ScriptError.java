@@ -25,7 +25,6 @@ import org.eclipse.xtext.util.LineAndColumn;
  * @see ScriptParsingException
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public final class ScriptError {
 

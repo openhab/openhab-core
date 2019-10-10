@@ -37,7 +37,6 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tilman Kamp - Initial contribution
  * @author Kai Kreuzer - Added further German interpretation rules
  * @author Laurent Garnier - Added French interpretation rules
- *
  */
 @Component(service = HumanLanguageInterpreter.class)
 public class StandardInterpreter extends AbstractRuleBasedInterpreter {

@@ -20,9 +20,8 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * This is the activator of the core openHAB bundle.
  *
- * @author Kai Kreuzer
- * @author Thomas.Eichstaedt-Engelen
- *
+ * @author Kai Kreuzer - Initial contribution
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public class CoreActivator implements BundleActivator {
 

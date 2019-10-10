@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * an undefined state if it is dimmed to 50%).
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public enum UnDefType implements PrimitiveType, State {

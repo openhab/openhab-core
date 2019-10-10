@@ -20,7 +20,6 @@ import org.openhab.core.automation.template.RuleTemplate;
  * This is a utility class to convert between the Rule Templates and RuleTemplateDTO objects.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class RuleTemplateDTOMapper {
 

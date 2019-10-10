@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.auth.Credentials;
 /**
  * Provider of credentials which works in given context and can provide credentials out of it.
  *
- * @author Łukasz Dywicki - inital contribution.
+ * @author Łukasz Dywicki - Initial contribution.
  *
  * @param <C> Context type.
  */

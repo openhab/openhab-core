@@ -27,8 +27,7 @@ import org.openhab.core.types.UnDefType;
  * It can also be used as a counter or as any other thing that can be expressed
  * as a number.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class NumberItem extends GenericItem {
 

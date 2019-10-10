@@ -20,7 +20,6 @@ import java.util.Map;
  * This class isolates the java 1.7 functionality which tracks the file system changes.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 @SuppressWarnings("rawtypes")
 public class WatchServiceUtil {

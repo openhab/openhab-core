@@ -23,8 +23,7 @@ import org.slf4j.LoggerFactory;
  * This class holds static "action" methods that can be used from within rules to execute
  * transformations.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class Transformation {
 

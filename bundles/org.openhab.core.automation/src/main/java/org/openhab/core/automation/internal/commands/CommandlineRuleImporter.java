@@ -41,7 +41,6 @@ import org.osgi.framework.ServiceReference;
  *
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
- *
  */
 public class CommandlineRuleImporter extends AbstractCommandProvider<Rule> {
 

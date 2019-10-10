@@ -19,7 +19,6 @@ import org.osgi.service.component.annotations.Component;
 /**
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 
 @Component(immediate = true, service = MagicMultiInstanceServiceMarker.class, property = {

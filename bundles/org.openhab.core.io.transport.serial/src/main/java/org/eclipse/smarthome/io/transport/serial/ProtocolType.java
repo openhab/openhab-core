@@ -20,7 +20,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Holds the {@link PathType}, which specifies whether its a local or remote path and the scheme.
  *
  * @author Matthias Steigenberger - Initial contribution
- *
  */
 @NonNullByDefault
 public class ProtocolType {

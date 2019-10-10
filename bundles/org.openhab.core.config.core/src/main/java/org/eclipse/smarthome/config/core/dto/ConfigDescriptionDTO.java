@@ -20,7 +20,6 @@ import org.eclipse.smarthome.config.core.ConfigDescription;
  * {@link ConfigDescriptionDTO} is a data transfer object for {@link ConfigDescription}.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 public class ConfigDescriptionDTO {
 

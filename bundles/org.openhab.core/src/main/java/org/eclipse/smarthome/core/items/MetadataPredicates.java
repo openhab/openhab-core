@@ -20,7 +20,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Provides some default predicates that are helpful when working with metadata.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public final class MetadataPredicates {

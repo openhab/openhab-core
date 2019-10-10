@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.auth;
  * Marker interface for credentials which can be handled by authentication providers.
  *
  * @author Łukasz Dywicki - Initial contribution
- *
  */
 public interface Credentials {
 

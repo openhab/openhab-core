@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
  * should definitely tweak those settings.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
 

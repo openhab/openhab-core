@@ -30,7 +30,6 @@ import com.google.inject.Module;
  * Guice module that binds openHAB services
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public class ServiceModule implements Module {
 

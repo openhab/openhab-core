@@ -25,7 +25,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Alternatively, {@link #isReady(ReadyMarker)} can be used to check for any given {@link ReadyMarker}.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ReadyService {

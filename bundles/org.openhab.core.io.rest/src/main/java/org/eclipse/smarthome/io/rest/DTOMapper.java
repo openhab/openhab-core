@@ -18,7 +18,6 @@ import java.util.stream.Stream;
  * Utilities for mapping/transforming DTOs.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public interface DTOMapper {
 

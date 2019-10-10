@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.internal.common;
  * Denotes that there already is a thread occupied by the same context.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 class DuplicateExecutionException extends RuntimeException {
     private static final long serialVersionUID = 1L;

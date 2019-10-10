@@ -30,7 +30,6 @@ import org.junit.runners.Parameterized.Parameters;
 /**
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @RunWith(Parameterized.class)
 public class MappingUriExtensionsTest {

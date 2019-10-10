@@ -34,7 +34,6 @@ import org.openhab.core.automation.util.ModuleBuilder;
  * This tests the TimeOfDay Condition.
  *
  * @author Dominik Schlierf - Initial contribution
- *
  */
 public class TimeOfDayConditionHandlerTest extends BasicConditionHandlerTest {
 

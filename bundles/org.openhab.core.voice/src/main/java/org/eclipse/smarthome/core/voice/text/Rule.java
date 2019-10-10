@@ -19,7 +19,6 @@ import java.util.ResourceBundle;
  * deriving classes should conform to this principle.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public abstract class Rule {
 

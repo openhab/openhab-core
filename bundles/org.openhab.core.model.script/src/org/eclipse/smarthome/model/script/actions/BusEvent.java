@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new ESH event concept
- *
  */
 public class BusEvent {
 

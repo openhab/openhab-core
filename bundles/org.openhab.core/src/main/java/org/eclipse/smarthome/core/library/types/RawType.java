@@ -24,9 +24,8 @@ import org.eclipse.smarthome.core.types.State;
  * This type can be used for all binary data such as images, documents, sounds etc.
  * Note that it is NOT adequate for any kind of streams, but only for fixed-size data.
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - add MIME type
- *
  */
 @NonNullByDefault
 public class RawType implements PrimitiveType, State {

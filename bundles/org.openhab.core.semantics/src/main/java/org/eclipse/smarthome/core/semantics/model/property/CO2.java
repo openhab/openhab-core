@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a CO2.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Property_CO2", label = "CO2", synonyms = "Carbon Dioxide", description = "")
 public interface CO2 extends Property {

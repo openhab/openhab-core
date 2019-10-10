@@ -45,7 +45,6 @@ import org.openhab.core.automation.type.Output;
  * Tests for the {@link AnnotatedActionModuleTypeProvider}
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class AnnotationActionModuleTypeProviderTest extends JavaTest {
 

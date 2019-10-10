@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * A Storage is the generic way to store key-value pairs in ESH. Each Storage
  * implementation can store its data differently, e.g in-memory or in-database.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial contribution
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Kai Kreuzer - improved return values
  */
 @NonNullByDefault

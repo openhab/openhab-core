@@ -42,7 +42,6 @@ import org.mockito.Mock;
 /**
  *
  * @author Simon Kaufmann - Initial contribution and API
- *
  */
 public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
 

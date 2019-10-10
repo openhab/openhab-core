@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Wall Switch.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_WallSwitch", label = "Wall Switch", synonyms = "Wall Switches", description = "")
 public interface WallSwitch extends Equipment {

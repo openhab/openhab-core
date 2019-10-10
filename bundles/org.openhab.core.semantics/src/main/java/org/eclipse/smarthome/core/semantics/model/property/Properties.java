@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.semantics.model.Property;
  * This class provides a stream of all defined properties.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 public class Properties {
 

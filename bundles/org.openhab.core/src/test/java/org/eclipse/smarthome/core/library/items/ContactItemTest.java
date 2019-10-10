@@ -20,7 +20,6 @@ import org.junit.Test;
 /**
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class ContactItemTest {
 

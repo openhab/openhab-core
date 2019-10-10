@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  * at a specific time (format 'hh:mm').
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler implements SchedulerRunnable {
 

@@ -17,7 +17,6 @@ package org.eclipse.smarthome.config.core.dto;
  * parameter group.
  *
  * @author Chris Jackson - Initial contribution
- *
  */
 public class ConfigDescriptionParameterGroupDTO {
 

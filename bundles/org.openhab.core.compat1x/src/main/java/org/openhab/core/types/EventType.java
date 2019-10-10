@@ -19,8 +19,7 @@ package org.openhab.core.types;
  * ON or that it should turn itself ON? To decide this, we send the event
  * type as an additional information on the event bus for each message.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public enum EventType {
     COMMAND,

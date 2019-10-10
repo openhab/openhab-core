@@ -18,7 +18,6 @@ import org.openhab.core.automation.dto.RuleDTO;
  * An {@link RuleUpdatedEvent} notifies subscribers that a rule has been updated.
  *
  * @author Benedikt Niehues - Initial contribution
- *
  */
 public class RuleUpdatedEvent extends AbstractRuleRegistryEvent {
 

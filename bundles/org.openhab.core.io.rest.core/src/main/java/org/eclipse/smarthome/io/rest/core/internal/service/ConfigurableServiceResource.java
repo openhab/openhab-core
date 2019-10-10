@@ -70,7 +70,6 @@ import io.swagger.annotations.ApiResponses;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Franck Dechavanne - Added DTOs to ApiResponses
- *
  */
 @Path(ConfigurableServiceResource.PATH_SERVICES)
 @RolesAllowed({ Role.ADMIN })

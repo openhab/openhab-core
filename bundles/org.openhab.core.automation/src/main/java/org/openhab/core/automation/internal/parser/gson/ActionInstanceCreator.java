@@ -23,7 +23,6 @@ import com.google.gson.InstanceCreator;
  * This class creates {@link ActionType} instances.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class ActionInstanceCreator implements InstanceCreator<CompositeActionType> {
 

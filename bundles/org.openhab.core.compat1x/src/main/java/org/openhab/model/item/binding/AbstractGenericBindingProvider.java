@@ -38,8 +38,7 @@ import org.slf4j.LoggerFactory;
  * listeners are correctly notified of any change.
  * <p>
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class AbstractGenericBindingProvider implements BindingConfigReader, BindingProvider {
 

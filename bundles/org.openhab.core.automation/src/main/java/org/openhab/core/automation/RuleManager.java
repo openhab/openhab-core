@@ -25,7 +25,6 @@ import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
  * for a single {@link Rule} to the Rule Engine.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface RuleManager {

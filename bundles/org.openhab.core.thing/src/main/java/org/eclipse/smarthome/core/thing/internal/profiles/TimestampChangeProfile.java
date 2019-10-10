@@ -27,7 +27,6 @@ import org.eclipse.smarthome.core.types.State;
  * The timestamp updates to now each time the channel or item state changes.
  *
  * @author Gaël L'hopital - Initial contribution
- *
  */
 @NonNullByDefault
 public class TimestampChangeProfile implements StateProfile {

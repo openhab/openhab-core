@@ -101,10 +101,9 @@ import org.slf4j.LoggerFactory;
  * registered providers as this is done inside this class.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Chris Jackson
+ * @author Chris Jackson - Initial contribution
  * @author Stefan Triller - Method to convert a state into something a sitemap entity can understand
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
- *
  */
 @Component
 public class ItemUIRegistryImpl implements ItemUIRegistry {

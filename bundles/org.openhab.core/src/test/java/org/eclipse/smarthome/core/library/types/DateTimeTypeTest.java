@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 /**
- * @author Thomas.Eichstaedt-Engelen - Initial contribution
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Gaël L'hopital - Added Timezone and Milliseconds
  * @author Erdoan Hadzhiyusein - Added ZonedDateTime tests
  * @author Laurent Garnier - Enhanced tests

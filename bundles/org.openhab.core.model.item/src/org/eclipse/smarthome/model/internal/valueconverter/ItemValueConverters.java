@@ -23,7 +23,6 @@ import com.google.inject.Inject;
  * Registers {@link IValueConverter}s for the items language.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public class ItemValueConverters extends DefaultTerminalConverters {
 

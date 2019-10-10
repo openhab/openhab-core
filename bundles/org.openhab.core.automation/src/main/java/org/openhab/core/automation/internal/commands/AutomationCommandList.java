@@ -34,7 +34,6 @@ import org.openhab.core.automation.type.ModuleType;
  * </ul>
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class AutomationCommandList extends AutomationCommand {
 

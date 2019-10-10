@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
  * configuration.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 

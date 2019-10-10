@@ -46,7 +46,6 @@ import tec.uom.se.unit.Units;
  * A utility for parsing dimensions to interface classes of {@link Quantity} and parsing units from format strings.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public class UnitUtils {

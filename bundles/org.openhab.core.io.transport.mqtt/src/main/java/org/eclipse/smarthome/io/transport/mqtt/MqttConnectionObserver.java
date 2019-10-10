@@ -19,8 +19,8 @@ import org.eclipse.jdt.annotation.Nullable;
  * Implement this interface to get notified of connection state changes.
  * Register this observer at {@see MqttBrokerConnection}.
  *
- * @author David Graeff - Rewritten
  * @author Markus Rathgeb - Initial contribution
+ * @author David Graeff - Rewritten
  */
 @NonNullByDefault
 public interface MqttConnectionObserver {

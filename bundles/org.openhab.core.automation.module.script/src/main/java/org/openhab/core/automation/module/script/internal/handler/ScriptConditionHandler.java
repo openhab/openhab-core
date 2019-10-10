@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * This handler can evaluate a condition based on a script.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Simon Merschjohann
+ * @author Simon Merschjohann - Initial contribution
  */
 @NonNullByDefault
 public class ScriptConditionHandler extends AbstractScriptModuleHandler<Condition> implements ConditionHandler {

@@ -16,7 +16,6 @@ package org.eclipse.smarthome.model.item;
  * This exception is used by {@link BindingConfigReader} instances if parsing configurations fails
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class BindingConfigParseException extends Exception {
 

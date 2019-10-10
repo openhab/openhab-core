@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * Interface to the safe call manager which handles queuing and tracking of safe-call executions.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface SafeCallManager {

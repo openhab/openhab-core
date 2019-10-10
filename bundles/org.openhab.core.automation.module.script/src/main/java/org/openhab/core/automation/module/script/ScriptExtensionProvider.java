@@ -19,7 +19,6 @@ import java.util.Map;
  * A {@link ScriptExtensionProvider} can provide variable and types on ScriptEngine instance basis.
  *
  * @author Simon Merschjohann - Initial contribution
- *
  */
 public interface ScriptExtensionProvider {
 

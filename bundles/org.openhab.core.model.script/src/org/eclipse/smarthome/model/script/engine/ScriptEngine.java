@@ -19,7 +19,6 @@ import org.eclipse.xtext.xbase.XExpression;
  * simple strings. These scripts can then be executed by the caller.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface ScriptEngine {
 

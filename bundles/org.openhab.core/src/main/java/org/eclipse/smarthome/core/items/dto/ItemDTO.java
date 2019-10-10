@@ -20,7 +20,6 @@ import java.util.Set;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - added tag support
- *
  */
 public class ItemDTO {
 

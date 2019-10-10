@@ -20,7 +20,6 @@ import org.eclipse.smarthome.core.audio.AudioSink;
  * A DTO that is used on the REST API to provide infos about {@link AudioSink} to UIs.
  *
  * @author Laurent Garnier - Initial contribution
- *
  */
 @NonNullByDefault
 public class AudioSinkDTO {

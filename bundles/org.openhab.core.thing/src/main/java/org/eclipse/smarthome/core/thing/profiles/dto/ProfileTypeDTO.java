@@ -18,7 +18,6 @@ import java.util.Collection;
  * DTO for profile types
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class ProfileTypeDTO {
 

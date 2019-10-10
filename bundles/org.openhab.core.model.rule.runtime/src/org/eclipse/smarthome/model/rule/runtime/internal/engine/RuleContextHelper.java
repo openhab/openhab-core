@@ -31,7 +31,6 @@ import com.google.inject.Provider;
  * Helper class to deal with rule evaluation contexts.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @SuppressWarnings("restriction")
 public class RuleContextHelper {

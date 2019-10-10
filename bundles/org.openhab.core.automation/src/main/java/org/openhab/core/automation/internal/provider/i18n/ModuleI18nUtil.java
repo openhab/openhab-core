@@ -30,7 +30,6 @@ import org.osgi.framework.Bundle;
  * default text is not a constant with the assistance of {@link TranslationProvider}.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class ModuleI18nUtil {
 

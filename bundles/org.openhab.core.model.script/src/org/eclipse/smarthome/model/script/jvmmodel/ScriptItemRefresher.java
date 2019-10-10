@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Libutzki - Initial contribution
  * @author Kai Kreuzer - added delayed execution
- *
  */
 @Component(service = ScriptItemRefresher.class, immediate = true)
 public class ScriptItemRefresher implements ItemRegistryChangeListener {

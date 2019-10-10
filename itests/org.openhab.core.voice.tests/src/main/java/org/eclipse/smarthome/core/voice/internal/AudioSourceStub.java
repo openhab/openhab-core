@@ -25,9 +25,8 @@ import org.eclipse.smarthome.core.audio.AudioStream;
 /**
  * An {@link AudioSource} stub used for the tests
  *
- * @author Mihaela Memova - inital contribution
- *
- * @author Velin Yordanov - migrated from groovy to java
+ * @author Mihaela Memova - Initial contribution
+ * @author Velin Yordanov - Migrated from groovy to java
  */
 public class AudioSourceStub implements AudioSource {
 

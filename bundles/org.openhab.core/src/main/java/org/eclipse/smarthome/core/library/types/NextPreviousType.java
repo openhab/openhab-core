@@ -20,7 +20,7 @@ import org.eclipse.smarthome.core.types.PrimitiveType;
 /**
  * This type is used by the {@link PlayerItem}.
  *
- * @author Alex Tugarev
+ * @author Alex Tugarev - Initial contribution
  */
 @NonNullByDefault
 public enum NextPreviousType implements PrimitiveType, Command {

@@ -39,7 +39,6 @@ import org.junit.Test;
  * Tests for the ProfileTypeResource
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class ProfileTypeResourceTest extends JavaTest {
 

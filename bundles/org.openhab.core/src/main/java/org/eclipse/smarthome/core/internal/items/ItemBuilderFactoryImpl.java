@@ -31,7 +31,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * be present.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 @Component

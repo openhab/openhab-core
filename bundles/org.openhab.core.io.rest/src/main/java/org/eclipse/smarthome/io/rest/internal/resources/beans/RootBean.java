@@ -20,7 +20,6 @@ import java.util.List;
  * page of the REST interface.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class RootBean {
 

@@ -13,7 +13,7 @@
 package org.eclipse.smarthome.test;
 
 /**
- * @author Tanya Georgieva - Refactor the groovy file to java
+ * @author Tanya Georgieva - Initial contribution
  */
 public class AsyncResultWrapper<T> {
     private T wrappedObject;

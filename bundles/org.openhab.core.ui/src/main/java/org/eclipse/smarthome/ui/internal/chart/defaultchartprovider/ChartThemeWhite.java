@@ -19,7 +19,6 @@ import java.awt.Font;
  * Implementation of the white {@link ChartTheme chart theme}.
  *
  * @author Holger Reichert - Initial contribution
- *
  */
 public class ChartThemeWhite implements ChartTheme {
 

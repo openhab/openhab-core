@@ -27,7 +27,6 @@ import org.eclipse.smarthome.core.library.types.PercentType;
  * @author Harald Kuhn - Initial contribution
  * @author Kelly Davis - Modified to match discussion in #584
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
- *
  */
 @NonNullByDefault
 public interface AudioSink {

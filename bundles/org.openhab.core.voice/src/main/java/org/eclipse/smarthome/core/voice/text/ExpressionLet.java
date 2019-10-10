@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
  * This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public final class ExpressionLet extends Expression {
 

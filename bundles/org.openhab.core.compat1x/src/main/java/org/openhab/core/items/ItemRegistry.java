@@ -22,8 +22,7 @@ import java.util.Collection;
  * Items are registered by {@link ItemProvider}s, which can provision them from any source
  * they like and also dynamically remove or add items.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ItemRegistry {
 

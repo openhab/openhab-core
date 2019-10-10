@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.semantics.model.Location;
  * This class provides a stream of all defined locations.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 public class Locations {
 

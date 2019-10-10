@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * library for scheduling.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class TimerImpl implements Timer {
 

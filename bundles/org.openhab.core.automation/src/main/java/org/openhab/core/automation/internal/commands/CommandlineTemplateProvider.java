@@ -51,7 +51,6 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
- *
  */
 public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTemplate> implements RuleTemplateProvider {
 

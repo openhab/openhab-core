@@ -26,7 +26,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  * This version of the proxy servlet uses asynchronous I/O and request processing, and is based on Jetty's proxy
  * servlets. It depends on Servlet API 3.0 or later.
  *
- * @author John Cocula - new version that uses Jetty proxy classes
+ * @author John Cocula - Initial contribution
  */
 public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet {
 

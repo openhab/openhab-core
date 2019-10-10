@@ -20,7 +20,6 @@ import org.eclipse.smarthome.core.common.AbstractUID;
  * It is a simple combination of a namespace and an item name.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public final class MetadataKey extends AbstractUID {

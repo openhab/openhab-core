@@ -17,7 +17,6 @@ package org.eclipse.smarthome.core.thing.type;
  * command was received.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public enum AutoUpdatePolicy {
     /**

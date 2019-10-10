@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
  * This is an ModuleHandler implementation for trigger channels with specific events
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 

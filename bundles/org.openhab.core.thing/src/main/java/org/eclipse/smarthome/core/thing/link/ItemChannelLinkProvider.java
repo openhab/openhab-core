@@ -20,7 +20,6 @@ import org.eclipse.smarthome.core.common.registry.Provider;
  * links.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ItemChannelLinkProvider extends Provider<ItemChannelLink> {

@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * {@link JavaTest} is an abstract base class for tests which are not necessarily based on OSGi.
  *
- * @author Simon Kaufmann - factored out of JavaOSGiTest
+ * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
 public class JavaTest {

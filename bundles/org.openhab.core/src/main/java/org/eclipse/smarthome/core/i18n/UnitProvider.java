@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * Provides {@link Unit}s and the current {@link SystemOfUnits}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public interface UnitProvider {

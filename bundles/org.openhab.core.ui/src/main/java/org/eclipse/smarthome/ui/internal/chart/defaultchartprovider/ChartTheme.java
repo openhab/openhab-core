@@ -19,7 +19,6 @@ import java.awt.Font;
  * Chart styling theme for the {@link DefaultChartProvider}.
  *
  * @author Holger Reichert - Initial contribution
- *
  */
 public interface ChartTheme {
 

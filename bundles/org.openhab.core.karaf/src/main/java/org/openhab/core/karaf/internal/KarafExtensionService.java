@@ -37,8 +37,7 @@ import org.slf4j.LoggerFactory;
  * features service. This exposes all openHAB addons through the rest api and allows
  * UIs to dynamically install and uninstall them.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(name = "org.openhab.core.karafextension")
 public class KarafExtensionService implements ExtensionService {

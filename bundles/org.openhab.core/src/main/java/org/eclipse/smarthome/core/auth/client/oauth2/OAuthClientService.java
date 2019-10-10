@@ -77,7 +77,6 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Gary Tse - Initial contribution
  * @author Hilbrand Bouwkamp - Added AccessTokenRefreshListener, fixed javadoc warnings
- *
  */
 @NonNullByDefault
 public interface OAuthClientService extends AutoCloseable {

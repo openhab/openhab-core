@@ -41,7 +41,6 @@ import org.osgi.service.event.EventHandler;
  * It simply duplicates events with an updated topic prefix and works both ways.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Component(immediate = true, property = "event.topics=smarthome/*")
 public class EventBridge implements EventHandler, EventSubscriber {

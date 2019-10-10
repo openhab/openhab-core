@@ -39,7 +39,6 @@ import org.osgi.service.component.annotations.Component;
  * methods.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(service = { MetadataProvider.class, GenericMetadataProvider.class })

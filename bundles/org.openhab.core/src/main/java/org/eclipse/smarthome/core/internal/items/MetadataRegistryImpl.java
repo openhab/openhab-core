@@ -32,7 +32,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * keeps track of all declared metadata of all metadata providers.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Component(immediate = true, service = { MetadataRegistry.class })
 public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey, MetadataProvider>

@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.auth;
  * Interface defining constants for roles within ESH.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface Role {
 

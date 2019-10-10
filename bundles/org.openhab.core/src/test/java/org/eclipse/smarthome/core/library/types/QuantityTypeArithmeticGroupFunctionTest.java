@@ -40,7 +40,7 @@ import org.mockito.Mock;
 import tec.uom.se.unit.Units;
 
 /**
- * @author Henning Treu
+ * @author Henning Treu - Initial contribution
  */
 public class QuantityTypeArithmeticGroupFunctionTest {
 

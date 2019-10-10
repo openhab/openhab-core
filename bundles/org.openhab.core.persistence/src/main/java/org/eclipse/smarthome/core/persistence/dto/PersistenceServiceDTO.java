@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.persistence.dto;
  * This is a java bean that is used to serialize services to JSON.
  *
  * @author Chris Jackson - Initial contribution
- *
  */
 public class PersistenceServiceDTO {
     public PersistenceServiceDTO() {

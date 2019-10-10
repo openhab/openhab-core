@@ -31,9 +31,7 @@ import org.junit.Before;
  * It takes care of the mocks, stubs and services that are used in all the extending classes.
  *
  * @author Mihaela Memova - Initial contribution
- *
  * @author Velin Yordanov - migrated tests from groovy to java
- *
  */
 public abstract class VoiceConsoleCommandExtensionTest extends JavaOSGiTest {
     protected VoiceManagerImpl voiceManager;

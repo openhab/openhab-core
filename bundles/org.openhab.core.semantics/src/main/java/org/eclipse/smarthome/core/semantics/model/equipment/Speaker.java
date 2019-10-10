@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Speaker.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_Speaker", label = "Speaker", synonyms = "Speakers", description = "")
 public interface Speaker extends Equipment {

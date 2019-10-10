@@ -32,7 +32,6 @@ import org.junit.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution and API
- *
  */
 public class SystemChannelsInChannelGroupsTest extends JavaOSGiTest {
 

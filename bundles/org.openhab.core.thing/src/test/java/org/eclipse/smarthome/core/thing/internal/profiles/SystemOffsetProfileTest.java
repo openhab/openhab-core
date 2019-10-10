@@ -37,7 +37,6 @@ import org.mockito.ArgumentCaptor;
  * Tests for the system:offset profile
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class SystemOffsetProfileTest {
 

@@ -28,7 +28,6 @@ import org.eclipse.smarthome.core.types.State;
  * for state updates.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public class SystemDefaultProfile implements StateProfile {

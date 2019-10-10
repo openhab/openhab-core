@@ -21,7 +21,6 @@ import org.osgi.service.http.HttpService;
  * {@link HttpService#registerServlet} and corresponding methods.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public interface HttpContextFactoryService {
 

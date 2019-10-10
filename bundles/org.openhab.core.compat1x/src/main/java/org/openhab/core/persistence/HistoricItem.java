@@ -26,7 +26,7 @@ import org.openhab.core.types.State;
  * getAcceptedXTypes() and getGroupNames().
  * </p>
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface HistoricItem {
 

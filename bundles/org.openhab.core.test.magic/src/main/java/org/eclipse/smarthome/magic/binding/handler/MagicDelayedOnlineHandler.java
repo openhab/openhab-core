@@ -26,7 +26,6 @@ import org.eclipse.smarthome.core.types.Command;
  * ThingHandler for a thing that goes online after 15 seconds
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @NonNullByDefault
 public class MagicDelayedOnlineHandler extends BaseThingHandler {

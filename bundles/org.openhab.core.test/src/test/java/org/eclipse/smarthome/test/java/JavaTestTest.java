@@ -22,7 +22,6 @@ import org.junit.Test;
  * Testing the test. Test suite for the JavaTest base test class.
  *
  * @author Henning Treu - Initial contribution.
- *
  */
 public class JavaTestTest {
 

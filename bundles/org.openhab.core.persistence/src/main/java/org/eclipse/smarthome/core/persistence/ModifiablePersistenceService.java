@@ -24,7 +24,6 @@ import org.eclipse.smarthome.core.types.State;
  * and then periodically provide it to the server to be accommodated.
  *
  * @author Chris Jackson - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ModifiablePersistenceService extends QueryablePersistenceService {

@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Jan N. Klug - add timeout methods
- *
  */
 public class HTTP {
 

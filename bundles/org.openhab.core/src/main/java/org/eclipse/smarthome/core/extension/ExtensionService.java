@@ -22,7 +22,6 @@ import java.util.Locale;
  * The REST API offers an uri that exposes this functionality.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface ExtensionService {
 

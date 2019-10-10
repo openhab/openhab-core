@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements {@link MqttService}.
  *
+ * @author Davy Vanherbergen - Initial contribution
  * @author David Graeff - Added/Removed observer interface, Add/Remove/Enumerate broker connections.
- * @author Davy Vanherbergen
  * @author Markus Rathgeb - Synchronize access to broker connections
  */
 @Component(immediate = true, service = {

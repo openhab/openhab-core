@@ -18,8 +18,7 @@ import java.util.SortedMap;
  * A complex type consists out of a sorted list of primitive constituents.
  * Each constituent can be referred to by a unique name.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ComplexType extends Type {
 

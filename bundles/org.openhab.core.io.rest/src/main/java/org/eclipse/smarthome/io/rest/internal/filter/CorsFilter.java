@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
  * This implementation does not allow specific request/response headers nor cookies (allowCredentials).
  *
  * @author Antoine Besnard - Initial contribution
- *
  */
 @Provider
 @Component(immediate = true, property = {

@@ -30,7 +30,6 @@ import org.eclipse.smarthome.magic.binding.MagicBindingConstants;
  * delays between the steps.
  *
  * @author Dimitar Ivanov - Initial contribution
- *
  */
 @NonNullByDefault
 public class MagicFirmwareUpdateThingHandler extends BaseThingHandler implements FirmwareUpdateHandler {

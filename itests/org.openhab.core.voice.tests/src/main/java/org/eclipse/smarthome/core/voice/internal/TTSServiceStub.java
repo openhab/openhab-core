@@ -31,9 +31,7 @@ import org.osgi.framework.ServiceReference;
  * A {@link TTSService} stub used for the tests.
  *
  * @author Mihaela Memova - Initial contribution
- *
  * @author Velin Yordanov - migrated from groovy to java
- *
  */
 public class TTSServiceStub implements TTSService {
 

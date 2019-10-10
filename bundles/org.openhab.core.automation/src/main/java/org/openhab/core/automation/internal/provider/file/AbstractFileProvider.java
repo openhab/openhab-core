@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
  * {@link ProviderChangeListener}s for adding, updating and removing the {@link ModuleType}s or {@link Template}s.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public abstract class AbstractFileProvider<E> implements Provider<E> {
 

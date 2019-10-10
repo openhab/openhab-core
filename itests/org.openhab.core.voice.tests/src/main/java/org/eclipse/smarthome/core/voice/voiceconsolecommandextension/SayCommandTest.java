@@ -44,9 +44,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * A {@link VoiceConsoleCommandExtensionTest} which tests the execution of the command "say".
  *
  * @author Mihaela Memova - Initial contribution
- *
  * @author Velin Yordanov - migrated tests from groovy to java
- *
  */
 @RunWith(Parameterized.class)
 public class SayCommandTest extends VoiceConsoleCommandExtensionTest {

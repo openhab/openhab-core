@@ -59,7 +59,6 @@ import org.osgi.framework.ServiceReference;
  * @author Kai Kreuzer - Applied formatting and license to the file
  * @author Dimitar Ivanov - The extension to include can be configured or default ones can be used; update method is
  *         introduced
- *
  */
 public class SyntheticBundleInstaller {
 

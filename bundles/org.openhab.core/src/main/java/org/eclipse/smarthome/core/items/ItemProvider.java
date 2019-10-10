@@ -21,7 +21,6 @@ import org.eclipse.smarthome.core.common.registry.Provider;
  * they can be derived from some dynamic logic.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ItemProvider extends Provider<Item> {

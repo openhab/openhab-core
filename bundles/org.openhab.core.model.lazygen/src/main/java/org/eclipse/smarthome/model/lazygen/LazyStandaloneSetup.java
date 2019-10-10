@@ -37,7 +37,6 @@ import org.eclipse.emf.mwe.utils.GenModelHelper;
 /**
  *
  * @author Holger Schill, Simon Kaufmann - Initial contribution
- *
  */
 public class LazyStandaloneSetup extends AbstractWorkflowComponent2 {
 

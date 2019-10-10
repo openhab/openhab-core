@@ -41,7 +41,6 @@ import org.osgi.service.component.annotations.Reference;
  * @author Chris Jackson - Initial contribution
  * @author Chris Jackson - Updated to separate thing type from thing name
  * @author Simon Kaufmann - Added support for channel config descriptions, turned into alias handler
- *
  */
 @Component
 @NonNullByDefault

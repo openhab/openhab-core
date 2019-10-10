@@ -17,7 +17,6 @@ package org.eclipse.smarthome.config.core.dto;
  * parameter.
  *
  * @author Alex Tugarev - Initial contribution
- *
  */
 public class ParameterOptionDTO {
 

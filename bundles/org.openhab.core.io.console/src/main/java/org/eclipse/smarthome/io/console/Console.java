@@ -17,7 +17,6 @@ package org.eclipse.smarthome.io.console;
  * It allows basic output commands.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface Console {
 

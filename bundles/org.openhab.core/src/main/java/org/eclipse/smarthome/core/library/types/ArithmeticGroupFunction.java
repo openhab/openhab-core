@@ -30,7 +30,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Eichstädt-Engelen - Added "N" functions
  * @author Gaël L'hopital - Added count function
- *
  */
 public interface ArithmeticGroupFunction extends GroupFunction {
 

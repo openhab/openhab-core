@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Reorganization of Guice injection
- *
  */
 @Component(immediate = true)
 public class ScriptEngineImpl implements ScriptEngine, ModelParser {

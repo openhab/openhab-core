@@ -39,7 +39,6 @@ import org.osgi.service.component.annotations.Reference;
  * It is not meant to be used anywhere productively.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Component
 public class SampleExtensionService implements ExtensionService {

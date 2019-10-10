@@ -26,7 +26,6 @@ import org.openhab.core.automation.template.TemplateProvider;
  * for importing the {@link RuleTemplate}s from local files.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public abstract class TemplateFileProvider extends AbstractFileProvider<RuleTemplate> implements RuleTemplateProvider {
 

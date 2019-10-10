@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Each constituent can be referred to by a unique name.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface ComplexType extends Type {

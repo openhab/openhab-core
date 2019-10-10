@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.voice.Voice;
  * A DTO that is used on the REST API to provide infos about {@link Voice} to UIs.
  *
  * @author Laurent Garnier - Initial contribution
- *
  */
 public class VoiceDTO {
     public String id;

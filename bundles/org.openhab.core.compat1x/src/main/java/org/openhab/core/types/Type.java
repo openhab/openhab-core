@@ -22,8 +22,7 @@ import java.util.Formatter;
  * captured by this marker interface and allows implementing classes
  * to be both state and command at the same time.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface Type {
 

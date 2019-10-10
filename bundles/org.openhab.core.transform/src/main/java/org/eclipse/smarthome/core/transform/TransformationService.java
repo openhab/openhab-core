@@ -26,9 +26,8 @@ import org.eclipse.jdt.annotation.Nullable;
  * One could provide his own processors by providing a new implementation of this
  * Interface.
  *
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface TransformationService {

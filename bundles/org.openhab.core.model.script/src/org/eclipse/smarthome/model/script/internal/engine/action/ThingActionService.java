@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Maoliang Huang - Initial contribution
  * @author Kai Kreuzer - Extended for general thing access
- *
  */
 @Component(immediate = true)
 public class ThingActionService implements ActionService {

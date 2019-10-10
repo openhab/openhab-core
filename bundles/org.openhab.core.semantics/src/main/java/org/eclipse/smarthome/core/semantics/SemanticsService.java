@@ -23,7 +23,6 @@ import org.eclipse.smarthome.core.semantics.model.Location;
  * This interface defines a service, which offers functionality regarding semantic tags.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public interface SemanticsService {

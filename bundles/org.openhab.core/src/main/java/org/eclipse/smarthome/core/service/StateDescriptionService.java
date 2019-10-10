@@ -23,7 +23,6 @@ import org.eclipse.smarthome.core.types.StateDescription;
  * different StateDescriptionProviders into one StateDescription.
  * 
  * @author Lyubomir Papazov - Initial contribution
- *
  */
 @NonNullByDefault
 public interface StateDescriptionService {

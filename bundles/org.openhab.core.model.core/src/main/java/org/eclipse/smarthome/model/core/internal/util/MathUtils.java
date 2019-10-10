@@ -17,7 +17,6 @@ package org.eclipse.smarthome.model.core.internal.util;
  * code of this bundle.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class MathUtils {
 

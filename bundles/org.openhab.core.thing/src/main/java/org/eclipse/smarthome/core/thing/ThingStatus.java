@@ -17,7 +17,6 @@ package org.eclipse.smarthome.core.thing;
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Simon Kaufmann - added UNKNOWN, removed numbers
- *
  */
 public enum ThingStatus {
     UNINITIALIZED,

@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Extension of the default OSGi bundle activator
  *
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public final class SchedulerActivator implements BundleActivator {
 

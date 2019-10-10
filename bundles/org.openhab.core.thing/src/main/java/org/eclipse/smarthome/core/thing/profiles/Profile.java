@@ -25,7 +25,6 @@ import org.eclipse.smarthome.core.types.State;
  * per link for all communication so that the temporal dimension can be taken in account.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public interface Profile {

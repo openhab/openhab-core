@@ -19,7 +19,6 @@ package org.eclipse.smarthome.config.core;
  * selection list for the parameter value.
  *
  * @author Alex Tugarev - Initial contribution
- *
  */
 public class ParameterOption {
 

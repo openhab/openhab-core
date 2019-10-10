@@ -32,7 +32,6 @@ import org.osgi.service.component.annotations.Component;
  * 503 - Service Unavailable.
  *
  * @author Ivan Iliev - Initial contribution
- *
  */
 @Provider
 @Component(immediate = true, service = SatisfiableResourceFilter.class)

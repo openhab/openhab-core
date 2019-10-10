@@ -16,7 +16,6 @@ package org.eclipse.smarthome.config.core;
  * This class provides constants relevant for the configuration of openHAB
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ConfigConstants {
 

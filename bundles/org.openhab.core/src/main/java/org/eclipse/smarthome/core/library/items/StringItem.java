@@ -33,7 +33,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * from a device.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public class StringItem extends GenericItem {

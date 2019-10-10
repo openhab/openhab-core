@@ -30,7 +30,6 @@ import org.openhab.core.automation.type.ModuleTypeRegistry;
  * configuration values.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class ConfigurationNormalizer {
 

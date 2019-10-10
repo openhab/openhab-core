@@ -17,7 +17,6 @@ package org.eclipse.smarthome.core.items;
  * not be found.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ItemNotFoundException extends ItemLookupException {
 

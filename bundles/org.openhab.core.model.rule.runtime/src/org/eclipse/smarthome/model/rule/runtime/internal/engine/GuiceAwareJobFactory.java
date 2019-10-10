@@ -26,7 +26,6 @@ import com.google.inject.Injector;
  * Guice injection within the Quartz jobs.
  * 
  * @author Oliver Libutzki - Initial contribution
- *
  */
 public class GuiceAwareJobFactory implements JobFactory {
 

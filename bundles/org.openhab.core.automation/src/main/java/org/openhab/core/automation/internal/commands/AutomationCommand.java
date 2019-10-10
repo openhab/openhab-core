@@ -18,7 +18,6 @@ package org.openhab.core.automation.internal.commands;
  * provider.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public abstract class AutomationCommand {
 

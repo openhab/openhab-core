@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - Send commands to an item to indicate the keyword has been spotted
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  * @author Christoph Weitkamp - Added parameter to adjust the volume
- *
  */
 public class DialogProcessor implements KSListener, STTListener {
 

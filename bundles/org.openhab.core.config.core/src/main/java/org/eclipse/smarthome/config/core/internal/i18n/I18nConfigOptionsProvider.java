@@ -32,7 +32,6 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Simon Kaufmann - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone
- *
  */
 @Component(immediate = true)
 public class I18nConfigOptionsProvider implements ConfigOptionProvider {

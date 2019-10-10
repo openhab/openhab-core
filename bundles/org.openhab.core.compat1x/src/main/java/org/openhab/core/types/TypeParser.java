@@ -19,8 +19,7 @@ import java.util.List;
 /**
  * This is a helper class that helps parsing a string into an openHAB type (state or command).
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class TypeParser {
 

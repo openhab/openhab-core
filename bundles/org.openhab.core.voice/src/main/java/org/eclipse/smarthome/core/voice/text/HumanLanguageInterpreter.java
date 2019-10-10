@@ -19,7 +19,6 @@ import java.util.Set;
  * This is the interface that a human language text interpreter has to implement.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public interface HumanLanguageInterpreter {
 

@@ -36,7 +36,6 @@ import org.openhab.core.automation.util.ReferenceResolver;
  * rule context. The outputs of the child triggers are not visible out of context of the trigger.
  *
  * @author Yordan Mihaylov - Initial contribution
- *
  */
 public class CompositeTriggerHandler
         extends AbstractCompositeModuleHandler<Trigger, CompositeTriggerType, TriggerHandler>

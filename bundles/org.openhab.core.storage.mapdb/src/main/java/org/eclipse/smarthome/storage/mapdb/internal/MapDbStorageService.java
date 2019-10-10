@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * This implementation of {@link StorageService} provides abilities to store
  * data in the lightweight key-value-store <a href="http://www.mapdb.org">MapDB</a>.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial contribution
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Alex Tugarev - Added getStorage for name only
  * @author Markus Rathgeb - Use {@link DeletableStorageService}
  */

@@ -20,7 +20,6 @@ import java.io.InputStream;
  * This is an implementation of a {@link FixedLengthAudioStream}, which is based on a simple byte array.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ByteArrayAudioStream extends FixedLengthAudioStream {
 

@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Change interface
- *
  */
 public class ConsoleInterpreter {
 

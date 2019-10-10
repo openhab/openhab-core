@@ -34,9 +34,7 @@ import org.eclipse.smarthome.core.types.Command;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Benedikt Niehues - Fix ESH Bug 450236
- *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=450236 - Considering
- *         ThingType Description
+ * @author Benedikt Niehues - Initial contribution
  */
 @NonNullByDefault
 @Component(service = ThingHandlerFactory.class)

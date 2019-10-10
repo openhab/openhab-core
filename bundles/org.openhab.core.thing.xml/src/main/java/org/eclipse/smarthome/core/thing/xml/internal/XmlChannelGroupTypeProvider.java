@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * {@link XmlChannelGroupTypeProvider} provides channel group types from XML files.
  *
- * @author Simon Kaufmann - factored out from {@link XmlChannelTypeProvider}
+ * @author Simon Kaufmann - Initial contribution
  * @author Christoph Weitkamp - factored out common aspects into ThingTypeI18nLocalizationService
  */
 @Component(property = { "esh.scope=core.xml.channelGroups" })

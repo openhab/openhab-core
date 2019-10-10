@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
  * file system location might be different due to remote access via SMB, SSH and the like.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public class MappingUriExtensions extends UriExtensions {
 

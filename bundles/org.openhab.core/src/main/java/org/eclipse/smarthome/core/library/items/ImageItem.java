@@ -28,8 +28,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * An ImageItem holds the binary image data as its status.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class ImageItem extends GenericItem {

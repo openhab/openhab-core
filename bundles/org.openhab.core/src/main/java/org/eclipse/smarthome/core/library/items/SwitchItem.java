@@ -30,7 +30,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * Useful for normal lights, presence detection etc.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public class SwitchItem extends GenericItem {

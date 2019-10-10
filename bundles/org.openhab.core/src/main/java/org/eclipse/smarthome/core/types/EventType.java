@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * type as an additional information on the event bus for each message.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public enum EventType {

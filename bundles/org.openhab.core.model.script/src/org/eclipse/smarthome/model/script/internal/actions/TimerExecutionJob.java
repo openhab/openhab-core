@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
  * to the createTimer() extension method.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class TimerExecutionJob implements Job {
 

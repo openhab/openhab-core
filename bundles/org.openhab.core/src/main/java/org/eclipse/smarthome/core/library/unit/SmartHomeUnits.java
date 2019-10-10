@@ -75,7 +75,6 @@ import tec.uom.se.unit.Units;
  * Also: Define common additional units used in {@link SIUnits} and {@link ImperialUnits}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public final class SmartHomeUnits extends CustomUnits {

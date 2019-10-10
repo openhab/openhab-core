@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
  * For testing of ResourceOwner credentials against a real provider
  *
  * @author Gary Tse - Initial contribution
- *
  */
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, name = "ResourceOwnerTestAgent", configurationPid = "ResourceOwnerTestAgent")
 public class ResourceOwnerTestAgent extends AbstractTestAgent implements TestAgent {

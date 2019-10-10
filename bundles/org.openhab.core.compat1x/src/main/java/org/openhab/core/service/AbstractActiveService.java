@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * Base class for services that frequently run some action in a separate thread in the
  * background.
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class AbstractActiveService {
 
@@ -145,7 +145,7 @@ public abstract class AbstractActiveService {
     /**
      * Worker thread which calls the execute method frequently.
      *
-     * @author Thomas.Eichstaedt-Engelen
+     * @author Thomas Eichstaedt-Engelen - Initial contribution
      */
     class RefreshThread extends Thread {
 

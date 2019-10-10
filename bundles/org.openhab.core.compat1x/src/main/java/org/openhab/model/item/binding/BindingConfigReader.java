@@ -18,8 +18,7 @@ import org.openhab.core.items.Item;
  * This interface must be implemented by services, which can parse the generic
  * binding configuration string used in the {@link GenericItemProvider}.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface BindingConfigReader {
 

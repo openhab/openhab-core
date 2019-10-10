@@ -17,7 +17,6 @@ package org.eclipse.smarthome.core.auth;
  *
  * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Added JavaDoc
- *
  */
 public class UsernamePasswordCredentials implements Credentials {
 

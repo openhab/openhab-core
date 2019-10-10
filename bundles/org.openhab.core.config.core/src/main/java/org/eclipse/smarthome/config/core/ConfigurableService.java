@@ -30,7 +30,6 @@ import org.osgi.service.component.ComponentConstants;
  * {@link ComponentConstants#COMPONENT_NAME} property will be used as fallback.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 public interface ConfigurableService {
 

@@ -35,7 +35,6 @@ import tec.uom.se.unit.Units;
  * Imperial units used for the United States and Liberia.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public final class ImperialUnits extends CustomUnits {

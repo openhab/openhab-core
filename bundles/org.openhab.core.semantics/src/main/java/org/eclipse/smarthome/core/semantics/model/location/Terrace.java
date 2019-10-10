@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Terrace.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Location_Outdoor_Terrace", label = "Terrace", synonyms = "Terraces, Deck, Decks", description = "")
 public interface Terrace extends Outdoor {

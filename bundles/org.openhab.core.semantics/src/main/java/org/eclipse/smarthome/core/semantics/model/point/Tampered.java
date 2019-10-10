@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Tampered.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Point_Status_Tampered", label = "Tampered", synonyms = "", description = "")
 public interface Tampered extends Status {

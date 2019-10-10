@@ -20,7 +20,6 @@ import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
 /**
  *
  * @author Markus Rathgeb - Initial contribution
- *
  */
 public class CommandWrapper {
 

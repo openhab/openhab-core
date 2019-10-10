@@ -26,7 +26,6 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  * It is the entity used for within the {@link MetadataRegistry}.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public final class Metadata implements Identifiable<MetadataKey> {

@@ -40,13 +40,12 @@ import org.slf4j.LoggerFactory;
  * This class provides static methods that can be used in automation rules
  * for using persistence services
  *
- * @author Kai Kreuzer - Initial contributionand refactoring for PersistenceServiceRegistryImpl
- * @author Thomas Eichstaedt-Engelen
- * @author Chris Jackson
- * @author Gaël L'hopital
- * @author Jan N. Klug
- * @author John Cocula
- *
+ * @author Kai Kreuzer - Initial contribution
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Chris Jackson - Initial contribution
+ * @author Gaël L'hopital - Add deltaSince, lastUpdate, evolutionRate
+ * @author Jan N. Klug - Added sumSince
+ * @author John Cocula - Added sumSince
  */
 @Component(immediate = true)
 public class PersistenceExtensions {

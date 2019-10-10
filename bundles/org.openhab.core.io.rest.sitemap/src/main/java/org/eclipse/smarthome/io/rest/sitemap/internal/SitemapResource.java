@@ -110,7 +110,7 @@ import io.swagger.annotations.ApiResponses;
  * a list of all available sitemaps or just getting the widgets of a single page.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Chris Jackson
+ * @author Chris Jackson - Initial contribution
  * @author Yordan Zhelev - Added Swagger annotations
  */
 @Component(service = RESTResource.class)

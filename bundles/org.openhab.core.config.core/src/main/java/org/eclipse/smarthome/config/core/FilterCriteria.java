@@ -21,7 +21,6 @@ package org.eclipse.smarthome.config.core;
  *
  * @author Alex Tugarev - Initial contribution
  * @author Markus Rathgeb - Add default constructor for deserialization
- *
  */
 public class FilterCriteria {
 

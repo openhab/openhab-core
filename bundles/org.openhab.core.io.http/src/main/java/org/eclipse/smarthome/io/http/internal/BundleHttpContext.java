@@ -20,7 +20,7 @@ import org.osgi.service.http.HttpContext;
 /**
  * A bundle specific http context - delegates security and mime type handling to "parent" context.
  *
- * @author Łukasz Dywicki
+ * @author Łukasz Dywicki - Initial contribution
  */
 class BundleHttpContext extends DelegatingHttpContext {
 

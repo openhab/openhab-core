@@ -68,7 +68,6 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Marin Mitev - make the test to pass on each run
  * @author Kai Kreuzer - refactored to Java
- *
  */
 public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 

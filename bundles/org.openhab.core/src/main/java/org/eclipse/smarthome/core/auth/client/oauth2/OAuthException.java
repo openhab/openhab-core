@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.auth.client.oauth2;
  * For all exceptions arising during oauth.
  *
  * @author Gary Tse - Initial contribution
- *
  */
 public class OAuthException extends Exception {
 

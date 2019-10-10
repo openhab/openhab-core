@@ -33,7 +33,6 @@ import org.junit.Test;
 
 /**
  * @author Ivan Iliev - Initial contribution
- *
  */
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 

@@ -15,8 +15,7 @@ package org.openhab.core.automation.module.script.rulesupport.shared;
 /**
  * Empty interface to identify scripted handlers
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 public interface ScriptedHandler {
 

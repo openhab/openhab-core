@@ -29,10 +29,9 @@ import org.slf4j.LoggerFactory;
  * "http://docs.oracle.com/javase/7/docs/api/java/nio/file/WatchService.html"
  * >java docs</a> for more details
  *
- * @author Fabio Marini
+ * @author Fabio Marini - Initial contribution
  * @author Dimitar Ivanov - added javadoc; introduced WatchKey to directory mapping for the queue reader
  * @author Ana Dimova - reduce to a single watch thread for all class instances of {@link AbstractWatchService}
- *
  */
 public abstract class AbstractWatchService {
 

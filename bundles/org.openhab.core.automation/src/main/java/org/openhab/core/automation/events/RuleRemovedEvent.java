@@ -18,7 +18,6 @@ import org.openhab.core.automation.dto.RuleDTO;
  * An {@link RuleRemovedEvent} notifies subscribers that a rule has been removed.
  *
  * @author Benedikt Niehues - Initial contribution
- *
  */
 public class RuleRemovedEvent extends AbstractRuleRegistryEvent {
 

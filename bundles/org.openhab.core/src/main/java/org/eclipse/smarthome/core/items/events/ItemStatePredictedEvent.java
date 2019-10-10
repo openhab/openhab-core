@@ -25,7 +25,6 @@ import org.eclipse.smarthome.core.types.State;
  * currently is capable of delivering such an event to its device).
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 public class ItemStatePredictedEvent extends AbstractEvent {
 

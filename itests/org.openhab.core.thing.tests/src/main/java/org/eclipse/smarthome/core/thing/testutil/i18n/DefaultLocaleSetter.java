@@ -27,7 +27,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Utility class for setting the default locale in tests.
  *
- * @author Henning Sudbrock - Migrated from Groovy OSGiTest
+ * @author Henning Sudbrock - Initial contribution
  */
 public class DefaultLocaleSetter {
 

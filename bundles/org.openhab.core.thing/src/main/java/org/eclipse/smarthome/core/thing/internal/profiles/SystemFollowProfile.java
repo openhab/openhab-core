@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * The ThingHandler may send commands to the framework, but no state updates are forwarded.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public class SystemFollowProfile implements StateProfile {

@@ -45,7 +45,6 @@ import org.osgi.service.http.HttpService;
  * A servlet that serves audio streams via HTTP.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Component
 public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {

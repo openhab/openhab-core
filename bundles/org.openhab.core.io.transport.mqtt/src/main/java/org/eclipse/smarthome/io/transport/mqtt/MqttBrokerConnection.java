@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
  *
  * When a connection to an MQTT broker is lost, it will try to reconnect every 60 seconds.
  *
+ * @author Davy Vanherbergen - Initial contribution
  * @author David Graeff - All operations are async now. More flexible sslContextProvider and reconnectStrategy added.
- * @author Davy Vanherbergen
- * @author Markus Rathgeb - added connection state callback
+ * @author Markus Rathgeb - Added connection state callback
  */
 @NonNullByDefault
 public class MqttBrokerConnection {

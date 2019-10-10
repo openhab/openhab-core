@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
  * {@link AnnotatedActions} for one action module with a configuration
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @Component(configurationPid = "org.eclipse.smarthome.automation.action.magicSingleActionService", property = {
         Constants.SERVICE_PID + "=org.eclipse.smarthome.automation.action.magicSingleActionService",

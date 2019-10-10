@@ -26,9 +26,7 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.ComponentContext;
 
 /**
- * @author Benedikt Niehues - Fix ESH Bug 450236
- *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=450236 - Considering
- *         ThingType Description
+ * @author Benedikt Niehues - Initial contribution
  */
 public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory implements ThingHandlerFactory {
 

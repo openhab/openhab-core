@@ -22,8 +22,7 @@ import org.eclipse.xtext.serializer.analysis.ISyntacticSequencerPDAProvider.ISyn
 
 /**
  *
- * @author Alex Tugarev
- *
+ * @author Alex Tugarev - Initial contribution
  */
 @SuppressWarnings("restriction")
 public class ThingSyntacticSequencerExtension extends ThingSyntacticSequencer {

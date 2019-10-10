@@ -22,7 +22,6 @@ import java.lang.annotation.Target;
  * This is an annotation to be used on semantic tag classes for providing their ids, labels and descriptions.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Retention(RUNTIME)
 @Target(TYPE)

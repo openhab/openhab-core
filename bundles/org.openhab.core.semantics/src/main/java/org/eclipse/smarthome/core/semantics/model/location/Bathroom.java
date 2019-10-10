@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Bathroom.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Location_Indoor_Room_Bathroom", label = "Bathroom", synonyms = "Bathrooms, Bath, Baths", description = "")
 public interface Bathroom extends Room {

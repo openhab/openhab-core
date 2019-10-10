@@ -28,7 +28,6 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
  * Abstract base class with common methods for {@link ChannelTypeBuilder}
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @NonNullByDefault
 @SuppressWarnings("unchecked")

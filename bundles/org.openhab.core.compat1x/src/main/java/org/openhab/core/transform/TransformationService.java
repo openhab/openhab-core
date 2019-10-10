@@ -23,9 +23,8 @@ package org.openhab.core.transform;
  * One could provide his own processors by providing a new implementation of this
  * Interface.
  *
- * @author Thomas.Eichstaedt-Engelen
- *         œauthor Kai Kreuzer
- *
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface TransformationService {
 

@@ -49,9 +49,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
- *
  */
 @Component(immediate = true)
 public class ModelRepositoryImpl implements ModelRepository {

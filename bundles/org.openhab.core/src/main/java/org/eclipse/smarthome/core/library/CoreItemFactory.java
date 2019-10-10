@@ -34,9 +34,9 @@ import org.osgi.service.component.annotations.Component;
 /**
  * {@link CoreItemFactory}-Implementation for the core ItemTypes
  *
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
- * @author Alexander Kostadinov
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
+ * @author Alexander Kostadinov - Initial contribution
  */
 @Component(immediate = true)
 @NonNullByDefault

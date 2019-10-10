@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Some common methods to be used in both HTTP-In-Binding and HTTP-Out-Binding
  *
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public class HttpUtil {
 

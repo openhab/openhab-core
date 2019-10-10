@@ -30,7 +30,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * This is useful for doors, windows, etc.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public class ContactItem extends GenericItem {

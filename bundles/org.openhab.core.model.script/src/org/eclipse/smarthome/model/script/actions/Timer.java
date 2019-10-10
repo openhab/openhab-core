@@ -20,7 +20,6 @@ import org.joda.time.base.AbstractInstant;
  * The script action "createTimer" returns a {@link Timer} instance.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface Timer {
 

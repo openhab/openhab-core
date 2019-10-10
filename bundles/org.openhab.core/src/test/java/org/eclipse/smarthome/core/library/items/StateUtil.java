@@ -42,7 +42,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * Utility class for testing states on items
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class StateUtil {
 

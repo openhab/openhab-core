@@ -30,7 +30,6 @@ import org.osgi.service.component.annotations.Component;
  * Provides a list of IPv4 addresses of the local machine and shows the user which interface belongs to which IP address
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @Component
 public class NetworkConfigOptionProvider implements ConfigOptionProvider {

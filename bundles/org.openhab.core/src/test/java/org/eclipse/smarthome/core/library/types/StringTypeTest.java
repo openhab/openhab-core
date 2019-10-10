@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public class StringTypeTest {
 

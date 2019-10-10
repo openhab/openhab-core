@@ -21,7 +21,6 @@ import org.osgi.service.component.annotations.Component;
  * Default implementation of {@link BundleResolver}. Use the {@link FrameworkUtil} to resolve bundles.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @Component(service = BundleResolver.class)
 public class BundleResolverImpl implements BundleResolver {

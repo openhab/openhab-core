@@ -18,7 +18,7 @@ import org.openhab.core.types.State;
 /**
  * An EventPublisher is used to send commands or status updates to the openHAB event bus.
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface EventPublisher {
 

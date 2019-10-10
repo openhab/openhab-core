@@ -21,7 +21,6 @@ import java.util.ResourceBundle;
  * Base class for all expressions.
  *
  * @author Tilman Kamp - Initial contribution
- *
  */
 public abstract class Expression {
 

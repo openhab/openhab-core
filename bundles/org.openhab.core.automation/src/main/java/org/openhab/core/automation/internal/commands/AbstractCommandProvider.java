@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
- *
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustomizer {

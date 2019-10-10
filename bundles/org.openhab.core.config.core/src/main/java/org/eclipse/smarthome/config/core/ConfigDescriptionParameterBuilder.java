@@ -24,7 +24,6 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
  *
  * @author Chris Jackson - Initial contribution
  * @author Thomas Höfer - Added unit
- *
  */
 public class ConfigDescriptionParameterBuilder {
     private String name;

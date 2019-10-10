@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Michael Bock - Initial contribution
  * @author Gary Tse - Initial contribution
- *
  */
 @NonNullByDefault
 public class OAuthClientServiceImpl implements OAuthClientService {

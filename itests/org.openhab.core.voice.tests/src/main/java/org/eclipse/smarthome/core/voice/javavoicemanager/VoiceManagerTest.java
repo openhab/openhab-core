@@ -51,7 +51,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
  *
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
- *
  */
 public class VoiceManagerTest extends JavaOSGiTest {
     private static final String PID = "org.eclipse.smarthome.voice";

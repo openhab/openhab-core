@@ -15,7 +15,7 @@ package org.openhab.core.scriptengine.action;
 /**
  * This interface must be implemented by services that want to contribute script actions.
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ActionService {
 

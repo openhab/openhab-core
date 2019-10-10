@@ -33,7 +33,6 @@ import org.eclipse.smarthome.core.types.State;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Added fromRGB
- *
  */
 @NonNullByDefault
 public class HSBType extends PercentType implements ComplexType, State, Command {

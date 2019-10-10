@@ -41,7 +41,6 @@ import org.junit.Test;
  * Unit tests for the {@link ProxyServletService} class.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ProxyServletServiceTest {
 

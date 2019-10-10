@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
  * Map an OSGi configuration map {@code Map<String, Object>} to an individual configuration bean.
  *
  * @author David Graeff - Initial contribution
- *
  */
 public class ConfigMapper {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigMapper.class);

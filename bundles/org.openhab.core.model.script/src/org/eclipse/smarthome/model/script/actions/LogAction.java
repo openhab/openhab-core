@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * The static methods of this class are made available as functions in the scripts.
  * This allows a script to log to the SLF4J-Log.
  *
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public class LogAction {
 

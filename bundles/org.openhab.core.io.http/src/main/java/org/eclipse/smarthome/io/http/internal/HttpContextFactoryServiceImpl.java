@@ -27,7 +27,6 @@ import org.osgi.service.http.HttpService;
  * The resulting {@link HttpContext} complies with the OSGi specification when it comes to resource resolving.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @Component(service = HttpContextFactoryService.class)
 public class HttpContextFactoryServiceImpl implements HttpContextFactoryService {

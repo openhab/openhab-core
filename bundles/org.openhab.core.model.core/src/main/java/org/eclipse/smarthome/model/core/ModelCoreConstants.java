@@ -16,7 +16,6 @@ package org.eclipse.smarthome.model.core;
  * This class holds all important constants relevant for this bundle.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ModelCoreConstants {
 

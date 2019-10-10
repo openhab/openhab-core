@@ -65,7 +65,6 @@ import org.osgi.service.component.ComponentContext;
  * @author Mihaela Memova - Initial contribution
  * @author Stefan Triller - added hidden file test
  * @author Simon Kaufmann - ported to Java
- *
  */
 public class FolderObserverTest extends JavaOSGiTest {
 

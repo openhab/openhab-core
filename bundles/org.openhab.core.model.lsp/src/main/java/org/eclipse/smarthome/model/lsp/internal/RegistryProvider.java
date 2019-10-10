@@ -42,7 +42,6 @@ import com.google.inject.Singleton;
  * It just piggy-backs the static Resgitry instance that the runtime bundles are using anyway.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @Singleton
 public class RegistryProvider implements Provider<IResourceServiceProvider.Registry> {

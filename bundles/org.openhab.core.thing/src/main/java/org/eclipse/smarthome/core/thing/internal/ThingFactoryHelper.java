@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Kaufmann - Initial contribution
  * @author Kai Kreuzer - Changed creation of channels to not require a thing type
- *
  */
 public class ThingFactoryHelper {
 

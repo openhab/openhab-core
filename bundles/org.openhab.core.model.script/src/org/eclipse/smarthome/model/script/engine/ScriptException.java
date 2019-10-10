@@ -20,7 +20,6 @@ import java.util.List;
  * Abstract class for exceptions thrown by the script engine.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public abstract class ScriptException extends Exception {
     private static final long serialVersionUID = -4155948282895039148L;

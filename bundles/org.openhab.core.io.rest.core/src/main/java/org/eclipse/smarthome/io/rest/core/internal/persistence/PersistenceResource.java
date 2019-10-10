@@ -79,7 +79,6 @@ import io.swagger.annotations.ApiResponses;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Erdoan Hadzhiyusein - Adapted the convertTime() method to work with the new DateTimeType
  * @author Lyubomir Papazov - Change java.util.Date references to be of type java.time.ZonedDateTime
- *
  */
 @Path(PersistenceResource.PATH)
 @Api(value = PersistenceResource.PATH)

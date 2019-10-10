@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * This is an abstract class that can be used when implementing any module handler that handles scripts.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Simon Merschjohann
+ * @author Simon Merschjohann - Initial contribution
  *
  * @param <T> the type of module the concrete handler can handle
  */

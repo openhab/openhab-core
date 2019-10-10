@@ -31,7 +31,6 @@ import org.osgi.service.component.annotations.Modified;
  * Implementation of the {@link SafeCaller} API.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(configurationPid = "org.eclipse.smarthome.safecaller", immediate = true)

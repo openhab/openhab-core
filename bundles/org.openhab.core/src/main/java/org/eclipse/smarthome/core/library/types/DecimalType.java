@@ -26,7 +26,6 @@ import org.eclipse.smarthome.core.types.State;
  * integers, longs and floating point numbers alike.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public class DecimalType extends Number implements PrimitiveType, State, Command, Comparable<DecimalType> {

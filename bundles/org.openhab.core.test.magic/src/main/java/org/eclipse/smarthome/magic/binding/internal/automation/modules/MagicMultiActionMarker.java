@@ -20,7 +20,6 @@ import org.osgi.service.component.annotations.Component;
  * Marker for the multiple action module
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @Component(immediate = true, service = MagicMultiActionMarker.class, property = {
         Constants.SERVICE_PID + "=org.eclipse.smarthome.MagicMultiAction",

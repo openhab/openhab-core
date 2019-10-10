@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
  * they like and also dynamically remove or add items.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public interface ItemRegistry extends Registry<Item, String> {
 

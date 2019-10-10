@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * @author Karel Goderis - Initial contribution
  * @author Kai Kreuzer - Refactored to not require a source
  * @author Christoph Weitkamp - Refactored use of filename extension
- *
  */
 public class URLAudioStream extends AudioStream {
 

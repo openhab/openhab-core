@@ -20,9 +20,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Extension of the default OSGi bundle activator
  *
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public final class TransformationActivator implements BundleActivator {
 

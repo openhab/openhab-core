@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
  * Example service which makes use of the metadata of the "magic" namespace.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(immediate = true)

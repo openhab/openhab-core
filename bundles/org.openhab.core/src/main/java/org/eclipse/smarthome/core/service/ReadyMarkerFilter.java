@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * By default, this filter will match any {@link ReadyMarker}.
  *
  * @author Simon Kaufmann - Initial contribution
- *
  */
 @NonNullByDefault
 public final class ReadyMarkerFilter {

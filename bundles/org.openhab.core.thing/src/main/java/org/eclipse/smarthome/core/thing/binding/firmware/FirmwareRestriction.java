@@ -44,7 +44,6 @@ import org.eclipse.smarthome.core.thing.firmware.FirmwareProvider;
  * </pre>
  * 
  * @author Dimitar Ivanov - Initial contribution
- *
  */
 public interface FirmwareRestriction extends Function<Thing, Boolean> {
 }

@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Motion Detector.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_MotionDetector", label = "Motion Detector", synonyms = "Motion Detectors, Motion sensor, Motion sensors", description = "")
 public interface MotionDetector extends Equipment {

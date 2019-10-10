@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
  * type {@link SitemapEvent}
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class SitemapEventOutput extends EventOutput {
 

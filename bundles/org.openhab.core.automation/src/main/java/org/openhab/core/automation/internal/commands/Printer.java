@@ -44,7 +44,6 @@ import org.openhab.core.automation.type.TriggerType;
  *
  * @author Ana Dimova - Initial contribution
  * @author Yordan Mihaylov - updates related to api changes
- *
  */
 public class Printer {
 
