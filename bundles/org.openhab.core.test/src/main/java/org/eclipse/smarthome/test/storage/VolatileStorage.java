@@ -29,7 +29,7 @@ import org.eclipse.smarthome.core.storage.Storage;
 @NonNullByDefault
 public class VolatileStorage<T> implements Storage<T> {
 
-    Map<String, T> storage = new ConcurrentHashMap<String, T>();
+    Map<String, T> storage = new ConcurrentHashMap<>();
 
     @Override
     public @Nullable T put(String key, @Nullable T value) {

@@ -28,17 +28,18 @@ import org.junit.Test;
  * @author David Graeff - Initial contribution
  */
 public class ExpiringCacheAsyncTest extends JavaTest {
-    double theValue = 0;
+
+    private double theValue = 0;
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWrongCacheTime() {
         // Fail if cache time is <= 0
-        new ExpiringCacheAsync<Double>(0);
+        new ExpiringCacheAsync<>(0);
     }
 
     @Test
     public void testFetchValue() throws InterruptedException, ExecutionException {
-        ExpiringCacheAsync<Double> t = new ExpiringCacheAsync<Double>(500);
+        ExpiringCacheAsync<Double> t = new ExpiringCacheAsync<>(500);
         assertTrue(t.isExpired());
         // We should always be able to get the raw value, expired or not
         assertNull(t.getLastKnownValue());
@@ -75,9 +76,9 @@ public class ExpiringCacheAsyncTest extends JavaTest {
 
     @Test
     public void testMutipleGetsWhileRefetching() {
-        ExpiringCacheAsync<Double> t = new ExpiringCacheAsync<Double>(100);
+        ExpiringCacheAsync<Double> t = new ExpiringCacheAsync<>(100);
 
-        CompletableFuture<Double> v = new CompletableFuture<Double>();
+        CompletableFuture<Double> v = new CompletableFuture<>();
 
         // Define a supplier which returns a future that is not yet completed
         Supplier<CompletableFuture<Double>> s = () -> v;

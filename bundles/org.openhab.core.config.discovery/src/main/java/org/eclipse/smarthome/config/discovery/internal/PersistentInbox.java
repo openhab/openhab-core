@@ -386,7 +386,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     @Override
     public @Nullable Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
             @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
-        HashSet<ThingUID> removedThings = new HashSet<>();
+        Set<ThingUID> removedThings = new HashSet<>();
         for (DiscoveryResult discoveryResult : getAll()) {
             Class<?> discoverer = resultDiscovererMap.get(discoveryResult);
             if (thingTypeUIDs != null && thingTypeUIDs.contains(discoveryResult.getThingTypeUID())

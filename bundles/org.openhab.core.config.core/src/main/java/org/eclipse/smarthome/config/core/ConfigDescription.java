@@ -99,13 +99,13 @@ public class ConfigDescription implements Identifiable<URI> {
         if (parameters != null) {
             this.parameters = Collections.unmodifiableList(parameters);
         } else {
-            this.parameters = Collections.unmodifiableList(new ArrayList<ConfigDescriptionParameter>(0));
+            this.parameters = Collections.unmodifiableList(new ArrayList<>(0));
         }
 
         if (groups != null) {
             this.parameterGroups = Collections.unmodifiableList(groups);
         } else {
-            this.parameterGroups = Collections.unmodifiableList(new ArrayList<ConfigDescriptionParameterGroup>(0));
+            this.parameterGroups = Collections.unmodifiableList(new ArrayList<>(0));
         }
     }
 

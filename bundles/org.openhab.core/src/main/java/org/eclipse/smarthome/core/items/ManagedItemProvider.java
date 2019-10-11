@@ -83,7 +83,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     private final Logger logger = LoggerFactory.getLogger(ManagedItemProvider.class);
 
-    private final Collection<ItemFactory> itemFactories = new CopyOnWriteArrayList<ItemFactory>();
+    private final Collection<ItemFactory> itemFactories = new CopyOnWriteArrayList<>();
 
     private final Map<String, PersistedItem> failedToCreate = new ConcurrentHashMap<>();
 

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -62,9 +63,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private Logger logger = LoggerFactory.getLogger(AbstractRuleBasedInterpreter.class);
 
-    private HashMap<Locale, ArrayList<Rule>> languageRules;
-    private HashMap<Locale, HashSet<String>> allItemTokens = null;
-    private HashMap<Locale, HashMap<Item, ArrayList<HashSet<String>>>> itemTokens = null;
+    private Map<Locale, List<Rule>> languageRules;
+    private Map<Locale, Set<String>> allItemTokens = null;
+    private Map<Locale, Map<Item, List<Set<String>>>> itemTokens = null;
 
     private ItemRegistry itemRegistry;
     private EventPublisher eventPublisher;
@@ -134,13 +135,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param locale The locale that is to be used for preparing the tokens.
      * @return the identifier tokens
      */
-    HashSet<String> getAllItemTokens(Locale locale) {
+    Set<String> getAllItemTokens(Locale locale) {
         if (allItemTokens == null) {
-            allItemTokens = new HashMap<Locale, HashSet<String>>();
+            allItemTokens = new HashMap<>();
         }
-        HashSet<String> localeTokens = allItemTokens.get(locale);
+        Set<String> localeTokens = allItemTokens.get(locale);
         if (localeTokens == null) {
-            allItemTokens.put(locale, localeTokens = new HashSet<String>());
+            allItemTokens.put(locale, localeTokens = new HashSet<>());
             for (Item item : itemRegistry.getAll()) {
                 localeTokens.addAll(tokenize(locale, item.getLabel()));
             }
@@ -157,29 +158,28 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param locale The locale that is to be used for preparing the tokens.
      * @return the list of identifier token sets per item
      */
-    HashMap<Item, ArrayList<HashSet<String>>> getItemTokens(Locale locale) {
+    Map<Item, List<Set<String>>> getItemTokens(Locale locale) {
         if (itemTokens == null) {
-            itemTokens = new HashMap<Locale, HashMap<Item, ArrayList<HashSet<String>>>>();
+            itemTokens = new HashMap<>();
         }
-        HashMap<Item, ArrayList<HashSet<String>>> localeTokens = itemTokens.get(locale);
+        Map<Item, List<Set<String>>> localeTokens = itemTokens.get(locale);
         if (localeTokens == null) {
-            itemTokens.put(locale, localeTokens = new HashMap<Item, ArrayList<HashSet<String>>>());
+            itemTokens.put(locale, localeTokens = new HashMap<>());
             for (Item item : itemRegistry.getItems()) {
                 if (item.getGroupNames().isEmpty()) {
-                    addItem(locale, localeTokens, new HashSet<String>(), item);
+                    addItem(locale, localeTokens, new HashSet<>(), item);
                 }
             }
         }
         return localeTokens;
     }
 
-    private void addItem(Locale locale, HashMap<Item, ArrayList<HashSet<String>>> target, HashSet<String> tokens,
-            Item item) {
-        HashSet<String> nt = new HashSet<String>(tokens);
+    private void addItem(Locale locale, Map<Item, List<Set<String>>> target, Set<String> tokens, Item item) {
+        Set<String> nt = new HashSet<>(tokens);
         nt.addAll(tokenize(locale, item.getLabel()));
-        ArrayList<HashSet<String>> list = target.get(item);
+        List<Set<String>> list = target.get(item);
         if (list == null) {
-            target.put(item, list = new ArrayList<HashSet<String>>());
+            target.put(item, list = new ArrayList<>());
         }
         list.add(nt);
         if (item instanceof GroupItem) {
@@ -212,9 +212,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return tag(NAME, star(new ExpressionIdentifier(this, stopper)));
     }
 
-    private HashMap<Locale, ArrayList<Rule>> getLanguageRules() {
+    private Map<Locale, List<Rule>> getLanguageRules() {
         if (languageRules == null) {
-            languageRules = new HashMap<Locale, ArrayList<Rule>>();
+            languageRules = new HashMap<>();
             createRules();
         }
         return languageRules;
@@ -228,10 +228,10 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return Rules in descending match priority order.
      */
     public Rule[] getRules(Locale locale) {
-        HashMap<Locale, ArrayList<Rule>> lr = getLanguageRules();
-        ArrayList<Rule> rules = new ArrayList<Rule>();
-        HashSet<ArrayList<Rule>> ruleSets = new HashSet<ArrayList<Rule>>();
-        ArrayList<Rule> ruleSet = lr.get(locale);
+        Map<Locale, List<Rule>> lr = getLanguageRules();
+        List<Rule> rules = new ArrayList<>();
+        Set<List<Rule>> ruleSets = new HashSet<>();
+        List<Rule> ruleSet = lr.get(locale);
         if (ruleSet != null) {
             ruleSets.add(ruleSet);
             rules.addAll(ruleSet);
@@ -257,9 +257,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param rules Rules to add.
      */
     protected void addRules(Locale locale, Rule... rules) {
-        ArrayList<Rule> ruleSet = languageRules.get(locale);
+        List<Rule> ruleSet = languageRules.get(locale);
         if (ruleSet == null) {
-            languageRules.put(locale, ruleSet = new ArrayList<Rule>());
+            languageRules.put(locale, ruleSet = new ArrayList<>());
         }
         for (Rule rule : rules) {
             ruleSet.add(rule);
@@ -343,7 +343,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting expression array
      */
     protected Expression[] exps(Object... objects) {
-        ArrayList<Expression> result = new ArrayList<Expression>();
+        List<Expression> result = new ArrayList<>();
         for (int i = 0; i < objects.length; i++) {
             Expression e = exp(objects[i]);
             if (e != null) {
@@ -481,7 +481,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      */
     protected String executeSingle(ResourceBundle language, String[] labelFragments, Command command)
             throws InterpretationException {
-        ArrayList<Item> items = getMatchingItems(language, labelFragments, command.getClass());
+        List<Item> items = getMatchingItems(language, labelFragments, command.getClass());
         if (items.size() < 1) {
             if (getMatchingItems(language, labelFragments, null).size() >= 1) {
                 throw new InterpretationException(
@@ -520,14 +520,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     /**
      * Filters the item registry by matching each item's name with the provided name fragments.
-     * The item's label and its parent group's labels are tokenizend {@link tokenize} and then altogether looked up
+     * The item's label and its parent group's labels are tokenized {@link tokenize} and then altogether looked up
      * by each and every provided fragment.
      * For the item to get included into the result list, every provided fragment has to be found among the label
      * tokens.
      * If a command type is provided, the item also has to support it.
      * In case of channels and their owners being ambiguous due to sharing most of the label sequence, only the top
-     * most item with support for the
-     * given command type is kept.
+     * most item with support for the given command type is kept.
      *
      * @param language Language information that is used for matching
      * @param labelFragments label fragments that are used to match an item's label.
@@ -537,11 +536,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      *            Provide {null} if there is no need for a certain command to be supported.
      * @return All matching items from the item registry.
      */
-    protected ArrayList<Item> getMatchingItems(ResourceBundle language, String[] labelFragments, Class<?> commandType) {
-        ArrayList<Item> items = new ArrayList<Item>();
-        HashMap<Item, ArrayList<HashSet<String>>> map = getItemTokens(language.getLocale());
+    protected List<Item> getMatchingItems(ResourceBundle language, String[] labelFragments, Class<?> commandType) {
+        List<Item> items = new ArrayList<>();
+        Map<Item, List<Set<String>>> map = getItemTokens(language.getLocale());
         for (Item item : map.keySet()) {
-            for (HashSet<String> parts : map.get(item)) {
+            for (Set<String> parts : map.get(item)) {
                 boolean allMatch = true;
                 for (String fragment : labelFragments) {
                     if (!parts.contains(fragment.toLowerCase(language.getLocale()))) {
@@ -582,9 +581,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param text the text that should be tokenized
      * @return resulting tokens
      */
-    protected ArrayList<String> tokenize(Locale locale, String text) {
+    protected List<String> tokenize(Locale locale, String text) {
         final Locale localeSafe = locale != null ? locale : Locale.getDefault();
-        ArrayList<String> parts = new ArrayList<String>();
+        List<String> parts = new ArrayList<>();
         if (text == null) {
             return parts;
         }
@@ -624,13 +623,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
         private ResourceBundle language;
 
-        private HashMap<Expression, Integer> ids = new HashMap<Expression, Integer>();
-        private HashSet<Expression> exported = new HashSet<Expression>();
-        private HashSet<Expression> shared = new HashSet<Expression>();
+        private Map<Expression, Integer> ids = new HashMap<>();
+        private Set<Expression> exported = new HashSet<>();
+        private Set<Expression> shared = new HashSet<>();
         private int counter = 0;
 
-        private HashSet<String> identifierExcludes = new HashSet<String>();
-        private HashSet<String> identifiers = new HashSet<String>();
+        private Set<String> identifierExcludes = new HashSet<>();
+        private Set<String> identifiers = new HashSet<>();
 
         private StringBuilder builder = new StringBuilder();
 
@@ -749,9 +748,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
 
         private void emitItemIdentifierExpression(ExpressionIdentifier expression) {
-            HashSet<String> remainder = new HashSet<String>(identifierExcludes);
+            Set<String> remainder = new HashSet<>(identifierExcludes);
             Expression stopper = expression.getStopper();
-            HashSet<String> excludes = stopper == null ? new HashSet<String>() : stopper.getFirsts(language);
+            Set<String> excludes = stopper == null ? new HashSet<>() : stopper.getFirsts(language);
             if (excludes.size() > 0) {
                 remainder.removeAll(excludes);
                 if (remainder.size() > 0) {
@@ -786,7 +785,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             }
         }
 
-        private void emitSet(HashSet<String> set, String separator) {
+        private void emitSet(Set<String> set, String separator) {
             boolean sep = false;
             for (String p : set) {
                 if (sep) {
@@ -817,7 +816,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             emit("#JSGF V1.0;\n\n");
 
             if (identifierExcludes.size() > 0) {
-                HashSet<String> identifierBase = new HashSet<String>(identifiers);
+                Set<String> identifierBase = new HashSet<>(identifiers);
                 identifierBase.removeAll(identifierExcludes);
                 emit("<idbase> = ");
                 emitSet(identifierBase, " | ");

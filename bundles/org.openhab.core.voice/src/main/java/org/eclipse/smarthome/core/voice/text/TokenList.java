@@ -34,7 +34,7 @@ public class TokenList {
      * @param list of the initial tokens
      */
     public TokenList(List<String> list) {
-        this.list = Collections.unmodifiableList(new ArrayList<String>(list));
+        this.list = Collections.unmodifiableList(new ArrayList<>(list));
         this.head = 0;
         this.tail = list.size() - 1;
     }

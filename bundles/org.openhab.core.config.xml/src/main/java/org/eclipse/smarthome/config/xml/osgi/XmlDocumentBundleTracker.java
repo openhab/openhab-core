@@ -298,8 +298,8 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
      * @return the URLs of the resources, never {@code null}
      */
     private Collection<URL> filterPatches(Enumeration<URL> xmlDocumentPaths, Bundle bundle) {
-        List<URL> hostResources = new ArrayList<URL>();
-        List<URL> fragmentResources = new ArrayList<URL>();
+        List<URL> hostResources = new ArrayList<>();
+        List<URL> fragmentResources = new ArrayList<>();
 
         while (xmlDocumentPaths.hasMoreElements()) {
             URL path = xmlDocumentPaths.nextElement();
@@ -310,7 +310,7 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
             }
         }
         if (!fragmentResources.isEmpty()) {
-            Map<String, URL> helper = new HashMap<String, URL>();
+            Map<String, URL> helper = new HashMap<>();
             for (URL url : hostResources) {
                 helper.put(url.getPath(), url);
             }

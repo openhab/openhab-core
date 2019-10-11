@@ -160,7 +160,7 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
             return rightOperandString2;
         }
         if (toCompare instanceof State) {
-            List<Class<? extends State>> stateTypeList = new ArrayList<Class<? extends State>>();
+            List<Class<? extends State>> stateTypeList = new ArrayList<>();
             stateTypeList.add(((State) toCompare).getClass());
             return TypeParser.parseState(stateTypeList, rightOperandString2);
         } else if (toCompare instanceof Integer) {

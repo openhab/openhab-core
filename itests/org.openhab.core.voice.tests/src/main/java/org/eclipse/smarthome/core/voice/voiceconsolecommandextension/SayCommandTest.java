@@ -109,7 +109,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
         methodParameters[0] = SUBCMD_SAY;
 
         if (defaultTTSService != null) {
-            Dictionary<String, Object> config = new Hashtable<String, Object>();
+            Dictionary<String, Object> config = new Hashtable<>();
             config.put(CONFIG_DEFAULT_TTS, defaultTTSService);
             ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
             String pid = "org.eclipse.smarthome.voice";

@@ -53,8 +53,8 @@ public abstract class ModuleTypeFileProvider extends AbstractFileProvider<Module
     public <T extends ModuleType> Collection<T> getModuleTypes(Locale locale) {
         Collection<ModuleType> values = providedObjectsHolder.values();
         if (values.isEmpty()) {
-            return Collections.<T>emptyList();
+            return Collections.<T> emptyList();
         }
-        return (Collection<T>) new LinkedList<ModuleType>(values);
+        return (Collection<T>) new LinkedList<>(values);
     }
 }

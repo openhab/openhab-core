@@ -83,11 +83,11 @@ public class ModuleTypeGSONParser extends AbstractGSONParser<ModuleType> {
     }
 
     private Map<String, List<? extends ModuleType>> createMapByType(Set<ModuleType> dataObjects) {
-        Map<String, List<? extends ModuleType>> map = new HashMap<String, List<? extends ModuleType>>();
+        Map<String, List<? extends ModuleType>> map = new HashMap<>();
 
-        List<TriggerType> triggers = new ArrayList<TriggerType>();
-        List<ConditionType> conditions = new ArrayList<ConditionType>();
-        List<ActionType> actions = new ArrayList<ActionType>();
+        List<TriggerType> triggers = new ArrayList<>();
+        List<ConditionType> conditions = new ArrayList<>();
+        List<ActionType> actions = new ArrayList<>();
         for (ModuleType moduleType : dataObjects) {
             if (moduleType instanceof TriggerType) {
                 triggers.add((TriggerType) moduleType);

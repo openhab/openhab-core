@@ -113,7 +113,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * {@link Map} of template UIDs to rules where these templates participated.
      */
-    private final Map<String, Set<String>> mapTemplateToRules = new HashMap<String, Set<String>>();
+    private final Map<String, Set<String>> mapTemplateToRules = new HashMap<>();
 
     /**
      * Constructor that is responsible to invoke the super constructor with appropriate providerClazz
@@ -292,7 +292,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     @Override
     public Collection<Rule> getByTag(String tag) {
-        Collection<Rule> result = new LinkedList<Rule>();
+        Collection<Rule> result = new LinkedList<>();
         if (tag == null) {
             forEach(result::add);
         } else {
@@ -307,8 +307,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     @Override
     public Collection<Rule> getByTags(String... tags) {
-        Set<String> tagSet = tags != null ? new HashSet<String>(Arrays.asList(tags)) : null;
-        Collection<Rule> result = new LinkedList<Rule>();
+        Set<String> tagSet = tags != null ? new HashSet<>(Arrays.asList(tags)) : null;
+        Collection<Rule> result = new LinkedList<>();
         if (tagSet == null || tagSet.isEmpty()) {
             forEach(result::add);
         } else {
@@ -364,7 +364,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         synchronized (this) {
             Set<String> ruleUIDs = mapTemplateToRules.get(templateUID);
             if (ruleUIDs == null) {
-                ruleUIDs = new HashSet<String>();
+                ruleUIDs = new HashSet<>();
                 mapTemplateToRules.put(templateUID, ruleUIDs);
             }
             if (resolved) {
@@ -615,7 +615,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     @Override
     public void added(RuleTemplate element) {
         String templateUID = element.getUID();
-        Set<String> rules = new HashSet<String>();
+        Set<String> rules = new HashSet<>();
         synchronized (this) {
             Set<String> rulesForResolving = mapTemplateToRules.get(templateUID);
             if (rulesForResolving != null) {

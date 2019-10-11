@@ -51,8 +51,8 @@ public class ConfigDescriptionParameterBuilder {
     private Boolean advanced;
     private Boolean verify;
 
-    private List<ParameterOption> options = new ArrayList<ParameterOption>();
-    private List<FilterCriteria> filterCriteria = new ArrayList<FilterCriteria>();
+    private List<ParameterOption> options = new ArrayList<>();
+    private List<FilterCriteria> filterCriteria = new ArrayList<>();
 
     private ConfigDescriptionParameterBuilder(String name, Type type) {
         this.name = name;

@@ -428,8 +428,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         List<ChannelDefinition> channelDefinitions = new ArrayList<>();
         ChannelTypeUID channelTypeUID = new ChannelTypeUID("test:" + thingTypeUID.getId());
         ChannelType channelType = new ChannelType(channelTypeUID, false, "itemType", "channelLabel", "description",
-                "category", new HashSet<String>(), null,
-                new URI("scheme", "channelType:" + thingTypeUID.getId(), null));
+                "category", new HashSet<>(), null, new URI("scheme", "channelType:" + thingTypeUID.getId(), null));
 
         channelTypes.put(channelTypeUID, channelType);
 

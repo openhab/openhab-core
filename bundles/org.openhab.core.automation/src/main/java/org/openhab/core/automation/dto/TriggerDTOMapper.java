@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.core.automation.Trigger;
-import org.openhab.core.automation.dto.TriggerDTO;
 import org.openhab.core.automation.util.ModuleBuilder;
 
 /**
@@ -45,7 +44,7 @@ public class TriggerDTOMapper extends ModuleDTOMapper {
         if (triggers == null) {
             return null;
         }
-        final List<TriggerDTO> dtos = new ArrayList<TriggerDTO>(triggers.size());
+        final List<TriggerDTO> dtos = new ArrayList<>(triggers.size());
         for (final Trigger trigger : triggers) {
             dtos.add(map(trigger));
         }
@@ -56,7 +55,7 @@ public class TriggerDTOMapper extends ModuleDTOMapper {
         if (dtos == null) {
             return null;
         }
-        final List<Trigger> triggers = new ArrayList<Trigger>(dtos.size());
+        final List<Trigger> triggers = new ArrayList<>(dtos.size());
         for (final TriggerDTO dto : dtos) {
             triggers.add(mapDto(dto));
         }

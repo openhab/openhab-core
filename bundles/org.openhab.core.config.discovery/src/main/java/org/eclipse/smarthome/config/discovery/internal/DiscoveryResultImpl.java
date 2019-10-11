@@ -100,7 +100,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
         this.thingTypeUID = thingTypeUID;
         this.bridgeUID = bridgeUID;
         this.properties = Collections
-                .unmodifiableMap((properties != null) ? new HashMap<>(properties) : new HashMap<String, Object>());
+                .unmodifiableMap((properties != null) ? new HashMap<>(properties) : new HashMap<>());
         this.representationProperty = representationProperty;
         this.label = label == null ? "" : label;
 

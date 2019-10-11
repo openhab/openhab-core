@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioStream;
@@ -35,13 +37,14 @@ import org.osgi.framework.ServiceReference;
  */
 public class TTSServiceStub implements TTSService {
 
-    private BundleContext context;
-
-    private Set<Voice> availableVoices;
-    private Set<AudioFormat> supportedFormats;
+    private static final Set<AudioFormat> SUPPORTED_FORMATS = Stream.of(AudioFormat.MP3, AudioFormat.WAV)
+            .collect(Collectors.toSet());
 
     private static final String TTS_SERVICE_STUB_ID = "ttsServiceStubID";
     private static final String TTS_SERVICE_STUB_LABEL = "ttsServiceStubLabel";
+
+    private Set<Voice> availableVoices;
+    private BundleContext context;
 
     public TTSServiceStub(BundleContext context) {
         this.context = context;
@@ -62,7 +65,7 @@ public class TTSServiceStub implements TTSService {
 
     @Override
     public Set<Voice> getAvailableVoices() {
-        availableVoices = new HashSet<Voice>();
+        availableVoices = new HashSet<>();
         Collection<ServiceReference<Voice>> refs;
         try {
             refs = context.getServiceReferences(Voice.class, null);
@@ -83,10 +86,7 @@ public class TTSServiceStub implements TTSService {
 
     @Override
     public Set<AudioFormat> getSupportedFormats() {
-        supportedFormats = new HashSet<AudioFormat>();
-        supportedFormats.add(AudioFormat.MP3);
-        supportedFormats.add(AudioFormat.WAV);
-        return supportedFormats;
+        return SUPPORTED_FORMATS;
     }
 
     @Override

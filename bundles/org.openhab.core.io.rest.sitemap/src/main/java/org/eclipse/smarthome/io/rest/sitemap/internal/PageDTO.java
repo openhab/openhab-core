@@ -31,7 +31,7 @@ public class PageDTO {
     public boolean leaf;
     public boolean timeout;
 
-    public List<WidgetDTO> widgets = new ArrayList<WidgetDTO>();
+    public List<WidgetDTO> widgets = new ArrayList<>();
 
     public PageDTO() {
     }

@@ -258,13 +258,11 @@ public class RuleImpl implements Rule {
 
     @Override
     public List<Module> getModules() {
-        final List<Module> result;
-        List<Module> modules = new ArrayList<Module>();
+        List<Module> modules = new ArrayList<>();
         modules.addAll(triggers);
         modules.addAll(conditions);
         modules.addAll(actions);
-        result = Collections.unmodifiableList(modules);
-        return result;
+        return Collections.unmodifiableList(modules);
     }
 
     @Override

@@ -58,7 +58,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
 
     protected final Map<String, T> cachedFiles = new ConcurrentHashMap<>();
     private final Map<WatchKey, Path> registeredKeys = new ConcurrentHashMap<>();
-    protected final List<String> watchedDirectories = new ArrayList<String>();
+    protected final List<String> watchedDirectories = new ArrayList<>();
 
     private final Logger logger = LoggerFactory.getLogger(AbstractFileTransformationService.class);
 

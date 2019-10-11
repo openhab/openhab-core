@@ -75,7 +75,7 @@ public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingTyp
     @Activate
     protected void activate(BundleContext bundleContext) {
         XmlDocumentReader<List<?>> thingTypeReader = new ThingDescriptionReader();
-        thingTypeTracker = new XmlDocumentBundleTracker<List<?>>(bundleContext, XML_DIRECTORY, thingTypeReader, this,
+        thingTypeTracker = new XmlDocumentBundleTracker<>(bundleContext, XML_DIRECTORY, thingTypeReader, this,
                 READY_MARKER, readyService);
 
         trackerJob = scheduler.submit(() -> {

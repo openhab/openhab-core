@@ -369,7 +369,7 @@ public class PersistenceResource implements RESTResource {
      * @return list of persistence services as {@link ServiceBean}
      */
     private List<PersistenceServiceDTO> getPersistenceServiceList(Locale locale) {
-        List<PersistenceServiceDTO> dtoList = new ArrayList<PersistenceServiceDTO>();
+        List<PersistenceServiceDTO> dtoList = new ArrayList<>();
 
         for (PersistenceService service : persistenceServiceRegistry.getAll()) {
             PersistenceServiceDTO serviceDTO = new PersistenceServiceDTO();

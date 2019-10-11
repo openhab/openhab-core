@@ -115,7 +115,7 @@ public class ConfigMapper {
      * @return A list of Field objects
      */
     private static List<Field> getAllFields(Class<?> clazz) {
-        List<Field> fields = new ArrayList<Field>();
+        List<Field> fields = new ArrayList<>();
 
         Class<?> currentClass = clazz;
         while (currentClass != null) {

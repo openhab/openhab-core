@@ -40,7 +40,7 @@ public class Utils {
      * @return an indexed UIDs of the automation objects.
      */
     static Map<String, String> putInHastable(String[] strings) {
-        Hashtable<String, String> sorted = new Hashtable<String, String>();
+        Hashtable<String, String> sorted = new Hashtable<>();
         for (int i = 0; i < strings.length; i++) {
             sorted.put(new Integer(i + 1).toString(), strings[i]);
         }
@@ -57,7 +57,7 @@ public class Utils {
      * @return filtered list with UIDs of the objects.
      */
     static Map<String, String> filterList(Map<String, ?> listObjects, Map<String, String> listUIDs) {
-        Hashtable<String, String> filtered = new Hashtable<String, String>();
+        Hashtable<String, String> filtered = new Hashtable<>();
         for (final Entry<String, String> entry : listUIDs.entrySet()) {
             final String id = entry.getKey();
             final String uid = entry.getValue();
@@ -133,7 +133,7 @@ public class Utils {
      * @return a string representing the title of the table.
      */
     static List<String> getTableTitle(String titleRow, int width) {
-        List<String> res = new ArrayList<String>();
+        List<String> res = new ArrayList<>();
         res.add(printChars(TABLE_DELIMITER, width));
         res.add(titleRow);
         res.add(printChars(TABLE_DELIMITER, width));

@@ -91,7 +91,7 @@ public class MDNSAnnouncer {
     }
 
     private ServiceDescription getDefaultServiceDescription() {
-        Hashtable<String, String> serviceProperties = new Hashtable<String, String>();
+        Hashtable<String, String> serviceProperties = new Hashtable<>();
         serviceProperties.put("uri", RESTConstants.REST_URI);
         return new ServiceDescription("_" + mdnsName + "-server._tcp.local.", mdnsName, httpPort, serviceProperties);
     }

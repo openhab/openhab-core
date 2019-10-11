@@ -96,14 +96,14 @@ public class Printer {
      */
     static String printRules(AutomationCommandsPluggable autoCommands, Map<String, String> ruleUIDs) {
         int[] columnWidths = new int[] { COLUMN_ID, COLUMN_RULE_UID, COLUMN_RULE_NAME, COLUMN_RULE_STATUS };
-        List<String> columnValues = new ArrayList<String>();
+        List<String> columnValues = new ArrayList<>();
         columnValues.add(ID);
         columnValues.add(UID);
         columnValues.add(NAME);
         columnValues.add(STATUS);
         String titleRow = Utils.getRow(columnWidths, columnValues);
 
-        List<String> rulesRows = new ArrayList<String>();
+        List<String> rulesRows = new ArrayList<>();
         for (int i = 1; i <= ruleUIDs.size(); i++) {
             String id = new Integer(i).toString();
             String uid = ruleUIDs.get(id);
@@ -125,12 +125,12 @@ public class Printer {
      */
     static String printTemplates(Map<String, String> templateUIDs) {
         int[] columnWidths = new int[] { COLUMN_ID, COLUMN_UID };
-        List<String> columnTitles = new ArrayList<String>();
+        List<String> columnTitles = new ArrayList<>();
         columnTitles.add(ID);
         columnTitles.add(UID);
         String titleRow = Utils.getRow(columnWidths, columnTitles);
 
-        List<String> templates = new ArrayList<String>();
+        List<String> templates = new ArrayList<>();
         collectListRecords(templateUIDs, templates, columnWidths);
         return Utils.getTableContent(TABLE_WIDTH, columnWidths, templates, titleRow);
     }
@@ -143,12 +143,12 @@ public class Printer {
      */
     static String printModuleTypes(Map<String, String> moduleTypeUIDs) {
         int[] columnWidths = new int[] { COLUMN_ID, COLUMN_UID };
-        List<String> columnTitles = new ArrayList<String>();
+        List<String> columnTitles = new ArrayList<>();
         columnTitles.add(ID);
         columnTitles.add(UID);
         String titleRow = Utils.getRow(columnWidths, columnTitles);
 
-        List<String> moduleTypes = new ArrayList<String>();
+        List<String> moduleTypes = new ArrayList<>();
         collectListRecords(moduleTypeUIDs, moduleTypes, columnWidths);
         return Utils.getTableContent(TABLE_WIDTH, columnWidths, moduleTypes, titleRow);
     }
@@ -161,11 +161,11 @@ public class Printer {
      */
     static String printRule(Rule rule, RuleStatus status) {
         int[] columnWidths = new int[] { TABLE_WIDTH };
-        List<String> ruleProperty = new ArrayList<String>();
+        List<String> ruleProperty = new ArrayList<>();
         ruleProperty.add(rule.getUID() + " [ " + status + " ]");
         String titleRow = Utils.getRow(columnWidths, ruleProperty);
 
-        List<String> ruleContent = new ArrayList<String>();
+        List<String> ruleContent = new ArrayList<>();
         columnWidths = new int[] { COLUMN_PROPERTY, COLUMN_PROPERTY_VALUE };
         ruleProperty.set(0, UID);
         ruleProperty.add(rule.getUID());
@@ -203,11 +203,11 @@ public class Printer {
      */
     static String printTemplate(Template template) {
         int[] columnWidths = new int[] { TABLE_WIDTH };
-        List<String> templateProperty = new ArrayList<String>();
+        List<String> templateProperty = new ArrayList<>();
         templateProperty.add(template.getUID());
         String titleRow = Utils.getRow(columnWidths, templateProperty);
 
-        List<String> templateContent = new ArrayList<String>();
+        List<String> templateContent = new ArrayList<>();
         columnWidths = new int[] { COLUMN_PROPERTY, COLUMN_PROPERTY_VALUE };
         templateProperty.set(0, UID);
         templateProperty.add(template.getUID());
@@ -247,11 +247,11 @@ public class Printer {
      */
     static String printModuleType(ModuleType moduleType) {
         int[] columnWidths = new int[] { TABLE_WIDTH };
-        List<String> moduleTypeProperty = new ArrayList<String>();
+        List<String> moduleTypeProperty = new ArrayList<>();
         moduleTypeProperty.add(moduleType.getUID());
         String titleRow = Utils.getRow(columnWidths, moduleTypeProperty);
 
-        List<String> moduleTypeContent = new ArrayList<String>();
+        List<String> moduleTypeContent = new ArrayList<>();
         columnWidths = new int[] { COLUMN_PROPERTY, COLUMN_PROPERTY_VALUE };
         moduleTypeProperty.set(0, UID);
         moduleTypeProperty.add(moduleType.getUID());
@@ -309,7 +309,7 @@ public class Printer {
      * @return a string representing the response of the command {@link AutomationCommands#ENABLE_RULE}.
      */
     static String printRuleStatus(String ruleUID, RuleStatus status) {
-        List<String> title = new ArrayList<String>();
+        List<String> title = new ArrayList<>();
         title.add(ruleUID + " [ " + status + " ]");
         String titleRow = Utils.getRow(new int[] { TABLE_WIDTH }, title);
         List<String> res = Utils.getTableTitle(titleRow, TABLE_WIDTH);
@@ -332,10 +332,10 @@ public class Printer {
      */
     @SuppressWarnings("unchecked")
     private static List<String> collectRecords(int[] columnWidths, String prop, Collection<?> list) {
-        List<String> res = new ArrayList<String>();
+        List<String> res = new ArrayList<>();
         boolean isFirst = true;
         boolean isList = false;
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
         values.add(prop);
         values.add("");
         if (list != null && !list.isEmpty()) {
@@ -395,9 +395,9 @@ public class Printer {
      */
     private static List<String> getModuleRecords(Module module) {
         int[] columnWidths = new int[] { COLUMN_PROPERTY_VALUE };
-        List<String> columnValues = new ArrayList<String>();
+        List<String> columnValues = new ArrayList<>();
         columnValues.add(module.getId());
-        List<String> moduleContent = new ArrayList<String>();
+        List<String> moduleContent = new ArrayList<>();
         moduleContent.addAll(Utils.getTableTitle(Utils.getRow(columnWidths, columnValues), COLUMN_PROPERTY_VALUE));
 
         columnWidths = new int[] { COLUMN_CONFIG_PARAMETER, COLUMN_CONFIG_PARAMETER_VALUE };
@@ -430,8 +430,7 @@ public class Printer {
             inputs = ((Action) module).getInputs();
         }
         if (inputs != null && !inputs.isEmpty()) {
-            moduleContent.addAll(
-                    collectRecords(columnWidths, INPUTS, new ArrayList<Entry<String, String>>(inputs.entrySet())));
+            moduleContent.addAll(collectRecords(columnWidths, INPUTS, new ArrayList<>(inputs.entrySet())));
         }
         return moduleContent;
     }
@@ -464,13 +463,13 @@ public class Printer {
      */
     private static List<String> getConfigurationDescriptionRecords(
             List<ConfigDescriptionParameter> configDescriptions) {
-        List<String> configParamContent = new ArrayList<String>();
+        List<String> configParamContent = new ArrayList<>();
         if (configDescriptions != null && !configDescriptions.isEmpty()) {
             for (ConfigDescriptionParameter parameter : configDescriptions) {
                 int[] columnWidths = new int[] { COLUMN_CONFIG_PARAMETER, COLUMN_CONFIG_PARAMETER_PROP,
                         COLUMN_CONFIG_PARAMETER_PROP_VALUE };
                 configParamContent.add(Utils.getColumn(COLUMN_PROPERTY_VALUE, parameter.getName() + " : "));
-                List<String> configParamProperty = new ArrayList<String>();
+                List<String> configParamProperty = new ArrayList<>();
                 configParamProperty.add("");
                 configParamProperty.add(TYPE);
                 configParamProperty.add(parameter.getType().toString());
@@ -566,7 +565,7 @@ public class Printer {
         for (int i = 1; i <= list.size(); i++) {
             String id = new Integer(i).toString();
             String uid = list.get(id);
-            List<String> columnValues = new ArrayList<String>();
+            List<String> columnValues = new ArrayList<>();
             columnValues.add(id);
             columnValues.add(uid);
             rows.add(Utils.getRow(columnWidths, columnValues));

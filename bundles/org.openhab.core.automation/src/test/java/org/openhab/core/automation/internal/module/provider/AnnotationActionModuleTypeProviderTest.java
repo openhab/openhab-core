@@ -87,7 +87,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
         AnnotatedActionModuleTypeProvider prov = new AnnotatedActionModuleTypeProvider();
         prov.setModuleTypeI18nService(moduleTypeI18nService);
 
-        HashMap<String, Object> properties1 = new HashMap<String, Object>();
+        Map<String, Object> properties1 = new HashMap<>();
         properties1.put(ConfigConstants.SERVICE_CONTEXT, "conf1");
         prov.addActionProvider(actionProviderConf1, properties1);
 
@@ -95,7 +95,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
         assertEquals(1, types.size());
         assertTrue(types.contains(TEST_ACTION_TYPE_ID));
 
-        HashMap<String, Object> properties2 = new HashMap<String, Object>();
+        Map<String, Object> properties2 = new HashMap<>();
         properties2.put(ConfigConstants.SERVICE_CONTEXT, "conf2");
         prov.addActionProvider(actionProviderConf2, properties2);
 

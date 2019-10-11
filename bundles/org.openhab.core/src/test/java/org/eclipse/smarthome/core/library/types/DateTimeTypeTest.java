@@ -225,7 +225,7 @@ public class DateTimeTypeTest {
     }
 
     private static Map<String, Integer> initTimeMap() {
-        Map<String, Integer> inputTimeMap = new HashMap<String, Integer>();
+        Map<String, Integer> inputTimeMap = new HashMap<>();
         inputTimeMap.put("year", 2014);
         inputTimeMap.put("month", 2);
         inputTimeMap.put("date", 30);

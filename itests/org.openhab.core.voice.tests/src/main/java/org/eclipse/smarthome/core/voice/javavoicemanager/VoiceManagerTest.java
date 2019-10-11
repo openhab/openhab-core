@@ -89,7 +89,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         registerService(sink);
         registerService(voice);
 
-        Dictionary<String, Object> voiceConfig = new Hashtable<String, Object>();
+        Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put(CONFIG_DEFAULT_TTS, ttsService.getId());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
         Configuration configuration = configAdmin.getConfiguration(PID);
@@ -161,7 +161,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         hliStub = new HumanLanguageInterpreterStub();
         registerService(hliStub);
 
-        Dictionary<String, Object> voiceConfig = new Hashtable<String, Object>();
+        Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put("defaultHLI", hliStub.getId());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
         String pid = "org.eclipse.smarthome.voice";
@@ -241,7 +241,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         registerService(hliStub);
         registerService(source);
 
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(CONFIG_KEYWORD, "word");
         config.put(CONFIG_DEFAULT_STT, sttService.getId());
         config.put(CONFIG_DEFAULT_KS, ksService.getId());

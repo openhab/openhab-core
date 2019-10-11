@@ -70,13 +70,13 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
             this.types = Collections.singleton(ItemStateEvent.TYPE);
         } else {
-            HashSet<String> set = new HashSet<>();
+            Set<String> set = new HashSet<>();
             set.add(ItemStateChangedEvent.TYPE);
             set.add(GroupItemStateChangedEvent.TYPE);
             this.types = Collections.unmodifiableSet(set);
         }
         this.bundleContext = bundleContext;
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", "smarthome/items/" + itemName + "/*");
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);

@@ -234,8 +234,8 @@ public class DefaultChartProvider implements ChartProvider {
             // always hide the legend
             showLegend = false;
 
-            List<Date> xData = new ArrayList<Date>();
-            List<Number> yData = new ArrayList<Number>();
+            List<Date> xData = new ArrayList<>();
+            List<Number> yData = new ArrayList<>();
 
             xData.add(startTime);
             yData.add(0);
@@ -312,8 +312,8 @@ public class DefaultChartProvider implements ChartProvider {
         FilterCriteria filter;
 
         // Generate data collections
-        List<Date> xData = new ArrayList<Date>();
-        List<Number> yData = new ArrayList<Number>();
+        List<Date> xData = new ArrayList<>();
+        List<Number> yData = new ArrayList<>();
 
         // Declare state here so it will hold the last value at the end of the process
         State state = null;

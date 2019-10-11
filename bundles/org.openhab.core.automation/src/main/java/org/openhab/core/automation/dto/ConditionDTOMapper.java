@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.core.automation.Condition;
-import org.openhab.core.automation.dto.ConditionDTO;
 import org.openhab.core.automation.util.ModuleBuilder;
 
 /**
@@ -45,7 +44,7 @@ public class ConditionDTOMapper extends ModuleDTOMapper {
         if (conditions == null) {
             return null;
         }
-        final List<ConditionDTO> dtos = new ArrayList<ConditionDTO>(conditions.size());
+        final List<ConditionDTO> dtos = new ArrayList<>(conditions.size());
         for (final Condition action : conditions) {
             dtos.add(map(action));
         }
@@ -56,7 +55,7 @@ public class ConditionDTOMapper extends ModuleDTOMapper {
         if (dtos == null) {
             return null;
         }
-        final List<Condition> conditions = new ArrayList<Condition>(dtos.size());
+        final List<Condition> conditions = new ArrayList<>(dtos.size());
         for (final ConditionDTO dto : dtos) {
             conditions.add(mapDto(dto));
         }

@@ -132,7 +132,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 if (stt != null) {
                     try {
                         this.sttServiceHandle = stt.recognize(this, source.getInputStream(format), this.locale,
-                                new HashSet<String>());
+                                new HashSet<>());
                     } catch (STTException e) {
                         say("Error during recognition: " + e.getMessage());
                     } catch (AudioException e) {

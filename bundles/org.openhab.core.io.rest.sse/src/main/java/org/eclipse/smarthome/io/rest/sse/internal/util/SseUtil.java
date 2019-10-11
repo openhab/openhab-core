@@ -72,7 +72,7 @@ public class SseUtil {
      * @return
      */
     public static List<String> convertToRegex(String topicFilter) {
-        List<String> filters = new ArrayList<String>();
+        List<String> filters = new ArrayList<>();
 
         if (StringUtils.isEmpty(topicFilter)) {
             filters.add(".*");

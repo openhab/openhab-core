@@ -22,6 +22,8 @@ import org.eclipse.smarthome.config.core.ConfigUtil;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.RuleRegistry;
+import org.openhab.core.automation.internal.ModuleImpl;
+import org.openhab.core.automation.internal.RuleImpl;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 
@@ -60,7 +62,7 @@ public class ConfigurationNormalizer {
      */
     public static Map<String, ConfigDescriptionParameter> getConfigDescriptionMap(
             List<ConfigDescriptionParameter> configDesc) {
-        Map<String, ConfigDescriptionParameter> mapConfigDescs = new HashMap<String, ConfigDescriptionParameter>();
+        Map<String, ConfigDescriptionParameter> mapConfigDescs = new HashMap<>();
         for (ConfigDescriptionParameter configDescriptionParameter : configDesc) {
             mapConfigDescs.put(configDescriptionParameter.getName(), configDescriptionParameter);
         }

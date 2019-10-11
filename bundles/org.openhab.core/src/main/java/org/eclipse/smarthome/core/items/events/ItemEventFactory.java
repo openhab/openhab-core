@@ -358,7 +358,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         String topic = buildTopic(ITEM_UPDATED_EVENT_TOPIC, item.getName());
         ItemDTO itemDTO = map(item);
         ItemDTO oldItemDTO = map(oldItem);
-        List<ItemDTO> itemDTOs = new LinkedList<ItemDTO>();
+        List<ItemDTO> itemDTOs = new LinkedList<>();
         itemDTOs.add(itemDTO);
         itemDTOs.add(oldItemDTO);
         String payload = serializePayload(itemDTOs);

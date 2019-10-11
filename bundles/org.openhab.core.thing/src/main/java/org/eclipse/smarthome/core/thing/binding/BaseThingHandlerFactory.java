@@ -14,6 +14,7 @@ package org.eclipse.smarthome.core.thing.binding;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -158,7 +159,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                 }
 
                 Class[] interfaces = c.getInterfaces();
-                LinkedList<String> serviceNames = new LinkedList<>();
+                List<String> serviceNames = new LinkedList<>();
                 if (interfaces != null) {
                     for (Class i : interfaces) {
                         String className = i.getCanonicalName();
@@ -179,7 +180,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                     if (serviceReg != null) {
                         Set<ServiceRegistration<?>> serviceRegs = this.thingHandlerServices.get(thingUID);
                         if (serviceRegs == null) {
-                            HashSet<ServiceRegistration<?>> set = new HashSet<>();
+                            Set<ServiceRegistration<?>> set = new HashSet<>();
                             set.add(serviceReg);
                             this.thingHandlerServices.put(thingUID, set);
                         } else {

@@ -14,6 +14,7 @@ package org.openhab.core.automation.module.script.rulesupport.shared;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
@@ -30,7 +31,7 @@ import org.openhab.core.automation.RuleRegistry;
 public class RuleSupportRuleRegistryDelegate implements RuleRegistry {
     private final RuleRegistry ruleRegistry;
 
-    private final HashSet<String> rules = new HashSet<>();
+    private final Set<String> rules = new HashSet<>();
 
     private final ScriptedRuleProvider ruleProvider;
 

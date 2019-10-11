@@ -178,7 +178,7 @@ public class ConfigurationService {
 
     private Dictionary<String, Object> getProperties(org.osgi.service.cm.Configuration configuration) {
         Dictionary<String, Object> properties = configuration.getProperties();
-        return properties != null ? properties : new Hashtable<String, Object>();
+        return properties != null ? properties : new Hashtable<>();
     }
 
     @Reference

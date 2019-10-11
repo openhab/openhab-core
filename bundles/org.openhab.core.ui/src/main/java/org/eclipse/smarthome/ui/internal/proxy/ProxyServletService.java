@@ -146,7 +146,7 @@ public class ProxyServletService extends HttpServlet {
      * @return properties to pass to servlet for initialization
      */
     private Hashtable<String, String> propsFromConfig(Map<String, Object> config) {
-        Hashtable<String, String> props = new Hashtable<String, String>();
+        Hashtable<String, String> props = new Hashtable<>();
 
         if (config != null) {
             for (String key : config.keySet()) {

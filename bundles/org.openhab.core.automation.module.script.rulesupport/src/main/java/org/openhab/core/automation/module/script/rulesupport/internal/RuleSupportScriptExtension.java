@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
@@ -61,10 +62,10 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
     private static final String RULE_REGISTRY = "ruleRegistry";
     private static final String AUTOMATION_MANAGER = "automationManager";
 
-    private static HashMap<String, Collection<String>> presets = new HashMap<>();
-    private static HashMap<String, Object> staticTypes = new HashMap<>();
-    private static HashSet<String> types = new HashSet<String>();
-    private final ConcurrentHashMap<String, HashMap<String, Object>> objectCache = new ConcurrentHashMap<>();
+    private static Map<String, Collection<String>> presets = new HashMap<>();
+    private static Map<String, Object> staticTypes = new HashMap<>();
+    private static Set<String> types = new HashSet<>();
+    private final Map<String, Map<String, Object>> objectCache = new ConcurrentHashMap<>();
 
     private RuleRegistry ruleRegistry;
     private ScriptedRuleProvider ruleProvider;
@@ -180,7 +181,7 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
             return obj;
         }
 
-        HashMap<String, Object> objects = objectCache.get(scriptIdentifier);
+        Map<String, Object> objects = objectCache.get(scriptIdentifier);
 
         if (objects == null) {
             objects = new HashMap<>();
@@ -230,7 +231,7 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public void unload(String scriptIdentifier) {
-        HashMap<String, Object> objects = objectCache.remove(scriptIdentifier);
+        Map<String, Object> objects = objectCache.remove(scriptIdentifier);
 
         if (objects != null) {
             Object hr = objects.get(AUTOMATION_MANAGER);

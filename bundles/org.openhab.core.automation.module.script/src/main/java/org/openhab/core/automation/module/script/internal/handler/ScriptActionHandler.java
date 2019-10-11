@@ -54,7 +54,7 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
 
     @Override
     public @Nullable Map<String, Object> execute(final Map<String, Object> context) {
-        HashMap<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
 
         getScriptEngine().ifPresent(scriptEngine -> {
             setExecutionContext(scriptEngine, context);

@@ -131,13 +131,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * There is only one {@link TriggerHandlerCallback} instance per {@link Rule}. The relation is
      * {@link Rule}'s UID to {@link TriggerHandlerCallback} instance.
      */
-    private final @NonNullByDefault({}) Map<String, TriggerHandlerCallbackImpl> thCallbacks = new HashMap<String, TriggerHandlerCallbackImpl>();
+    private final @NonNullByDefault({}) Map<String, TriggerHandlerCallbackImpl> thCallbacks = new HashMap<>();
 
     /**
      * {@link Map} holding all {@link ModuleType} UIDs that are available in some rule's module definition. The relation
      * is {@link ModuleType}'s UID to {@link Set} of {@link Rule} UIDs.
      */
-    private final @NonNullByDefault({}) Map<String, Set<String>> mapModuleTypeToRules = new HashMap<String, Set<String>>();
+    private final @NonNullByDefault({}) Map<String, Set<String>> mapModuleTypeToRules = new HashMap<>();
 
     /**
      * {@link Map} holding all available {@link ModuleHandlerFactory}s linked with {@link ModuleType}s that they
@@ -251,8 +251,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     @Activate
     public RuleEngineImpl(final Config config, final @Reference ModuleTypeRegistry moduleTypeRegistry,
             final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService) {
-        this.contextMap = new HashMap<String, Map<String, Object>>();
-        this.moduleHandlerFactories = new HashMap<String, ModuleHandlerFactory>(20);
+        this.contextMap = new HashMap<>();
+        this.moduleHandlerFactories = new HashMap<>(20);
 
         this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
                 this.getClass().getClassLoader());
@@ -334,7 +334,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         synchronized (this) {
             Set<String> rulesPerModule = mapModuleTypeToRules.get(moduleTypeName);
             if (rulesPerModule != null) {
-                rules = new HashSet<String>();
+                rules = new HashSet<>();
                 rules.addAll(rulesPerModule);
             }
         }
@@ -363,7 +363,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         synchronized (this) {
             Set<String> rulesPerModule = mapModuleTypeToRules.get(moduleTypeName);
             if (rulesPerModule != null) {
-                rules = new HashSet<String>();
+                rules = new HashSet<>();
                 rules.addAll(rulesPerModule);
             }
         }
@@ -400,7 +400,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 moduleHandlerFactories.put(moduleTypeName, moduleHandlerFactory);
                 Set<String> rulesPerModule = mapModuleTypeToRules.get(moduleTypeName);
                 if (rulesPerModule != null) {
-                    rules = new HashSet<String>();
+                    rules = new HashSet<>();
                     rules.addAll(rulesPerModule);
                 }
             }
@@ -408,8 +408,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 for (String rUID : rules) {
                     RuleStatus ruleStatus = getRuleStatus(rUID);
                     if (ruleStatus == RuleStatus.UNINITIALIZED) {
-                        notInitializedRules = notInitializedRules != null ? notInitializedRules
-                                : new HashSet<String>(20);
+                        notInitializedRules = notInitializedRules != null ? notInitializedRules : new HashSet<>(20);
                         notInitializedRules.add(rUID);
                     }
                 }
@@ -743,7 +742,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     public synchronized void updateMapModuleTypeToRule(String rUID, String moduleTypeId) {
         Set<String> rules = mapModuleTypeToRules.get(moduleTypeId);
         if (rules == null) {
-            rules = new HashSet<String>(11);
+            rules = new HashSet<>(11);
         }
         rules.add(rUID);
         mapModuleTypeToRules.put(moduleTypeId, rules);
@@ -933,11 +932,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                     switch (ruleStatus) {
                         case RUNNING:
                         case IDLE:
-                            mapMissingHandlers = mapMissingHandlers != null ? mapMissingHandlers
-                                    : new HashMap<String, List<String>>(20);
+                            mapMissingHandlers = mapMissingHandlers != null ? mapMissingHandlers : new HashMap<>(20);
                             List<String> list = mapMissingHandlers.get(rUID);
                             if (list == null) {
-                                list = new ArrayList<String>(5);
+                                list = new ArrayList<>(5);
                             }
                             list.add(moduleTypeName);
                             mapMissingHandlers.put(rUID, list);
@@ -1101,7 +1099,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         @NonNullByDefault({})
         Map<String, Object> context = contextMap.get(ruleUID);
         if (context == null) {
-            context = new HashMap<String, Object>();
+            context = new HashMap<>();
             contextMap.put(ruleUID, context);
         }
         if (connections != null) {
@@ -1264,7 +1262,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @param rule updated rule
      */
     private void autoMapConnections(WrappedRule rule) {
-        Map<Set<String>, OutputRef> triggerOutputTags = new HashMap<Set<String>, OutputRef>(11);
+        Map<Set<String>, OutputRef> triggerOutputTags = new HashMap<>(11);
         for (WrappedTrigger mt : rule.getTriggers()) {
             final Trigger t = mt.unwrap();
             TriggerType tt = (TriggerType) mtRegistry.get(t.getTypeUID());
@@ -1272,7 +1270,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 initTagsMap(t.getId(), tt.getOutputs(), triggerOutputTags);
             }
         }
-        Map<Set<String>, OutputRef> actionOutputTags = new HashMap<Set<String>, OutputRef>(11);
+        Map<Set<String>, OutputRef> actionOutputTags = new HashMap<>(11);
         for (WrappedAction ma : rule.getActions()) {
             final Action a = ma.unwrap();
             ActionType at = (ActionType) mtRegistry.get(a.getTypeUID());

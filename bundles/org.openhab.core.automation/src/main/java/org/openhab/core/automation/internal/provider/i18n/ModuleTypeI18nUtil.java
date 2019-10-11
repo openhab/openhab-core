@@ -48,7 +48,7 @@ public class ModuleTypeI18nUtil {
 
     public static List<Input> getLocalizedInputs(TranslationProvider i18nProvider, List<Input> inputs, Bundle bundle,
             String uid, Locale locale) {
-        List<Input> linputs = new ArrayList<Input>();
+        List<Input> linputs = new ArrayList<>();
         if (inputs != null) {
             for (Input input : inputs) {
                 String inputName = input.getName();
@@ -65,7 +65,7 @@ public class ModuleTypeI18nUtil {
 
     public static List<Output> getLocalizedOutputs(TranslationProvider i18nProvider, List<Output> outputs,
             Bundle bundle, String uid, Locale locale) {
-        List<Output> loutputs = new ArrayList<Output>();
+        List<Output> loutputs = new ArrayList<>();
         if (outputs != null) {
             for (Output output : outputs) {
                 String outputName = output.getName();

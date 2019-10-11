@@ -15,6 +15,7 @@ package org.openhab.core.automation.module.script.internal;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -43,9 +44,9 @@ import org.slf4j.LoggerFactory;
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private HashMap<String, @Nullable ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private HashMap<String, @Nullable ScriptEngineFactory> customSupport = new HashMap<>();
-    private HashMap<String, @Nullable ScriptEngineFactory> genericSupport = new HashMap<>();
+    private Map<String, @Nullable ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
+    private Map<String, @Nullable ScriptEngineFactory> customSupport = new HashMap<>();
+    private Map<String, @Nullable ScriptEngineFactory> genericSupport = new HashMap<>();
     private @NonNullByDefault({}) ScriptExtensionManager scriptExtensionManager;
 
     @Reference
@@ -113,7 +114,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             try {
                 ScriptEngine engine = engineFactory.createScriptEngine(scriptType);
                 if (engine != null) {
-                    HashMap<String, Object> scriptExManager = new HashMap<>();
+                    Map<String, Object> scriptExManager = new HashMap<>();
                     result = new ScriptEngineContainer(engine, engineFactory, engineIdentifier);
                     ScriptExtensionManagerWrapper wrapper = new ScriptExtensionManagerWrapper(scriptExtensionManager,
                             result);

@@ -70,7 +70,7 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
      */
     public CommandlineTemplateProvider(BundleContext context, TemplateRegistry<RuleTemplate> templateRegistry) {
         super(context);
-        listeners = new LinkedList<ProviderChangeListener<RuleTemplate>>();
+        listeners = new LinkedList<>();
         tpReg = bc.registerService(RuleTemplateProvider.class.getName(), this, null);
         this.templateRegistry = templateRegistry;
     }
@@ -178,13 +178,13 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
             throws ParsingException {
         Set<RuleTemplate> providedObjects = parser.parse(inputStreamReader);
         if (providedObjects != null && !providedObjects.isEmpty()) {
-            List<String> portfolio = new ArrayList<String>();
+            List<String> portfolio = new ArrayList<>();
             synchronized (providerPortfolio) {
                 providerPortfolio.put(url, portfolio);
             }
-            List<ParsingNestedException> importDataExceptions = new ArrayList<ParsingNestedException>();
+            List<ParsingNestedException> importDataExceptions = new ArrayList<>();
             for (RuleTemplate ruleT : providedObjects) {
-                List<ParsingNestedException> exceptions = new ArrayList<ParsingNestedException>();
+                List<ParsingNestedException> exceptions = new ArrayList<>();
                 String uid = ruleT.getUID();
                 checkExistence(uid, exceptions);
                 if (exceptions.isEmpty()) {
@@ -225,7 +225,7 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
 
     @Override
     public Collection<RuleTemplate> getAll() {
-        return new LinkedList<RuleTemplate>(providedObjectsHolder.values());
+        return new LinkedList<>(providedObjectsHolder.values());
     }
 
     @Override

@@ -956,7 +956,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         firmwareUpdateService.updateFirmware(THING4_UID, FW111_EN.getVersion(), locale);
         firmwareUpdateService.cancelFirmwareUpdate(THING4_UID);
 
-        AtomicReference<FirmwareUpdateResultInfoEvent> resultEvent = new AtomicReference<FirmwareUpdateResultInfoEvent>();
+        AtomicReference<FirmwareUpdateResultInfoEvent> resultEvent = new AtomicReference<>();
         waitForAssert(() -> {
             ArgumentCaptor<FirmwareUpdateResultInfoEvent> eventCaptor = ArgumentCaptor
                     .forClass(FirmwareUpdateResultInfoEvent.class);

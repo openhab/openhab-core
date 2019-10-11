@@ -58,7 +58,7 @@ public class StringItem extends GenericItem {
 
     @Override
     public State getStateAs(Class<? extends State> typeClass) {
-        ArrayList<Class<? extends State>> list = new ArrayList<>();
+        List<Class<? extends State>> list = new ArrayList<>();
         list.add(typeClass);
         State convertedState = TypeParser.parseState(list, state.toString());
         if (convertedState != null) {

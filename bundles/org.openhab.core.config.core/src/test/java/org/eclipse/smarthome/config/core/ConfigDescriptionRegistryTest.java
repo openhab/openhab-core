@@ -62,7 +62,7 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry = new ConfigDescriptionRegistry();
         ConfigDescriptionParameter param1 = new ConfigDescriptionParameter("param1",
                 ConfigDescriptionParameter.Type.INTEGER);
-        List<ConfigDescriptionParameter> pList1 = new ArrayList<ConfigDescriptionParameter>();
+        List<ConfigDescriptionParameter> pList1 = new ArrayList<>();
         pList1.add(param1);
 
         configDescription = new ConfigDescription(URI_DUMMY, pList1);
@@ -84,7 +84,7 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
 
         ConfigDescriptionParameter param2 = new ConfigDescriptionParameter("param2",
                 ConfigDescriptionParameter.Type.INTEGER);
-        List<ConfigDescriptionParameter> pList2 = new ArrayList<ConfigDescriptionParameter>();
+        List<ConfigDescriptionParameter> pList2 = new ArrayList<>();
         pList2.add(param2);
         configDescription2 = new ConfigDescription(URI_DUMMY, pList2);
         when(configDescriptionProviderMock2.getConfigDescriptions(any()))

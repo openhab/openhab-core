@@ -501,7 +501,7 @@ public class ItemUIRegistryImplTest {
 
         Switch switchWidget = mock(Switch.class);
         when(switchWidget.getItem()).thenReturn("myItem");
-        when(switchWidget.getMappings()).thenReturn(new BasicEList<Mapping>());
+        when(switchWidget.getMappings()).thenReturn(new BasicEList<>());
 
         State stateForSwitch = uiRegistry.getState(switchWidget);
 
@@ -522,7 +522,7 @@ public class ItemUIRegistryImplTest {
         when(switchWidget.getItem()).thenReturn("myItem");
 
         Mapping mapping = mock(Mapping.class);
-        BasicEList<Mapping> mappings = new BasicEList<Mapping>();
+        BasicEList<Mapping> mappings = new BasicEList<>();
         mappings.add(mapping);
         when(switchWidget.getMappings()).thenReturn(mappings);
 
@@ -661,7 +661,7 @@ public class ItemUIRegistryImplTest {
         when(colorArray.getState()).thenReturn("21");
         when(colorArray.getCondition()).thenReturn("<");
         when(colorArray.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> colorArrays = new BasicEList<ColorArray>();
+        BasicEList<ColorArray> colorArrays = new BasicEList<>();
         colorArrays.add(colorArray);
         when(widget.getLabelColor()).thenReturn(colorArrays);
 
@@ -681,7 +681,7 @@ public class ItemUIRegistryImplTest {
         when(colorArray.getState()).thenReturn("20");
         when(colorArray.getCondition()).thenReturn("==");
         when(colorArray.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> colorArrays = new BasicEList<ColorArray>();
+        BasicEList<ColorArray> colorArrays = new BasicEList<>();
         colorArrays.add(colorArray);
         when(widget.getLabelColor()).thenReturn(colorArrays);
 

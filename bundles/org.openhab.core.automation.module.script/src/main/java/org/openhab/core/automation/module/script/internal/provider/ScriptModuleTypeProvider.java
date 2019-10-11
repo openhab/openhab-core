@@ -71,7 +71,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
         if (parameterOptions.isEmpty()) {
             return null;
         } else {
-            List<Output> outputs = new ArrayList<Output>();
+            List<Output> outputs = new ArrayList<>();
 
             Output result = new Output("result", "java.lang.Object", "result", "the script result", null, null, null);
             outputs.add(result);

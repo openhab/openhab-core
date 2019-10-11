@@ -47,8 +47,8 @@ import org.eclipse.smarthome.core.types.util.UnitUtils;
 @NonNullByDefault
 public class NumberItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
     @Nullable
     private Class<? extends Quantity<?>> dimension;

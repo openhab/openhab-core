@@ -66,8 +66,7 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
 
         URI uri = null;
         if (uriText == null) {
-            throw new ConversionException(
-                    "No URI provided");
+            throw new ConversionException("No URI provided");
         }
 
         try {
@@ -78,8 +77,8 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
         }
 
         // create the lists to hold parameters and groups
-        List<ConfigDescriptionParameter> configDescriptionParams = new ArrayList<ConfigDescriptionParameter>();
-        List<ConfigDescriptionParameterGroup> configDescriptionGroups = new ArrayList<ConfigDescriptionParameterGroup>();
+        List<ConfigDescriptionParameter> configDescriptionParams = new ArrayList<>();
+        List<ConfigDescriptionParameterGroup> configDescriptionGroups = new ArrayList<>();
 
         // read values
         List<?> nodes = (List<?>) context.convertAnother(context, List.class);

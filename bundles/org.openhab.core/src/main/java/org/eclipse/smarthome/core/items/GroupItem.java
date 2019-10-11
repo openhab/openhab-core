@@ -82,7 +82,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
             this.baseItem = baseItem;
         }
 
-        members = new CopyOnWriteArrayList<Item>();
+        members = new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -154,7 +154,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
      * @return Set of member items filtered by filterItem
      */
     public Set<Item> getMembers(Predicate<Item> filterItem) {
-        Set<Item> allMembers = new LinkedHashSet<Item>();
+        Set<Item> allMembers = new LinkedHashSet<>();
         collectMembers(allMembers, members);
         return allMembers.stream().filter(filterItem).collect(Collectors.toSet());
     }
@@ -172,7 +172,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
 
         boolean added = members.addIfAbsent(item);
 
-        // in case membership is constructed programmatically this sanitises
+        // in case membership is constructed programmatically this sanitizes
         // the group names on the item:
         if (added && item instanceof GenericItem) {
             ((GenericItem) item).addGroupName(this.getName());

@@ -12,9 +12,10 @@
  */
 package org.eclipse.smarthome.core.voice.internal;
 
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioStream;
@@ -31,13 +32,14 @@ import org.eclipse.smarthome.core.voice.KSServiceHandle;
  */
 public class KSServiceStub implements KSService {
 
-    private Set<AudioFormat> supportedFormats = new HashSet<AudioFormat>();
-
-    private boolean isWordSpotted;
-    private boolean isKSExceptionExpected;
+    private static final Set<AudioFormat> SUPPORTED_FORMATS = Stream.of(AudioFormat.MP3, AudioFormat.WAV)
+            .collect(Collectors.toSet());
 
     private static final String KSSERVICE_STUB_ID = "ksServiceStubID";
     private static final String KSSERVICE_STUB_LABEL = "ksServiceStubLabel";
+
+    private boolean isWordSpotted;
+    private boolean isKSExceptionExpected;
 
     @Override
     public String getId() {
@@ -60,9 +62,7 @@ public class KSServiceStub implements KSService {
 
     @Override
     public Set<AudioFormat> getSupportedFormats() {
-        supportedFormats.add(AudioFormat.MP3);
-        supportedFormats.add(AudioFormat.WAV);
-        return supportedFormats;
+        return SUPPORTED_FORMATS;
     }
 
     @Override

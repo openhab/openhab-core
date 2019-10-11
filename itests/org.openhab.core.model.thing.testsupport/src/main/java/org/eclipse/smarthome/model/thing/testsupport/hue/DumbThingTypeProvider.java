@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class DumbThingTypeProvider implements ThingTypeProvider {
 
     private final Logger logger = LoggerFactory.getLogger(DumbThingTypeProvider.class);
-    private static final Map<ThingTypeUID, ThingType> THING_TYPES = new HashMap<ThingTypeUID, ThingType>();
+    private static final Map<ThingTypeUID, ThingType> THING_TYPES = new HashMap<>();
 
     public DumbThingTypeProvider() {
         logger.debug("DumbThingTypeProvider created");

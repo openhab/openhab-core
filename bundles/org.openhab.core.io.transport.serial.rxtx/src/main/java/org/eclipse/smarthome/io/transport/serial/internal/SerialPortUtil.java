@@ -109,7 +109,7 @@ public class SerialPortUtil {
         if (serialPortsProperty != null) {
             serialPorts = Stream.of(serialPortsProperty.split(pathSeparator)).collect(Collectors.toSet());
         } else {
-            serialPorts = new HashSet<String>();
+            serialPorts = new HashSet<>();
         }
         if (serialPorts.add(port)) {
             return serialPorts.stream().collect(Collectors.joining(pathSeparator)); // see

@@ -80,7 +80,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ModuleType> Collection<T> getByTag(String moduleTypeTag, Locale locale) {
-        Collection<T> result = new ArrayList<T>(20);
+        Collection<T> result = new ArrayList<>(20);
         forEach((provider, mType) -> {
             ModuleType mt = locale == null ? mType
                     : ((ModuleTypeProvider) provider).getModuleType(mType.getUID(), locale);
@@ -102,8 +102,8 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ModuleType> Collection<T> getByTags(Locale locale, String... tags) {
-        Set<String> tagSet = tags != null ? new HashSet<String>(Arrays.asList(tags)) : null;
-        Collection<T> result = new ArrayList<T>(20);
+        Set<String> tagSet = tags != null ? new HashSet<>(Arrays.asList(tags)) : null;
+        Collection<T> result = new ArrayList<>(20);
         forEach((provider, mType) -> {
             ModuleType mt = locale == null ? mType
                     : ((ModuleTypeProvider) provider).getModuleType(mType.getUID(), locale);
@@ -119,7 +119,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     @Override
     public Collection<TriggerType> getTriggers(Locale locale, String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
-        Collection<TriggerType> triggerTypes = new ArrayList<TriggerType>();
+        Collection<TriggerType> triggerTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
             if (mt instanceof TriggerType) {
                 triggerTypes.add((TriggerType) mt);
@@ -131,7 +131,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     @Override
     public Collection<TriggerType> getTriggers(String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(tags);
-        Collection<TriggerType> triggerTypes = new ArrayList<TriggerType>();
+        Collection<TriggerType> triggerTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
             if (mt instanceof TriggerType) {
                 triggerTypes.add((TriggerType) mt);
@@ -143,7 +143,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     @Override
     public Collection<ConditionType> getConditions(String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(tags);
-        Collection<ConditionType> conditionTypes = new ArrayList<ConditionType>();
+        Collection<ConditionType> conditionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
             if (mt instanceof ConditionType) {
                 conditionTypes.add((ConditionType) mt);
@@ -155,7 +155,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     @Override
     public Collection<ConditionType> getConditions(Locale locale, String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
-        Collection<ConditionType> conditionTypes = new ArrayList<ConditionType>();
+        Collection<ConditionType> conditionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
             if (mt instanceof ConditionType) {
                 conditionTypes.add((ConditionType) mt);
@@ -167,7 +167,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     @Override
     public Collection<ActionType> getActions(String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(tags);
-        Collection<ActionType> actionTypes = new ArrayList<ActionType>();
+        Collection<ActionType> actionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
             if (mt instanceof ActionType) {
                 actionTypes.add((ActionType) mt);
@@ -179,7 +179,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     @Override
     public Collection<ActionType> getActions(Locale locale, String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
-        Collection<ActionType> actionTypes = new ArrayList<ActionType>();
+        Collection<ActionType> actionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
             if (mt instanceof ActionType) {
                 actionTypes.add((ActionType) mt);

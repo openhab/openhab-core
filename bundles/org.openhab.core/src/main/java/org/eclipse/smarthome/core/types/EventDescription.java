@@ -31,9 +31,9 @@ public class EventDescription {
      */
     public EventDescription(List<EventOption> options) {
         if (options != null) {
-            this.options = Collections.unmodifiableList(new ArrayList<EventOption>(options));
+            this.options = Collections.unmodifiableList(new ArrayList<>(options));
         } else {
-            this.options = Collections.unmodifiableList(new ArrayList<EventOption>(0));
+            this.options = Collections.unmodifiableList(new ArrayList<>(0));
         }
     }
 

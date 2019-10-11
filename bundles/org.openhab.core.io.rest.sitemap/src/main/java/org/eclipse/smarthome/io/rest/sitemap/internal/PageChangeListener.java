@@ -54,8 +54,7 @@ public class PageChangeListener implements StateChangeListener {
     private final ItemUIRegistry itemUIRegistry;
     private EList<Widget> widgets;
     private Set<Item> items;
-    private final List<SitemapSubscriptionCallback> callbacks = Collections
-            .synchronizedList(new ArrayList<SitemapSubscriptionCallback>());
+    private final List<SitemapSubscriptionCallback> callbacks = Collections.synchronizedList(new ArrayList<>());
     private Set<SitemapSubscriptionCallback> distinctCallbacks = Collections.emptySet();
 
     /**
@@ -134,7 +133,7 @@ public class PageChangeListener implements StateChangeListener {
      * @return all items that are represented by the list of widgets
      */
     private Set<Item> getAllItems(EList<Widget> widgets) {
-        Set<Item> items = new HashSet<Item>();
+        Set<Item> items = new HashSet<>();
         if (itemUIRegistry != null) {
             for (Widget widget : widgets) {
                 addItemWithName(items, widget.getItem());
@@ -235,8 +234,8 @@ public class PageChangeListener implements StateChangeListener {
                 // the widget including its state (in event.item.state)
                 final Item itemToBeSent = itemBelongsToWidget ? item : getItemForWidget(w);
                 if (itemToBeSent != null) {
-                    String widgetTypeName = w.eClass().getInstanceTypeName().substring(
-                            w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
+                    String widgetTypeName = w.eClass().getInstanceTypeName()
+                            .substring(w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
                     boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
                     Predicate<Item> itemFilter = (i -> i.getType().equals(CoreItemFactory.LOCATION));
                     event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);

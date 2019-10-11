@@ -58,7 +58,7 @@ public class ChannelGroupType extends AbstractDescriptionType {
         if (channelDefinitions != null) {
             this.channelDefinitions = Collections.unmodifiableList(channelDefinitions);
         } else {
-            this.channelDefinitions = Collections.unmodifiableList(new ArrayList<ChannelDefinition>(0));
+            this.channelDefinitions = Collections.unmodifiableList(new ArrayList<>(0));
         }
     }
 
@@ -87,7 +87,7 @@ public class ChannelGroupType extends AbstractDescriptionType {
         if (channelDefinitions != null) {
             this.channelDefinitions = Collections.unmodifiableList(channelDefinitions);
         } else {
-            this.channelDefinitions = Collections.unmodifiableList(new ArrayList<ChannelDefinition>(0));
+            this.channelDefinitions = Collections.unmodifiableList(new ArrayList<>(0));
         }
     }
 

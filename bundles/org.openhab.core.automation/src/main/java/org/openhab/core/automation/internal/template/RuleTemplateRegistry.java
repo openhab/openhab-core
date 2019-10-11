@@ -21,7 +21,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.openhab.core.automation.template.RuleTemplate;
@@ -70,10 +69,9 @@ public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String,
 
     private RuleTemplate createCopy(RuleTemplate template) {
         return new RuleTemplate(template.getUID(), template.getLabel(), template.getDescription(),
-                new HashSet<String>(template.getTags()), new ArrayList<>(template.getTriggers()),
+                new HashSet<>(template.getTags()), new ArrayList<>(template.getTriggers()),
                 new ArrayList<>(template.getConditions()), new ArrayList<>(template.getActions()),
-                new LinkedList<ConfigDescriptionParameter>(template.getConfigurationDescriptions()),
-                template.getVisibility());
+                new LinkedList<>(template.getConfigurationDescriptions()), template.getVisibility());
     }
 
     @Override

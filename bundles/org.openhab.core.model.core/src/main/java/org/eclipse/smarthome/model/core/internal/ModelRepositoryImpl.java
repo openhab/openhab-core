@@ -121,7 +121,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                         resource = resourceSet.createResource(URI.createURI(name));
                         if (resource != null) {
                             logger.info("Loading model '{}'", name);
-                            Map<String, String> options = new HashMap<String, String>();
+                            Map<String, String> options = new HashMap<>();
                             options.put(XtextResource.OPTION_ENCODING, "UTF-8");
                             if (inputStream == null) {
                                 logger.warn(
@@ -178,7 +178,7 @@ public class ModelRepositoryImpl implements ModelRepository {
     public Iterable<String> getAllModelNamesOfType(final String modelType) {
         synchronized (resourceSet) {
             // Make a copy to avoid ConcurrentModificationException
-            List<Resource> resourceListCopy = new ArrayList<Resource>(resourceSet.getResources());
+            List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
 
             return resourceListCopy.stream().filter(input -> {
                 return input != null && input.getURI().lastSegment().contains(".") && input.isLoaded()
@@ -193,7 +193,7 @@ public class ModelRepositoryImpl implements ModelRepository {
     public void reloadAllModelsOfType(final String modelType) {
         synchronized (resourceSet) {
             // Make a copy to avoid ConcurrentModificationException
-            List<Resource> resourceListCopy = new ArrayList<Resource>(resourceSet.getResources());
+            List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
             for (Resource resource : resourceListCopy) {
                 if (resource != null && resource.getURI().lastSegment().contains(".") && resource.isLoaded()) {
                     if (modelType.equalsIgnoreCase(resource.getURI().fileExtension())) {
@@ -215,7 +215,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         Set<String> ret = new HashSet<>();
         synchronized (resourceSet) {
             // Make a copy to avoid ConcurrentModificationException
-            List<Resource> resourceListCopy = new ArrayList<Resource>(resourceSet.getResources());
+            List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
             for (Resource resource : resourceListCopy) {
                 if (resource != null && resource.getURI().lastSegment().contains(".") && resource.isLoaded()) {
                     if (modelType.equalsIgnoreCase(resource.getURI().fileExtension())) {

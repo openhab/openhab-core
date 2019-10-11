@@ -14,9 +14,9 @@ package org.eclipse.smarthome.core.voice.text;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Expression that decorates the resulting (proxied) AST node of a given expression by a name, value and tag.
@@ -94,7 +94,7 @@ public final class ExpressionLet extends Expression {
     }
 
     @Override
-    boolean collectFirsts(ResourceBundle language, HashSet<String> firsts) {
+    boolean collectFirsts(ResourceBundle language, Set<String> firsts) {
         return subExpression.collectFirsts(language, firsts);
     }
 

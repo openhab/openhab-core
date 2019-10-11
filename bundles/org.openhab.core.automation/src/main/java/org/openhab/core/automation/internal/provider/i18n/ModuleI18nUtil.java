@@ -35,7 +35,7 @@ public class ModuleI18nUtil {
 
     public static <T extends Module> List<T> getLocalizedModules(TranslationProvider i18nProvider, List<T> modules,
             Bundle bundle, String uid, String prefix, Locale locale) {
-        List<T> lmodules = new ArrayList<T>();
+        List<T> lmodules = new ArrayList<>();
         for (T module : modules) {
             String label = getModuleLabel(i18nProvider, bundle, uid, module.getId(), module.getLabel(), prefix, locale);
             String description = getModuleDescription(i18nProvider, bundle, uid, prefix, module.getId(),

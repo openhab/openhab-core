@@ -71,7 +71,7 @@ public class ConsoleInterpreter {
 
     /** returns an array of the usage texts for all available commands */
     public static List<String> getUsages(Collection<ConsoleCommandExtension> consoleCommandExtensions) {
-        List<String> usages = new ArrayList<String>();
+        List<String> usages = new ArrayList<>();
         for (ConsoleCommandExtension consoleCommandExtension : consoleCommandExtensions) {
             usages.addAll(consoleCommandExtension.getUsages());
         }

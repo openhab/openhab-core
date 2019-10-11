@@ -423,7 +423,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         Locale locale = localeProvider.getLocale();
 
         // Get collection of voice locales
-        Collection<Locale> locales = new ArrayList<Locale>();
+        Collection<Locale> locales = new ArrayList<>();
         for (Voice currentVoice : voices) {
             locales.add(currentVoice.getLocale());
         }

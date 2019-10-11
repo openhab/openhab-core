@@ -64,7 +64,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
         this.types = Collections.singleton(ItemCommandEvent.TYPE);
         this.bundleContext = bundleContext;
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         this.topic = "smarthome/items/" + itemName + "/command";
         properties.put("event.topics", topic);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,

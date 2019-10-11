@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
@@ -41,7 +42,7 @@ public class PersistenceResourceTest {
     private static final String PERSISTENCE_SERVICE_ID = "TestServiceID";
 
     private PersistenceResource pResource;
-    private ArrayList<HistoricItem> items;
+    private List<HistoricItem> items;
 
     @Before
     public void setup() {
@@ -49,7 +50,7 @@ public class PersistenceResourceTest {
 
         int startValue = 2016;
         int endValue = 2018;
-        items = new ArrayList<HistoricItem>(endValue - startValue);
+        items = new ArrayList<>(endValue - startValue);
         for (int i = startValue; i <= endValue; i++) {
             final int year = i;
             items.add(new HistoricItem() {

@@ -36,7 +36,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Michael Grammling - Initial contribution
  * @author Martin Herbst - UTF-8 replaced by ISO-8859-1 to follow Java standards
- * 
+ *
  */
 public class ResourceBundleClassLoader extends ClassLoader {
 
@@ -70,7 +70,7 @@ public class ResourceBundleClassLoader extends ClassLoader {
     public URL getResource(String name) {
         Enumeration<URL> resourceFiles = this.bundle.findEntries(this.path, this.filePattern, true);
 
-        List<URL> allResources = new LinkedList<URL>();
+        List<URL> allResources = new LinkedList<>();
         if (resourceFiles != null) {
             while (resourceFiles.hasMoreElements()) {
                 URL resourceURL = resourceFiles.nextElement();
