@@ -48,6 +48,7 @@ import org.eclipse.smarthome.core.library.unit.ImperialUnits;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The {@link I18nProviderImpl} is a concrete implementation of the {@link TranslationProvider}, {@link LocaleProvider},
  * and {@link LocationProvider} service interfaces.
- * *
+ *
  * <p>
  * This implementation uses the i18n mechanism of Java ({@link ResourceBundle}) to translate a given key into text. The
  * resources must be placed under the specific directory {@link LanguageResourceBundleManager#RESOURCE_DIRECTORY} within
@@ -75,15 +76,16 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone
  */
-
+@Component(immediate = true, configurationPid = "org.eclipse.smarthome.i18n", property = {
+        Constants.SERVICE_PID + "=org.eclipse.smarthome.i18n", //
+        "service.config.label=Regional Settings", //
+        "service.config.category=system", //
+        "service.config.description.uri=system:i18n" })
 @NonNullByDefault
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.core.i18nprovider", property = {
-        "service.pid=org.eclipse.smarthome.core.i18nprovider", "service.config.description.uri:String=system:i18n",
-        "service.config.label:String=Regional Settings", "service.config.category:String=system" })
 public class I18nProviderImpl
         implements TranslationProvider, LocaleProvider, LocationProvider, TimeZoneProvider, UnitProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(I18nProviderImpl.class);
 
     // LocaleProvider
     static final String LANGUAGE = "language";

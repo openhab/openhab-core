@@ -89,20 +89,31 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
     public void assertUsingDefaultLocale() throws Exception {
         // Set german locale
         ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
-        Configuration config = configAdmin.getConfiguration("org.eclipse.smarthome.core.i18nprovider", null);
-        Dictionary<String, String> localeCfg = new Hashtable<>();
-        localeCfg.put("language", "de");
-        localeCfg.put("country", "DE");
-        config.update(localeCfg);
+        assertThat(configAdmin, is(notNullValue()));
+
+        Configuration config = configAdmin.getConfiguration("org.eclipse.smarthome.i18n", null);
+        assertThat(config, is(notNullValue()));
+
+        Dictionary<String, Object> properties = config.getProperties();
+        if (properties == null) {
+            properties = new Hashtable<>();
+        }
+
+        properties.put("language", "de");
+        properties.put("region", "DE");
+
+        config.update(properties);
 
         // before running the test with a default locale make sure the locale has been set
         LocaleProvider localeProvider = getService(LocaleProvider.class);
-        waitForAssert(() -> assertThat(localeProvider.getLocale().toString(), is("de")));
+        assertThat(localeProvider, is(notNullValue()));
+
+        waitForAssert(() -> assertThat(localeProvider.getLocale().toString(), is("de_DE")));
 
         bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
-            Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(/* use default locale */ null);
+            // use default locale
+            Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(null);
             BindingInfo bindingInfo = bindingInfos.iterator().next();
-
             assertThat(bindingInfo, is(notNullValue()));
             assertThat(bindingInfo.getName(), is("Yahoo Wetter Binding"));
             assertThat(bindingInfo.getDescription(), is(
