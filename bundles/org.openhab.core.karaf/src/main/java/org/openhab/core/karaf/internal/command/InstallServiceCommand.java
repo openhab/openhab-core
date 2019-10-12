@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -240,7 +241,7 @@ public class InstallServiceCommand implements Action {
         System.out.println("  To stop the service:");
         System.out.println("    $ service " + serviceFile.getName() + " stop");
         System.out.println("");
-        System.out.println("  To uninstall the service :");
+        System.out.println("  To uninstall the service:");
         System.out.println("    $ chkconfig " + serviceFile.getName() + " --del");
         System.out.println("    $ rm /etc/init.d/" + serviceFile.getPath());
     }
@@ -269,7 +270,7 @@ public class InstallServiceCommand implements Action {
         System.out.println("  To stop the service:");
         System.out.println("    $ /etc/init.d/" + serviceFile.getName() + " stop");
         System.out.println("");
-        System.out.println("  To uninstall the service :");
+        System.out.println("  To uninstall the service:");
         System.out.println("    $ rm /etc/init.d/" + serviceFile.getName());
     }
 
@@ -401,8 +402,8 @@ public class InstallServiceCommand implements Action {
         }
         try {
             is.close();
-        } catch (Throwable t) {
-            logger.error("Error closing inputstream", t);
+        } catch (IOException e) {
+            logger.error("Error closing inputstream", e);
         }
     }
 
@@ -418,8 +419,8 @@ public class InstallServiceCommand implements Action {
         }
         try {
             os.close();
-        } catch (Throwable t) {
-            logger.error("Error closing outputstream", t);
+        } catch (IOException e) {
+            logger.error("Error closing outputstream", e);
         }
     }
 }
