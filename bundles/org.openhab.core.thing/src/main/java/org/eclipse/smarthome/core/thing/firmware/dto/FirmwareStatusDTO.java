@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * This is a data transfer object that is used to serialize firmware status information.
  *
  * @author Aoun Bukhari - Initial contribution
- *
  */
 @NonNullByDefault
 public class FirmwareStatusDTO {

@@ -22,7 +22,6 @@ import org.openhab.core.automation.Visibility;
  * This is a data transfer object that is used to serialize the rule templates.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class RuleTemplateDTO {
     public String label;

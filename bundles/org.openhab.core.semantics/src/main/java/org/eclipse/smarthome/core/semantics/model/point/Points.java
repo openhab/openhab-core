@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.semantics.model.Point;
  * This class provides a stream of all defined points.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 public class Points {
 

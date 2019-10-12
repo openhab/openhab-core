@@ -25,7 +25,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
  * A class that is interested in processing discovery events fired synchronously by a {@link DiscoveryService} has to
  * implement this interface.
  *
- * @author Michael Grammling - Initial Contribution.
+ * @author Michael Grammling - Initial contribution
  * @author Andre Fuechsel - Added removeOlderThings
  *
  * @see DiscoveryService

@@ -58,7 +58,7 @@ import org.slf4j.Logger;
  * 'childInput' : '${compositeModuleConfiguration}'</li>
  * </ul>
  *
- * @author Vasil Ilchev - Initial Contribution
+ * @author Vasil Ilchev - Initial contribution
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
  */
 public class ReferenceResolver {
@@ -84,7 +84,7 @@ public class ReferenceResolver {
                 Object result = resolveProperty(config, context, logger, configKey, (String) o);
                 config.put(configKey, result);
             } else if (o instanceof List) {
-                ArrayList<Object> resultList = new ArrayList<>();
+                List<Object> resultList = new ArrayList<>();
                 List<?> list = (List<?>) o;
                 for (Object obj : list) {
                     if (obj instanceof String) {
@@ -309,7 +309,6 @@ public class ReferenceResolver {
      * @param tokens a sequence of field names, indexes, or keys that represent the hierarchical path to the required
      *            object
      * @return the value of the object to witch the hierarchical path is pointing.
-     *
      * @throws IllegalArgumentException if one of the tokens point to field that is not existing or the object is null
      * @throws SecurityException If a security manager, <i>s</i>, is present and any of the following
      *             conditions is met:

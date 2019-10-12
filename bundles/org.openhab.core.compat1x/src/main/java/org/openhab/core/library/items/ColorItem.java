@@ -29,9 +29,7 @@ import org.openhab.core.types.UnDefType;
 /**
  * A ColorItem can be used for color values, e.g. for LED lights
  *
- * @author Kai Kreuzer
- * @since 1.2.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class ColorItem extends DimmerItem {
 

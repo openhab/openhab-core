@@ -19,12 +19,11 @@ import org.slf4j.LoggerFactory;
  * Base class for services that frequently run some action in a separate thread in the
  * background.
  *
- * @author Kai Kreuzer
- * @since 0.7.0
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class AbstractActiveService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractActiveService.class);
+    private final Logger logger = LoggerFactory.getLogger(AbstractActiveService.class);
 
     /** <code>true</code> if this binding is configured properly which means that all necessary data is available */
     private boolean properlyConfigured = false;
@@ -101,7 +100,7 @@ public abstract class AbstractActiveService {
      * @return <code>true</code> if this binding is configured properly which means
      *         that all necessary data is available
      */
-    final public boolean isProperlyConfigured() {
+    public final boolean isProperlyConfigured() {
         return properlyConfigured;
     }
 
@@ -146,7 +145,7 @@ public abstract class AbstractActiveService {
     /**
      * Worker thread which calls the execute method frequently.
      *
-     * @author Thomas.Eichstaedt-Engelen
+     * @author Thomas Eichstaedt-Engelen - Initial contribution
      */
     class RefreshThread extends Thread {
 
@@ -185,7 +184,6 @@ public abstract class AbstractActiveService {
          * @param refreshInterval
          */
         protected void pause(long refreshInterval) {
-
             try {
                 Thread.sleep(refreshInterval);
             } catch (InterruptedException e) {

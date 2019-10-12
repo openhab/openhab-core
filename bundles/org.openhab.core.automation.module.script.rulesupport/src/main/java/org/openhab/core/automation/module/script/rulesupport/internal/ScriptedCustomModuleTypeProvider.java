@@ -28,7 +28,6 @@ import org.osgi.service.component.annotations.Component;
  * registered types can then be used publicly from any Rule-Editor.
  *
  * @author Simon Merschjohann - Initial contribution
- *
  */
 @Component(immediate = true, service = { ScriptedCustomModuleTypeProvider.class, ModuleTypeProvider.class })
 public class ScriptedCustomModuleTypeProvider implements ModuleTypeProvider {

@@ -24,7 +24,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * This interface is a container for group functions that require {@link DateTimeType}s for its calculations.
  *
  * @author Robert Michalak - Initial contribution
- *
  */
 public interface DateTimeGroupFunction extends GroupFunction {
 

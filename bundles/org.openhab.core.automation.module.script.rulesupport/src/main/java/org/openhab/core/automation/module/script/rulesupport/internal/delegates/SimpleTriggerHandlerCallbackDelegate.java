@@ -23,8 +23,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.simple.Simpl
 /**
  * The {@link SimpleTriggerHandlerCallbackDelegate} allows a script to define callbacks for triggers in different ways.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 public class SimpleTriggerHandlerCallbackDelegate implements SimpleTriggerHandlerCallback {
     private final Trigger trigger;

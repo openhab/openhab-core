@@ -66,7 +66,7 @@ public class RuleEnablementActionHandler extends BaseActionModuleHandler {
     /**
      * This field stores the UIDs of the rules to which the action will be applied.
      */
-    private final List<String> UIDs;
+    private final List<String> uids;
 
     /**
      * This field stores the value for the setEnabled() method of {@link RuleRegistry}.
@@ -84,15 +84,15 @@ public class RuleEnablementActionHandler extends BaseActionModuleHandler {
         }
         this.enable = enable.booleanValue();
 
-        UIDs = (List<String>) config.get(RULE_UIDS_KEY);
-        if (UIDs == null) {
+        uids = (List<String>) config.get(RULE_UIDS_KEY);
+        if (uids == null) {
             throw new IllegalArgumentException("'ruleUIDs' property can not be null.");
         }
     }
 
     @Override
     public Map<String, Object> execute(Map<String, Object> context) {
-        for (String uid : UIDs) {
+        for (String uid : uids) {
             if (callback != null) {
                 callback.setEnabled(uid, enable);
             } else {

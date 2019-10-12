@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.measure.quantity.Temperature;
 
@@ -41,13 +42,12 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * Utility class for testing states on items
  *
- * @author Stefan Triller - Initial version
- *
+ * @author Stefan Triller - Initial contribution
  */
 public class StateUtil {
 
     public static List<State> getAllStates() {
-        LinkedList<State> states = new LinkedList<>();
+        List<State> states = new LinkedList<>();
 
         DateTimeType dateTime = new DateTimeType();
         states.add(dateTime);
@@ -91,14 +91,14 @@ public class StateUtil {
         states.add(UpDownType.UP);
         states.add(UpDownType.DOWN);
 
-        QuantityType<Temperature> quantityType = new QuantityType<Temperature>("12 °C");
+        QuantityType<Temperature> quantityType = new QuantityType<>("12 °C");
         states.add(quantityType);
 
         return states;
     }
 
     public static void testAcceptedStates(GenericItem item) {
-        HashSet<Class<? extends State>> successfullStates = new HashSet<>();
+        Set<Class<? extends State>> successfullStates = new HashSet<>();
 
         for (State s : getAllStates()) {
             item.setState(s);

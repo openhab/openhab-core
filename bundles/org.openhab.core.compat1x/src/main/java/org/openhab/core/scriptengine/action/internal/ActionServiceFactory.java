@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * This class listens for services that implement the old action service interface and registers
  * an according service for each under the new interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component
 public class ActionServiceFactory {

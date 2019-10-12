@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
  * All threads will time out after {@link THREAD_TIMEOUT}.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Component(configurationPid = ThreadPoolManager.CONFIGURATION_PID)
 public class ThreadPoolManager {

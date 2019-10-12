@@ -20,7 +20,7 @@ import org.openhab.core.automation.ModuleHandlerCallback;
 /**
  * This is a base class that can be used by any ModuleHandler implementation
  *
- * @author Kai Kreuzer - Initial Contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class BaseModuleHandler<T extends Module> implements ModuleHandler {

@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.Modified;
  * Real authentication logic is embedded in login modules implemented by 3rd party, this code is just for bridging it to
  * smarthome platform.
  *
- * @author Łukasz Dywicki - Initial contribution and API
+ * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Removed ManagedService and used DS configuration instead
  */
 @Component(configurationPid = "org.eclipse.smarthome.jaas")

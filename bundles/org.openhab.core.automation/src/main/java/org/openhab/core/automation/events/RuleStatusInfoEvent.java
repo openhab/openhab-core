@@ -20,7 +20,6 @@ import org.openhab.core.automation.RuleStatusInfo;
  *
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - added toString method
- *
  */
 public class RuleStatusInfoEvent extends AbstractEvent {
 

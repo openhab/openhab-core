@@ -32,14 +32,13 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * A ColorItem can be used for color values, e.g. for LED lights
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class ColorItem extends DimmerItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
     static {
         acceptedDataTypes.add(HSBType.class);

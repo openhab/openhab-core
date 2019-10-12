@@ -20,7 +20,7 @@ import java.util.Set;
  * {@link BindingInfoProvider} services are tracked by the {@link BindingInfoRegistry} and provided as one common
  * collection.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @see BindingInfoRegistry
  */

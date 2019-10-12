@@ -42,14 +42,13 @@ import org.eclipse.smarthome.core.types.util.UnitUtils;
  * It can also be used as a counter or as any other thing that can be expressed
  * as a number.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class NumberItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
     @Nullable
     private Class<? extends Quantity<?>> dimension;

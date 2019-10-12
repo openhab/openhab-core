@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Smoke.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Property_Smoke", label = "Smoke", synonyms = "", description = "")
 public interface Smoke extends Property {

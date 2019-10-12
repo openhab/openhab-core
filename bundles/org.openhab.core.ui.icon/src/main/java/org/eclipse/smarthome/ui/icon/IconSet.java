@@ -20,7 +20,6 @@ import java.util.Set;
  * This is a bean that provides some meta-information about available icon sets.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class IconSet {
 

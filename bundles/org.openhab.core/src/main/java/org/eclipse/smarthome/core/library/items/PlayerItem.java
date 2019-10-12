@@ -30,13 +30,13 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * An {@link PlayerItem} allows to control a player, e.g. an audio player.
  *
- * @author Alex Tugarev
+ * @author Alex Tugarev - Initial contribution
  */
 @NonNullByDefault
 public class PlayerItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
     static {
         acceptedDataTypes.add(PlayPauseType.class);

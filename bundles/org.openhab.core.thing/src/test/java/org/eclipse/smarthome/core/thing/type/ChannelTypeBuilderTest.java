@@ -33,7 +33,6 @@ import org.junit.Test;
  * Tests the {@link ChannelTypeBuilder}.
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class ChannelTypeBuilderTest {
 

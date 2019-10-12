@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.Configuration;
@@ -43,16 +41,15 @@ import org.slf4j.LoggerFactory;
  * ThingHandler that randomly sends numbers and strings to channels based on a configured interval
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @NonNullByDefault
 public class MagicChattyThingHandler extends BaseThingHandler {
 
     private static Logger logger = LoggerFactory.getLogger(MagicChattyThingHandler.class);
-    private static String PARAM_INTERVAL = "interval";
-    private static int START_DELAY = 3;
+    private static final String PARAM_INTERVAL = "interval";
+    private static final int START_DELAY = 3;
 
-    private static final List<String> randomTexts = Stream
+    private static final List<String> RANDOM_TEXTS = Stream
             .of("OPEN", "CLOSED", "ON", "OFF", "Hello", "This is a sentence").collect(Collectors.toList());
 
     private final Set<ChannelUID> numberChannelUIDs = new HashSet<>();
@@ -99,7 +96,7 @@ public class MagicChattyThingHandler extends BaseThingHandler {
                     int intValue = (int) randomValue;
                     State cmd;
                     if (intValue % 2 == 0) {
-                        cmd = new QuantityType<Temperature>(randomValue + "°C");
+                        cmd = new QuantityType<>(randomValue + "°C");
                     } else {
                         cmd = new DecimalType(randomValue);
                     }
@@ -107,15 +104,14 @@ public class MagicChattyThingHandler extends BaseThingHandler {
                 }
 
                 for (ChannelUID channelUID : textChannelUIDs) {
-                    int pos = (int) (Math.random() * (randomTexts.size() - 1));
-                    String randomValue = randomTexts.get(pos);
+                    int pos = (int) (Math.random() * (RANDOM_TEXTS.size() - 1));
+                    String randomValue = RANDOM_TEXTS.get(pos);
 
                     StringType cmd = new StringType(randomValue);
                     updateState(channelUID, cmd);
                 }
             }
         };
-
     }
 
     @Override

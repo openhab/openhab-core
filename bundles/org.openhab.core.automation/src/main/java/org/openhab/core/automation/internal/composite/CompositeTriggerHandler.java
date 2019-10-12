@@ -35,8 +35,7 @@ import org.openhab.core.automation.util.ReferenceResolver;
  * of them is triggered. The handler has to put outputs of the trigger, base on the outputs of the child triggers, into
  * rule context. The outputs of the child triggers are not visible out of context of the trigger.
  *
- * @author Yordan Mihaylov - Initial Contribution
- *
+ * @author Yordan Mihaylov - Initial contribution
  */
 public class CompositeTriggerHandler
         extends AbstractCompositeModuleHandler<Trigger, CompositeTriggerType, TriggerHandler>
@@ -71,7 +70,7 @@ public class CompositeTriggerHandler
     public void triggered(Trigger trigger, Map<String, ?> context) {
         if (callback != null) {
             List<Output> outputs = moduleType.getOutputs();
-            Map<String, Object> result = new HashMap<String, Object>(11);
+            Map<String, Object> result = new HashMap<>(11);
             for (Output output : outputs) {
                 String refs = output.getReference();
                 if (refs != null) {

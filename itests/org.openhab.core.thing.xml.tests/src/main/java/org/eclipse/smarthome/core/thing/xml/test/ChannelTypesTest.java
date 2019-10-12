@@ -52,7 +52,7 @@ public class ChannelTypesTest extends JavaOSGiTest {
     }
 
     @Test
-    public void ChannelTypesShouldBeLoaded() throws Exception {
+    public void channelTypesShouldBeLoaded() throws Exception {
         int initialNumberOfChannelTypes = channelTypeProvider.getChannelTypes(null).size();
         int initialNumberOfChannelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null).size();
 

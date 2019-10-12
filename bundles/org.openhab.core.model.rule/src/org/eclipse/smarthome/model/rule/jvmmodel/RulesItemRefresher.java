@@ -30,7 +30,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Oliver Libutzki - Initial contribution
  * @author Kai Kreuzer - added delayed execution
  * @author Maoliang Huang - refactor
- *
  */
 @Component(service = {})
 public class RulesItemRefresher extends RulesRefresher implements ItemRegistryChangeListener {

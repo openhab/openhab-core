@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * {@link ExtensionEventFactory#TYPE}
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(service = EventFactory.class, immediate = true)
 public class ExtensionEventFactory extends AbstractEventFactory {

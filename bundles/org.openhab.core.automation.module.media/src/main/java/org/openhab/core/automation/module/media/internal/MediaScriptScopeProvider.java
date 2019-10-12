@@ -27,7 +27,6 @@ import org.osgi.service.component.annotations.Reference;
  * This is a scope provider for features that are related to audio and voice support.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @Component
 public class MediaScriptScopeProvider implements ScriptExtensionProvider {

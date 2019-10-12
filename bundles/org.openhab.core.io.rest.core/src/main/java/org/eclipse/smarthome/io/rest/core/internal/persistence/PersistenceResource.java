@@ -74,12 +74,11 @@ import io.swagger.annotations.ApiResponses;
  * This class acts as a REST resource for history data and provides different methods to interact with the persistence
  * store
  *
- * @author Chris Jackson - Initial Contribution and add support for ModifiablePersistenceService
+ * @author Chris Jackson - Initial contribution
  * @author Kai Kreuzer - Refactored to use PersistenceServiceRegistryImpl
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Erdoan Hadzhiyusein - Adapted the convertTime() method to work with the new DateTimeType
  * @author Lyubomir Papazov - Change java.util.Date references to be of type java.time.ZonedDateTime
- *
  */
 @Path(PersistenceResource.PATH)
 @Api(value = PersistenceResource.PATH)
@@ -88,9 +87,9 @@ public class PersistenceResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceResource.class);
 
-    private final String MODIFYABLE = "Modifiable";
-    private final String QUERYABLE = "Queryable";
-    private final String STANDARD = "Standard";
+    private static final String MODIFYABLE = "Modifiable";
+    private static final String QUERYABLE = "Queryable";
+    private static final String STANDARD = "Standard";
 
     // The URI path to this resource
     public static final String PATH = "persistence";
@@ -370,7 +369,7 @@ public class PersistenceResource implements RESTResource {
      * @return list of persistence services as {@link ServiceBean}
      */
     private List<PersistenceServiceDTO> getPersistenceServiceList(Locale locale) {
-        List<PersistenceServiceDTO> dtoList = new ArrayList<PersistenceServiceDTO>();
+        List<PersistenceServiceDTO> dtoList = new ArrayList<>();
 
         for (PersistenceService service : persistenceServiceRegistry.getAll()) {
             PersistenceServiceDTO serviceDTO = new PersistenceServiceDTO();

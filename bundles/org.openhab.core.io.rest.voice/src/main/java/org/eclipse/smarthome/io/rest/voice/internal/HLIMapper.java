@@ -22,8 +22,7 @@ import org.eclipse.smarthome.core.voice.text.InterpretationResult;
 /**
  * Mapper class that maps {@link HumanLanguageInterpreter} instanced to their respective DTOs.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class HLIMapper {
 
@@ -41,7 +40,7 @@ public class HLIMapper {
         dto.label = hli.getLabel(locale);
         final Set<Locale> supportedLocales = hli.getSupportedLocales();
         if (supportedLocales != null) {
-            dto.locales = new HashSet<String>(supportedLocales.size());
+            dto.locales = new HashSet<>(supportedLocales.size());
             for (final Locale supportedLocale : supportedLocales) {
                 dto.locales.add(supportedLocale.toString());
             }

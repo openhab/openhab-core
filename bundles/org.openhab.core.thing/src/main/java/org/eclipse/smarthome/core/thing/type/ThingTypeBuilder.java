@@ -25,7 +25,6 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  * A {@link ThingType} builder.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public class ThingTypeBuilder {

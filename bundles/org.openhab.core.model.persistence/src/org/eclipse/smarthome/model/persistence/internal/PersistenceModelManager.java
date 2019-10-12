@@ -45,9 +45,8 @@ import org.osgi.service.component.annotations.Reference;
  * This class is the central part of the persistence management and delegation. It reads the persistence
  * models, schedules timers and manages the invocation of {@link PersistenceService}s upon events.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Move non-model logic to core.persistence
- *
  */
 @Component(immediate = true)
 public class PersistenceModelManager implements ModelRepositoryChangeListener {

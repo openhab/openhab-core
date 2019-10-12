@@ -21,9 +21,8 @@ import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTO;
 /**
  * This is a data transfer object that is used to serialize widgets.
  *
- * @author Kai Kreuzer - Initial contribution and API
- * @author Chris Jackson
- *
+ * @author Kai Kreuzer - Initial contribution
+ * @author Chris Jackson - Initial contribution
  */
 public class WidgetDTO {
 
@@ -38,7 +37,7 @@ public class WidgetDTO {
     public String valuecolor;
 
     // widget-specific attributes
-    public List<MappingDTO> mappings = new ArrayList<MappingDTO>();
+    public final List<MappingDTO> mappings = new ArrayList<>();
     public Boolean switchSupport;
     public Integer sendFrequency;
     public String separator;
@@ -58,7 +57,7 @@ public class WidgetDTO {
     public PageDTO linkedPage;
 
     // only for frames, other linkable widgets link to a page
-    public final List<WidgetDTO> widgets = new ArrayList<WidgetDTO>();
+    public final List<WidgetDTO> widgets = new ArrayList<>();
 
     public WidgetDTO() {
     }

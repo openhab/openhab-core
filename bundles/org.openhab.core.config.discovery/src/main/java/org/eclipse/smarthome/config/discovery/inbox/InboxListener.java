@@ -21,7 +21,7 @@ import org.eclipse.smarthome.config.discovery.DiscoveryResult;
  * A class that is interested in processing {@link Inbox} events fired synchronously by the {@link Inbox} service has to
  * implement this interface.
  *
- * @author Michael Grammling - Initial Contribution.
+ * @author Michael Grammling - Initial contribution
  *
  * @see Inbox
  */

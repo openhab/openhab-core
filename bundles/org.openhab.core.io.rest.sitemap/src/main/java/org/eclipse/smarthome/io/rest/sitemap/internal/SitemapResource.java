@@ -109,8 +109,8 @@ import io.swagger.annotations.ApiResponses;
  * This class acts as a REST resource for sitemaps and provides different methods to interact with them, like retrieving
  * a list of all available sitemaps or just getting the widgets of a single page.
  *
- * @author Kai Kreuzer - Initial contribution and API
- * @author Chris Jackson
+ * @author Kai Kreuzer - Initial contribution
+ * @author Chris Jackson - Initial contribution
  * @author Yordan Zhelev - Added Swagger annotations
  */
 @Component(service = RESTResource.class)
@@ -400,7 +400,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     public Collection<SitemapDTO> getSitemapBeans(URI uri) {
-        Collection<SitemapDTO> beans = new LinkedList<SitemapDTO>();
+        Collection<SitemapDTO> beans = new LinkedList<>();
         Set<String> names = new HashSet<>();
         logger.debug("Received HTTP GET request at '{}'.", UriBuilder.fromUri(uri).build().toASCIIString());
         for (SitemapProvider provider : sitemapProviders) {
@@ -699,7 +699,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      * @return all items that are represented by the list of widgets
      */
     private Set<GenericItem> getAllItems(EList<Widget> widgets) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
+        Set<GenericItem> items = new HashSet<>();
         if (itemUIRegistry != null) {
             for (Widget widget : widgets) {
                 // We skip the chart widgets having a refresh argument
@@ -733,7 +733,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     private Set<GenericItem> getItemsInVisibilityCond(EList<VisibilityRule> ruleList) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
+        Set<GenericItem> items = new HashSet<>();
         for (VisibilityRule rule : ruleList) {
             String itemName = rule.getItem();
             if (itemName != null) {
@@ -751,7 +751,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     private Set<GenericItem> getItemsInColorCond(EList<ColorArray> colorList) {
-        Set<GenericItem> items = new HashSet<GenericItem>();
+        Set<GenericItem> items = new HashSet<>();
         for (ColorArray color : colorList) {
             String itemName = color.getItem();
             if (itemName != null) {
@@ -772,7 +772,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      * This is a state change listener, which is merely used to determine, if a
      * state change has occurred on one of a list of items.
      *
-     * @author Kai Kreuzer - Initial contribution and API
+     * @author Kai Kreuzer - Initial contribution
      *
      */
     private static class BlockingStateChangeListener implements StateChangeListener {

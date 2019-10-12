@@ -31,9 +31,8 @@ import org.eclipse.smarthome.model.sitemap.Widget;
  * with an aggregation of item ui providers; it can be therefore widely used for
  * all UI related information requests regarding items.
  *
- * @author Kai Kreuzer - Initial contribution and API
- * @author Chris Jackson
- *
+ * @author Kai Kreuzer - Initial contribution
+ * @author Chris Jackson - Initial contribution
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {

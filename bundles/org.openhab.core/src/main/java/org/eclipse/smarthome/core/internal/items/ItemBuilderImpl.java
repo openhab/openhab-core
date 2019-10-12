@@ -31,8 +31,7 @@ import org.eclipse.smarthome.core.items.ItemFactory;
 /**
  * The {@link ItemBuilder} implementation.
  *
- * @author Simon Kaufmann - Initial contribution and API
- *
+ * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
 public class ItemBuilderImpl implements ItemBuilder {

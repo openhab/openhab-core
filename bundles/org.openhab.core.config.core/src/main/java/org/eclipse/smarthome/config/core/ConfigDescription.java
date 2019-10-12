@@ -38,8 +38,8 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
- * @author Dennis Nobel - Initial Contribution
+ * @author Michael Grammling - Initial contribution
+ * @author Dennis Nobel - Initial contribution
  * @author Chris Jackson - Added parameter groups
  * @author Thomas Höfer - Added convenient operation to get config description parameters in a map
  */
@@ -99,13 +99,13 @@ public class ConfigDescription implements Identifiable<URI> {
         if (parameters != null) {
             this.parameters = Collections.unmodifiableList(parameters);
         } else {
-            this.parameters = Collections.unmodifiableList(new ArrayList<ConfigDescriptionParameter>(0));
+            this.parameters = Collections.unmodifiableList(new ArrayList<>(0));
         }
 
         if (groups != null) {
             this.parameterGroups = Collections.unmodifiableList(groups);
         } else {
-            this.parameterGroups = Collections.unmodifiableList(new ArrayList<ConfigDescriptionParameterGroup>(0));
+            this.parameterGroups = Collections.unmodifiableList(new ArrayList<>(0));
         }
     }
 

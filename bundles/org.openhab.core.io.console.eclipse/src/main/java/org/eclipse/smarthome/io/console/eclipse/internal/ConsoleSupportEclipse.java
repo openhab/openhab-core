@@ -37,17 +37,16 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * of Equinox. Unfortunately, there these command providers are not standardized
  * for OSGi, so we need different implementations for different OSGi containers.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split console interface and specific implementation
- *
  */
 @Component
 public class ConsoleSupportEclipse implements CommandProvider {
 
-    private final String BASE = "smarthome";
+    private static final String BASE = "smarthome";
 
     private final SortedMap<String, ConsoleCommandExtension> consoleCommandExtensions = Collections
-            .synchronizedSortedMap(new TreeMap<String, ConsoleCommandExtension>());
+            .synchronizedSortedMap(new TreeMap<>());
 
     public ConsoleSupportEclipse() {
     }
@@ -91,7 +90,7 @@ public class ConsoleSupportEclipse implements CommandProvider {
                 console.println(String.format("No handler for command '%s' was found.", cmd));
             } else {
                 // Build argument list
-                final List<String> argsList = new ArrayList<String>();
+                final List<String> argsList = new ArrayList<>();
                 while (true) {
                     final String narg = interpreter.nextArgument();
                     if (!StringUtils.isEmpty(narg)) {

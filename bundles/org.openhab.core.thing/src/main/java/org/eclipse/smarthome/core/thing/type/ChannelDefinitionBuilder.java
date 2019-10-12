@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Builder for a channel definition.
  *
- * @author Markus Rathgeb - Initial Contribution
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public class ChannelDefinitionBuilder {

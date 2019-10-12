@@ -17,7 +17,7 @@ import java.util.Set;
 /**
  * An audio format definition
  *
- * @author Harald Kuhn - Initial API
+ * @author Harald Kuhn - Initial contribution
  * @author Kelly Davis - Modified to match discussion in #584
  * @author Kai Kreuzer - Moved class, included constants, added toString
  */

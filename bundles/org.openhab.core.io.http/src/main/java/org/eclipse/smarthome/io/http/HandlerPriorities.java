@@ -15,7 +15,7 @@ package org.eclipse.smarthome.io.http;
 /**
  * Constants for making handlers in proper order.
  *
- * @author Łukasz Dywicki - Initial contribution and API.
+ * @author Łukasz Dywicki - Initial contribution
  */
 public interface HandlerPriorities {
 

@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
  *
  * When a connection to an MQTT broker is lost, it will try to reconnect every 60 seconds.
  *
+ * @author Davy Vanherbergen - Initial contribution
  * @author David Graeff - All operations are async now. More flexible sslContextProvider and reconnectStrategy added.
- * @author Davy Vanherbergen
- * @author Markus Rathgeb - added connection state callback
+ * @author Markus Rathgeb - Added connection state callback
  */
 @NonNullByDefault
 public class MqttBrokerConnection {
@@ -115,7 +115,7 @@ public class MqttBrokerConnection {
     public class ConnectionCallback implements IMqttActionListener {
         private final MqttBrokerConnection connection;
         private final Runnable cancelTimeoutFuture;
-        private CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        private CompletableFuture<Boolean> future = new CompletableFuture<>();
 
         public ConnectionCallback(MqttBrokerConnection mqttBrokerConnectionImpl) {
             this.connection = mqttBrokerConnectionImpl;
@@ -163,7 +163,7 @@ public class MqttBrokerConnection {
         }
 
         public CompletableFuture<Boolean> createFuture() {
-            future = new CompletableFuture<Boolean>();
+            future = new CompletableFuture<>();
             return future;
         }
     }
@@ -481,7 +481,7 @@ public class MqttBrokerConnection {
      * @return Completes with true if successful. Completes with false if not connected yet. Exceptionally otherwise.
      */
     public CompletableFuture<Boolean> subscribe(String topic, MqttMessageSubscriber subscriber) {
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
         synchronized (subscribers) {
             TopicSubscribers subscriberList = subscribers.getOrDefault(topic, new TopicSubscribers(topic));
             subscribers.put(topic, subscriberList);
@@ -513,7 +513,7 @@ public class MqttBrokerConnection {
      */
     protected CompletableFuture<Boolean> subscribeRaw(String topic) {
         logger.trace("subscribeRaw message consumer for topic '{}' from broker '{}'", topic, host);
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
         try {
             MqttAsyncClient client = this.client;
             if (client != null && client.isConnected()) {
@@ -538,7 +538,6 @@ public class MqttBrokerConnection {
      */
     @SuppressWarnings({ "null", "unused" })
     public CompletableFuture<Boolean> unsubscribe(String topic, MqttMessageSubscriber subscriber) {
-
         synchronized (subscribers) {
             final @Nullable List<MqttMessageSubscriber> list = subscribers.get(topic);
             if (list == null) {
@@ -570,7 +569,7 @@ public class MqttBrokerConnection {
      */
     protected CompletableFuture<Boolean> unsubscribeRaw(MqttAsyncClient client, String topic) {
         logger.trace("Unsubscribing message consumer for topic '{}' from broker '{}'", topic, host);
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
         try {
             if (client.isConnected()) {
                 client.unsubscribe(topic, future, actionCallback);
@@ -699,27 +698,27 @@ public class MqttBrokerConnection {
             future.completeExceptionally(new MqttException(e));
             return future;
         }
-        MqttDefaultFilePersistence _dataStore = new MqttDefaultFilePersistence(persistencePath.toString());
+        MqttDefaultFilePersistence localDataStore = new MqttDefaultFilePersistence(persistencePath.toString());
 
         // Create the client
-        MqttAsyncClient _client;
+        MqttAsyncClient localClient;
         try {
-            _client = createClient(serverURI.toString(), clientId, _dataStore);
+            localClient = createClient(serverURI.toString(), clientId, localDataStore);
         } catch (org.eclipse.paho.client.mqttv3.MqttException e) {
             future.completeExceptionally(new MqttException(e));
             return future;
         }
 
         // Assign to object
-        this.client = _client;
-        this.dataStore = _dataStore;
+        this.client = localClient;
+        this.dataStore = localDataStore;
 
         // Connect
-        _client.setCallback(clientCallback);
+        localClient.setCallback(clientCallback);
         try {
             MqttConnectOptions mqttConnectOptions = createMqttOptions();
             mqttConnectOptions.setMaxInflight(16384); // 1/4 of available message ids
-            _client.connect(mqttConnectOptions, null, connectionCallback);
+            localClient.connect(mqttConnectOptions, null, connectionCallback);
             logger.info("Starting MQTT broker connection to '{}' with clientid {} and file store '{}'", host,
                     getClientId(), persistencePath);
         } catch (org.eclipse.paho.client.mqttv3.MqttException | ConfigurationException e) {
@@ -824,7 +823,7 @@ public class MqttBrokerConnection {
             reconnectStrategy.stop();
         }
 
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
         // Close connection
         if (client.isConnected()) {
             // We need to thread change here. Because paho does not allow to disconnect within a callback method
@@ -857,13 +856,14 @@ public class MqttBrokerConnection {
      * @param listener A listener to be notified of success or failure of the delivery.
      */
     public void publish(String topic, byte[] payload, int qos, boolean retain, MqttActionCallback listener) {
-        MqttAsyncClient client_ = client;
-        if (client_ == null) {
+        MqttAsyncClient localClient = client;
+        if (localClient == null) {
             listener.onFailure(topic, new MqttException(0));
             return;
         }
         try {
-            IMqttDeliveryToken deliveryToken = client_.publish(topic, payload, qos, retain, listener, actionCallback);
+            IMqttDeliveryToken deliveryToken = localClient.publish(topic, payload, qos, retain, listener,
+                    actionCallback);
             logger.debug("Publishing message {} to topic '{}'", deliveryToken.getMessageId(), topic);
         } catch (org.eclipse.paho.client.mqttv3.MqttException e) {
             listener.onFailure(topic, new MqttException(e));
@@ -910,7 +910,7 @@ public class MqttBrokerConnection {
             return CompletableFuture.completedFuture(false);
         }
         // publish message asynchronously
-        CompletableFuture<Boolean> f = new CompletableFuture<Boolean>();
+        CompletableFuture<Boolean> f = new CompletableFuture<>();
         try {
             client.publish(topic, payload, qos, retain, f, actionCallback);
         } catch (org.eclipse.paho.client.mqttv3.MqttException e) {

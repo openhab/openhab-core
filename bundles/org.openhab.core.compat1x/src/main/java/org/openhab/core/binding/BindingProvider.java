@@ -15,9 +15,8 @@ package org.openhab.core.binding;
 import java.util.Collection;
 
 /**
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
- * @since 0.6.0
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface BindingProvider {
 
@@ -42,7 +41,6 @@ public interface BindingProvider {
      * <code>itemName</code>
      *
      * @param itemName the itemName to check
-     *
      * @return <code>true</code> if this provider contains an adequate mapping
      *         for <code>itemName</code> and <code>false</code> otherwise.
      */

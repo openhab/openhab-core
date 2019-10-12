@@ -21,8 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * Class encapsulating the last will and testament that is published after the client has gone offline.
  *
- * @author Markus Mann
- *
+ * @author Markus Mann - Initial contribution
  */
 @NonNullByDefault
 public class MqttWillAndTestament {

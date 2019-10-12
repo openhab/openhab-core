@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * General purpose keyword spotting exception
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public class KSException extends Exception {
 

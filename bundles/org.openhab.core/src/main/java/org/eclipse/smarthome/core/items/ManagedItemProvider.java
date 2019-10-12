@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * a {@link StorageService}. Items are being restored using the given {@link ItemFactory}s.
  *
  * @author Dennis Nobel - Initial contribution, added support for GroupItems
- * @author Thomas Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Kai Kreuzer - improved return values
  * @author Alex Tugarev - added tags
  */
@@ -83,7 +83,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     private final Logger logger = LoggerFactory.getLogger(ManagedItemProvider.class);
 
-    private final Collection<ItemFactory> itemFactories = new CopyOnWriteArrayList<ItemFactory>();
+    private final Collection<ItemFactory> itemFactories = new CopyOnWriteArrayList<>();
 
     private final Map<String, PersistedItem> failedToCreate = new ConcurrentHashMap<>();
 

@@ -31,7 +31,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * <p>
  * This converter converts {@code command} XML tags.
  *
- * @author Henning Treu - Initial Contribution
+ * @author Henning Treu - Initial contribution
  */
 public class CommandDescriptionConverter extends GenericUnmarshaller<CommandDescription> {
 
@@ -47,7 +47,6 @@ public class CommandDescriptionConverter extends GenericUnmarshaller<CommandDesc
         NodeList commandOptionsNode = (NodeList) nodeIterator.next();
         if (commandOptionsNode != null) {
             if ("options".equals(commandOptionsNode.getNodeName())) {
-
                 CommandDescriptionBuilder commandDescriptionBuilder = CommandDescriptionBuilder.create();
                 for (Object coNodeObject : commandOptionsNode.getList()) {
                     NodeValue optionsNode = (NodeValue) coNodeObject;

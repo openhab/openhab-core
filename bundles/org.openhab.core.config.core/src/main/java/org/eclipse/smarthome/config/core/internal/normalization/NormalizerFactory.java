@@ -23,7 +23,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
  * The {@link NormalizerFactory} can be used in order to obtain the {@link Normalizer} for any concrete
  * {@link ConfigDescriptionParameter.Type}.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - introduced normalizers map and added precondition check as well as some additional javadoc
  */
 public final class NormalizerFactory {
@@ -31,7 +31,7 @@ public final class NormalizerFactory {
     private static final Map<Type, Normalizer> NORMALIZERS;
 
     static {
-        Map<Type, Normalizer> map = new HashMap<Type, Normalizer>(11);
+        Map<Type, Normalizer> map = new HashMap<>(11);
         map.put(Type.BOOLEAN, new BooleanNormalizer());
         map.put(Type.TEXT, new TextNormalizer());
         map.put(Type.INTEGER, new IntNormalizer());

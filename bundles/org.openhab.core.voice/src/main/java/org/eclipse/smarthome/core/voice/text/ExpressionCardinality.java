@@ -15,16 +15,15 @@ package org.eclipse.smarthome.core.voice.text;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Expression that successfully parses, if a given expression occurs or repeats with a specified cardinality. This class
  * is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
- *
+ * @author Tilman Kamp - Initial contribution
  */
 public final class ExpressionCardinality extends Expression {
 
@@ -49,8 +48,8 @@ public final class ExpressionCardinality extends Expression {
     ASTNode parse(ResourceBundle language, TokenList tokenList) {
         TokenList list = tokenList;
         ASTNode node = new ASTNode(), cr;
-        ArrayList<ASTNode> nodes = new ArrayList<ASTNode>();
-        ArrayList<Object> values = new ArrayList<Object>();
+        List<ASTNode> nodes = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
         while ((cr = subExpression.parse(language, list)).isSuccess()) {
             nodes.add(cr);
             values.add(cr.getValue());
@@ -75,7 +74,7 @@ public final class ExpressionCardinality extends Expression {
     }
 
     @Override
-    boolean collectFirsts(ResourceBundle language, HashSet<String> firsts) {
+    boolean collectFirsts(ResourceBundle language, Set<String> firsts) {
         return subExpression.collectFirsts(language, firsts) || atLeastOne;
     }
 

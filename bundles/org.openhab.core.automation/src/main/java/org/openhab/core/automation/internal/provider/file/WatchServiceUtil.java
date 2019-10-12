@@ -19,20 +19,19 @@ import java.util.Map;
 /**
  * This class isolates the java 1.7 functionality which tracks the file system changes.
  *
- * @author Ana Dimova - Initial Contribution
- *
+ * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("rawtypes")
 public class WatchServiceUtil {
 
-    private static final Map<AbstractFileProvider, Map<String, AutomationWatchService>> WATCH_SERVICES = new HashMap<AbstractFileProvider, Map<String, AutomationWatchService>>();
+    private static final Map<AbstractFileProvider, Map<String, AutomationWatchService>> WATCH_SERVICES = new HashMap<>();
 
     public static void initializeWatchService(String watchingDir, AbstractFileProvider provider) {
         AutomationWatchService aws = null;
         synchronized (WATCH_SERVICES) {
             Map<String, AutomationWatchService> watchers = WATCH_SERVICES.get(provider);
             if (watchers == null) {
-                watchers = new HashMap<String, AutomationWatchService>();
+                watchers = new HashMap<>();
                 WATCH_SERVICES.put(provider, watchers);
             }
             if (watchers.get(watchingDir) == null) {

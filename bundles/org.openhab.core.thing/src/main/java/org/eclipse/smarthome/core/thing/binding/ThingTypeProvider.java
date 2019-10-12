@@ -23,8 +23,7 @@ import org.eclipse.smarthome.core.thing.type.ThingType;
 /**
  * The {@link ThingTypeProvider} is responsible for providing thing types.
  *
- * @author Dennis Nobel
- *
+ * @author Dennis Nobel - Initial contribution
  */
 @NonNullByDefault
 public interface ThingTypeProvider {

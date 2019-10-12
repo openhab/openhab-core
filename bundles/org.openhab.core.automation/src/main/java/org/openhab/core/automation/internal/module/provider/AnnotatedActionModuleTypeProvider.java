@@ -49,7 +49,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * from them
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @Component(service = { ModuleTypeProvider.class, ModuleHandlerFactory.class })
 public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory implements ModuleTypeProvider {

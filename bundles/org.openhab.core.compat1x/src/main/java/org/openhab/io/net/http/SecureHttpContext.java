@@ -24,8 +24,7 @@ import org.osgi.service.http.HttpContext;
  * Implementation of {@link HttpContext} which adds Basic-Authentication
  * functionality to openHAB.
  *
- * @author Thomas.Eichstaedt-Engelen
- * @since 0.9.0
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public class SecureHttpContext implements HttpContext {
 

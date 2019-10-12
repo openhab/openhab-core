@@ -26,7 +26,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
  * @deprecated The use of this callback is deprecated. The {@link Inbox} is able to deal with updates.
  *             Incremental discovery should be handled internally by each {@link DiscoveryService}.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  * @author Henning Treu - deprecation.
  */
 @Deprecated

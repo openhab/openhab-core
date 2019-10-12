@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Cleaning Robot.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_CleaningRobot", label = "Cleaning Robot", synonyms = "Cleaning Robots, Vacuum robot, Vacuum robots", description = "")
 public interface CleaningRobot extends Equipment {

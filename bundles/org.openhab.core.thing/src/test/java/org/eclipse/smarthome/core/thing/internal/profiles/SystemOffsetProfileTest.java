@@ -37,7 +37,6 @@ import org.mockito.ArgumentCaptor;
  * Tests for the system:offset profile
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class SystemOffsetProfileTest {
 
@@ -85,7 +84,7 @@ public class SystemOffsetProfileTest {
         ProfileCallback callback = mock(ProfileCallback.class);
         SystemOffsetProfile offsetProfile = createProfile(callback, "3°C");
 
-        Command cmd = new QuantityType<Temperature>("23°C");
+        Command cmd = new QuantityType<>("23°C");
         offsetProfile.onCommandFromItem(cmd);
 
         ArgumentCaptor<Command> capture = ArgumentCaptor.forClass(Command.class);
@@ -103,7 +102,7 @@ public class SystemOffsetProfileTest {
         ProfileCallback callback = mock(ProfileCallback.class);
         SystemOffsetProfile offsetProfile = createProfile(callback, "3°C");
 
-        State state = new QuantityType<Temperature>("23°C");
+        State state = new QuantityType<>("23°C");
         offsetProfile.onStateUpdateFromItem(state);
 
         ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
@@ -153,7 +152,7 @@ public class SystemOffsetProfileTest {
         ProfileCallback callback = mock(ProfileCallback.class);
         SystemOffsetProfile offsetProfile = createProfile(callback, "3°C");
 
-        Command cmd = new QuantityType<Temperature>("23°C");
+        Command cmd = new QuantityType<>("23°C");
         offsetProfile.onCommandFromHandler(cmd);
 
         ArgumentCaptor<Command> capture = ArgumentCaptor.forClass(Command.class);
@@ -171,7 +170,7 @@ public class SystemOffsetProfileTest {
         ProfileCallback callback = mock(ProfileCallback.class);
         SystemOffsetProfile offsetProfile = createProfile(callback, "3°C");
 
-        State state = new QuantityType<Temperature>("23°C");
+        State state = new QuantityType<>("23°C");
         offsetProfile.onStateUpdateFromHandler(state);
 
         ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
@@ -189,7 +188,7 @@ public class SystemOffsetProfileTest {
         ProfileCallback callback = mock(ProfileCallback.class);
         SystemOffsetProfile offsetProfile = createProfile(callback, "3 °F");
 
-        State state = new QuantityType<Temperature>("23 °C");
+        State state = new QuantityType<>("23 °C");
         offsetProfile.onStateUpdateFromHandler(state);
 
         ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
@@ -207,7 +206,7 @@ public class SystemOffsetProfileTest {
         ProfileCallback callback = mock(ProfileCallback.class);
         SystemOffsetProfile offsetProfile = createProfile(callback, "3");
 
-        State state = new QuantityType<Temperature>("23 °C");
+        State state = new QuantityType<>("23 °C");
         offsetProfile.onStateUpdateFromHandler(state);
 
         ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);

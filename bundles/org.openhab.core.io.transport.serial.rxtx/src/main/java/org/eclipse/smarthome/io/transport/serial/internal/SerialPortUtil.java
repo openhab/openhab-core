@@ -28,7 +28,7 @@ import gnu.io.NoSuchPortException;
 
 /**
  *
- * @author Matthias Steigenberger - Initial Contribution
+ * @author Matthias Steigenberger - Initial contribution
  * @author Wouter Born - Fix serial ports missing when ports are added to system property
  */
 @NonNullByDefault
@@ -36,11 +36,11 @@ public class SerialPortUtil {
 
     private static final String GNU_IO_RXTX_SERIAL_PORTS = "gnu.io.rxtx.SerialPorts";
 
-    private synchronized static boolean isSerialPortsKeySet() {
+    private static synchronized boolean isSerialPortsKeySet() {
         return System.getProperties().containsKey(GNU_IO_RXTX_SERIAL_PORTS);
     }
 
-    public synchronized static CommPortIdentifier getPortIdentifier(String port) throws NoSuchPortException {
+    public static synchronized CommPortIdentifier getPortIdentifier(String port) throws NoSuchPortException {
         if ((System.getProperty("os.name").toLowerCase().indexOf("linux") != -1)) {
             appendSerialPortProperty(port);
         }
@@ -54,7 +54,7 @@ public class SerialPortUtil {
      *
      * @param port the port to be registered
      */
-    private synchronized static void appendSerialPortProperty(String port) {
+    private static synchronized void appendSerialPortProperty(String port) {
         String serialPortsProperty = System.getProperty(GNU_IO_RXTX_SERIAL_PORTS);
         String newValue = initSerialPort(port, serialPortsProperty);
         if (newValue != null) {
@@ -69,7 +69,7 @@ public class SerialPortUtil {
      * @return the scanned port identifiers
      */
     @SuppressWarnings("unchecked")
-    public synchronized static Stream<CommPortIdentifier> getPortIdentifiersUsingScan() {
+    public static synchronized Stream<CommPortIdentifier> getPortIdentifiersUsingScan() {
         Enumeration<CommPortIdentifier> identifiers;
         if (isSerialPortsKeySet()) {
             // Save the existing serial ports property
@@ -94,7 +94,7 @@ public class SerialPortUtil {
      * @return the port identifiers for the ports defined in the {@value #GNU_IO_RXTX_SERIAL_PORTS} property
      */
     @SuppressWarnings("unchecked")
-    public synchronized static Stream<CommPortIdentifier> getPortIdentifiersUsingProperty() {
+    public static synchronized Stream<CommPortIdentifier> getPortIdentifiersUsingProperty() {
         if (isSerialPortsKeySet()) {
             // Save the Enumeration to a new list so the result is thread safe
             return Collections.list(CommPortIdentifier.getPortIdentifiers()).stream();
@@ -104,13 +104,12 @@ public class SerialPortUtil {
     }
 
     static @Nullable String initSerialPort(String port, @Nullable String serialPortsProperty) {
-
         String pathSeparator = File.pathSeparator;
         Set<String> serialPorts = null;
         if (serialPortsProperty != null) {
             serialPorts = Stream.of(serialPortsProperty.split(pathSeparator)).collect(Collectors.toSet());
         } else {
-            serialPorts = new HashSet<String>();
+            serialPorts = new HashSet<>();
         }
         if (serialPorts.add(port)) {
             return serialPorts.stream().collect(Collectors.joining(pathSeparator)); // see

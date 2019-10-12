@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * equivalent to the {@link Constants#SERVICE_PID}.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 @Component(service = ConfigurationService.class)
 public class ConfigurationService {
@@ -179,7 +178,7 @@ public class ConfigurationService {
 
     private Dictionary<String, Object> getProperties(org.osgi.service.cm.Configuration configuration) {
         Dictionary<String, Object> properties = configuration.getProperties();
-        return properties != null ? properties : new Hashtable<String, Object>();
+        return properties != null ? properties : new Hashtable<>();
     }
 
     @Reference

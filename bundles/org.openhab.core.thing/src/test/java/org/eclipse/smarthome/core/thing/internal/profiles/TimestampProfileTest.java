@@ -30,7 +30,6 @@ import org.mockito.ArgumentCaptor;
  * Tests for the system:timestamp-update profile
  *
  * @author Gaël L'hopital - Initial contribution
- *
  */
 public class TimestampProfileTest extends JavaTest {
 

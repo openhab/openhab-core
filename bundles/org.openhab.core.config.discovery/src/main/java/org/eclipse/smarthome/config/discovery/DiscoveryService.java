@@ -36,7 +36,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  * and should report new results within the defined scan timeout. An active scan can be aborted.</li>
  * </ul>
  *
- * @author Michael Grammling - Initial Contribution.
+ * @author Michael Grammling - Initial contribution
  * @author Kai Kreuzer - Refactored API
  * @author Dennis Nobel - Added background discovery configuration through Configuration Admin
  *

@@ -19,7 +19,7 @@ import org.openhab.core.automation.type.ModuleType;
 /**
  * This is a utility class to convert between the respective object and its DTO.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class ModuleTypeDTOMapper {
 

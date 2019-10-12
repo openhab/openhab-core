@@ -14,15 +14,14 @@ package org.eclipse.smarthome.core.voice.text;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Expression that successfully parses, if a sequence of given expressions is matching. This class is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
- *
+ * @author Tilman Kamp - Initial contribution
  */
 public final class ExpressionSequence extends Expression {
 
@@ -68,7 +67,7 @@ public final class ExpressionSequence extends Expression {
     }
 
     @Override
-    boolean collectFirsts(ResourceBundle language, HashSet<String> firsts) {
+    boolean collectFirsts(ResourceBundle language, Set<String> firsts) {
         boolean blocking = false;
         for (Expression e : subExpressions) {
             blocking = e.collectFirsts(language, firsts);
@@ -76,7 +75,7 @@ public final class ExpressionSequence extends Expression {
                 break;
             }
         }
-        
+
         return blocking;
     }
 

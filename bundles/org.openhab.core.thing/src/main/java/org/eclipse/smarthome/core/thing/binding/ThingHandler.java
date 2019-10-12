@@ -36,7 +36,7 @@ import org.eclipse.smarthome.core.types.State;
  * state and status updates, updates of the whole thing, by a {@link ThingHandlerCallback}.
  * <p>
  *
- * @author Dennis Nobel - Initial contribution and API
+ * @author Dennis Nobel - Initial contribution
  * @author Michael Grammling - Added dynamic configuration update
  * @author Thomas Höfer - Added config description validation exception to handleConfigurationUpdate operation
  * @author Stefan Bußweiler - API changes due to bridge/thing life cycle refactoring

@@ -38,8 +38,7 @@ import tec.uom.se.unit.Units;
 /**
  * Test for the framework defined {@link SmartHomeUnits}.
  *
- * @author Henning Treu - Initial contribution and API
- *
+ * @author Henning Treu - Initial contribution
  */
 public class SmartHomeUnitsTest {
 
@@ -249,7 +248,7 @@ public class SmartHomeUnitsTest {
     @Test
     public void testDobsonUnits() {
         // https://en.wikipedia.org/wiki/Dobson_unit
-        QuantityType<ArealDensity> oneDU = new QuantityType<ArealDensity>("1 DU");
+        QuantityType<ArealDensity> oneDU = new QuantityType<>("1 DU");
         QuantityType<ArealDensity> mmolpsq = oneDU.toUnit(MetricPrefix.MILLI(Units.MOLE).multiply(Units.METRE.pow(-2)));
         assertThat(mmolpsq.doubleValue(), is(closeTo(0.4462d, DEFAULT_ERROR)));
         assertThat(mmolpsq.toUnit(SmartHomeUnits.DOBSON_UNIT).doubleValue(), is(closeTo(1, DEFAULT_ERROR)));

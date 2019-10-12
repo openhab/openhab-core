@@ -38,7 +38,6 @@ import org.osgi.framework.Bundle;
  * Test the GenericThingProvider for different {@link ThingHandlerFactory}s for Bridge and Thing.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public class GenericThingProviderMultipleBundlesTest {
 
@@ -100,7 +99,7 @@ public class GenericThingProviderMultipleBundlesTest {
         EList<ModelThing> modelThings = createModelThing();
         when(bridge.getThings()).thenReturn(modelThings);
 
-        BasicEList<ModelThing> result = new BasicEList<ModelThing>();
+        BasicEList<ModelThing> result = new BasicEList<>();
         result.add(bridge);
         return result;
     }
@@ -114,7 +113,7 @@ public class GenericThingProviderMultipleBundlesTest {
         when(thing.getProperties()).thenReturn(new BasicEList<>(0));
         when(thing.getChannels()).thenReturn(new BasicEList<>(0));
 
-        BasicEList<ModelThing> result = new BasicEList<ModelThing>();
+        BasicEList<ModelThing> result = new BasicEList<>();
         result.add(thing);
         return result;
     }

@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * This allows the encryption and decryption to be performed before saving to storage.
  *
  * @author Gary Tse - Initial contribution
- *
  */
 @NonNullByDefault
 public interface StorageCipher {
@@ -40,7 +39,7 @@ public interface StorageCipher {
      * Encrypt the plainText, then produce a base64 encoded cipher text
      *
      * @param plainText
-     * @return base64-encoded( encrypted( text ) )
+     * @return base64 encoded( encrypted( text ) )
      * @throws GeneralSecurityException all security-related exception
      */
     @Nullable

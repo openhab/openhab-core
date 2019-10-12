@@ -217,7 +217,7 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
     }
 
     @Test
-    public void testMetadata_simple() {
+    public void testMetadataSimple() {
         String model = "Switch simple { namespace=\"value\" } ";
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
@@ -231,7 +231,7 @@ public class GenericItemProvider2Test extends JavaOSGiTest {
     }
 
     @Test
-    public void testMetadata_configured() {
+    public void testMetadataConfigured() {
         String model = "Switch simple { namespace=\"value\" } " + //
                 "Switch configured { foo=\"bar\" [ answer=42 ] } ";
 

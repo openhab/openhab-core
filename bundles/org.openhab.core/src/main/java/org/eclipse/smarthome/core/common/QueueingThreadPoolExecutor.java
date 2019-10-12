@@ -55,8 +55,7 @@ import org.slf4j.LoggerFactory;
  * on embedded devices without a high throughput. If you intend to use it for mass data processing on a server, you
  * should definitely tweak those settings.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
 
@@ -86,8 +85,8 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
 
     private QueueingThreadPoolExecutor(String threadPoolName, ThreadFactory threadFactory, int threadPoolSize,
             RejectedExecutionHandler rejectionHandler) {
-        super(CORE_THREAD_POOL_SIZE, threadPoolSize, 10L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
-                threadFactory, rejectionHandler);
+        super(CORE_THREAD_POOL_SIZE, threadPoolSize, 10L, TimeUnit.SECONDS, new SynchronousQueue<>(), threadFactory,
+                rejectionHandler);
 
         if (threadPoolName == null || threadPoolName.trim().isEmpty()) {
             throw new IllegalArgumentException("A thread pool name must be provided!");

@@ -22,9 +22,8 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
  * The {@link ConfigDescriptionParameterBuilder} class provides a builder for the {@link ConfigDescriptionParameter}
  * class.
  *
- * @author Chris Jackson - Initial Contribution
+ * @author Chris Jackson - Initial contribution
  * @author Thomas Höfer - Added unit
- *
  */
 public class ConfigDescriptionParameterBuilder {
     private String name;
@@ -52,8 +51,8 @@ public class ConfigDescriptionParameterBuilder {
     private Boolean advanced;
     private Boolean verify;
 
-    private List<ParameterOption> options = new ArrayList<ParameterOption>();
-    private List<FilterCriteria> filterCriteria = new ArrayList<FilterCriteria>();
+    private List<ParameterOption> options = new ArrayList<>();
+    private List<FilterCriteria> filterCriteria = new ArrayList<>();
 
     private ConfigDescriptionParameterBuilder(String name, Type type) {
         this.name = name;

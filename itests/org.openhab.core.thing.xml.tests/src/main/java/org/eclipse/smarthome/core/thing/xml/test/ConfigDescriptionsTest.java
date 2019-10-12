@@ -53,7 +53,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     }
 
     @Test
-    public void ConfigDescriptionsShouldLoadProperly() throws Exception {
+    public void configDescriptionsShouldLoadProperly() throws Exception {
         try (final AutoCloseable unused = loadedTestBundle()) {
             URI bridgeURI = new URI("thing-type:hue:bridge");
             ConfigDescription bridgeConfigDescription = configDescriptionRegistry.getConfigDescriptions().stream()

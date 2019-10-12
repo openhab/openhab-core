@@ -12,14 +12,13 @@
  */
 package org.eclipse.smarthome.core.voice.text;
 
-import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Expression that successfully parses, if a given string constant is found. This class is immutable.
  *
- * @author Tilman Kamp - Initial contribution and API
- *
+ * @author Tilman Kamp - Initial contribution
  */
 public final class ExpressionMatch extends Expression {
 
@@ -49,7 +48,7 @@ public final class ExpressionMatch extends Expression {
     }
 
     @Override
-    boolean collectFirsts(ResourceBundle language, HashSet<String> firsts) {
+    boolean collectFirsts(ResourceBundle language, Set<String> firsts) {
         firsts.add(pattern);
         return true;
     }

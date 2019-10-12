@@ -19,7 +19,7 @@ import org.openhab.core.automation.type.Input;
 /**
  * This is a data transfer object that is used to serialize the respective class.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class ConditionTypeDTO extends ModuleTypeDTO {
 

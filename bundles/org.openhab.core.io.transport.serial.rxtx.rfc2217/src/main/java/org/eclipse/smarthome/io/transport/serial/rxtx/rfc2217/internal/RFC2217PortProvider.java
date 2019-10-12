@@ -27,14 +27,13 @@ import gnu.io.rfc2217.TelnetSerialPort;
 
 /**
  *
- * @author Matthias Steigenberger - Initial Contribution
- *
+ * @author Matthias Steigenberger - Initial contribution
  */
 @NonNullByDefault
 @Component(service = SerialPortProvider.class)
 public class RFC2217PortProvider implements SerialPortProvider {
 
-    private final static String PROTOCOL = "rfc2217";
+    private static final String PROTOCOL = "rfc2217";
 
     @Override
     public @Nullable SerialPortIdentifier getPortIdentifier(URI portName) {

@@ -35,7 +35,7 @@ import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
  * except if a {@link ConfigDescriptionParameter} is given. In the latter case,
  * a conversion according to the type given in the description is performed.
  *
- * @author Kai Kreuzer - Initial API and implementation
+ * @author Kai Kreuzer - Initial contribution
  * @author Thomas Höfer - Minor changes for type normalization based on config description
  */
 public class ConfigUtil {

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GroupItem extends GenericItem implements StateChangeListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(GroupItem.class);
+    private final Logger logger = LoggerFactory.getLogger(GroupItem.class);
 
     protected final GenericItem baseItem;
 

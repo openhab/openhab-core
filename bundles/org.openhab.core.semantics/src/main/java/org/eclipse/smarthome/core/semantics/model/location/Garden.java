@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Garden.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Location_Outdoor_Garden", label = "Garden", synonyms = "Gardens", description = "")
 public interface Garden extends Outdoor {

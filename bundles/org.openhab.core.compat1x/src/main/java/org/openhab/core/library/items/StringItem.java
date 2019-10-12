@@ -27,9 +27,7 @@ import org.openhab.core.types.UnDefType;
  * A StringItem can be used for any kind of string to either send or receive
  * from a device.
  *
- * @author Kai Kreuzer
- * @since 0.1.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class StringItem extends GenericItem {
 
@@ -60,7 +58,7 @@ public class StringItem extends GenericItem {
 
     @Override
     public State getStateAs(Class<? extends State> typeClass) {
-        ArrayList<Class<? extends State>> list = new ArrayList<>();
+        List<Class<? extends State>> list = new ArrayList<>();
         list.add(typeClass);
         State convertedState = TypeParser.parseState(list, state.toString());
         if (convertedState != null) {

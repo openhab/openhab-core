@@ -16,8 +16,7 @@ package org.openhab.core.persistence;
  * A queryable persistence service which can be used to store and retrieve
  * data from openHAB. This is most likely some kind of database system.
  *
- * @author Kai Kreuzer
- * @since 1.0.0
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface QueryablePersistenceService extends PersistenceService {
 

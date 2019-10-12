@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This HandlerFactory creates ModuleHandlers for scripts.
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 @Component(service = ModuleHandlerFactory.class)

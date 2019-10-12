@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Corridor.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Location_Indoor_Corridor", label = "Corridor", synonyms = "Corridors", description = "")
 public interface Corridor extends Indoor {

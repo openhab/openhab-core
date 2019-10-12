@@ -46,7 +46,7 @@ public class QuantityTypeTest {
     @Test
     public void testDimensionless() {
         // Dimensionless value that works
-        new QuantityType<Dimensionless>("57%");
+        new QuantityType<>("57%");
 
         QuantityType<Dimensionless> dt0 = new QuantityType<>("12");
         assertTrue(dt0.getUnit().getDimension() == QuantityDimension.NONE);
@@ -97,7 +97,7 @@ public class QuantityTypeTest {
 
         assertEquals(dt1.intValue(), dt2.intValue());
 
-        QuantityType<Length> dt3 = new QuantityType<Length>("200cm");
+        QuantityType<Length> dt3 = new QuantityType<>("200cm");
         assertEquals(dt3.compareTo(dt2), 0);
         assertTrue(dt3.equals(dt2));
 
@@ -262,11 +262,11 @@ public class QuantityTypeTest {
         density = density.toUnit("W/cm²");
         assertEquals("0.001 W/cm²", density.toString());
 
-        density = new QuantityType<Intensity>(2, SmartHomeUnits.IRRADIANCE);
+        density = new QuantityType<>(2, SmartHomeUnits.IRRADIANCE);
         assertEquals(2, density.doubleValue(), 1E-5);
         assertEquals("2 W/m²", density.toString());
 
-        density = new QuantityType<Intensity>("3 W/m^2");
+        density = new QuantityType<>("3 W/m^2");
         assertEquals(3, density.doubleValue(), 1E-5);
         assertEquals("3 W/m²", density.toString());
     }

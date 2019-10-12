@@ -18,7 +18,7 @@ package org.eclipse.smarthome.core.auth;
  * This can usually happen when configuration is somewhat wrong. In order to make debugging easier a separate exception
  * is created.
  *
- * @author Łukasz Dywicki - Initial contribution and API.
+ * @author Łukasz Dywicki - Initial contribution
  */
 public class UnsupportedCredentialsException extends AuthenticationException {
 

@@ -31,15 +31,14 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * A RollershutterItem allows the control of roller shutters, i.e.
  * moving them up, down, stopping or setting it to close to a certain percentage.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Support more types for getStateAs
- *
  */
 @NonNullByDefault
 public class RollershutterItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
     static {
         acceptedDataTypes.add(PercentType.class);

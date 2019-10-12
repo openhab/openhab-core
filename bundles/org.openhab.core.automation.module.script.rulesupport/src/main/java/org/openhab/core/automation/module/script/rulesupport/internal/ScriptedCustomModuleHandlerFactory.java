@@ -29,8 +29,7 @@ import org.osgi.service.component.annotations.Component;
  * This class provides the handlers from the script to the RuleManager. As Jsr223 languages have different needs, it
  * allows these handlers to be defined in different ways.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 @Component(immediate = true, service = { ScriptedCustomModuleHandlerFactory.class, ModuleHandlerFactory.class })
 public class ScriptedCustomModuleHandlerFactory extends AbstractScriptedModuleHandlerFactory {

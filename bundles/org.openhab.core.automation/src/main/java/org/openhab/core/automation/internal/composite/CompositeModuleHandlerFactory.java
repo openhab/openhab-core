@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * framework, but it will be used by the rule engine to serve composite module types without any action of the user.
  *
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  */
 public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory implements ModuleHandlerFactory {
 
@@ -172,7 +172,7 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
     @SuppressWarnings("unchecked")
     private <T extends Module, MT extends ModuleHandler> LinkedHashMap<T, MT> getChildHandlers(String compositeModuleId,
             Configuration compositeConfig, List<T> childModules, String childModulePrefix) {
-        LinkedHashMap<T, MT> mapModuleToHandler = new LinkedHashMap<T, MT>();
+        LinkedHashMap<T, MT> mapModuleToHandler = new LinkedHashMap<>();
         for (T child : childModules) {
             String ruleId = getRuleId(childModulePrefix);
             ruleEngine.updateMapModuleTypeToRule(ruleId, child.getTypeUID());

@@ -46,7 +46,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * Implementation providing default system wide channel types
  *
- * @author Ivan Iliev - Initial Contribution
+ * @author Ivan Iliev - Initial contribution
  * @author Chris Jackson - Added battery level
  * @author Dennis Nobel - Changed to {@link ChannelTypeProvider}
  * @author Markus Rathgeb - Make battery-low indication read-only

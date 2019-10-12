@@ -21,7 +21,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * This class registers an OSGi service for the ephemeris action.
  *
- * @author Gaël L'hopital - Initial contribution and API
+ * @author Gaël L'hopital - Initial contribution
  */
 @Component
 public class EphemerisActionService implements ActionService {

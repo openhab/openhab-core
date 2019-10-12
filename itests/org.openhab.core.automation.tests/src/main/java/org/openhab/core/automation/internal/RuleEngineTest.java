@@ -44,7 +44,7 @@ import org.openhab.core.automation.util.RuleBuilder;
 /**
  * Test adding, retrieving and updating rules from the RuleEngineImpl
  *
- * @author Marin Mitev - initial version
+ * @author Marin Mitev - Initial contribution
  * @author Thomas Höfer - Added config description parameter unit
  */
 public class RuleEngineTest extends JavaOSGiTest {
@@ -106,7 +106,6 @@ public class RuleEngineTest extends JavaOSGiTest {
                 "triggerId.out3", actionInputs.get("in5"));
         Assert.assertEquals("Auto map action input in5[tagD, tagE] to action output out5[tagD, tagE]", "actionId.out5",
                 actionInputs.get("in4"));
-
     }
 
     /**
@@ -116,13 +115,13 @@ public class RuleEngineTest extends JavaOSGiTest {
     @Test
     public void testRuleTags() {
         RuleImpl rule1 = new RuleImpl("ruleWithTag1");
-        Set<String> ruleTags = new LinkedHashSet<String>();
+        Set<String> ruleTags = new LinkedHashSet<>();
         ruleTags.add("tag1");
         rule1.setTags(ruleTags);
         ruleRegistry.add(rule1);
 
         RuleImpl rule2 = new RuleImpl("ruleWithTags12");
-        ruleTags = new LinkedHashSet<String>();
+        ruleTags = new LinkedHashSet<>();
         ruleTags.add("tag1");
         ruleTags.add("tag2");
         rule2.setTags(ruleTags);
@@ -191,7 +190,7 @@ public class RuleEngineTest extends JavaOSGiTest {
     @Test
     public void testRuleActions() {
         RuleImpl rule1 = createRule();
-        List<Action> actions = new ArrayList<Action>(rule1.getActions());
+        List<Action> actions = new ArrayList<>(rule1.getActions());
         ruleRegistry.add(rule1);
 
         Rule rule1Get = ruleEngine.getRule("rule1");
@@ -226,7 +225,7 @@ public class RuleEngineTest extends JavaOSGiTest {
     @Test
     public void testRuleTriggers() {
         RuleImpl rule1 = createRule();
-        List<Trigger> triggers = new ArrayList<Trigger>(rule1.getTriggers());
+        List<Trigger> triggers = new ArrayList<>(rule1.getTriggers());
         ruleRegistry.add(rule1);
         Rule rule1Get = ruleEngine.getRule("rule1");
         List<Trigger> triggersGet = rule1Get.getTriggers();
@@ -287,7 +286,7 @@ public class RuleEngineTest extends JavaOSGiTest {
     }
 
     private List<Trigger> createTriggers(String type) {
-        List<Trigger> triggers = new ArrayList<Trigger>();
+        List<Trigger> triggers = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
@@ -298,12 +297,12 @@ public class RuleEngineTest extends JavaOSGiTest {
     }
 
     private List<Condition> createConditions(String type) {
-        List<Condition> conditions = new ArrayList<Condition>();
+        List<Condition> conditions = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
         configurations.put("c", "z");
-        Map<String, String> inputs = new HashMap<String, String>(11);
+        Map<String, String> inputs = new HashMap<>(11);
         String ouputModuleId = "triggerId";
         String outputName = "triggerOutput";
         String inputName = "conditionInput";
@@ -314,12 +313,12 @@ public class RuleEngineTest extends JavaOSGiTest {
     }
 
     private List<Action> createActions(String type) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
         configurations.put("c", "z");
-        Map<String, String> inputs = new HashMap<String, String>(11);
+        Map<String, String> inputs = new HashMap<>(11);
         String ouputModuleId = "triggerId";
         String outputName = "triggerOutput";
         String inputName = "actionInput";
@@ -331,8 +330,8 @@ public class RuleEngineTest extends JavaOSGiTest {
     }
 
     private List<ConfigDescriptionParameter> createConfigDescriptions() {
-        List<ConfigDescriptionParameter> configDescriptions = new ArrayList<ConfigDescriptionParameter>();
-        List<ParameterOption> options = new ArrayList<ParameterOption>();
+        List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
+        List<ParameterOption> options = new ArrayList<>();
         options.add(new ParameterOption("1", "one"));
         options.add(new ParameterOption("2", "two"));
 
@@ -355,7 +354,7 @@ public class RuleEngineTest extends JavaOSGiTest {
         String typeStr = ConfigDescriptionParameter.Type.INTEGER.name();
         String defValue = "3";
 
-        List<FilterCriteria> filter = new ArrayList<FilterCriteria>();
+        List<FilterCriteria> filter = new ArrayList<>();
 
         String configPropertyName = "config1";
 

@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Switch.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Point_Control_Switch", label = "Switch", synonyms = "", description = "")
 public interface Switch extends Control {

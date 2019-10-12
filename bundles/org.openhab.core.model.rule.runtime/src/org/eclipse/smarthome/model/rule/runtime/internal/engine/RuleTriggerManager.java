@@ -68,8 +68,7 @@ import com.google.inject.Injector;
  * It keeps lists of which rule must be executed for which trigger and takes
  * over the evaluation of states and trigger conditions for the rule engine.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class RuleTriggerManager {
 
@@ -375,7 +374,7 @@ public class RuleTriggerManager {
                 if ((!isGroup) && (t instanceof CommandEventTrigger)) {
                     final CommandEventTrigger ct = (CommandEventTrigger) t;
                     if (ct.getItem().equals(name)) {
-                        triggerCommandString = ct.getCommand()!=null?ct.getCommand().getValue() : null;
+                        triggerCommandString = ct.getCommand() != null ? ct.getCommand().getValue() : null;
                     } else {
                         continue;
                     }
@@ -575,7 +574,7 @@ public class RuleTriggerManager {
                 CommandEventTrigger ceTrigger = (CommandEventTrigger) t;
                 Set<Rule> rules = commandEventTriggeredRules.get(ceTrigger.getItem());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     commandEventTriggeredRules.put(ceTrigger.getItem(), rules);
                 }
                 rules.add(rule);
@@ -583,7 +582,7 @@ public class RuleTriggerManager {
                 GroupMemberCommandEventTrigger gmceTrigger = (GroupMemberCommandEventTrigger) t;
                 Set<Rule> rules = commandEventTriggeredRules.get(GROUP_NAME_PREFIX + gmceTrigger.getGroup());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     commandEventTriggeredRules.put(GROUP_NAME_PREFIX + gmceTrigger.getGroup(), rules);
                 }
                 rules.add(rule);
@@ -591,7 +590,7 @@ public class RuleTriggerManager {
                 UpdateEventTrigger ueTrigger = (UpdateEventTrigger) t;
                 Set<Rule> rules = updateEventTriggeredRules.get(ueTrigger.getItem());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     updateEventTriggeredRules.put(ueTrigger.getItem(), rules);
                 }
                 rules.add(rule);
@@ -599,7 +598,7 @@ public class RuleTriggerManager {
                 GroupMemberUpdateEventTrigger gmueTrigger = (GroupMemberUpdateEventTrigger) t;
                 Set<Rule> rules = updateEventTriggeredRules.get(GROUP_NAME_PREFIX + gmueTrigger.getGroup());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     updateEventTriggeredRules.put(GROUP_NAME_PREFIX + gmueTrigger.getGroup(), rules);
                 }
                 rules.add(rule);
@@ -607,7 +606,7 @@ public class RuleTriggerManager {
                 ChangedEventTrigger ceTrigger = (ChangedEventTrigger) t;
                 Set<Rule> rules = changedEventTriggeredRules.get(ceTrigger.getItem());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     changedEventTriggeredRules.put(ceTrigger.getItem(), rules);
                 }
                 rules.add(rule);
@@ -615,7 +614,7 @@ public class RuleTriggerManager {
                 GroupMemberChangedEventTrigger gmceTrigger = (GroupMemberChangedEventTrigger) t;
                 Set<Rule> rules = changedEventTriggeredRules.get(GROUP_NAME_PREFIX + gmceTrigger.getGroup());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     changedEventTriggeredRules.put(GROUP_NAME_PREFIX + gmceTrigger.getGroup(), rules);
                 }
                 rules.add(rule);
@@ -630,7 +629,7 @@ public class RuleTriggerManager {
                 EventEmittedTrigger eeTrigger = (EventEmittedTrigger) t;
                 Set<Rule> rules = triggerEventTriggeredRules.get(eeTrigger.getChannel());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     triggerEventTriggeredRules.put(eeTrigger.getChannel(), rules);
                 }
                 rules.add(rule);
@@ -638,7 +637,7 @@ public class RuleTriggerManager {
                 ThingStateUpdateEventTrigger tsuTrigger = (ThingStateUpdateEventTrigger) t;
                 Set<Rule> rules = thingUpdateEventTriggeredRules.get(tsuTrigger.getThing());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     thingUpdateEventTriggeredRules.put(tsuTrigger.getThing(), rules);
                 }
                 rules.add(rule);
@@ -646,7 +645,7 @@ public class RuleTriggerManager {
                 ThingStateChangedEventTrigger tscTrigger = (ThingStateChangedEventTrigger) t;
                 Set<Rule> rules = thingChangedEventTriggeredRules.get(tscTrigger.getThing());
                 if (rules == null) {
-                    rules = new HashSet<Rule>();
+                    rules = new HashSet<>();
                     thingChangedEventTriggeredRules.put(tscTrigger.getThing(), rules);
                 }
                 rules.add(rule);
@@ -735,7 +734,7 @@ public class RuleTriggerManager {
 
     private void removeRules(TriggerTypes type, Collection<? extends Collection<Rule>> ruleSets, RuleModel model) {
         for (Collection<Rule> ruleSet : ruleSets) {
-            Set<Rule> clonedSet = new HashSet<Rule>(ruleSet);
+            Set<Rule> clonedSet = new HashSet<>(ruleSet);
             // first remove all rules of the model, if not null (=non-existent)
             if (model != null) {
                 for (Rule newRule : model.getRules()) {
@@ -751,7 +750,7 @@ public class RuleTriggerManager {
             }
 
             // now also remove all proxified rules from the set
-            clonedSet = new HashSet<Rule>(ruleSet);
+            clonedSet = new HashSet<>(ruleSet);
             for (Rule rule : clonedSet) {
                 if (rule.eResource() == null) {
                     ruleSet.remove(rule);

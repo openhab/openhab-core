@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
  * {@link #handleError(HttpServletRequest, HttpServletResponse, HandlerContext) method must remain silent and take care
  * of all issues which might occur while handling error.
  *
- * @author Łukasz Dywicki - Initial contribution and API.
+ * @author Łukasz Dywicki - Initial contribution
  */
 public interface Handler {
 

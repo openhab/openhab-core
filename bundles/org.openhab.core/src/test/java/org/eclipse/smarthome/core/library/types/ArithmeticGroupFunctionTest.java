@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public class ArithmeticGroupFunctionTest {
 
@@ -40,7 +40,7 @@ public class ArithmeticGroupFunctionTest {
 
     @Before
     public void init() {
-        items = new HashSet<Item>();
+        items = new HashSet<>();
     }
 
     @Test

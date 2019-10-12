@@ -26,8 +26,7 @@ import org.openhab.core.types.UnDefType;
  * A LocationItem can be used to store GPS related informations, addresses...
  * This is useful for location awareness related functions
  *
- * @author Gaël L'hopital
- * @since 1.7.0
+ * @author Gaël L'hopital - Initial contribution
  */
 public class LocationItem extends GenericItem {
     private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
@@ -59,11 +58,9 @@ public class LocationItem extends GenericItem {
      * @return distance between the two points in meters
      */
     public DecimalType distanceFrom(PointType away) {
-
         double dist = -1;
 
         if ((away != null) && (this.state instanceof PointType)) {
-
             PointType me = (PointType) this.state;
 
             double dLat = Math.pow(
@@ -74,7 +71,7 @@ public class LocationItem extends GenericItem {
             double a = dLat + Math.cos(Math.toRadians(me.getLatitude().doubleValue()))
                     * Math.cos(Math.toRadians(away.getLatitude().doubleValue())) * dLng;
 
-            dist = PointType.WGS84_a * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            dist = PointType.WGS84_A * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
         return new DecimalType(dist);

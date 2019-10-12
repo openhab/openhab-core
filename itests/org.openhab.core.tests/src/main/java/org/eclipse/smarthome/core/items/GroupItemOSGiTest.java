@@ -71,12 +71,12 @@ import tec.uom.se.unit.Units;
 public class GroupItemOSGiTest extends JavaOSGiTest {
 
     /** Time to sleep when a file is created/modified/deleted, so the event can be handled */
-    private final static int WAIT_EVENT_TO_BE_HANDLED = 1000;
+    private static final int WAIT_EVENT_TO_BE_HANDLED = 1000;
 
-    List<Event> events = new LinkedList<>();
-    EventPublisher publisher;
+    private List<Event> events = new LinkedList<>();
+    private EventPublisher publisher;
 
-    ItemRegistry itemRegistry;
+    private ItemRegistry itemRegistry;
 
     @Mock
     private UnitProvider unitProvider;
@@ -102,7 +102,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                HashSet<String> hs = new HashSet<>();
+                Set<String> hs = new HashSet<>();
                 hs.add(ItemUpdatedEvent.TYPE);
                 return hs;
             }
@@ -294,7 +294,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testGetStateAs_shouldEqualStateUpdate() {
+    public void testGetStateAsShouldEqualStateUpdate() {
         // Main group uses AND function
         GroupItem rootGroupItem = new GroupItem("root", new SwitchItem("baseItem"),
                 new ArithmeticGroupFunction.And(OnOffType.ON, OnOffType.OFF));
@@ -379,7 +379,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGroupItemPostsEventsForChangesCorrectly() {
         // from ItemEventFactory.GROUPITEM_STATE_CHANGED_EVENT_TOPIC
-        String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "smarthome/items/{itemName}/{memberName}/statechanged";
+        String groupitemStateChangedEventTopic = "smarthome/items/{itemName}/{memberName}/statechanged";
 
         events.clear();
         GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), new GroupFunction.Equality());
@@ -402,8 +402,8 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
         assertTrue(change.getItemName().equals(groupItem.getName()));
         assertTrue(change.getMemberName().equals(member.getName()));
-        assertTrue(change.getTopic().equals(GROUPITEM_STATE_CHANGED_EVENT_TOPIC
-                .replace("{memberName}", member.getName()).replace("{itemName}", groupItem.getName())));
+        assertTrue(change.getTopic().equals(groupitemStateChangedEventTopic.replace("{memberName}", member.getName())
+                .replace("{itemName}", groupItem.getName())));
         assertTrue(change.getItemState().equals(groupItem.getState()));
         assertTrue(change.getOldItemState().equals(oldGroupState));
 
@@ -685,11 +685,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         GroupItem groupItem = new GroupItem("number", baseItem, function);
         groupItem.setUnitProvider(unitProvider);
 
-        NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<Temperature>("23 °C"));
+        NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<>("23 °C"));
         groupItem.addMember(celsius);
-        NumberItem fahrenheit = createNumberItem("F", Temperature.class, new QuantityType<Temperature>("23 °F"));
+        NumberItem fahrenheit = createNumberItem("F", Temperature.class, new QuantityType<>("23 °F"));
         groupItem.addMember(fahrenheit);
-        NumberItem kelvin = createNumberItem("K", Temperature.class, new QuantityType<Temperature>("23 K"));
+        NumberItem kelvin = createNumberItem("K", Temperature.class, new QuantityType<>("23 K"));
         groupItem.addMember(kelvin);
 
         QuantityType<?> state = groupItem.getStateAs(QuantityType.class);
@@ -697,7 +697,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(state.getUnit(), is(Units.CELSIUS));
         assertThat(state.doubleValue(), is(-232.15d));
 
-        celsius.setState(new QuantityType<Temperature>("265 °C"));
+        celsius.setState(new QuantityType<>("265 °C"));
 
         state = groupItem.getStateAs(QuantityType.class);
 
@@ -716,19 +716,19 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         groupItem.setUnitProvider(unitProvider);
         groupItem.setItemStateConverter(itemStateConverter);
 
-        NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<Temperature>("23 °C"));
+        NumberItem celsius = createNumberItem("C", Temperature.class, new QuantityType<>("23 °C"));
         groupItem.addMember(celsius);
-        NumberItem hectoPascal = createNumberItem("F", Pressure.class, new QuantityType<Pressure>("1010 hPa"));
+        NumberItem hectoPascal = createNumberItem("F", Pressure.class, new QuantityType<>("1010 hPa"));
         groupItem.addMember(hectoPascal);
-        NumberItem percent = createNumberItem("K", Dimensionless.class, new QuantityType<Dimensionless>("110 %"));
+        NumberItem percent = createNumberItem("K", Dimensionless.class, new QuantityType<>("110 %"));
         groupItem.addMember(percent);
 
         QuantityType<?> state = groupItem.getStateAs(QuantityType.class);
 
-        assertThat(state, is(new QuantityType<Temperature>("23 °C")));
+        assertThat(state, is(new QuantityType<>("23 °C")));
 
         groupItem.stateUpdated(celsius, UnDefType.NULL);
-        assertThat(groupItem.getState(), is(new QuantityType<Temperature>("23 °C")));
+        assertThat(groupItem.getState(), is(new QuantityType<>("23 °C")));
     }
 
     private NumberItem createNumberItem(String name, Class<? extends Quantity<?>> dimension, State state) {

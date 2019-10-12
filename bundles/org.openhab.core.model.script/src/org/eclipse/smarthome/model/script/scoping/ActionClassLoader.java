@@ -20,8 +20,7 @@ import org.eclipse.smarthome.model.script.engine.action.ActionService;
  * This is a special class loader that tries to resolve classes from available {@link ActionService}s,
  * if the class cannot be resolved from the normal classpath.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 final public class ActionClassLoader extends ClassLoader {
 

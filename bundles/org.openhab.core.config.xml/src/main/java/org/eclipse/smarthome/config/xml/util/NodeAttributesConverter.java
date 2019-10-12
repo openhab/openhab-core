@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * used to convert the attributes of an XML tag within an XML
  * document into a {@link NodeAttributes} object.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class NodeAttributesConverter extends GenericUnmarshaller<NodeAttributes> {
 

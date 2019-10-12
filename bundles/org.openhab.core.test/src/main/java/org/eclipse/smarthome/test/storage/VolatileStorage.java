@@ -23,13 +23,13 @@ import org.eclipse.smarthome.core.storage.Storage;
 /**
  * A {@link Storage} implementation which stores it's data in-memory.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial Contribution and API
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Kai Kreuzer - improved return values
  */
 @NonNullByDefault
 public class VolatileStorage<T> implements Storage<T> {
 
-    Map<String, T> storage = new ConcurrentHashMap<String, T>();
+    Map<String, T> storage = new ConcurrentHashMap<>();
 
     @Override
     public @Nullable T put(String key, @Nullable T value) {

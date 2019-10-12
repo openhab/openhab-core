@@ -26,25 +26,24 @@ import org.openhab.core.types.State;
 /**
  * This type can be used for items that are dealing with GPS functionality.
  *
- * @author Gaël L'hopital
- * @since 1.7.0
+ * @author Gaël L'hopital - Initial contribution
  */
 public class PointType implements ComplexType, Command, State {
 
     public static final double EARTH_GRAVITATIONAL_CONSTANT = 3.986004418e14;
-    public static final double WGS84_a = 6378137; // The equatorial radius of
+    public static final double WGS84_A = 6378137; // The equatorial radius of
                                                   // WGS84 ellipsoid (6378137
                                                   // m).
     private BigDecimal latitude = BigDecimal.ZERO; // in decimal degrees
     private BigDecimal longitude = BigDecimal.ZERO; // in decimal degrees
     private BigDecimal altitude = BigDecimal.ZERO; // in decimal meters
     // constants for the constituents
-    static final public String KEY_LATITUDE = "lat";
-    static final public String KEY_LONGITUDE = "long";
-    static final public String KEY_ALTITUDE = "alt";
-    private static final BigDecimal circle = new BigDecimal(360);
-    private static final BigDecimal flat = new BigDecimal(180);
-    private static final BigDecimal right = new BigDecimal(90);
+    public static final String KEY_LATITUDE = "lat";
+    public static final String KEY_LONGITUDE = "long";
+    public static final String KEY_ALTITUDE = "alt";
+    private static final BigDecimal CIRCLE = new BigDecimal(360);
+    private static final BigDecimal FLAT = new BigDecimal(180);
+    private static final BigDecimal RIGHT = new BigDecimal(90);
     public static final PointType EMPTY = new PointType(new DecimalType(0), new DecimalType(0));
 
     /**
@@ -110,7 +109,7 @@ public class PointType implements ComplexType, Command, State {
     public DecimalType getGravity() {
         double latRad = Math.toRadians(latitude.doubleValue());
         double deltaG = -2000.0 * (altitude.doubleValue() / 1000) * EARTH_GRAVITATIONAL_CONSTANT
-                / (Math.pow(WGS84_a, 3.0));
+                / (Math.pow(WGS84_A, 3.0));
         double sin2lat = Math.sin(latRad) * Math.sin(latRad);
         double sin22lat = Math.sin(2.0 * latRad) * Math.sin(2.0 * latRad);
         double result = (9.780327 * (1.0 + 5.3024e-3 * sin2lat - 5.8e-6 * sin22lat) + deltaG);
@@ -132,7 +131,7 @@ public class PointType implements ComplexType, Command, State {
         double a = Math.pow(Math.sin(dLat / 2D), 2D) + Math.cos(Math.toRadians(this.latitude.doubleValue()))
                 * Math.cos(Math.toRadians(otherPoint.latitude.doubleValue())) * Math.pow(Math.sin(dLong / 2D), 2D);
         double c = 2D * Math.atan2(Math.sqrt(a), Math.sqrt(1D - a));
-        return new DecimalType(WGS84_a * c);
+        return new DecimalType(WGS84_A * c);
     }
 
     /**
@@ -143,8 +142,7 @@ public class PointType implements ComplexType, Command, State {
      * (alphabetical) order of their keys.
      * </p>
      *
-     * @param pattern
-     *            the pattern to use containing indexes to reference the single
+     * @param pattern the pattern to use containing indexes to reference the single
      *            elements of this type.
      */
     @Override
@@ -185,24 +183,24 @@ public class PointType implements ComplexType, Command, State {
      * </pre>
      */
     private void canonicalize(DecimalType aLat, DecimalType aLon) {
-        latitude = flat.add(aLat.toBigDecimal()).remainder(circle);
+        latitude = FLAT.add(aLat.toBigDecimal()).remainder(CIRCLE);
         longitude = aLon.toBigDecimal();
         if (latitude.compareTo(BigDecimal.ZERO) == -1) {
-            latitude.add(circle);
+            latitude.add(CIRCLE);
         }
-        latitude = latitude.subtract(flat);
-        if (latitude.compareTo(right) == 1) {
-            latitude = flat.subtract(latitude);
-            longitude = longitude.add(flat);
-        } else if (latitude.compareTo(right.negate()) == -1) {
-            latitude = flat.negate().subtract(latitude);
-            longitude = longitude.add(flat);
+        latitude = latitude.subtract(FLAT);
+        if (latitude.compareTo(RIGHT) == 1) {
+            latitude = FLAT.subtract(latitude);
+            longitude = longitude.add(FLAT);
+        } else if (latitude.compareTo(RIGHT.negate()) == -1) {
+            latitude = FLAT.negate().subtract(latitude);
+            longitude = longitude.add(FLAT);
         }
-        longitude = flat.add(longitude).remainder(circle);
+        longitude = FLAT.add(longitude).remainder(CIRCLE);
         if (longitude.compareTo(BigDecimal.ZERO) <= 0) {
-            longitude = longitude.add(circle);
+            longitude = longitude.add(CIRCLE);
         }
-        longitude = longitude.subtract(flat);
+        longitude = longitude.subtract(FLAT);
     }
 
     @Override

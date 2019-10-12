@@ -40,8 +40,7 @@ import org.osgi.service.event.EventHandler;
  * openHAB (using "smarthome" as a topic prefix).
  * It simply duplicates events with an updated topic prefix and works both ways.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true, property = "event.topics=smarthome/*")
 public class EventBridge implements EventHandler, EventSubscriber {
@@ -70,9 +69,7 @@ public class EventBridge implements EventHandler, EventSubscriber {
 
     @Override
     public void handleEvent(Event event) {
-
         if (!Boolean.TRUE.equals(event.getProperty(BRIDGEMARKER))) {
-
             // map event from openHAB to ESH
             if (event.getTopic().startsWith(org.openhab.core.events.EventConstants.TOPIC_PREFIX)) {
                 if (event.getTopic().endsWith(EventType.COMMAND.name())) {

@@ -20,7 +20,6 @@ import org.eclipse.smarthome.core.thing.profiles.TriggerProfileType;
  * objects (DTOs).
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class ProfileTypeDTOMapper {
 

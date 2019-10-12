@@ -55,7 +55,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * <li>tracking the managing of the {@link RuleTemplates}s.
  * </ul>
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Yordan Mihaylov - updates related to api changes
  */
@@ -71,7 +71,7 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      */
     public TemplateResourceBundleProvider() {
-        listeners = new LinkedList<ProviderChangeListener<RuleTemplate>>();
+        listeners = new LinkedList<>();
         path = ROOT_DIRECTORY + "/templates/";
     }
 
@@ -141,7 +141,7 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      */
     @Override
     public Collection<RuleTemplate> getTemplates(Locale locale) {
-        ArrayList<RuleTemplate> templatesList = new ArrayList<RuleTemplate>();
+        List<RuleTemplate> templatesList = new ArrayList<>();
         for (RuleTemplate t : providedObjectsHolder.values()) {
             templatesList.add(getPerLocale(t, locale));
         }

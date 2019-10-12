@@ -31,15 +31,15 @@ import org.eclipse.smarthome.model.core.ModelRepository;
 import org.eclipse.smarthome.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;;
+import org.junit.Test;
 
 /**
  * @author Henning Treu - Initial contribution
  */
 public class GenericItemChannelLinkProviderTest extends JavaOSGiTest {
 
-    private final static String THINGS_TESTMODEL_NAME = "test.things";
-    private final static String ITEMS_TESTMODEL_NAME = "test.items";
+    private static final String THINGS_TESTMODEL_NAME = "test.things";
+    private static final String ITEMS_TESTMODEL_NAME = "test.items";
 
     private ModelRepository modelRepository;
     private ThingRegistry thingRegistry;

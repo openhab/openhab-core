@@ -29,10 +29,9 @@ import org.slf4j.LoggerFactory;
  * This class is responsible for tracking the bundles providing automation resources and delegating the processing to
  * the responsible providers in separate thread.
  *
- * @author Ana Dimova - Initial Contribution, host-fragment support
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @param <E>
- *
  */
 public class AutomationResourceBundlesEventQueue<E> implements Runnable {
 
@@ -45,7 +44,7 @@ public class AutomationResourceBundlesEventQueue<E> implements Runnable {
      * This field serves for saving the BundleEvents for the bundles providing automation resources until their
      * processing completes.
      */
-    private List<BundleEvent> queue = new ArrayList<BundleEvent>();
+    private List<BundleEvent> queue = new ArrayList<>();
 
     /**
      * This field is for synchronization purposes
@@ -174,7 +173,7 @@ public class AutomationResourceBundlesEventQueue<E> implements Runnable {
             return;
         }
         if (shared) {
-            queue = new LinkedList<BundleEvent>();
+            queue = new LinkedList<>();
             shared = false;
         }
         if (queue.add(event)) {
@@ -232,7 +231,7 @@ public class AutomationResourceBundlesEventQueue<E> implements Runnable {
             return;
         }
         if (shared) {
-            this.queue = new LinkedList<BundleEvent>();
+            this.queue = new LinkedList<>();
             shared = false;
         }
         if (this.queue.addAll(queue)) {

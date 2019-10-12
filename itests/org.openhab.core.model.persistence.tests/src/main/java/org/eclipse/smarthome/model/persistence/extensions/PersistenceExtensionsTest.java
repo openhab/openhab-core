@@ -34,8 +34,8 @@ import org.junit.Test;
 
 /**
  * @author Kai Kreuzer - Initial contribution
- * @author Chris Jackson
- * @author Jan N. Klug
+ * @author Chris Jackson - Initial contribution
+ * @author Jan N. Klug - Fix averageSince calculation
  */
 @SuppressWarnings("deprecation")
 public class PersistenceExtensionsTest {

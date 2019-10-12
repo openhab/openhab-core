@@ -19,7 +19,6 @@ import javax.measure.Quantity;
  * https://en.wikipedia.org/wiki/Area_density
  *
  * @author Gaël L'hopital - Initial contribution
- *
  */
 public interface ArealDensity extends Quantity<ArealDensity> {
 }

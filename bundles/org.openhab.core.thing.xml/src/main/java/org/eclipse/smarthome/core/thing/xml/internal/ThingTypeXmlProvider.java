@@ -50,9 +50,8 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * process has been finished, the cache is cleared again. The merge process is started when {@link #addingFinished()} is
  * invoked from the according {@link XmlDocumentBundleTracker}.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Ivan Iliev - Added support for system wide channel types
- *
  */
 public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
 

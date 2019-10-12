@@ -18,7 +18,6 @@ import java.util.List;
  * This is a data transfer object that is used to serialize the respective class.
  *
  * @author Ana Dimova - Initial contribution
- *
  */
 public class CompositeConditionTypeDTO extends ConditionTypeDTO {
 

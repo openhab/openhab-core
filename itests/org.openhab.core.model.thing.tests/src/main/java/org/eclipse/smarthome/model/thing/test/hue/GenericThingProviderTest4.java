@@ -64,7 +64,7 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
     private int thingInitializeCounter;
     final boolean slowInit;
 
-    private final static String TESTMODEL_NAME = "testModelX.things";
+    private static final String TESTMODEL_NAME = "testModelX.things";
 
     ModelRepository modelRepository;
     ThingRegistry thingRegistry;

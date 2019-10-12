@@ -23,10 +23,8 @@ package org.openhab.core.transform;
  * One could provide his own processors by providing a new implementation of this
  * Interface.
  *
- * @author Thomas.Eichstaedt-Engelen
- *         œauthor Kai Kreuzer
- *
- * @since 0.7.0
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface TransformationService {
 
@@ -39,10 +37,8 @@ public interface TransformationService {
      *
      * @param function the function to be used to transform the input
      * @param source the input to be transformed
-     *
      * @return the transformed result or the unchanged <code>source</code> if the
      *         transformation couldn't be completed for any reason.
-     *
      * @throws TransformationException if any error occurs
      */
     String transform(String function, String source) throws TransformationException;

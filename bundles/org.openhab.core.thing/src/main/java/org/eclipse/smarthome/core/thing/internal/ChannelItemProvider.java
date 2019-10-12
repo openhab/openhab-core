@@ -54,16 +54,16 @@ import org.slf4j.LoggerFactory;
 /**
  * This class dynamically provides items for all links that point to non-existing items.
  *
- * @author Kai Kreuzer
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Add locale provider support
  * @author Thomas Höfer - Added modified operation
  */
 @Component(configurationPid = "org.eclipse.smarthome.channelitemprovider", immediate = true)
 public class ChannelItemProvider implements ItemProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(ChannelItemProvider.class);
+    private static final long INITIALIZATION_DELAY_NANOS = TimeUnit.SECONDS.toNanos(2);
 
-    private final long INITIALIZATION_DELAY_NANOS = TimeUnit.SECONDS.toNanos(2);
+    private final Logger logger = LoggerFactory.getLogger(ChannelItemProvider.class);
 
     private final Set<ProviderChangeListener<Item>> listeners = new HashSet<>();
 

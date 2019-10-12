@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Remote Control.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_RemoteControl", label = "Remote Control", synonyms = "Remote Controls", description = "")
 public interface RemoteControl extends Equipment {

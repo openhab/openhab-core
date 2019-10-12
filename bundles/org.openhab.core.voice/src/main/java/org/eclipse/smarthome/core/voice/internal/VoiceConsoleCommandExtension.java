@@ -36,7 +36,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * Console command extension for all voice features.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Wouter Born - Sort TTS voices
  */
 @Component(service = ConsoleCommandExtension.class)

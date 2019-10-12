@@ -38,13 +38,11 @@ import org.slf4j.LoggerFactory;
  * listeners are correctly notified of any change.
  * <p>
  *
- * @author Kai Kreuzer
- * @since 0.6.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class AbstractGenericBindingProvider implements BindingConfigReader, BindingProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractGenericBindingProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(AbstractGenericBindingProvider.class);
 
     private Set<BindingChangeListener> listeners = new CopyOnWriteArraySet<>();
 

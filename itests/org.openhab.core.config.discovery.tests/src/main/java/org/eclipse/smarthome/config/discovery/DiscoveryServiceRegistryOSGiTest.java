@@ -43,26 +43,26 @@ import org.osgi.framework.ServiceRegistration;
  * {@link DiscoveryResult}s which are added to the {@link Inbox},
  * the {@link Inbox} is cleared again after this test returns.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Simon Kaufmann - added tests for ExtendedDiscoveryService, ported to Java
  * @author Andre Fuechsel - added tests for removeOlderResults for a specific bridge only
  */
 public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
-    private final String ANY_BINDING_ID_1 = "any2BindingId1";
-    private final String ANY_THING_TYPE_1 = "any2ThingType1";
+    private static final String ANY_BINDING_ID_1 = "any2BindingId1";
+    private static final String ANY_THING_TYPE_1 = "any2ThingType1";
 
-    private final String ANY_BINDING_ID_2 = "any2BindingId2";
-    private final String ANY_THING_TYPE_2 = "any2ThingType2";
+    private static final String ANY_BINDING_ID_2 = "any2BindingId2";
+    private static final String ANY_THING_TYPE_2 = "any2ThingType2";
 
-    private final String ANY_BINDING_ID_3 = "any2BindingId3";
-    private final String ANY_THING_TYPE_3 = "any2ThingType3";
+    private static final String ANY_BINDING_ID_3 = "any2BindingId3";
+    private static final String ANY_THING_TYPE_3 = "any2ThingType3";
 
-    private final ThingUID BRIDGE_UID_1 = new ThingUID("binding:bridge:1");
-    private final ThingUID BRIDGE_UID_2 = new ThingUID("binding:bridge:2");
+    private static final ThingUID BRIDGE_UID_1 = new ThingUID("binding:bridge:1");
+    private static final ThingUID BRIDGE_UID_2 = new ThingUID("binding:bridge:2");
 
-    private final String FAULTY_BINDING_ID = "faulty2BindingId";
-    private final String FAULTY_THING_TYPE = "faulty2ThingType";
+    private static final String FAULTY_BINDING_ID = "faulty2BindingId";
+    private static final String FAULTY_THING_TYPE = "faulty2ThingType";
 
     private static class AnotherDiscoveryService extends DiscoveryServiceMock {
         public AnotherDiscoveryService(ThingTypeUID thingType, int timeout) {
@@ -138,27 +138,27 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testStartScan_nonExisting() {
+    public void testStartScanNonExisting() {
         assertFalse(discoveryServiceRegistry.startScan(new ThingTypeUID("bindingId", "thingType"), null));
     }
 
     @Test
-    public void testStartScan_existing() {
+    public void testStartScanExisting() {
         assertTrue(discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), null));
     }
 
     @Test
-    public void testStan_faulty() {
+    public void testScanFaulty() {
         assertFalse(discoveryServiceRegistry.startScan(new ThingTypeUID(FAULTY_BINDING_ID, FAULTY_THING_TYPE), null));
     }
 
     @Test
-    public void testAbortScan_nonExisting() {
+    public void testAbortScanNonExisting() {
         assertFalse(discoveryServiceRegistry.abortScan(new ThingTypeUID("bindingId", "thingType")));
     }
 
     @Test
-    public void testAbortScan_known() {
+    public void testAbortScanKnown() {
         ScanListener mockScanListener = mock(ScanListener.class);
 
         assertTrue(discoveryServiceRegistry.startScan(new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1),
@@ -195,7 +195,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveOlderResults_works() {
+    public void testRemoveOlderResultsWorks() {
         ScanListener mockScanListener1 = mock(ScanListener.class);
         ScanListener mockScanListener2 = mock(ScanListener.class);
 
@@ -224,7 +224,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveOlderResults_onlySameService() {
+    public void testRemoveOlderResultsOnlySameService() {
         mockDiscoveryListener = mock(DiscoveryListener.class);
         ScanListener mockScanListener1 = mock(ScanListener.class);
 
@@ -262,7 +262,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveOlderResults_onlyOfSpecificBridge() {
+    public void testRemoveOlderResultsOnlyOfSpecificBridge() {
         mockDiscoveryListener = mock(DiscoveryListener.class);
         ScanListener mockScanListener1 = mock(ScanListener.class);
 
@@ -315,11 +315,10 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         assertThat(inbox.getAll().size(), is(2));
         assertThat(inbox.getAll().stream().filter(r -> BRIDGE_UID_1.equals(r.getBridgeUID())).count(), is(1L));
         assertThat(inbox.getAll().stream().filter(r -> BRIDGE_UID_2.equals(r.getBridgeUID())).count(), is(1L));
-
     }
 
     @Test
-    public void testThingDiscovered_removedListener() {
+    public void testThingDiscoveredRemovedListener() {
         ScanListener mockScanListener1 = mock(ScanListener.class);
         discoveryServiceRegistry.addDiscoveryListener(mockDiscoveryListener);
         discoveryServiceRegistry.removeDiscoveryListener(mockDiscoveryListener);
@@ -330,7 +329,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testStartScan_twoDiscoveryServices() {
+    public void testStartScanTwoDiscoveryServices() {
         ScanListener mockScanListener1 = mock(ScanListener.class);
         DiscoveryService anotherDiscoveryServiceMock = new DiscoveryServiceMock(
                 new ThingTypeUID(ANY_BINDING_ID_1, ANY_THING_TYPE_1), 1);
@@ -344,7 +343,7 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testStartScan_bindingId() {
+    public void testStartScanBindingId() {
         ScanListener mockScanListener1 = mock(ScanListener.class);
         discoveryServiceRegistry.startScan(ANY_BINDING_ID_1, mockScanListener1);
 

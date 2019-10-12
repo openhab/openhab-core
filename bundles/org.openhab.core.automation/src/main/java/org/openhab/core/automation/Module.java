@@ -31,8 +31,8 @@ import org.openhab.core.automation.type.Output;
  * Setters of the module don't have immediate effect on the Rule. To apply the changes, the Module should be set on the
  * {@link Rule} and the Rule has to be updated in {@link RuleRegistry} by invoking {@code update} method.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Kai Kreuzer - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public interface Module {

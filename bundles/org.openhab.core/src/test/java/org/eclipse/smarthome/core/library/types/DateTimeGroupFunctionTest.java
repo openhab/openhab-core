@@ -39,7 +39,7 @@ public class DateTimeGroupFunctionTest {
 
     @Before
     public void init() {
-        items = new HashSet<Item>();
+        items = new HashSet<>();
     }
 
     @Test

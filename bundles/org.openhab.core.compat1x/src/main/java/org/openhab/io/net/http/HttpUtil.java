@@ -45,13 +45,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Some common methods to be used in both HTTP-In-Binding and HTTP-Out-Binding
  *
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
- * @since 0.6.0
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public class HttpUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
 
     /** {@link Pattern} which matches the credentials out of an URL */
     private static final Pattern URL_CREDENTIALS_PATTERN = Pattern.compile("http://(.*?):(.*?)@.*");
@@ -64,7 +63,6 @@ public class HttpUtil {
      * @param httpMethod the HTTP method to use
      * @param url the url to execute (in milliseconds)
      * @param timeout the socket timeout to wait for data
-     *
      * @return the response body or <code>NULL</code> when the request went wrong
      */
     public static String executeUrl(String httpMethod, String url, int timeout) {
@@ -82,12 +80,10 @@ public class HttpUtil {
      *            <code>null</code> if no content should be send.
      * @param contentType the content type of the given <code>content</code>
      * @param timeout the socket timeout to wait for data
-     *
      * @return the response body or <code>NULL</code> when the request went wrong
      */
     public static String executeUrl(String httpMethod, String url, InputStream content, String contentType,
             int timeout) {
-
         return executeUrl(httpMethod, url, null, content, contentType, timeout);
     }
 
@@ -103,7 +99,6 @@ public class HttpUtil {
      *            <code>null</code> if no content should be send.
      * @param contentType the content type of the given <code>content</code>
      * @param timeout the socket timeout to wait for data
-     *
      * @return the response body or <code>NULL</code> when the request went wrong
      */
     public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
@@ -123,7 +118,7 @@ public class HttpUtil {
                 try {
                     proxyPort = Integer.valueOf(proxyPortString);
                 } catch (NumberFormatException e) {
-                    logger.warn("'{}' is not a valid proxy port - using port 80 instead");
+                    LOGGER.warn("'{}' is not a valid proxy port - using port 80 instead");
                 }
             }
             proxyUser = System.getProperty("http.proxyUser");
@@ -133,7 +128,6 @@ public class HttpUtil {
 
         return executeUrl(httpMethod, url, httpHeaders, content, contentType, timeout, proxyHost, proxyPort, proxyUser,
                 proxyPassword, nonProxyHosts);
-
     }
 
     /**
@@ -156,7 +150,6 @@ public class HttpUtil {
     public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
             String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
             String proxyPassword, String nonProxyHosts) {
-
         HttpClient client = new HttpClient();
 
         // only configure a proxy if a host is provided
@@ -188,31 +181,30 @@ public class HttpUtil {
             client.getState().setCredentials(AuthScope.ANY, credentials);
         }
 
-        if (logger.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             try {
-                logger.debug("About to execute '{}'", method.getURI());
+                LOGGER.debug("About to execute '{}'", method.getURI());
             } catch (URIException e) {
-                logger.debug("{}", e.getMessage());
+                LOGGER.debug("{}", e.getMessage());
             }
         }
 
         try {
-
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
-                logger.debug("Method failed: {}", method.getStatusLine());
+                LOGGER.debug("Method failed: {}", method.getStatusLine());
             }
 
             String responseBody = IOUtils.toString(method.getResponseBodyAsStream());
             if (!responseBody.isEmpty()) {
-                logger.debug("{}", responseBody);
+                LOGGER.debug("{}", responseBody);
             }
 
             return responseBody;
         } catch (HttpException he) {
-            logger.error("Fatal protocol violation: {}", he.toString());
+            LOGGER.error("Fatal protocol violation: {}", he.toString());
         } catch (IOException ioe) {
-            logger.error("Fatal transport error: {}", ioe.toString());
+            LOGGER.error("Fatal transport error: {}", ioe.toString());
         } finally {
             method.releaseConnection();
         }
@@ -226,13 +218,11 @@ public class HttpUtil {
      *
      * @param urlString
      * @param nonProxyHosts
-     *
      * @return <code>false</code> if the host of the given <code>urlString</code>
      *         is contained in <code>nonProxyHosts</code>-list and <code>true</code>
      *         otherwise
      */
     private static boolean shouldUseProxy(String urlString, String nonProxyHosts) {
-
         if (StringUtils.isNotBlank(nonProxyHosts)) {
             String givenHost = urlString;
 
@@ -240,7 +230,7 @@ public class HttpUtil {
                 URL url = new URL(urlString);
                 givenHost = url.getHost();
             } catch (MalformedURLException e) {
-                logger.error("the given url {} is malformed", urlString);
+                LOGGER.error("the given url {} is malformed", urlString);
             }
 
             String[] hosts = nonProxyHosts.split("\\|");
@@ -273,16 +263,13 @@ public class HttpUtil {
      * </pre>
      *
      * @param url the URL to extract {@link Credentials} from
-     *
      * @return the exracted Credentials or <code>null</code> if the given
      *         <code>url</code> does not contain credentials
      */
     protected static Credentials extractCredentials(String url) {
-
         Matcher matcher = URL_CREDENTIALS_PATTERN.matcher(url);
 
         if (matcher.matches()) {
-
             matcher.reset();
 
             String username = "";
@@ -302,18 +289,16 @@ public class HttpUtil {
 
     /**
      * Factory method to create a {@link HttpMethod}-object according to the
-     * given String <code>httpMethod</codde>
+     * given String <code>httpMethod</code>
      *
-     * &#64;param httpMethodString the name of the {@link HttpMethod} to create
-     * &#64;param url
-     *
-     * &#64;return an object of type {@link GetMethod}, {@link PutMethod},
-     * {@link PostMethod} or {@link DeleteMethod}
+     * @param httpMethodString the name of the {@link HttpMethod} to create
+     * @param url
+     * @return an object of type {@link GetMethod}, {@link PutMethod},
+     *         {@link PostMethod} or {@link DeleteMethod}
      * @throws IllegalArgumentException if <code>httpMethod</code> is none of
      *             <code>GET</code>, <code>PUT</code>, <code>POST</POST> or <code>DELETE</code>
      */
     public static HttpMethod createHttpMethod(String httpMethodString, String url) {
-
         if ("GET".equals(httpMethodString)) {
             return new GetMethod(url);
         } else if ("PUT".equals(httpMethodString)) {

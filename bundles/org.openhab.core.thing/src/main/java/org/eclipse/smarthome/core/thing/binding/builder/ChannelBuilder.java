@@ -62,7 +62,7 @@ public class ChannelBuilder {
      * @return channel builder
      */
     public static ChannelBuilder create(ChannelUID channelUID, @Nullable String acceptedItemType) {
-        return new ChannelBuilder(channelUID, acceptedItemType, new HashSet<String>());
+        return new ChannelBuilder(channelUID, acceptedItemType, new HashSet<>());
     }
 
     /**

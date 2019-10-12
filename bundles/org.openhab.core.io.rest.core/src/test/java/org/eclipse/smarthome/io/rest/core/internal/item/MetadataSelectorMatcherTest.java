@@ -37,7 +37,6 @@ import org.mockito.Mock;
  * Test the {@link MetadataSelectorMatcher}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public class MetadataSelectorMatcherTest {
 

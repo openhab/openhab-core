@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Some utility functions related to network interfaces etc.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  * @author Mark Herwege - Added methods to find broadcast address(es)
  * @author Stefan Triller - Converted to OSGi service with primary ipv4 conf
  * @author Gary Tse - Network address change listener
@@ -274,7 +274,7 @@ public class NetUtil implements NetworkAddressService {
      * @return list of broadcast addresses, empty list if no broadcast addresses found
      */
     public static List<String> getAllBroadcastAddresses() {
-        List<String> broadcastAddresses = new LinkedList<String>();
+        List<String> broadcastAddresses = new LinkedList<>();
         try {
             final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
@@ -557,7 +557,6 @@ public class NetUtil implements NetworkAddressService {
     }
 
     private void scheduleToPollNetworkInterface(int intervalInSeconds) {
-
         if (networkInterfacePollFuture != null) {
             networkInterfacePollFuture.cancel(true);
             networkInterfacePollFuture = null;

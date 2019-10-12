@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
  *
  * This servlet also supports data streams, such as a webcam video stream etc.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author John Cocula - added optional Image/Video item= support; refactored to allow use of later spec servlet
  */
 @Component(immediate = true, property = { "service.pid=org.eclipse.smarthome.proxy" })
@@ -146,7 +146,7 @@ public class ProxyServletService extends HttpServlet {
      * @return properties to pass to servlet for initialization
      */
     private Hashtable<String, String> propsFromConfig(Map<String, Object> config) {
-        Hashtable<String, String> props = new Hashtable<String, String>();
+        Hashtable<String, String> props = new Hashtable<>();
 
         if (config != null) {
             for (String key : config.keySet()) {
@@ -330,7 +330,6 @@ public class ProxyServletService extends HttpServlet {
      * @return true if the request is relative to a video widget
      */
     boolean proxyingVideoWidget(HttpServletRequest request) {
-
         boolean proxyingVideo = false;
 
         try {

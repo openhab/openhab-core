@@ -25,9 +25,7 @@ import org.openhab.core.types.UnDefType;
  * This interface is only a container for functions that require the core type library
  * for its calculations.
  *
- * @author Kai Kreuzer
- * @since 0.7.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ArithmeticGroupFunction extends GroupFunction {
 
@@ -38,8 +36,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * Through the getStateAs() method, it can be determined, how many
      * items actually are not in the 'activeState'.
      *
-     * @author Kai Kreuzer
-     * @since 0.7.0
+     * @author Kai Kreuzer - Initial contribution
      *
      */
     static class And implements GroupFunction {
@@ -115,8 +112,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * Through the getStateAs() method, it can be determined, how many
      * items actually are in the 'activeState'.
      *
-     * @author Kai Kreuzer
-     * @since 0.7.0
+     * @author Kai Kreuzer - Initial contribution
      *
      */
     static class Or implements GroupFunction {
@@ -183,8 +179,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * value. E.g. when the 'and' operation calculates the activeValue the
      * passiveValue will be returned and vice versa.
      *
-     * @author Thomas.Eichstaedt-Engelen
-     * @since 1.0.0
+     * @author Thomas Eichstaedt-Engelen - Initial contribution
      */
     static class NAnd extends And {
 
@@ -207,8 +202,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * value. E.g. when the 'or' operation calculates the activeValue the
      * passiveValue will be returned and vice versa.
      *
-     * @author Thomas.Eichstaedt-Engelen
-     * @since 1.0.0
+     * @author Thomas Eichstaedt-Engelen - Initial contribution
      */
     static class NOr extends Or {
 
@@ -228,8 +222,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the numeric average over all item states of decimal type.
      *
-     * @author Kai Kreuzer
-     * @since 0.7.0
+     * @author Kai Kreuzer - Initial contribution
      *
      */
     static class Avg implements GroupFunction {
@@ -277,8 +270,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the numeric sum over all item states of decimal type.
      *
-     * @author Thomas.Eichstaedt-Engelen
-     * @since 1.1.0
+     * @author Thomas Eichstaedt-Engelen - Initial contribution
      *
      */
     static class Sum implements GroupFunction {
@@ -320,8 +312,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the minimum value of all item states of decimal type.
      *
-     * @author Kai Kreuzer
-     * @since 0.7.0
+     * @author Kai Kreuzer - Initial contribution
      *
      */
     static class Min implements GroupFunction {
@@ -368,8 +359,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the maximum value of all item states of decimal type.
      *
-     * @author Kai Kreuzer
-     * @since 0.7.0
+     * @author Kai Kreuzer - Initial contribution
      *
      */
     static class Max implements GroupFunction {

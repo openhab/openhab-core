@@ -23,9 +23,8 @@ import org.openhab.core.automation.Trigger;
 /**
  * This class allows the easy construction of a {@link Module} instance using the builder pattern.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Split implementation for different module types in sub classes
- *
  */
 @NonNullByDefault
 public abstract class ModuleBuilder<B extends ModuleBuilder<B, T>, T extends Module> {

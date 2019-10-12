@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Michael Bock - Initial contribution
  * @author Gary Tse - Initial contribution
- *
  */
 @NonNullByDefault
 public class OAuthClientServiceImpl implements OAuthClientService {
@@ -59,7 +58,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private static final String EXCEPTION_MESSAGE_CLOSED = "Client service is closed";
 
-    private transient final Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
+    private final transient Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
 
     private @NonNullByDefault({}) OAuthStoreHandler storeHandler;
 
@@ -187,7 +186,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     @Override
     public AccessTokenResponse getAccessTokenResponseByAuthorizationCode(String authorizationCode,
             @Nullable String redirectURI) throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -231,7 +229,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     @Override
     public AccessTokenResponse getAccessTokenByResourceOwnerPasswordCredentials(String username, String password,
             @Nullable String scope) throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -253,7 +250,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     @Override
     public AccessTokenResponse getAccessTokenByClientCredentials(@Nullable String scope)
             throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -278,7 +274,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     @Override
     public AccessTokenResponse refreshToken() throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -319,7 +314,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     @Override
     public @Nullable AccessTokenResponse getAccessTokenResponse()
             throws OAuthException, IOException, OAuthResponseException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -366,7 +360,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     @Override
     public void remove() throws OAuthException {
-
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }

@@ -38,7 +38,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * This converter converts {@code thing-type} XML tags. It uses the {@link AbstractDescriptionTypeConverter} which
  * offers base functionality for each type definition.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Chris Jackson - Added channel properties
  * @author Andre Fuechsel - Added representationProperty

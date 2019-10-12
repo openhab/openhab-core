@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Stefan Triller - more tests for type conversions
  */
 public class OpenClosedTypeTest {

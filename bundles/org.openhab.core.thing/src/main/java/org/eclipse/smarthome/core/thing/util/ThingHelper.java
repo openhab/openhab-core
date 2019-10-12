@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.iterators.ArrayIterator;
@@ -112,7 +113,7 @@ public class ThingHelper {
      */
     @Deprecated
     public static void ensureUnique(Collection<Channel> channels) {
-        HashSet<UID> ids = new HashSet<>();
+        Set<UID> ids = new HashSet<>();
         for (Channel channel : channels) {
             if (!ids.add(channel.getUID())) {
                 throw new IllegalArgumentException("Duplicate channels " + channel.getUID().getAsString());
@@ -130,7 +131,7 @@ public class ThingHelper {
         @SuppressWarnings("unchecked")
         final Iterator<Channel> it = new ArrayIterator(channels);
 
-        ensureUniqueChannels(it, new HashSet<UID>(channels.length));
+        ensureUniqueChannels(it, new HashSet<>(channels.length));
     }
 
     /**
@@ -140,7 +141,7 @@ public class ThingHelper {
      * @throws IllegalArgumentException in case there are duplicate channels found
      */
     public static void ensureUniqueChannels(final Collection<Channel> channels) {
-        ensureUniqueChannels(channels.iterator(), new HashSet<UID>(channels.size()));
+        ensureUniqueChannels(channels.iterator(), new HashSet<>(channels.size()));
     }
 
     /**
@@ -157,7 +158,7 @@ public class ThingHelper {
 
     private static void ensureUniqueChannels(final Collection<Channel> channels1, final Collection<Channel> channels2) {
         ensureUniqueChannels(channels1.iterator(),
-                ensureUniqueChannels(channels2.iterator(), new HashSet<UID>(channels1.size() + channels2.size())));
+                ensureUniqueChannels(channels2.iterator(), new HashSet<>(channels1.size() + channels2.size())));
     }
 
     private static HashSet<UID> ensureUniqueChannels(final Iterator<Channel> channels, final HashSet<UID> ids) {

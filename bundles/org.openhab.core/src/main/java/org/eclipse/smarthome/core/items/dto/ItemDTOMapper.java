@@ -104,7 +104,7 @@ public class ItemDTOMapper {
     }
 
     private static List<State> parseStates(@Nullable Item baseItem, String @Nullable [] params) {
-        List<State> states = new ArrayList<State>();
+        List<State> states = new ArrayList<>();
 
         if (params == null || baseItem == null) {
             return states;

@@ -33,9 +33,11 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runners.MethodSorters;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -43,6 +45,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * @author Petar Valchev - Initial contribution
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
     @Rule
@@ -110,6 +113,24 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         // Assert that more than one file with local pid from the services directory is processed.
         verifyValueOfConfigurationProperty("local.service.second.pid", "service.property", "service.value");
+    }
+
+    @Test
+    public void allConfigurationFilesWithLocalPIDsAndWhitespacesAreProcessedAndConfigurationIsUpdated() {
+        String configDirectory = configBaseDirectory + SEP + "local_pid_whitespaces_conf";
+        String servicesDirectory = "local_pid_services";
+
+        String defaultConfigFileName = configDirectory + SEP + "local.pid.default.file.cfg";
+
+        initialize(defaultConfigFileName);
+
+        cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
+
+        // Assert that a file with local pid from the root configuration directory is processed.
+        verifyValueOfConfigurationProperty("local.default.pid", "default.property", "default.value");
+
+        // Assert that a file with local pid from the services directory is processed.
+        verifyValueOfConfigurationProperty("local.service.pid", "service.property", "service.value");
     }
 
     @Test
@@ -187,7 +208,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void IfNoPIDIsDefinedInConfigurationFileWithNo_dotNameTheDefaultNamespacePlusTheFileNameBecomesPID() {
+    public void ifNoPIDIsDefinedInConfigurationFileWithNoDotNameTheDefaultNamespacePlusTheFileNameBecomesPID() {
         String configDirectory = configBaseDirectory + SEP + "no_pid_no_dot_conf";
         String servicesDirectory = "no_pid_no_dot_services";
         // In this test case we need configuration files, which names don't contain dots.
@@ -497,7 +518,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void PropertyValuePairsForALocalPIDInDifferentFilesAreStillAssociatedWithThatPID() {
+    public void propertyValuePairsForALocalPIDInDifferentFilesAreStillAssociatedWithThatPID() {
         String configDirectory = configBaseDirectory + SEP + "local_pid_different_files_no_conflict_conf";
         String servicesDirectory = "local_pid_different_files_no_conflict_services";
         String defaultConfigFilePath = configDirectory + SEP + "local.pid.default.file.cfg";
@@ -574,7 +595,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void whenLocalPIDIsDefinedForGlobalPIDFile_AbortParsing() {
+    public void whenLocalPIDIsDefinedForGlobalPIDFileAbortParsing() {
         String configDirectory = configBaseDirectory + SEP + "global_pid_with_local_pid_line_error";
         String servicesDirectory = "global_pid_with_local_pid_line_services_error";
 
@@ -645,7 +666,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void whenExclusivePIDFileIsDeleted_DeleteTheConfiguration() throws IOException {
+    public void whenExclusivePIDFileIsDeletedDeleteTheConfiguration() throws IOException {
         String configDirectory = configBaseDirectory + SEP + "exclusive_pid_file_removed_during_runtime";
         String servicesDirectory = "exclusive_pid_file_removed_during_runtime_services";
 
@@ -672,7 +693,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void whenExclusiveConfigIsTruncated_OverrideReducedConfig() throws IOException {
+    public void whenExclusiveConfigIsTruncatedOverrideReducedConfig() throws IOException {
         String configDirectory = configBaseDirectory + SEP + "exclusive_pid_overrides_configuration_on_update";
         String servicesDirectory = "exclusive_pid_overrides_configuration_on_update_services";
 
@@ -701,7 +722,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void whenExclusiveConfigFileIsDeleted_shouldRemoveConfigFromConfigAdmin() throws IOException {
+    public void whenExclusiveConfigFileIsDeletedShouldRemoveConfigFromConfigAdmin() throws IOException {
         String configDirectory = configBaseDirectory + SEP + "exclusive_pid_configuration_removed_after_file_delete";
         String servicesDirectory = "exclusive_pid_configuration_removed_after_file_delete_services";
 
@@ -771,7 +792,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void whenExclusivePIDisDefinedInlineFromDifferentFile_skipTheLine() {
+    public void whenExclusivePIDisDefinedInlineFromDifferentFileSkipTheLine() {
         String configDirectory = configBaseDirectory + SEP + "global_and_local_pid_different_files_conf";
         String servicesDirectory = "global_and_local_pid_no_conflict_services";
         String defaultConfigFilePath = configDirectory + SEP + "global.and.local.pid.default.file.cfg";

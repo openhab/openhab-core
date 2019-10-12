@@ -23,13 +23,11 @@ import org.slf4j.LoggerFactory;
  * This class holds static "action" methods that can be used from within rules to execute
  * transformations.
  *
- * @author Kai Kreuzer
- * @since 0.8.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class Transformation {
 
-    static private final Logger logger = LoggerFactory.getLogger(Transformation.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Transformation.class);
 
     /**
      * Applies a transformation of a given type with some function to a value.
@@ -37,8 +35,7 @@ public class Transformation {
      * @param type the transformation type, e.g. REGEX or MAP
      * @param function the function to call, this value depends on the transformation type
      * @param value the value to apply the transformation to
-     * @return
-     *         the transformed value or the original one, if there was no service registered for the
+     * @return the transformed value or the original one, if there was no service registered for the
      *         given type or a transformation exception occurred.
      */
     public static String transform(String type, String function, String value) {
@@ -49,11 +46,11 @@ public class Transformation {
             try {
                 result = service.transform(function, value);
             } catch (TransformationException e) {
-                logger.error("Error executing the transformation '{}': {}", type, e.getMessage());
+                LOGGER.error("Error executing the transformation '{}': {}", type, e.getMessage());
                 result = value;
             }
         } else {
-            logger.warn("No transformation service '{}' could be found.", type);
+            LOGGER.warn("No transformation service '{}' could be found.", type);
             result = value;
         }
         return result;

@@ -27,7 +27,6 @@ import org.eclipse.smarthome.core.types.State;
  * This is a helper class that can be added to script scopes. It provides easy access to the current item states.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class ItemRegistryDelegate implements Map<String, State> {
 
@@ -114,7 +113,7 @@ public class ItemRegistryDelegate implements Map<String, State> {
 
     @Override
     public Set<java.util.Map.Entry<String, State>> entrySet() {
-        Set<Map.Entry<String, State>> entries = new HashSet<Map.Entry<String, State>>();
+        Set<Map.Entry<String, State>> entries = new HashSet<>();
         for (Item item : itemRegistry.getAll()) {
             entries.add(new AbstractMap.SimpleEntry<>(item.getName(), item.getState()));
         }

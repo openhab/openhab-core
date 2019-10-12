@@ -11,7 +11,6 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 /**
- *
  */
 package org.eclipse.smarthome.model.script.tests.lib;
 
@@ -35,7 +34,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_plus(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_plus() {
+    public void testOperatorPlus() {
         Number x = 9;
         Number y = 0;
 
@@ -49,7 +48,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_plus(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_plusNullLeft() {
+    public void testOperatorPlusNullLeft() {
         Number x = null;
         Number y = 5;
 
@@ -63,7 +62,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_plus(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_plusNullRight() {
+    public void testOperatorPlusNullRight() {
         Number x = 10;
         Number y = null;
 
@@ -77,7 +76,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_minus(java.lang.Number)}
      */
     @Test
-    public void testOperator_minusNumber() {
+    public void testOperatorMinusNumber() {
         Number x = 2;
 
         BigDecimal result = NumberExtensions.operator_minus(x);
@@ -90,7 +89,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_minus(java.lang.Number)}
      */
     @Test
-    public void testOperator_minusNull() {
+    public void testOperatorMinusNull() {
         Number x = null;
 
         BigDecimal result = NumberExtensions.operator_minus(x);
@@ -102,7 +101,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_minus(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_minusNumberNumber() {
+    public void testOperatorMinusNumberNumber() {
         Number x = 10;
         Number y = 100;
 
@@ -116,7 +115,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_minus(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_minusNullNumber() {
+    public void testOperatorMinusNullNumber() {
         Number x = null;
         Number y = 100;
 
@@ -130,7 +129,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_minus(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_minusNumberNull() {
+    public void testOperatorMinusNumberNull() {
         Number x = 10;
         Number y = null;
 
@@ -144,7 +143,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_multiply(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_multiply() {
+    public void testOperatorMultiply() {
         Number x = 20;
         Number y = 30;
 
@@ -158,7 +157,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_multiply(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_multiplyNullLeft() {
+    public void testOperatorMultiplyNullLeft() {
         Number x = null;
         Number y = 30;
 
@@ -172,7 +171,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_multiply(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_multiplyNullRight() {
+    public void testOperatorMultiplyNullRight() {
         Number x = 20;
         Number y = null;
 
@@ -186,7 +185,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_divide(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_divide() {
+    public void testOperatorDivide() {
         Number x = 12;
         Number y = 4;
 
@@ -200,7 +199,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_divide(java.lang.Number, java.lang.Number)}
      */
     @Test(expected = NullPointerException.class)
-    public void testOperator_divideNullLeft() {
+    public void testOperatorDivideNullLeft() {
         Number x = null;
         Number y = 4;
 
@@ -214,7 +213,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_divide(java.lang.Number, java.lang.Number)}
      */
     @Test(expected = NullPointerException.class)
-    public void testOperator_divideNullRight() {
+    public void testOperatorDivideNullRight() {
         Number x = 12;
         Number y = null;
 
@@ -225,7 +224,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_equals(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_equalsNumberNumber() {
+    public void testOperatorEqualsNumberNumber() {
         Number x = 123;
         Number y = 123;
 
@@ -243,7 +242,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_equals(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_equalsNullNumber() {
+    public void testOperatorEqualsNullNumber() {
         Number x = null;
         Number y = 123;
 
@@ -255,7 +254,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_equals(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_equalsNumberNull() {
+    public void testOperatorEqualsNumberNull() {
         Number x = 123;
         Number y = null;
 
@@ -267,7 +266,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_equals(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_equalsNullrNull() {
+    public void testOperatorEqualsNullrNull() {
         Number x = null;
         Number y = null;
 
@@ -279,7 +278,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_notEquals(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_notEqualsNumberNumber() {
+    public void testOperatorNotEqualsNumberNumber() {
         Number x = 123;
         Number y = 123;
 
@@ -297,7 +296,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_notEquals(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_notEqualsNullNumber() {
+    public void testOperatorNotEqualsNullNumber() {
         Number x = 123;
         Number y = null;
 
@@ -309,7 +308,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_notEquals(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_notEqualsNumberNull() {
+    public void testOperatorNotEqualsNumberNull() {
         Number x = null;
         Number y = 123;
 
@@ -321,7 +320,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_lessThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessThanNumberNumber() {
+    public void testOperatorLessThanNumberNumber() {
         Number x = 12;
         Number y = 123;
 
@@ -339,7 +338,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_lessThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessThanNullNumber() {
+    public void testOperatorLessThanNullNumber() {
         Number x = null;
         Number y = 123;
 
@@ -351,7 +350,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_lessThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessThanNumberNull() {
+    public void testOperatorLessThanNumberNull() {
         Number x = 12;
         Number y = null;
 
@@ -363,7 +362,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_greaterThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterThanNumberNumber() {
+    public void testOperatorGreaterThanNumberNumber() {
         Number x = 12;
         Number y = 123;
 
@@ -381,7 +380,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_greaterThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterThanNullNumber() {
+    public void testOperatorGreaterThanNullNumber() {
         Number x = null;
         Number y = 123;
 
@@ -393,7 +392,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_greaterThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterThanNumberNull() {
+    public void testOperatorGreaterThanNumberNull() {
         Number x = 123;
         Number y = null;
 
@@ -405,7 +404,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_lessEqualsThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessEqualsThanNumberNumber() {
+    public void testOperatorLessEqualsThanNumberNumber() {
         Number x = 12;
         Number y = 123;
 
@@ -429,7 +428,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_lessEqualsThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessEqualsThanNullNumber() {
+    public void testOperatorLessEqualsThanNullNumber() {
         Number x = null;
         Number y = 123;
 
@@ -441,7 +440,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_lessEqualsThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessEqualsThanNumberNull() {
+    public void testOperatorLessEqualsThanNumberNull() {
         Number x = 12;
         Number y = null;
 
@@ -453,7 +452,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_lessEqualsThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessEqualsThanNullNull() {
+    public void testOperatorLessEqualsThanNullNull() {
         Number x = null;
         Number y = null;
 
@@ -465,7 +464,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_greaterEqualsThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterEqualsThanNumberNumber() {
+    public void testOperatorGreaterEqualsThanNumberNumber() {
         Number x = 12;
         Number y = 123;
 
@@ -489,7 +488,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_greaterEqualsThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterEqualsThanNullNumber() {
+    public void testOperatorGreaterEqualsThanNullNumber() {
         Number x = null;
         Number y = 123;
 
@@ -501,7 +500,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_greaterEqualsThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterEqualsThanNumberNull() {
+    public void testOperatorGreaterEqualsThanNumberNull() {
         Number x = 12;
         Number y = null;
 
@@ -513,7 +512,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_greaterEqualsThan(java.lang.Number, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterEqualsThanNullNull() {
+    public void testOperatorGreaterEqualsThanNullNull() {
         Number x = null;
         Number y = null;
 
@@ -525,7 +524,7 @@ public class NumberExtensionsTest {
      * Test method for {@link NumberExtensions#operator_equals(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
      */
     @Test
-    public void testOperator_equalsTypeNumber() {
+    public void testOperatorEqualsTypeNumber() {
         DecimalType type = new DecimalType(10);
         Number x = 10;
 
@@ -545,7 +544,7 @@ public class NumberExtensionsTest {
      * {@link NumberExtensions#operator_notEquals(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
      */
     @Test
-    public void testOperator_notEqualsTypeNumber() {
+    public void testOperatorNotEqualsTypeNumber() {
         DecimalType type = new DecimalType(10);
         Number x = 10;
 
@@ -565,7 +564,7 @@ public class NumberExtensionsTest {
      * {@link NumberExtensions#operator_greaterThan(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterThanTypeNumber() {
+    public void testOperatorGreaterThanTypeNumber() {
         DecimalType type = new DecimalType(10);
         Number x = 123;
 
@@ -585,7 +584,7 @@ public class NumberExtensionsTest {
      * {@link NumberExtensions#operator_greaterEqualsThan(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
      */
     @Test
-    public void testOperator_greaterEqualsThanTypeNumber() {
+    public void testOperatorGreaterEqualsThanTypeNumber() {
         DecimalType type = new DecimalType(10);
         Number x = 123;
 
@@ -611,7 +610,7 @@ public class NumberExtensionsTest {
      * {@link NumberExtensions#operator_lessThan(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessThanTypeNumber() {
+    public void testOperatorLessThanTypeNumber() {
         DecimalType type = new DecimalType(10);
         Number x = 123;
 
@@ -631,7 +630,7 @@ public class NumberExtensionsTest {
      * {@link NumberExtensions#operator_lessEqualsThan(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
      */
     @Test
-    public void testOperator_lessEqualsThanTypeNumber() {
+    public void testOperatorLessEqualsThanTypeNumber() {
         DecimalType type = new DecimalType(10);
         Number x = 123;
 

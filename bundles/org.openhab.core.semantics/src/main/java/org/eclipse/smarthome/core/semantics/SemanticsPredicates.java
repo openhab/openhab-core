@@ -26,7 +26,6 @@ import org.eclipse.smarthome.core.semantics.model.Tag;
  * This class provides predicates that allow filtering item streams with regards to their semantics.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 @NonNullByDefault
 public class SemanticsPredicates {

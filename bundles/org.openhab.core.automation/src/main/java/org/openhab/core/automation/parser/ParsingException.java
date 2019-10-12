@@ -19,7 +19,7 @@ import java.util.List;
  * This class extends the {@link Exception} class functionality with functionality serving to accumulate the all
  * exceptions during the parsing process.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("serial")
 public class ParsingException extends Exception {

@@ -66,7 +66,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - ported test to Java
- *
  */
 public class RuleEventTest extends JavaOSGiTest {
 
@@ -104,7 +103,6 @@ public class RuleEventTest extends JavaOSGiTest {
 
     @Test
     public void testRuleEvents() throws ItemNotFoundException {
-
         // Registering eventSubscriber
         List<Event> ruleEvents = new ArrayList<>();
 

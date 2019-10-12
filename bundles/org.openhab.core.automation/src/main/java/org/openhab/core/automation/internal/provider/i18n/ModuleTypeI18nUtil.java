@@ -26,9 +26,8 @@ import org.osgi.framework.Bundle;
  * This class is used as utility for resolving the localized {@link ModuleTypes}s. It automatically infers the key if
  * the default text is not a constant with the assistance of {@link TranslationProvider}.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Yordan Mihaylov - updates related to api changes
- *
  */
 public class ModuleTypeI18nUtil {
 
@@ -49,7 +48,7 @@ public class ModuleTypeI18nUtil {
 
     public static List<Input> getLocalizedInputs(TranslationProvider i18nProvider, List<Input> inputs, Bundle bundle,
             String uid, Locale locale) {
-        List<Input> linputs = new ArrayList<Input>();
+        List<Input> linputs = new ArrayList<>();
         if (inputs != null) {
             for (Input input : inputs) {
                 String inputName = input.getName();
@@ -66,7 +65,7 @@ public class ModuleTypeI18nUtil {
 
     public static List<Output> getLocalizedOutputs(TranslationProvider i18nProvider, List<Output> outputs,
             Bundle bundle, String uid, Locale locale) {
-        List<Output> loutputs = new ArrayList<Output>();
+        List<Output> loutputs = new ArrayList<>();
         if (outputs != null) {
             for (Output output : outputs) {
                 String outputName = output.getName();

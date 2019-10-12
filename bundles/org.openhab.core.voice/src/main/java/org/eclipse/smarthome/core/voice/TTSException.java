@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * General purpose TTS exception
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public class TTSException extends Exception {
 

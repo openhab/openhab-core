@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Rain.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Property_Rain", label = "Rain", synonyms = "", description = "")
 public interface Rain extends Property {

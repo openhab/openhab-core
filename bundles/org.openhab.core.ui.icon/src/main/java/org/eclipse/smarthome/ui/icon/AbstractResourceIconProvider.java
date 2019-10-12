@@ -35,8 +35,7 @@ import org.slf4j.LoggerFactory;
  * smaller state postfix available. Example: For category "DimmableLight" and state 84, it will check for the resources
  * dimmablelight-82.png, dimmablelight-81.png, dimmablelight-80.png and return the first one it can find.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class AbstractResourceIconProvider implements IconProvider {
 

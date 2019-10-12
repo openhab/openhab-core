@@ -42,7 +42,6 @@ public class ChannelGroupTypeBuilder {
      * @return ChannelGroupTypeBuilder for {@link ChannelGroupType}s
      */
     public static ChannelGroupTypeBuilder instance(ChannelGroupTypeUID channelGroupTypeUID, String label) {
-
         if (channelGroupTypeUID == null) {
             throw new IllegalArgumentException("ChannelGroupTypeUID must be set.");
         }

@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * captured by this marker interface and allows implementing classes
  * to be both state and command at the same time.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Add the simple and full type string methods
  */
 @NonNullByDefault

@@ -19,7 +19,7 @@ import java.text.DecimalFormatSymbols;
 import org.junit.Test;
 
 /**
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Stefan Triller - more tests for type conversions
  */
 public class DecimalTypeTest {

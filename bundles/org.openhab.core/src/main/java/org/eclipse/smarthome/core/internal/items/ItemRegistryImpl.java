@@ -113,7 +113,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     public Collection<Item> getItemsOfType(String type) {
-        Collection<Item> matchedItems = new ArrayList<Item>();
+        Collection<Item> matchedItems = new ArrayList<>();
 
         for (Item item : getItems()) {
             if (item.getType().equals(type)) {
@@ -127,7 +127,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     @Override
     public Collection<Item> getItems(String pattern) {
         String regex = pattern.replace("?", ".?").replace("*", ".*?");
-        Collection<Item> matchedItems = new ArrayList<Item>();
+        Collection<Item> matchedItems = new ArrayList<>();
 
         for (Item item : getItems()) {
             if (item.getName().matches(regex)) {
@@ -309,7 +309,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     public Collection<Item> getItemsByTag(String... tags) {
-        List<Item> filteredItems = new ArrayList<Item>();
+        List<Item> filteredItems = new ArrayList<>();
         for (Item item : getItems()) {
             if (itemHasTags(item, tags)) {
                 filteredItems.add(item);
@@ -330,7 +330,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Item> Collection<T> getItemsByTag(Class<T> typeFilter, String... tags) {
-        Collection<T> filteredItems = new ArrayList<T>();
+        Collection<T> filteredItems = new ArrayList<>();
 
         Collection<Item> items = getItemsByTag(tags);
         for (Item item : items) {
@@ -343,7 +343,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     public Collection<Item> getItemsByTagAndType(String type, String... tags) {
-        List<Item> filteredItems = new ArrayList<Item>();
+        List<Item> filteredItems = new ArrayList<>();
         for (Item item : getItemsOfType(type)) {
             if (itemHasTags(item, tags)) {
                 filteredItems.add(item);

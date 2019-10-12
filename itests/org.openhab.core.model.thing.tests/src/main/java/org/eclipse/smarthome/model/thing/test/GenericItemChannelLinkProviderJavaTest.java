@@ -42,12 +42,11 @@ import org.mockito.Mock;
 /**
  *
  * @author Simon Kaufmann - Initial contribution and API
- *
  */
 public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
 
-    private final static String THINGS_TESTMODEL_NAME = "test.things";
-    private final static String ITEMS_TESTMODEL_NAME = "test.items";
+    private static final String THINGS_TESTMODEL_NAME = "test.things";
+    private static final String ITEMS_TESTMODEL_NAME = "test.items";
 
     private static final String ITEM = "test";
     private static final String CHANNEL = "test:test:test:test";
@@ -192,7 +191,6 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
         assertEquals("bar", link.getConfiguration().get("foo"));
         assertEquals(new BigDecimal(42), link.getConfiguration().get("answer"));
         assertEquals(true, link.getConfiguration().get("always"));
-
     }
 
     @Test
@@ -225,7 +223,6 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
                 .getConfiguration().get("value"));
         assertEquals(new BigDecimal(2), itemChannelLinkRegistry.get("Light3Color -> hue:LCT001:huebridge:bulb4:color")
                 .getConfiguration().get("value"));
-
     }
 
 }

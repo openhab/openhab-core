@@ -32,14 +32,13 @@ import org.eclipse.smarthome.core.types.UnDefType;
  * A StringItem can be used for any kind of string to either send or receive
  * from a device.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class StringItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
     static {
         acceptedDataTypes.add(UnDefType.class);
@@ -70,7 +69,7 @@ public class StringItem extends GenericItem {
 
     @Override
     public <T extends State> @Nullable T getStateAs(Class<T> typeClass) {
-        ArrayList<Class<? extends State>> list = new ArrayList<Class<? extends State>>();
+        List<Class<? extends State>> list = new ArrayList<>();
         list.add(typeClass);
         State convertedState = TypeParser.parseState(list, state.toString());
         if (typeClass.isInstance(convertedState)) {

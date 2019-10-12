@@ -15,6 +15,7 @@ package org.openhab.core.persistence.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.smarthome.core.persistence.FilterCriteria;
@@ -31,7 +32,7 @@ import org.openhab.core.persistence.FilterCriteria.Ordering;
  * namespace for the queryable persistence service. It wraps an instance with the old interface
  * into a class with the new interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class QueryablePersistenceServiceDelegate extends PersistenceServiceDelegate
         implements QueryablePersistenceService {
@@ -49,7 +50,7 @@ public class QueryablePersistenceServiceDelegate extends PersistenceServiceDeleg
                 .setState(mapState(filter.getState()));
         org.openhab.core.persistence.QueryablePersistenceService pService = (org.openhab.core.persistence.QueryablePersistenceService) service;
         Iterable<org.openhab.core.persistence.HistoricItem> historicItems = pService.query(mappedFilter);
-        ArrayList<HistoricItem> result = new ArrayList<>();
+        List<HistoricItem> result = new ArrayList<>();
         if (historicItems != null) {
             for (final org.openhab.core.persistence.HistoricItem item : historicItems) {
                 result.add(new HistoricItem() {

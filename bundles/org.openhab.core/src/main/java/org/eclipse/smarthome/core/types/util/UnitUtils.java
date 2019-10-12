@@ -46,7 +46,6 @@ import tec.uom.se.unit.Units;
  * A utility for parsing dimensions to interface classes of {@link Quantity} and parsing units from format strings.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public class UnitUtils {
@@ -110,7 +109,6 @@ public class UnitUtils {
         for (Class<? extends SystemOfUnits> system : ALL_SYSTEM_OF_UNITS) {
             for (Field field : system.getDeclaredFields()) {
                 if (field.getType().isAssignableFrom(Unit.class) && Modifier.isStatic(field.getModifiers())) {
-
                     Type genericType = field.getGenericType();
                     if (genericType instanceof ParameterizedType) {
                         String dimension = ((Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0])

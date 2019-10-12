@@ -20,8 +20,7 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 /**
  * Describes a {@link TriggerProfile} type.
  *
- * @author Simon Kaufmann - Initial contribution and API.
- *
+ * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
 public interface TriggerProfileType extends ProfileType {

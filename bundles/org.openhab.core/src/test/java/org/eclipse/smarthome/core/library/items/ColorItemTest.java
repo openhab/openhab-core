@@ -22,9 +22,8 @@ import org.junit.Test;
 
 /**
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Stefan Triller - test with on/off type
- *
  */
 public class ColorItemTest {
 

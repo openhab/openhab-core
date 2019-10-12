@@ -45,7 +45,7 @@ public class RuleTriggerTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChangedEventTrigger_withoutQuotes() throws Exception {
+    public void testChangedEventTriggerWithoutQuotes() throws Exception {
         String model = "rule\"State Machine Rule 1\" " + //
                 "when " + //
                 "    Item test changed to world " + //
@@ -58,7 +58,7 @@ public class RuleTriggerTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testChangedEventTrigger_withQuotes() throws Exception {
+    public void testChangedEventTriggerWithQuotes() throws Exception {
         String model = "rule\"State Machine Rule 1\" " + //
                 "when " + //
                 "    Item test changed to \"world\" " + //
@@ -71,7 +71,7 @@ public class RuleTriggerTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testCommandEventTrigger_withoutQuotes() throws Exception {
+    public void testCommandEventTriggerWithoutQuotes() throws Exception {
         String model = "rule\"State Machine Rule 1\" " + //
                 "when " + //
                 "    Item test received command world " + //
@@ -84,7 +84,7 @@ public class RuleTriggerTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testCommandEventTrigger_withQuotes() throws Exception {
+    public void testCommandEventTriggerWithQuotes() throws Exception {
         String model = "rule\"State Machine Rule 1\" " + //
                 "when " + //
                 "    Item test received command \"world\" " + //
@@ -97,7 +97,7 @@ public class RuleTriggerTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testEventEmittedTrigger_withoutQuotes() throws Exception {
+    public void testEventEmittedTriggerWithoutQuotes() throws Exception {
         String model = "rule\"State Machine Rule 1\" " + //
                 "when " + //
                 "    Channel test triggered world " + //
@@ -110,7 +110,7 @@ public class RuleTriggerTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testEventEmittedTrigger_withQuotes() throws Exception {
+    public void testEventEmittedTriggerWithQuotes() throws Exception {
         String model = "rule\"State Machine Rule 1\" " + //
                 "when " + //
                 "    Channel test triggered \"world\" " + //

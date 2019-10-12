@@ -39,7 +39,6 @@ import org.openhab.core.automation.template.RuleTemplate;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - made it implement Rule
- *
  */
 @NonNullByDefault
 public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
@@ -209,13 +208,11 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
 
     @Override
     public List<Module> getModules() {
-        final List<Module> result;
-        List<Module> modules = new ArrayList<Module>();
+        List<Module> modules = new ArrayList<>();
         modules.addAll(triggers);
         modules.addAll(conditions);
         modules.addAll(actions);
-        result = Collections.unmodifiableList(modules);
-        return result;
+        return Collections.unmodifiableList(modules);
     }
 
     @SuppressWarnings("unchecked")

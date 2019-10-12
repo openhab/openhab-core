@@ -22,7 +22,6 @@ import org.eclipse.smarthome.model.script.internal.engine.action.ThingActionServ
  *
  * @author Maoliang Huang - Initial contribution
  * @author Kai Kreuzer - Extended for general thing access
- *
  */
 public class Things {
 

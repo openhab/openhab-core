@@ -33,8 +33,7 @@ import org.slf4j.LoggerFactory;
  * This class starts the JmDNS and implements interface to register and
  * unregister services.
  *
- * @author Victor Belov
- *
+ * @author Victor Belov - Initial contribution
  */
 @Component(immediate = true)
 public class MDNSServiceImpl implements MDNSService {

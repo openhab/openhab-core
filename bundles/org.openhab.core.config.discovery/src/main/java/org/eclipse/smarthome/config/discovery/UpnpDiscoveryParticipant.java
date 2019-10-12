@@ -27,7 +27,6 @@ import org.jupnp.model.meta.RemoteDevice;
  *
  * @author Kai Kreuzer - Initial contribution
  * @deprecated use org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant instead.
- *
  */
 @Deprecated
 @NonNullByDefault

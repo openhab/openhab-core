@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Andre Fuechsel - Made author tag optional
  */
 public class BindingInfo implements Identifiable<String> {

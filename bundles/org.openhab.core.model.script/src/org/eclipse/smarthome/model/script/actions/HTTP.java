@@ -23,14 +23,13 @@ import org.slf4j.LoggerFactory;
  * This class provides static methods that can be used in automation rules
  * for sending HTTP requests
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Jan N. Klug - add timeout methods
- *
  */
 public class HTTP {
 
     /** Constant which represents the content type <code>application/json</code> */
-    public final static String CONTENT_TYPE_JSON = "application/json";
+    public static final String CONTENT_TYPE_JSON = "application/json";
 
     private static Logger logger = LoggerFactory.getLogger(HTTP.class);
 

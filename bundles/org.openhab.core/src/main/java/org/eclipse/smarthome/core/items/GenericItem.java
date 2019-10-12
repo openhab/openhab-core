@@ -49,10 +49,9 @@ import org.slf4j.LoggerFactory;
  * for the infrastructure, such as publishing updates to the event bus
  * or notifying listeners.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - Added tags
  * @author Stefan Bußweiler - Migration to new ESH event concept
- *
  */
 @NonNullByDefault
 public abstract class GenericItem implements ActiveItem {
@@ -63,12 +62,12 @@ public abstract class GenericItem implements ActiveItem {
 
     protected @Nullable EventPublisher eventPublisher;
 
-    protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<StateChangeListener>(
-            Collections.newSetFromMap(new WeakHashMap<StateChangeListener, Boolean>()));
+    protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<>(
+            Collections.newSetFromMap(new WeakHashMap<>()));
 
-    protected List<String> groupNames = new ArrayList<String>();
+    protected List<String> groupNames = new ArrayList<>();
 
-    protected Set<String> tags = new HashSet<String>();
+    protected Set<String> tags = new HashSet<>();
 
     protected final String name;
 
@@ -250,7 +249,7 @@ public abstract class GenericItem implements ActiveItem {
     protected void notifyListeners(final State oldState, final State newState) {
         // if nothing has changed, we send update notifications
         Set<StateChangeListener> clonedListeners = null;
-        clonedListeners = new CopyOnWriteArraySet<StateChangeListener>(listeners);
+        clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         for (final StateChangeListener listener : clonedListeners) {
             pool.execute(new Runnable() {

@@ -29,9 +29,7 @@ import org.openhab.core.types.UnDefType;
  * A DimmerItem can be used as a switch (ON/OFF), but it also accepts percent values
  * to reflect the dimmed state.
  *
- * @author Kai Kreuzer
- * @since 0.1.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class DimmerItem extends SwitchItem {
 

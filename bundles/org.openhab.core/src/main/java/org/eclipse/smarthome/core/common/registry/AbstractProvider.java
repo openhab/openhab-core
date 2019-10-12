@@ -36,7 +36,7 @@ public abstract class AbstractProvider<E> implements Provider<E> {
     }
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractProvider.class);
-    protected List<ProviderChangeListener<E>> listeners = new CopyOnWriteArrayList<ProviderChangeListener<E>>();
+    protected List<ProviderChangeListener<E>> listeners = new CopyOnWriteArrayList<>();
 
     @Override
     public void addProviderChangeListener(ProviderChangeListener<E> listener) {
@@ -65,7 +65,8 @@ public abstract class AbstractProvider<E> implements Provider<E> {
                         break;
                 }
             } catch (Exception ex) {
-                logger.error("Could not inform the listener '{}' about the '{}' event!: {}", listener, eventType.name(), ex.getMessage(), ex);
+                logger.error("Could not inform the listener '{}' about the '{}' event!: {}", listener, eventType.name(),
+                        ex.getMessage(), ex);
             }
         }
     }

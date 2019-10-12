@@ -22,9 +22,9 @@ import org.eclipse.smarthome.core.common.registry.Registry;
  * localized depending on locale parameter. When it is not specified or there is no such localization resources the
  * returned module type is localized with default locale.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  */
 public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
 

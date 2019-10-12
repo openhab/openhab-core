@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * The interface describe a provider for a locale.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public interface LocaleProvider {

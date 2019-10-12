@@ -23,9 +23,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This class provides generic methods for handling console input (i.e. pure strings).
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Change interface
- *
  */
 public class ConsoleInterpreter {
 
@@ -72,7 +71,7 @@ public class ConsoleInterpreter {
 
     /** returns an array of the usage texts for all available commands */
     public static List<String> getUsages(Collection<ConsoleCommandExtension> consoleCommandExtensions) {
-        List<String> usages = new ArrayList<String>();
+        List<String> usages = new ArrayList<>();
         for (ConsoleCommandExtension consoleCommandExtension : consoleCommandExtensions) {
             usages.addAll(consoleCommandExtension.getUsages());
         }

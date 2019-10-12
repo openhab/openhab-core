@@ -26,7 +26,6 @@ import org.osgi.service.component.annotations.Reference;
  * {@link ManagedItemChannelLinkProvider} is responsible for managed {@link ItemChannelLink}s at runtime.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 @Component(immediate = true, service = { ItemChannelLinkProvider.class, ManagedItemChannelLinkProvider.class })
 public class ManagedItemChannelLinkProvider extends DefaultAbstractManagedProvider<ItemChannelLink, String>

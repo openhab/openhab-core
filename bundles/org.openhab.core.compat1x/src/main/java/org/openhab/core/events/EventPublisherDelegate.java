@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class EventPublisherDelegate implements org.openhab.core.events.EventPublisher {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventPublisherDelegate.class);
+    private final Logger logger = LoggerFactory.getLogger(EventPublisherDelegate.class);
 
     private EventPublisher eventPublisher;
 

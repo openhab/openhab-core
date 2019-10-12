@@ -18,7 +18,6 @@ import org.osgi.framework.Bundle;
  * Resolve bundle specific information from the framework.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public interface BundleResolver {
 

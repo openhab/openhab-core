@@ -21,7 +21,7 @@ import org.osgi.framework.BundleException;
  * <p>
  * This wrapper allows the usage in try-with-resources blocks.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 public class BundleCloseable implements AutoCloseable {
 

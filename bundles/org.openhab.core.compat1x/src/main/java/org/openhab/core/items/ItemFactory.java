@@ -15,8 +15,7 @@ package org.openhab.core.items;
 /**
  * This Factory creates concrete instances of the known ItemTypes.
  *
- * @author Thomas.Eichstaedt-Engelen
- * @since 0.9.0
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public interface ItemFactory {
 
@@ -26,7 +25,6 @@ public interface ItemFactory {
      *
      * @param itemTypeName
      * @param itemName
-     *
      * @return a new Item of type <code>itemTypeName</code> or
      *         <code>null</code> if no matching class is known.
      */

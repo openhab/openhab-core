@@ -28,7 +28,7 @@ import org.openhab.core.automation.type.Output;
 /**
  * This class holds the information that is necessary for the rule engine.
  *
- * @author Markus Rathgeb - Initial Contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public class WrappedAction extends WrappedModule<Action, ActionHandler> {

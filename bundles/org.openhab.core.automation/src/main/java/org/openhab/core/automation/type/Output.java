@@ -39,9 +39,9 @@ import org.openhab.core.automation.Rule;
  * <p>
  * An {@link Output} can be connected to more than one {@link Input} with a compatible data type.<br>
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  */
 public class Output {
 

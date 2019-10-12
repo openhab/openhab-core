@@ -35,8 +35,7 @@ import org.openhab.core.automation.template.RuleTemplate;
 /**
  * This class allows the easy construction of a {@link Rule} instance using the builder pattern.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class RuleBuilder {
@@ -113,7 +112,7 @@ public class RuleBuilder {
 
     public RuleBuilder withTriggers(@Nullable List<? extends Trigger> triggers) {
         if (triggers != null) {
-            ArrayList<Trigger> triggerList = new ArrayList<>(triggers.size());
+            List<Trigger> triggerList = new ArrayList<>(triggers.size());
             triggers.forEach(t -> triggerList.add(TriggerBuilder.create(t).build()));
             this.triggers = triggerList;
         }
@@ -126,7 +125,7 @@ public class RuleBuilder {
 
     public RuleBuilder withConditions(@Nullable List<? extends Condition> conditions) {
         if (conditions != null) {
-            ArrayList<Condition> conditionList = new ArrayList<>(conditions.size());
+            List<Condition> conditionList = new ArrayList<>(conditions.size());
             conditions.forEach(c -> conditionList.add(ConditionBuilder.create(c).build()));
             this.conditions = conditionList;
         }
@@ -139,7 +138,7 @@ public class RuleBuilder {
 
     public RuleBuilder withActions(@Nullable List<? extends Action> actions) {
         if (actions != null) {
-            ArrayList<Action> actionList = new ArrayList<>(actions.size());
+            List<Action> actionList = new ArrayList<>(actions.size());
             actions.forEach(a -> actionList.add(ActionBuilder.create(a).build()));
             this.actions = actionList;
         }

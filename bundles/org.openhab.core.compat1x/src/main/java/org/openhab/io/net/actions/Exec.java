@@ -22,9 +22,7 @@ import org.openhab.io.net.exec.ExecUtil;
  * This class provides static methods that can be used in automation rules for
  * executing commands on command line.
  *
- * @author Pauli Anttila
- * @since 1.3.0
- *
+ * @author Pauli Anttila - Initial contribution
  */
 public class Exec {
 
@@ -42,12 +40,11 @@ public class Exec {
      * done.
      * </p>
      *
-     * @param commandLine
-     *            the command line to execute
+     * @param commandLine the command line to execute
      * @see http://www.peterfriese.de/running-applescript-from-java/
      */
     @ActionDoc(text = "Executes <code>commandLine</code>.")
-    static public void executeCommandLine(@ParamDoc(name = "commandLine") String commandLine) {
+    public static void executeCommandLine(@ParamDoc(name = "commandLine") String commandLine) {
         ExecUtil.executeCommandLine(commandLine);
     }
 
@@ -65,14 +62,12 @@ public class Exec {
      * done.
      * </p>
      *
-     * @param commandLine
-     *            the command line to execute
-     * @param timeout
-     *            timeout for execution in milliseconds
+     * @param commandLine the command line to execute
+     * @param timeout timeout for execution in milliseconds
      * @return response data from executed command line
      */
     @ActionDoc(text = "Executes <code>commandLine</code>.")
-    static public String executeCommandLine(@ParamDoc(name = "commandLine") String commandLine,
+    public static String executeCommandLine(@ParamDoc(name = "commandLine") String commandLine,
             @ParamDoc(name = "timeout", text = "timeout for execution in milliseconds") int timeout) {
         return ExecUtil.executeCommandLineAndWaitResponse(commandLine, timeout);
     }

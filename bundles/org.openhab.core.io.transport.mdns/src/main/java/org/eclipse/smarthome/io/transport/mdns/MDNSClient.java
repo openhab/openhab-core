@@ -24,7 +24,7 @@ import javax.jmdns.ServiceListener;
  * This interface defines how to get an JmDNS instance
  * to access Bonjour/MDNS
  *
- * @author Tobias Br�utigam - Initial contribution and API
+ * @author Tobias Br�utigam - Initial contribution
  */
 public interface MDNSClient {
 

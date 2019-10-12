@@ -156,7 +156,7 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testSubscriberUnregistration1_2() throws Exception {
+    public void testSubscriberUnregistration1And2() throws Exception {
         internalUnregisterService(TYPE_BASED_SUBSCRIBER_1);
         internalUnregisterService(TYPE_BASED_SUBSCRIBER_2);
         eventPublisher.post(createEvent(EVENT_TYPE_A));
@@ -188,7 +188,6 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         } catch (IllegalArgumentException e) {
             assertEquals("Argument 'event' must not be null.", e.getMessage());
         }
-
     }
 
     @Test

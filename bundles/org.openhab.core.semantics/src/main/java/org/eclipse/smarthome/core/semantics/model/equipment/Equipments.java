@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.semantics.model.Equipment;
  * This class provides a stream of all defined equipments.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 public class Equipments {
 

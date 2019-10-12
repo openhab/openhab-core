@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * convert a list of XML tags within an XML document
  * into a {@link NodeList} object.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class NodeListConverter extends GenericUnmarshaller<NodeList> {
 

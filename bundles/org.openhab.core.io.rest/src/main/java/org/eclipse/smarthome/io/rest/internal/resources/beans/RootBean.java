@@ -19,14 +19,13 @@ import java.util.List;
  * This is a java bean that is used to define the root entry
  * page of the REST interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class RootBean {
 
     public final String version = "3";
 
-    public final List<Links> links = new ArrayList<Links>();
+    public final List<Links> links = new ArrayList<>();
 
     public static class Links {
         public Links(String type, String url) {

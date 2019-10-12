@@ -24,7 +24,6 @@ import org.eclipse.smarthome.core.types.StateDescription;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Added metadata
- *
  */
 public class EnrichedItemDTO extends ItemDTO {
 

@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * to be injected into service consumers with the need for storing generic key-value pairs like the
  * ManagedXXXProviders.
  *
- * @author Thomas.Eichstaedt-Engelen - Initial contribution
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Dennis Nobel - Added second method with ClassLoader
  */
 @NonNullByDefault

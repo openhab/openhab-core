@@ -31,7 +31,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * build a resulting {@link CommandDescription}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 @Component

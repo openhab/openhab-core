@@ -16,7 +16,7 @@ package org.openhab.core.automation.parser;
  * This class extends the {@link Exception} class functionality with keeping additional information about reasons for
  * exception during the parsing process.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("serial")
 public class ParsingNestedException extends Exception {

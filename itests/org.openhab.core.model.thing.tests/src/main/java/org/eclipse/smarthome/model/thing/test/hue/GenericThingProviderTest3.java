@@ -53,7 +53,7 @@ import org.osgi.service.component.ComponentContext;
 public class GenericThingProviderTest3 extends JavaOSGiTest {
     private DumbThingHandlerFactory dumbThingHandlerFactory;
 
-    private final static String TESTMODEL_NAME = "testModel3.things";
+    private static final String TESTMODEL_NAME = "testModel3.things";
 
     private ModelRepository modelRepository;
     private ThingRegistry thingRegistry;

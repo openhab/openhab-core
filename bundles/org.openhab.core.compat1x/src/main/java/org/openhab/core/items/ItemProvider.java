@@ -19,9 +19,7 @@ import java.util.Collection;
  * items can be constructed from some static configuration files or
  * they can be derived from some dynamic logic.
  *
- * @author Kai Kreuzer
- * @since 0.1.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ItemProvider {
 

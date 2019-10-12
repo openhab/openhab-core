@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Sensor.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_Sensor", label = "Sensor", synonyms = "Sensors", description = "")
 public interface Sensor extends Equipment {

@@ -22,8 +22,8 @@ import java.net.SocketTimeoutException;
 /**
  * This Action checks the vitality of the given host.
  *
- * @author Thomas.Eichstaedt-Engelen
- * @author Kai Kreuzer
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Kai Kreuzer - Initial contribution
  */
 public class Ping {
 

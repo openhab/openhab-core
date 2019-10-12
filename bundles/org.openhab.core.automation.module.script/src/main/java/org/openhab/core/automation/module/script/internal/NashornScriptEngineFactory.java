@@ -43,7 +43,7 @@ public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
     public List<String> getScriptTypes() {
         List<String> scriptTypes = new ArrayList<>();
 
-        for (javax.script.ScriptEngineFactory f : engineManager.getEngineFactories()) {
+        for (javax.script.ScriptEngineFactory f : ENGINE_MANAGER.getEngineFactories()) {
             List<String> extensions = f.getExtensions();
 
             if (extensions.contains(SCRIPT_TYPE)) {

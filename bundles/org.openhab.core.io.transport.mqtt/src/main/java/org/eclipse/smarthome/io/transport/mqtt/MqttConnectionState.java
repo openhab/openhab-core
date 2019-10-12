@@ -15,7 +15,7 @@ package org.eclipse.smarthome.io.transport.mqtt;
 /**
  * The connection state of a {@link MqttBrokerConnection}.
  *
- * @author David Graeff
+ * @author David Graeff - Initial contribution
  */
 public enum MqttConnectionState {
     DISCONNECTED,

@@ -33,9 +33,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This tests the dayOfWeek Condition.
  *
- * @author Dominik Schlierf - added extension of BasicConditionHandlerTest
  * @author Kai Kreuzer - Initial contribution
- *
+ * @author Dominik Schlierf - added extension of BasicConditionHandlerTest
  */
 public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
 

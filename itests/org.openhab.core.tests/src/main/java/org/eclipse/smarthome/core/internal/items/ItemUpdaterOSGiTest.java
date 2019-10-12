@@ -45,7 +45,7 @@ public class ItemUpdaterOSGiTest extends JavaOSGiTest {
 
     private EventPublisher eventPublisher;
     private ItemRegistry itemRegistry;
-    private final ConcurrentLinkedQueue<Event> receivedEvents = new ConcurrentLinkedQueue<Event>();
+    private final ConcurrentLinkedQueue<Event> receivedEvents = new ConcurrentLinkedQueue<>();
 
     @Before
     public void setUp() {

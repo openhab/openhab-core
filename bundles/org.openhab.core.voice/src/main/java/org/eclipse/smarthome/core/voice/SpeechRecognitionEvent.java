@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * A {@link STTEvent} fired when the {@link STTService} recognizes speech.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public class SpeechRecognitionEvent  implements STTEvent {
    /**

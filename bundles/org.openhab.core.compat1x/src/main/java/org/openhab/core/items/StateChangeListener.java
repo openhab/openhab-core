@@ -24,8 +24,7 @@ import org.openhab.core.types.State;
  * listeners.
  * </p>
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface StateChangeListener {
 

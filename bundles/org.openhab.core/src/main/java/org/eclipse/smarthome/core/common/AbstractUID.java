@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * A non specific base class for unique identifiers within the SmartHome framework.
  *
- * @author Markus Rathgeb - Splitted from the Thing's UID class
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public abstract class AbstractUID {

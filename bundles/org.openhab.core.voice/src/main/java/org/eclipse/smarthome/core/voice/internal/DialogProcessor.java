@@ -52,11 +52,10 @@ import org.slf4j.LoggerFactory;
  * An instance of this class can handle a complete dialog with the user. It orchestrates the keyword spotting, the stt
  * and tts services together with the human language interpreter.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Yannick Schaus - Send commands to an item to indicate the keyword has been spotted
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  * @author Christoph Weitkamp - Added parameter to adjust the volume
- *
  */
 public class DialogProcessor implements KSListener, STTListener {
 
@@ -133,7 +132,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 if (stt != null) {
                     try {
                         this.sttServiceHandle = stt.recognize(this, source.getInputStream(format), this.locale,
-                                new HashSet<String>());
+                                new HashSet<>());
                     } catch (STTException e) {
                         say("Error during recognition: " + e.getMessage());
                     } catch (AudioException e) {

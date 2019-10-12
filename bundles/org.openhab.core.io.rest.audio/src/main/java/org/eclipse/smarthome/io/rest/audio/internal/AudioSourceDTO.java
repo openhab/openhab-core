@@ -20,7 +20,6 @@ import org.eclipse.smarthome.core.audio.AudioSource;
  * A DTO that is used on the REST API to provide infos about {@link AudioSource} to UIs.
  *
  * @author Laurent Garnier - Initial contribution
- *
  */
 @NonNullByDefault
 public class AudioSourceDTO {

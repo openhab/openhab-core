@@ -29,7 +29,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * The {@link ChannelTypeRegistry} tracks all {@link ChannelType}s provided by registered {@link ChannelTypeProvider}s.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(service = ChannelTypeRegistry.class)

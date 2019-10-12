@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Oliver Libutzki - Initial contribution
  * @author Alex Tugarev - Added parsing of multiple Channel UIDs
- *
  */
 @Component(immediate = true, service = { ItemChannelLinkProvider.class, BindingConfigReader.class })
 public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannelLink>

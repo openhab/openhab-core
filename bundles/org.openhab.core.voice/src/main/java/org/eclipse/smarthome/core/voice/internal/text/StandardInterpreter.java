@@ -34,10 +34,9 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * A human language command interpretation service.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  * @author Kai Kreuzer - Added further German interpretation rules
  * @author Laurent Garnier - Added French interpretation rules
- *
  */
 @Component(service = HumanLanguageInterpreter.class)
 public class StandardInterpreter extends AbstractRuleBasedInterpreter {

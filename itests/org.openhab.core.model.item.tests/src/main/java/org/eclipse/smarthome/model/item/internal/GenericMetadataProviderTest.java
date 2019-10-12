@@ -25,7 +25,7 @@ import org.junit.Test;
 public class GenericMetadataProviderTest {
 
     @Test
-    public void testGetAll_empty() {
+    public void testGetAllEmpty() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
         Collection<Metadata> res = provider.getAll();
         assertNotNull(res);
@@ -42,7 +42,7 @@ public class GenericMetadataProviderTest {
     }
 
     @Test
-    public void testRemoveMetadata_nonExistentItem() {
+    public void testRemoveMetadataNonExistentItem() {
         GenericMetadataProvider provider = new GenericMetadataProvider();
         provider.removeMetadata("nonExistentItem");
     }

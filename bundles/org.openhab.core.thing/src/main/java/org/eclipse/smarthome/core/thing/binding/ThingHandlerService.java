@@ -17,7 +17,6 @@ package org.eclipse.smarthome.core.thing.binding;
  * Interface for a service that provides access to a {@link ThingHandler}
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public interface ThingHandlerService {
 

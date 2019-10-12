@@ -15,8 +15,7 @@ package org.openhab.core.events;
 /**
  * This interface defines constants required for using the OSGi Event Admin service.
  *
- * @author Kai Kreuzer
- * @since 0.1.0
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface EventConstants {
 

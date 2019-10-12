@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * The static methods of this class are made available as functions in the scripts.
  * This allows a script to use audio features.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  */
 public class Audio {

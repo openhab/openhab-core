@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
  * {@link #addProviderChangeListener(ProviderChangeListener)}
  * and removed with the {@link #removeProviderChangeListener(ProviderChangeListener)} methods.
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  */
 public interface RuleTemplateProvider extends TemplateProvider<RuleTemplate> {
 

@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.thing.type;
 /**
  * Kind of the channel.
  *
- * @author Moritz Kammerer - Initial contribution and API.
+ * @author Moritz Kammerer - Initial contribution
  */
 public enum ChannelKind {
     /**

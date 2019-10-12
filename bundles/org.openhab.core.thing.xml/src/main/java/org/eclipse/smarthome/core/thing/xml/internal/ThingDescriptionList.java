@@ -19,7 +19,7 @@ import java.util.Collection;
  * The {@link ThingDescriptionList} is the XML conversion result object which
  * is a list of {@link ThingTypeXmlResult}, {@link BridgeTypeXmlResult} and {@link ChannelTypeXmlResult} objects.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 @SuppressWarnings({ "serial", "rawtypes" })
 public class ThingDescriptionList extends ArrayList {

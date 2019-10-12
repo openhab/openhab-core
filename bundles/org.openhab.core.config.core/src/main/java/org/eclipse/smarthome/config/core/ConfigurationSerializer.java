@@ -27,7 +27,7 @@ import com.google.gson.JsonSerializer;
  * This class serializes elements of Configuration object into json as configuration object (not as
  * configuration.properties object).
  *
- * @author Yordan Mihaylov - initial content
+ * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - provide serialization of multiple configuration values.
  */
 public class ConfigurationSerializer implements JsonSerializer<Configuration> {

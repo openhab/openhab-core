@@ -24,8 +24,7 @@ import org.osgi.framework.FrameworkUtil;
 /**
  * Some core static methods that provide information about the running openHAB instance.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class OpenHAB {
 
@@ -40,7 +39,7 @@ public class OpenHAB {
      *
      * @return the openHAB runtime version
      */
-    static public String getVersion() {
+    public static String getVersion() {
         String versionString = FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString();
         // if the version string contains a "snapshot" qualifier, remove it!
         if (StringUtils.countMatches(versionString, ".") == 3) {
@@ -52,7 +51,7 @@ public class OpenHAB {
         return versionString;
     }
 
-    static public String buildString() {
+    public static String buildString() {
         Properties prop = new Properties();
 
         Path versionFilePath = Paths.get(ConfigConstants.getUserDataFolder(), "etc", "version.properties");
@@ -66,6 +65,5 @@ public class OpenHAB {
             // ignore if the file is not there or not readable
         }
         return "Unknown Build No.";
-
     }
 }

@@ -21,7 +21,6 @@ import org.eclipse.smarthome.io.net.exec.ExecUtil;
  * executing commands on command line.
  *
  * @author Pauli Anttila
- *
  */
 public class Exec {
 

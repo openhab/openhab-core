@@ -42,7 +42,7 @@ public class SimpleActionHandlerDelegate extends BaseActionModuleHandler {
 
     @Override
     public Map<String, Object> execute(Map<String, Object> inputs) {
-        Set<String> keys = new HashSet<String>(inputs.keySet());
+        Set<String> keys = new HashSet<>(inputs.keySet());
 
         Map<String, Object> extendedInputs = new HashMap<>(inputs);
         for (String key : keys) {
@@ -57,7 +57,7 @@ public class SimpleActionHandlerDelegate extends BaseActionModuleHandler {
         }
 
         Object result = actionHandler.execute(module, extendedInputs);
-        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("result", result);
         return resultMap;
     }

@@ -61,9 +61,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This provides common functionality for all condition tests.
  *
- * @author Dominik Schlierf - extracting this base class from TimeOfDayConditionHandlerTest
+ * @author Dominik Schlierf - Initial contribution
  * @author Kai Kreuzer - Initial contribution of TimeOfDayConditionHandlerTest
- *
  */
 public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(BasicConditionHandlerTest.class);
@@ -112,7 +111,6 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
     @Test
     public void assertThatConditionWorksInRule() throws ItemNotFoundException {
-
         String testItemName1 = "TriggeredItem";
         String testItemName2 = "SwitchedItem";
 

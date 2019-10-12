@@ -36,9 +36,8 @@ import org.slf4j.LoggerFactory;
  * Items should not be updated directly (setting the state property), but updates should
  * be sent to the bus, so that all interested bundles are notified.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new ESH event concept
- *
  */
 public class BusEvent {
 

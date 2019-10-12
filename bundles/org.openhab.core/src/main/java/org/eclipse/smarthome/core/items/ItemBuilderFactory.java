@@ -17,8 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Creates a new {@link ItemBuilder} which is based on all available {@link ItemFactory}s.
  *
- * @author Henning Treu - Initial contribution and API
- *
+ * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
 public interface ItemBuilderFactory {
@@ -27,7 +26,6 @@ public interface ItemBuilderFactory {
      * Create a new {@link ItemBuilder}, which is initialized by the given item.
      *
      * @param item the template to initialize the builder with
-     *
      * @return an ItemBuilder instance
      */
     ItemBuilder newItemBuilder(Item item);
@@ -37,7 +35,6 @@ public interface ItemBuilderFactory {
      *
      * @param itemType the item type to create
      * @param itemName the name of the item to create
-     *
      * @return an ItemBuilder instance
      */
     ItemBuilder newItemBuilder(String itemType, String itemName);

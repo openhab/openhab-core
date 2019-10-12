@@ -18,8 +18,7 @@ import org.openhab.core.types.State;
 /**
  * An EventSubscriber receives events from the openHAB event bus for further processing.
  *
- * @author Kai Kreuzer
- * @since 0.1.0
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface EventSubscriber {
 

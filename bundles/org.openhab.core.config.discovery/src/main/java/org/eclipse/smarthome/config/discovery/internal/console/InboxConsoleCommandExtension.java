@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * This class provides console commands around the inbox functionality.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
 public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtension {

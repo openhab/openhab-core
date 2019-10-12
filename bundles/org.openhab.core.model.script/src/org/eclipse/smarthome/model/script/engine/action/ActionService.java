@@ -15,7 +15,7 @@ package org.eclipse.smarthome.model.script.engine.action;
 /**
  * This interface must be implemented by services that want to contribute script actions.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ActionService {
 

@@ -44,14 +44,12 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * A {@link VoiceConsoleCommandExtensionTest} which tests the execution of the command "say".
  *
  * @author Mihaela Memova - Initial contribution
- *
  * @author Velin Yordanov - migrated tests from groovy to java
- *
  */
 @RunWith(Parameterized.class)
 public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
-    private final String CONFIG_DEFAULT_TTS = "defaultTTS";
-    private final String SUBCMD_SAY = "say";
+    private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
+    private static final String SUBCMD_SAY = "say";
     private boolean shouldItemsBePassed;
     private boolean shouldItemsBeRegistered;
     private boolean shouldMultipleItemsBeRegistered;
@@ -111,7 +109,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
         methodParameters[0] = SUBCMD_SAY;
 
         if (defaultTTSService != null) {
-            Dictionary<String, Object> config = new Hashtable<String, Object>();
+            Dictionary<String, Object> config = new Hashtable<>();
             config.put(CONFIG_DEFAULT_TTS, defaultTTSService);
             ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
             String pid = "org.eclipse.smarthome.voice";

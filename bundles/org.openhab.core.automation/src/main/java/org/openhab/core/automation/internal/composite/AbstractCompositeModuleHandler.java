@@ -41,7 +41,7 @@ import org.openhab.core.automation.util.ReferenceResolver;
  * module type and to call the handlers which are responsible for the child modules.
  *
  *
- * @author Yordan Mihaylov - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
  *
  * @param <M> type of module. It can be {@link Trigger}, {@link Condition} or {@link Action}
  * @param <MT> type of module type. It can be {@link TriggerType}, {@link ConditionType} or {@link ActionType}
@@ -77,7 +77,7 @@ public abstract class AbstractCompositeModuleHandler<M extends Module, MT extend
      * @return context that will be passed to the child module
      */
     protected Map<String, Object> getCompositeContext(Map<String, ?> context) {
-        Map<String, Object> result = new HashMap<String, Object>(context);
+        Map<String, Object> result = new HashMap<>(context);
         result.putAll(module.getConfiguration().getProperties());
         return result;
     }

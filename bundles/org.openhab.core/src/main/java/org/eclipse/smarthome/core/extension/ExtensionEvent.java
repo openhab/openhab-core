@@ -17,7 +17,7 @@ import org.eclipse.smarthome.core.events.AbstractEvent;
 /**
  * This is an {@link Event} that is sent on extension operations, such as installing and uninstalling.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class ExtensionEvent extends AbstractEvent {
 

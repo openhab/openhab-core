@@ -100,11 +100,10 @@ import org.slf4j.LoggerFactory;
  * single method call, i.e. the consumer does not need to iterate over all
  * registered providers as this is done inside this class.
  *
- * @author Kai Kreuzer - Initial contribution and API
- * @author Chris Jackson
+ * @author Kai Kreuzer - Initial contribution
+ * @author Chris Jackson - Initial contribution
  * @author Stefan Triller - Method to convert a state into something a sitemap entity can understand
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
- *
  */
 @Component
 public class ItemUIRegistryImpl implements ItemUIRegistry {
@@ -122,13 +121,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private static final Pattern LABEL_PATTERN = Pattern.compile(".*?\\[.*? (.*?)\\]");
 
-    protected Set<ItemUIProvider> itemUIProviders = new HashSet<ItemUIProvider>();
+    protected Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     protected ItemRegistry itemRegistry;
 
     private ItemBuilderFactory itemBuilderFactory;
 
-    private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<Widget, Widget>());
+    private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
     public ItemUIRegistryImpl() {
     }
@@ -674,7 +673,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     public EList<Widget> getChildren(Sitemap sitemap) {
         EList<Widget> widgets = sitemap.getChildren();
 
-        EList<Widget> result = new BasicEList<Widget>();
+        EList<Widget> result = new BasicEList<>();
         for (Widget widget : widgets) {
             Widget resolvedWidget = resolveDefault(widget);
             if (resolvedWidget != null) {
@@ -693,7 +692,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             widgets = w.getChildren();
         }
 
-        EList<Widget> result = new BasicEList<Widget>();
+        EList<Widget> result = new BasicEList<>();
         for (Widget widget : widgets) {
             Widget resolvedWidget = resolveDefault(widget);
             if (resolvedWidget != null) {
@@ -747,7 +746,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
      * @return a list of default widgets provided for the member items
      */
     private EList<Widget> getDynamicGroupChildren(Group group) {
-        EList<Widget> children = new BasicEList<Widget>();
+        EList<Widget> children = new BasicEList<>();
         String itemName = group.getItem();
         try {
             if (itemName != null) {

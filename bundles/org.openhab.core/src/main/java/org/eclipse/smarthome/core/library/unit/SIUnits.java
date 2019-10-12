@@ -32,7 +32,6 @@ import tec.uom.se.unit.Units;
  * See members of {@link Units} for a detailed description.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 @NonNullByDefault
 public final class SIUnits extends CustomUnits {

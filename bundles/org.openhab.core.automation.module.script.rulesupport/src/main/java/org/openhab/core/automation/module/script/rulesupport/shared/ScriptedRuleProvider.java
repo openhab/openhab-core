@@ -15,6 +15,7 @@ package org.openhab.core.automation.module.script.rulesupport.shared;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.Rule;
@@ -25,14 +26,13 @@ import org.osgi.service.component.annotations.Component;
  * This RuleProvider keeps Rules at added by scripts during the runtime. This ensures that Rules are not kept on reboot,
  * but have to be added by the scripts again.
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 @Component(immediate = true, service = { ScriptedRuleProvider.class, RuleProvider.class })
 public class ScriptedRuleProvider implements RuleProvider {
-    private final Collection<ProviderChangeListener<Rule>> listeners = new ArrayList<ProviderChangeListener<Rule>>();
+    private final Collection<ProviderChangeListener<Rule>> listeners = new ArrayList<>();
 
-    HashMap<String, Rule> rules = new HashMap<>();
+    private final Map<String, Rule> rules = new HashMap<>();
 
     @Override
     public void addProviderChangeListener(ProviderChangeListener<Rule> listener) {

@@ -21,8 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * (e.g. a dimmed light that is treated as a switch (ON/OFF) will have
  * an undefined state if it is dimmed to 50%).
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public enum UnDefType implements PrimitiveType, State {

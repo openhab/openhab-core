@@ -19,7 +19,7 @@ import java.util.List;
  * The normalizer for configuration parameters allowing multiple values. It converts all collections/arrays to a
  * {@link List} and applies the underlying normalizer to each of the values inside that list.
  *
- * @author Simon Kaufmann - Initial contribution and API.
+ * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - made class final and minor javadoc changes
  */
 final class ListNormalizer extends AbstractNormalizer {

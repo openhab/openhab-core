@@ -41,8 +41,7 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
  * This class is responsible for tracking the bundles - suppliers of automation resources. It implements
  * {@link BundleTrackerCustomizer} and is notified for events for adding, modifying or removing the bundles.
  *
- * @author Ana Dimova
- *
+ * @author Ana Dimova - Initial contribution
  */
 @SuppressWarnings("deprecation")
 @Component(immediate = true)
@@ -53,7 +52,7 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
      * {@link AbstractResourceBundleProvider}s of {@link ModuleType}s, {@link Template}s and {@link Rule}s.
      */
     @SuppressWarnings("rawtypes")
-    private final List<AutomationResourceBundlesEventQueue> providerEventsQueue = new ArrayList<AutomationResourceBundlesEventQueue>();
+    private final List<AutomationResourceBundlesEventQueue> providerEventsQueue = new ArrayList<>();
 
     /**
      * This field holds a reference to an importer of {@link Rule}s.
@@ -69,7 +68,7 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
      * This field serves for saving the BundleEvents for the bundles providing automation resources until their
      * processing completes. The events have been for adding, modifying or removing a bundle.
      */
-    private final List<BundleEvent> queue = new LinkedList<BundleEvent>();
+    private final List<BundleEvent> queue = new LinkedList<>();
 
     public AutomationResourceBundlesTracker() {
         rImporter = createImporter();
@@ -81,7 +80,7 @@ public class AutomationResourceBundlesTracker implements BundleTrackerCustomizer
 
     @Activate
     protected void activate(BundleContext bc) {
-        bTracker = new BundleTracker<Bundle>(bc, ~Bundle.UNINSTALLED, this);
+        bTracker = new BundleTracker<>(bc, ~Bundle.UNINSTALLED, this);
         bTracker.open();
     }
 

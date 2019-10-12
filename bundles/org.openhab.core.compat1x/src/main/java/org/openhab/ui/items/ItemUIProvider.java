@@ -19,8 +19,7 @@ import org.openhab.model.sitemap.Widget;
  * This interface describes the methods that need to be implemented by a provider that
  * wants to define the appearance of an item in the UI.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface ItemUIProvider {
 
@@ -51,7 +50,6 @@ public interface ItemUIProvider {
      *
      * @param itemType the class of the item
      * @param itemName the item name to get the default widget for
-     *
      * @return a widget implementation that can be used for the given item
      */
     public Widget getDefaultWidget(Class<? extends Item> itemType, String itemName);

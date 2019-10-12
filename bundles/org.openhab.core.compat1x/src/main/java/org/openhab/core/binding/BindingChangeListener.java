@@ -16,8 +16,7 @@ package org.openhab.core.binding;
  * This interface must be implemented by classes which want to be notified by a
  * {@link BindingProvider} about changes in the binding configuration.
  *
- * @author Kai Kreuzer
- * @since 0.3.0
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface BindingChangeListener {
 

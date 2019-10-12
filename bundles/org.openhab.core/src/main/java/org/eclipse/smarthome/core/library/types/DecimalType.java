@@ -25,8 +25,7 @@ import org.eclipse.smarthome.core.types.State;
  * The decimal type uses a BigDecimal internally and thus can be used for
  * integers, longs and floating point numbers alike.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 public class DecimalType extends Number implements PrimitiveType, State, Command, Comparable<DecimalType> {

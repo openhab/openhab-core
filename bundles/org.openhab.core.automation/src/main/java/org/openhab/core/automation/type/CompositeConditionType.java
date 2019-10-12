@@ -26,9 +26,9 @@ import org.openhab.core.automation.Visibility;
  * This class is as {@link ConditionType} which logically combines {@link Condition} modules. The composite condition
  * hides internal logic between participating conditions and it can be used as a regular {@link Condition} module.
  *
- * @author Yordan Mihaylov - Initial Contribution
- * @author Ana Dimova - Initial Contribution
- * @author Vasil Ilchev - Initial Contribution
+ * @author Yordan Mihaylov - Initial contribution
+ * @author Ana Dimova - Initial contribution
+ * @author Vasil Ilchev - Initial contribution
  */
 @NonNullByDefault
 public class CompositeConditionType extends ConditionType {

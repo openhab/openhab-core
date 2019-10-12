@@ -25,7 +25,6 @@ import org.eclipse.smarthome.core.thing.firmware.dto.FirmwareStatusDTO;
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Removed links and items
  * @author Chris Jackson - Added 'editable' flag
- *
  */
 public class EnrichedThingDTO extends ThingDTO {
 

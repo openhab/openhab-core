@@ -35,7 +35,6 @@ import org.junit.Before;
  * Base class for tests using the {@link AudioServlet}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public abstract class AbstractAudioServletTest extends JavaTest {
 
@@ -44,8 +43,8 @@ public abstract class AbstractAudioServletTest extends JavaTest {
     private int port;
     private TestServer server;
 
-    private final static String AUDIO_SERVLET_PROTOCOL = "http";
-    private final static String AUDIO_SERVLET_HOSTNAME = "localhost";
+    private static final String AUDIO_SERVLET_PROTOCOL = "http";
+    private static final String AUDIO_SERVLET_HOSTNAME = "localhost";
 
     private CompletableFuture<Boolean> serverStarted;
 

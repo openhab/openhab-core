@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of the {@link Scheduler}.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  * @author Simon Kaufmann - ported to CompletableFuture
  * @author Hilbrand Bouwkamp - improved implementation and moved cron and periodic to own implementations.
  */
@@ -65,7 +65,7 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public <T> ScheduledCompletableFuture<T> after(Callable<T> callable, Duration duration) {
-        return afterInternal(new ScheduledCompletableFutureOnce<T>(), callable, duration);
+        return afterInternal(new ScheduledCompletableFutureOnce<>(), callable, duration);
     }
 
     private <T> ScheduledCompletableFutureOnce<T> afterInternal(ScheduledCompletableFutureOnce<T> deferred,
@@ -127,7 +127,7 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public <T> ScheduledCompletableFuture<T> at(Callable<T> callable, Instant instant) {
-        return atInternal(new ScheduledCompletableFutureOnce<T>(), callable, instant);
+        return atInternal(new ScheduledCompletableFutureOnce<>(), callable, instant);
     }
 
     private <T> ScheduledCompletableFuture<T> atInternal(ScheduledCompletableFutureOnce<T> deferred,
@@ -140,8 +140,7 @@ public class SchedulerImpl implements Scheduler {
     @Override
     public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable,
             SchedulerTemporalAdjuster temporalAdjuster) {
-
-        final ScheduledCompletableFutureRecurring<T> schedule = new ScheduledCompletableFutureRecurring<T>();
+        final ScheduledCompletableFutureRecurring<T> schedule = new ScheduledCompletableFutureRecurring<>();
 
         schedule(schedule, runnable, temporalAdjuster);
         return schedule;

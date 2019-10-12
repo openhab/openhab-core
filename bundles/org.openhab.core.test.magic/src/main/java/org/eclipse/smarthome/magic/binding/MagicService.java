@@ -20,7 +20,6 @@ import org.eclipse.smarthome.config.core.ConfigOptionProvider;
  * A public interface for a service from this virtual bundle which is also a {@link ConfigOptionProvider}.
  *
  * @author Henning Treu - Initial contribution
- *
  */
 public interface MagicService extends ConfigOptionProvider {
 

@@ -41,9 +41,8 @@ import org.slf4j.LoggerFactory;
  * EventSubscriber, so the dispose method must be called for unregistering the
  * service.
  *
- * @author Benedikt Niehues - Initial contribution and API
+ * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - refactored and simplified customized module handling
- *
  */
 public class GenericEventTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
@@ -74,7 +73,7 @@ public class GenericEventTriggerHandler extends BaseTriggerModuleHandler impleme
             this.types = Collections.emptySet();
         }
         this.bundleContext = bundleContext;
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("event.topics", topic);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);

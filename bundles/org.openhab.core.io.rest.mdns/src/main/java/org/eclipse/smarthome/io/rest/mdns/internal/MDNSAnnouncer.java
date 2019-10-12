@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * This class announces the REST API through mDNS for clients to automatically
  * discover it.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Use HTTP service utility functions
  */
 @Component(immediate = true, configurationPid = "org.eclipse.smarthome.mdns", property = {
@@ -91,7 +91,7 @@ public class MDNSAnnouncer {
     }
 
     private ServiceDescription getDefaultServiceDescription() {
-        Hashtable<String, String> serviceProperties = new Hashtable<String, String>();
+        Hashtable<String, String> serviceProperties = new Hashtable<>();
         serviceProperties.put("uri", RESTConstants.REST_URI);
         return new ServiceDescription("_" + mdnsName + "-server._tcp.local.", mdnsName, httpPort, serviceProperties);
     }

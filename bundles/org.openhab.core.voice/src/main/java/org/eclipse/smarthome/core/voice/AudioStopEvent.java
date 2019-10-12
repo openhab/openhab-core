@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.voice;
 /**
  * A {@link STTEvent} fired when the {@link STTService} stops hearing audio.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public class AudioStopEvent implements STTEvent {
 }

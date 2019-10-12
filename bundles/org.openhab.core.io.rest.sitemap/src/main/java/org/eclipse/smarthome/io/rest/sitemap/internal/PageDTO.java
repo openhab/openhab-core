@@ -18,8 +18,7 @@ import java.util.List;
 /**
  * This is a data transfer object that is used to serialize page content.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class PageDTO {
 
@@ -32,7 +31,7 @@ public class PageDTO {
     public boolean leaf;
     public boolean timeout;
 
-    public List<WidgetDTO> widgets = new ArrayList<WidgetDTO>();
+    public List<WidgetDTO> widgets = new ArrayList<>();
 
     public PageDTO() {
     }

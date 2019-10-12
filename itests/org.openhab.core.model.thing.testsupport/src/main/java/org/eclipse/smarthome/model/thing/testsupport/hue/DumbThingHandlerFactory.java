@@ -30,15 +30,15 @@ import org.osgi.service.component.ComponentContext;
  * In <code>dumb</code> mode, it behaves as if the XML configuration files have not been processed yet,
  * i.e. it returns <code>null</code> on {@link #createThing(ThingTypeUID, Configuration, ThingUID, ThingUID)}
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  */
 public class DumbThingHandlerFactory extends BaseThingHandlerFactory implements ThingHandlerFactory {
 
     public static final String BINDING_ID = "dumb";
 
-    public final static ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "DUMB");
+    public static final ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "DUMB");
 
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_TEST);
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_TEST);
 
     private boolean dumb;
 

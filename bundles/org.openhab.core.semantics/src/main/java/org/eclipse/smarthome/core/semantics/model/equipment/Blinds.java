@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Blinds.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_Blinds", label = "Blinds", synonyms = "Rollershutter, Rollershutters, Roller shutter, Roller shutters, Shutter, Shutters", description = "")
 public interface Blinds extends Equipment {

@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Victor Belov - Initial contribution
  * @author Gary Tse - Add NetworkAddressChangeListener to handle interface changes
- *
  */
 @Component(immediate = true, service = MDNSClient.class)
 public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener {

@@ -28,7 +28,6 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
  * Abstract base class with common methods for {@link ChannelTypeBuilder}
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @NonNullByDefault
 @SuppressWarnings("unchecked")
@@ -43,7 +42,6 @@ abstract class AbstractChannelTypeBuilder<T extends ChannelTypeBuilder<T>> imple
     protected @Nullable URI configDescriptionURI;
 
     public AbstractChannelTypeBuilder(ChannelTypeUID channelTypeUID, String label) {
-
         if (channelTypeUID == null) {
             throw new IllegalArgumentException("ChannelTypeUID must be set.");
         }

@@ -16,12 +16,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Base class for all expressions.
  *
- * @author Tilman Kamp - Initial contribution and API
- *
+ * @author Tilman Kamp - Initial contribution
  */
 public abstract class Expression {
 
@@ -37,10 +37,10 @@ public abstract class Expression {
         return Collections.emptyList();
     }
 
-    abstract boolean collectFirsts(ResourceBundle language, HashSet<String> firsts);
+    abstract boolean collectFirsts(ResourceBundle language, Set<String> firsts);
 
-    HashSet<String> getFirsts(ResourceBundle language) {
-        HashSet<String> firsts = new HashSet<String>();
+    Set<String> getFirsts(ResourceBundle language) {
+        Set<String> firsts = new HashSet<>();
         collectFirsts(language, firsts);
         return firsts;
     }

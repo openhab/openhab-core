@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Smoke Detector.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_SmokeDetector", label = "Smoke Detector", synonyms = "Smoke Detectors", description = "")
 public interface SmokeDetector extends Equipment {

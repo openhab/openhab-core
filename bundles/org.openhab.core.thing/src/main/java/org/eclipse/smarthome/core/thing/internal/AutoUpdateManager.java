@@ -48,9 +48,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Component which takes care of calculating and sending potential auto-update event.
  *
- * @author Simon Kaufmann - Initial contribution and API
+ * @author Simon Kaufmann - Initial contribution
  * @author Kai Kreuzer - fixed issues if a linked thing is OFFLINE
- *
  */
 @NonNullByDefault
 @Component(immediate = true, service = {

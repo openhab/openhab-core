@@ -24,7 +24,7 @@ import org.osgi.service.event.EventHandler;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-abstract public class AbstractEventSubscriber implements EventHandler {
+public abstract class AbstractEventSubscriber implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         String itemName = (String) event.getProperty("item");

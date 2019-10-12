@@ -38,7 +38,7 @@ import com.thoughtworks.xstream.XStream;
  * <p>
  * This reader uses {@code XStream} and {@code StAX} to parse and convert the XML document.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Alex Tugarev - Extended for options and filter criteria
  * @author Chris Jackson - Added configuration groups
  */

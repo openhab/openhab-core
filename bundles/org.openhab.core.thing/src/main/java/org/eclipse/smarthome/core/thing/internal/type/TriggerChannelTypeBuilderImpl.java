@@ -24,7 +24,6 @@ import org.eclipse.smarthome.core.types.EventDescription;
  * Implementation of {@link TriggerChannelTypeBuilder} to build {@link ChannelType}s of kind TRIGGER
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @NonNullByDefault
 public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<TriggerChannelTypeBuilder>

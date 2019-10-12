@@ -16,7 +16,6 @@ package org.eclipse.smarthome.core.binding.dto;
  * This is a data transfer object that is used to serialize binding info objects.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 public class BindingInfoDTO {
 

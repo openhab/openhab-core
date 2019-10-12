@@ -30,12 +30,11 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 /**
  * This manager allows a script import extension providers
  *
- * @author Simon Merschjohann
- *
+ * @author Simon Merschjohann - Initial contribution
  */
 @Component(service = ScriptExtensionManager.class)
 public class ScriptExtensionManager {
-    private Set<ScriptExtensionProvider> scriptExtensionProviders = new CopyOnWriteArraySet<ScriptExtensionProvider>();
+    private Set<ScriptExtensionProvider> scriptExtensionProviders = new CopyOnWriteArraySet<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addScriptExtensionProvider(ScriptExtensionProvider provider) {
@@ -55,7 +54,7 @@ public class ScriptExtensionManager {
     }
 
     public List<String> getTypes() {
-        ArrayList<String> types = new ArrayList<>();
+        List<String> types = new ArrayList<>();
 
         for (ScriptExtensionProvider provider : scriptExtensionProviders) {
             types.addAll(provider.getTypes());
@@ -65,7 +64,7 @@ public class ScriptExtensionManager {
     }
 
     public List<String> getPresets() {
-        ArrayList<String> presets = new ArrayList<>();
+        List<String> presets = new ArrayList<>();
 
         for (ScriptExtensionProvider provider : scriptExtensionProviders) {
             presets.addAll(provider.getPresets());
@@ -85,7 +84,7 @@ public class ScriptExtensionManager {
     }
 
     public List<String> getDefaultPresets() {
-        ArrayList<String> defaultPresets = new ArrayList<>();
+        List<String> defaultPresets = new ArrayList<>();
 
         for (ScriptExtensionProvider provider : scriptExtensionProviders) {
             defaultPresets.addAll(provider.getDefaultPresets());

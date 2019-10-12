@@ -40,7 +40,7 @@ public abstract class AbstractScriptEngineFactory implements ScriptEngineFactory
     public List<String> getScriptTypes() {
         List<String> scriptTypes = new ArrayList<>();
 
-        for (javax.script.ScriptEngineFactory f : engineManager.getEngineFactories()) {
+        for (javax.script.ScriptEngineFactory f : ENGINE_MANAGER.getEngineFactories()) {
             scriptTypes.addAll(f.getExtensions());
             scriptTypes.addAll(f.getMimeTypes());
         }
@@ -56,12 +56,12 @@ public abstract class AbstractScriptEngineFactory implements ScriptEngineFactory
 
     @Override
     public @Nullable ScriptEngine createScriptEngine(String scriptType) {
-        ScriptEngine scriptEngine = engineManager.getEngineByExtension(scriptType);
+        ScriptEngine scriptEngine = ENGINE_MANAGER.getEngineByExtension(scriptType);
         if (scriptEngine == null) {
-            scriptEngine = engineManager.getEngineByMimeType(scriptType);
+            scriptEngine = ENGINE_MANAGER.getEngineByMimeType(scriptType);
         }
         if (scriptEngine == null) {
-            scriptEngine = engineManager.getEngineByName(scriptType);
+            scriptEngine = ENGINE_MANAGER.getEngineByName(scriptType);
         }
         return scriptEngine;
     }

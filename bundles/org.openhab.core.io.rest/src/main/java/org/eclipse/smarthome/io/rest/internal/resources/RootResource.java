@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The result is returned as JSON
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 @Path("/")
 @Component(service = RootResource.class, configurationPid = "org.eclipse.smarthome.io.rest.root")
@@ -59,7 +59,7 @@ public class RootResource {
 
     private final transient Logger logger = LoggerFactory.getLogger(RootResource.class);
 
-    private List<RESTResource> restResources = new ArrayList<RESTResource>();
+    private final List<RESTResource> restResources = new ArrayList<>();
 
     private ConfigurationAdmin configurationAdmin;
 

@@ -22,7 +22,7 @@ import java.util.Map;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public class NodeValue implements NodeName {
 

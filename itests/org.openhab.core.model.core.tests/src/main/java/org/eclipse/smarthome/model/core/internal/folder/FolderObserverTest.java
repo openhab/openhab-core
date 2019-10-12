@@ -62,10 +62,9 @@ import org.osgi.service.component.ComponentContext;
  * Since the assertions in the tests depend on handling the events,
  * putting the current Thread to sleep after the file operations is also necessary.
  *
- * @author Mihaela Memova - Initial Contribution
+ * @author Mihaela Memova - Initial contribution
  * @author Stefan Triller - added hidden file test
  * @author Simon Kaufmann - ported to Java
- *
  */
 public class FolderObserverTest extends JavaOSGiTest {
 
@@ -241,7 +240,7 @@ public class FolderObserverTest extends JavaOSGiTest {
      * @throws Exception
      */
     @Test
-    public void testCreation_untrackedExtension() throws Exception {
+    public void testCreationUntrackedExtension() throws Exception {
         String noParserExtension = "jpg";
 
         configProps.put(EXISTING_SUBDIR_NAME, "java,txt," + noParserExtension);
@@ -264,7 +263,7 @@ public class FolderObserverTest extends JavaOSGiTest {
      * @throws Exception
      */
     @Test
-    public void testCreation_untrackedDirectory() throws Exception {
+    public void testCreationUntrackedDirectory() throws Exception {
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg");
         folderObserver.activate(context);
 
@@ -318,7 +317,7 @@ public class FolderObserverTest extends JavaOSGiTest {
      * @throws Exception
      */
     @Test
-    public void testCreation_noExtensions() throws Exception {
+    public void testCreationNoExtensions() throws Exception {
         String subdir = "noExtensionsSubdir";
         new File(WATCHED_DIRECTORY, subdir).mkdirs();
 

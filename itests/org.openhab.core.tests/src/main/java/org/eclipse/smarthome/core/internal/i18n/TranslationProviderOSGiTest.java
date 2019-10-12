@@ -69,7 +69,6 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
 
     @Test
     public void assertThatGetTextWithoutBundleIsWorkingProperly() {
-
         String text = translationProvider.getText(null, null, null, null);
         assertThat(text, is(nullValue()));
 

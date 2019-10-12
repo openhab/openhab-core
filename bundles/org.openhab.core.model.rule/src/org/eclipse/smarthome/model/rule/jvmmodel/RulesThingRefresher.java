@@ -26,7 +26,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * The {@link RulesThingRefresher} is responsible for reloading rules resources every time a thing is added or removed.
  *
  * @author Maoliang Huang - Initial contribution
- *
  */
 @Component(service = {})
 public class RulesThingRefresher extends RulesRefresher implements ThingRegistryChangeListener {

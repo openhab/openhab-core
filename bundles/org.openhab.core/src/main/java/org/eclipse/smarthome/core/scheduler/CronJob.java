@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Runnable that can be passed data and can throw a checked exception.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  */
 @NonNullByDefault
 public interface CronJob {

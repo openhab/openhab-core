@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 /**
  * This Factory creates concrete instances of the known ItemTypes.
  *
- * @author Thomas.Eichstaedt-Engelen
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 @NonNullByDefault
 public interface ItemFactory {

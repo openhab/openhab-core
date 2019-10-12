@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.scheduler;
 /**
  * Runnable that can throw checked exceptions.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  * @author Simon Kaufmann - adapted to CompletableFutures
  * @author Hilbrand Bouwkamp - moved to it's own class and renamed
  */

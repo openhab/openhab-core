@@ -21,7 +21,7 @@ import org.eclipse.smarthome.core.audio.AudioStream;
 /**
  * This is the interface that a speech-to-text service has to implement.
  *
- * @author Kelly Davis - Initial contribution and API
+ * @author Kelly Davis - Initial contribution
  */
 public interface STTService {
 

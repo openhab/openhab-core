@@ -22,14 +22,13 @@ import org.openhab.core.types.State;
  * The decimal type uses a BigDecimal internally and thus can be used for
  * integers, longs and floating point numbers alike.
  *
- * @author Kai Kreuzer
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public class DecimalType extends Number implements PrimitiveType, State, Command, Comparable<DecimalType> {
 
     private static final long serialVersionUID = 4226845847123464690L;
 
-    final static public DecimalType ZERO = new DecimalType(0);
+    public static final DecimalType ZERO = new DecimalType(0);
 
     protected BigDecimal value;
 

@@ -18,7 +18,7 @@ import java.util.Set;
 /**
  * This is the interface that a human language text interpreter has to implement.
  *
- * @author Tilman Kamp - Initial contribution and API
+ * @author Tilman Kamp - Initial contribution
  * @author Laurent Garnier - extended interface to support chat and intent interpretation
  */
 public interface HumanLanguageInterpreter {

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * Context is responsible for tracking current position of invocation chain and reseting it in order to handle errors
  * if any of processors fails to do its job.
  *
- * @author Łukasz Dywicki - Initial contribution and API.
+ * @author Łukasz Dywicki - Initial contribution
  */
 public class DefaultHandlerContext implements HandlerContext {
 

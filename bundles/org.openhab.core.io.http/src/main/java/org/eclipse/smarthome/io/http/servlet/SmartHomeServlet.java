@@ -17,7 +17,7 @@ import org.osgi.service.http.HttpContext;
 /**
  * Base class for HTTP servlets which share certain {@link HttpContext} instance.
  *
- * @author Łukasz Dywicki - initial implementation.
+ * @author Łukasz Dywicki - Initial contribution
  */
 public abstract class SmartHomeServlet extends BaseSmartHomeServlet {
 

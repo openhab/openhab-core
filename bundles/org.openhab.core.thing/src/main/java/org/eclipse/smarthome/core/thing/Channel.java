@@ -33,7 +33,7 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
  * of it. Therefore {@link Item}s can be linked a to a channel. The channel only
  * accepts a specific item type which is specified by {@link Channel#getAcceptedItemType()} methods.
  *
- * @author Dennis Nobel - Initial contribution and API
+ * @author Dennis Nobel - Initial contribution
  * @author Alex Tugarev - Extended about default tags
  * @author Benedikt Niehues - fix for Bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=445137 considering default
  *         values
@@ -70,7 +70,7 @@ public class Channel {
     Channel() {
         this.kind = ChannelKind.STATE;
         this.configuration = new Configuration();
-        this.properties = Collections.unmodifiableMap(new HashMap<String, String>(0));
+        this.properties = Collections.unmodifiableMap(new HashMap<>(0));
     }
 
     /**
@@ -82,7 +82,7 @@ public class Channel {
         this.acceptedItemType = acceptedItemType;
         this.kind = ChannelKind.STATE;
         this.configuration = new Configuration();
-        this.properties = Collections.unmodifiableMap(new HashMap<String, String>(0));
+        this.properties = Collections.unmodifiableMap(new HashMap<>(0));
     }
 
     /**
@@ -90,8 +90,7 @@ public class Channel {
      */
     @Deprecated
     public Channel(ChannelUID uid, String acceptedItemType, Configuration configuration) {
-        this(uid, null, acceptedItemType, ChannelKind.STATE, configuration, new HashSet<String>(0), null, null, null,
-                null);
+        this(uid, null, acceptedItemType, ChannelKind.STATE, configuration, new HashSet<>(0), null, null, null, null);
     }
 
     /**
@@ -126,14 +125,14 @@ public class Channel {
         this.label = label;
         this.description = description;
         this.autoUpdatePolicy = autoUpdatePolicy;
-        this.defaultTags = Collections.<String> unmodifiableSet(new HashSet<String>(defaultTags));
+        this.defaultTags = Collections.<String> unmodifiableSet(new HashSet<>(defaultTags));
         if (configuration == null) {
             this.configuration = new Configuration();
         } else {
             this.configuration = configuration;
         }
         if (properties == null) {
-            this.properties = Collections.unmodifiableMap(new HashMap<String, String>(0));
+            this.properties = Collections.unmodifiableMap(new HashMap<>(0));
         } else {
             this.properties = properties;
         }

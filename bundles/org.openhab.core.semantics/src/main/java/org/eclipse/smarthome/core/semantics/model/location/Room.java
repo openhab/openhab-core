@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Room.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Location_Indoor_Room", label = "Room", synonyms = "Rooms", description = "")
 public interface Room extends Indoor {

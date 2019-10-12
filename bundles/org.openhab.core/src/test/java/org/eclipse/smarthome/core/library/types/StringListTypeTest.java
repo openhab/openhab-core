@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * @author Gaël L'hopital
+ * @author Gaël L'hopital - Initial contribution
  * @author Kai Kreuzer - added tests for valueOf and toFullString
  */
 public class StringListTypeTest {

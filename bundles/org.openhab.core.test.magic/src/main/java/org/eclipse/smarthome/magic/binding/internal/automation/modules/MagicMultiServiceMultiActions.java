@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * instantiated multiple times
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, configurationPid = "org.eclipse.smarthome.MagicMultiAction")
 @ActionScope(name = "binding.magic")

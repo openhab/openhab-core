@@ -22,7 +22,7 @@ import org.eclipse.smarthome.model.item.BindingConfigReader;
  * namespace for the binding config readers. It wraps an instance with the old interface
  * into a class with the new interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class BindingConfigReaderDelegate implements BindingConfigReader {
 
@@ -62,7 +62,6 @@ public class BindingConfigReaderDelegate implements BindingConfigReader {
 
     private org.openhab.core.items.Item getOpenHABItem(String itemType, String itemName)
             throws BindingConfigParseException {
-
         String mainType = ItemUtil.getMainItemType(itemType);
 
         switch (mainType) {

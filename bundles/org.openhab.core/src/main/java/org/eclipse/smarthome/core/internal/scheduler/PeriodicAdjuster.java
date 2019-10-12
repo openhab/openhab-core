@@ -29,7 +29,7 @@ import org.eclipse.smarthome.core.scheduler.SchedulerTemporalAdjuster;
  * This scheduler runs as a fixed rate scheduler from the first
  * time adjustInto is called.
  *
- * @author Peter Kriens - Initial contribution and API
+ * @author Peter Kriens - Initial contribution
  * @author Hilbrand Bouwkamp - implemented adjuster as a fixed rate scheduler
  */
 @NonNullByDefault

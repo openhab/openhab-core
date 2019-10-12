@@ -30,9 +30,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Creates {@link GroupFunction}s according to the given parameters.
  *
- * @author Henning Treu - Initial contribution and API
+ * @author Henning Treu - Initial contribution
  * @author Robert Michalak - LATEST and EARLIEST group functions
- *
  */
 public class GroupFunctionHelper {
 

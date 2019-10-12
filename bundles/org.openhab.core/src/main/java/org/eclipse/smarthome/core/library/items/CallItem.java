@@ -27,14 +27,14 @@ import org.eclipse.smarthome.core.types.UnDefType;
 /**
  * This item identifies a telephone call by its origin and destination.
  *
- * @author Thomas.Eichstaedt-Engelen / Initially CallItem
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Gaël L'hopital - port to Eclipse SmartHome
  */
 @NonNullByDefault
 public class CallItem extends GenericItem {
 
-    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<Class<? extends State>>();
-    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<Class<? extends Command>>();
+    private static List<Class<? extends State>> acceptedDataTypes = new ArrayList<>();
+    private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
     static {
         acceptedDataTypes.add(StringListType.class);

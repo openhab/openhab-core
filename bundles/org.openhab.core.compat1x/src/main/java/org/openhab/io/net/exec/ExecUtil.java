@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ExecUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExecUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecUtil.class);
 
     private static final String CMD_LINE_DELIMITER = "@@";
 
@@ -52,8 +52,7 @@ public class ExecUtil {
      * done.
      * </p>
      *
-     * @param commandLine
-     *            the command line to execute
+     * @param commandLine the command line to execute
      * @see http://www.peterfriese.de/running-applescript-from-java/
      */
     public static void executeCommandLine(String commandLine) {
@@ -61,13 +60,13 @@ public class ExecUtil {
             if (commandLine.contains(CMD_LINE_DELIMITER)) {
                 String[] cmdArray = commandLine.split(CMD_LINE_DELIMITER);
                 Runtime.getRuntime().exec(cmdArray);
-                logger.info("executed commandLine '{}'", Arrays.asList(cmdArray));
+                LOGGER.info("executed commandLine '{}'", Arrays.asList(cmdArray));
             } else {
                 Runtime.getRuntime().exec(commandLine);
-                logger.info("executed commandLine '{}'", commandLine);
+                LOGGER.info("executed commandLine '{}'", commandLine);
             }
         } catch (IOException e) {
-            logger.error("couldn't execute commandLine '{}'", commandLine, e);
+            LOGGER.error("couldn't execute commandLine '{}'", commandLine, e);
         }
     }
 
@@ -85,10 +84,8 @@ public class ExecUtil {
      * done.
      * </p>
      *
-     * @param commandLine
-     *            the command line to execute
-     * @param timeout
-     *            timeout for execution in milliseconds
+     * @param commandLine the command line to execute
+     * @param timeout timeout for execution in milliseconds
      * @return response data from executed command line
      */
     public static String executeCommandLineAndWaitResponse(String commandLine, int timeout) {
@@ -121,9 +118,9 @@ public class ExecUtil {
 
         try {
             executor.execute(cmdLine, resultHandler);
-            logger.debug("executed commandLine '{}'", commandLine);
+            LOGGER.debug("executed commandLine '{}'", commandLine);
         } catch (IOException e) {
-            logger.error("couldn't execute commandLine '{}'", commandLine, e);
+            LOGGER.error("couldn't execute commandLine '{}'", commandLine, e);
         }
 
         // some time later the result handler callback was invoked so we
@@ -133,12 +130,12 @@ public class ExecUtil {
             int exitCode = resultHandler.getExitValue();
             retval = StringUtils.chomp(stdout.toString());
             if (resultHandler.getException() != null) {
-                logger.warn("{}", resultHandler.getException().getMessage());
+                LOGGER.warn("{}", resultHandler.getException().getMessage());
             } else {
-                logger.debug("exit code '{}', result '{}'", exitCode, retval);
+                LOGGER.debug("exit code '{}', result '{}'", exitCode, retval);
             }
         } catch (InterruptedException e) {
-            logger.error("Timeout occurred when executing commandLine '{}'", commandLine, e);
+            LOGGER.error("Timeout occurred when executing commandLine '{}'", commandLine, e);
         }
 
         return retval;

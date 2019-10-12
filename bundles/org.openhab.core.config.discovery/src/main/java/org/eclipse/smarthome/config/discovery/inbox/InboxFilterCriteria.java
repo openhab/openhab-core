@@ -23,7 +23,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
  * The according property is filtered in the {@link Inbox} if it's <i>NEITHER</i> {@code null} <i>NOR</i> empty. All
  * specified properties are filtered with an <i>AND</i> operator.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @see Inbox
  *

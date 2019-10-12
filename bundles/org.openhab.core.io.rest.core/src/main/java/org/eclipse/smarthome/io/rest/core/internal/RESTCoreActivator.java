@@ -20,7 +20,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Extension of the default OSGi bundle activator
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Benedikt Niehues - made serviceRegistration of ExceptionMapper compatible with older OSGI versions
  */
 public class RESTCoreActivator implements BundleActivator {

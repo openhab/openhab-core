@@ -21,9 +21,7 @@ import org.eclipse.smarthome.io.console.Console;
  * method is called, the corresponding boolean variable is set to true.
  *
  * @author Mihaela Memova - Initial contribution
- *
  * @author Velin Yordanov - migrated from groovy to java
- *
  */
 public class ConsoleStub implements Console {
 

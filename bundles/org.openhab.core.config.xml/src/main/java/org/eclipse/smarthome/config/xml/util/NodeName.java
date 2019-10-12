@@ -17,7 +17,7 @@ package org.eclipse.smarthome.config.xml.util;
  * <p>
  * Each {@code Node}* class has to return its node name.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public interface NodeName {
 

@@ -25,7 +25,6 @@ import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Chris Jackson - Added parameter groups
  * @author Miki Jankov - Introducing StrippedThingTypeDTO
- *
  */
 public class ThingTypeDTO extends StrippedThingTypeDTO {
 

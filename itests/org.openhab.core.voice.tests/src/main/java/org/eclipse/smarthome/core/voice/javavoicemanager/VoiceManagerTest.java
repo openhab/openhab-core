@@ -51,16 +51,15 @@ import org.osgi.service.cm.ConfigurationAdmin;
  *
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
- *
  */
 public class VoiceManagerTest extends JavaOSGiTest {
-    private final String PID = "org.eclipse.smarthome.voice";
-    private final String CONFIG_DEFAULT_HLI = "defaultHLI";
-    private final String CONFIG_DEFAULT_KS = "defaultKS";
-    private final String CONFIG_DEFAULT_STT = "defaultSTT";
-    private final String CONFIG_DEFAULT_VOICE = "defaultVoice";
-    private final String CONFIG_DEFAULT_TTS = "defaultTTS";
-    private final String CONFIG_KEYWORD = "keyword";
+    private static final String PID = "org.eclipse.smarthome.voice";
+    private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
+    private static final String CONFIG_DEFAULT_KS = "defaultKS";
+    private static final String CONFIG_DEFAULT_STT = "defaultSTT";
+    private static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
+    private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
+    private static final String CONFIG_KEYWORD = "keyword";
     private VoiceManagerImpl voiceManager = new VoiceManagerImpl();
     private ConsoleStub stubConsole;
     private SinkStub sink;
@@ -90,7 +89,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         registerService(sink);
         registerService(voice);
 
-        Dictionary<String, Object> voiceConfig = new Hashtable<String, Object>();
+        Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put(CONFIG_DEFAULT_TTS, ttsService.getId());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
         Configuration configuration = configAdmin.getConfiguration(PID);
@@ -162,7 +161,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         hliStub = new HumanLanguageInterpreterStub();
         registerService(hliStub);
 
-        Dictionary<String, Object> voiceConfig = new Hashtable<String, Object>();
+        Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put("defaultHLI", hliStub.getId());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
         String pid = "org.eclipse.smarthome.voice";
@@ -242,7 +241,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         registerService(hliStub);
         registerService(source);
 
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(CONFIG_KEYWORD, "word");
         config.put(CONFIG_DEFAULT_STT, sttService.getId());
         config.put(CONFIG_DEFAULT_KS, ksService.getId());

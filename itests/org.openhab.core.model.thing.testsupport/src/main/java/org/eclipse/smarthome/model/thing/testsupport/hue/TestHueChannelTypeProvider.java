@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.Component;
  * {@link TestHueChannelTypeProvider} is used for the model thing tests to provide channel types.
  *
  * @author Dennis Nobel - Initial contribution
- *
  */
 @Component
 public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelGroupTypeProvider {
@@ -80,7 +79,6 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
                                     .build()))
                     .build();
             channelGroupTypes = Arrays.asList(groupX);
-
         } catch (Exception willNeverBeThrown) {
         }
     }

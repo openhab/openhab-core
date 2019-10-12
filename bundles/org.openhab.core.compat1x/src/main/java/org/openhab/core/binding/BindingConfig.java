@@ -16,9 +16,7 @@ package org.openhab.core.binding;
  * This is a simple marker interface to define data structures that are
  * used as binding configurations.
  *
- * @author Kai Kreuzer
- * @since 0.6.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public interface BindingConfig {
 

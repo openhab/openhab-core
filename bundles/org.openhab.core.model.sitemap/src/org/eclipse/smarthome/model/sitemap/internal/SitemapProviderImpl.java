@@ -37,8 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class provides access to the sitemap model files.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)

@@ -28,7 +28,7 @@ import org.osgi.framework.Bundle;
  * {@link AbstractXmlConfigDescriptionProvider} which
  * is itself registered as {@link ConfigDescriptionProvider} service at the <i>OSGi</i> service registry.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  *
  * @see ConfigDescriptionXmlProviderFactory
  */

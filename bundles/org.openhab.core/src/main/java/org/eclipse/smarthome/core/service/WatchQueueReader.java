@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for watch queue readers
  *
- * @author Fabio Marini
+ * @author Fabio Marini - Initial contribution
  * @author Dimitar Ivanov - use relative path in watch events. Added option to watch directory events or not
  * @author Ana Dimova - reduce to a single watch thread for all class instances of {@link AbstractWatchService}
  */

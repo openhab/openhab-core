@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Describes event options and gives information how to interpret it.
  *
- * @author Moritz Kammerer - Initial contribution and API
+ * @author Moritz Kammerer - Initial contribution
  */
 public class EventDescription {
     private final List<EventOption> options;
@@ -31,9 +31,9 @@ public class EventDescription {
      */
     public EventDescription(List<EventOption> options) {
         if (options != null) {
-            this.options = Collections.unmodifiableList(new ArrayList<EventOption>(options));
+            this.options = Collections.unmodifiableList(new ArrayList<>(options));
         } else {
-            this.options = Collections.unmodifiableList(new ArrayList<EventOption>(0));
+            this.options = Collections.unmodifiableList(new ArrayList<>(0));
         }
     }
 

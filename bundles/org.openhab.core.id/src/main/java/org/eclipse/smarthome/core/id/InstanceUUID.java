@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * integrating with external systems. The UUID is generated only once and written to the file system, so that it does
  * not change over time.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class InstanceUUID {
 

@@ -60,9 +60,8 @@ import org.osgi.service.http.HttpService;
  * <li>legend: Show the legend? If not supplied, the ChartProvider should make his own decision.</li>
  * </ul>
  *
- * @author Chris Jackson
+ * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
- *
  */
 @Component(immediate = true, service = ChartServlet.class, configurationPid = "org.eclipse.smarthome.chart", property = {
         "service.pid=org.eclipse.smarthome.chart", "service.config.description.uri=system:chart",
@@ -83,7 +82,7 @@ public class ChartServlet extends SmartHomeServlet {
     // The URI of this servlet
     public static final String SERVLET_NAME = "/chart";
 
-    protected static final Map<String, Long> PERIODS = new HashMap<String, Long>();
+    protected static final Map<String, Long> PERIODS = new HashMap<>();
 
     static {
         PERIODS.put("h", 3600000L);
@@ -101,7 +100,7 @@ public class ChartServlet extends SmartHomeServlet {
         PERIODS.put("Y", 31536000000L);
     }
 
-    protected static Map<String, ChartProvider> chartProviders = new ConcurrentHashMap<String, ChartProvider>();
+    protected static Map<String, ChartProvider> chartProviders = new ConcurrentHashMap<>();
 
     @Override
     @Reference

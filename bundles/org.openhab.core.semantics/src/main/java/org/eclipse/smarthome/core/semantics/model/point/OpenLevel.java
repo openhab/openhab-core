@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a OpenLevel.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Point_Status_OpenLevel", label = "OpenLevel", synonyms = "", description = "")
 public interface OpenLevel extends Status {

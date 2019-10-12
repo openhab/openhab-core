@@ -264,7 +264,6 @@ public final class FirmwareImpl implements Firmware {
         }
 
         private int compare(@Nullable Version theVersion) {
-
             if (theVersion == null) {
                 return 1;
             }

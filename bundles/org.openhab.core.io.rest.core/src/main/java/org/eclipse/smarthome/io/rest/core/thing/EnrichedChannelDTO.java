@@ -14,13 +14,13 @@ package org.eclipse.smarthome.io.rest.core.thing;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import org.eclipse.smarthome.core.thing.dto.ChannelDTO;
 
 /**
  * This is a data transfer object that is used to serialize channels with dynamic data like linked items.
  *
  * @author Kai Kreuzer - Initial contribution
- *
  */
 public class EnrichedChannelDTO extends ChannelDTO {
 
@@ -37,6 +37,6 @@ public class EnrichedChannelDTO extends ChannelDTO {
         this.properties = channelDTO.properties;
         this.configuration = channelDTO.configuration;
         this.defaultTags = channelDTO.defaultTags;
-        this.linkedItems = linkedItems != null ? new HashSet<>(linkedItems) : new HashSet<String>();
+        this.linkedItems = linkedItems != null ? new HashSet<>(linkedItems) : new HashSet<>();
     }
 }

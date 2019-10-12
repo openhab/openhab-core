@@ -37,9 +37,8 @@ import org.osgi.framework.Bundle;
  * <li>tracking the managing service of the {@link Rule}s.
  * </ul>
  *
- * @author Ana Dimova - Initial Contribution
+ * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
- *
  */
 public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<Rule> {
 

@@ -15,7 +15,7 @@ package org.eclipse.smarthome.io.rest.sitemap.internal;
 /**
  * A general sitemap event, meant to be sub-classed.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
 public class SitemapEvent {
 

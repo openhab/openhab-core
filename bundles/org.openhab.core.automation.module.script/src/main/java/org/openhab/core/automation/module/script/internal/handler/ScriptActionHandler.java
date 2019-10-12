@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * This handler can execute script actions.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Simon Merschjohann
+ * @author Simon Merschjohann - Initial contribution
  */
 @NonNullByDefault
 public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> implements ActionHandler {
@@ -54,7 +54,7 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
 
     @Override
     public @Nullable Map<String, Object> execute(final Map<String, Object> context) {
-        HashMap<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
 
         getScriptEngine().ifPresent(scriptEngine -> {
             setExecutionContext(scriptEngine, context);

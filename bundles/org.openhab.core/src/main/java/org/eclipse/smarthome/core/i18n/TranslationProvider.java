@@ -25,7 +25,7 @@ import org.osgi.framework.Bundle;
  * resource files is managed by this provider and used for translation. This service uses
  * the i18n mechanism of Java.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added getText operation with arguments
  */
 @NonNullByDefault

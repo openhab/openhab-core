@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.thing;
 /**
  * Contains often used trigger events.
  *
- * @author Moritz Kammerer - Initial contribution and API.
+ * @author Moritz Kammerer - Initial contribution
  */
 public final class CommonTriggerEvents {
     /**

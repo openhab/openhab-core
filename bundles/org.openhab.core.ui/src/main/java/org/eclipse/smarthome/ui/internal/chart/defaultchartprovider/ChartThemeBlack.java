@@ -19,13 +19,12 @@ import java.awt.Font;
  * Implementation of the black {@link ChartTheme chart theme}.
  *
  * @author Holger Reichert - Initial contribution
- *
  */
 public class ChartThemeBlack implements ChartTheme {
 
     private static final String THEME_NAME = "black";
 
-    private Color[] LINECOLORS = new Color[] { //
+    private static final Color[] LINECOLORS = new Color[] { //
             new Color(244, 67, 54), // red
             new Color(76, 175, 80), // green
             new Color(63, 81, 181), // blue

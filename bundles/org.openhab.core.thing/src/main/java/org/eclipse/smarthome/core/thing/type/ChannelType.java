@@ -31,7 +31,7 @@ import org.eclipse.smarthome.core.types.StateDescription;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  * @author Henning Treu - add command options
  */
 public class ChannelType extends AbstractDescriptionType {
@@ -147,9 +147,9 @@ public class ChannelType extends AbstractDescriptionType {
         this.configDescriptionURI = configDescriptionURI;
 
         if (tags != null) {
-            this.tags = Collections.unmodifiableSet(new HashSet<String>(tags));
+            this.tags = Collections.unmodifiableSet(new HashSet<>(tags));
         } else {
-            this.tags = Collections.unmodifiableSet(new HashSet<String>(0));
+            this.tags = Collections.unmodifiableSet(new HashSet<>(0));
         }
 
         this.advanced = advanced;

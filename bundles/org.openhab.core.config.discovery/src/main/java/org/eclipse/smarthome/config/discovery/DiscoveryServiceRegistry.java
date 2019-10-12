@@ -27,7 +27,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  * <li>Forwarding all events received from the monitored {@link DiscoveryService}s.</li>
  * </ul>
  *
- * @author Michael Grammling - Initial Contribution.
+ * @author Michael Grammling - Initial contribution
  * @author Ivaylo Ivanov - Added getMaxScanTimeout
  *
  * @see DiscoveryService

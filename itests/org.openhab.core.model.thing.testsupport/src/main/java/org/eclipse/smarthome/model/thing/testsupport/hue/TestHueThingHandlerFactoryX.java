@@ -26,23 +26,21 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.ComponentContext;
 
 /**
- * @author Benedikt Niehues - Fix ESH Bug 450236
- *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=450236 - Considering
- *         ThingType Description
+ * @author Benedikt Niehues - Initial contribution
  */
 public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory implements ThingHandlerFactory {
 
     public static final String BINDING_ID = "Xhue";
 
-    public final static ThingTypeUID THING_TYPE_BRIDGE = new ThingTypeUID(BINDING_ID, "Xbridge");
-    public final static ThingTypeUID THING_TYPE_LCT001 = new ThingTypeUID(BINDING_ID, "XLCT001");
-    public final static ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "XTEST");
+    public static final ThingTypeUID THING_TYPE_BRIDGE = new ThingTypeUID(BINDING_ID, "Xbridge");
+    public static final ThingTypeUID THING_TYPE_LCT001 = new ThingTypeUID(BINDING_ID, "XLCT001");
+    public static final ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "XTEST");
 
-    public final static Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Stream.of(THING_TYPE_BRIDGE)
+    public static final Set<ThingTypeUID> SUPPORTED_BRIDGE_TYPES = Stream.of(THING_TYPE_BRIDGE)
             .collect(Collectors.toSet());
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES = Stream.of(THING_TYPE_LCT001, THING_TYPE_TEST)
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Stream.of(THING_TYPE_LCT001, THING_TYPE_TEST)
             .collect(Collectors.toSet());
-    public final static Set<ThingTypeUID> SUPPORTED_TYPES = Stream
+    public static final Set<ThingTypeUID> SUPPORTED_TYPES = Stream
             .concat(SUPPORTED_BRIDGE_TYPES.stream(), SUPPORTED_THING_TYPES.stream()).collect(Collectors.toSet());
 
     // List all channels
@@ -59,7 +57,6 @@ public class TestHueThingHandlerFactoryX extends BaseThingHandlerFactory impleme
     public static final String LIGHT_ID = "XlightId";
 
     public TestHueThingHandlerFactoryX(ComponentContext componentContext) {
-
         super.activate(componentContext);
     }
 

@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 /**
- * @author Thomas.Eichstaedt-Engelen - Initial contribution
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Gaël L'hopital - Added Timezone and Milliseconds
  * @author Erdoan Hadzhiyusein - Added ZonedDateTime tests
  * @author Laurent Garnier - Enhanced tests
@@ -225,7 +225,7 @@ public class DateTimeTypeTest {
     }
 
     private static Map<String, Integer> initTimeMap() {
-        Map<String, Integer> inputTimeMap = new HashMap<String, Integer>();
+        Map<String, Integer> inputTimeMap = new HashMap<>();
         inputTimeMap.put("year", 2014);
         inputTimeMap.put("month", 2);
         inputTimeMap.put("date", 30);

@@ -29,20 +29,18 @@ import org.openhab.core.types.UnDefType;
  * for the infrastructure, such as publishing updates to the event bus
  * or notifying listeners.
  *
- * @author Kai Kreuzer
- * @since 0.1.0
- *
+ * @author Kai Kreuzer - Initial contribution
  */
-abstract public class GenericItem implements Item {
+public abstract class GenericItem implements Item {
 
     protected EventPublisher eventPublisher;
 
     protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<>(
-            Collections.newSetFromMap(new WeakHashMap<StateChangeListener, Boolean>()));
+            Collections.newSetFromMap(new WeakHashMap<>()));
 
     protected List<String> groupNames = new ArrayList<>();
 
-    final protected String name;
+    protected final String name;
 
     protected State state = UnDefType.NULL;
 

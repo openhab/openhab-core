@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Tilt.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Point_Status_Tilt", label = "Tilt", synonyms = "", description = "")
 public interface Tilt extends Status {

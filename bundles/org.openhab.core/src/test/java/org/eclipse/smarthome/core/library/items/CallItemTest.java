@@ -19,9 +19,8 @@ import org.junit.Test;
 
 /**
  *
- * @author Gaël L'hopital - Initial version
+ * @author Gaël L'hopital - Initial contribution
  * @author Stefan Triller - Added state tests
- *
  */
 public class CallItemTest {
 

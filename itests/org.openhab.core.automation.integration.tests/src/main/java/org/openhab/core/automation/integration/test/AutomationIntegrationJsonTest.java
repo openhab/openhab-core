@@ -68,7 +68,6 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Marin Mitev - make the test to pass on each run
  * @author Kai Kreuzer - refactored to Java
- *
  */
 public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
@@ -82,9 +81,8 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     private Event ruleEvent;
     public Event itemEvent;
 
-    public static VolatileStorageService VOLATILE_STORAGE_SERVICE = new VolatileStorageService(); // keep storage with
-                                                                                                  // rules imported from
-                                                                                                  // json files
+    // keep storage rules imported from json files
+    public static final VolatileStorageService VOLATILE_STORAGE_SERVICE = new VolatileStorageService();
 
     @Before
     public void before() {
@@ -101,7 +99,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                HashSet<Item> items = new HashSet<>();
+                Set<Item> items = new HashSet<>();
                 items.add(new SwitchItem("myMotionItem"));
                 items.add(new SwitchItem("myPresenceItem"));
                 items.add(new SwitchItem("myLampItem"));
@@ -168,7 +166,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             assertThat(moduleTypeRegistry, is(notNullValue()));
         }, 9000, 1000);
         logger.info("@Before.finish");
-
     }
 
     @After
@@ -219,7 +216,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             assertThat(output3.isPresent(), is(true));
             assertThat(output3.get().getDefaultValue(), is("{\"command\":\"OFF\"}"));
         }, 10000, 200);
-
     }
 
     @Test

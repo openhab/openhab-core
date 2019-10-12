@@ -37,7 +37,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @param <T> the result type of the conversion
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarshaller<T> {
 

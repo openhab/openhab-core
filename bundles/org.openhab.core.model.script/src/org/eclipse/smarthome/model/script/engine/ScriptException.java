@@ -19,8 +19,7 @@ import java.util.List;
 /**
  * Abstract class for exceptions thrown by the script engine.
  *
- * @author Kai Kreuzer - Initial contribution and API
- *
+ * @author Kai Kreuzer - Initial contribution
  */
 public abstract class ScriptException extends Exception {
     private static final long serialVersionUID = -4155948282895039148L;
@@ -30,13 +29,13 @@ public abstract class ScriptException extends Exception {
 
     protected ScriptException(String message) {
         super(message);
-        this.errors = new ArrayList<ScriptError>(1);
+        this.errors = new ArrayList<>(1);
         errors.add(new ScriptError(message, 0, 0, -1));
     }
 
     protected ScriptException(ScriptError scriptError) {
         super(scriptError.getMessage());
-        this.errors = new ArrayList<ScriptError>(1);
+        this.errors = new ArrayList<>(1);
         errors.add(scriptError);
     }
 
@@ -47,13 +46,13 @@ public abstract class ScriptException extends Exception {
     protected ScriptException(final String message, final String scriptText, final Throwable cause) {
         super(message, cause);
         this.scriptText = scriptText;
-        this.errors = new LinkedList<ScriptError>();
+        this.errors = new LinkedList<>();
     }
 
     protected ScriptException(final String message, final String scriptText) {
         super(message);
         this.scriptText = scriptText;
-        this.errors = new LinkedList<ScriptError>();
+        this.errors = new LinkedList<>();
     }
 
     public ScriptException(final String message, final String scriptText, final int line, final int column,
@@ -69,7 +68,7 @@ public abstract class ScriptException extends Exception {
     private ScriptException(final Throwable cause, final String scriptText, final ScriptError error) {
         super(error.getMessage(), cause); // ?
         this.scriptText = scriptText;
-        this.errors = new ArrayList<ScriptError>(1);
+        this.errors = new ArrayList<>(1);
         errors.add(error);
     }
 
@@ -81,13 +80,13 @@ public abstract class ScriptException extends Exception {
     private ScriptException(final String scriptText, final ScriptError error) {
         super(error.getMessage()); // ?
         this.scriptText = scriptText;
-        this.errors = new ArrayList<ScriptError>(1);
+        this.errors = new ArrayList<>(1);
         errors.add(error);
     }
 
     public ScriptException(String message, Throwable cause) {
         super(message, cause);
-        this.errors = new ArrayList<ScriptError>(0);
+        this.errors = new ArrayList<>(0);
     }
 
     /**

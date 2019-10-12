@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Color Temperature.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Property_ColorTemperature", label = "Color Temperature", synonyms = "", description = "")
 public interface ColorTemperature extends Property {

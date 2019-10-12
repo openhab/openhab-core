@@ -23,7 +23,7 @@ import org.openhab.core.compat1x.internal.ItemMapper;
  * namespace for the persistence service. It wraps an instance with the old interface
  * into a class with the new interface.
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - updated API to support getId/getLabel
  */
 public class PersistenceServiceDelegate implements PersistenceService {

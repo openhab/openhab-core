@@ -39,7 +39,7 @@ import com.google.gson.Gson;
  * @author Stefan Bußweiler - Initial contribution
  */
 public class ThingEventFactoryTest extends JavaOSGiTest {
-    private final ThingStatusInfo THING_STATUS_INFO = ThingStatusInfoBuilder
+    private static final ThingStatusInfo THING_STATUS_INFO = ThingStatusInfoBuilder
             .create(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR).withDescription("Some description")
             .build();
 
@@ -49,22 +49,22 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "id");
     private static final Thing THING = ThingBuilder.create(THING_TYPE_UID, THING_UID).build();
 
-    private final String THING_STATUS_EVENT_TOPIC = ThingEventFactory.THING_STATUS_INFO_EVENT_TOPIC
+    private static final String THING_STATUS_EVENT_TOPIC = ThingEventFactory.THING_STATUS_INFO_EVENT_TOPIC
             .replace("{thingUID}", THING_UID.getAsString());
-    private final String THING_ADDED_EVENT_TOPIC = ThingEventFactory.THING_ADDED_EVENT_TOPIC.replace("{thingUID}",
-            THING_UID.getAsString());
+    private static final String THING_ADDED_EVENT_TOPIC = ThingEventFactory.THING_ADDED_EVENT_TOPIC
+            .replace("{thingUID}", THING_UID.getAsString());
 
-    private final String THING_STATUS_EVENT_PAYLOAD = new Gson().toJson(THING_STATUS_INFO);
-    private final String THING_ADDED_EVENT_PAYLOAD = new Gson().toJson(ThingDTOMapper.map(THING));
+    private static final String THING_STATUS_EVENT_PAYLOAD = new Gson().toJson(THING_STATUS_INFO);
+    private static final String THING_ADDED_EVENT_PAYLOAD = new Gson().toJson(ThingDTOMapper.map(THING));
 
-    private final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
-    private final String CHANNEL_TRIGGERED_EVENT_TOPIC = ThingEventFactory.CHANNEL_TRIGGERED_EVENT_TOPIC
+    private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
+    private static final String CHANNEL_TRIGGERED_EVENT_TOPIC = ThingEventFactory.CHANNEL_TRIGGERED_EVENT_TOPIC
             .replace("{channelUID}", CHANNEL_UID.getAsString());
-    private final String CHANNEL_TRIGGERED_EVENT_PAYLOAD = new Gson()
+    private static final String CHANNEL_TRIGGERED_EVENT_PAYLOAD = new Gson()
             .toJson(new TriggerEventPayloadBean(CommonTriggerEvents.PRESSED, CHANNEL_UID.getAsString()));
 
     @Test
-    public void testCreateEvent_ThingStatusInfoEvent() throws Exception {
+    public void testCreateEventThingStatusInfoEvent() throws Exception {
         Event event = factory.createEvent(ThingStatusInfoEvent.TYPE, THING_STATUS_EVENT_TOPIC,
                 THING_STATUS_EVENT_PAYLOAD, null);
 
@@ -89,7 +89,7 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testCreateEvent_ThingAddedEvent() throws Exception {
+    public void testCreateEventThingAddedEvent() throws Exception {
         Event event = factory.createEvent(ThingAddedEvent.TYPE, THING_ADDED_EVENT_TOPIC, THING_ADDED_EVENT_PAYLOAD,
                 null);
 
@@ -125,7 +125,7 @@ public class ThingEventFactoryTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testCreateEvent_ChannelTriggeredEvent() throws Exception {
+    public void testCreateEventChannelTriggeredEvent() throws Exception {
         Event event = factory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
                 CHANNEL_TRIGGERED_EVENT_PAYLOAD, null);
 

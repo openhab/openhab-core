@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.thing.UID;
  * <p>
  * <b>Hint:</b> This class is immutable.
  *
- * @author Michael Grammling - Initial Contribution
+ * @author Michael Grammling - Initial contribution
  */
 @NonNullByDefault
 public abstract class AbstractDescriptionType implements Identifiable<UID> {

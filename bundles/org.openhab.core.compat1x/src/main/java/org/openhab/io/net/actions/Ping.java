@@ -22,8 +22,7 @@ import java.net.SocketTimeoutException;
 /**
  * This Action checks the vitality of the given host.
  *
- * @author Thomas.Eichstaedt-Engelen
- * @since 1.0.0
+ * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 public class Ping {
 
@@ -36,11 +35,9 @@ public class Ping {
      * @param host
      * @param port
      * @param timeout
-     *
      * @return <code>true</code> when <code>host</code> is reachable on <code>port</code>
      *         within the given <code>timeout</code> and <code>false</code> in all other
      *         cases.
-     *
      * @throws IOException
      * @throws SocketTimeoutException
      */

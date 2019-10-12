@@ -16,7 +16,6 @@ package org.eclipse.smarthome.auth.oauth2client.internal;
  * Just a place to store all the important, reused keywords.
  *
  * @author Gary Tse - Initial contribution
- *
  */
 public interface Keyword {
 

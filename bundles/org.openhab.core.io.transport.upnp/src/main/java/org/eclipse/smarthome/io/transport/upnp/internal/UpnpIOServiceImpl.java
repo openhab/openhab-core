@@ -72,15 +72,15 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(POOL_NAME);
 
-    private final int DEFAULT_POLLING_INTERVAL = 60;
+    private static final int DEFAULT_POLLING_INTERVAL = 60;
     private static final String POOL_NAME = "upnp-io";
 
     private UpnpService upnpService;
 
     final Set<UpnpIOParticipant> participants = new CopyOnWriteArraySet<>();
-    final Map<UpnpIOParticipant, ScheduledFuture> pollingJobs = new ConcurrentHashMap<UpnpIOParticipant, ScheduledFuture>();
-    final Map<UpnpIOParticipant, Boolean> currentStates = new ConcurrentHashMap<UpnpIOParticipant, Boolean>();
-    final Map<Service, UpnpSubscriptionCallback> subscriptionCallbacks = new ConcurrentHashMap<Service, UpnpSubscriptionCallback>();
+    final Map<UpnpIOParticipant, ScheduledFuture> pollingJobs = new ConcurrentHashMap<>();
+    final Map<UpnpIOParticipant, Boolean> currentStates = new ConcurrentHashMap<>();
+    final Map<Service, UpnpSubscriptionCallback> subscriptionCallbacks = new ConcurrentHashMap<>();
 
     public class UpnpSubscriptionCallback extends SubscriptionCallback {
 
@@ -288,7 +288,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     @Override
     public Map<String, String> invokeAction(UpnpIOParticipant participant, String serviceID, String actionID,
             Map<String, String> inputs) {
-        HashMap<String, String> resultMap = new HashMap<>();
+        Map<String, String> resultMap = new HashMap<>();
 
         if (serviceID != null && actionID != null && participant != null) {
             registerParticipant(participant);

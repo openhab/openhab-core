@@ -18,7 +18,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a OpenState.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Point_Status_OpenState", label = "OpenState", synonyms = "", description = "")
 public interface OpenState extends Status {

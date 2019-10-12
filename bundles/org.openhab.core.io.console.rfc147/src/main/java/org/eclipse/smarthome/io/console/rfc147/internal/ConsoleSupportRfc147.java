@@ -41,8 +41,7 @@ import org.slf4j.LoggerFactory;
  * Read this link to get a short overview about the way to implement commands for RFC 147:
  * https://felix.apache.org/site/rfc-147-overview.html
  *
- * @author Markus Rathgeb - Initial contribution and API
- *
+ * @author Markus Rathgeb - Initial contribution
  */
 @Component(immediate = true, service = {})
 public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
@@ -69,7 +68,7 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
      * known). Otherwise it stores the registered service reference, so we could unregister the command extension later.
      */
     private final Map<ConsoleCommandExtension, ServiceRegistration<?>> commands = Collections
-            .synchronizedMap(new HashMap<ConsoleCommandExtension, ServiceRegistration<?>>());
+            .synchronizedMap(new HashMap<>());
 
     public ConsoleSupportRfc147() {
         // Add our custom help console command extensions.

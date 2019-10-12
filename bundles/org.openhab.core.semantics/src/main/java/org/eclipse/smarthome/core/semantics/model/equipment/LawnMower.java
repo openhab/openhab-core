@@ -19,7 +19,6 @@ import org.eclipse.smarthome.core.semantics.model.TagInfo;
  * This class defines a Lawn Mower.
  * 
  * @author Generated from generateTagClasses.groovy - Initial contribution
- *
  */
 @TagInfo(id = "Equipment_LawnMower", label = "Lawn Mower", synonyms = "Lawn Mowers", description = "")
 public interface LawnMower extends Equipment {

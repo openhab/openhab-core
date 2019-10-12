@@ -19,7 +19,7 @@ import org.openhab.core.automation.internal.TriggerImpl;
 /**
  * This class allows the easy construction of a {@link Trigger} instance using the builder pattern.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
 public class TriggerBuilder extends ModuleBuilder<TriggerBuilder, Trigger> {

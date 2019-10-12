@@ -60,7 +60,7 @@ public class OSGiEventPublisher implements EventPublisher {
             AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
                 @Override
                 public Void run() throws Exception {
-                    Dictionary<String, Object> properties = new Hashtable<String, Object>(3);
+                    Dictionary<String, Object> properties = new Hashtable<>(3);
                     properties.put("type", event.getType());
                     properties.put("payload", event.getPayload());
                     properties.put("topic", event.getTopic());

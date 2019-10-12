@@ -17,15 +17,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
-import org.openhab.core.automation.dto.CompositeConditionTypeDTO;
-import org.openhab.core.automation.dto.ConditionTypeDTO;
 import org.openhab.core.automation.type.CompositeConditionType;
 import org.openhab.core.automation.type.ConditionType;
 
 /**
  * This is a utility class to convert between the respective object and its DTO.
  *
- * @author Markus Rathgeb - Initial contribution and API
+ * @author Markus Rathgeb - Initial contribution
  * @author Ana Dimova - extends Condition Module type DTOs with composites
  */
 public class ConditionTypeDTOMapper extends ModuleTypeDTOMapper {
@@ -58,7 +56,7 @@ public class ConditionTypeDTOMapper extends ModuleTypeDTOMapper {
         if (types == null) {
             return null;
         }
-        final List<ConditionTypeDTO> dtos = new ArrayList<ConditionTypeDTO>(types.size());
+        final List<ConditionTypeDTO> dtos = new ArrayList<>(types.size());
         for (final ConditionType type : types) {
             if (type instanceof CompositeConditionType) {
                 dtos.add(map((CompositeConditionType) type));

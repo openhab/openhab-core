@@ -20,8 +20,7 @@ import org.eclipse.smarthome.core.types.State;
 /**
  * This is a java bean that is used to serialize items to JSON.
  *
- * @author Chris Jackson - Initial Contribution
- *
+ * @author Chris Jackson - Initial contribution
  */
 public class ItemHistoryDTO {
 
@@ -29,7 +28,7 @@ public class ItemHistoryDTO {
     public String totalrecords;
     public String datapoints;
 
-    public List<HistoryDataBean> data = new ArrayList<HistoryDataBean>();
+    public List<HistoryDataBean> data = new ArrayList<>();
 
     public ItemHistoryDTO() {
     };

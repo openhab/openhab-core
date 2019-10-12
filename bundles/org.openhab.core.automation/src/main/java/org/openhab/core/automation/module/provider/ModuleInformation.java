@@ -24,7 +24,6 @@ import org.openhab.core.automation.type.Output;
  * Wrapper class to collect information about actions modules to be created
  *
  * @author Stefan Triller - Initial contribution
- *
  */
 public class ModuleInformation {
     private final Method method;

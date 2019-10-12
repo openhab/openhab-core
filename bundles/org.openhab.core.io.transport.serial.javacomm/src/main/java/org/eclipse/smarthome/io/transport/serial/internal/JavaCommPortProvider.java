@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Matthias Steigenberger - Initial Contribution
- *
+ * @author Matthias Steigenberger - Initial contribution
  */
 @NonNullByDefault
 @Component(service = SerialPortProvider.class)
@@ -53,7 +52,6 @@ public class JavaCommPortProvider implements SerialPortProvider {
             return null;
         }
         return new SerialPortIdentifierImpl(ident);
-
     }
 
     @Override
