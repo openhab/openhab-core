@@ -19,7 +19,7 @@ import java.util.Set;
  * This is the interface that a human language text interpreter has to implement.
  *
  * @author Tilman Kamp - Initial contribution and API
- *
+ * @author Laurent Garnier - extended interface to support chat and intent interpretation
  */
 public interface HumanLanguageInterpreter {
 
@@ -39,13 +39,42 @@ public interface HumanLanguageInterpreter {
     public String getLabel(Locale locale);
 
     /**
-     * Interprets a human language text fragment of a given {@link Locale}
+     * Interprets a human language text fragment of a given {@link Locale} for voice control
+     * Returns a greeting message if the text empty.
      *
      * @param locale language of the text (given by a {@link Locale})
      * @param text the text to interpret
      * @return a human language response
      */
     String interpret(Locale locale, String text) throws InterpretationException;
+
+    /**
+     * Interprets a human language text fragment of a given {@link Locale} for chat dialog
+     * Returns a greeting message if the text empty.
+     *
+     * @param locale language of the text (given by a {@link Locale})
+     * @param text the text to interpret
+     * @return a result including a human language response and a card
+     */
+    InterpretationResult interpretForChat(Locale locale, String text) throws InterpretationException;
+
+    /**
+     * Interprets an intent for voice control
+     *
+     * @param locale the expected language of the result (given by a {@link Locale})
+     * @param intent the intent
+     * @return a human language response
+     */
+    String interpretForVoice(Locale locale, Intent intent) throws InterpretationException;
+
+    /**
+     * Interprets an intent for chat dialog
+     *
+     * @param locale the expected language of the result (given by a {@link Locale})
+     * @param intent the intent
+     * @return a result including a human language response and a card
+     */
+    InterpretationResult interpretForChat(Locale locale, Intent intent) throws InterpretationException;
 
     /**
      * Gets the grammar of all commands of a given {@link Locale} of the interpreter
@@ -69,5 +98,19 @@ public interface HumanLanguageInterpreter {
      * @return Set of supported grammars (each given by a short name)
      */
     Set<String> getSupportedGrammarFormats();
+
+    /**
+     * Get all supported intents suitable for chat dialog handled by the interpreter
+     *
+     * @return Set of supported intents ids suitable for chat dialog, or null if none
+     */
+    Set<String> getSupportedChatIntents();
+
+    /**
+     * Get all supported intents suitable for voice control handled by the interpreter
+     *
+     * @return Set of supported intents ids suitable for voice control, or null if none
+     */
+    Set<String> getSupportedVoiceIntents();
 
 }

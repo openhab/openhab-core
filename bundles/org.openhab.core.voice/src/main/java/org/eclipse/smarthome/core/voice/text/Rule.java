@@ -41,14 +41,14 @@ public abstract class Rule {
      * @param node the resulting AST node of the parse run. To be used as input.
      * @return
      */
-    public abstract InterpretationResult interpretAST(ResourceBundle language, ASTNode node);
+    public abstract RuleResult interpretAST(ResourceBundle language, ASTNode node);
 
-    InterpretationResult execute(ResourceBundle language, TokenList list) {
+    RuleResult execute(ResourceBundle language, TokenList list) {
         ASTNode node = expression.parse(language, list);
         if (node.isSuccess() && node.getRemainingTokens().eof()) {
             return interpretAST(language, node);
         }
-        return InterpretationResult.SYNTAX_ERROR;
+        return RuleResult.SYNTAX_ERROR;
     }
 
     /**

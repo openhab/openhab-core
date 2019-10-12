@@ -50,6 +50,7 @@ import org.eclipse.smarthome.core.voice.TTSService;
 import org.eclipse.smarthome.core.voice.Voice;
 import org.eclipse.smarthome.core.voice.VoiceManager;
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
+import org.eclipse.smarthome.core.voice.text.Intent;
 import org.eclipse.smarthome.core.voice.text.InterpretationException;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -70,6 +71,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort TTS options
+ * @author Laurent Garnier - new interpret API for intent interpretation
  */
 @Component(immediate = true, configurationPid = "org.eclipse.smarthome.voice", property = { //
         Constants.SERVICE_PID + "=org.eclipse.smarthome.voice", //
@@ -276,7 +278,25 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 throw new InterpretationException("No human language interpreter can be found for " + hliId);
             }
         }
-        return interpreter.interpret(localeProvider.getLocale(), text);
+        String answer = interpreter.interpret(localeProvider.getLocale(), text);
+        return (answer == null) ? "" : answer;
+    }
+
+    @Override
+    public String interpret(Intent intent, String hliId) throws InterpretationException {
+        HumanLanguageInterpreter interpreter;
+        if (hliId == null) {
+            interpreter = getHLI();
+            if (interpreter == null) {
+                throw new InterpretationException("No human language interpreter available!");
+            }
+        } else {
+            interpreter = getHLI(hliId);
+            if (interpreter == null) {
+                throw new InterpretationException("No human language interpreter can be found for " + hliId);
+            }
+        }
+        return interpreter.interpretForVoice(localeProvider.getLocale(), intent);
     }
 
     private Voice getVoice(String id) {

@@ -12,85 +12,136 @@
  */
 package org.eclipse.smarthome.core.voice.text;
 
+import java.util.Locale;
+
+import org.eclipse.smarthome.core.voice.chat.Card;
+
 /**
- * Bundles results of an interpretation. Represents final outcome and user feedback. This class is immutable.
+ * The complete object representing a chat reply.
+ * It includes the natural language answer and hint, recognized intent (name and entities), matched items and card.
  *
- * @author Tilman Kamp - Initial contribution and API
- *
+ * @author Laurent Garnier - Initial contribution
  */
-public final class InterpretationResult {
+public class InterpretationResult {
+
+    Locale locale;
+    String answer;
+    String hint;
+    Intent intent;
+    String[] matchedItemNames;
+    Card card;
+
+    public InterpretationResult(Locale locale) {
+        this.locale = locale;
+    }
+
+    public InterpretationResult(Locale locale, String answer) {
+        this.locale = locale;
+        this.answer = answer;
+    }
+
+    public InterpretationResult(Locale locale, Intent intent) {
+        this.locale = locale;
+        this.intent = intent;
+    }
 
     /**
-     * Represents successful parsing and interpretation.
-     */
-    public static final InterpretationResult OK = new InterpretationResult(true, "");
-
-    /**
-     * Represents a syntactical problem during parsing.
-     */
-    public static final InterpretationResult SYNTAX_ERROR = new InterpretationResult(false, "Syntax error.");
-
-    /**
-     * Represents a problem in the interpretation step after successful parsing.
-     */
-    public static final InterpretationResult SEMANTIC_ERROR = new InterpretationResult(false, "Semantic error.");
-
-    private boolean success = false;
-    private InterpretationException exception;
-    private String response;
-
-    /**
-     * Constructs a successful result.
+     * Gets the locale of the answer
      *
-     * @param response the textual response. Should be short, localized and understandable by non-technical users.
+     * @return the locale of the answer
      */
-    public InterpretationResult(String response) {
-        super();
-        this.response = response;
-        this.success = true;
+    public Locale getLocale() {
+        return locale;
     }
 
     /**
-     * Constructs an unsuccessful result.
+     * Gets the natural language answer
      *
-     * @param exception the responsible exception
+     * @return the answer
      */
-    public InterpretationResult(InterpretationException exception) {
-        super();
-        this.exception = exception;
-        this.success = false;
+    public String getAnswer() {
+        return answer;
     }
 
     /**
-     * Constructs a result.
+     * Sets the natural language answer
      *
-     * @param success if the result represents a successful or unsuccessful interpretation
-     * @param response the textual response. Should be short, localized and understandable by non-technical users.
+     * @param answer the answer
      */
-    public InterpretationResult(boolean success, String response) {
-        super();
-        this.success = success;
-        this.response = response;
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 
     /**
-     * @return if interpretation was successful
+     * Gets the hint - usually an indication why the interpretation failed.
+     *
+     * @return the hint
      */
-    public boolean isSuccess() {
-        return success;
+    public String getHint() {
+        return hint;
     }
 
     /**
-     * @return the exception
+     * Sets the hint - usually an indication why the interpretation failed.
+     *
+     * @param hint the hint
      */
-    public InterpretationException getException() {
-        return exception;
+    public void setHint(String hint) {
+        this.hint = hint;
     }
 
     /**
-     * @return the response
+     * Gets the recognized intent
+     *
+     * @return the intent
      */
-    public String getResponse() {
-        return response;
+    public Intent getIntent() {
+        return intent;
     }
+
+    /**
+     * Sets the recognized intent
+     *
+     * @param intent the intent
+     */
+    public void setIntent(Intent intent) {
+        this.intent = intent;
+    }
+
+    /**
+     * Gets the item names matched by the intent entities
+     *
+     * @return the matched item names
+     */
+    public String[] getMatchedItemNames() {
+        return matchedItemNames;
+    }
+
+    /**
+     * Sets the item names matched by the intent entities
+     *
+     * @param matchedItemNames the matched item names
+     */
+    public void setMatchedItems(String[] matchedItemNames) {
+        this.matchedItemNames = matchedItemNames;
+    }
+
+    /**
+     * Gets the {@link Card} to present with the answer
+     *
+     * @return the card
+     */
+    public Card getCard() {
+        return card;
+    }
+
+    /**
+     * Sets the {@link Card} to present with the answer
+     *
+     * @return the card
+     */
+    public void setCard(Card card) {
+        this.card = card;
+    }
+
 }

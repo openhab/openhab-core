@@ -22,6 +22,7 @@ import org.eclipse.smarthome.core.audio.AudioSink;
 import org.eclipse.smarthome.core.audio.AudioSource;
 import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
+import org.eclipse.smarthome.core.voice.text.Intent;
 import org.eclipse.smarthome.core.voice.text.InterpretationException;
 
 /**
@@ -29,6 +30,7 @@ import org.eclipse.smarthome.core.voice.text.InterpretationException;
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Christoph Weitkamp - Added parameter to adjust the volume
+ * @author Laurent Garnier - new interpret API for intent interpretation
  *
  */
 @NonNullByDefault
@@ -94,7 +96,7 @@ public interface VoiceManager {
     void say(String text, @Nullable String voiceId, @Nullable String sinkId, @Nullable PercentType volume);
 
     /**
-     * Interprets the passed string using the default services for HLI and locale.
+     * Interprets the passed string for voice control using the default services for HLI and locale.
      *
      * @param text The text to interpret
      * @throws InterpretationException
@@ -103,7 +105,7 @@ public interface VoiceManager {
     String interpret(String text) throws InterpretationException;
 
     /**
-     * Interprets the passed string using a particular HLI service and the default locale.
+     * Interprets the passed string for voice control using a particular HLI service and the default locale.
      *
      * @param text The text to interpret
      * @param hliId The id of the HLI service to use or null
@@ -111,6 +113,16 @@ public interface VoiceManager {
      * @return a human language response
      */
     String interpret(String text, @Nullable String hliId) throws InterpretationException;
+
+    /**
+     * Interprets the passed intent for voice control using a particular HLI service and the default locale.
+     *
+     * @param intent The intent to interpret
+     * @param hliId The id of the HLI service to use or null
+     * @throws InterpretationException
+     * @return a human language response
+     */
+    String interpret(Intent intent, @Nullable String hliId) throws InterpretationException;
 
     /**
      * Determines the preferred voice for the currently set locale

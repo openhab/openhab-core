@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
+import org.eclipse.smarthome.core.voice.text.InterpretationResult;
 
 /**
  * Mapper class that maps {@link HumanLanguageInterpreter} instanced to their respective DTOs.
@@ -45,6 +46,26 @@ public class HLIMapper {
                 dto.locales.add(supportedLocale.toString());
             }
         }
+        dto.chatIntents = hli.getSupportedChatIntents();
+        dto.voiceIntents = hli.getSupportedVoiceIntents();
+        return dto;
+    }
+
+    /**
+     * Maps a {@link InterpretationResult} to an {@link InterpretationResultDTO}.
+     *
+     * @param result the interpretation result
+     *
+     * @return the corresponding DTO
+     */
+    public static InterpretationResultDTO map(InterpretationResult result) {
+        InterpretationResultDTO dto = new InterpretationResultDTO();
+        dto.language = (result.getLocale() == null) ? null : result.getLocale().toString();
+        dto.answer = result.getAnswer();
+        dto.hint = result.getHint();
+        dto.intent = result.getIntent();
+        dto.matchedItemNames = result.getMatchedItemNames();
+        dto.card = result.getCard();
         return dto;
     }
 

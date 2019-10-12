@@ -24,7 +24,9 @@ import org.eclipse.smarthome.core.items.ItemUtil;
 import org.eclipse.smarthome.core.items.events.ItemEventFactory;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
+import org.eclipse.smarthome.core.voice.text.Intent;
 import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.eclipse.smarthome.core.voice.text.InterpretationResult;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -97,6 +99,21 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
     }
 
     @Override
+    public InterpretationResult interpretForChat(Locale locale, String text) throws InterpretationException {
+        throw new InterpretationException("Chat dialog not supported by the rule-based interpreter");
+    }
+
+    @Override
+    public String interpretForVoice(Locale locale, Intent intent) throws InterpretationException {
+        throw new InterpretationException("Intent interpretation not supported by the rule-based interpreter");
+    }
+
+    @Override
+    public InterpretationResult interpretForChat(Locale locale, Intent intent) throws InterpretationException {
+        throw new InterpretationException("Intent interpretation not supported by the rule-based interpreter");
+    }
+
+    @Override
     public String getGrammar(Locale locale, String format) {
         return null;
     }
@@ -110,6 +127,16 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
     @Override
     public Set<String> getSupportedGrammarFormats() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> getSupportedChatIntents() {
+        return null;
+    }
+
+    @Override
+    public Set<String> getSupportedVoiceIntents() {
+        return null;
     }
 
 }
