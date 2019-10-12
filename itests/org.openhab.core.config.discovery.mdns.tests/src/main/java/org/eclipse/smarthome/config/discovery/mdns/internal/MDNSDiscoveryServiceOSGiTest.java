@@ -46,11 +46,13 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
      */
     @Test
     public void testDynamicConfigurationOfBackgroundDiscovery() throws IOException {
-        setBackgroundDiscoveryViaConfigAdmin(true);
         waitForAssert(() -> assertThat(mdnsDiscoveryService.isBackgroundDiscoveryEnabled(), is(true)), 5000, 100);
 
         setBackgroundDiscoveryViaConfigAdmin(false);
         waitForAssert(() -> assertThat(mdnsDiscoveryService.isBackgroundDiscoveryEnabled(), is(false)), 5000, 100);
+
+        setBackgroundDiscoveryViaConfigAdmin(true);
+        waitForAssert(() -> assertThat(mdnsDiscoveryService.isBackgroundDiscoveryEnabled(), is(true)), 5000, 100);
     }
 
     private void setBackgroundDiscoveryViaConfigAdmin(boolean status) throws IOException {
