@@ -35,6 +35,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.io.transport.mqtt.internal.ClientCallback;
 import org.eclipse.smarthome.io.transport.mqtt.internal.TopicSubscribers;
 import org.eclipse.smarthome.io.transport.mqtt.internal.client.Mqtt3AsyncClientWrapper;
+import org.eclipse.smarthome.io.transport.mqtt.internal.client.Mqtt5AsyncClientWrapper;
 import org.eclipse.smarthome.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
 import org.eclipse.smarthome.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
 import org.eclipse.smarthome.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
@@ -61,7 +62,7 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
  * @author David Graeff - All operations are async now. More flexible sslContextProvider and reconnectStrategy added.
  * @author Markus Rathgeb - added connection state callback
  * @author Jan N. Klug - changed from PAHO to HiveMQ client
-*/
+ */
 @NonNullByDefault
 public class MqttBrokerConnection {
     final Logger logger = LoggerFactory.getLogger(MqttBrokerConnection.class);
@@ -74,13 +75,22 @@ public class MqttBrokerConnection {
     public enum Protocol {
         TCP,
         WEBSOCKETS
-    };
+    }
 
-    /// Connection parameters
+    /**
+     * MQTT version (currently v3 and v5)
+     */
+    public enum MqttVersion {
+        V3,
+        V5
+    }
+
+    // Connection parameters
     protected final Protocol protocol;
     protected final String host;
     protected final int port;
     protected final boolean secure;
+    protected final MqttVersion mqttVersion;
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
     private SSLContextProvider sslContextProvider = new CustomSSLContextProvider(trustManagerFactory);
@@ -90,6 +100,7 @@ public class MqttBrokerConnection {
 
     /// Configuration variables
     private int qos = DEFAULT_QOS;
+    @Deprecated
     private boolean retain = false;
     private @Nullable MqttWillAndTestament lastWill;
     protected @Nullable AbstractReconnectStrategy reconnectStrategy;
@@ -112,6 +123,7 @@ public class MqttBrokerConnection {
      * The callback will interact with the {@link AbstractReconnectStrategy} as well as inform registered
      * {@link MqttConnectionObserver}s.
      */
+    @NonNullByDefault
     public class ConnectionCallback implements MqttClientConnectedListener, MqttClientDisconnectedListener {
         private final MqttBrokerConnection connection;
         private final Runnable cancelTimeoutFuture;
@@ -122,7 +134,6 @@ public class MqttBrokerConnection {
             this.cancelTimeoutFuture = mqttBrokerConnectionImpl::cancelTimeoutFuture;
         }
 
-        @Override
         public void onConnected(@Nullable MqttClientConnectedContext context) {
             cancelTimeoutFuture.run();
 
@@ -143,7 +154,6 @@ public class MqttBrokerConnection {
             });
         }
 
-        @Override
         public void onDisconnected(@Nullable MqttClientDisconnectedContext context) {
             if (context != null) {
                 final Throwable throwable = context.getCause();
@@ -175,13 +185,13 @@ public class MqttBrokerConnection {
         }
     }
 
-    /** Client callback object */
+    // Client callback object
     protected ClientCallback clientCallback = new ClientCallback(this, connectionObservers, subscribers);
-    /** Connection callback object */
+    // Connection callback object
     protected ConnectionCallback connectionCallback;
 
     /**
-     * Create a new TCP MQTT client connection to a server with the given host and port.
+     * Create a new TCP MQTT3 client connection to a server with the given host and port.
      *
      * @param host A host name or address
      * @param port A port or null to select the default port for a secure or insecure connection
@@ -197,7 +207,7 @@ public class MqttBrokerConnection {
     }
 
     /**
-     * Create a new MQTT client connection to a server with the given protocol, host and port.
+     * Create a new MQTT3 client connection to a server with the given protocol, mqtt client version,  host and port.
      *
      * @param protocol The transport protocol
      * @param host A host name or address
@@ -211,9 +221,47 @@ public class MqttBrokerConnection {
      */
     public MqttBrokerConnection(Protocol protocol, String host, @Nullable Integer port, boolean secure,
             @Nullable String clientId) {
+        this(protocol, MqttVersion.V3, host, port, secure, clientId);
+    }
+
+    /**
+     * Create a new TCP MQTT client connection to a server with the given mqtt client version, host and port.
+     *
+     * @param mqttVersion The version of the MQTT client (v3 or v5)
+     * @param host A host name or address
+     * @param port A port or null to select the default port for a secure or insecure connection
+     * @param secure A secure connection
+     * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
+     *            used for access restriction implementations.
+     *            If none is specified, a default is generated. The client id cannot be longer than 65535
+     *            characters.
+     * @throws IllegalArgumentException If the client id or port is not valid.
+     */
+    public MqttBrokerConnection(MqttVersion mqttVersion, String host, @Nullable Integer port, boolean secure,
+            @Nullable String clientId) {
+        this(Protocol.TCP, mqttVersion, host, port, secure, clientId);
+    }
+
+    /**
+     * Create a new MQTT client connection to a server with the given protocol, host and port.
+     *
+     * @param protocol The transport protocol
+     * @param mqttVersion The version of the MQTT client (v3 or v5)
+     * @param host A host name or address
+     * @param port A port or null to select the default port for a secure or insecure connection
+     * @param secure A secure connection
+     * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
+     *            used for access restriction implementations.
+     *            If none is specified, a default is generated. The client id cannot be longer than 65535
+     *            characters.
+     * @throws IllegalArgumentException If the client id or port is not valid.
+     */
+    public MqttBrokerConnection(Protocol protocol, MqttVersion mqttVersion, String host, @Nullable Integer port,
+            boolean secure, @Nullable String clientId) {
         this.protocol = protocol;
         this.host = host;
         this.secure = secure;
+        this.mqttVersion = mqttVersion;
         String newClientID = clientId;
         if (newClientID == null) {
             newClientID = UUID.randomUUID().toString();
@@ -234,7 +282,7 @@ public class MqttBrokerConnection {
      * state to the MQTT broker changed.
      *
      * The reconnect strategy will not be informed if the initial connection to the broker
-     * timed out. You need a timeout executor additionally, see {@link #setTimeoutExecutor(Executor)}.
+     * timed out. You need a timeout executor additionally, see {@link #setTimeoutExecutor(ScheduledExecutorService, int)}.
      *
      * @param reconnectStrategy The reconnect strategy. May not be null.
      */
@@ -426,7 +474,6 @@ public class MqttBrokerConnection {
      */
     @Deprecated
     public void setPersistencePath(final @Nullable Path persistencePath) {
-
     }
 
     /**
@@ -701,9 +748,13 @@ public class MqttBrokerConnection {
     }
 
     protected MqttAsyncClientWrapper createClient() {
-        Mqtt3AsyncClientWrapper client = new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, secure,
-                connectionCallback, trustManagerFactory);
-        return client;
+        if (mqttVersion == MqttVersion.V3) {
+            return new Mqtt3AsyncClientWrapper(host, port, clientId, protocol, secure, connectionCallback,
+                    trustManagerFactory);
+        } else {
+            return new Mqtt5AsyncClientWrapper(host, port, clientId, protocol, secure, connectionCallback,
+                    trustManagerFactory);
+        }
     }
 
     /**
@@ -842,7 +893,6 @@ public class MqttBrokerConnection {
      * @param payload The message payload
      * @param qos The quality of service for this message
      * @param retain Set to true to retain the message on the broker
-     * @param listener An optional listener to be notified of success or failure of the delivery.
      * @return Returns a future that completes with a result of true if the publishing succeeded and completes
      *         exceptionally on an error or with a result of false if no broker connection is established.
      */

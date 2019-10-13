@@ -70,7 +70,6 @@ public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
         Mqtt5Subscribe subscribeMessage = Mqtt5Subscribe.builder().topicFilter(topic).qos(getMqttQosFromInt(qos))
                 .build();
         return client.subscribe(subscribeMessage, clientCallback::messageArrived);
-
     }
 
     @Override

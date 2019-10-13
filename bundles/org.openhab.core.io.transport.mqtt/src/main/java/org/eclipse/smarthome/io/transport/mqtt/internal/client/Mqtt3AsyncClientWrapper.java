@@ -69,7 +69,6 @@ public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
         Mqtt3Subscribe subscribeMessage = Mqtt3Subscribe.builder().topicFilter(topic).qos(getMqttQosFromInt(qos))
                 .build();
         return client.subscribe(subscribeMessage, clientCallback::messageArrived);
-
     }
 
     @Override
