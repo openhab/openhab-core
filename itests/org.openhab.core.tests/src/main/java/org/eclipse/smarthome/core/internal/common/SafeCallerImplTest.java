@@ -54,13 +54,13 @@ public class SafeCallerImplTest extends JavaTest {
     private static final int THREAD_POOL_SIZE = 3;
 
     // the duration that the called object should block for
-    private static final int BLOCK = 500;
+    private static final int BLOCK = 1000;
 
     // the standard timeout for the safe-caller used in most tests
-    private static final int TIMEOUT = 200;
+    private static final int TIMEOUT = 500;
 
     // the grace period allowed for processing before a timing assertion should fail
-    private static final int GRACE = 100;
+    private static final int GRACE = 300;
 
     public @Rule TestName name = new TestName();
 
