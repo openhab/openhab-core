@@ -53,7 +53,7 @@ public interface SystemProfiles {
 
     TriggerProfileType RAWBUTTON_ON_OFF_SWITCH_TYPE = ProfileTypeBuilder
             .newTrigger(RAWBUTTON_ON_OFF_SWITCH, "Raw Button On Off Switch")
-            .withSupportedItemTypes(CoreItemFactory.SWITCH)
+            .withSupportedItemTypes(CoreItemFactory.SWITCH, CoreItemFactory.DIMMER, CoreItemFactory.COLOR)
             .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON.getUID()).build();
 
     TriggerProfileType RAWBUTTON_TOGGLE_PLAYER_TYPE = ProfileTypeBuilder
@@ -108,5 +108,4 @@ public interface SystemProfiles {
 
     StateProfileType TIMESTAMP_UPDATE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_UPDATE, "Timestamp on update")
             .withSupportedItemTypes(CoreItemFactory.DATETIME).build();
-
 }

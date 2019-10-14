@@ -27,7 +27,6 @@ import org.mockito.Mock;
 /**
  *
  * @author Mark Hilbush - Initial contribution
- *
  */
 public class RawButtonOnOffSwitchProfileTest {
 
@@ -51,5 +50,4 @@ public class RawButtonOnOffSwitchProfileTest {
         profile.onTriggerFromHandler(trigger);
         verify(mockCallback, times(1)).sendCommand(eq(expectation));
     }
-
 }
