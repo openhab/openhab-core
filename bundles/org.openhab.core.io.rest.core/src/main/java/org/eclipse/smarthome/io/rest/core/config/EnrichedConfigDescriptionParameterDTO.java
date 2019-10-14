@@ -27,7 +27,8 @@ import org.eclipse.smarthome.config.core.dto.FilterCriteriaDTO;
 import org.eclipse.smarthome.config.core.dto.ParameterOptionDTO;
 
 /**
- * This is a data transfer object that is used to serialize parameter of an enriched configuration description.
+ * This is an enriched data transfer object that is used to serialize config descriptions parameters with a list of
+ * default values if a configuration description defines <code>multiple="true"</code>.
  *
  * @author Christoph Weitkamp - Initial contribution
  */

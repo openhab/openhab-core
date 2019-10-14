@@ -24,8 +24,9 @@ import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
 import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
 
 /**
- * The {@link EnrichedConfigDescriptionDTOMapper} is a utility class to map config descriptions into config
- * descriptions data transform objects (DTOs) containing enriched config descriptions parameters.
+ * The {@link EnrichedConfigDescriptionDTOMapper} is a utility class to map {@link ConfigDescription}s to config
+ * descriptions data transform objects {@link ConfigDescriptionDTO} containing
+ * {@link EnrichedConfigDescriptionParameterDTO}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
@@ -45,6 +46,12 @@ public class EnrichedConfigDescriptionDTOMapper extends ConfigDescriptionDTOMapp
         return new ConfigDescriptionDTO(toDecodedString(configDescription.getUID()), parameters, parameterGroups);
     }
 
+    /**
+     * Maps configuration description parameters into enriched DTO objects.
+     *
+     * @param parameters the configuration description parameters (not null)
+     * @return the parameter enriched DTO objects
+     */
     public static List<ConfigDescriptionParameterDTO> mapEnrichedParameters(
             List<ConfigDescriptionParameter> parameters) {
         List<ConfigDescriptionParameterDTO> configDescriptionParameterBeans = new ArrayList<>(parameters.size());
