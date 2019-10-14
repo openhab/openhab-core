@@ -275,7 +275,7 @@ public class QueueingThreadPoolExecutorTest {
     private static abstract class AbstractRunnable implements Runnable {
         private static AtomicInteger runs = new AtomicInteger(0);
 
-        protected Logger logger = LoggerFactory.getLogger(this.getClass());
+        protected final Logger logger = LoggerFactory.getLogger(AbstractRunnable.class);
 
         protected void sleep(int milliseconds) {
             try {

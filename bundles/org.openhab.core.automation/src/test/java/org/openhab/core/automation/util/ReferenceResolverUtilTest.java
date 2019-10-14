@@ -40,7 +40,7 @@ public class ReferenceResolverUtilTest {
     private static final Map<String, String> COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES = new HashMap<>();
     private static final Map<String, Object> EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT = new HashMap<>();
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(ReferenceResolverUtilTest.class);
 
     static {
         // context from where references will be taken

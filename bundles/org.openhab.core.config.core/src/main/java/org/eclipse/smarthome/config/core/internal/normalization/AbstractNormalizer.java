@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractNormalizer implements Normalizer {
 
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(AbstractNormalizer.class);
 
     @Override
     public final Object normalize(Object value) {

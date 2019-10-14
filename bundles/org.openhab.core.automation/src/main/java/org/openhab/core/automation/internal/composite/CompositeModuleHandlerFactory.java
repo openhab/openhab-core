@@ -57,7 +57,7 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
 
     private final ModuleTypeRegistry mtRegistry;
     private final RuleEngineImpl ruleEngine;
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(CompositeModuleHandlerFactory.class);
 
     /**
      * The constructor of system handler factory for composite module types.

@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractScriptModuleHandler<T extends Module> extends BaseModuleHandler<T> {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(AbstractScriptModuleHandler.class);
 
     /** Constant defining the configuration parameter of modules that specifies the mime type of a script */
     protected static final String SCRIPT_TYPE = "type";

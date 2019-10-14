@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractFileProvider<E> implements Provider<E> {
 
     protected static final String CONFIG_PROPERTY_ROOTS = "roots";
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(AbstractFileProvider.class);
 
     protected String rootSubdirectory;
     protected String[] configurationRoots;

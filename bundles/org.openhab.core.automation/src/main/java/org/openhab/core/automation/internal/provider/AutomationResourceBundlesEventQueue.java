@@ -38,7 +38,7 @@ public class AutomationResourceBundlesEventQueue<E> implements Runnable {
     /**
      * This field keeps instance of {@link Logger} that is used for logging.
      */
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(AutomationResourceBundlesEventQueue.class);
 
     /**
      * This field serves for saving the BundleEvents for the bundles providing automation resources until their
