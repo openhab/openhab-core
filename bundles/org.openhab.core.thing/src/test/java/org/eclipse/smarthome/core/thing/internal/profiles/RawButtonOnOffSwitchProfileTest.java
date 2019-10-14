@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 /**
+ * Tests for the system:rawbutton-on-off-switch profile
  *
  * @author Mark Hilbush - Initial contribution
  */
