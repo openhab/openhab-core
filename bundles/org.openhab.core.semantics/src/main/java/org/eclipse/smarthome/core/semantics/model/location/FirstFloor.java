@@ -12,13 +12,15 @@
  */
 package org.eclipse.smarthome.core.semantics.model.location;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a First Floor.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Location_Indoor_Floor_FirstFloor", label = "First Floor", synonyms = "First Floors, Upstairs", description = "")
 public interface FirstFloor extends Floor {
 }

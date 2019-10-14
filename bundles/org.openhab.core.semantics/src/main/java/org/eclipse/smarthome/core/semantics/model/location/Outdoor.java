@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model.location;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Location;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Outdoor.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Location_Outdoor", label = "Outdoor", synonyms = "", description = "")
 public interface Outdoor extends Location {
 }

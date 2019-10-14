@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model.equipment;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Equipment;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a HVAC.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Equipment_HVAC", label = "HVAC", synonyms = "Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC", description = "")
 public interface HVAC extends Equipment {
 }

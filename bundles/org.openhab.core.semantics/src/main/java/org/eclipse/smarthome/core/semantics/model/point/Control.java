@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model.point;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Point;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Control.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Point_Control", label = "Control", synonyms = "", description = "")
 public interface Control extends Point {
 }

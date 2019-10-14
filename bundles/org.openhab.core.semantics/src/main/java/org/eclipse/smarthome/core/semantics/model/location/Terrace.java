@@ -12,13 +12,15 @@
  */
 package org.eclipse.smarthome.core.semantics.model.location;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Terrace.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Location_Outdoor_Terrace", label = "Terrace", synonyms = "Terraces, Deck, Decks", description = "")
 public interface Terrace extends Outdoor {
 }

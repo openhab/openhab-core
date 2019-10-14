@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model.property;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Property;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Wind.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Property_Wind", label = "Wind", synonyms = "", description = "")
 public interface Wind extends Property {
 }

@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model.equipment;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Equipment;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a White Good.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Equipment_WhiteGood", label = "White Good", synonyms = "White Goods", description = "")
 public interface WhiteGood extends Equipment {
 }

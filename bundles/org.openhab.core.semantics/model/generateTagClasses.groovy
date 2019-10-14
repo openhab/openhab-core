@@ -64,6 +64,7 @@ def createTagSetClass(def line, String tagSet) {
     def file = new FileWriter("../src/main/java/org/eclipse/smarthome/core/semantics/model/" + pkg + "/" + tag + ".java")
     file.write(header())
     file.write("package org.eclipse.smarthome.core.semantics.model." + pkg + ";\n\n")
+    file.write("import org.eclipse.jdt.annotation.NonNullByDefault;\n")
     if(!parent) {
             file.write("import org.eclipse.smarthome.core.semantics.model." + type + ";\n")
     }
@@ -71,10 +72,10 @@ def createTagSetClass(def line, String tagSet) {
 
 /**
  * This class defines a ${label}.
- * 
- * @author Generated from generateTagClasses.groovy - Initial contribution
  *
+ * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "${tagSet}", label = "${label}", synonyms = "${synonyms}", description = "${desc}")
 public interface ${tag} extends ${parentClass} {
 }
@@ -99,14 +100,15 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Location;
 
 /**
  * This class provides a stream of all defined locations.
- * 
- * @author Generated from generateTagClasses.groovy - Initial contribution
  *
+ * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 public class Locations {
 
     static final Set<Class<? extends Location>> LOCATIONS = new HashSet<>();
@@ -138,14 +140,15 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Equipment;
 
 /**
  * This class provides a stream of all defined equipments.
- * 
- * @author Generated from generateTagClasses.groovy - Initial contribution
  *
+ * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 public class Equipments {
 
     static final Set<Class<? extends Equipment>> EQUIPMENTS = new HashSet<>();
@@ -177,14 +180,15 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Point;
 
 /**
  * This class provides a stream of all defined points.
- * 
- * @author Generated from generateTagClasses.groovy - Initial contribution
  *
+ * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 public class Points {
 
     static final Set<Class<? extends Point>> POINTS = new HashSet<>();
@@ -216,14 +220,15 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Property;
 
 /**
  * This class provides a stream of all defined properties.
- * 
- * @author Generated from generateTagClasses.groovy - Initial contribution
  *
+ * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 public class Properties {
 
     static final Set<Class<? extends Property>> PROPERTIES = new HashSet<>();

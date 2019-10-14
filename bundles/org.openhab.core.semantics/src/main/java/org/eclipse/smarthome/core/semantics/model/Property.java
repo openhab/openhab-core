@@ -12,11 +12,14 @@
  */
 package org.eclipse.smarthome.core.semantics.model;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is the super interface for all property tags.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "MeasurementProperty")
 public interface Property extends Tag {
 }

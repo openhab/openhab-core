@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model.equipment;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Equipment;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Cleaning Robot.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Equipment_CleaningRobot", label = "Cleaning Robot", synonyms = "Cleaning Robots, Vacuum robot, Vacuum robots", description = "")
 public interface CleaningRobot extends Equipment {
 }

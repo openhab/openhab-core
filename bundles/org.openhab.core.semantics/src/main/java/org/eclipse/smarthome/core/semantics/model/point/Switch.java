@@ -12,13 +12,15 @@
  */
 package org.eclipse.smarthome.core.semantics.model.point;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Switch.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Point_Control_Switch", label = "Switch", synonyms = "", description = "")
 public interface Switch extends Control {
 }

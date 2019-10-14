@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model.property;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Property;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a CO.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Property_CO", label = "CO", synonyms = "Carbon Monoxide", description = "")
 public interface CO extends Property {
 }
