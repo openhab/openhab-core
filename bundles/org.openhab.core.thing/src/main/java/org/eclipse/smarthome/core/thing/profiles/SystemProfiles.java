@@ -29,6 +29,7 @@ public interface SystemProfiles {
     ProfileTypeUID DEFAULT = new ProfileTypeUID(SYSTEM_SCOPE, "default");
     ProfileTypeUID FOLLOW = new ProfileTypeUID(SYSTEM_SCOPE, "follow");
     ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
+    ProfileTypeUID RAWBUTTON_ON_OFF_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-on-off-switch");
     ProfileTypeUID RAWBUTTON_TOGGLE_PLAYER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-player");
     ProfileTypeUID RAWBUTTON_TOGGLE_ROLLERSHUTTER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-rollershutter");
     ProfileTypeUID RAWBUTTON_TOGGLE_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-switch");
@@ -49,6 +50,11 @@ public interface SystemProfiles {
     StateProfileType OFFSET_TYPE = ProfileTypeBuilder.newState(OFFSET, "Offset")
             .withSupportedItemTypes(CoreItemFactory.NUMBER).withSupportedItemTypesOfChannel(CoreItemFactory.NUMBER)
             .build();
+
+    TriggerProfileType RAWBUTTON_ON_OFF_SWITCH_TYPE = ProfileTypeBuilder
+            .newTrigger(RAWBUTTON_ON_OFF_SWITCH, "Raw Button On Off Switch")
+            .withSupportedItemTypes(CoreItemFactory.SWITCH, CoreItemFactory.DIMMER, CoreItemFactory.COLOR)
+            .withSupportedChannelTypeUIDs(DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON.getUID()).build();
 
     TriggerProfileType RAWBUTTON_TOGGLE_PLAYER_TYPE = ProfileTypeBuilder
             .newTrigger(RAWBUTTON_TOGGLE_PLAYER, "Raw Button Toggle Player")
@@ -102,5 +108,4 @@ public interface SystemProfiles {
 
     StateProfileType TIMESTAMP_UPDATE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_UPDATE, "Timestamp on update")
             .withSupportedItemTypes(CoreItemFactory.DATETIME).build();
-
 }
