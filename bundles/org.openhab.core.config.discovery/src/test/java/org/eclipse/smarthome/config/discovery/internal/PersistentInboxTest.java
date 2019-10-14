@@ -100,7 +100,6 @@ public class PersistentInboxTest {
         inbox = new PersistentInbox(storageService, mock(DiscoveryServiceRegistry.class), thingRegistry, thingProvider,
                 thingTypeRegistry, configDescriptionRegistry);
         inbox.addThingHandlerFactory(thingHandlerFactory);
-        inbox.activate();
     }
 
     @Test
@@ -113,7 +112,10 @@ public class PersistentInboxTest {
         when(thingRegistry.get(eq(THING_UID))).thenReturn(thing);
 
         assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
+
+        inbox.activate();
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
+
         assertTrue(thing.getConfiguration().get("foo") instanceof BigDecimal);
         assertEquals(new BigDecimal(3), thing.getConfiguration().get("foo"));
     }
@@ -128,7 +130,10 @@ public class PersistentInboxTest {
         when(thingRegistry.get(eq(THING_UID))).thenReturn(thing);
 
         assertTrue(thing.getConfiguration().get("foo") instanceof String);
+
+        inbox.activate();
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
+
         assertTrue(thing.getConfiguration().get("foo") instanceof String);
         assertEquals("3", thing.getConfiguration().get("foo"));
     }
@@ -139,6 +144,7 @@ public class PersistentInboxTest {
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(storage.getValues()).thenReturn(Collections.singletonList(result));
 
+        inbox.activate();
         inbox.approve(THING_UID, "Test");
 
         assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
@@ -156,6 +162,7 @@ public class PersistentInboxTest {
                 .thenReturn(null) //
                 .thenReturn(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", "bar").build());
 
+        inbox.activate();
         inbox.add(result);
 
         // 1st call checks existence of the result in the storage (returns null)
@@ -179,6 +186,7 @@ public class PersistentInboxTest {
                 .thenReturn(result) //
                 .thenReturn(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", "bar").build());
 
+        inbox.activate();
         inbox.add(result);
 
         // 1st call checks existence of the result in the storage (returns the original result)
