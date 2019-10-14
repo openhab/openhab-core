@@ -100,6 +100,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return new SystemFollowProfile(callback);
         } else if (OFFSET.equals(profileTypeUID)) {
             return new SystemOffsetProfile(callback, context);
+        } else if (RAWBUTTON_ON_OFF_SWITCH.equals(profileTypeUID)) {
+            return new RawButtonOnOffSwitchProfile(callback);
         } else if (RAWBUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
             return new RawButtonToggleSwitchProfile(callback);
         } else if (RAWBUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
