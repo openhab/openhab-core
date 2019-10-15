@@ -22,7 +22,6 @@ import org.eclipse.smarthome.core.voice.text.InterpretationResult;
  * @author Laurent Garnier - Initial contribution
  */
 public class InterpretationResultDTO {
-
     String language;
     String answer;
     String hint;

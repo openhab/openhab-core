@@ -16,24 +16,25 @@ package org.eclipse.smarthome.core.voice.text;
  * Bundles results of an interpretation. Represents final outcome and user feedback. This class is immutable.
  *
  * @author Tilman Kamp - Initial contribution
- * @author Laurent Garnier - class renamed
+ * @author Laurent Garnier - class renamed from InterpretationResult into RuleInterpretationResult
  */
-public final class RuleResult {
+public final class RuleInterpretationResult {
 
     /**
      * Represents successful parsing and interpretation.
      */
-    public static final RuleResult OK = new RuleResult(true, "");
+    public static final RuleInterpretationResult OK = new RuleInterpretationResult(true, "");
 
     /**
      * Represents a syntactical problem during parsing.
      */
-    public static final RuleResult SYNTAX_ERROR = new RuleResult(false, "Syntax error.");
+    public static final RuleInterpretationResult SYNTAX_ERROR = new RuleInterpretationResult(false, "Syntax error.");
 
     /**
      * Represents a problem in the interpretation step after successful parsing.
      */
-    public static final RuleResult SEMANTIC_ERROR = new RuleResult(false, "Semantic error.");
+    public static final RuleInterpretationResult SEMANTIC_ERROR = new RuleInterpretationResult(false,
+            "Semantic error.");
 
     private boolean success = false;
     private InterpretationException exception;
@@ -44,7 +45,7 @@ public final class RuleResult {
      *
      * @param response the textual response. Should be short, localized and understandable by non-technical users.
      */
-    public RuleResult(String response) {
+    public RuleInterpretationResult(String response) {
         super();
         this.response = response;
         this.success = true;
@@ -55,7 +56,7 @@ public final class RuleResult {
      *
      * @param exception the responsible exception
      */
-    public RuleResult(InterpretationException exception) {
+    public RuleInterpretationResult(InterpretationException exception) {
         super();
         this.exception = exception;
         this.success = false;
@@ -67,7 +68,7 @@ public final class RuleResult {
      * @param success if the result represents a successful or unsuccessful interpretation
      * @param response the textual response. Should be short, localized and understandable by non-technical users.
      */
-    public RuleResult(boolean success, String response) {
+    public RuleInterpretationResult(boolean success, String response) {
         super();
         this.success = success;
         this.response = response;

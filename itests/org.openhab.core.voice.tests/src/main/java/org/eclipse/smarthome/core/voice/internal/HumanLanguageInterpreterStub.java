@@ -12,11 +12,15 @@
  */
 package org.eclipse.smarthome.core.voice.internal;
 
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
 import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.eclipse.smarthome.core.voice.text.InterpretationResult;
 
 /**
  * A {@link HumanLanguageInterpreter} stub used for the tests. Since the tests do not cover
@@ -47,12 +51,12 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public String getLabel(@Nullable Locale locale) {
         return HLI_STUB_LABEL;
     }
 
     @Override
-    public String interpret(Locale locale, String text) throws InterpretationException {
+    public @Nullable String interpret(Locale locale, String text) throws InterpretationException {
         if (isInterpretationExceptionExpected) {
             throw new InterpretationException(EXCEPTION_MESSAGE);
         } else {
@@ -61,7 +65,13 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
     }
 
     @Override
-    public String getGrammar(Locale locale, String format) {
+    public @NonNull InterpretationResult interpretForChat(@NonNull Locale locale, @NonNull String text)
+            throws InterpretationException {
+        throw new InterpretationException(EXCEPTION_MESSAGE);
+    }
+
+    @Override
+    public @Nullable String getGrammar(Locale locale, String format) {
         // This method will not be used in the tests
         return null;
     }
@@ -69,13 +79,13 @@ public class HumanLanguageInterpreterStub implements HumanLanguageInterpreter {
     @Override
     public Set<Locale> getSupportedLocales() {
         // This method will not be used in the tests
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<String> getSupportedGrammarFormats() {
         // This method will not be used in the tests
-        return null;
+        return Collections.emptySet();
     }
 
     @Override

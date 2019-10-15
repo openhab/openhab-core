@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemPredicates;
 import org.eclipse.smarthome.core.items.ItemRegistry;
@@ -44,38 +46,44 @@ import org.osgi.service.component.annotations.Reference;
  * This class resolves items and provide name samples using Eclipse SmartHome's semantics feature.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - Moved from HABot + null annotations added
  */
+@NonNullByDefault
 @Component(service = ItemResolver.class, immediate = true)
 public class SemanticsItemResolver implements ItemResolver {
 
     private static final String SYNONYMS_NAMESPACE = "synonyms";
 
-    private ItemRegistry itemRegistry;
-    private MetadataRegistry metadataRegistry;
-    private SemanticsService semanticsService;
-    private Locale currentLocale = null;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
+    private @NonNullByDefault({}) SemanticsService semanticsService;
+    private @Nullable Locale currentLocale;
 
     @Override
     public void setLocale(Locale locale) {
-        if (locale == null || locale.getLanguage().equals(Locale.ENGLISH.getLanguage())) {
+        if (locale.getLanguage().equals(Locale.ENGLISH.getLanguage())) {
             this.currentLocale = Locale.ROOT;
         } else {
             this.currentLocale = locale;
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Stream<Item> getMatchingItems(String object, String location) {
+    public Stream<Item> getMatchingItems(@Nullable String object, @Nullable String location) {
+        Locale locale = currentLocale;
+        if (locale == null) {
+            return new HashSet<Item>().stream();
+        }
+
         Stream<Item> items;
         if (location != null) {
-            items = semanticsService.getItemsInLocation(location, currentLocale).stream();
+            items = semanticsService.getItemsInLocation(location, locale).stream();
         } else {
             items = new HashSet<Item>(itemRegistry.getAll()).stream();
         }
 
         if (object != null) {
-            List<Class<? extends Tag>> semanticTagTypes = SemanticTags.getByLabelOrSynonym(object, currentLocale);
+            List<Class<? extends Tag>> semanticTagTypes = SemanticTags.getByLabelOrSynonym(object, locale);
             if (!semanticTagTypes.isEmpty()
                     && semanticTagTypes.stream().noneMatch(t -> Location.class.isAssignableFrom(t))) {
                 Predicate<Item> tagsPredicate = null;
@@ -98,8 +106,9 @@ public class SemanticsItemResolver implements ItemResolver {
 
     @Override
     public Map<Item, Set<ItemNamedAttribute>> getAllItemNamedAttributes() throws UnsupportedLanguageException {
-        if (currentLocale == null) {
-            throw new UnsupportedLanguageException(currentLocale);
+        Locale locale = currentLocale;
+        if (locale == null) {
+            throw new UnsupportedLanguageException(locale);
         }
 
         Map<Item, Set<ItemNamedAttribute>> attributes = new HashMap<Item, Set<ItemNamedAttribute>>();
@@ -116,14 +125,14 @@ public class SemanticsItemResolver implements ItemResolver {
                 itemAttributes.add(new ItemNamedAttribute(attributeType, item.getLabel(), AttributeSource.LABEL));
 
                 // Add the primary type's label and synonyms
-                for (String tagLabel : SemanticTags.getLabelAndSynonyms(semanticType, currentLocale)) {
+                for (String tagLabel : SemanticTags.getLabelAndSynonyms(semanticType, locale)) {
                     itemAttributes.add(new ItemNamedAttribute(attributeType, tagLabel, AttributeSource.TAG));
                 }
 
                 // Add the related property's label and synonyms
                 Class<? extends Property> relatedProperty = SemanticTags.getProperty(item);
                 if (relatedProperty != null) {
-                    for (String propertyLabel : SemanticTags.getLabelAndSynonyms(relatedProperty, currentLocale)) {
+                    for (String propertyLabel : SemanticTags.getLabelAndSynonyms(relatedProperty, locale)) {
                         itemAttributes.add(new ItemNamedAttribute("object", propertyLabel, AttributeSource.TAG));
                     }
                 }

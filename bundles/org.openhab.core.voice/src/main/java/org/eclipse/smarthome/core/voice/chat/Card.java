@@ -30,6 +30,7 @@ import org.eclipse.smarthome.core.voice.text.Intent;
  * identifiable by its UID (generally a GUID).
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - Moved from HABot
  */
 public class Card extends Component implements Identifiable<String> {
     @NonNull

@@ -18,6 +18,7 @@ package org.eclipse.smarthome.core.voice.text;
  * semantic tags and additional monikers defined in the item's "habot" namespace.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - Moved from HABot
  */
 public class ItemNamedAttribute {
     public enum AttributeType {

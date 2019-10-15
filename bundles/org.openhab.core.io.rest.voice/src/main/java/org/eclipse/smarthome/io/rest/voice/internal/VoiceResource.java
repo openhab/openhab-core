@@ -220,7 +220,7 @@ public class VoiceResource implements RESTResource {
         if (hli != null) {
             try {
                 InterpretationResult result = hli.interpretForChat(locale, text);
-                InterpretationResultDTO dto = (result == null) ? null : HLIMapper.map(result);
+                InterpretationResultDTO dto = HLIMapper.map(result);
                 return Response.ok(dto).build();
             } catch (InterpretationException e) {
                 return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
@@ -245,7 +245,7 @@ public class VoiceResource implements RESTResource {
         if (hli != null) {
             try {
                 InterpretationResult result = hli.interpretForChat(locale, text);
-                InterpretationResultDTO dto = (result == null) ? null : HLIMapper.map(result);
+                InterpretationResultDTO dto = HLIMapper.map(result);
                 return Response.ok(dto).build();
             } catch (InterpretationException e) {
                 return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());

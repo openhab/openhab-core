@@ -93,6 +93,7 @@ Fragment-Host: org.openhab.core.model.item
 	org.openhab.core.model.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.persistence;version='[2.5.0,2.5.1)',\
 	org.openhab.core.scheduler;version='[2.5.0,2.5.1)',\
+	org.openhab.core.semantics;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
 	org.ops4j.pax.swissbox.optional.jcl;version='[1.8.2,1.8.3)',\

@@ -54,6 +54,7 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.core.model.script;version='[2.5.0,2.5.1)',\
 	org.openhab.core.persistence;version='[2.5.0,2.5.1)',\
 	org.openhab.core.scheduler;version='[2.5.0,2.5.1)',\
+	org.openhab.core.semantics;version='[2.5.0,2.5.1)',\
 	org.openhab.core.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\

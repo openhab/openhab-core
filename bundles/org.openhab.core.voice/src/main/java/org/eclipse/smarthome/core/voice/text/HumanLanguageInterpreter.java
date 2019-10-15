@@ -15,12 +15,16 @@ package org.eclipse.smarthome.core.voice.text;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is the interface that a human language text interpreter has to implement.
  *
  * @author Tilman Kamp - Initial contribution
- * @author Laurent Garnier - extended interface to support chat and intent interpretation
+ * @author Laurent Garnier - extended interface to support chat + null annotations added
  */
+@NonNullByDefault
 public interface HumanLanguageInterpreter {
 
     /**
@@ -36,16 +40,17 @@ public interface HumanLanguageInterpreter {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
-    public String getLabel(Locale locale);
+    public String getLabel(@Nullable Locale locale);
 
     /**
      * Interprets a human language text fragment of a given {@link Locale} for voice control
-     * Returns a greeting message if the text empty.
+     * Returns a greeting message if the text is empty.
      *
      * @param locale language of the text (given by a {@link Locale})
      * @param text the text to interpret
      * @return a human language response
      */
+    @Nullable
     String interpret(Locale locale, String text) throws InterpretationException;
 
     /**
@@ -59,30 +64,13 @@ public interface HumanLanguageInterpreter {
     InterpretationResult interpretForChat(Locale locale, String text) throws InterpretationException;
 
     /**
-     * Interprets an intent for voice control
-     *
-     * @param locale the expected language of the result (given by a {@link Locale})
-     * @param intent the intent
-     * @return a human language response
-     */
-    String interpretForVoice(Locale locale, Intent intent) throws InterpretationException;
-
-    /**
-     * Interprets an intent for chat dialog
-     *
-     * @param locale the expected language of the result (given by a {@link Locale})
-     * @param intent the intent
-     * @return a result including a human language response and a card
-     */
-    InterpretationResult interpretForChat(Locale locale, Intent intent) throws InterpretationException;
-
-    /**
      * Gets the grammar of all commands of a given {@link Locale} of the interpreter
      *
      * @param locale language of the commands (given by a {@link Locale})
      * @param format the grammar format
      * @return a grammar of the specified format
      */
+    @Nullable
     String getGrammar(Locale locale, String format);
 
     /**
@@ -98,19 +86,5 @@ public interface HumanLanguageInterpreter {
      * @return Set of supported grammars (each given by a short name)
      */
     Set<String> getSupportedGrammarFormats();
-
-    /**
-     * Get all supported intents suitable for chat dialog handled by the interpreter
-     *
-     * @return Set of supported intents ids suitable for chat dialog, or null if none
-     */
-    Set<String> getSupportedChatIntents();
-
-    /**
-     * Get all supported intents suitable for voice control handled by the interpreter
-     *
-     * @return Set of supported intents ids suitable for voice control, or null if none
-     */
-    Set<String> getSupportedVoiceIntents();
 
 }

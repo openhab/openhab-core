@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigOptionProvider;
 import org.eclipse.smarthome.config.core.ConfigurableService;
@@ -50,8 +51,8 @@ import org.eclipse.smarthome.core.voice.TTSService;
 import org.eclipse.smarthome.core.voice.Voice;
 import org.eclipse.smarthome.core.voice.VoiceManager;
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
-import org.eclipse.smarthome.core.voice.text.Intent;
 import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.eclipse.smarthome.core.voice.text.InterpretationResult;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -71,7 +72,6 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort TTS options
- * @author Laurent Garnier - new interpret API for intent interpretation
  */
 @Component(immediate = true, configurationPid = "org.eclipse.smarthome.voice", property = { //
         Constants.SERVICE_PID + "=org.eclipse.smarthome.voice", //
@@ -283,7 +283,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     @Override
-    public String interpret(Intent intent, String hliId) throws InterpretationException {
+    public @NonNull InterpretationResult interpretForChat(@NonNull String text) throws InterpretationException {
+        return interpretForChat(localeProvider.getLocale(), text, null);
+    }
+
+    @Override
+    public @NonNull InterpretationResult interpretForChat(@NonNull Locale locale, @NonNull String text,
+            @Nullable String hliId) throws InterpretationException {
         HumanLanguageInterpreter interpreter;
         if (hliId == null) {
             interpreter = getHLI();
@@ -296,7 +302,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 throw new InterpretationException("No human language interpreter can be found for " + hliId);
             }
         }
-        return interpreter.interpretForVoice(localeProvider.getLocale(), intent);
+        return interpreter.interpretForChat(locale, text);
     }
 
     private Voice getVoice(String id) {

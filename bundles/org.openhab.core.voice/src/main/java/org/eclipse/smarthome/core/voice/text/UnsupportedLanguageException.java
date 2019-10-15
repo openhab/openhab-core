@@ -14,15 +14,20 @@ package org.eclipse.smarthome.core.voice.text;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This exception is thrown when the particular language is not supported by a {@link Skill} - for instance, if it has
  * no training data for that language.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - Moved from HABot + null annotations added
  */
+@NonNullByDefault
 public class UnsupportedLanguageException extends Exception {
 
-    private Locale language;
+    private @Nullable Locale language;
 
     private static final long serialVersionUID = -7147837667959343830L;
 
@@ -35,7 +40,7 @@ public class UnsupportedLanguageException extends Exception {
         this.language = Locale.forLanguageTag(language);
     }
 
-    public UnsupportedLanguageException(Locale locale) {
+    public UnsupportedLanguageException(@Nullable Locale locale) {
         this.language = locale;
     }
 

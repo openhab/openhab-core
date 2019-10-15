@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.items.Item;
 
 /**
@@ -24,7 +26,9 @@ import org.eclipse.smarthome.core.items.Item;
  * user natural language query: object - "what" and location - "where".
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - Moved from HABot + null annotations added
  */
+@NonNullByDefault
 public interface ItemResolver {
 
     /**
@@ -45,7 +49,7 @@ public interface ItemResolver {
      * @param location the location extracted from the intent (or null)
      * @return a stream of matching items (groups included)
      */
-    Stream<Item> getMatchingItems(String object, String location);
+    Stream<Item> getMatchingItems(@Nullable String object, @Nullable String location);
 
     /**
      * Gets all named attributes for all items

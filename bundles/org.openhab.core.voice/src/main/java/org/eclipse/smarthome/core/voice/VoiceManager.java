@@ -22,15 +22,14 @@ import org.eclipse.smarthome.core.audio.AudioSink;
 import org.eclipse.smarthome.core.audio.AudioSource;
 import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
-import org.eclipse.smarthome.core.voice.text.Intent;
 import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.eclipse.smarthome.core.voice.text.InterpretationResult;
 
 /**
  * This service provides functionality around voice services and is the central service to be used directly by others.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Christoph Weitkamp - Added parameter to adjust the volume
- * @author Laurent Garnier - new interpret API for intent interpretation
  */
 @NonNullByDefault
 public interface VoiceManager {
@@ -114,14 +113,27 @@ public interface VoiceManager {
     String interpret(String text, @Nullable String hliId) throws InterpretationException;
 
     /**
-     * Interprets the passed intent for voice control using a particular HLI service and the default locale.
+     * Interprets the passed string for chat dialog using the default services for HLI and locale.
+     * Returns a greeting message if the text empty.
      *
-     * @param intent The intent to interpret
+     * @param text the text to interpret
+     * @throws InterpretationException
+     * @return a result including a human language response and a card
+     */
+    InterpretationResult interpretForChat(String text) throws InterpretationException;
+
+    /**
+     * Interprets the passed string for chat dialog using a particular HLI service and the default locale.
+     * Returns a greeting message if the text empty.
+     *
+     * @param locale language of the text (given by a {@link Locale})
+     * @param text the text to interpret
      * @param hliId The id of the HLI service to use or null
      * @throws InterpretationException
-     * @return a human language response
+     * @return a result including a human language response and a card
      */
-    String interpret(Intent intent, @Nullable String hliId) throws InterpretationException;
+    InterpretationResult interpretForChat(Locale locale, String text, @Nullable String hliId)
+            throws InterpretationException;
 
     /**
      * Determines the preferred voice for the currently set locale

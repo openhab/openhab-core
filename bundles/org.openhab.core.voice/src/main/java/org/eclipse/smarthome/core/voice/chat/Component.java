@@ -29,6 +29,7 @@ import java.util.Map;
  * that is the frontend's responsibility.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - Moved from HABot
  */
 public class Component {
     String component;
@@ -70,7 +71,7 @@ public class Component {
     /**
      * Adds a new configuration parameter to the component
      *
-     * @param key   the parameter key
+     * @param key the parameter key
      * @param value the parameter value
      */
     public void addConfig(String key, Object value) {
@@ -115,7 +116,7 @@ public class Component {
     /**
      * Add a new sub-component to the specified slot. Creates the slot if necessary.
      *
-     * @param slotName     the slot to add the component to
+     * @param slotName the slot to add the component to
      * @param subComponent the sub-component to add
      */
     public void addComponent(String slotName, Component subComponent) {

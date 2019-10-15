@@ -104,14 +104,14 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (tokens.eof()) {
             throw new InterpretationException(language.getString(SORRY));
         }
-        RuleResult result;
+        RuleInterpretationResult result;
 
-        RuleResult lastResult = null;
+        RuleInterpretationResult lastResult = null;
         for (Rule rule : rules) {
             if ((result = rule.execute(language, tokens)).isSuccess()) {
                 return result.getResponse();
             } else {
-                if (result != RuleResult.SYNTAX_ERROR) {
+                if (result != RuleInterpretationResult.SYNTAX_ERROR) {
                     lastResult = result;
                 }
             }
@@ -126,16 +126,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     @Override
     public InterpretationResult interpretForChat(Locale locale, String text) throws InterpretationException {
         throw new InterpretationException("Chat dialog not supported by the built-in interpreter");
-    }
-
-    @Override
-    public String interpretForVoice(Locale locale, Intent intent) throws InterpretationException {
-        throw new InterpretationException("Intent interpretation not supported by the built-in interpreter");
-    }
-
-    @Override
-    public InterpretationResult interpretForChat(Locale locale, Intent intent) throws InterpretationException {
-        throw new InterpretationException("Intent interpretation not supported by the built-in interpreter");
     }
 
     private void invalidate() {
@@ -309,7 +299,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         Expression expression = tail == null ? seq(headExpression, name()) : seq(headExpression, name(tail), tail);
         return new Rule(expression) {
             @Override
-            public RuleResult interpretAST(ResourceBundle language, ASTNode node) {
+            public RuleInterpretationResult interpretAST(ResourceBundle language, ASTNode node) {
                 String[] name = node.findValueAsStringArray(NAME);
                 ASTNode cmdNode = node.findNode(CMD);
                 Object tag = cmdNode.getTag();
@@ -324,12 +314,12 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 }
                 if (name != null && command != null) {
                     try {
-                        return new RuleResult(true, executeSingle(language, name, command));
+                        return new RuleInterpretationResult(true, executeSingle(language, name, command));
                     } catch (InterpretationException ex) {
-                        return new RuleResult(ex);
+                        return new RuleInterpretationResult(ex);
                     }
                 }
-                return RuleResult.SEMANTIC_ERROR;
+                return RuleInterpretationResult.SEMANTIC_ERROR;
             }
         };
     }
@@ -626,16 +616,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     @Override
     public Set<String> getSupportedGrammarFormats() {
         return SUPPORTED_GRAMMERS;
-    }
-
-    @Override
-    public Set<String> getSupportedChatIntents() {
-        return null;
-    }
-
-    @Override
-    public Set<String> getSupportedVoiceIntents() {
-        return null;
     }
 
     /**

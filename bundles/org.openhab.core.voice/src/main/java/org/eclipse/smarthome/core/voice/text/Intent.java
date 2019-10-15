@@ -15,13 +15,17 @@ package org.eclipse.smarthome.core.voice.text;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * An Intent consists of an identifier of the type of intent, and one or several entities.
  * It is the result of the categorization (for the intent name) and token extraction (for the entities) performed by
  * the OpenNLP interpreter.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - Moved from HABot + null annotations added
  */
+@NonNullByDefault
 public class Intent {
     String name;
 

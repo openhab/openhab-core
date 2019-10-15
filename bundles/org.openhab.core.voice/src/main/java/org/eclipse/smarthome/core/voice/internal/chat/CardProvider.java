@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Reference;
  * The @link {@link ManagedProvider} for {@link Card} elements
  *
  * @author Yannick Schaus - Initial contribution
- * @author Laurent Garnier - storage name updated
+ * @author Laurent Garnier - Moved from HABot + storage name updated
  */
 @Component(service = CardProvider.class, immediate = true)
 public class CardProvider extends DefaultAbstractManagedProvider<Card, String> {

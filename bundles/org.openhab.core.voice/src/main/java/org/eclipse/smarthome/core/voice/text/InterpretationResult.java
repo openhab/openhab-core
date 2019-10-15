@@ -12,8 +12,12 @@
  */
 package org.eclipse.smarthome.core.voice.text;
 
-import java.util.Locale;
+import java.util.Collections;
+import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.voice.chat.Card;
 
 /**
@@ -22,36 +26,42 @@ import org.eclipse.smarthome.core.voice.chat.Card;
  *
  * @author Laurent Garnier - Initial contribution
  */
+@NonNullByDefault
 public class InterpretationResult {
 
-    Locale locale;
+    String language;
+    @Nullable
     String answer;
+    @Nullable
     String hint;
+    @Nullable
     Intent intent;
     String[] matchedItemNames;
+    Set<Item> matchedItems;
+    @Nullable
     Card card;
 
-    public InterpretationResult(Locale locale) {
-        this.locale = locale;
-    }
-
-    public InterpretationResult(Locale locale, String answer) {
-        this.locale = locale;
+    public InterpretationResult(String language, String answer) {
+        this.language = language;
         this.answer = answer;
+        this.matchedItemNames = new String[0];
+        this.matchedItems = Collections.emptySet();
     }
 
-    public InterpretationResult(Locale locale, Intent intent) {
-        this.locale = locale;
+    public InterpretationResult(String language, Intent intent) {
+        this.language = language;
         this.intent = intent;
+        this.matchedItemNames = new String[0];
+        this.matchedItems = Collections.emptySet();
     }
 
     /**
-     * Gets the locale of the answer
+     * Gets the language of the answer
      *
-     * @return the locale of the answer
+     * @return the language of the answer
      */
-    public Locale getLocale() {
-        return locale;
+    public String getLanguage() {
+        return language;
     }
 
     /**
@@ -59,7 +69,7 @@ public class InterpretationResult {
      *
      * @return the answer
      */
-    public String getAnswer() {
+    public @Nullable String getAnswer() {
         return answer;
     }
 
@@ -77,7 +87,7 @@ public class InterpretationResult {
      *
      * @return the hint
      */
-    public String getHint() {
+    public @Nullable String getHint() {
         return hint;
     }
 
@@ -95,7 +105,7 @@ public class InterpretationResult {
      *
      * @return the intent
      */
-    public Intent getIntent() {
+    public @Nullable Intent getIntent() {
         return intent;
     }
 
@@ -109,21 +119,21 @@ public class InterpretationResult {
     }
 
     /**
-     * Gets the item names matched by the intent entities
+     * Gets the items matched by the intent entities
      *
-     * @return the matched item names
+     * @return the matched items
      */
-    public String[] getMatchedItemNames() {
-        return matchedItemNames;
+    public Set<Item> getMatchedItems() {
+        return matchedItems;
     }
 
     /**
-     * Sets the item names matched by the intent entities
+     * Sets the items matched by the intent entities
      *
-     * @param matchedItemNames the matched item names
+     * @param matchedItems the matched items
      */
-    public void setMatchedItems(String[] matchedItemNames) {
-        this.matchedItemNames = matchedItemNames;
+    public void setMatchedItems(Set<Item> matchedItems) {
+        this.matchedItems = matchedItems;
     }
 
     /**
@@ -131,7 +141,7 @@ public class InterpretationResult {
      *
      * @return the card
      */
-    public Card getCard() {
+    public @Nullable Card getCard() {
         return card;
     }
 

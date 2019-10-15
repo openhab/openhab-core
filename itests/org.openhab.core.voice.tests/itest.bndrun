@@ -29,6 +29,7 @@ Fragment-Host: org.openhab.core.voice
 	org.openhab.core.config.core;version='[2.5.0,2.5.1)',\
 	org.openhab.core.io.console;version='[2.5.0,2.5.1)',\
 	org.openhab.core.io.http;version='[2.5.0,2.5.1)',\
+	org.openhab.core.semantics;version='[2.5.0,2.5.1)',\
 	org.openhab.core.test;version='[2.5.0,2.5.1)',\
 	org.openhab.core.thing;version='[2.5.0,2.5.1)',\
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
