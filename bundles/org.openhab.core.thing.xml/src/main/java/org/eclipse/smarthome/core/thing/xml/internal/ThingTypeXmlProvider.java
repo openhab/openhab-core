@@ -13,9 +13,7 @@
 package org.eclipse.smarthome.core.thing.xml.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
@@ -117,7 +115,7 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
         if (configDescription != null) {
             try {
                 configDescriptionProvider.add(bundle, configDescription);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 logger.error("Could not register ConfigDescription: {}", configDescription.getUID(), e);
             }
         }
@@ -125,14 +123,12 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
 
     @Override
     public synchronized void addingFinished() {
-        Map<String, ChannelType> channelTypes = new HashMap<>(10);
         // create channel types
         for (ChannelTypeXmlResult type : channelTypeRefs) {
             ChannelType channelType = type.toChannelType();
             try {
-                channelTypes.put(channelType.getUID().getAsString(), channelType);
                 channelTypeProvider.add(bundle, channelType);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 logger.error("Could not register ChannelType: {}", channelType.getUID(), e);
             }
         }
@@ -141,7 +137,7 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
         for (ChannelGroupTypeXmlResult type : channelGroupTypeRefs) {
             try {
                 channelGroupTypeProvider.add(bundle, type.toChannelGroupType());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 logger.error("Could not register ChannelGroupType: {}", type.getUID(), e);
             }
         }
@@ -150,7 +146,7 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
         for (ThingTypeXmlResult type : thingTypeRefs) {
             try {
                 thingTypeProvider.add(bundle, type.toThingType());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 logger.error("Could not register ThingType: {}", type.getUID(), e);
             }
         }
