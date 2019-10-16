@@ -90,9 +90,9 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
         this.channelTypeProvider = channelTypeProvider;
         this.channelGroupTypeProvider = channelGroupTypeProvider;
 
-        this.thingTypeRefs = new ArrayList<>(10);
-        this.channelGroupTypeRefs = new ArrayList<>(10);
-        this.channelTypeRefs = new ArrayList<>(10);
+        thingTypeRefs = new ArrayList<>(10);
+        channelGroupTypeRefs = new ArrayList<>(10);
+        channelTypeRefs = new ArrayList<>(10);
     }
 
     @Override
@@ -102,13 +102,13 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
                 if (type instanceof ThingTypeXmlResult) {
                     ThingTypeXmlResult typeResult = (ThingTypeXmlResult) type;
                     addConfigDescription(typeResult.getConfigDescription());
-                    this.thingTypeRefs.add(typeResult);
+                    thingTypeRefs.add(typeResult);
                 } else if (type instanceof ChannelGroupTypeXmlResult) {
                     ChannelGroupTypeXmlResult typeResult = (ChannelGroupTypeXmlResult) type;
-                    this.channelGroupTypeRefs.add(typeResult);
+                    channelGroupTypeRefs.add(typeResult);
                 } else if (type instanceof ChannelTypeXmlResult) {
                     ChannelTypeXmlResult typeResult = (ChannelTypeXmlResult) type;
-                    this.channelTypeRefs.add(typeResult);
+                    channelTypeRefs.add(typeResult);
                     addConfigDescription(typeResult.getConfigDescription());
                 } else {
                     throw new ConversionException("Unknown data type for '" + type + "'!");
@@ -120,9 +120,9 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
     private void addConfigDescription(ConfigDescription configDescription) {
         if (configDescription != null) {
             try {
-                this.configDescriptionProvider.add(this.bundle, configDescription);
-            } catch (Exception ex) {
-                this.logger.error("Could not register ConfigDescription!", ex);
+                configDescriptionProvider.add(bundle, configDescription);
+            } catch (Exception e) {
+                logger.error("Could not register ConfigDescription: {}", configDescription.getUID(), e);
             }
         }
     }
@@ -131,34 +131,46 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
     public synchronized void addingFinished() {
         Map<String, ChannelType> channelTypes = new HashMap<>(10);
         // create channel types
-        for (ChannelTypeXmlResult type : this.channelTypeRefs) {
+        for (ChannelTypeXmlResult type : channelTypeRefs) {
             ChannelType channelType = type.toChannelType();
-            channelTypes.put(channelType.getUID().getAsString(), channelType);
-            this.channelTypeProvider.add(this.bundle, channelType);
+            try {
+                channelTypes.put(channelType.getUID().getAsString(), channelType);
+                channelTypeProvider.add(bundle, channelType);
+            } catch (Exception e) {
+                logger.error("Could not register ChannelType: {}", channelType.getUID(), e);
+            }
         }
 
         // create channel group types
-        for (ChannelGroupTypeXmlResult type : this.channelGroupTypeRefs) {
-            this.channelGroupTypeProvider.add(this.bundle, type.toChannelGroupType());
+        for (ChannelGroupTypeXmlResult type : channelGroupTypeRefs) {
+            try {
+                channelGroupTypeProvider.add(bundle, type.toChannelGroupType());
+            } catch (Exception e) {
+                logger.error("Could not register ChannelGroupType: {}", type.getUID(), e);
+            }
         }
 
         // create thing and bridge types
-        for (ThingTypeXmlResult type : this.thingTypeRefs) {
-            this.thingTypeProvider.add(this.bundle, type.toThingType());
+        for (ThingTypeXmlResult type : thingTypeRefs) {
+            try {
+                thingTypeProvider.add(bundle, type.toThingType());
+            } catch (Exception e) {
+                logger.error("Could not register ThingType: {}", type.getUID(), e);
+            }
         }
 
         // release temporary cache
-        this.thingTypeRefs.clear();
-        this.channelGroupTypeRefs.clear();
-        this.channelTypeRefs.clear();
+        thingTypeRefs.clear();
+        channelGroupTypeRefs.clear();
+        channelTypeRefs.clear();
     }
 
     @Override
     public synchronized void release() {
-        this.thingTypeProvider.removeAll(bundle);
-        this.channelGroupTypeProvider.removeAll(bundle);
-        this.channelTypeProvider.removeAll(bundle);
-        this.configDescriptionProvider.removeAll(bundle);
+        thingTypeProvider.removeAll(bundle);
+        channelGroupTypeProvider.removeAll(bundle);
+        channelTypeProvider.removeAll(bundle);
+        configDescriptionProvider.removeAll(bundle);
     }
 
 }
