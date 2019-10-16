@@ -62,9 +62,9 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
     private final XmlThingTypeProvider thingTypeProvider;
 
     // temporary cache
-    private final List<ThingTypeXmlResult> thingTypeRefs;
-    private final List<ChannelGroupTypeXmlResult> channelGroupTypeRefs;
-    private final List<ChannelTypeXmlResult> channelTypeRefs;
+    private final List<ThingTypeXmlResult> thingTypeRefs = new ArrayList<>(10);
+    private final List<ChannelGroupTypeXmlResult> channelGroupTypeRefs = new ArrayList<>(10);
+    private final List<ChannelTypeXmlResult> channelTypeRefs = new ArrayList<>(10);
 
     private final XmlChannelTypeProvider channelTypeProvider;
     private final XmlChannelGroupTypeProvider channelGroupTypeProvider;
@@ -89,10 +89,6 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
         this.thingTypeProvider = thingTypeProvider;
         this.channelTypeProvider = channelTypeProvider;
         this.channelGroupTypeProvider = channelGroupTypeProvider;
-
-        thingTypeRefs = new ArrayList<>(10);
-        channelGroupTypeRefs = new ArrayList<>(10);
-        channelTypeRefs = new ArrayList<>(10);
     }
 
     @Override
