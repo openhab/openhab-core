@@ -71,16 +71,16 @@
   </feature>
 
   <feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
-    <capability>openhab.tp;feature=jackson;version=2.9.9</capability>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-joda/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.9.9</bundle>
+    <capability>openhab.tp;feature=jackson;version=2.9.10</capability>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-joda/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.9.10</bundle>
     <bundle dependency="true">mvn:org.yaml/snakeyaml/1.23</bundle>
   </feature>
 
