@@ -119,10 +119,6 @@
     <feature dependency="true">openhab.tp-jollyday</feature>
     <feature>openhab-core-base</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
-    <config name="org.openhab.ephemeris">
-        dayset-weekend=[SATURDAY,SUNDAY]
-        dayset-school=[MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY]
-    </config>
   </feature>
 
   <feature name="openhab-core-io-bin2json" description="Binary to JSON converter" version="${project.version}">
