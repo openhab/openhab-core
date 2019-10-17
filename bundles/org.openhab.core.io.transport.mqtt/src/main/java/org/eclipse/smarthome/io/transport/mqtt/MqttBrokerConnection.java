@@ -847,12 +847,17 @@ public class MqttBrokerConnection {
      * @param retain Set to true to retain the message on the broker
      * @param listener A listener to be notified of success or failure of the delivery.
      */
-    public void publish(String topic, byte[] payload, int qos, boolean retain, MqttActionCallback listener) {
+    public void publish(String topic, byte[] payload, Integer qos, Boolean retain, MqttActionCallback listener) {
         final MqttAsyncClientWrapper client = this.client;
         if (client == null) {
             listener.onFailure(topic, new MqttException(new Throwable()));
             return;
         }
+
+        // use defaults when not provided by caller
+        qos = qos == null ? this.qos : qos;
+        retain = retain == null ? this.retain : retain;
+
         client.publish(topic, payload, retain, qos).whenComplete((m, t) -> {
             if (t != null) {
                 listener.onFailure(topic, new MqttException(t));
@@ -871,7 +876,7 @@ public class MqttBrokerConnection {
      * @param listener A listener to be notified of success or failure of the delivery.
      */
     public void publish(String topic, byte[] payload, MqttActionCallback listener) {
-        publish(topic, payload, qos, retain, listener);
+        publish(topic, payload, null, null, listener);
     }
 
     /**
@@ -883,7 +888,7 @@ public class MqttBrokerConnection {
      *         exceptionally on an error or with a result of false if no broker connection is established.
      */
     public CompletableFuture<Boolean> publish(String topic, byte[] payload) {
-        return publish(topic, payload, qos, retain);
+        return publish(topic, payload, null, null);
     }
 
     /**
@@ -896,11 +901,16 @@ public class MqttBrokerConnection {
      * @return Returns a future that completes with a result of true if the publishing succeeded and completes
      *         exceptionally on an error or with a result of false if no broker connection is established.
      */
-    public CompletableFuture<Boolean> publish(String topic, byte[] payload, int qos, boolean retain) {
+    public CompletableFuture<Boolean> publish(String topic, byte[] payload, Integer qos, Boolean retain) {
         final MqttAsyncClientWrapper client = this.client;
         if (client == null) {
             return CompletableFuture.completedFuture(false);
         }
+
+        // use defaults if not provided
+        qos = qos == null ? this.qos : qos;
+        retain = retain == null ? this.retain : retain;
+
         // publish message asynchronously
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         client.publish(topic, payload, retain, qos).whenComplete((m, t) -> {
