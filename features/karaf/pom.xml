@@ -85,7 +85,7 @@
                   <feature>framework</feature>
                 </framework>
                 <features>
-                  <feature>openhab-core.tp-*</feature>
+                  <feature>openhab.tp-*</feature>
                   <feature>openhab-core-*</feature>
                 </features>
                 <verifyTransitive>false</verifyTransitive>

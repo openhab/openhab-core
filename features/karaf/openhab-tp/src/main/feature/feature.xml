@@ -71,10 +71,17 @@
   </feature>
 
   <feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
-    <capability>openhab.tp;feature=jackson;version=2.9.9</capability>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.9</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.9</bundle>
+    <capability>openhab.tp;feature=jackson;version=2.9.10</capability>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-joda/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.9.10</bundle>
+    <bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.9.10</bundle>
+    <bundle dependency="true">mvn:org.yaml/snakeyaml/1.23</bundle>
   </feature>
 
   <feature name="openhab.tp-jax-rs" version="${project.version}">
@@ -146,6 +153,7 @@
     <capability>openhab.tp;feature=jax-ws;version=2.9.0</capability>
     <bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.saaj-api-1.3/2.9.0</bundle>
     <bundle start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saaj-impl/1.3.23_2</bundle>
+    <bundle start-level="20">mvn:org.jvnet.staxex/stax-ex/1.7.4</bundle>
   </feature>
 
   <feature name="openhab.tp-jollyday" description="Jollyday library" version="${project.version}">
@@ -266,7 +274,7 @@
     </details>
     <capability>openhab.tp;feature=jax-rs-provider-swagger;version=1.1.1</capability>
     <feature dependency="true">openhab.tp-jax-rs-min</feature>
-
+    <feature dependency="true">openhab.tp-jackson</feature>
     <!-- BEG: swagger-jersey2-1.5.8 -->
     <feature dependency="true">openhab.tp-kat.cpy-jersey-min-2.22.2</feature>
     <bundle>mvn:de.maggu2810.thirdparty.modified.io.swagger/swagger-jersey2-jaxrs/1.5.8.v20160511-1038</bundle>
@@ -275,15 +283,6 @@
     <bundle dependency="true">mvn:io.swagger/swagger-jaxrs/1.5.8</bundle>
     <bundle dependency="true">mvn:io.swagger/swagger-models/1.5.8</bundle>
     <bundle dependency="true">mvn:de.maggu2810.thirdparty.modified.org.reflections/reflections/0.9.10.v20160429-1435</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.4.5</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.4.5</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.4.5</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.4.5</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.4.5</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-joda/2.4.5</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.4.5</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.4.5</bundle>
-    <bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.4.5</bundle>
     <bundle dependency="true">mvn:com.google.code.findbugs/annotations/2.0.1</bundle>
     <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
     <bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
@@ -292,7 +291,6 @@
     <bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/3.1.4</bundle>
     <bundle dependency="true">mvn:org.javassist/javassist/3.19.0-GA</bundle>
     <bundle dependency="true">mvn:org.slf4j/slf4j-api/1.7.7</bundle>
-    <bundle dependency="true">mvn:org.yaml/snakeyaml/1.12</bundle>
     <!-- END: swagger-jersey2-1.5.8 -->
 
     <bundle>mvn:de.maggu2810.thirdparty.modified.com.eclipsesource.jaxrs/provider-swagger/1.1.1.201605111122</bundle>
