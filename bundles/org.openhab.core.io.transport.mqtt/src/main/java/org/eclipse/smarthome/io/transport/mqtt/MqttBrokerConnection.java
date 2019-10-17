@@ -839,6 +839,17 @@ public class MqttBrokerConnection {
     }
 
     /**
+     * Publish a message to the broker.
+     *
+     * @param topic The topic
+     * @param payload The message payload
+     * @param listener A listener to be notified of success or failure of the delivery.
+     */
+    public void publish(String topic, byte[] payload, MqttActionCallback listener) {
+        publish(topic, payload, null, null, listener);
+    }
+
+    /**
      * Publish a message to the broker with the given QoS and retained flag.
      *
      * @param topic The topic
@@ -847,7 +858,7 @@ public class MqttBrokerConnection {
      * @param retain Set to true to retain the message on the broker
      * @param listener A listener to be notified of success or failure of the delivery.
      */
-    public void publish(String topic, byte[] payload, Integer qos, Boolean retain, MqttActionCallback listener) {
+    public void publish(String topic, byte[] payload, @Nullable Integer qos, @Nullable Boolean retain, MqttActionCallback listener) {
         final MqttAsyncClientWrapper client = this.client;
         if (client == null) {
             listener.onFailure(topic, new MqttException(new Throwable()));
@@ -873,17 +884,6 @@ public class MqttBrokerConnection {
      *
      * @param topic The topic
      * @param payload The message payload
-     * @param listener A listener to be notified of success or failure of the delivery.
-     */
-    public void publish(String topic, byte[] payload, MqttActionCallback listener) {
-        publish(topic, payload, null, null, listener);
-    }
-
-    /**
-     * Publish a message to the broker.
-     *
-     * @param topic The topic
-     * @param payload The message payload
      * @return Returns a future that completes with a result of true if the publishing succeeded and completes
      *         exceptionally on an error or with a result of false if no broker connection is established.
      */
@@ -901,7 +901,7 @@ public class MqttBrokerConnection {
      * @return Returns a future that completes with a result of true if the publishing succeeded and completes
      *         exceptionally on an error or with a result of false if no broker connection is established.
      */
-    public CompletableFuture<Boolean> publish(String topic, byte[] payload, Integer qos, Boolean retain) {
+    public CompletableFuture<Boolean> publish(String topic, byte[] payload, @Nullable Integer qos, @Nullable Boolean retain) {
         final MqttAsyncClientWrapper client = this.client;
         if (client == null) {
             return CompletableFuture.completedFuture(false);
