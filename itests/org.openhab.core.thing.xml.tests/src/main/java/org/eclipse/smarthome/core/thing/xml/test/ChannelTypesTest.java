@@ -76,8 +76,11 @@ public class ChannelTypesTest extends JavaOSGiTest {
                     .get();
             assertThat(channelType2, is(not(nullValue())));
 
-            Collection<ChannelGroupType> channelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null);
-            assertThat(channelGroupTypes.size(), is(initialNumberOfChannelGroupTypes + 1));
+            Collection<ChannelGroupType> channelGroupTypes = waitForAssert(() -> {
+                Collection<ChannelGroupType> channelGroupTypesTmp = channelGroupTypeProvider.getChannelGroupTypes(null);
+                assertThat(channelGroupTypesTmp.size(), is(initialNumberOfChannelGroupTypes + 1));
+                return channelGroupTypesTmp;
+            });
 
             ChannelGroupType channelGroupType = channelGroupTypes.stream()
                     .filter(it -> it.getUID().toString().equals("somebinding:channelgroup")).findFirst().get();
