@@ -13,9 +13,7 @@
 package org.eclipse.smarthome.core.thing.xml.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
@@ -62,9 +60,9 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
     private final XmlThingTypeProvider thingTypeProvider;
 
     // temporary cache
-    private final List<ThingTypeXmlResult> thingTypeRefs;
-    private final List<ChannelGroupTypeXmlResult> channelGroupTypeRefs;
-    private final List<ChannelTypeXmlResult> channelTypeRefs;
+    private final List<ThingTypeXmlResult> thingTypeRefs = new ArrayList<>(10);
+    private final List<ChannelGroupTypeXmlResult> channelGroupTypeRefs = new ArrayList<>(10);
+    private final List<ChannelTypeXmlResult> channelTypeRefs = new ArrayList<>(10);
 
     private final XmlChannelTypeProvider channelTypeProvider;
     private final XmlChannelGroupTypeProvider channelGroupTypeProvider;
@@ -89,10 +87,6 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
         this.thingTypeProvider = thingTypeProvider;
         this.channelTypeProvider = channelTypeProvider;
         this.channelGroupTypeProvider = channelGroupTypeProvider;
-
-        this.thingTypeRefs = new ArrayList<>(10);
-        this.channelGroupTypeRefs = new ArrayList<>(10);
-        this.channelTypeRefs = new ArrayList<>(10);
     }
 
     @Override
@@ -102,13 +96,13 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
                 if (type instanceof ThingTypeXmlResult) {
                     ThingTypeXmlResult typeResult = (ThingTypeXmlResult) type;
                     addConfigDescription(typeResult.getConfigDescription());
-                    this.thingTypeRefs.add(typeResult);
+                    thingTypeRefs.add(typeResult);
                 } else if (type instanceof ChannelGroupTypeXmlResult) {
                     ChannelGroupTypeXmlResult typeResult = (ChannelGroupTypeXmlResult) type;
-                    this.channelGroupTypeRefs.add(typeResult);
+                    channelGroupTypeRefs.add(typeResult);
                 } else if (type instanceof ChannelTypeXmlResult) {
                     ChannelTypeXmlResult typeResult = (ChannelTypeXmlResult) type;
-                    this.channelTypeRefs.add(typeResult);
+                    channelTypeRefs.add(typeResult);
                     addConfigDescription(typeResult.getConfigDescription());
                 } else {
                     throw new ConversionException("Unknown data type for '" + type + "'!");
@@ -120,45 +114,55 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
     private void addConfigDescription(ConfigDescription configDescription) {
         if (configDescription != null) {
             try {
-                this.configDescriptionProvider.add(this.bundle, configDescription);
-            } catch (Exception ex) {
-                this.logger.error("Could not register ConfigDescription!", ex);
+                configDescriptionProvider.add(bundle, configDescription);
+            } catch (RuntimeException e) {
+                logger.error("Could not register ConfigDescription: {}", configDescription.getUID(), e);
             }
         }
     }
 
     @Override
     public synchronized void addingFinished() {
-        Map<String, ChannelType> channelTypes = new HashMap<>(10);
         // create channel types
-        for (ChannelTypeXmlResult type : this.channelTypeRefs) {
+        for (ChannelTypeXmlResult type : channelTypeRefs) {
             ChannelType channelType = type.toChannelType();
-            channelTypes.put(channelType.getUID().getAsString(), channelType);
-            this.channelTypeProvider.add(this.bundle, channelType);
+            try {
+                channelTypeProvider.add(bundle, channelType);
+            } catch (RuntimeException e) {
+                logger.error("Could not register ChannelType: {}", channelType.getUID(), e);
+            }
         }
 
         // create channel group types
-        for (ChannelGroupTypeXmlResult type : this.channelGroupTypeRefs) {
-            this.channelGroupTypeProvider.add(this.bundle, type.toChannelGroupType());
+        for (ChannelGroupTypeXmlResult type : channelGroupTypeRefs) {
+            try {
+                channelGroupTypeProvider.add(bundle, type.toChannelGroupType());
+            } catch (RuntimeException e) {
+                logger.error("Could not register ChannelGroupType: {}", type.getUID(), e);
+            }
         }
 
         // create thing and bridge types
-        for (ThingTypeXmlResult type : this.thingTypeRefs) {
-            this.thingTypeProvider.add(this.bundle, type.toThingType());
+        for (ThingTypeXmlResult type : thingTypeRefs) {
+            try {
+                thingTypeProvider.add(bundle, type.toThingType());
+            } catch (RuntimeException e) {
+                logger.error("Could not register ThingType: {}", type.getUID(), e);
+            }
         }
 
         // release temporary cache
-        this.thingTypeRefs.clear();
-        this.channelGroupTypeRefs.clear();
-        this.channelTypeRefs.clear();
+        thingTypeRefs.clear();
+        channelGroupTypeRefs.clear();
+        channelTypeRefs.clear();
     }
 
     @Override
     public synchronized void release() {
-        this.thingTypeProvider.removeAll(bundle);
-        this.channelGroupTypeProvider.removeAll(bundle);
-        this.channelTypeProvider.removeAll(bundle);
-        this.configDescriptionProvider.removeAll(bundle);
+        thingTypeProvider.removeAll(bundle);
+        channelGroupTypeProvider.removeAll(bundle);
+        channelTypeProvider.removeAll(bundle);
+        configDescriptionProvider.removeAll(bundle);
     }
 
 }

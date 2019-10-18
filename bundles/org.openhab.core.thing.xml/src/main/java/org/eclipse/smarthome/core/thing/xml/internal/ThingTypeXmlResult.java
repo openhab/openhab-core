@@ -79,8 +79,12 @@ public class ThingTypeXmlResult {
         this.configDescription = (ConfigDescription) configDescriptionObjects[1];
     }
 
+    public ThingTypeUID getUID() {
+        return thingTypeUID;
+    }
+
     public ConfigDescription getConfigDescription() {
-        return this.configDescription;
+        return configDescription;
     }
 
     protected List<ChannelDefinition> toChannelDefinitions(List<ChannelXmlResult> channelTypeReferences)
