@@ -44,6 +44,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -61,6 +63,8 @@ public class SafeCallerImplTest extends JavaTest {
 
     // the grace period allowed for processing before a timing assertion should fail
     private static final int GRACE = 300;
+
+    private final Logger logger = LoggerFactory.getLogger(SafeCallerImplTest.class);
 
     public @Rule TestName name = new TestName();
 
@@ -549,13 +553,13 @@ public class SafeCallerImplTest extends JavaTest {
                             durationMillis), durationMillis < high);
                 }
             } catch (AssertionError e) {
-                System.out.println(printThreadDump(name.getMethodName()));
+                logger.debug("{}", createThreadDump(name.getMethodName()));
                 throw e;
             }
         }
     }
 
-    private static String printThreadDump(String threadNamePrefix) {
+    private static String createThreadDump(String threadNamePrefix) {
         final StringBuilder sb = new StringBuilder();
         final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), Integer.MAX_VALUE)) {

@@ -493,7 +493,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             public Void answer(InvocationOnMock invocation) throws Throwable {
                 Boolean shouldFail = (Boolean) testThing.getConfiguration().get("shouldFail");
                 if (shouldFail) {
-                    throw new RuntimeException("Invalid config!");
+                    throw new IllegalStateException("Invalid config!");
                 } else {
                     state.callback.statusUpdated(testThing, ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build());
                 }
@@ -808,7 +808,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         // event should not be delivered, because the source is the same
         eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, OnOffType.ON, CHANNEL_UID.toString()));
 
-        waitFor(() -> state.handleCommandWasCalled == true);
+        waitFor(() -> state.handleCommandWasCalled);
         assertThat(state.handleCommandWasCalled, is(false));
     }
 

@@ -477,21 +477,21 @@ public class InboxOSGiTest extends JavaOSGiTest {
         InboxListener inboxListener = new InboxListener() {
             @Override
             public void thingAdded(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     addedDiscoveryResultWrapper.set(result);
                 }
             }
 
             @Override
             public void thingUpdated(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     updatedDiscoveryResultWrapper.set(result);
                 }
             }
 
             @Override
             public void thingRemoved(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     removedDiscoveryResultWrapper.set(result);
                 }
             }
@@ -550,21 +550,21 @@ public class InboxOSGiTest extends JavaOSGiTest {
         InboxListener inboxListener = new InboxListener() {
             @Override
             public void thingAdded(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     addedDiscoveryResultWrapper.set(result);
                 }
             }
 
             @Override
             public void thingUpdated(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     updatedDiscoveryResultWrapper.set(result);
                 }
             }
 
             @Override
             public void thingRemoved(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     removedDiscoveryResultWrapper.set(result);
                 }
             }
@@ -615,21 +615,21 @@ public class InboxOSGiTest extends JavaOSGiTest {
         InboxListener inboxListener = new InboxListener() {
             @Override
             public void thingAdded(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     addedDiscoveryResultWrapper.set(result);
                 }
             }
 
             @Override
             public void thingUpdated(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     updatedDiscoveryResultWrapper.set(result);
                 }
             }
 
             @Override
             public void thingRemoved(Inbox source, DiscoveryResult result) {
-                if (source == inbox) {
+                if (source.equals(inbox)) {
                     removedDiscoveryResultWrapper.set(result);
                 }
             }
