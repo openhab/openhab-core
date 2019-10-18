@@ -43,10 +43,10 @@ import org.slf4j.LoggerFactory;
 @Component(service = ScriptEngineManager.class)
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Map<String, @Nullable ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private Map<String, @Nullable ScriptEngineFactory> customSupport = new HashMap<>();
-    private Map<String, @Nullable ScriptEngineFactory> genericSupport = new HashMap<>();
+    private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
+    private final Map<String, @Nullable ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
+    private final Map<String, @Nullable ScriptEngineFactory> customSupport = new HashMap<>();
+    private final Map<String, @Nullable ScriptEngineFactory> genericSupport = new HashMap<>();
     private @NonNullByDefault({}) ScriptExtensionManager scriptExtensionManager;
 
     @Reference

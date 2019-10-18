@@ -35,7 +35,7 @@ public abstract class BaseSmartHomeServlet extends HttpServlet {
     /**
      * Logger bound to child class.
      */
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(BaseSmartHomeServlet.class);
 
     /**
      * Http service.

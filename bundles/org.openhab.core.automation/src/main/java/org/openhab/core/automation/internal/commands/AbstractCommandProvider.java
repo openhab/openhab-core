@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustomizer {
 
-    protected Logger logger;
+    protected final Logger logger = LoggerFactory.getLogger(AbstractCommandProvider.class);
 
     /**
      * A bundle's execution context within the Framework.
@@ -91,7 +91,6 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
     @SuppressWarnings("unchecked")
     public AbstractCommandProvider(BundleContext context) {
         this.bc = context;
-        logger = LoggerFactory.getLogger(AbstractCommandProvider.this.getClass());
         parserTracker = new ServiceTracker(context, Parser.class.getName(), this);
         parserTracker.open();
     }

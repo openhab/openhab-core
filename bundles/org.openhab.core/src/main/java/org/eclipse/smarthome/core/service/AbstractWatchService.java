@@ -38,7 +38,7 @@ public abstract class AbstractWatchService {
     /**
      * Default logger for ESH Watch Services
      */
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(AbstractWatchService.class);
 
     protected String pathToWatch;
 

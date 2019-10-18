@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 @Component
 public class ScriptModuleTypeProvider implements ModuleTypeProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(ScriptModuleTypeProvider.class);
     private final List<ParameterOption> parameterOptions = new CopyOnWriteArrayList<>();
 
     @SuppressWarnings("unchecked")

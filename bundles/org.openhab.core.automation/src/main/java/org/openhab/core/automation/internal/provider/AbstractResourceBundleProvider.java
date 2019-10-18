@@ -70,7 +70,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractResourceBundleProvider<E> {
 
     public AbstractResourceBundleProvider() {
-        logger = LoggerFactory.getLogger(this.getClass());
         providedObjectsHolder = new ConcurrentHashMap<>();
         providerPortfolio = new ConcurrentHashMap<>();
         queue = new AutomationResourceBundlesEventQueue<>(this);
@@ -92,7 +91,7 @@ public abstract class AbstractResourceBundleProvider<E> {
     /**
      * This field keeps instance of {@link Logger} that is used for logging.
      */
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(AbstractResourceBundleProvider.class);
 
     /**
      * A bundle's execution context within the Framework.

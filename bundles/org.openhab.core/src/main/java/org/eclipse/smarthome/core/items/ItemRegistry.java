@@ -139,7 +139,7 @@ public interface ItemRegistry extends Registry<Item, String> {
      */
     @Deprecated
     default ItemBuilder newItemBuilder(Item item) {
-        LoggerFactory.getLogger(getClass())
+        LoggerFactory.getLogger(ItemRegistry.class)
                 .warn("Deprecation: You are using a deprecated API. Please use the ItemBuilder OSGi service instead.");
         return new ItemBuilderImpl(Collections.singleton(new CoreItemFactory()), item);
     }
@@ -155,7 +155,7 @@ public interface ItemRegistry extends Registry<Item, String> {
      */
     @Deprecated
     default ItemBuilder newItemBuilder(String itemType, String itemName) {
-        LoggerFactory.getLogger(getClass())
+        LoggerFactory.getLogger(ItemRegistry.class)
                 .warn("Deprecation: You are using a deprecated API. Please use the ItemBuilder OSGi service instead.");
         return new ItemBuilderImpl(Collections.singleton(new CoreItemFactory()), itemType, itemName);
     }
