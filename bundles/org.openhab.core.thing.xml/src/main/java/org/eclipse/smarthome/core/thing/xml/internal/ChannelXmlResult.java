@@ -117,7 +117,7 @@ public class ChannelXmlResult {
 
     @Override
     public String toString() {
-        return "ChannelTypeXmlResult [id=" + id + ", typeId=" + typeId + ", properties=" + properties + "]";
+        return "ChannelXmlResult [id=" + id + ", typeId=" + typeId + ", properties=" + properties + "]";
     }
 
     protected ChannelDefinition toChannelDefinition(String bindingId) throws ConversionException {
