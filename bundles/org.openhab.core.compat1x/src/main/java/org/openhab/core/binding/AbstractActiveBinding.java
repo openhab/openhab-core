@@ -55,7 +55,7 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
 
         // if there are no binding providers there is no need to run this
         // refresh thread any longer ...
-        if (this.providers.size() == 0) {
+        if (this.providers.isEmpty()) {
             activeService.deactivate();
         }
     }

@@ -537,7 +537,7 @@ public class Printer {
      * @return a formated string, representing the set of {@link Input}s or {@link Output}s or {@link Input}s.
      */
     private static String getTagsRecord(Set<String> tags) {
-        if (tags == null || tags.size() == 0) {
+        if (tags == null || tags.isEmpty()) {
             return "[ ]";
         }
         StringBuilder res = new StringBuilder().append("[ ");

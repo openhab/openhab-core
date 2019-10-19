@@ -146,7 +146,7 @@ public class ConfigUtil {
      * @throws IllegalArgumentException if the type of the normalized values differ or an invalid type has been given
      */
     private static Collection<Object> normalizeCollection(Collection<?> collection) throws IllegalArgumentException {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return Collections.emptyList();
         } else {
             final List<Object> lst = new ArrayList<>(collection.size());

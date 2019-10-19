@@ -58,7 +58,7 @@ public final class ExpressionCardinality extends Expression {
                 break;
             }
         }
-        if (!(atLeastOne && nodes.size() == 0)) {
+        if (!(atLeastOne && nodes.isEmpty())) {
             node.setChildren(nodes.toArray(new ASTNode[0]));
             node.setRemainingTokens(list);
             node.setSuccess(true);

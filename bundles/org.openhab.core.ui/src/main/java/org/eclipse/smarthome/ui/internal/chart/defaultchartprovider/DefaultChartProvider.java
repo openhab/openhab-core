@@ -372,7 +372,7 @@ public class DefaultChartProvider implements ChartProvider {
 
         // Add the new series to the chart - only if there's data elements to display
         // The chart engine will throw an exception if there's no data
-        if (xData.size() == 0) {
+        if (xData.isEmpty()) {
             return false;
         }
 

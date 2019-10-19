@@ -120,7 +120,7 @@ public class ProfileTypeResource implements RESTResource {
 
     private boolean profileTypeMatchesItemType(ProfileType pt, String itemType) {
         Collection<String> supportedItemTypesOnProfileType = pt.getSupportedItemTypes();
-        if (supportedItemTypesOnProfileType.size() == 0
+        if (supportedItemTypesOnProfileType.isEmpty()
                 || supportedItemTypesOnProfileType.contains(ItemUtil.getMainItemType(itemType))
                 || supportedItemTypesOnProfileType.contains(itemType)) {
             return true;
@@ -132,7 +132,7 @@ public class ProfileTypeResource implements RESTResource {
         if (profileType instanceof TriggerProfileType) {
             TriggerProfileType triggerProfileType = (TriggerProfileType) profileType;
 
-            if (triggerProfileType.getSupportedChannelTypeUIDs().size() == 0) {
+            if (triggerProfileType.getSupportedChannelTypeUIDs().isEmpty()) {
                 return true;
             }
 
@@ -147,7 +147,7 @@ public class ProfileTypeResource implements RESTResource {
         if (profileType instanceof StateProfileType) {
             StateProfileType stateProfileType = (StateProfileType) profileType;
 
-            if (stateProfileType.getSupportedItemTypesOfChannel().size() == 0) {
+            if (stateProfileType.getSupportedItemTypesOfChannel().isEmpty()) {
                 return true;
             }
 
