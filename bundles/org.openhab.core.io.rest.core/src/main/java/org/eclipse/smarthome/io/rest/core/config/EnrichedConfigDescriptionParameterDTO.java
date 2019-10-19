@@ -41,14 +41,14 @@ public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionPara
 
     public EnrichedConfigDescriptionParameterDTO(String name, Type type, BigDecimal minimum, BigDecimal maximum,
             BigDecimal stepsize, String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context,
-            String defaultValue, String label, String description, List<ParameterOptionDTO> options,
+            @Nullable String defaultValue, String label, String description, List<ParameterOptionDTO> options,
             List<FilterCriteriaDTO> filterCriteria, String groupName, Boolean advanced, Boolean limitToOptions,
             Integer multipleLimit, String unit, String unitLabel, Boolean verify) {
         super(name, type, minimum, maximum, stepsize, pattern, required, readOnly, multiple, context, defaultValue,
                 label, description, options, filterCriteria, groupName, advanced, limitToOptions, multipleLimit, unit,
                 unitLabel, verify);
 
-        if (multiple) {
+        if (multiple && defaultValue != null) {
             if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
                 defaultValues = Arrays.asList(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream().map(v -> v.trim())
                         .filter(v -> !v.isEmpty()).collect(Collectors.toList());
