@@ -41,4 +41,7 @@ Bundle-SymbolicName: ${project.artifactId}
 	osgi.enroute.junit.wrapper;version='[4.12.0,4.12.1)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\
 	tec.uom.lib.uom-lib-common;version='[1.0.3,1.0.4)',\
-	tec.uom.se;version='[1.0.10,1.0.11)'
+	tec.uom.se;version='[1.0.10,1.0.11)',\
+	jollyday;version='[0.5.8,0.5.9)',\
+	org.openhab.core.ephemeris;version='[2.5.0,2.5.1)',\
+	org.threeten.extra;version='[1.4.0,1.4.1)'

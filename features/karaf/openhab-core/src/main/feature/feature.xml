@@ -73,6 +73,7 @@
 
   <feature name="openhab-core-automation" version="${project.version}">
     <feature>openhab-core-base</feature>
+    <feature>openhab-core-ephemeris</feature>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
   </feature>
 
