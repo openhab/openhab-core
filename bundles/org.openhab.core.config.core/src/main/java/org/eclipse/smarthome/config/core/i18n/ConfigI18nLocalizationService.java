@@ -26,6 +26,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameterGroup;
 import org.eclipse.smarthome.config.core.ParameterOption;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -35,22 +36,17 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Markus Rathgeb - Initial contribution
  */
-@NonNullByDefault
 @Component(immediate = true, service = { ConfigI18nLocalizationService.class })
+@NonNullByDefault
 public class ConfigI18nLocalizationService {
 
-    private @NonNullByDefault({}) ConfigDescriptionI18nUtil configDescriptionParamI18nUtil;
-    private @NonNullByDefault({}) ConfigDescriptionGroupI18nUtil configDescriptionGroupI18nUtil;
+    private final ConfigDescriptionI18nUtil configDescriptionI18nUtil;
+    private final ConfigDescriptionGroupI18nUtil configDescriptionGroupI18nUtil;
 
-    @Reference
-    protected void setTranslationProvider(final TranslationProvider i18nProvider) {
-        this.configDescriptionParamI18nUtil = new ConfigDescriptionI18nUtil(i18nProvider);
+    @Activate
+    public ConfigI18nLocalizationService(final @Reference TranslationProvider i18nProvider) {
+        this.configDescriptionI18nUtil = new ConfigDescriptionI18nUtil(i18nProvider);
         this.configDescriptionGroupI18nUtil = new ConfigDescriptionGroupI18nUtil(i18nProvider);
-    }
-
-    protected void unsetTranslationProvider(final TranslationProvider i18nProvider) {
-        this.configDescriptionParamI18nUtil = null;
-        this.configDescriptionGroupI18nUtil = null;
     }
 
     /**
@@ -103,16 +99,16 @@ public class ConfigI18nLocalizationService {
         final URI configDescriptionURI = configDescription.getUID();
         final String parameterName = parameter.getName();
 
-        final String label = this.configDescriptionParamI18nUtil.getParameterLabel(bundle, configDescriptionURI,
-                parameterName, parameter.getLabel(), locale);
+        final String label = configDescriptionI18nUtil.getParameterLabel(bundle, configDescriptionURI, parameterName,
+                parameter.getLabel(), locale);
 
-        final String description = this.configDescriptionParamI18nUtil.getParameterDescription(bundle,
-                configDescriptionURI, parameterName, parameter.getDescription(), locale);
+        final String description = configDescriptionI18nUtil.getParameterDescription(bundle, configDescriptionURI,
+                parameterName, parameter.getDescription(), locale);
 
-        final String pattern = this.configDescriptionParamI18nUtil.getParameterPattern(bundle, configDescriptionURI,
+        final String pattern = configDescriptionI18nUtil.getParameterPattern(bundle, configDescriptionURI,
                 parameterName, parameter.getPattern(), locale);
 
-        final String unitLabel = this.configDescriptionParamI18nUtil.getParameterUnitLabel(bundle, configDescriptionURI,
+        final String unitLabel = configDescriptionI18nUtil.getParameterUnitLabel(bundle, configDescriptionURI,
                 parameterName, parameter.getUnit(), parameter.getUnitLabel(), locale);
 
         final List<ParameterOption> options = getLocalizedOptions(parameter.getOptions(), bundle, configDescriptionURI,
@@ -147,10 +143,10 @@ public class ConfigI18nLocalizationService {
         final URI configDescriptionURI = configDescription.getUID();
         final String name = group.getName();
 
-        final String label = this.configDescriptionGroupI18nUtil.getGroupLabel(bundle, configDescriptionURI, name,
+        final String label = configDescriptionGroupI18nUtil.getGroupLabel(bundle, configDescriptionURI, name,
                 group.getLabel(), locale);
 
-        final String description = this.configDescriptionGroupI18nUtil.getGroupDescription(bundle, configDescriptionURI,
+        final String description = configDescriptionGroupI18nUtil.getGroupDescription(bundle, configDescriptionURI,
                 name, group.getDescription(), locale);
 
         final ConfigDescriptionParameterGroup localizedGroup = new ConfigDescriptionParameterGroup(name,
@@ -179,7 +175,7 @@ public class ConfigI18nLocalizationService {
         final List<ParameterOption> localizedOptions = new ArrayList<>();
         for (final ParameterOption option : originalOptions) {
 
-            final String localizedLabel = this.configDescriptionParamI18nUtil.getParameterOptionLabel(bundle,
+            final String localizedLabel = configDescriptionI18nUtil.getParameterOptionLabel(bundle,
                     configDescriptionURI, parameterName, /* key */option.getValue(), /* fallback */option.getLabel(),
                     locale);
             final ParameterOption localizedOption = new ParameterOption(option.getValue(), localizedLabel);
