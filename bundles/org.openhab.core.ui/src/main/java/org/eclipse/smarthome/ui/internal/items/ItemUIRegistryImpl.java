@@ -623,7 +623,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
         } else if (w instanceof Switch) {
             Switch sw = (Switch) w;
-            if (sw.getMappings().size() == 0) {
+            if (sw.getMappings().isEmpty()) {
                 returnState = itemState.as(OnOffType.class);
             }
         }
@@ -1084,7 +1084,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         if (colorList == null) {
             return null;
         }
-        if (colorList.size() == 0) {
+        if (colorList.isEmpty()) {
             return null;
         }
 
@@ -1167,7 +1167,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         if (ruleList == null) {
             return true;
         }
-        if (ruleList.size() == 0) {
+        if (ruleList.isEmpty()) {
             return true;
         }
 

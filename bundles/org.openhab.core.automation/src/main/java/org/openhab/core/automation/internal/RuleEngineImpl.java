@@ -1140,7 +1140,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     private boolean calculateConditions(WrappedRule rule) {
         List<WrappedCondition> conditions = rule.getConditions();
-        if (conditions.size() == 0) {
+        if (conditions.isEmpty()) {
             return true;
         }
         final String ruleUID = rule.getUID();
@@ -1171,7 +1171,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     private void executeActions(WrappedRule rule, boolean stopOnFirstFail) {
         final String ruleUID = rule.getUID();
         final Collection<WrappedAction> actions = rule.getActions();
-        if (actions.size() == 0) {
+        if (actions.isEmpty()) {
             return;
         }
         RuleStatus ruleStatus = null;

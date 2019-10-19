@@ -50,7 +50,7 @@ public class WatchServiceUtil {
         synchronized (WATCH_SERVICES) {
             Map<String, AutomationWatchService> watchers = WATCH_SERVICES.get(provider);
             aws = watchers.remove(watchingDir);
-            if (watchers.size() == 0) {
+            if (watchers.isEmpty()) {
                 WATCH_SERVICES.remove(provider);
             }
         }
