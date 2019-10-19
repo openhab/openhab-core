@@ -13,6 +13,7 @@
 package org.eclipse.smarthome.io.rest.core.config;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
 import java.net.URI;
@@ -36,6 +37,23 @@ public class EnrichedConfigDescriptionDTOMapperTest {
     private static final String CONFIG_PARAMETER_DEFAULT_VALUE = "first value,second value,third value";
 
     @Test
+    public void testThatDefaultValuesAreEmptyIfMultipleIsTrue() {
+        ConfigDescriptionParameter configDescriptionParameter = ConfigDescriptionParameterBuilder
+                .create(CONFIG_PARAMETER_NAME, Type.TEXT).withMultiple(true).build();
+        ConfigDescription configDescription = new ConfigDescription(CONFIG_URI,
+                Arrays.asList(configDescriptionParameter));
+
+        ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
+        assertThat(cddto.parameters, hasSize(1));
+
+        ConfigDescriptionParameterDTO cdpdto = cddto.parameters.get(0);
+        assertThat(cdpdto, instanceOf(EnrichedConfigDescriptionParameterDTO.class));
+        assertThat(cdpdto.defaultValue, is(nullValue()));
+        EnrichedConfigDescriptionParameterDTO ecdpdto = (EnrichedConfigDescriptionParameterDTO) cdpdto;
+        assertThat(ecdpdto.defaultValues, is(nullValue()));
+    }
+
+    @Test
     public void testThatDefaultValueIsNotAList() {
         ConfigDescriptionParameter configDescriptionParameter = ConfigDescriptionParameterBuilder
                 .create(CONFIG_PARAMETER_NAME, Type.TEXT).withDefault(CONFIG_PARAMETER_DEFAULT_VALUE).build();
@@ -43,7 +61,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
                 Arrays.asList(configDescriptionParameter));
 
         ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
-        assertThat(cddto.parameters.size(), is(1));
+        assertThat(cddto.parameters, hasSize(1));
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.get(0);
         assertThat(cdpdto, instanceOf(EnrichedConfigDescriptionParameterDTO.class));
@@ -62,14 +80,14 @@ public class EnrichedConfigDescriptionDTOMapperTest {
                 Arrays.asList(configDescriptionParameter));
 
         ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
-        assertThat(cddto.parameters.size(), is(1));
+        assertThat(cddto.parameters, hasSize(1));
 
         ConfigDescriptionParameterDTO cdpdto = cddto.parameters.get(0);
         assertThat(cdpdto, instanceOf(EnrichedConfigDescriptionParameterDTO.class));
         assertThat(cdpdto.defaultValue, is(CONFIG_PARAMETER_DEFAULT_VALUE));
         EnrichedConfigDescriptionParameterDTO ecdpdto = (EnrichedConfigDescriptionParameterDTO) cdpdto;
         assertThat(ecdpdto.defaultValues, is(notNullValue()));
-        assertThat(ecdpdto.defaultValues.size(), is(3));
+        assertThat(ecdpdto.defaultValues, hasSize(3));
         assertThat(ecdpdto.defaultValues, is(equalTo(Arrays.asList("first value", "second value", "third value"))));
     }
 
