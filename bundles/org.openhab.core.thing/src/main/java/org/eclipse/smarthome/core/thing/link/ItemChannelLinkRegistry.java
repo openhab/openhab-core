@@ -15,7 +15,10 @@ package org.eclipse.smarthome.core.thing.link;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemRegistry;
@@ -39,6 +42,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Markus Rathgeb - Linked items returns only existing items
  * @author Markus Rathgeb - Rewrite collection handling to improve performance
  */
+@NonNullByDefault
 @Component(immediate = true, service = ItemChannelLinkRegistry.class)
 public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLink, ItemChannelLinkProvider> {
 
@@ -70,8 +74,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     public Set<Item> getLinkedItems(final UID uid) {
-        return super.getLinkedItemNames(uid).parallelStream().map(itemName -> itemRegistry.get(itemName))
-                .filter(Objects::nonNull).collect(Collectors.toSet());
+        return ((Stream<@NonNull Item>) super.getLinkedItemNames(uid).parallelStream()
+                .map(itemName -> itemRegistry.get(itemName)).filter(Objects::nonNull)).collect(Collectors.toSet());
     }
 
     /**
@@ -81,9 +85,9 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound things for the given item name
      */
     public Set<Thing> getBoundThings(final String itemName) {
-        return getBoundChannels(itemName).parallelStream()
-                .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+        return ((Stream<@NonNull Thing>) getBoundChannels(itemName).parallelStream()
+                .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull))
+                        .collect(Collectors.toSet());
     }
 
     @Reference

@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 
@@ -26,6 +28,7 @@ import org.openhab.core.automation.type.ModuleTypeProvider;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public abstract class ModuleTypeFileProvider extends AbstractFileProvider<ModuleType> implements ModuleTypeProvider {
 
     public ModuleTypeFileProvider() {
@@ -44,16 +47,16 @@ public abstract class ModuleTypeFileProvider extends AbstractFileProvider<Module
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ModuleType> T getModuleType(String UID, Locale locale) {
+    public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
         return (T) providedObjectsHolder.get(UID);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ModuleType> Collection<T> getModuleTypes(Locale locale) {
+    public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
         Collection<ModuleType> values = providedObjectsHolder.values();
         if (values.isEmpty()) {
-            return Collections.<T> emptyList();
+            return Collections.emptyList();
         }
         return (Collection<T>) new LinkedList<>(values);
     }

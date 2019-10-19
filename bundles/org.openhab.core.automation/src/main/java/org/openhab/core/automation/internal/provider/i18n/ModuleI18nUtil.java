@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.I18nUtil;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.openhab.core.automation.Action;
@@ -31,22 +33,26 @@ import org.osgi.framework.Bundle;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class ModuleI18nUtil {
 
     public static <T extends Module> List<T> getLocalizedModules(TranslationProvider i18nProvider, List<T> modules,
-            Bundle bundle, String uid, String prefix, Locale locale) {
+            Bundle bundle, String uid, String prefix, @Nullable Locale locale) {
         List<T> lmodules = new ArrayList<>();
         for (T module : modules) {
             String label = getModuleLabel(i18nProvider, bundle, uid, module.getId(), module.getLabel(), prefix, locale);
-            String description = getModuleDescription(i18nProvider, bundle, uid, prefix, module.getId(),
-                    module.getDescription(), locale);
-            lmodules.add(createLocalizedModule(module, label, description));
+            String description = getModuleDescription(i18nProvider, bundle, uid, module.getId(),
+                    module.getDescription(), prefix, locale);
+            @Nullable
+            T lmodule = createLocalizedModule(module, label, description);
+            lmodules.add(lmodule == null ? module : lmodule);
         }
         return lmodules;
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Module> T createLocalizedModule(T module, String label, String description) {
+    private static <T extends Module> @Nullable T createLocalizedModule(T module, @Nullable String label,
+            @Nullable String description) {
         if (module instanceof Action) {
             return (T) createLocalizedAction((Action) module, label, description);
         }
@@ -59,26 +65,28 @@ public class ModuleI18nUtil {
         return null;
     }
 
-    private static Trigger createLocalizedTrigger(Trigger module, String label, String description) {
+    private static Trigger createLocalizedTrigger(Trigger module, @Nullable String label,
+            @Nullable String description) {
         return ModuleBuilder.createTrigger(module).withLabel(label).withDescription(description).build();
     }
 
-    private static Condition createLocalizedCondition(Condition module, String label, String description) {
+    private static Condition createLocalizedCondition(Condition module, @Nullable String label,
+            @Nullable String description) {
         return ModuleBuilder.createCondition(module).withLabel(label).withDescription(description).build();
     }
 
-    private static Action createLocalizedAction(Action module, String label, String description) {
+    private static Action createLocalizedAction(Action module, @Nullable String label, @Nullable String description) {
         return ModuleBuilder.createAction(module).withLabel(label).withDescription(description).build();
     }
 
-    private static String getModuleLabel(TranslationProvider i18nProvider, Bundle bundle, String uid, String moduleName,
-            String defaultLabel, String prefix, Locale locale) {
+    private static @Nullable String getModuleLabel(TranslationProvider i18nProvider, Bundle bundle, String uid,
+            String moduleName, @Nullable String defaultLabel, String prefix, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferModuleKey(prefix, uid, moduleName, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
-    private static String getModuleDescription(TranslationProvider i18nProvider, Bundle bundle, String uid,
-            String moduleName, String defaultDescription, String prefix, Locale locale) {
+    private static @Nullable String getModuleDescription(TranslationProvider i18nProvider, Bundle bundle, String uid,
+            String moduleName, @Nullable String defaultDescription, String prefix, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferModuleKey(prefix, uid, moduleName, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);

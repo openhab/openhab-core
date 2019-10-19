@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -583,7 +584,10 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
 
         managedThingProvider.add(thing);
 
-        thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", null));
+        Map<String, Object> configuration = new HashMap<>();
+        configuration.put("parameter", null);
+
+        thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", configuration));
     }
 
     @Test

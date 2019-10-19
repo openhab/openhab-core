@@ -28,6 +28,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.io.rest.LocaleService;
 import org.eclipse.smarthome.io.rest.RESTResource;
 import org.openhab.core.automation.dto.ActionTypeDTOMapper;
@@ -62,14 +64,15 @@ import io.swagger.annotations.ApiResponses;
  */
 @Path("module-types")
 @Api("module-types")
+@NonNullByDefault
 @Component
 public class ModuleTypeResource implements RESTResource {
 
-    private ModuleTypeRegistry moduleTypeRegistry;
-    private LocaleService localeService;
+    private @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
+    private @NonNullByDefault({}) LocaleService localeService;
 
     @Context
-    private UriInfo uriInfo;
+    private @NonNullByDefault({}) UriInfo uriInfo;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     protected void setModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
@@ -94,11 +97,11 @@ public class ModuleTypeResource implements RESTResource {
     @ApiOperation(value = "Get all available module types.", response = ModuleTypeDTO.class, responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ModuleTypeDTO.class, responseContainer = "List") })
-    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
-            @QueryParam("tags") @ApiParam(value = "tags for filtering", required = false) String tagList,
-            @QueryParam("type") @ApiParam(value = "filtering by action, condition or trigger", required = false) String type) {
+    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
+            @QueryParam("tags") @ApiParam(value = "tags for filtering", required = false) @Nullable String tagList,
+            @QueryParam("type") @ApiParam(value = "filtering by action, condition or trigger", required = false) @Nullable String type) {
         final Locale locale = localeService.getLocale(language);
-        final String[] tags = tagList != null ? tagList.split(",") : null;
+        final String[] tags = tagList != null ? tagList.split(",") : new String[0];
         final List<ModuleTypeDTO> modules = new ArrayList<>();
 
         if (type == null || type.equals("trigger")) {
@@ -119,7 +122,7 @@ public class ModuleTypeResource implements RESTResource {
     @ApiOperation(value = "Gets a module type corresponding to the given UID.", response = ModuleTypeDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ModuleTypeDTO.class),
             @ApiResponse(code = 404, message = "Module Type corresponding to the given UID does not found.") })
-    public Response getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
+    public Response getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
             @PathParam("moduleTypeUID") @ApiParam(value = "moduleTypeUID", required = true) String moduleTypeUID) {
         Locale locale = localeService.getLocale(language);
         final ModuleType moduleType = moduleTypeRegistry.get(moduleTypeUID, locale);

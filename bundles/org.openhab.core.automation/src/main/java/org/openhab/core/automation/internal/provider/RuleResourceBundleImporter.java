@@ -54,7 +54,7 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
      * @param registry the managing service of the {@link Rule}s.
      */
     public RuleResourceBundleImporter() {
-        path = ROOT_DIRECTORY + "/rules/";
+        super(ROOT_DIRECTORY + "/rules/");
     }
 
     protected void setManagedRuleProvider(ManagedRuleProvider mProvider) {
@@ -110,12 +110,12 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
                 updateWaitingProviders(parser, bundle, url);
                 if (parser != null) {
                     Set<Rule> parsedObjects = parseData(parser, url, bundle);
-                    if (parsedObjects != null && !parsedObjects.isEmpty()) {
-                        addNewProvidedObjects(null, null, parsedObjects);
+                    if (!parsedObjects.isEmpty()) {
+                        addNewProvidedObjects(Collections.emptyList(), Collections.emptyList(), parsedObjects);
                     }
                 }
             }
-            putNewPortfolio(vendor, Collections.<String> emptyList());
+            putNewPortfolio(vendor, Collections.emptyList());
         }
     }
 

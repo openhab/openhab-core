@@ -14,6 +14,7 @@ package org.openhab.core.automation.template;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 
@@ -29,6 +30,7 @@ import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public interface RuleTemplateProvider extends TemplateProvider<RuleTemplate> {
 
 }

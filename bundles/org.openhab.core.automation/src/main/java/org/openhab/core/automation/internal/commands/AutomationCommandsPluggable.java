@@ -14,10 +14,14 @@ package org.openhab.core.automation.internal.commands;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.io.console.Console;
 import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.automation.Rule;
@@ -45,6 +49,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
+@NonNullByDefault
 @Component
 public class AutomationCommandsPluggable extends AutomationCommands implements ConsoleCommandExtension {
 
@@ -79,23 +84,23 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     /**
      * This field holds the reference to the {@code RuleRegistry} providing the {@code Rule} automation objects.
      */
-    protected RuleRegistry ruleRegistry;
+    protected @NonNullByDefault({}) RuleRegistry ruleRegistry;
 
     /**
      * This field holds the reference to the {@code RuleManager}.
      */
-    protected RuleManager ruleManager;
+    protected @NonNullByDefault({}) RuleManager ruleManager;
 
     /**
      * This field holds the reference to the {@code TemplateRegistry} providing the {@code Template} automation objects.
      */
-    protected TemplateRegistry<RuleTemplate> templateRegistry;
+    protected @NonNullByDefault({}) TemplateRegistry<@NonNull RuleTemplate> templateRegistry;
 
     /**
      * This field holds the reference to the {@code ModuleTypeRegistry} providing the {@code ModuleType} automation
      * objects.
      */
-    protected ModuleTypeRegistry moduleTypeRegistry;
+    protected @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
 
     /**
      * Activating this component - called from DS.
@@ -241,7 +246,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     }
 
     @Override
-    public Rule getRule(String uid) {
+    public @Nullable Rule getRule(String uid) {
         if (ruleRegistry != null) {
             return ruleRegistry.get(uid);
         }
@@ -249,7 +254,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     }
 
     @Override
-    public RuleTemplate getTemplate(String templateUID, Locale locale) {
+    public @Nullable RuleTemplate getTemplate(String templateUID, @Nullable Locale locale) {
         if (templateRegistry != null) {
             return templateRegistry.get(templateUID, locale);
         }
@@ -257,15 +262,15 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     }
 
     @Override
-    public Collection<RuleTemplate> getTemplates(Locale locale) {
+    public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
         if (templateRegistry != null) {
             return templateRegistry.getAll(locale);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
-    public ModuleType getModuleType(String typeUID, Locale locale) {
+    public @Nullable ModuleType getModuleType(String typeUID, @Nullable Locale locale) {
         if (moduleTypeRegistry != null) {
             return moduleTypeRegistry.get(typeUID, locale);
         }
@@ -274,29 +279,29 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<TriggerType> getTriggers(Locale locale) {
+    public Collection<TriggerType> getTriggers(@Nullable Locale locale) {
         if (moduleTypeRegistry != null) {
             return moduleTypeRegistry.getTriggers(locale);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<ConditionType> getConditions(Locale locale) {
+    public Collection<ConditionType> getConditions(@Nullable Locale locale) {
         if (moduleTypeRegistry != null) {
             return moduleTypeRegistry.getConditions(locale);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<ActionType> getActions(Locale locale) {
+    public Collection<ActionType> getActions(@Nullable Locale locale) {
         if (moduleTypeRegistry != null) {
             return moduleTypeRegistry.getActions(locale);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -325,7 +330,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     }
 
     @Override
-    protected AutomationCommand parseCommand(String command, String[] params) {
+    protected @Nullable AutomationCommand parseCommand(String command, String[] params) {
         if (command.equalsIgnoreCase(IMPORT_MODULE_TYPES)) {
             return new AutomationCommandImport(IMPORT_MODULE_TYPES, params, MODULE_TYPE_REGISTRY, this);
         }
@@ -406,12 +411,12 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
         if (ruleRegistry != null) {
             return ruleRegistry.getAll();
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
     @Override
-    public RuleStatus getRuleStatus(String ruleUID) {
+    public @Nullable RuleStatus getRuleStatus(String ruleUID) {
         RuleStatusInfo rsi = ruleManager.getStatusInfo(ruleUID);
         return rsi != null ? rsi.getStatus() : null;
     }

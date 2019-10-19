@@ -20,6 +20,8 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.openhab.core.automation.type.ActionType;
@@ -39,6 +41,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
+@NonNullByDefault
 @Component(service = ModuleTypeRegistry.class, immediate = true)
 public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String, ModuleTypeProvider>
         implements ModuleTypeRegistry {
@@ -55,13 +58,13 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     }
 
     @Override
-    public ModuleType get(String typeUID) {
+    public @Nullable ModuleType get(String typeUID) {
         return get(typeUID, null);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends ModuleType> T get(String moduleTypeUID, Locale locale) {
+    public <T extends ModuleType> @Nullable T get(String moduleTypeUID, @Nullable Locale locale) {
         Entry<Provider<ModuleType>, ModuleType> mType = getValueAndProvider(moduleTypeUID);
         if (mType == null) {
             return null;
@@ -73,22 +76,23 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     }
 
     @Override
-    public <T extends ModuleType> Collection<T> getByTag(String moduleTypeTag) {
+    public <T extends ModuleType> Collection<T> getByTag(@Nullable String moduleTypeTag) {
         return getByTag(moduleTypeTag, null);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends ModuleType> Collection<T> getByTag(String moduleTypeTag, Locale locale) {
+    public <T extends ModuleType> Collection<T> getByTag(@Nullable String moduleTypeTag, @Nullable Locale locale) {
         Collection<T> result = new ArrayList<>(20);
         forEach((provider, mType) -> {
             ModuleType mt = locale == null ? mType
                     : ((ModuleTypeProvider) provider).getModuleType(mType.getUID(), locale);
-            Collection<String> tags = mt.getTags();
-            if (moduleTypeTag == null) {
-                result.add((T) createCopy(mt));
-            } else if (tags.contains(moduleTypeTag)) {
-                result.add((T) createCopy(mt));
+            if (mt != null && (moduleTypeTag == null || mt.getTags().contains(moduleTypeTag))) {
+                @Nullable
+                T mtCopy = (T) createCopy(mt);
+                if (mtCopy != null) {
+                    result.add(mtCopy);
+                }
             }
         });
         return result;
@@ -101,23 +105,25 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends ModuleType> Collection<T> getByTags(Locale locale, String... tags) {
-        Set<String> tagSet = tags != null ? new HashSet<>(Arrays.asList(tags)) : null;
+    public <T extends ModuleType> Collection<T> getByTags(@Nullable Locale locale, String... tags) {
+        Set<String> tagSet = new HashSet<>(Arrays.asList(tags));
         Collection<T> result = new ArrayList<>(20);
         forEach((provider, mType) -> {
             ModuleType mt = locale == null ? mType
                     : ((ModuleTypeProvider) provider).getModuleType(mType.getUID(), locale);
-            if (tagSet == null) {
-                result.add((T) createCopy(mt));
-            } else if (mt.getTags().containsAll(tagSet)) {
-                result.add((T) createCopy(mt));
+            if (mt != null && (mt.getTags().containsAll(tagSet))) {
+                @Nullable
+                T mtCopy = (T) createCopy(mt);
+                if (mtCopy != null) {
+                    result.add(mtCopy);
+                }
             }
         });
         return result;
     }
 
     @Override
-    public Collection<TriggerType> getTriggers(Locale locale, String... tags) {
+    public Collection<TriggerType> getTriggers(@Nullable Locale locale, String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
         Collection<TriggerType> triggerTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
@@ -153,7 +159,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     }
 
     @Override
-    public Collection<ConditionType> getConditions(Locale locale, String... tags) {
+    public Collection<ConditionType> getConditions(@Nullable Locale locale, String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
         Collection<ConditionType> conditionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
@@ -177,7 +183,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
     }
 
     @Override
-    public Collection<ActionType> getActions(Locale locale, String... tags) {
+    public Collection<ActionType> getActions(@Nullable Locale locale, String... tags) {
         Collection<ModuleType> moduleTypes = getByTags(locale, tags);
         Collection<ActionType> actionTypes = new ArrayList<>();
         for (ModuleType mt : moduleTypes) {
@@ -188,7 +194,7 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         return actionTypes;
     }
 
-    private ModuleType createCopy(ModuleType mType) {
+    private @Nullable ModuleType createCopy(@Nullable ModuleType mType) {
         if (mType == null) {
             return null;
         }

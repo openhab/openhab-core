@@ -85,27 +85,28 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Marin Mitev - various fixes and extracted JSON parser test to separate file
  */
+@NonNullByDefault
 public class AutomationIntegrationTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(AutomationIntegrationTest.class);
-    private EventPublisher eventPublisher;
-    private ItemRegistry itemRegistry;
-    private RuleRegistry ruleRegistry;
-    private RuleManager ruleEngine;
-    private ManagedRuleProvider managedRuleProvider;
-    private ModuleTypeRegistry moduleTypeRegistry;
-    private TemplateRegistry<RuleTemplate> templateRegistry;
+    private @Nullable EventPublisher eventPublisher;
+    private @Nullable ItemRegistry itemRegistry;
+    private @Nullable RuleRegistry ruleRegistry;
+    private @Nullable RuleManager ruleEngine;
+    private @Nullable ManagedRuleProvider managedRuleProvider;
+    private @Nullable ModuleTypeRegistry moduleTypeRegistry;
+    private @Nullable TemplateRegistry<RuleTemplate> templateRegistry;
 
-    Event ruleEvent = null;
-    Event itemEvent = null;
+    private @Nullable Event ruleEvent;
+    private @Nullable Event itemEvent;
 
     @Before
     public void before() {
         logger.info("@Before.begin");
 
         getService(ItemRegistry.class);
+        
         ItemProvider itemProvider = new ItemProvider() {
-
             @Override
             public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
@@ -179,9 +180,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     public void assertThatARuleCanBeAddedUpdatedAndRemovedByTheApi() {
         logger.info("assert that a rule can be added, updated and removed by the api");
 
-        @NonNullByDefault
         EventSubscriber ruleEventHandler = new EventSubscriber() {
-
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Stream.of(RuleAddedEvent.TYPE, RuleRemovedEvent.TYPE, RuleUpdatedEvent.TYPE).collect(toSet());
@@ -283,9 +282,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         List<RuleStatusInfoEvent> ruleEvents = new CopyOnWriteArrayList<>();
 
-        @NonNullByDefault
         EventSubscriber ruleEventHandler = new EventSubscriber() {
-
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(RuleStatusInfoEvent.TYPE);
@@ -392,9 +389,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         EventPublisher eventPublisher = getService(EventPublisher.class);
         eventPublisher.post(ItemEventFactory.createStateEvent("myPresenceItem3", OnOffType.ON));
 
-        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
-
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
@@ -461,9 +456,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         Item myLampItem3 = itemRegistry.getItem("myLampItem3");
 
-        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
-
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
@@ -519,9 +512,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE));
         }, 3000, 100);
 
-        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
-
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
@@ -607,7 +598,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         // prepare the presenceItems state to be on to match the second condition of the rule
         eventPublisher.post(ItemEventFactory.createStateEvent("myPresenceItem4", OnOffType.ON));
 
-        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
@@ -671,7 +661,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         logger.info("assert that a rule can be added by a ruleProvider");
         Rule rule = createSimpleRule();
 
-        @NonNullByDefault
         RuleProvider ruleProvider = new RuleProvider() {
             @Override
             public void addProviderChangeListener(ProviderChangeListener<Rule> listener) {
@@ -723,9 +712,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         ruleRegistry.add(templateRule);
         assertThat(ruleRegistry.get(templateRule.getUID()), is(notNullValue()));
 
-        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
-
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
@@ -784,9 +771,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             assertThat(ruleEngine.getStatus(templateRule.getUID()), is(RuleStatus.IDLE));
         });
 
-        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
-
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);
@@ -839,9 +824,8 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         ActionType actionType = new ActionType(actionTypeUID, templateConfigDescriptionParameters, null);
 
         RuleTemplateProvider templateProvider = new RuleTemplateProvider() {
-
             @Override
-            public RuleTemplate getTemplate(String UID, Locale locale) {
+            public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
                 if (UID == templateUID) {
                     return template;
                 } else {
@@ -850,7 +834,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public Collection<RuleTemplate> getTemplates(Locale locale) {
+            public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
                 return Collections.singleton(template);
             }
 
@@ -869,7 +853,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         };
 
         ModuleTypeProvider moduleTypeProvider = new ModuleTypeProvider() {
-
             @Override
             public void addProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
             }
@@ -884,7 +867,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public <T extends ModuleType> T getModuleType(String UID, Locale locale) {
+            public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
                 if (UID == triggerTypeUID) {
                     return (T) triggerType;
                 } else if (UID == actionTypeUID) {
@@ -895,7 +878,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public <T extends ModuleType> Collection<T> getModuleTypes(Locale locale) {
+            public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
                 return (Collection<T>) Stream.of(triggerType, actionType).collect(toSet());
             }
         };
@@ -1005,9 +988,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         SwitchItem myMotionItem = (SwitchItem) itemRegistry.getItem("myPresenceItem5");
         myMotionItem.setState(OnOffType.ON);
 
-        @NonNullByDefault
         EventSubscriber itemEventHandler = new EventSubscriber() {
-
             @Override
             public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemCommandEvent.TYPE);

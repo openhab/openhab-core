@@ -262,7 +262,13 @@ public class ThingManagerImpl
                     } else {
                         logger.debug("Only updating thing {} in the registry because provider {} is not managed.",
                                 thing.getUID().getAsString(), provider);
-                        thingRegistry.updated(provider, thingRegistry.get(thing.getUID()), thing);
+                        Thing oldThing = thingRegistry.get(thing.getUID());
+                        if (oldThing == null) {
+                            throw new IllegalArgumentException(MessageFormat.format(
+                                    "Cannot update thing {0} because it is not known to the registry",
+                                    thing.getUID().getAsString()));
+                        }
+                        thingRegistry.updated(provider, oldThing, thing);
                     }
                     return null;
                 }

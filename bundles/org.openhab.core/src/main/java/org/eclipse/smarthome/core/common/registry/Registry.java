@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.common.registry;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @param <E> type of the elements in the registry
  */
+@NonNullByDefault
 public interface Registry<E extends Identifiable<K>, K> {
 
     /**
@@ -35,15 +36,14 @@ public interface Registry<E extends Identifiable<K>, K> {
      *
      * @param listener registry change listener
      */
-    void addRegistryChangeListener(@NonNull RegistryChangeListener<E> listener);
+    void addRegistryChangeListener(RegistryChangeListener<E> listener);
 
     /**
      * Returns a collection of all elements in the registry.
      *
      * @return collection of all elements in the registry
      */
-    @NonNull
-    Collection<@NonNull E> getAll();
+    Collection<E> getAll();
 
     /**
      * Returns a stream of all elements in the registry.
@@ -65,7 +65,7 @@ public interface Registry<E extends Identifiable<K>, K> {
      *
      * @param listener registry change listener
      */
-    void removeRegistryChangeListener(@NonNull RegistryChangeListener<E> listener);
+    void removeRegistryChangeListener(RegistryChangeListener<E> listener);
 
     /**
      * Adds the given element to the according {@link ManagedProvider}.
@@ -74,7 +74,7 @@ public interface Registry<E extends Identifiable<K>, K> {
      * @return the added element or newly created object of the same type
      * @throws IllegalStateException if no ManagedProvider is available
      */
-    public @NonNull E add(@NonNull E element);
+    public E add(E element);
 
     /**
      * Updates the given element at the according {@link ManagedProvider}.
@@ -84,7 +84,7 @@ public interface Registry<E extends Identifiable<K>, K> {
      *         exists
      * @throws IllegalStateException if no ManagedProvider is available
      */
-    public @Nullable E update(@NonNull E element);
+    public @Nullable E update(E element);
 
     /**
      * Removes the given element from the according {@link ManagedProvider}.
@@ -94,5 +94,5 @@ public interface Registry<E extends Identifiable<K>, K> {
      *         key exists
      * @throws IllegalStateException if no ManagedProvider is available
      */
-    public @Nullable E remove(@NonNull K key);
+    public @Nullable E remove(K key);
 }

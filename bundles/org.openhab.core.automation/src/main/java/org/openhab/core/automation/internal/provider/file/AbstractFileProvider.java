@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
@@ -47,12 +48,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractFileProvider<E> implements Provider<E> {
 
     protected static final String CONFIG_PROPERTY_ROOTS = "roots";
     protected final Logger logger = LoggerFactory.getLogger(AbstractFileProvider.class);
 
-    protected String rootSubdirectory;
+    protected final String rootSubdirectory;
     protected String[] configurationRoots;
 
     /**
@@ -62,7 +64,7 @@ public abstract class AbstractFileProvider<E> implements Provider<E> {
      * <p>
      * The Map has for keys URLs of the files containing automation objects and for values - parsed objects.
      */
-    protected Map<String, E> providedObjectsHolder = new ConcurrentHashMap<>();
+    protected final Map<String, E> providedObjectsHolder = new ConcurrentHashMap<>();
 
     /**
      * This Map provides structure for fast access to the {@link Parser}s. This provides opportunity for high

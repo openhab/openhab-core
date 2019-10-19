@@ -15,6 +15,7 @@ package org.openhab.core.automation.internal.parser.gson;
 import java.io.OutputStreamWriter;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.core.ConfigurationDeserializer;
 import org.eclipse.smarthome.config.core.ConfigurationSerializer;
@@ -34,6 +35,7 @@ import com.google.gson.GsonBuilder;
  *
  * @param <T> the type of the entities to parse
  */
+@NonNullByDefault
 public abstract class AbstractGSONParser<T> implements Parser<T> {
 
     // A Gson instance to use by the parsers

@@ -28,6 +28,8 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.osgi.framework.BundleContext;
@@ -49,6 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <E> type of the element
  */
+@NonNullByDefault
 public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends Provider<E>>
         implements ProviderChangeListener<E>, Registry<E, K> {
 
@@ -61,7 +64,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
     private final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
 
     private final Class<P> providerClazz;
-    private ServiceTracker<P, P> providerTracker;
+    private @Nullable ServiceTracker<P, P> providerTracker;
 
     private final ReentrantReadWriteLock elementLock = new ReentrantReadWriteLock();
     private final ReentrantReadWriteLock.ReadLock elementReadLock = elementLock.readLock();
@@ -75,7 +78,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
 
     private Optional<ManagedProvider<E, K>> managedProvider = Optional.empty();
 
-    private EventPublisher eventPublisher;
+    private @Nullable EventPublisher eventPublisher;
 
     /**
      * Constructor.
@@ -123,14 +126,14 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
         }
 
         @Override
-        public P addingService(ServiceReference<P> reference) {
+        public P addingService(@Nullable ServiceReference<P> reference) {
             final P service = context.getService(reference);
             addProvider(service);
             return service;
         }
 
         @Override
-        public void removedService(ServiceReference<P> reference, P service) {
+        public void removedService(@Nullable ServiceReference<P> reference, P service) {
             removeProvider(service);
         }
     }
@@ -289,7 +292,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
     }
 
     @Override
-    public E get(K key) {
+    public @Nullable E get(K key) {
         elementReadLock.lock();
         try {
             return identifierToElement.get(key);
@@ -304,7 +307,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
      * @param key key of the element
      * @return provider and element entry or null if no element was found
      */
-    protected Entry<Provider<E>, E> getValueAndProvider(K key) {
+    protected @Nullable Entry<Provider<E>, E> getValueAndProvider(K key) {
         elementReadLock.lock();
         try {
             final E element = identifierToElement.get(key);
@@ -330,12 +333,12 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
     }
 
     @Override
-    public E remove(K key) {
+    public @Nullable E remove(K key) {
         return managedProvider.orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))
                 .remove(key);
     }
 
-    protected void notifyListeners(E oldElement, E element, EventType eventType) {
+    protected void notifyListeners(E element, EventType eventType) {
         for (RegistryChangeListener<E> listener : this.listeners) {
             try {
                 switch (eventType) {
@@ -344,9 +347,6 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
                         break;
                     case REMOVED:
                         listener.removed(element);
-                        break;
-                    case UPDATED:
-                        listener.updated(oldElement, element);
                         break;
                     default:
                         break;
@@ -358,8 +358,21 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
         }
     }
 
-    protected void notifyListeners(E element, EventType eventType) {
-        notifyListeners(null, element, eventType);
+    protected void notifyListeners(E oldElement, E element, EventType eventType) {
+        for (RegistryChangeListener<E> listener : this.listeners) {
+            try {
+                switch (eventType) {
+                    case UPDATED:
+                        listener.updated(oldElement, element);
+                        break;
+                    default:
+                        break;
+                }
+            } catch (Throwable throwable) {
+                logger.error("Cannot inform the listener \"{}\" about the \"{}\" event: {}", listener, eventType.name(),
+                        throwable.getMessage(), throwable);
+            }
+        }
     }
 
     protected void notifyListenersAboutAddedElement(E element) {
@@ -405,7 +418,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
      * @param key key of the element
      * @return provider or null if no provider was found
      */
-    protected Provider<E> getProvider(K key) {
+    protected @Nullable Provider<E> getProvider(K key) {
         elementReadLock.lock();
         try {
             final E element = identifierToElement.get(key);
@@ -424,7 +437,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
      * @param element the element
      * @return provider or null if no provider was found
      */
-    public Provider<E> getProvider(E element) {
+    public @Nullable Provider<E> getProvider(E element) {
         elementReadLock.lock();
         try {
             return elementToProvider.get(element);
@@ -612,7 +625,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
         logger.debug("Provider \"{}\" has been removed.", provider.getClass().getSimpleName());
     }
 
-    protected EventPublisher getEventPublisher() {
+    protected @Nullable EventPublisher getEventPublisher() {
         return this.eventPublisher;
     }
 

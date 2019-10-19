@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.automation.template.TemplateProvider;
@@ -27,6 +29,7 @@ import org.openhab.core.automation.template.TemplateProvider;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public abstract class TemplateFileProvider extends AbstractFileProvider<RuleTemplate> implements RuleTemplateProvider {
 
     public TemplateFileProvider() {
@@ -44,15 +47,15 @@ public abstract class TemplateFileProvider extends AbstractFileProvider<RuleTemp
     }
 
     @Override
-    public RuleTemplate getTemplate(String UID, Locale locale) {
+    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
         return providedObjectsHolder.get(UID);
     }
 
     @Override
-    public Collection<RuleTemplate> getTemplates(Locale locale) {
+    public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
         Collection<RuleTemplate> values = providedObjectsHolder.values();
         if (values.isEmpty()) {
-            return Collections.<RuleTemplate> emptyList();
+            return Collections.emptyList();
         }
         return new LinkedList<>(values);
     }

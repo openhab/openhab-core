@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.Provider;
 
 /**
@@ -20,6 +21,7 @@ import org.eclipse.smarthome.core.common.registry.Provider;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface RuleProvider extends Provider<Rule> {
 
 }

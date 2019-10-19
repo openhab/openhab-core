@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.events.EventPublisher;
@@ -57,17 +59,18 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new event mechanism
  */
+@NonNullByDefault
 @Component(immediate = true)
 public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvider> implements ItemRegistry {
 
     private final Logger logger = LoggerFactory.getLogger(ItemRegistryImpl.class);
 
     private final List<RegistryHook<Item>> registryHooks = new CopyOnWriteArrayList<>();
-    private StateDescriptionService stateDescriptionService;
-    private CommandDescriptionService commandDescriptionService;
+    private @Nullable StateDescriptionService stateDescriptionService;
+    private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
-    private UnitProvider unitProvider;
-    private ItemStateConverter itemStateConverter;
+    private @Nullable UnitProvider unitProvider;
+    private @Nullable ItemStateConverter itemStateConverter;
 
     @Activate
     public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry) {
@@ -353,7 +356,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     }
 
     @Override
-    public Item remove(String itemName, boolean recursive) {
+    public @Nullable Item remove(String itemName, boolean recursive) {
         return ((ManagedItemProvider) getManagedProvider()
                 .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))).remove(itemName,
                         recursive);

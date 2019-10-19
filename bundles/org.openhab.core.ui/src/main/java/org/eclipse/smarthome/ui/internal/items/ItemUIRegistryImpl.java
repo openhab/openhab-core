@@ -33,7 +33,7 @@ import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
 import org.eclipse.smarthome.core.items.GroupItem;
@@ -105,6 +105,7 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Method to convert a state into something a sitemap entity can understand
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
  */
+@NonNullByDefault
 @Component
 public class ItemUIRegistryImpl implements ItemUIRegistry {
 
@@ -123,9 +124,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     protected Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
-    protected ItemRegistry itemRegistry;
+    protected @Nullable ItemRegistry itemRegistry;
 
-    private ItemBuilderFactory itemBuilderFactory;
+    private @Nullable ItemBuilderFactory itemBuilderFactory;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -160,7 +161,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public String getCategory(String itemName) {
+    public @Nullable String getCategory(String itemName) {
         for (ItemUIProvider provider : itemUIProviders) {
             String currentCategory = provider.getCategory(itemName);
             if (currentCategory != null) {
@@ -193,7 +194,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public String getLabel(String itemName) {
+    public @Nullable String getLabel(String itemName) {
         for (ItemUIProvider provider : itemUIProviders) {
             String currentLabel = provider.getLabel(itemName);
             if (currentLabel != null) {
@@ -212,7 +213,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public Widget getWidget(String itemName) {
+    public @Nullable Widget getWidget(String itemName) {
         for (ItemUIProvider provider : itemUIProviders) {
             Widget currentWidget = provider.getWidget(itemName);
             if (currentWidget != null) {
@@ -223,7 +224,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public Widget getDefaultWidget(Class<? extends Item> targetItemType, String itemName) {
+    public @Nullable Widget getDefaultWidget(@Nullable Class<? extends Item> targetItemType, String itemName) {
         for (ItemUIProvider provider : itemUIProviders) {
             Widget widget = provider.getDefaultWidget(targetItemType, itemName);
             if (widget != null) {
@@ -310,7 +311,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public String getLabel(Widget w) {
+    public @Nullable String getLabel(Widget w) {
         String label = getLabelFromWidget(w);
 
         String itemName = w.getItem();
@@ -406,7 +407,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         }
 
                         // The widget may define its own unit in the widget label. Convert to this unit:
-                        quantityState = convertStateToWidgetUnit(quantityState, w);
+                        if (quantityState != null) {
+                            quantityState = convertStateToWidgetUnit(quantityState, w);
+                        }
                         state = quantityState;
                     } else if (state instanceof DateTimeType) {
                         // Translate a DateTimeType state to the local time zone
@@ -446,7 +449,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return transform(label, considerTransform, labelMappedOption);
     }
 
-    private QuantityType<?> convertStateToWidgetUnit(QuantityType<?> quantityState, @NonNull Widget w) {
+    private @Nullable QuantityType<?> convertStateToWidgetUnit(QuantityType<?> quantityState, Widget w) {
         Unit<?> widgetUnit = UnitUtils.parseUnit(getFormatPattern(w.getLabel()));
         if (widgetUnit != null && !widgetUnit.equals(quantityState.getUnit())) {
             return quantityState.toUnit(widgetUnit);
@@ -455,7 +458,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return quantityState;
     }
 
-    private String getFormatPattern(String label) {
+    private @Nullable String getFormatPattern(@Nullable String label) {
         if (label == null) {
             return null;
         }
@@ -518,7 +521,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
      * If the value does not start with the call to a transformation service,
      * we return the label with the mapped option value if provided (not null).
      */
-    private String transform(String label, boolean matchTransform, String labelMappedOption) {
+    private String transform(String label, boolean matchTransform, @Nullable String labelMappedOption) {
         String ret = label;
         String formatPattern = getFormatPattern(label);
         if (formatPattern != null) {
@@ -557,7 +560,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public String getCategory(Widget w) {
+    public @Nullable String getCategory(Widget w) {
         String widgetTypeName = w.eClass().getInstanceTypeName()
                 .substring(w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
 
@@ -581,7 +584,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public State getState(Widget w) {
+    public @Nullable State getState(Widget w) {
         String itemName = w.getItem();
         if (itemName != null) {
             try {
@@ -604,7 +607,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
      * @return the converted state or the original if conversion was not possible
      */
     @Override
-    public State convertState(Widget w, Item i, State state) {
+    public @Nullable State convertState(Widget w, Item i, State state) {
         State returnState = null;
 
         State itemState = i.getState();
@@ -637,7 +640,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public Widget getWidget(Sitemap sitemap, String id) {
+    public @Nullable Widget getWidget(Sitemap sitemap, String id) {
         if (id.length() > 0) {
             // see if the id is an itemName and try to get the a widget for it
             Widget w = getWidget(id);
@@ -703,12 +706,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public EObject getParent(Widget w) {
+    public @Nullable EObject getParent(Widget w) {
         Widget w2 = defaultWidgets.get(w);
         return (w2 == null) ? w.eContainer() : w2.eContainer();
     }
 
-    private Widget resolveDefault(Widget widget) {
+    private @Nullable Widget resolveDefault(@Nullable Widget widget) {
         if (!(widget instanceof Default)) {
             return widget;
         } else {
@@ -800,7 +803,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return 0;
     }
 
-    private Class<? extends Item> getItemType(@NonNull String itemName) {
+    private @Nullable Class<? extends Item> getItemType(String itemName) {
         try {
             Item item = itemRegistry.getItem(itemName);
             return item.getClass();
@@ -810,7 +813,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public State getItemState(String itemName) {
+    public @Nullable State getItemState(String itemName) {
         try {
             Item item = itemRegistry.getItem(itemName);
             return item.getState();
@@ -819,7 +822,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
     }
 
-    public String getItemCategory(@NonNull String itemName) {
+    public @Nullable String getItemCategory(String itemName) {
         try {
             Item item = itemRegistry.getItem(itemName);
             return item.getCategory();
@@ -1079,7 +1082,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return matched;
     }
 
-    private String processColorDefinition(State state, List<ColorArray> colorList) {
+    private @Nullable String processColorDefinition(@Nullable State state, List<ColorArray> colorList) {
         // Sanity check
         if (colorList == null) {
             return null;
@@ -1151,12 +1154,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public String getLabelColor(Widget w) {
+    public @Nullable String getLabelColor(Widget w) {
         return processColorDefinition(getState(w), w.getLabelColor());
     }
 
     @Override
-    public String getValueColor(Widget w) {
+    public @Nullable String getValueColor(Widget w) {
         return processColorDefinition(getState(w), w.getValueColor());
     }
 
@@ -1233,7 +1236,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             this.value = value;
         }
 
-        public static Condition fromString(String text) {
+        public static @Nullable Condition fromString(String text) {
             if (text != null) {
                 for (Condition c : Condition.values()) {
                     if (text.equalsIgnoreCase(c.value)) {
@@ -1286,7 +1289,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public Item update(Item element) {
+    public @Nullable Item update(Item element) {
         if (itemRegistry != null) {
             return itemRegistry.update(element);
         } else {
@@ -1295,7 +1298,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public Item remove(String key) {
+    public @Nullable Item remove(String key) {
         if (itemRegistry != null) {
             return itemRegistry.remove(key);
         } else {
@@ -1304,7 +1307,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public Item get(String key) {
+    public @Nullable Item get(String key) {
         if (itemRegistry != null) {
             return itemRegistry.get(key);
         } else {
@@ -1313,13 +1316,12 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Override
-    public Item remove(String itemName, boolean recursive) {
+    public @Nullable Item remove(String itemName, boolean recursive) {
         if (itemRegistry != null) {
             return itemRegistry.remove(itemName, recursive);
         } else {
             return null;
         }
-
     }
 
     @Override
@@ -1367,7 +1369,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return state;
     }
 
-    private String getUnitFromLabel(String label) {
+    private @Nullable String getUnitFromLabel(String label) {
         if (StringUtils.isBlank(label)) {
             return null;
         }

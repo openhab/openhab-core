@@ -225,18 +225,19 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         // WAIT until Rule modules types are parsed and the rule becomes IDLE
         waitForAssert(() -> {
             assertThat(ruleRegistry.getAll().isEmpty(), is(false));
-            Rule rule2 = ruleRegistry.stream().filter(
+            Optional<Rule> rule2 = ruleRegistry.stream().filter(
                     RulePredicates.hasAnyOfTags("jsonTest").and(RulePredicates.hasAnyOfTags("references").negate()))
-                    .findFirst().orElse(null);
-            assertThat(rule2, is(notNullValue()));
-            RuleStatusInfo ruleStatus2 = ruleManager.getStatusInfo(rule2.getUID());
+                    .findFirst();
+            assertThat(rule2.isPresent(), is(true));
+            RuleStatusInfo ruleStatus2 = ruleManager.getStatusInfo(rule2.get().getUID());
             assertThat(ruleStatus2.getStatus(), is(RuleStatus.IDLE));
         }, 10000, 200);
 
-        Rule rule = ruleRegistry.stream()
+        Optional<Rule> optionalRule = ruleRegistry.stream()
                 .filter(RulePredicates.hasAnyOfTags("jsonTest").and(RulePredicates.hasAnyOfTags("references").negate()))
-                .findFirst().orElse(null);
-        assertThat(rule, is(notNullValue()));
+                .findFirst();
+        assertThat(optionalRule.isPresent(), is(true));
+        Rule rule = optionalRule.get();
         assertThat(rule.getName(), is("ItemSampleRule"));
         assertTrue(rule.getTags().contains("sample"));
         assertTrue(rule.getTags().contains("item"));
@@ -266,15 +267,16 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         // WAIT until Rule modules types are parsed and the rule becomes IDLE
         waitForAssert(() -> {
             assertThat(ruleRegistry.getAll().isEmpty(), is(false));
-            Rule rule2 = ruleRegistry.stream().filter(RulePredicates.hasAllTags("jsonTest", "references")).findFirst()
-                    .orElse(null);
-            assertThat(rule2, is(notNullValue()));
-            RuleStatusInfo ruleStatus2 = ruleManager.getStatusInfo(rule2.getUID());
+            Optional<Rule> rule2 = ruleRegistry.stream().filter(RulePredicates.hasAllTags("jsonTest", "references"))
+                    .findFirst();
+            assertThat(rule2.isPresent(), is(true));
+            RuleStatusInfo ruleStatus2 = ruleManager.getStatusInfo(rule2.get().getUID());
             assertThat(ruleStatus2.getStatus(), is(RuleStatus.IDLE));
         }, 10000, 200);
-        Rule rule = ruleRegistry.stream().filter(RulePredicates.hasAllTags("jsonTest", "references")).findFirst()
-                .orElse(null);
-        assertThat(rule, is(notNullValue()));
+        Optional<Rule> optionalRule = ruleRegistry.stream().filter(RulePredicates.hasAllTags("jsonTest", "references"))
+                .findFirst();
+        assertThat(optionalRule.isPresent(), is(true));
+        Rule rule = optionalRule.get();
         assertThat(rule.getName(), is("ItemSampleRuleWithReferences"));
         assertTrue(rule.getTags().contains("sample"));
         assertTrue(rule.getTags().contains("item"));
@@ -286,11 +288,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
         assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/*"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
-        // def condition1 = rule.conditions.find{it.id.equals("ItemStateConditionID")} as Condition
-        // assertThat(condition1, is(notNullValue())
-        // assertThat(condition1.typeUID, is("core.GenericEventCondition")
-        // assertThat(condition1.configuration.get("topic"), is("smarthome/items/myMotionItem/state")
-        // assertThat(condition1.configuration.get("payload"), is(".*ON.*")
         Optional<? extends Action> action = rule.getActions().stream()
                 .filter(a -> a.getId().equals("ItemPostCommandActionID")).findFirst();
         assertThat(action.isPresent(), is(true));

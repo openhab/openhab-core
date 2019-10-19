@@ -18,10 +18,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
@@ -45,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
 @SuppressWarnings("rawtypes")
+@NonNullByDefault
 public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustomizer {
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractCommandProvider.class);
@@ -52,25 +56,25 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
     /**
      * A bundle's execution context within the Framework.
      */
-    protected BundleContext bc;
+    protected BundleContext bundleContext;
 
     /**
      * This Map provides reference between provider of resources and the loaded objects from these resources.
      * <p>
      * The Map has for keys - {@link URL} resource provider and for values - Lists with UIDs of the objects.
      */
-    Map<URL, List<String>> providerPortfolio = new HashMap<>();
+    protected final Map<URL, List<String>> providerPortfolio = new HashMap<>();
 
     /**
      * This field is a {@link ServiceTracker} for {@link Parser} services.
      */
-    protected ServiceTracker<Parser, Parser> parserTracker;
+    protected @NonNullByDefault({}) ServiceTracker<Parser, Parser> parserTracker;
 
     /**
      * This Map provides structure for fast access to the {@link Parser}s. This provides opportunity for high
      * performance at runtime of the system.
      */
-    protected Map<String, Parser<E>> parsers = new HashMap<>();
+    protected final Map<String, Parser<E>> parsers = new HashMap<>();
 
     /**
      * This Map provides structure for fast access to the provided automation objects. This provides opportunity for
@@ -79,9 +83,9 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
      * <p>
      * The Map has for keys UIDs of the objects and for values {@link Localizer}s of the objects.
      */
-    protected Map<String, E> providedObjectsHolder = new HashMap<>();
+    protected final Map<String, E> providedObjectsHolder = new HashMap<>();
 
-    protected List<ProviderChangeListener<E>> listeners;
+    protected final List<ProviderChangeListener<E>> listeners = new LinkedList<>();
 
     /**
      * This constructor is responsible for creation and opening a tracker for {@link Parser} services.
@@ -90,7 +94,7 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
      */
     @SuppressWarnings("unchecked")
     public AbstractCommandProvider(BundleContext context) {
-        this.bc = context;
+        this.bundleContext = context;
         parserTracker = new ServiceTracker(context, Parser.class.getName(), this);
         parserTracker.open();
     }
@@ -98,18 +102,18 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
     /**
      * This method is inherited from {@link AbstractPersistentProvider}.
      * Extends parent's functionality with closing the {@link Parser} service tracker.
-     * Sets <code>null</code> to {@link #parsers}, {@link #providedObjectsHolder}, {@link #providerPortfolio}
+     * Clears the {@link #parsers}, {@link #providedObjectsHolder}, {@link #providerPortfolio}
      */
     public void close() {
         if (parserTracker != null) {
             parserTracker.close();
             parserTracker = null;
-            parsers = null;
+            parsers.clear();
             synchronized (providedObjectsHolder) {
-                providedObjectsHolder = null;
+                providedObjectsHolder.clear();
             }
             synchronized (providerPortfolio) {
-                providerPortfolio = null;
+                providerPortfolio.clear();
             }
         }
     }
@@ -121,9 +125,9 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public Object addingService(ServiceReference reference) {
+    public @Nullable Object addingService(@Nullable ServiceReference reference) {
         @SuppressWarnings("unchecked")
-        Parser<E> service = (Parser<E>) bc.getService(reference);
+        Parser<E> service = (Parser<E>) bundleContext.getService(reference);
         String key = (String) reference.getProperty(Parser.FORMAT);
         key = key == null ? Parser.FORMAT_JSON : key;
         parsers.put(key, service);
@@ -135,7 +139,7 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
      *      java.lang.Object)
      */
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(@Nullable ServiceReference reference, @Nullable Object service) {
         // do nothing
     }
 
@@ -146,7 +150,7 @@ public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustom
      *      java.lang.Object)
      */
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(@Nullable ServiceReference reference, @Nullable Object service) {
         String key = (String) reference.getProperty(Parser.FORMAT);
         key = key == null ? Parser.FORMAT_JSON : key;
         parsers.remove(key);

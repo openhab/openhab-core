@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioSink;
 import org.eclipse.smarthome.core.audio.AudioStream;
@@ -35,14 +37,15 @@ import org.eclipse.smarthome.core.library.types.PercentType;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class AudioSinkFake implements AudioSink {
 
-    public AudioStream audioStream;
-    public AudioFormat audioFormat;
+    public @Nullable AudioStream audioStream;
+    public @Nullable AudioFormat audioFormat;
 
     public boolean isStreamProcessed;
     public boolean isStreamStopped;
-    public PercentType volume;
+    public @Nullable PercentType volume;
     public boolean isIOExceptionExpected;
     public boolean isUnsupportedAudioFormatExceptionExpected;
     public boolean isUnsupportedAudioStreamExceptionExpected;
@@ -58,12 +61,12 @@ public class AudioSinkFake implements AudioSink {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public @Nullable String getLabel(@Nullable Locale locale) {
         return "testSinkLabel";
     }
 
     @Override
-    public void process(AudioStream audioStream)
+    public void process(@Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
         if (isUnsupportedAudioFormatExceptionExpected) {
             throw new UnsupportedAudioFormatException("Expected audio format exception", null);
@@ -80,7 +83,7 @@ public class AudioSinkFake implements AudioSink {
         isStreamProcessed = true;
     }
 
-    public AudioFormat getAudioFormat() {
+    public @Nullable AudioFormat getAudioFormat() {
         return audioFormat;
     }
 
@@ -96,10 +99,11 @@ public class AudioSinkFake implements AudioSink {
 
     @Override
     public PercentType getVolume() throws IOException {
-        if (isIOExceptionExpected) {
+        PercentType localVolume = volume;
+        if (localVolume == null || isIOExceptionExpected) {
             throw new IOException();
         }
-        return volume;
+        return localVolume;
     }
 
     @Override
