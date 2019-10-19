@@ -12,14 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model.equipment;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Equipment;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Receiver.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Equipment_Receiver", label = "Receiver", synonyms = "Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers", description = "")
 public interface Receiver extends Equipment {
 }

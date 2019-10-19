@@ -16,13 +16,15 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Equipment;
 
 /**
  * This class provides a stream of all defined equipments.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 public class Equipments {
 
     static final Set<Class<? extends Equipment>> EQUIPMENTS = new HashSet<>();

@@ -12,10 +12,13 @@
  */
 package org.eclipse.smarthome.core.semantics.model;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is a marker interface for all semantic tag classes.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface Tag {
 }

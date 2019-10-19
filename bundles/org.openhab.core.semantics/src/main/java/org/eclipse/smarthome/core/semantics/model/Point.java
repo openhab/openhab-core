@@ -12,16 +12,22 @@
  */
 package org.eclipse.smarthome.core.semantics.model;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is the super interface for all types that represent an Point.
  * The interface describes the relations to other entity types.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Point")
 public interface Point extends Tag {
 
+    @Nullable
     Location hasLocation();
 
+    @Nullable
     Property relatesTo();
 }

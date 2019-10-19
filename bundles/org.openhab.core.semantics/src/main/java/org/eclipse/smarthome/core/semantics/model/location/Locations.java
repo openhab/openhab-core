@@ -16,13 +16,15 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.Location;
 
 /**
  * This class provides a stream of all defined locations.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 public class Locations {
 
     static final Set<Class<? extends Location>> LOCATIONS = new HashSet<>();

@@ -12,13 +12,15 @@
  */
 package org.eclipse.smarthome.core.semantics.model.equipment;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Front Door.
- * 
+ *
  * @author Generated from generateTagClasses.groovy - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Equipment_Door_FrontDoor", label = "Front Door", synonyms = "Front Doors, Frontdoor, Frontdoors", description = "")
 public interface FrontDoor extends Door {
 }

@@ -12,17 +12,23 @@
  */
 package org.eclipse.smarthome.core.semantics.model;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is the super interface for all types that represent an Equipment.
  * The interface describes the relations to other entity types.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Equipment")
 public interface Equipment extends Tag {
 
+    @Nullable
     Equipment isPartOf();
 
+    @Nullable
     Location hasLocation();
 
 }

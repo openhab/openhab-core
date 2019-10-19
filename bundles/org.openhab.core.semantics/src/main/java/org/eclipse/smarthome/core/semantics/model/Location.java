@@ -12,12 +12,16 @@
  */
 package org.eclipse.smarthome.core.semantics.model;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is the super interface for all types that represent a Location.
  * The interface describes the relations to other entity types.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @TagInfo(id = "Location")
 public interface Location extends Tag {
 
@@ -25,6 +29,7 @@ public interface Location extends Tag {
         return "Location";
     }
 
+    @Nullable
     Location isPartOf();
 
 }
