@@ -341,6 +341,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             assertThat(ruleRegistry.getAll().isEmpty(), is(false));
             Rule r = ruleRegistry.get("ItemSampleRule");
             assertThat(r, is(notNullValue()));
+            assertThat(ruleManager.getStatusInfo(r.getUID()), is(notNullValue()));
             assertThat(ruleManager.getStatusInfo(r.getUID()).getStatus(), is(RuleStatus.IDLE));
         }, 9000, 200);
 
