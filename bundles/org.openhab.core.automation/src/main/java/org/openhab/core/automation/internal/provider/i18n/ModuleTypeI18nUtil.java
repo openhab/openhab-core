@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.I18nUtil;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.openhab.core.automation.type.Input;
@@ -29,25 +31,26 @@ import org.osgi.framework.Bundle;
  * @author Ana Dimova - Initial contribution
  * @author Yordan Mihaylov - updates related to api changes
  */
+@NonNullByDefault
 public class ModuleTypeI18nUtil {
 
     public static final String MODULE_TYPE = "module-type";
 
-    public static String getLocalizedModuleTypeLabel(TranslationProvider i18nProvider, Bundle bundle,
-            String moduleTypeUID, String defaultLabel, Locale locale) {
+    public static @Nullable String getLocalizedModuleTypeLabel(TranslationProvider i18nProvider, Bundle bundle,
+            String moduleTypeUID, @Nullable String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferModuleTypeKey(moduleTypeUID, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
-    public static String getLocalizedModuleTypeDescription(TranslationProvider i18nProvider, Bundle bundle,
-            String moduleTypeUID, String defaultDescription, Locale locale) {
+    public static @Nullable String getLocalizedModuleTypeDescription(TranslationProvider i18nProvider, Bundle bundle,
+            String moduleTypeUID, @Nullable String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferModuleTypeKey(moduleTypeUID, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
     }
 
-    public static List<Input> getLocalizedInputs(TranslationProvider i18nProvider, List<Input> inputs, Bundle bundle,
-            String uid, Locale locale) {
+    public static List<Input> getLocalizedInputs(TranslationProvider i18nProvider, @Nullable List<Input> inputs,
+            Bundle bundle, String uid, @Nullable Locale locale) {
         List<Input> linputs = new ArrayList<>();
         if (inputs != null) {
             for (Input input : inputs) {
@@ -63,8 +66,8 @@ public class ModuleTypeI18nUtil {
         return linputs;
     }
 
-    public static List<Output> getLocalizedOutputs(TranslationProvider i18nProvider, List<Output> outputs,
-            Bundle bundle, String uid, Locale locale) {
+    public static List<Output> getLocalizedOutputs(TranslationProvider i18nProvider, @Nullable List<Output> outputs,
+            Bundle bundle, String uid, @Nullable Locale locale) {
         List<Output> loutputs = new ArrayList<>();
         if (outputs != null) {
             for (Output output : outputs) {
@@ -80,27 +83,27 @@ public class ModuleTypeI18nUtil {
         return loutputs;
     }
 
-    private static String getInputLabel(TranslationProvider i18nProvider, Bundle bundle, String moduleTypeUID,
-            String inputName, String defaultLabel, Locale locale) {
+    private static @Nullable String getInputLabel(TranslationProvider i18nProvider, Bundle bundle, String moduleTypeUID,
+            String inputName, @Nullable String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferInputKey(moduleTypeUID, inputName, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
-    private static String getInputDescription(TranslationProvider i18nProvider, Bundle bundle, String moduleTypeUID,
-            String inputName, String defaultDescription, Locale locale) {
+    private static @Nullable String getInputDescription(TranslationProvider i18nProvider, Bundle bundle,
+            String moduleTypeUID, String inputName, @Nullable String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferInputKey(moduleTypeUID, inputName, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
     }
 
-    private static String getOutputLabel(TranslationProvider i18nProvider, Bundle bundle, String ruleTemplateUID,
-            String outputName, String defaultLabel, Locale locale) {
+    private static @Nullable String getOutputLabel(TranslationProvider i18nProvider, Bundle bundle,
+            String ruleTemplateUID, String outputName, String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferOutputKey(ruleTemplateUID, outputName, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
-    public static String getOutputDescription(TranslationProvider i18nProvider, Bundle bundle, String moduleTypeUID,
-            String outputName, String defaultDescription, Locale locale) {
+    private static @Nullable String getOutputDescription(TranslationProvider i18nProvider, Bundle bundle,
+            String moduleTypeUID, String outputName, String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferOutputKey(moduleTypeUID, outputName, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
