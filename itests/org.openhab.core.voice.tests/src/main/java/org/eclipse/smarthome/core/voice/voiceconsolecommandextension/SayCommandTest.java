@@ -54,7 +54,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
     private boolean shouldItemsBeRegistered;
     private boolean shouldMultipleItemsBeRegistered;
     private TTSService defaultTTSService;
-    private boolean TTSServiceMockShouldBeRegistered;
+    private boolean ttsServiceMockShouldBeRegistered;
     private boolean shouldStreamBeExpected;
 
     private static TTSServiceStub ttsService;
@@ -79,7 +79,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
         this.shouldItemsBeRegistered = areItemsRegistered;
         this.shouldMultipleItemsBeRegistered = areMultipleItemsRegistered;
         this.defaultTTSService = defaultTTSService;
-        this.TTSServiceMockShouldBeRegistered = isStreamProcessedExpected;
+        this.ttsServiceMockShouldBeRegistered = isStreamProcessedExpected;
         this.shouldStreamBeExpected = isStreamProcessedExpected;
     }
 
@@ -117,7 +117,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
             configuration.update(config);
         }
 
-        if (TTSServiceMockShouldBeRegistered) {
+        if (ttsServiceMockShouldBeRegistered) {
             registerService(ttsService);
         }
 

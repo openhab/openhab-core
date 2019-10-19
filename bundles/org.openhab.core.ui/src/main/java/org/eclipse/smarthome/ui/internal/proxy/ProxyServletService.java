@@ -330,8 +330,6 @@ public class ProxyServletService extends HttpServlet {
      * @return true if the request is relative to a video widget
      */
     boolean proxyingVideoWidget(HttpServletRequest request) {
-        boolean proxyingVideo = false;
-
         try {
             String sitemapName = request.getParameter("sitemap");
             if (sitemapName == null) {
@@ -358,16 +356,17 @@ public class ProxyServletService extends HttpServlet {
             }
 
             if (widget instanceof Image) {
+                return false;
             } else if (widget instanceof Video) {
-                proxyingVideo = true;
+                return true;
             } else {
                 throw new ProxyServletException(HttpServletResponse.SC_FORBIDDEN,
                         String.format("Widget type '%s' is not supported!", widget.getClass().getName()));
             }
         } catch (ProxyServletException pse) {
             request.setAttribute(ATTR_SERVLET_EXCEPTION, pse);
+            return false;
         }
-        return proxyingVideo;
     }
 
     /**
