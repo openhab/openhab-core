@@ -16,7 +16,6 @@ import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -268,7 +268,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         inputs.put("topic", "ItemStateChangeTrigger.topic");
         inputs.put("event", "ItemStateChangeTrigger.event");
 
-        // def conditionInputs=[topicConnection] as Set
         List<Condition> conditions = Collections.singletonList(
                 ModuleBuilder.createCondition().withId("EventCondition_2").withTypeUID("core.GenericEventCondition")
                         .withConfiguration(condition1Config).withInputs(inputs).build());
@@ -282,7 +281,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         logger.info("Rule created and added: {}", rule.getUID());
 
-        List<RuleStatusInfoEvent> ruleEvents = new ArrayList<>();
+        List<RuleStatusInfoEvent> ruleEvents = new CopyOnWriteArrayList<>();
 
         @NonNullByDefault
         EventSubscriber ruleEventHandler = new EventSubscriber() {
