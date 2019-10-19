@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.module.script.defaultscope.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -35,7 +34,7 @@ public class ScopeTest extends JavaOSGiTest {
 
     private ScriptEngine engine;
 
-    private final String path = "ESH-INF" + File.separator + "automation" + File.separator + "jsr223";
+    private final String path = "ESH-INF/automation/jsr223/";
     private final String workingFile = "scopeWorking.js";
     private final String failureFile = "scopeFailure.js";
 
@@ -48,13 +47,13 @@ public class ScopeTest extends JavaOSGiTest {
 
     @Test
     public void testScopeDefinesItemTypes() throws ScriptException, IOException {
-        URL url = bundleContext.getBundle().getResource(path + File.separator + workingFile);
+        URL url = bundleContext.getBundle().getResource(path + workingFile);
         engine.eval(new InputStreamReader(url.openStream()));
     }
 
     @Test(expected = ScriptException.class)
     public void testScopeDoesNotDefineFoobar() throws ScriptException, IOException {
-        URL url = bundleContext.getBundle().getResource(path + File.separator + failureFile);
+        URL url = bundleContext.getBundle().getResource(path + failureFile);
         engine.eval(new InputStreamReader(url.openStream()));
     }
 }
