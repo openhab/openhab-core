@@ -14,9 +14,8 @@ package org.eclipse.smarthome.core.thing.internal.profiles;
 
 import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -59,28 +58,31 @@ import org.osgi.service.component.annotations.Reference;
  * @author Simon Kaufmann - Initial contribution
  * @author Christoph Weitkamp - Added translation for profile labels
  */
-@NonNullByDefault
 @Component(service = { SystemProfileFactory.class, ProfileTypeProvider.class })
+@NonNullByDefault
 public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, ProfileTypeProvider {
 
     private final ChannelTypeRegistry channelTypeRegistry;
 
-    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Stream.of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE,
-            RAWBUTTON_ON_OFF_SWITCH_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE,
-            RAWBUTTON_TOGGLE_SWITCH_TYPE, RAWROCKER_DIMMER_TYPE, RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE,
-            RAWROCKER_PLAY_PAUSE_TYPE, RAWROCKER_REWIND_FASTFORWARD_TYPE, RAWROCKER_STOP_MOVE_TYPE,
-            RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE).collect(Collectors.toSet());
+    private static final Set<ProfileType> SUPPORTED_PROFILE_TYPES = Collections
+            .unmodifiableSet(Stream
+                    .of(DEFAULT_TYPE, FOLLOW_TYPE, OFFSET_TYPE, RAWBUTTON_ON_OFF_SWITCH_TYPE,
+                            RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_PLAYER_TYPE, RAWBUTTON_TOGGLE_SWITCH_TYPE,
+                            RAWROCKER_DIMMER_TYPE, RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE,
+                            RAWROCKER_PLAY_PAUSE_TYPE, RAWROCKER_REWIND_FASTFORWARD_TYPE, RAWROCKER_STOP_MOVE_TYPE,
+                            RAWROCKER_UP_DOWN_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_UPDATE_TYPE)
+                    .collect(Collectors.toSet()));
 
-    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Stream.of(DEFAULT, FOLLOW, OFFSET,
-            RAWBUTTON_ON_OFF_SWITCH, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH,
-            RAWROCKER_DIMMER, RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE,
-            RAWROCKER_REWIND_FASTFORWARD, RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE)
-            .collect(Collectors.toSet());
+    private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Collections
+            .unmodifiableSet(Stream.of(DEFAULT, FOLLOW, OFFSET, RAWBUTTON_ON_OFF_SWITCH, RAWBUTTON_TOGGLE_PLAYER,
+                    RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER, RAWROCKER_NEXT_PREVIOUS,
+                    RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE, RAWROCKER_REWIND_FASTFORWARD, RAWROCKER_STOP_MOVE,
+                    RAWROCKER_UP_DOWN, TIMESTAMP_CHANGE, TIMESTAMP_UPDATE).collect(Collectors.toSet()));
 
-    private final Map<LocalizedKey, @Nullable ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
+    private final Map<LocalizedKey, ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
 
     private final ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService;
-    private final BundleResolver bundleResolver;
+    private final Bundle bundle;
 
     @Activate
     public SystemProfileFactory(final @Reference ChannelTypeRegistry channelTypeRegistry,
@@ -88,7 +90,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             final @Reference BundleResolver bundleResolver) {
         this.channelTypeRegistry = channelTypeRegistry;
         this.profileTypeI18nLocalizationService = profileTypeI18nLocalizationService;
-        this.bundleResolver = bundleResolver;
+        this.bundle = bundleResolver.resolveBundle(SystemProfileFactory.class);
     }
 
     @Override
@@ -186,13 +188,8 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
 
     @Override
     public Collection<ProfileType> getProfileTypes(@Nullable Locale locale) {
-        final List<ProfileType> allProfileTypes = new ArrayList<>();
-        final Bundle bundle = bundleResolver.resolveBundle(SystemProfileFactory.class);
-
-        for (final ProfileType profileType : SUPPORTED_PROFILE_TYPES) {
-            allProfileTypes.add(createLocalizedProfileType(bundle, profileType, locale));
-        }
-        return allProfileTypes;
+        return Collections.unmodifiableList(SUPPORTED_PROFILE_TYPES.stream()
+                .map(p -> createLocalizedProfileType(p, locale)).collect(Collectors.toList()));
     }
 
     @Override
@@ -200,7 +197,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         return SUPPORTED_PROFILE_TYPE_UIDS;
     }
 
-    private ProfileType createLocalizedProfileType(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
+    private ProfileType createLocalizedProfileType(ProfileType profileType, @Nullable Locale locale) {
         LocalizedKey localizedKey = getLocalizedProfileTypeKey(profileType.getUID(), locale);
 
         ProfileType cachedEntry = localizedProfileTypeCache.get(localizedKey);
@@ -208,7 +205,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return cachedEntry;
         }
 
-        ProfileType localizedProfileType = localize(bundle, profileType, locale);
+        ProfileType localizedProfileType = localize(profileType, locale);
         if (localizedProfileType != null) {
             localizedProfileTypeCache.put(localizedKey, localizedProfileType);
             return localizedProfileType;
@@ -217,10 +214,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         }
     }
 
-    private @Nullable ProfileType localize(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
-        if (profileTypeI18nLocalizationService == null) {
-            return null;
-        }
+    private @Nullable ProfileType localize(ProfileType profileType, @Nullable Locale locale) {
         return profileTypeI18nLocalizationService.createLocalizedProfileType(bundle, profileType, locale);
     }
 
