@@ -203,7 +203,7 @@ public class MqttBrokerConnection {
      * @throws IllegalArgumentException If the client id or port is not valid.
      */
     public MqttBrokerConnection(String host, @Nullable Integer port, boolean secure, @Nullable String clientId) {
-        this(Protocol.TCP, host, port, secure, clientId);
+        this(Protocol.TCP, MqttVersion.V3, host, port, secure, clientId);
     }
 
     /**
@@ -219,27 +219,10 @@ public class MqttBrokerConnection {
      *            characters.
      * @throws IllegalArgumentException If the client id or port is not valid.
      */
+    @Deprecated
     public MqttBrokerConnection(Protocol protocol, String host, @Nullable Integer port, boolean secure,
             @Nullable String clientId) {
         this(protocol, MqttVersion.V3, host, port, secure, clientId);
-    }
-
-    /**
-     * Create a new TCP MQTT client connection to a server with the given mqtt client version, host and port.
-     *
-     * @param mqttVersion The version of the MQTT client (v3 or v5)
-     * @param host A host name or address
-     * @param port A port or null to select the default port for a secure or insecure connection
-     * @param secure A secure connection
-     * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
-     *            used for access restriction implementations.
-     *            If none is specified, a default is generated. The client id cannot be longer than 65535
-     *            characters.
-     * @throws IllegalArgumentException If the client id or port is not valid.
-     */
-    public MqttBrokerConnection(MqttVersion mqttVersion, String host, @Nullable Integer port, boolean secure,
-            @Nullable String clientId) {
-        this(Protocol.TCP, mqttVersion, host, port, secure, clientId);
     }
 
     /**
@@ -724,9 +707,6 @@ public class MqttBrokerConnection {
 
         // Create the client
         MqttAsyncClientWrapper client = createClient();
-
-        logger.info("client created");
-        // Assign to object
         this.client = client;
 
         // connect

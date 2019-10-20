@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.hivemq.client.mqtt.datatypes.MqttTopic;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
@@ -67,46 +68,32 @@ public class ClientCallback {
     }
 
     public void messageArrived(Mqtt3Publish message) {
-        byte[] payload = message.getPayloadAsBytes();
-        String topic = message.getTopic().toString();
-        logger.trace("Received message on topic '{}' : {}", topic, new String(payload));
-        List<MqttMessageSubscriber> matches = new ArrayList<>();
-        synchronized (subscribers) {
-            subscribers.values().forEach(subscriberList -> {
-                if (subscriberList.topicMatch(topic)) {
-                    logger.trace("Topic match for '{}' using regex {}", topic, subscriberList.getTopicRegexPattern());
-                    subscriberList.forEach(consumer -> matches.add(consumer));
-                } else {
-                    logger.trace("No topic match for '{}' using regex {}", topic,
-                            subscriberList.getTopicRegexPattern());
-                }
-            });
-        }
-        try {
-            matches.forEach(subscriber -> subscriber.processMessage(topic, payload));
-        } catch (Exception e) {
-            logger.error("MQTT message received. MqttMessageSubscriber#processMessage() implementation failure", e);
-        }
+        messageArrived(message.getTopic(), message.getPayloadAsBytes());
     }
 
     public void messageArrived(Mqtt5Publish message) {
-        byte[] payload = message.getPayloadAsBytes();
-        String topic = message.getTopic().toString();
+        messageArrived(message.getTopic(), message.getPayloadAsBytes());
+    }
+
+    private void messageArrived(MqttTopic topic, byte[] payload) {
+        String topicString = topic.toString();
         logger.trace("Received message on topic '{}' : {}", topic, new String(payload));
-        List<MqttMessageSubscriber> matches = new ArrayList<>();
+
+        List<MqttMessageSubscriber> matchingSubscribers = new ArrayList<>();
         synchronized (subscribers) {
             subscribers.values().forEach(subscriberList -> {
-                if (subscriberList.topicMatch(topic)) {
+                if (subscriberList.topicMatch(topicString)) {
                     logger.trace("Topic match for '{}' using regex {}", topic, subscriberList.getTopicRegexPattern());
-                    subscriberList.forEach(consumer -> matches.add(consumer));
+                    subscriberList.forEach(consumer -> matchingSubscribers.add(consumer));
                 } else {
                     logger.trace("No topic match for '{}' using regex {}", topic,
                             subscriberList.getTopicRegexPattern());
                 }
             });
         }
+
         try {
-            matches.forEach(subscriber -> subscriber.processMessage(topic, payload));
+            matchingSubscribers.forEach(subscriber -> subscriber.processMessage(topicString, payload));
         } catch (Exception e) {
             logger.error("MQTT message received. MqttMessageSubscriber#processMessage() implementation failure", e);
         }
