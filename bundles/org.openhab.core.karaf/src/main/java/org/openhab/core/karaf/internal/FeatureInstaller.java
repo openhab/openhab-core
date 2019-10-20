@@ -458,10 +458,10 @@ public class FeatureInstaller implements ConfigurationListener {
                     }
                 }
 
-                if (installed.size() > 0) {
+                if (!installed.isEmpty()) {
                     logger.debug("Installed '{}'", StringUtils.join(installed, ", "));
                 }
-                if (failed.size() > 0) {
+                if (!failed.isEmpty()) {
                     logger.error("Failed installing '{}'", StringUtils.join(failed, ", "));
                 }
 

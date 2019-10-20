@@ -150,7 +150,7 @@ public class AnnotationActionModuleTypeHelper {
         Set<ModuleInformation> mis = moduleInformation.get(UID);
         List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
 
-        if (mis != null && mis.size() > 0) {
+        if (mis != null && !mis.isEmpty()) {
             ModuleInformation mi = (ModuleInformation) mis.toArray()[0];
 
             ActionModuleKind kind = ActionModuleKind.SINGLE;

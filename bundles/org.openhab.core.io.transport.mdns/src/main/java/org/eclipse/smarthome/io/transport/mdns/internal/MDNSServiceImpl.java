@@ -50,7 +50,7 @@ public class MDNSServiceImpl implements MDNSService {
     protected void setMDNSClient(MDNSClient client) {
         this.mdnsClient = client;
         // register queued services
-        if (servicesToRegisterQueue.size() > 0) {
+        if (!servicesToRegisterQueue.isEmpty()) {
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {

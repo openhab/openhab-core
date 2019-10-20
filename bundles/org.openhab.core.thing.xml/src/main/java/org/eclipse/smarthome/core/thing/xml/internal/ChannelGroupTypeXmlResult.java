@@ -59,7 +59,7 @@ public class ChannelGroupTypeXmlResult {
             throws ConversionException {
         List<ChannelDefinition> channelTypeDefinitions = null;
 
-        if ((channelTypeReferences != null) && (channelTypeReferences.size() > 0)) {
+        if (channelTypeReferences != null && !channelTypeReferences.isEmpty()) {
             channelTypeDefinitions = new ArrayList<>(channelTypeReferences.size());
 
             for (ChannelXmlResult channelTypeReference : channelTypeReferences) {

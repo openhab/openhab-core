@@ -37,10 +37,10 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
     public JsonElement serialize(Configuration src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = null;
         if (src != null) {
-            Set<String> kyes = src.keySet();
-            if (kyes.size() > 0) {
+            Set<String> keys = src.keySet();
+            if (!keys.isEmpty()) {
                 result = new JsonObject();
-                for (String propName : kyes) {
+                for (String propName : keys) {
                     Object value = src.get(propName);
                     if (value instanceof List) {
                         JsonArray array = new JsonArray();

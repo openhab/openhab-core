@@ -56,7 +56,7 @@ public abstract interface GroupFunction {
          */
         @Override
         public State calculate(List<Item> items) {
-            if (items.size() > 0) {
+            if (!items.isEmpty()) {
                 State state = items.get(0).getState();
                 for (int i = 1; i < items.size(); i++) {
                     if (!state.equals(items.get(i).getState())) {

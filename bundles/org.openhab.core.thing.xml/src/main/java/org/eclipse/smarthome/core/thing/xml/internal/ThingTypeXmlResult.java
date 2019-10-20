@@ -91,7 +91,7 @@ public class ThingTypeXmlResult {
             throws ConversionException {
         List<ChannelDefinition> channelTypeDefinitions = null;
 
-        if ((channelTypeReferences != null) && (channelTypeReferences.size() > 0)) {
+        if (channelTypeReferences != null && !channelTypeReferences.isEmpty()) {
             channelTypeDefinitions = new ArrayList<>(channelTypeReferences.size());
 
             for (ChannelXmlResult channelTypeReference : channelTypeReferences) {
@@ -106,7 +106,7 @@ public class ThingTypeXmlResult {
             throws ConversionException {
         List<ChannelGroupDefinition> channelGroupTypeDefinitions = null;
 
-        if ((channelGroupTypeReferences != null) && (channelGroupTypeReferences.size() > 0)) {
+        if (channelGroupTypeReferences != null && !channelGroupTypeReferences.isEmpty()) {
             channelGroupTypeDefinitions = new ArrayList<>(channelGroupTypeReferences.size());
 
             for (ChannelXmlResult channelGroupTypeReference : channelGroupTypeReferences) {
@@ -120,7 +120,6 @@ public class ThingTypeXmlResult {
                         channelGroupTypeReference.getDescription());
 
                 channelGroupTypeDefinitions.add(channelGroupDefinition);
-
             }
         }
 

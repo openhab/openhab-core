@@ -155,7 +155,7 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     private void listItems(Console console, String pattern) {
         Collection<Item> items = itemRegistry.getItems(pattern);
-        if (items.size() > 0) {
+        if (!items.isEmpty()) {
             for (Item item : items) {
                 console.println(item.toString());
             }

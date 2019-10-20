@@ -105,7 +105,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     private void listSources(Console console) {
         Set<AudioSource> sources = audioManager.getAllSources();
-        if (sources.size() > 0) {
+        if (!sources.isEmpty()) {
             AudioSource defaultSource = audioManager.getSource();
             Locale locale = localeProvider.getLocale();
             sources.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(source -> {
@@ -119,7 +119,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     private void listSinks(Console console) {
         Set<AudioSink> sinks = audioManager.getAllSinks();
-        if (sinks.size() > 0) {
+        if (!sinks.isEmpty()) {
             AudioSink defaultSink = audioManager.getSink();
             Locale locale = localeProvider.getLocale();
             sinks.stream().sorted(comparing(s -> s.getLabel(locale))).forEach(sink -> {

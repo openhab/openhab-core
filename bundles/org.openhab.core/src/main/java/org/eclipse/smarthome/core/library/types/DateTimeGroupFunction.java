@@ -37,7 +37,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
 
         @Override
         public State calculate(Set<Item> items) {
-            if (items != null && items.size() > 0) {
+            if (items != null && !items.isEmpty()) {
                 ZonedDateTime max = null;
                 for (Item item : items) {
                     DateTimeType itemState = item.getStateAs(DateTimeType.class);
@@ -80,7 +80,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
 
         @Override
         public State calculate(Set<Item> items) {
-            if (items != null && items.size() > 0) {
+            if (items != null && !items.isEmpty()) {
                 ZonedDateTime max = null;
                 for (Item item : items) {
                     DateTimeType itemState = item.getStateAs(DateTimeType.class);

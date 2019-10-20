@@ -87,7 +87,7 @@ public class RulePredicates {
             namespaceSet.add(namespace);
         }
 
-        // this will even work for null namepace
+        // this will even work for null namespace
         return r -> namespaceSet.contains(getPrefix(r));
     }
 
@@ -100,7 +100,7 @@ public class RulePredicates {
     public static Predicate<Rule> hasTags() {
         // everything with a tag is matching
         // Rule.getTags() is never null
-        return r -> 0 < r.getTags().size();
+        return r -> !r.getTags().isEmpty();
     }
 
     /**

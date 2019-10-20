@@ -1348,7 +1348,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         Set<String> inputTags = input.getTags();
         OutputRef outputRef = null;
         boolean conflict = false;
-        if (inputTags.size() > 0) {
+        if (!inputTags.isEmpty()) {
             for (Set<String> outTags : outputTagMap.keySet()) {
                 if (outTags.containsAll(inputTags)) { // input tags must be subset of the output ones
                     if (outputRef == null) {
@@ -1371,7 +1371,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     private void initTagsMap(String moduleId, List<Output> outputs, Map<Set<String>, OutputRef> tagMap) {
         for (Output output : outputs) {
             Set<String> tags = output.getTags();
-            if (tags.size() > 0) {
+            if (!tags.isEmpty()) {
                 if (tagMap.get(tags) != null) {
                     // this set of output tags already exists. (conflict)
                     tagMap.remove(tags);

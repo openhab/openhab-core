@@ -13,6 +13,7 @@
 package org.eclipse.smarthome.core.thing.link;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -258,7 +259,7 @@ public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusIn
 
     private void informHandlerAboutLinkedChannel(Thing thing, Channel channel) {
         scheduler.submit(() -> {
-            // Don't notify the thing if the thing isn't initialised
+            // Don't notify the thing if the thing isn't initialized
             if (ThingHandlerHelper.isHandlerInitialized(thing)) {
                 ThingHandler handler = thing.getHandler();
                 if (handler != null) {
@@ -278,7 +279,7 @@ public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusIn
 
     private void informHandlerAboutUnlinkedChannel(Thing thing, Channel channel) {
         scheduler.submit(() -> {
-            // Don't notify the thing if the thing isn't initialised
+            // Don't notify the thing if the thing isn't initialized
             if (ThingHandlerHelper.isHandlerInitialized(thing)) {
                 ThingHandler handler = thing.getHandler();
                 if (handler != null) {
@@ -305,7 +306,8 @@ public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusIn
                 Thing thing = thingRegistry.get(event.getThingUID());
                 if (thing != null) {
                     for (Channel channel : thing.getChannels()) {
-                        if (itemChannelLinkRegistry.getLinkedItemNames(channel.getUID()).size() > 0) {
+                        Set<String> linkedItemNames = itemChannelLinkRegistry.getLinkedItemNames(channel.getUID());
+                        if (!linkedItemNames.isEmpty()) {
                             informHandlerAboutLinkedChannel(thing, channel);
                         }
                     }

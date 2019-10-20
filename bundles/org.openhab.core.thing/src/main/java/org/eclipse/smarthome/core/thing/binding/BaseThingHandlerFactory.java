@@ -171,7 +171,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                         }
                     }
                 }
-                if (serviceNames.size() > 0) {
+                if (!serviceNames.isEmpty()) {
                     String[] serviceNamesArray = serviceNames.toArray(new String[serviceNames.size()]);
 
                     ServiceRegistration<?> serviceReg = this.bundleContext.registerService(serviceNamesArray,

@@ -222,7 +222,7 @@ public class JsonStorage<T> implements Storage<T> {
             FileReader reader = new FileReader(inputFile);
             Map<String, StorageEntry> loadedMap = internalMapper.fromJson(reader, map.getClass());
 
-            if (loadedMap != null && loadedMap.size() != 0) {
+            if (loadedMap != null && !loadedMap.isEmpty()) {
                 inputMap.putAll(loadedMap);
             }
 

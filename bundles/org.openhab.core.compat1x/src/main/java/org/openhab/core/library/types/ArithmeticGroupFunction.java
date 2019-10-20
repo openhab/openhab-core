@@ -57,7 +57,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
          */
         @Override
         public State calculate(List<Item> items) {
-            if (items != null && items.size() > 0) {
+            if (items != null && !items.isEmpty()) {
                 for (Item item : items) {
                     if (!activeState.equals(item.getStateAs(activeState.getClass()))) {
                         return passiveState;
@@ -325,7 +325,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
          */
         @Override
         public State calculate(List<Item> items) {
-            if (items != null && items.size() > 0) {
+            if (items != null && !items.isEmpty()) {
                 BigDecimal min = null;
                 for (Item item : items) {
                     DecimalType itemState = (DecimalType) item.getStateAs(DecimalType.class);
@@ -372,7 +372,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
          */
         @Override
         public State calculate(List<Item> items) {
-            if (items != null && items.size() > 0) {
+            if (items != null && !items.isEmpty()) {
                 BigDecimal max = null;
                 for (Item item : items) {
                     DecimalType itemState = (DecimalType) item.getStateAs(DecimalType.class);
