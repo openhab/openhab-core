@@ -318,6 +318,13 @@ public class MqttBrokerConnection {
     }
 
     /**
+     * Get the MQTT version
+     */
+    public MqttVersion getMqttVersion() {
+        return mqttVersion;
+    }
+
+    /**
      * Get the MQTT broker host
      */
     public String getHost() {
@@ -438,6 +445,7 @@ public class MqttBrokerConnection {
      *
      * @param lastWill The last will object or null.
      */
+    @Deprecated
     public void setLastWill(@Nullable MqttWillAndTestament lastWill) {
         this.lastWill = lastWill;
     }
@@ -503,6 +511,7 @@ public class MqttBrokerConnection {
     /**
      * Return the ssl context provider.
      */
+    @Deprecated
     public SSLContextProvider getSSLContextProvider() {
         return sslContextProvider;
     }
@@ -513,6 +522,7 @@ public class MqttBrokerConnection {
      * @return The ssl context provider. Should not be null, but the ssl context will in fact
      *         only be used if a ssl:// url is given.
      */
+    @Deprecated
     public void setSSLContextProvider(SSLContextProvider sslContextProvider) {
         this.sslContextProvider = sslContextProvider;
         trustManagerFactory = new CustomTrustManagerFactory(sslContextProvider);
@@ -825,8 +835,9 @@ public class MqttBrokerConnection {
      * @param payload The message payload
      * @param listener A listener to be notified of success or failure of the delivery.
      */
+    @Deprecated
     public void publish(String topic, byte[] payload, MqttActionCallback listener) {
-        publish(topic, payload, null, null, listener);
+        publish(topic, payload, getQos(), isRetain(), listener);
     }
 
     /**
@@ -838,16 +849,13 @@ public class MqttBrokerConnection {
      * @param retain Set to true to retain the message on the broker
      * @param listener A listener to be notified of success or failure of the delivery.
      */
-    public void publish(String topic, byte[] payload, @Nullable Integer qos, @Nullable Boolean retain, MqttActionCallback listener) {
+    @Deprecated
+    public void publish(String topic, byte[] payload, int qos, boolean retain, MqttActionCallback listener) {
         final MqttAsyncClientWrapper client = this.client;
         if (client == null) {
             listener.onFailure(topic, new MqttException(new Throwable()));
             return;
         }
-
-        // use defaults when not provided by caller
-        qos = qos == null ? this.qos : qos;
-        retain = retain == null ? this.retain : retain;
 
         client.publish(topic, payload, retain, qos).whenComplete((m, t) -> {
             if (t != null) {
@@ -868,7 +876,7 @@ public class MqttBrokerConnection {
      *         exceptionally on an error or with a result of false if no broker connection is established.
      */
     public CompletableFuture<Boolean> publish(String topic, byte[] payload) {
-        return publish(topic, payload, null, null);
+        return publish(topic, payload, getQos(), isRetain());
     }
 
     /**
@@ -881,15 +889,11 @@ public class MqttBrokerConnection {
      * @return Returns a future that completes with a result of true if the publishing succeeded and completes
      *         exceptionally on an error or with a result of false if no broker connection is established.
      */
-    public CompletableFuture<Boolean> publish(String topic, byte[] payload, @Nullable Integer qos, @Nullable Boolean retain) {
+    public CompletableFuture<Boolean> publish(String topic, byte[] payload, int qos, boolean retain) {
         final MqttAsyncClientWrapper client = this.client;
         if (client == null) {
             return CompletableFuture.completedFuture(false);
         }
-
-        // use defaults if not provided
-        qos = qos == null ? this.qos : qos;
-        retain = retain == null ? this.retain : retain;
 
         // publish message asynchronously
         CompletableFuture<Boolean> future = new CompletableFuture<>();
