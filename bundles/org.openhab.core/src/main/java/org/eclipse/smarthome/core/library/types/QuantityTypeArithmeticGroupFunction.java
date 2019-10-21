@@ -77,7 +77,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(Set<Item> items) {
-            if (items == null || items.size() <= 0) {
+            if (items == null || items.isEmpty()) {
                 return UnDefType.UNDEF;
             }
 
@@ -120,7 +120,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(Set<Item> items) {
-            if (items == null || items.size() <= 0) {
+            if (items == null || items.isEmpty()) {
                 return UnDefType.UNDEF;
             }
 
@@ -155,7 +155,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(Set<Item> items) {
-            if (items == null || items.size() <= 0) {
+            if (items == null || items.isEmpty()) {
                 return UnDefType.UNDEF;
             }
 
@@ -188,7 +188,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(Set<Item> items) {
-            if (items == null || items.size() <= 0) {
+            if (items == null || items.isEmpty()) {
                 return UnDefType.UNDEF;
             }
 

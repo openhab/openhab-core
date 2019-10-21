@@ -79,7 +79,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         synchronized (resourceSet) {
             Resource resource = getResource(name);
             if (resource != null) {
-                if (resource.getContents().size() > 0) {
+                if (!resource.getContents().isEmpty()) {
                     return resource.getContents().get(0);
                 } else {
                     logger.warn("Configuration model '{}' is either empty or cannot be parsed correctly!", name);
@@ -291,7 +291,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
                         warnings.add(d.getMessage());
                     }
-                    if (warnings.size() > 0) {
+                    if (!warnings.isEmpty()) {
                         logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
                                 StringUtils.join(warnings, "\n"));
                     }

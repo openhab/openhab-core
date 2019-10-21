@@ -88,7 +88,7 @@ public class InstanceUUID {
         } catch (IOException ioe) {
             LOGGER.warn("Failed reading the UUID file '{}': {}", file.getAbsolutePath(), ioe.getMessage());
         }
-        return lines != null && lines.size() > 0 ? lines.get(0) : "";
+        return lines == null || lines.isEmpty() ? "" : lines.get(0);
     }
 
 }

@@ -61,7 +61,7 @@ public interface GroupFunction {
 
         @Override
         public State calculate(Set<Item> items) {
-            if (items.size() > 0) {
+            if (!items.isEmpty()) {
                 Iterator<Item> it = items.iterator();
                 State state = it.next().getState();
                 while (it.hasNext()) {

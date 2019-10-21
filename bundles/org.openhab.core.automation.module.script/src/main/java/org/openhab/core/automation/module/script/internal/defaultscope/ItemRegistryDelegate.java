@@ -43,7 +43,7 @@ public class ItemRegistryDelegate implements Map<String, State> {
 
     @Override
     public boolean isEmpty() {
-        return size() == 0;
+        return itemRegistry.getAll().isEmpty();
     }
 
     @Override

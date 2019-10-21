@@ -142,7 +142,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
             mimeTypes.addAll(f.getMimeTypes());
             String preferredMimeType = mimeTypes.get(0);
             mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || mimeType.contains("x-"));
-            if (mimeTypes.size() > 0) {
+            if (!mimeTypes.isEmpty()) {
                 preferredMimeType = mimeTypes.get(0);
             }
             parameterOptions.add(new ParameterOption(preferredMimeType, languageName));

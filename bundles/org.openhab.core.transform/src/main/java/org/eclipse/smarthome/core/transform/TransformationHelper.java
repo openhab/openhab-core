@@ -65,7 +65,7 @@ public class TransformationHelper {
             try {
                 Collection<ServiceReference<TransformationService>> refs = context
                         .getServiceReferences(TransformationService.class, filter);
-                if (refs != null && refs.size() > 0) {
+                if (refs != null && !refs.isEmpty()) {
                     return context.getService(refs.iterator().next());
                 } else {
                     LOGGER.debug("Cannot get service reference for transformation service of type {}",
@@ -116,7 +116,7 @@ public class TransformationHelper {
      * @param state the state to be formatted before being passed into the transformation function
      * @return the result of the transformation. If no transformation was done, <code>null</code> is returned
      * @throws TransformationException if transformation service fails or the state cannot be formatted according to the
-     *                                 format
+     *             format
      */
     public static @Nullable String transform(TransformationService service, String function, String format,
             String state) throws TransformationException {

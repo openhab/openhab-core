@@ -87,7 +87,7 @@ public class CompositeActionHandler extends AbstractCompositeModuleHandler<Actio
             }
 
         }
-        return result.size() > 0 ? result : null;
+        return !result.isEmpty() ? result : null;
     }
 
     /**

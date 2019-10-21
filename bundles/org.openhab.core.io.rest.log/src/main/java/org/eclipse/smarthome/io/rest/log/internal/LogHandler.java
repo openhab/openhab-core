@@ -86,7 +86,7 @@ public class LogHandler implements RESTResource {
             + LogConstants.LOG_BUFFER_LIMIT + " last entries.")
     @ApiParam(name = "limit", allowableValues = "range[1, " + LogConstants.LOG_BUFFER_LIMIT + "]")
     public Response getLastLogs(@DefaultValue(LogConstants.LOG_BUFFER_LIMIT + "") @QueryParam("limit") Integer limit) {
-        if (logBuffer.size() <= 0) {
+        if (logBuffer.isEmpty()) {
             return Response.ok("[]").build();
         }
 

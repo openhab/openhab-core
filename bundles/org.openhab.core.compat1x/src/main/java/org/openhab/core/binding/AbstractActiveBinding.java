@@ -91,7 +91,7 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
      * @param properlyConfigured
      */
     protected void setProperlyConfigured(boolean properlyConfigured) {
-        if (providers.size() > 0) {
+        if (!providers.isEmpty()) {
             activeService.setProperlyConfigured(properlyConfigured);
         }
     }

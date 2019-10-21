@@ -62,7 +62,7 @@ public final class ExpressionCardinality extends Expression {
             node.setChildren(nodes.toArray(new ASTNode[0]));
             node.setRemainingTokens(list);
             node.setSuccess(true);
-            node.setValue(atMostOne ? (values.size() > 0 ? values.get(0) : null) : values.toArray());
+            node.setValue(atMostOne ? (values.isEmpty() ? null : values.get(0)) : values.toArray());
             generateValue(node);
         }
         return node;

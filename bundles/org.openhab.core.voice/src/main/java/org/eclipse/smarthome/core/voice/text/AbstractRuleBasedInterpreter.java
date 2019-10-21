@@ -751,9 +751,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             Set<String> remainder = new HashSet<>(identifierExcludes);
             Expression stopper = expression.getStopper();
             Set<String> excludes = stopper == null ? new HashSet<>() : stopper.getFirsts(language);
-            if (excludes.size() > 0) {
+            if (!excludes.isEmpty()) {
                 remainder.removeAll(excludes);
-                if (remainder.size() > 0) {
+                if (!remainder.isEmpty()) {
                     emit("(");
                 }
                 emit("<idbase>");
@@ -761,7 +761,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     emit(" | ");
                     emit(token);
                 }
-                if (remainder.size() > 0) {
+                if (!remainder.isEmpty()) {
                     emit(")");
                 }
             } else {
@@ -815,7 +815,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
             emit("#JSGF V1.0;\n\n");
 
-            if (identifierExcludes.size() > 0) {
+            if (!identifierExcludes.isEmpty()) {
                 Set<String> identifierBase = new HashSet<>(identifiers);
                 identifierBase.removeAll(identifierExcludes);
                 emit("<idbase> = ");

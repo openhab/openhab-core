@@ -155,7 +155,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     protected void addItemFactory(ItemFactory itemFactory) {
         itemFactories.add(itemFactory);
 
-        if (failedToCreate.size() > 0) {
+        if (!failedToCreate.isEmpty()) {
             // retry failed creation attempts
             Iterator<Entry<String, PersistedItem>> iterator = failedToCreate.entrySet().iterator();
             while (iterator.hasNext()) {

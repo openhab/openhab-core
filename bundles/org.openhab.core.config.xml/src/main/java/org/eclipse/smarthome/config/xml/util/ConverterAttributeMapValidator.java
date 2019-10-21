@@ -120,7 +120,7 @@ public class ConverterAttributeMapValidator {
         }
 
         // there are still attributes in the validation mask left -> check if they are required
-        if ((validationMask != null) && (validationMask.size() > 0)) {
+        if (validationMask != null && !validationMask.isEmpty()) {
             for (Map.Entry<String, Boolean> entry : validationMask.entrySet()) {
                 String attributeName = entry.getKey();
                 boolean attributeRequired = entry.getValue();

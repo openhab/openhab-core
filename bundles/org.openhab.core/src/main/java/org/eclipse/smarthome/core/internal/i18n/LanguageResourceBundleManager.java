@@ -95,7 +95,7 @@ public class LanguageResourceBundleManager {
      * @return true if the according bundle provides resource information, otherwise false
      */
     public boolean containsResources() {
-        return (this.resourceNames.size() > 0);
+        return !resourceNames.isEmpty();
     }
 
     private List<String> determineResourceNames() {

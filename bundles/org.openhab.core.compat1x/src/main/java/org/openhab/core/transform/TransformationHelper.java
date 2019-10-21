@@ -41,7 +41,7 @@ public class TransformationHelper {
             try {
                 Collection<ServiceReference<org.eclipse.smarthome.core.transform.TransformationService>> refs = context
                         .getServiceReferences(org.eclipse.smarthome.core.transform.TransformationService.class, filter);
-                if (refs != null && refs.size() > 0) {
+                if (refs != null && !refs.isEmpty()) {
                     return new TransformationServiceDelegate(context.getService(refs.iterator().next()));
                 } else {
                     LOGGER.warn("Cannot get service reference for transformation service of type {}",

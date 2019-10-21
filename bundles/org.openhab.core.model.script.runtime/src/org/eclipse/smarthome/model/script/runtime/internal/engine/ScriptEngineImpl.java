@@ -135,7 +135,7 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
         }
 
         List<Diagnostic> errors = resource.getErrors();
-        if (errors.size() != 0) {
+        if (!errors.isEmpty()) {
             throw new ScriptParsingException("Failed to parse expression (due to managed SyntaxError/s)",
                     scriptAsString).addDiagnosticErrors(errors);
         }

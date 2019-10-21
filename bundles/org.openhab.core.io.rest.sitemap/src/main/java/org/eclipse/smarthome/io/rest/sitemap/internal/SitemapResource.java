@@ -521,7 +521,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
                         bean.widgets.add(subWidget);
                     }
                 }
-            } else if (children.size() > 0) {
+            } else if (!children.isEmpty()) {
                 String pageName = itemUIRegistry.getWidgetId(linkableWidget);
                 bean.linkedPage = createPageBean(sitemapName, itemUIRegistry.getLabel(widget),
                         itemUIRegistry.getCategory(widget), pageName, drillDown ? children : null, drillDown,
@@ -622,7 +622,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
                 }
             } else if (w instanceof LinkableWidget) {
                 LinkableWidget linkableWidget = (LinkableWidget) w;
-                if (itemUIRegistry.getChildren(linkableWidget).size() > 0) {
+                if (!itemUIRegistry.getChildren(linkableWidget).isEmpty()) {
                     return false;
                 }
             }
