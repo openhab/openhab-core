@@ -14,7 +14,6 @@ package org.eclipse.smarthome.io.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
@@ -96,11 +95,7 @@ public class Stream2JSONInputStream extends InputStream {
         }
 
         IOUtils.closeQuietly(jsonElementStream);
-        try {
-            jsonElementStream = IOUtils.toInputStream(prefix + entity + postfix, StandardCharsets.UTF_8.name());
-        } catch (IOException e) {
-            // IOException is thrown for invalid encoding. This will never happen with StandardCharsets.UTF_8.
-        }
+        jsonElementStream = IOUtils.toInputStream(prefix + entity + postfix);
     }
 
     private boolean finished() {
