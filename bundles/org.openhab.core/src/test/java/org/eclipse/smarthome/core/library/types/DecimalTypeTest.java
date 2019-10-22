@@ -118,6 +118,12 @@ public class DecimalTypeTest {
     }
 
     @Test
+    public void testConversionToDateTimeType() {
+        assertEquals(new DateTimeType("2014-03-30T10:58:47+0000"),
+                new DecimalType("1396177127").as(DateTimeType.class));
+    }
+
+    @Test
     public void testConversionToPercentType() {
         assertEquals(new PercentType(70), new DecimalType("0.7").as(PercentType.class));
     }
