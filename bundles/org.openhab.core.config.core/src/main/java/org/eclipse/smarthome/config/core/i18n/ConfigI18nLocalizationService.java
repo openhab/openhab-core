@@ -24,6 +24,7 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterGroup;
 import org.eclipse.smarthome.config.core.ParameterOption;
+import org.eclipse.smarthome.config.core.internal.i18n.ConfigDescriptionGroupI18nUtil;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
