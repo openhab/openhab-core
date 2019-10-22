@@ -38,7 +38,7 @@ import org.eclipse.smarthome.core.scheduler.SchedulerTemporalAdjuster;
  * cron specification.
  *
  * @See http://www.cronmaker.com/
- * @See http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger
+ * @See http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/tutorial-lesson-06.html
  * @author Peter Kriens - Initial contribution
  * @author Hilbrand Bouwkamp - code cleanup
  */
@@ -62,7 +62,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             .mapToObj(i -> new SimpleEntry<>(MONTHS2[i], i)).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     private static final String[] WEEK_DAYS_STRINGS = { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" };
     private static final Map<String, Integer> WEEK_DAYS = IntStream.range(0, WEEK_DAYS_STRINGS.length)
-            .mapToObj(i -> new SimpleEntry<>(WEEK_DAYS_STRINGS[i], i))
+            .mapToObj(i -> new SimpleEntry<>(WEEK_DAYS_STRINGS[i], i + 1))
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
     private final List<Field> fields = new ArrayList<>(7);
@@ -73,7 +73,6 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * Constructs the class with a cron specification. containing variables and a cron expression at the last line.
      */
     public CronAdjuster(String specification) {
-        int x = 1;
         final String entries[] = specification.split("[\n\r]+");
         environmentMap = parseEnvironment(entries);
 
@@ -189,7 +188,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             case "@reboot":
                 return "0 0 0 1 1 ? 1900";
             default:
-                throw new IllegalArgumentException("Unrecognized @ expression: '" + expression + "'");
+                throw new IllegalArgumentException(String.format("Unrecognized @ expression: '%s'", expression));
         }
     }
 
@@ -250,13 +249,12 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             } else {
                 final Matcher m = WEEKDAY_PATTERN.matcher(sub);
                 if (m.matches()) {
-                    final int day = parseInt(cronExpression, chronoField, m.group("day"), min, max, names);
+                    final int day = parseInt(cronExpression, chronoField, m.group("day"), min, max, names) - 1;
                     final Checker c = temporal -> temporal.get(ChronoField.DAY_OF_WEEK) == day;
 
                     if (m.group("nr") != null) {
                         final int n = parseInt(cronExpression, chronoField, m.group("nr"));
                         return and(c, temporal -> isNthWeekDayInMonth(temporal, n));
-
                     } else if (m.group("l") != null) {
                         return and(c, CronAdjuster::isLastOfThisWeekDayInMonth);
                     } else {
@@ -281,16 +279,19 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         final String[] increments = sub.split("/");
         final int[] range = parseRange(cronExpression, chronoField, increments[0], min, max, names);
 
+        if (chronoField == ChronoField.DAY_OF_WEEK) {
+            range[0] = range[0] - 1;
+            range[1] = range[1] - 1;
+        }
+
         if (increments.length == 2) {
             // we had a / expression
             final int increment = parseInt(cronExpression, chronoField, increments[1]);
-
             if (range[0] == range[1]) {
                 range[1] = max;
             }
             return temporal -> {
                 final int n = temporal.get(chronoField);
-
                 return n >= range[0] && n <= range[1] && ((n - range[0]) % increment) == 0;
             };
         }
@@ -407,7 +408,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
 
     private int[] parseRange(String cronExpression, ChronoField chronoField, String range, int min, int max,
             Map<String, Integer> names) {
-        final int[] r = { 0, max };
+        final int[] r = { min, max };
         if ("*".equals(range)) {
             return r;
         }
