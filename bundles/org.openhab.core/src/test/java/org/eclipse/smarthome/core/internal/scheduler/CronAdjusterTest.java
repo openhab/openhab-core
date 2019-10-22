@@ -83,12 +83,24 @@ public class CronAdjusterTest {
                         new String[] { "2015-01-01T10:15", "2015-01-11T10:15", "2015-01-21T10:15", "2015-01-31T10:15",
                                 "2015-02-01T10:15" } },
 
+                // Fire at 12:00am on the first Monday of every month
+                { JAN_1ST_2015, "0 0 0 ? * MON#1",
+                        new String[] { "2015-01-05T00:00", "2015-02-02T00:00", "2015-03-02T00:00" } },
+
+                // Fire at 12:00am on the first Monday of every month
+                { JAN_1ST_2015, "0 0 0 ? * 2#1",
+                        new String[] { "2015-01-05T00:00", "2015-02-02T00:00", "2015-03-02T00:00" } },
+
                 // Fire at 10:15am on the second Friday of every month
                 { JAN_1ST_2015, "0 15 10 ? * FRI#2",
                         new String[] { "2015-01-09T10:15", "2015-02-13T10:15", "2015-03-13T10:15" } },
 
+                // Fire at 10:15am on the second Friday of every month
+                { JAN_1ST_2015, "0 15 10 ? * 6#2",
+                        new String[] { "2015-01-09T10:15", "2015-02-13T10:15", "2015-03-13T10:15" } },
+
                 // Fire at 10:15am on the last Friday of every month
-                { JAN_1ST_2015, "0 15 10 ? * 5L",
+                { JAN_1ST_2015, "0 15 10 ? * 6L",
                         new String[] { "2015-01-30T10:15", "2015-02-27T10:15", "2015-03-27T10:15" } },
 
                 // Fire at 10:15am on the last day of every month
@@ -106,6 +118,10 @@ public class CronAdjusterTest {
 
                 // Fire at 2:10pm and at 2:44pm every Wednesday in the month of January.
                 { JAN_1ST_2015, "0 10,44 14 ? 1 WED",
+                        new String[] { "2015-01-07T14:10", "2015-01-07T14:44", "2015-01-14T14:10" } },
+
+                // Fire at 2:10pm and at 2:44pm every Wednesday in the month of January.
+                { JAN_1ST_2015, "0 10,44 14 ? 1 4",
                         new String[] { "2015-01-07T14:10", "2015-01-07T14:44", "2015-01-14T14:10" } },
 
                 // Fire every minute starting at 2pm and ending at 2:02pm, every day
@@ -130,8 +146,8 @@ public class CronAdjusterTest {
                 { JAN_1ST_2015, "0 0-2 14 * * ?",
                         new String[] { "2015-01-01T14:00", "2015-01-01T14:01", "2015-01-01T14:02",
                                 "2015-01-02T14:00" } },
-
                 { JAN_1ST_2015, "0 0 0 ? * SAT", new String[] { "2015-01-03T00:00" } },
+                { JAN_1ST_2015, "0 0 0 ? * SUN", new String[] { "2015-01-04T00:00" } },
                 { JAN_1ST_2000, "10-14/2 * * * * *",
                         new String[] { "2000-01-01T00:00:10", "2000-01-01T00:00:12", "2000-01-01T00:00:14",
                                 "2000-01-01T00:01:10" } },
@@ -170,7 +186,8 @@ public class CronAdjusterTest {
 
         for (String out : outs) {
             ldt = ldt.with(cronAdjuster);
-            assertThat("CronAdjuster did return expected next cron string", ldt.toString(), equalTo(out));
+            assertThat("CronAdjuster did return expected next cron string for expression: " + cron, ldt.toString(),
+                    equalTo(out));
         }
     }
 }
