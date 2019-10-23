@@ -22,6 +22,8 @@ import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.junit.Test;
 
 /**
+ * Tests for {@link ConfigDescriptionParameterBuilder) class.
+ *
  * @author Christoph Knauf - Initial contribution
  */
 public class ConfigDescriptionParameterBuilderTest {

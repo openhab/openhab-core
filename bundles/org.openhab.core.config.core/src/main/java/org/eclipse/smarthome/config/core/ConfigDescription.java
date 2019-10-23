@@ -13,7 +13,6 @@
 package org.eclipse.smarthome.config.core;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,16 +44,19 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  */
 public class ConfigDescription implements Identifiable<URI> {
 
-    private URI uri;
-    private List<ConfigDescriptionParameter> parameters;
-    private List<ConfigDescriptionParameterGroup> parameterGroups;
+    private final URI uri;
+    private final List<ConfigDescriptionParameter> parameters;
+    private final List<ConfigDescriptionParameterGroup> parameterGroups;
 
     /**
      * Creates a new instance of this class with the specified parameter.
      *
+     * @deprecated Use the {@link ConfigDescriptionBuilder} instead.
+     *
      * @param uri the URI of this description within the {@link ConfigDescriptionRegistry}
      * @throws IllegalArgumentException if the URI is null or invalid
      */
+    @Deprecated
     public ConfigDescription(URI uri) throws IllegalArgumentException {
         this(uri, null, null);
     }
@@ -62,18 +64,23 @@ public class ConfigDescription implements Identifiable<URI> {
     /**
      * Creates a new instance of this class with the specified parameters.
      *
+     * @deprecated Use the {@link ConfigDescriptionBuilder} instead.
+     *
      * @param uri the URI of this description within the {@link ConfigDescriptionRegistry} (must neither be null nor
      *            empty)
      * @param parameters the list of configuration parameters that belong to the given URI
      *            (could be null or empty)
      * @throws IllegalArgumentException if the URI is null or invalid
      */
+    @Deprecated
     public ConfigDescription(URI uri, List<ConfigDescriptionParameter> parameters) {
         this(uri, parameters, null);
     }
 
     /**
      * Creates a new instance of this class with the specified parameters.
+     *
+     * @deprecated Use the {@link ConfigDescriptionBuilder} instead.
      *
      * @param uri the URI of this description within the {@link ConfigDescriptionRegistry} (must neither be null nor
      *            empty)
@@ -82,6 +89,7 @@ public class ConfigDescription implements Identifiable<URI> {
      * @param groups the list of groups associated with the parameters
      * @throws IllegalArgumentException if the URI is null or invalid
      */
+    @Deprecated
     public ConfigDescription(URI uri, List<ConfigDescriptionParameter> parameters,
             List<ConfigDescriptionParameterGroup> groups) {
         if (uri == null) {
@@ -99,13 +107,13 @@ public class ConfigDescription implements Identifiable<URI> {
         if (parameters != null) {
             this.parameters = Collections.unmodifiableList(parameters);
         } else {
-            this.parameters = Collections.unmodifiableList(new ArrayList<>(0));
+            this.parameters = Collections.emptyList();
         }
 
         if (groups != null) {
             this.parameterGroups = Collections.unmodifiableList(groups);
         } else {
-            this.parameterGroups = Collections.unmodifiableList(new ArrayList<>(0));
+            this.parameterGroups = Collections.emptyList();
         }
     }
 
@@ -117,7 +125,7 @@ public class ConfigDescription implements Identifiable<URI> {
      */
     @Override
     public URI getUID() {
-        return this.uri;
+        return uri;
     }
 
     /**
@@ -128,7 +136,7 @@ public class ConfigDescription implements Identifiable<URI> {
      * @return the corresponding configuration description parameters (not null, could be empty)
      */
     public List<ConfigDescriptionParameter> getParameters() {
-        return this.parameters;
+        return parameters;
     }
 
     /**
@@ -154,12 +162,11 @@ public class ConfigDescription implements Identifiable<URI> {
      * @return the list of parameter groups parameter (not null, could be empty)
      */
     public List<ConfigDescriptionParameterGroup> getParameterGroups() {
-        return this.parameterGroups;
+        return parameterGroups;
     }
 
     @Override
     public String toString() {
         return "ConfigDescription [uri=" + uri + ", parameters=" + parameters + ", groups=" + parameterGroups + "]";
     }
-
 }
