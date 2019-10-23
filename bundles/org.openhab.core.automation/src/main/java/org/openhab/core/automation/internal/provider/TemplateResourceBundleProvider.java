@@ -66,14 +66,18 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class TemplateResourceBundleProvider extends AbstractResourceBundleProvider<RuleTemplate>
         implements RuleTemplateProvider {
 
+    private final RuleTemplateI18nUtil ruleTemplateI18nUtil;
+
     /**
      * This constructor is responsible for initializing the path to resources and tracking the managing service of the
      * {@link ModuleType}s and the managing service of the {@link RuleTemplates}s.
      *
      * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      */
-    public TemplateResourceBundleProvider() {
+    @Activate
+    public TemplateResourceBundleProvider(final @Reference TranslationProvider i18nProvider) {
         super(ROOT_DIRECTORY + "/templates/");
+        this.ruleTemplateI18nUtil = new RuleTemplateI18nUtil(i18nProvider);
     }
 
     @Override
@@ -167,9 +171,9 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
         Bundle bundle = getBundle(uid);
 
         if (bundle != null && defTemplate instanceof RuleTemplate) {
-            String llabel = RuleTemplateI18nUtil.getLocalizedRuleTemplateLabel(i18nProvider, bundle, uid,
-                    defTemplate.getLabel(), locale);
-            String ldescription = RuleTemplateI18nUtil.getLocalizedRuleTemplateDescription(i18nProvider, bundle, uid,
+            String llabel = ruleTemplateI18nUtil.getLocalizedRuleTemplateLabel(bundle, uid, defTemplate.getLabel(),
+                    locale);
+            String ldescription = ruleTemplateI18nUtil.getLocalizedRuleTemplateDescription(bundle, uid,
                     defTemplate.getDescription(), locale);
             List<ConfigDescriptionParameter> lconfigDescriptions = getLocalizedConfigurationDescription(i18nProvider,
                     defTemplate.getConfigurationDescriptions(), bundle, uid, RuleTemplateI18nUtil.RULE_TEMPLATE,
