@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
@@ -40,6 +42,7 @@ import org.osgi.framework.BundleContext;
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
+@NonNullByDefault
 public abstract class AutomationCommands {
 
     /**
@@ -200,17 +203,17 @@ public abstract class AutomationCommands {
     /**
      * This field holds a reference to the {@link CommandlineModuleTypeProvider} instance.
      */
-    protected CommandlineModuleTypeProvider moduleTypeProvider;
+    protected @NonNullByDefault({}) CommandlineModuleTypeProvider moduleTypeProvider;
 
     /**
      * This field holds a reference to the {@link CommandlineTemplateProvider} instance.
      */
-    protected CommandlineTemplateProvider templateProvider;
+    protected @NonNullByDefault({}) CommandlineTemplateProvider templateProvider;
 
     /**
      * This field holds a reference to the {@link CommandlineRuleImporter} instance.
      */
-    protected CommandlineRuleImporter ruleImporter;
+    protected @NonNullByDefault({}) CommandlineRuleImporter ruleImporter;
 
     /**
      * This method is used for getting the rule corresponding to the specified UID from the RuleManager.
@@ -219,7 +222,7 @@ public abstract class AutomationCommands {
      *            specifies the wanted {@link Rule} uniquely.
      * @return a {@link Rule}, corresponding to the specified UID.
      */
-    public abstract Rule getRule(String uid);
+    public abstract @Nullable Rule getRule(String uid);
 
     /**
      * This method is used to get the all existing rules from the RuleManager.
@@ -233,7 +236,7 @@ public abstract class AutomationCommands {
      * @param uid
      * @return
      */
-    public abstract RuleStatus getRuleStatus(String uid);
+    public abstract @Nullable RuleStatus getRuleStatus(String uid);
 
     /**
      *
@@ -253,7 +256,7 @@ public abstract class AutomationCommands {
      *            Can be <code>null</code> and then the default locale will be used.
      * @return a {@link RuleTemplate}, corresponding to the specified UID and locale.
      */
-    public abstract Template getTemplate(String templateUID, Locale locale);
+    public abstract @Nullable Template getTemplate(String templateUID, @Nullable Locale locale);
 
     /**
      * This method is used for getting the collection of {@link RuleTemplate}s corresponding to the specified locale
@@ -264,7 +267,7 @@ public abstract class AutomationCommands {
      *            Can be <code>null</code> and then the default locale will be used.
      * @return a collection of {@link RuleTemplate}s, corresponding to the specified locale.
      */
-    public abstract Collection<RuleTemplate> getTemplates(Locale locale);
+    public abstract Collection<RuleTemplate> getTemplates(@Nullable Locale locale);
 
     /**
      * This method is used for getting the {@link ModuleType} corresponding to the specified UID from the manager of the
@@ -277,7 +280,7 @@ public abstract class AutomationCommands {
      *            be <code>null</code> and then the default locale will be used.
      * @return a {@link ModuleType}, corresponding to the specified UID and locale.
      */
-    public abstract ModuleType getModuleType(String typeUID, Locale locale);
+    public abstract @Nullable ModuleType getModuleType(String typeUID, @Nullable Locale locale);
 
     /**
      * This method is used for getting the collection of {@link TriggerType}s corresponding to
@@ -288,7 +291,7 @@ public abstract class AutomationCommands {
      *            be <code>null</code> and then the default locale will be used.
      * @return a collection of {@link ModuleType}s from given class and locale.
      */
-    public abstract <T extends ModuleType> Collection<T> getTriggers(Locale locale);
+    public abstract <T extends ModuleType> Collection<T> getTriggers(@Nullable Locale locale);
 
     /**
      * This method is used for getting the collection of {@link ConditionType}s corresponding to
@@ -299,7 +302,7 @@ public abstract class AutomationCommands {
      *            be <code>null</code> and then the default locale will be used.
      * @return a collection of {@link ModuleType}s from given class and locale.
      */
-    public abstract <T extends ModuleType> Collection<T> getConditions(Locale locale);
+    public abstract <T extends ModuleType> Collection<T> getConditions(@Nullable Locale locale);
 
     /**
      * This method is used for getting the collection of {@link ActionType}s corresponding to
@@ -310,7 +313,7 @@ public abstract class AutomationCommands {
      *            be <code>null</code> and then the default locale will be used.
      * @return a collection of {@link ModuleType}s from given class and locale.
      */
-    public abstract <T extends ModuleType> Collection<T> getActions(Locale locale);
+    public abstract <T extends ModuleType> Collection<T> getActions(@Nullable Locale locale);
 
     /**
      * This method is used for removing a rule corresponding to the specified UID from the RuleManager.
@@ -341,7 +344,7 @@ public abstract class AutomationCommands {
      *            order for their description is a random.
      * @return an instance of the class corresponding to the identifier of the command.
      */
-    protected abstract AutomationCommand parseCommand(String command, String[] parameterValues);
+    protected abstract @Nullable AutomationCommand parseCommand(String command, String[] parameterValues);
 
     /**
      * Initializing method.

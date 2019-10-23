@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.openhab.core.automation.template.RuleTemplate;
@@ -35,6 +37,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Yordan Mihaylov - Initial contribution
  * @author Ana Dimova - TemplateRegistry extends AbstractRegistry
  */
+@NonNullByDefault
 @Component(service = { TemplateRegistry.class, RuleTemplateRegistry.class }, immediate = true)
 public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String, RuleTemplateProvider>
         implements TemplateRegistry<RuleTemplate> {
@@ -51,19 +54,19 @@ public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String,
     }
 
     @Override
-    public RuleTemplate get(String templateUID) {
+    public @Nullable RuleTemplate get(String templateUID) {
         return get(templateUID, null);
     }
 
     @Override
-    public RuleTemplate get(String templateUID, Locale locale) {
+    public @Nullable RuleTemplate get(String templateUID, @Nullable Locale locale) {
         Entry<Provider<RuleTemplate>, RuleTemplate> prt = getValueAndProvider(templateUID);
         if (prt == null) {
             return null;
         } else {
             RuleTemplate t = locale == null ? prt.getValue()
                     : ((RuleTemplateProvider) prt.getKey()).getTemplate(templateUID, locale);
-            return createCopy(t);
+            return t != null ? createCopy(t) : null;
         }
     }
 
@@ -75,18 +78,18 @@ public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String,
     }
 
     @Override
-    public Collection<RuleTemplate> getByTag(String tag) {
+    public Collection<RuleTemplate> getByTag(@Nullable String tag) {
         return getByTag(tag, null);
     }
 
     @Override
-    public Collection<RuleTemplate> getByTag(String tag, Locale locale) {
+    public Collection<RuleTemplate> getByTag(@Nullable String tag, @Nullable Locale locale) {
         Collection<RuleTemplate> result = new ArrayList<>();
         forEach((provider, resultTemplate) -> {
             Collection<String> tags = resultTemplate.getTags();
             RuleTemplate t = locale == null ? resultTemplate
                     : ((RuleTemplateProvider) provider).getTemplate(resultTemplate.getUID(), locale);
-            if (tag == null || tags.contains(tag)) {
+            if (t != null && (tag == null || tags.contains(tag))) {
                 result.add(t);
             }
         });
@@ -99,14 +102,14 @@ public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String,
     }
 
     @Override
-    public Collection<RuleTemplate> getByTags(Locale locale, String... tags) {
-        Set<String> tagSet = tags != null ? new HashSet<>(Arrays.asList(tags)) : null;
+    public Collection<RuleTemplate> getByTags(@Nullable Locale locale, String... tags) {
+        Set<String> tagSet = new HashSet<>(Arrays.asList(tags));
         Collection<RuleTemplate> result = new ArrayList<>();
         forEach((provider, resultTemplate) -> {
             Collection<String> tTags = resultTemplate.getTags();
             RuleTemplate t = locale == null ? resultTemplate
                     : ((RuleTemplateProvider) provider).getTemplate(resultTemplate.getUID(), locale);
-            if (tTags.containsAll(tagSet)) {
+            if (t != null && tTags.containsAll(tagSet)) {
                 result.add(t);
             }
         });
@@ -114,7 +117,7 @@ public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String,
     }
 
     @Override
-    public Collection<RuleTemplate> getAll(Locale locale) {
+    public Collection<RuleTemplate> getAll(@Nullable Locale locale) {
         return getByTag(null, locale);
     }
 

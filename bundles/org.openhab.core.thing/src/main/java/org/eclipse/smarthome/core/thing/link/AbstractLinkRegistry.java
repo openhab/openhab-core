@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.thing.UID;
@@ -33,6 +34,7 @@ import org.eclipse.smarthome.core.thing.UID;
  *
  * @param <L> Concrete type of the abstract link
  */
+@NonNullByDefault
 public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Provider<L>>
         extends AbstractRegistry<L, String, P> {
 

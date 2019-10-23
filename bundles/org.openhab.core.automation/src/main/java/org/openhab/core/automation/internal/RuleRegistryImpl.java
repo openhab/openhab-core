@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.eclipse.smarthome.config.core.Configuration;
@@ -99,6 +101,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - added events for rules
  * @author Victor Toni - return only copies of {@link Rule}s
  */
+@NonNullByDefault
 @Component(service = RuleRegistry.class, immediate = true)
 public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvider>
         implements RuleRegistry, RegistryChangeListener<RuleTemplate> {
@@ -107,8 +110,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     private final Logger logger = LoggerFactory.getLogger(RuleRegistryImpl.class.getName());
 
-    private ModuleTypeRegistry moduleTypeRegistry;
-    private RuleTemplateRegistry templateRegistry;
+    private @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
+    private @NonNullByDefault({}) RuleTemplateRegistry templateRegistry;
 
     /**
      * {@link Map} of template UIDs to rules where these templates participated.
@@ -291,7 +294,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     }
 
     @Override
-    public Collection<Rule> getByTag(String tag) {
+    public Collection<Rule> getByTag(@Nullable String tag) {
         Collection<Rule> result = new LinkedList<>();
         if (tag == null) {
             forEach(result::add);
@@ -307,9 +310,9 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
 
     @Override
     public Collection<Rule> getByTags(String... tags) {
-        Set<String> tagSet = tags != null ? new HashSet<>(Arrays.asList(tags)) : null;
+        Set<String> tagSet = new HashSet<>(Arrays.asList(tags));
         Collection<Rule> result = new LinkedList<>();
-        if (tagSet == null || tagSet.isEmpty()) {
+        if (tagSet.isEmpty()) {
             forEach(result::add);
         } else {
             forEach(rule -> {
@@ -538,7 +541,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      * @param configValue the value for {@link Rule}s configuration property, that should be validated.
      * @param configParameter the meta-data for {@link Rule}s configuration value, used for validation.
      */
-    private void processValue(Object configValue, ConfigDescriptionParameter configParameter) {
+    private void processValue(@Nullable Object configValue, ConfigDescriptionParameter configParameter) {
         if (configValue != null) {
             Type type = configParameter.getType();
             if (configParameter.isMultiple()) {
@@ -625,12 +628,22 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         for (String rUID : rules) {
             try {
                 Rule unresolvedRule = get(rUID);
-                Rule resolvedRule = resolveRuleByTemplate(unresolvedRule);
-                Provider<Rule> provider = getProvider(rUID);
-                if (provider instanceof ManagedRuleProvider) {
-                    update(resolvedRule);
+                if (unresolvedRule != null) {
+                    Rule resolvedRule = resolveRuleByTemplate(unresolvedRule);
+                    Provider<Rule> provider = getProvider(rUID);
+                    if (provider instanceof ManagedRuleProvider) {
+                        update(resolvedRule);
+                    } else if (provider != null) {
+                        updated(provider, unresolvedRule, unresolvedRule);
+                    } else {
+                        logger.error(
+                                "Resolving the rule '{}' by template '{}' failed because the provider is not known",
+                                rUID, templateUID);
+                    }
                 } else {
-                    updated(provider, unresolvedRule, unresolvedRule);
+                    logger.error(
+                            "Resolving the rule '{}' by template '{}' failed because it is not known to the registry",
+                            rUID, templateUID);
                 }
             } catch (IllegalArgumentException e) {
                 logger.error("Resolving the rule '{}' by template '{}' failed", rUID, templateUID, e);

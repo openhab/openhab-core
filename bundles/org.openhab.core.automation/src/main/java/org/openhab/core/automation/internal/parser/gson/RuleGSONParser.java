@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.dto.RuleDTO;
 import org.openhab.core.automation.dto.RuleDTOMapper;
@@ -36,6 +37,7 @@ import com.google.gson.stream.JsonToken;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = Parser.class, property = { "parser.type=parser.rule", "format=json" })
 public class RuleGSONParser extends AbstractGSONParser<Rule> {
 

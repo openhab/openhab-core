@@ -15,6 +15,8 @@ package org.openhab.core.automation.template;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.Provider;
 
 /**
@@ -25,29 +27,31 @@ import org.eclipse.smarthome.core.common.registry.Provider;
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Ana Dimova - add registration property - rule.templates
  */
+@NonNullByDefault
 public interface TemplateProvider<E extends Template> extends Provider<E> {
 
     /**
      * Gets the localized Templates defined by this provider. When the localization is not specified or it is not
      * supported a Template localized with default locale is returned.
      *
-     * @param UID    unique identifier of the desired Template.
+     * @param UID unique identifier of the desired Template.
      * @param locale specifies the desired {@link Locale} to be used for localization of the returned element. If
-     *               localization resources for this locale are not available or the passed locale is {@code null} the
-     *               element is returned with the default localization.
+     *            localization resources for this locale are not available or the passed locale is {@code null} the
+     *            element is returned with the default localization.
      * @return the desired localized Template.
      */
-    E getTemplate(String UID, Locale locale);
+    @Nullable
+    E getTemplate(String UID, @Nullable Locale locale);
 
     /**
      * Gets the localized Templates defined by this provider. When localization is not specified or it is not supported
      * a Templates with default localization is returned.
      *
      * @param locale specifies the desired {@link Locale} to be used for localization of the returned elements. If
-     *               localization resources for this locale are not available or the passed locale is {@code null} the
-     *               elements are returned with the default localization.
+     *            localization resources for this locale are not available or the passed locale is {@code null} the
+     *            elements are returned with the default localization.
      * @return a collection of localized {@link Template}s provided by this provider.
      */
-    Collection<E> getTemplates(Locale locale);
+    Collection<E> getTemplates(@Nullable Locale locale);
 
 }

@@ -16,6 +16,8 @@ import java.net.URI;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.I18nUtil;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
@@ -30,6 +32,7 @@ import org.osgi.framework.FrameworkUtil;
  * @author Alex Tugarev - Extended for pattern and option label
  * @author Thomas Höfer - Extended for unit label
  */
+@NonNullByDefault
 public class ConfigDescriptionI18nUtil {
 
     private final TranslationProvider i18nProvider;
@@ -40,29 +43,29 @@ public class ConfigDescriptionI18nUtil {
         this.i18nProvider = i18nProvider;
     }
 
-    public String getParameterPattern(Bundle bundle, URI configDescriptionURI, String parameterName,
-            String defaultPattern, Locale locale) {
+    public @Nullable String getParameterPattern(Bundle bundle, URI configDescriptionURI, String parameterName,
+            @Nullable String defaultPattern, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultPattern,
                 () -> inferKey(configDescriptionURI, parameterName, "pattern"));
         return i18nProvider.getText(bundle, key, defaultPattern, locale);
     }
 
-    public String getParameterDescription(Bundle bundle, URI configDescriptionURI, String parameterName,
-            String defaultDescription, Locale locale) {
+    public @Nullable String getParameterDescription(Bundle bundle, URI configDescriptionURI, String parameterName,
+            @Nullable String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferKey(configDescriptionURI, parameterName, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
     }
 
-    public String getParameterLabel(Bundle bundle, URI configDescriptionURI, String parameterName, String defaultLabel,
-            Locale locale) {
+    public @Nullable String getParameterLabel(Bundle bundle, URI configDescriptionURI, String parameterName,
+            @Nullable String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel,
                 () -> inferKey(configDescriptionURI, parameterName, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
-    public String getParameterOptionLabel(Bundle bundle, URI configDescriptionURI, String parameterName,
-            String optionValue, String defaultOptionLabel, Locale locale) {
+    public @Nullable String getParameterOptionLabel(Bundle bundle, URI configDescriptionURI, String parameterName,
+            @Nullable String optionValue, @Nullable String defaultOptionLabel, @Nullable Locale locale) {
         if (!isValidPropertyKey(optionValue)) {
             return defaultOptionLabel;
         }
@@ -73,8 +76,8 @@ public class ConfigDescriptionI18nUtil {
         return i18nProvider.getText(bundle, key, defaultOptionLabel, locale);
     }
 
-    public String getParameterUnitLabel(Bundle bundle, URI configDescriptionURI, String parameterName, String unit,
-            String defaultUnitLabel, Locale locale) {
+    public @Nullable String getParameterUnitLabel(Bundle bundle, URI configDescriptionURI, String parameterName,
+            @Nullable String unit, @Nullable String defaultUnitLabel, @Nullable Locale locale) {
         if (unit != null && defaultUnitLabel == null) {
             String label = i18nProvider.getText(FrameworkUtil.getBundle(this.getClass()), "unit." + unit, null, locale);
             if (label != null) {
@@ -91,7 +94,7 @@ public class ConfigDescriptionI18nUtil {
         return configDescriptionURI.getScheme() + ".config." + uri + "." + parameterName + "." + lastSegment;
     }
 
-    private boolean isValidPropertyKey(String key) {
+    private boolean isValidPropertyKey(@Nullable String key) {
         if (key != null) {
             return !DELIMITER.matcher(key).find();
         }

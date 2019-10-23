@@ -160,7 +160,11 @@ public class ThingLinkManagerOSGiTest extends JavaOSGiTest {
         ThingUID thingUID = new ThingUID("hue:lamp:lamp1");
         Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), thingUID, null, "test thing",
                 new Configuration());
-        managedThingProvider.add(thing);
+        if (thing != null) {
+            managedThingProvider.add(thing);
+        } else {
+            throw new AssertionError("thing is null");
+        }
 
         ChannelUID channelUID = new ChannelUID(thingUID, "1");
 

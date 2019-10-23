@@ -12,6 +12,7 @@
  */
 package org.eclipse.smarthome.core.internal.items;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.items.ManagedMetadataProvider;
@@ -33,6 +34,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = { MetadataRegistry.class })
 public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey, MetadataProvider>
         implements MetadataRegistry {

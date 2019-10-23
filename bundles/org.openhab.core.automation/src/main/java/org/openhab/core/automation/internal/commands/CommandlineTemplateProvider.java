@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
@@ -52,13 +54,14 @@ import org.osgi.framework.ServiceRegistration;
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
+@NonNullByDefault
 public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTemplate> implements RuleTemplateProvider {
 
     /**
      * This field holds a reference to the {@link ModuleTypeProvider} service registration.
      */
     @SuppressWarnings("rawtypes")
-    protected ServiceRegistration tpReg;
+    protected @Nullable ServiceRegistration tpReg;
     private final TemplateRegistry<RuleTemplate> templateRegistry;
 
     /**
@@ -66,12 +69,11 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
      * any new functionality to the constructors of the providers. Only provides consistency by invoking the parent's
      * constructor.
      *
-     * @param context is the {@link BundleContext}, used for creating a tracker for {@link Parser} services.
+     * @param bundleContext is the {@link BundleContext}, used for creating a tracker for {@link Parser} services.
      */
-    public CommandlineTemplateProvider(BundleContext context, TemplateRegistry<RuleTemplate> templateRegistry) {
-        super(context);
-        listeners = new LinkedList<>();
-        tpReg = bc.registerService(RuleTemplateProvider.class.getName(), this, null);
+    public CommandlineTemplateProvider(BundleContext bundleContext, TemplateRegistry<RuleTemplate> templateRegistry) {
+        super(bundleContext);
+        tpReg = bundleContext.registerService(RuleTemplateProvider.class.getName(), this, null);
         this.templateRegistry = templateRegistry;
     }
 
@@ -82,7 +84,7 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
      * @see AbstractCommandProvider#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public Object addingService(@SuppressWarnings("rawtypes") ServiceReference reference) {
+    public @Nullable Object addingService(@SuppressWarnings("rawtypes") @Nullable ServiceReference reference) {
         if (reference.getProperty(Parser.PARSER_TYPE).equals(Parser.PARSER_TEMPLATE)) {
             return super.addingService(reference);
         }
@@ -128,14 +130,14 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
     }
 
     @Override
-    public RuleTemplate getTemplate(String UID, Locale locale) {
+    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
         synchronized (providerPortfolio) {
             return providedObjectsHolder.get(UID);
         }
     }
 
     @Override
-    public Collection<RuleTemplate> getTemplates(Locale locale) {
+    public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
         synchronized (providedObjectsHolder) {
             return providedObjectsHolder.values();
         }

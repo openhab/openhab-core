@@ -27,6 +27,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.io.rest.LocaleService;
 import org.eclipse.smarthome.io.rest.RESTResource;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
@@ -52,14 +54,15 @@ import io.swagger.annotations.ApiResponses;
  */
 @Path("templates")
 @Api("templates")
+@NonNullByDefault
 @Component
 public class TemplateResource implements RESTResource {
 
-    private TemplateRegistry<RuleTemplate> templateRegistry;
-    private LocaleService localeService;
+    private @NonNullByDefault({}) TemplateRegistry<@NonNull RuleTemplate> templateRegistry;
+    private @NonNullByDefault({}) LocaleService localeService;
 
     @Context
-    private UriInfo uriInfo;
+    private @NonNullByDefault({}) UriInfo uriInfo;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     protected void setTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {

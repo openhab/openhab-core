@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.provider.i18n;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.type.ModuleType;
 import org.osgi.framework.Bundle;
 
@@ -22,6 +24,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public interface ModuleTypeI18nService {
 
     /**
@@ -32,6 +35,7 @@ public interface ModuleTypeI18nService {
      * @param bundle the bundle containing the localization files
      * @return the localized ModuleType
      */
-    ModuleType getModuleTypePerLocale(ModuleType defModuleType, Locale locale, Bundle bundle);
+    @Nullable
+    ModuleType getModuleTypePerLocale(@Nullable ModuleType defModuleType, @Nullable Locale locale, Bundle bundle);
 
 }

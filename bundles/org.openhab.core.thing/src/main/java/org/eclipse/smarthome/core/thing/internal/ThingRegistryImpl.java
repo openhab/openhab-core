@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
 import org.eclipse.smarthome.core.events.EventPublisher;
@@ -48,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * @author Chris Jackson - ensure thing added event is sent before linked events
  * @auther Thomas Höfer - Added config description validation exception to updateConfiguration operation
  */
+@NonNullByDefault
 @Component(immediate = true)
 public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingProvider> implements ThingRegistry {
 
@@ -73,7 +75,7 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     }
 
     @Override
-    public Channel getChannel(ChannelUID channelUID) {
+    public @Nullable Channel getChannel(ChannelUID channelUID) {
         ThingUID thingUID = channelUID.getThingUID();
         Thing thing = get(thingUID);
         if (thing != null) {
@@ -83,7 +85,7 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     }
 
     @Override
-    public void updateConfiguration(ThingUID thingUID, Map<@NonNull String, Object> configurationParameters) {
+    public void updateConfiguration(ThingUID thingUID, Map<String, Object> configurationParameters) {
         Thing thing = get(thingUID);
         if (thing != null) {
             ThingHandler thingHandler = thing.getHandler();
@@ -98,12 +100,12 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     }
 
     @Override
-    public Thing forceRemove(ThingUID thingUID) {
+    public @Nullable Thing forceRemove(ThingUID thingUID) {
         return super.remove(thingUID);
     }
 
     @Override
-    public Thing remove(ThingUID thingUID) {
+    public @Nullable Thing remove(ThingUID thingUID) {
         Thing thing = get(thingUID);
         if (thing != null) {
             notifyTrackers(thing, ThingTrackerEvent.THING_REMOVING);
@@ -240,8 +242,8 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     }
 
     @Override
-    public Thing createThingOfType(ThingTypeUID thingTypeUID, ThingUID thingUID, ThingUID bridgeUID, String label,
-            Configuration configuration) {
+    public @Nullable Thing createThingOfType(ThingTypeUID thingTypeUID, @Nullable ThingUID thingUID,
+            @Nullable ThingUID bridgeUID, @Nullable String label, Configuration configuration) {
         logger.debug("Creating thing for type '{}'.", thingTypeUID);
         for (ThingHandlerFactory thingHandlerFactory : thingHandlerFactories) {
             if (thingHandlerFactory.supportsThingType(thingTypeUID)) {

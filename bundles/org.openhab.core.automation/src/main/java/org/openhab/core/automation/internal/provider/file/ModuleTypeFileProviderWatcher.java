@@ -14,6 +14,7 @@ package org.openhab.core.automation.internal.provider.file;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
@@ -27,6 +28,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = ModuleTypeProvider.class)
 public class ModuleTypeFileProviderWatcher extends ModuleTypeFileProvider {
 

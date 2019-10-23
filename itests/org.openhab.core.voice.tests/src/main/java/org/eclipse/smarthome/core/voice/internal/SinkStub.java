@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioSink;
 import org.eclipse.smarthome.core.audio.AudioStream;
@@ -33,10 +35,10 @@ import org.eclipse.smarthome.core.library.types.PercentType;
  * @author Velin Yordanov - migrated from groovy to java
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  */
+@NonNullByDefault
 public class SinkStub implements AudioSink {
 
     private boolean isStreamProcessed;
-    private PercentType volume;
     private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Collections
             .unmodifiableSet(Stream.of(AudioFormat.MP3, AudioFormat.WAV).collect(Collectors.toSet()));
     private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Collections
@@ -51,7 +53,7 @@ public class SinkStub implements AudioSink {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public @Nullable String getLabel(@Nullable Locale locale) {
         return SINK_STUB_LABEL;
     }
 
@@ -60,7 +62,7 @@ public class SinkStub implements AudioSink {
     }
 
     @Override
-    public void process(AudioStream audioStream) throws UnsupportedAudioFormatException {
+    public void process(@Nullable AudioStream audioStream) throws UnsupportedAudioFormatException {
         isStreamProcessed = true;
     }
 
@@ -72,13 +74,12 @@ public class SinkStub implements AudioSink {
     @Override
     public PercentType getVolume() throws IOException {
         // this method will no be used in the tests
-        return volume;
+        return PercentType.ZERO;
     }
 
     @Override
     public void setVolume(PercentType volume) throws IOException {
         // this method will not be used in the tests
-        this.volume = volume;
     }
 
     public boolean isStreamProcessed() {

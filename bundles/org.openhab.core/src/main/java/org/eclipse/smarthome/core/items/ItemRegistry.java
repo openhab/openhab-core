@@ -15,7 +15,7 @@ package org.eclipse.smarthome.core.items;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.Registry;
 import org.eclipse.smarthome.core.internal.items.ItemBuilderImpl;
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface ItemRegistry extends Registry<Item, String> {
 
     /**
@@ -41,7 +42,7 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @return the uniquely identified item
      * @throws ItemNotFoundException if no item matches the input
      */
-    public @NonNull Item getItem(String name) throws ItemNotFoundException;
+    public Item getItem(String name) throws ItemNotFoundException;
 
     /**
      * This method retrieves a single item from the registry.
@@ -52,68 +53,61 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @throws ItemNotFoundException if no item matches the input
      * @throws ItemNotUniqueException if multiply items match the input
      */
-    public @NonNull Item getItemByPattern(@NonNull String name) throws ItemNotFoundException, ItemNotUniqueException;
+    public Item getItemByPattern(String name) throws ItemNotFoundException, ItemNotUniqueException;
 
     /**
      * This method retrieves all items that are currently available in the registry
      *
      * @return a collection of all available items
      */
-    public @NonNull Collection<@NonNull Item> getItems();
+    public Collection<Item> getItems();
 
     /**
      * This method retrieves all items with the given type
      *
-     * @param type
-     *            - item type as defined by {@link ItemFactory}s
+     * @param type item type as defined by {@link ItemFactory}s
      * @return a collection of all items of the given type
      */
-    public @NonNull Collection<Item> getItemsOfType(@NonNull String type);
+    public Collection<Item> getItemsOfType(String type);
 
     /**
      * This method retrieves all items that match a given search pattern
      *
      * @return a collection of all items matching the search pattern
      */
-    public @NonNull Collection<@NonNull Item> getItems(@NonNull String pattern);
+    public Collection<Item> getItems(String pattern);
 
     /**
      * Returns list of items which contains all of the given tags.
      *
-     * @param tags
-     *            - array of tags to be present on the returned items.
+     * @param tags array of tags to be present on the returned items.
      * @return list of items which contains all of the given tags.
      */
-    public @NonNull Collection<Item> getItemsByTag(@NonNull String... tags);
+    public Collection<Item> getItemsByTag(String... tags);
 
     /**
      * Returns list of items with a certain type containing all of the given tags.
      *
-     * @param type
-     *            - item type as defined by {@link ItemFactory}s
-     * @param tags
-     *            - array of tags to be present on the returned items.
+     * @param type item type as defined by {@link ItemFactory}s
+     * @param tags array of tags to be present on the returned items.
      * @return list of items which contains all of the given tags.
      */
-    public @NonNull Collection<Item> getItemsByTagAndType(@NonNull String type, @NonNull String... tags);
+    public Collection<Item> getItemsByTagAndType(String type, String... tags);
 
     /**
      * Returns list of items which contains all of the given tags.
      *
-     * @param typeFilter
-     *            - subclass of {@link GenericItem} to filter the resulting list
-     *            for.
-     * @param tags
-     *            - array of tags to be present on the returned items.
+     * @param typeFilter subclass of {@link GenericItem} to filter the resulting list for.
+     * @param tags array of tags to be present on the returned items.
      * @return list of items which contains all of the given tags, which is
      *         filtered by the given type filter.
      */
-    public @NonNull <T extends Item> Collection<T> getItemsByTag(@NonNull Class<T> typeFilter, @NonNull String... tags);
+    public <T extends Item> Collection<T> getItemsByTag(Class<T> typeFilter, String... tags);
 
     /**
      * @see ManagedItemProvider#remove(String, boolean)
      */
-    public @Nullable Item remove(@NonNull String itemName, boolean recursive);
+    public @Nullable Item remove(String itemName, boolean recursive);
 
     /**
      * Add a hook to be informed before adding/after removing items.

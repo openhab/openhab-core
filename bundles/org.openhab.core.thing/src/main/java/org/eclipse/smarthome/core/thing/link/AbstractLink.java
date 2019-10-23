@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.thing.link;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.Identifiable;
 import org.eclipse.smarthome.core.items.ItemUtil;
 import org.eclipse.smarthome.core.thing.UID;
@@ -21,6 +23,7 @@ import org.eclipse.smarthome.core.thing.UID;
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractLink implements Identifiable<String> {
 
     /**
@@ -34,7 +37,7 @@ public abstract class AbstractLink implements Identifiable<String> {
         return itemName + " -> " + uid.toString();
     }
 
-    private final String itemName;
+    private final @NonNullByDefault({}) String itemName;
 
     /**
      * Constructor.
@@ -52,7 +55,7 @@ public abstract class AbstractLink implements Identifiable<String> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof AbstractLink) {
             AbstractLink link = (AbstractLink) obj;
             return this.getUID().equals(link.getUID());

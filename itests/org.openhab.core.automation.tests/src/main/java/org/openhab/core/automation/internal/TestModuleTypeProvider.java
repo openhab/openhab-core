@@ -17,13 +17,15 @@ import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ConditionType;
@@ -39,6 +41,7 @@ import org.openhab.core.automation.type.TriggerType;
  *
  * @author Yordan Mihaylov - Initial contribution
  */
+@NonNullByDefault
 public class TestModuleTypeProvider implements ModuleTypeProvider {
 
     public static final String TRIGGER_TYPE = "triggerTypeUID";
@@ -92,26 +95,26 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     }
 
     @Override
-    public void addProviderChangeListener(@NonNull ProviderChangeListener<ModuleType> listener) {
+    public void addProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
     }
 
     @Override
-    public @NonNull Collection<ModuleType> getAll() {
+    public Collection<ModuleType> getAll() {
         return Stream.of(createTriggerType(), createConditionType(), createActionType()).collect(toSet());
     }
 
     @Override
-    public void removeProviderChangeListener(@NonNull ProviderChangeListener<ModuleType> listener) {
+    public void removeProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
     }
 
     @Override
-    public <T extends ModuleType> T getModuleType(String UID, Locale locale) {
+    public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
         return null;
     }
 
     @Override
-    public <T extends ModuleType> Collection<T> getModuleTypes(Locale locale) {
-        return null;
+    public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
+        return Collections.emptyList();
     }
 
 }

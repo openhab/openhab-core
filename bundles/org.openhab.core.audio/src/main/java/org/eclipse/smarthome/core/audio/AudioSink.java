@@ -45,7 +45,7 @@ public interface AudioSink {
      * @return a localized string to be used in UIs
      */
     @Nullable
-    String getLabel(Locale locale);
+    String getLabel(@Nullable Locale locale);
 
     /**
      * Processes the passed {@link AudioStream}

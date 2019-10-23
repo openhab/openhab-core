@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
@@ -55,14 +57,15 @@ import org.osgi.framework.ServiceRegistration;
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
+@NonNullByDefault
 public class CommandlineModuleTypeProvider extends AbstractCommandProvider<ModuleType> implements ModuleTypeProvider {
 
     /**
      * This field holds a reference to the {@link TemplateProvider} service registration.
      */
     @SuppressWarnings("rawtypes")
-    protected ServiceRegistration mtpReg;
-    private ModuleTypeRegistry moduleTypeRegistry;
+    protected @Nullable ServiceRegistration mtpReg;
+    private final ModuleTypeRegistry moduleTypeRegistry;
 
     /**
      * This constructor creates instances of this particular implementation of {@link ModuleTypeProvider}. It does not
@@ -72,10 +75,9 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
      * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      * @param moduleTypeRegistry a ModuleTypeRegistry service
      */
-    public CommandlineModuleTypeProvider(BundleContext context, ModuleTypeRegistry moduleTypeRegistry) {
-        super(context);
-        listeners = new LinkedList<>();
-        mtpReg = bc.registerService(ModuleTypeProvider.class.getName(), this, null);
+    public CommandlineModuleTypeProvider(BundleContext bundleContext, ModuleTypeRegistry moduleTypeRegistry) {
+        super(bundleContext);
+        mtpReg = bundleContext.registerService(ModuleTypeProvider.class.getName(), this, null);
         this.moduleTypeRegistry = moduleTypeRegistry;
     }
 
@@ -86,7 +88,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
      * @see AbstractCommandProvider#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public Object addingService(@SuppressWarnings("rawtypes") ServiceReference reference) {
+    public @Nullable Object addingService(@SuppressWarnings("rawtypes") @Nullable ServiceReference reference) {
         if (reference.getProperty(Parser.PARSER_TYPE).equals(Parser.PARSER_MODULE_TYPE)) {
             return super.addingService(reference);
         }
@@ -136,14 +138,14 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
 
     @SuppressWarnings("unchecked")
     @Override
-    public ModuleType getModuleType(String UID, Locale locale) {
+    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
         synchronized (providedObjectsHolder) {
             return providedObjectsHolder.get(UID);
         }
     }
 
     @Override
-    public Collection<ModuleType> getModuleTypes(Locale locale) {
+    public Collection<ModuleType> getModuleTypes(@Nullable Locale locale) {
         synchronized (providedObjectsHolder) {
             return !providedObjectsHolder.isEmpty() ? providedObjectsHolder.values()
                     : Collections.<ModuleType> emptyList();

@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
 import org.eclipse.smarthome.config.core.ParameterOption;
@@ -67,14 +70,11 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
 @SuppressWarnings("rawtypes")
+@NonNullByDefault
 public abstract class AbstractResourceBundleProvider<E> {
 
-    public AbstractResourceBundleProvider() {
-        providedObjectsHolder = new ConcurrentHashMap<>();
-        providerPortfolio = new ConcurrentHashMap<>();
-        queue = new AutomationResourceBundlesEventQueue<>(this);
-        parsers = new ConcurrentHashMap<>();
-        waitingProviders = new ConcurrentHashMap<>();
+    public AbstractResourceBundleProvider(String path) {
+        this.path = path;
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class AbstractResourceBundleProvider<E> {
     /**
      * This field holds a reference to the service instance for internationalization support within the platform.
      */
-    protected TranslationProvider i18nProvider;
+    protected @NonNullByDefault({}) TranslationProvider i18nProvider;
 
     /**
      * This field keeps instance of {@link Logger} that is used for logging.
@@ -96,7 +96,7 @@ public abstract class AbstractResourceBundleProvider<E> {
     /**
      * A bundle's execution context within the Framework.
      */
-    protected BundleContext bc;
+    protected @NonNullByDefault({}) BundleContext bundleContext;
 
     /**
      * This field is initialized in constructors of any particular provider with specific path for the particular
@@ -107,12 +107,12 @@ public abstract class AbstractResourceBundleProvider<E> {
      * "ESH-INF/automation/templates/"
      * <li>for {@link Rule}s it is a "ESH-INF/automation/rules/"
      */
-    protected String path;
+    protected final String path;
 
     /**
      * This Map collects all binded {@link Parser}s.
      */
-    protected Map<String, Parser<E>> parsers;
+    protected final Map<String, Parser<E>> parsers = new ConcurrentHashMap<>();
 
     /**
      * This Map provides structure for fast access to the provided automation objects. This provides opportunity for
@@ -122,37 +122,35 @@ public abstract class AbstractResourceBundleProvider<E> {
      * The Map has for keys UIDs of the objects and for values one of {@link ModuleType}s, {@link RuleTemplate}s and
      * {@link Rule}s.
      */
-    protected Map<String, E> providedObjectsHolder;
+    protected final Map<String, E> providedObjectsHolder = new ConcurrentHashMap<>();
 
     /**
      * This Map provides reference between provider of resources and the loaded objects from these resources.
      * <p>
      * The Map has for keys - {@link Vendor}s and for values - Lists with UIDs of the objects.
      */
-    protected Map<Vendor, List<String>> providerPortfolio;
+    protected final Map<Vendor, List<String>> providerPortfolio = new ConcurrentHashMap<>();
 
     /**
      * This Map holds bundles whose {@link Parser} for resources is missing in the moment of processing the bundle.
      * Later, if the {@link Parser} appears, they will be added again in the {@link #queue} for processing.
      */
-    protected Map<Bundle, List<URL>> waitingProviders;
+    protected final Map<Bundle, List<URL>> waitingProviders = new ConcurrentHashMap<>();
 
     /**
      * This field provides an access to the queue for processing bundles.
      */
-    protected AutomationResourceBundlesEventQueue queue;
+    protected final AutomationResourceBundlesEventQueue queue = new AutomationResourceBundlesEventQueue<>(this);
 
-    protected List<ProviderChangeListener<E>> listeners;
+    protected final List<ProviderChangeListener<E>> listeners = new LinkedList<>();
 
-    protected void activate(BundleContext bc) {
-        this.bc = bc;
+    protected void activate(@Nullable BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
     protected void deactivate() {
-        bc = null;
-        if (queue != null) {
-            queue.stop();
-        }
+        bundleContext = null;
+        queue.stop();
         synchronized (parsers) {
             parsers.clear();
         }
@@ -165,10 +163,8 @@ public abstract class AbstractResourceBundleProvider<E> {
         synchronized (waitingProviders) {
             waitingProviders.clear();
         }
-        if (listeners != null) {
-            synchronized (listeners) {
-                listeners.clear();
-            }
+        synchronized (listeners) {
+            listeners.clear();
         }
     }
 
@@ -270,7 +266,7 @@ public abstract class AbstractResourceBundleProvider<E> {
                 updateWaitingProviders(parser, bundle, url);
                 if (parser != null) {
                     Set<E> parsedObjects = parseData(parser, url, bundle);
-                    if (parsedObjects != null && !parsedObjects.isEmpty()) {
+                    if (!parsedObjects.isEmpty()) {
                         addNewProvidedObjects(newPortfolio, previousPortfolio, parsedObjects);
                     }
                 }
@@ -281,19 +277,17 @@ public abstract class AbstractResourceBundleProvider<E> {
     }
 
     @SuppressWarnings("unchecked")
-    protected void removeUninstalledObjects(List<String> previousPortfolio, List<String> newPortfolio) {
+    protected void removeUninstalledObjects(@Nullable List<String> previousPortfolio, List<String> newPortfolio) {
         if (previousPortfolio != null && !previousPortfolio.isEmpty()) {
             for (String uid : previousPortfolio) {
                 if (!newPortfolio.contains(uid)) {
                     E removedObject = providedObjectsHolder.remove(uid);
-                    if (listeners != null) {
-                        List<ProviderChangeListener<E>> snapshot = null;
-                        synchronized (listeners) {
-                            snapshot = new LinkedList<>(listeners);
-                        }
-                        for (ProviderChangeListener<E> listener : snapshot) {
-                            listener.removed((Provider<E>) this, removedObject);
-                        }
+                    List<ProviderChangeListener<E>> snapshot = null;
+                    synchronized (listeners) {
+                        snapshot = new LinkedList<>(listeners);
+                    }
+                    for (ProviderChangeListener<E> listener : snapshot) {
+                        listener.removed((Provider<E>) this, removedObject);
                     }
                 }
             }
@@ -355,14 +349,12 @@ public abstract class AbstractResourceBundleProvider<E> {
         if (portfolio != null && !portfolio.isEmpty()) {
             for (String uid : portfolio) {
                 E removedObject = providedObjectsHolder.remove(uid);
-                if (listeners != null) {
-                    List<ProviderChangeListener<E>> snapshot = null;
-                    synchronized (listeners) {
-                        snapshot = new LinkedList<>(listeners);
-                    }
-                    for (ProviderChangeListener<E> listener : snapshot) {
-                        listener.removed((Provider<E>) this, removedObject);
-                    }
+                List<ProviderChangeListener<E>> snapshot = null;
+                synchronized (listeners) {
+                    snapshot = new LinkedList<>(listeners);
+                }
+                for (ProviderChangeListener<E> listener : snapshot) {
+                    listener.removed((Provider<E>) this, removedObject);
                 }
             }
         }
@@ -375,7 +367,7 @@ public abstract class AbstractResourceBundleProvider<E> {
      * @param uid is the unique identifier of {@link ModuleType} or {@link Template} that must be localized.
      * @return the bundle providing localization resources.
      */
-    protected Bundle getBundle(String uid) {
+    protected @Nullable Bundle getBundle(String uid) {
         String symbolicName = null;
         for (Entry<Vendor, List<String>> entry : providerPortfolio.entrySet()) {
             if (entry.getValue().contains(uid)) {
@@ -384,7 +376,7 @@ public abstract class AbstractResourceBundleProvider<E> {
             }
         }
         if (symbolicName != null) {
-            Bundle[] bundles = bc.getBundles();
+            Bundle[] bundles = bundleContext.getBundles();
             for (int i = 0; i < bundles.length; i++) {
                 if (bundles[i].getSymbolicName().equals(symbolicName)) {
                     return bundles[i];
@@ -395,7 +387,8 @@ public abstract class AbstractResourceBundleProvider<E> {
     }
 
     protected List<ConfigDescriptionParameter> getLocalizedConfigurationDescription(TranslationProvider i18nProvider,
-            List<ConfigDescriptionParameter> config, Bundle bundle, String uid, String prefix, Locale locale) {
+            @Nullable List<ConfigDescriptionParameter> config, Bundle bundle, String uid, String prefix,
+            @Nullable Locale locale) {
         List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
         if (config != null) {
             ConfigDescriptionI18nUtil util = new ConfigDescriptionI18nUtil(i18nProvider);
@@ -406,6 +399,7 @@ public abstract class AbstractResourceBundleProvider<E> {
                     uri = new URI(prefix + ":" + uid + ".name");
                 } catch (URISyntaxException e) {
                     logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);
+                    return Collections.emptyList();
                 }
                 String llabel = parameter.getLabel();
                 if (llabel != null) {
@@ -485,7 +479,7 @@ public abstract class AbstractResourceBundleProvider<E> {
                 }
             }
         }
-        return null;
+        return Collections.emptySet();
     }
 
     @SuppressWarnings("unchecked")

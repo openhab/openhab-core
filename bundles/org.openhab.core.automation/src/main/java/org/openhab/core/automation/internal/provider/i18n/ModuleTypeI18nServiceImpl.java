@@ -17,6 +17,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
@@ -35,10 +37,9 @@ import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.type.TriggerType;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
 
     private final Logger logger = LoggerFactory.getLogger(ModuleTypeI18nServiceImpl.class);
@@ -55,8 +57,15 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
     /**
      * This field holds a reference to the service instance for internationalization support within the platform.
      */
-    private TranslationProvider i18nProvider;
-    private ConfigI18nLocalizationService localizationService;
+    private final TranslationProvider i18nProvider;
+    private final ConfigI18nLocalizationService localizationService;
+
+    @Activate
+    public ModuleTypeI18nServiceImpl(final @Reference TranslationProvider i18nProvider,
+            final @Reference ConfigI18nLocalizationService localizationService) {
+        this.i18nProvider = i18nProvider;
+        this.localizationService = localizationService;
+    }
 
     /**
      * This method is used to localize the {@link ModuleType}s.
@@ -66,8 +75,9 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
      * @return the localized {@link ModuleType}.
      */
     @Override
-    public ModuleType getModuleTypePerLocale(ModuleType defModuleType, Locale locale, Bundle bundle) {
-        if (locale == null || defModuleType == null || i18nProvider == null) {
+    public @Nullable ModuleType getModuleTypePerLocale(@Nullable ModuleType defModuleType, @Nullable Locale locale,
+            Bundle bundle) {
+        if (defModuleType == null || locale == null) {
             return defModuleType;
         }
         String uid = defModuleType.getUID();
@@ -76,35 +86,35 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
         String ldescription = ModuleTypeI18nUtil.getLocalizedModuleTypeDescription(i18nProvider, bundle, uid,
                 defModuleType.getDescription(), locale);
 
-        List<ConfigDescriptionParameter> lconfigDescriptions = getLocalizedConfigDescriptionParameters(
+        List<ConfigDescriptionParameter> lconfigDescriptionParameters = getLocalizedConfigDescriptionParameters(
                 defModuleType.getConfigurationDescriptions(), ModuleTypeI18nUtil.MODULE_TYPE, uid, bundle, locale);
         if (defModuleType instanceof ActionType) {
-            return createLocalizedActionType((ActionType) defModuleType, bundle, uid, locale, lconfigDescriptions,
-                    llabel, ldescription);
+            return createLocalizedActionType((ActionType) defModuleType, bundle, uid, locale,
+                    lconfigDescriptionParameters, llabel, ldescription);
         }
         if (defModuleType instanceof ConditionType) {
-            return createLocalizedConditionType((ConditionType) defModuleType, bundle, uid, locale, lconfigDescriptions,
-                    llabel, ldescription);
+            return createLocalizedConditionType((ConditionType) defModuleType, bundle, uid, locale,
+                    lconfigDescriptionParameters, llabel, ldescription);
         }
         if (defModuleType instanceof TriggerType) {
-            return createLocalizedTriggerType((TriggerType) defModuleType, bundle, uid, locale, lconfigDescriptions,
-                    llabel, ldescription);
+            return createLocalizedTriggerType((TriggerType) defModuleType, bundle, uid, locale,
+                    lconfigDescriptionParameters, llabel, ldescription);
         }
         return null;
     }
 
-    private List<ConfigDescriptionParameter> getLocalizedConfigDescriptionParameters(
-            List<ConfigDescriptionParameter> parameters, String prefix, String uid, Bundle bundle, Locale locale) {
-        URI uri = null;
+    private @Nullable List<ConfigDescriptionParameter> getLocalizedConfigDescriptionParameters(
+            List<ConfigDescriptionParameter> parameters, String prefix, String uid, Bundle bundle,
+            @Nullable Locale locale) {
         try {
-            uri = new URI(prefix + ":" + uid + ".name");
+            return localizationService
+                    .getLocalizedConfigDescription(bundle,
+                            new ConfigDescription(new URI(prefix + ":" + uid + ".name"), parameters), locale)
+                    .getParameters();
         } catch (URISyntaxException e) {
             logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);
+            return null;
         }
-
-        ConfigDescription configDescription = new ConfigDescription(uri, parameters);
-
-        return localizationService.getLocalizedConfigDescription(bundle, configDescription, locale).getParameters();
     }
 
     /**
@@ -119,8 +129,9 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
      * @param ldescription is an ActionType localized description.
      * @return localized ActionType.
      */
-    private ActionType createLocalizedActionType(ActionType at, Bundle bundle, String moduleTypeUID, Locale locale,
-            List<ConfigDescriptionParameter> lconfigDescriptions, String llabel, String ldescription) {
+    private @Nullable ActionType createLocalizedActionType(ActionType at, Bundle bundle, String moduleTypeUID,
+            @Nullable Locale locale, @Nullable List<ConfigDescriptionParameter> lconfigDescriptions,
+            @Nullable String llabel, @Nullable String ldescription) {
         List<Input> inputs = ModuleTypeI18nUtil.getLocalizedInputs(i18nProvider, at.getInputs(), bundle, moduleTypeUID,
                 locale);
         List<Output> outputs = ModuleTypeI18nUtil.getLocalizedOutputs(i18nProvider, at.getOutputs(), bundle,
@@ -151,8 +162,9 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
      * @param ldescription is a ConditionType localized description.
      * @return localized ConditionType.
      */
-    private ConditionType createLocalizedConditionType(ConditionType ct, Bundle bundle, String moduleTypeUID,
-            Locale locale, List<ConfigDescriptionParameter> lconfigDescriptions, String llabel, String ldescription) {
+    private @Nullable ConditionType createLocalizedConditionType(ConditionType ct, Bundle bundle, String moduleTypeUID,
+            @Nullable Locale locale, @Nullable List<ConfigDescriptionParameter> lconfigDescriptions,
+            @Nullable String llabel, @Nullable String ldescription) {
         List<Input> inputs = ModuleTypeI18nUtil.getLocalizedInputs(i18nProvider, ct.getInputs(), bundle, moduleTypeUID,
                 locale);
         ConditionType lct = null;
@@ -181,8 +193,9 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
      * @param ldescription is a TriggerType localized description.
      * @return localized TriggerType.
      */
-    private TriggerType createLocalizedTriggerType(TriggerType tt, Bundle bundle, String moduleTypeUID, Locale locale,
-            List<ConfigDescriptionParameter> lconfigDescriptions, String llabel, String ldescription) {
+    private @Nullable TriggerType createLocalizedTriggerType(TriggerType tt, Bundle bundle, String moduleTypeUID,
+            @Nullable Locale locale, @Nullable List<ConfigDescriptionParameter> lconfigDescriptions,
+            @Nullable String llabel, @Nullable String ldescription) {
         List<Output> outputs = ModuleTypeI18nUtil.getLocalizedOutputs(i18nProvider, tt.getOutputs(), bundle,
                 moduleTypeUID, locale);
         TriggerType ltt = null;
@@ -197,24 +210,6 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
                     tt.getVisibility(), outputs);
         }
         return ltt;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = i18nProvider;
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = null;
-    }
-
-    @Reference
-    protected void setConfigI18nLocalizationService(ConfigI18nLocalizationService localizationService) {
-        this.localizationService = localizationService;
-    }
-
-    protected void unsetConfigI18nLocalizationService(ConfigI18nLocalizationService localizationService) {
-        this.localizationService = null;
     }
 
 }

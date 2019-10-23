@@ -17,6 +17,7 @@ import static org.eclipse.smarthome.config.discovery.inbox.InboxPredicates.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
@@ -155,11 +156,10 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
         if (autoIgnore) {
             String value = getRepresentationValue(result);
             if (value != null) {
-                Thing thing = thingRegistry.stream()
+                Optional<Thing> thing = thingRegistry.stream()
                         .filter(t -> Objects.equals(value, getRepresentationPropertyValueForThing(t)))
-                        .filter(t -> Objects.equals(t.getThingTypeUID(), result.getThingTypeUID())).findFirst()
-                        .orElse(null);
-                if (thing != null) {
+                        .filter(t -> Objects.equals(t.getThingTypeUID(), result.getThingTypeUID())).findFirst();
+                if (thing.isPresent()) {
                     logger.debug("Auto-ignoring the inbox entry for the representation value {}", value);
                     inbox.setFlag(result.getThingUID(), DiscoveryResultFlag.IGNORED);
                 }

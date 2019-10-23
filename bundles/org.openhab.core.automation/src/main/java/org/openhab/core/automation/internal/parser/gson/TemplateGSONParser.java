@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
 import org.openhab.core.automation.dto.RuleTemplateDTOMapper;
 import org.openhab.core.automation.parser.Parser;
@@ -36,6 +37,7 @@ import com.google.gson.stream.JsonToken;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = Parser.class, property = { "parser.type=parser.template", "format=json" })
 public class TemplateGSONParser extends AbstractGSONParser<Template> {
 

@@ -14,11 +14,12 @@ package org.openhab.core.automation.internal.provider;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
@@ -59,6 +60,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Yordan Mihaylov - updates related to api changes
  */
+@NonNullByDefault
 @Component(immediate = true, service = { RuleTemplateProvider.class,
         Provider.class }, property = "provider.type=bundle")
 public class TemplateResourceBundleProvider extends AbstractResourceBundleProvider<RuleTemplate>
@@ -71,14 +73,13 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      */
     public TemplateResourceBundleProvider() {
-        listeners = new LinkedList<>();
-        path = ROOT_DIRECTORY + "/templates/";
+        super(ROOT_DIRECTORY + "/templates/");
     }
 
     @Override
     @Activate
-    protected void activate(BundleContext bc) {
-        super.activate(bc);
+    protected void activate(@Nullable BundleContext bundleContext) {
+        super.activate(bundleContext);
     }
 
     @Override
@@ -132,18 +133,21 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @see TemplateProvider#getTemplate(java.lang.String, java.util.Locale)
      */
     @Override
-    public RuleTemplate getTemplate(String UID, Locale locale) {
+    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
         return getPerLocale(providedObjectsHolder.get(UID), locale);
     }
 
     /**
-     * @see TemplateProvider#getTemplates(java.util.Locale)
+     * @see TemplateProvider#getTemplates(Locale)
      */
     @Override
-    public Collection<RuleTemplate> getTemplates(Locale locale) {
+    public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
         List<RuleTemplate> templatesList = new ArrayList<>();
         for (RuleTemplate t : providedObjectsHolder.values()) {
-            templatesList.add(getPerLocale(t, locale));
+            RuleTemplate rtPerLocale = getPerLocale(t, locale);
+            if (rtPerLocale != null) {
+                templatesList.add(rtPerLocale);
+            }
         }
         return templatesList;
     }
@@ -155,13 +159,14 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @param locale represents a specific geographical, political, or cultural region.
      * @return the localized {@link Template}.
      */
-    private RuleTemplate getPerLocale(RuleTemplate defTemplate, Locale locale) {
+    private @Nullable RuleTemplate getPerLocale(@Nullable RuleTemplate defTemplate, @Nullable Locale locale) {
         if (locale == null || defTemplate == null || i18nProvider == null) {
             return defTemplate;
         }
         String uid = defTemplate.getUID();
         Bundle bundle = getBundle(uid);
-        if (defTemplate instanceof RuleTemplate) {
+
+        if (bundle != null && defTemplate instanceof RuleTemplate) {
             String llabel = RuleTemplateI18nUtil.getLocalizedRuleTemplateLabel(i18nProvider, bundle, uid,
                     defTemplate.getLabel(), locale);
             String ldescription = RuleTemplateI18nUtil.getLocalizedRuleTemplateDescription(i18nProvider, bundle, uid,

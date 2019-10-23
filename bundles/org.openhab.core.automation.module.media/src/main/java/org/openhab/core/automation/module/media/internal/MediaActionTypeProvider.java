@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
@@ -44,14 +46,15 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Kaufmann - added "say" action
  */
+@NonNullByDefault
 @Component(immediate = true)
 public class MediaActionTypeProvider implements ModuleTypeProvider {
 
-    private AudioManager audioManager;
+    private @NonNullByDefault({}) AudioManager audioManager;
 
     @SuppressWarnings("unchecked")
     @Override
-    public ModuleType getModuleType(String UID, Locale locale) {
+    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
         if (PlayActionHandler.TYPE_ID.equals(UID)) {
             return getPlayActionType(locale);
         } else if (SayActionHandler.TYPE_ID.equals(UID)) {
@@ -62,36 +65,36 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
     }
 
     @Override
-    public Collection<ModuleType> getModuleTypes(Locale locale) {
+    public Collection<ModuleType> getModuleTypes(@Nullable Locale locale) {
         return Stream.of(getPlayActionType(locale), getSayActionType(locale)).collect(Collectors.toList());
     }
 
-    private ModuleType getPlayActionType(Locale locale) {
+    private ModuleType getPlayActionType(@Nullable Locale locale) {
         return new ActionType(PlayActionHandler.TYPE_ID, getConfigPlayDesc(locale), "play a sound",
                 "Plays a sound file.", null, Visibility.VISIBLE, new ArrayList<>(), new ArrayList<>());
     }
 
-    private ModuleType getSayActionType(Locale locale) {
+    private ModuleType getSayActionType(@Nullable Locale locale) {
         return new ActionType(SayActionHandler.TYPE_ID, getConfigSayDesc(locale), "say something",
                 "Speaks a given text through a natural voice.", null, Visibility.VISIBLE, new ArrayList<>(),
                 new ArrayList<>());
     }
 
-    private List<ConfigDescriptionParameter> getConfigPlayDesc(Locale locale) {
+    private List<ConfigDescriptionParameter> getConfigPlayDesc(@Nullable Locale locale) {
         ConfigDescriptionParameter param1 = ConfigDescriptionParameterBuilder
                 .create(PlayActionHandler.PARAM_SOUND, Type.TEXT).withRequired(true).withLabel("Sound")
                 .withDescription("the sound to play").withOptions(getSoundOptions()).withLimitToOptions(true).build();
         return Stream.of(param1, getAudioSinkConfigDescParam(locale)).collect(Collectors.toList());
     }
 
-    private List<ConfigDescriptionParameter> getConfigSayDesc(Locale locale) {
+    private List<ConfigDescriptionParameter> getConfigSayDesc(@Nullable Locale locale) {
         ConfigDescriptionParameter param1 = ConfigDescriptionParameterBuilder
                 .create(SayActionHandler.PARAM_TEXT, Type.TEXT).withRequired(true).withLabel("Text")
                 .withDescription("the text to speak").build();
         return Stream.of(param1, getAudioSinkConfigDescParam(locale)).collect(Collectors.toList());
     }
 
-    private ConfigDescriptionParameter getAudioSinkConfigDescParam(Locale locale) {
+    private ConfigDescriptionParameter getAudioSinkConfigDescParam(@Nullable Locale locale) {
         ConfigDescriptionParameter param2 = ConfigDescriptionParameterBuilder
                 .create(SayActionHandler.PARAM_SINK, Type.TEXT).withRequired(false).withLabel("Sink")
                 .withDescription("the audio sink id").withOptions(getSinkOptions(locale)).withLimitToOptions(true)
@@ -124,7 +127,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
      *
      * @return a list of parameter options representing the audio sinks
      */
-    private List<ParameterOption> getSinkOptions(Locale locale) {
+    private List<ParameterOption> getSinkOptions(@Nullable Locale locale) {
         List<ParameterOption> options = new ArrayList<>();
 
         for (AudioSink sink : audioManager.getAllSinks()) {

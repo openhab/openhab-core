@@ -143,7 +143,7 @@ public class UnitUtils {
      * @return the unit symbol extracted from the string or {@code null} if no unit could be parsed
      *
      */
-    public static @Nullable Unit<?> parseUnit(String pattern) {
+    public static @Nullable Unit<?> parseUnit(@Nullable String pattern) {
         if (StringUtils.isBlank(pattern)) {
             return null;
         }

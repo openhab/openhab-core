@@ -14,7 +14,7 @@ package org.eclipse.smarthome.core.thing;
 
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
@@ -31,6 +31,7 @@ import org.eclipse.smarthome.core.thing.internal.ThingTracker;
  * @author Oliver Libutzki - Extracted ManagedThingProvider
  * @auther Thomas Höfer - Added config description validation exception to updateConfiguration operation
  */
+@NonNullByDefault
 public interface ThingRegistry extends Registry<Thing, ThingUID> {
 
     /**
@@ -40,6 +41,7 @@ public interface ThingRegistry extends Registry<Thing, ThingUID> {
      * @return thing for a given UID or null if no thing was found
      */
     @Override
+    @Nullable
     Thing get(ThingUID uid);
 
     /**
@@ -49,7 +51,7 @@ public interface ThingRegistry extends Registry<Thing, ThingUID> {
      * @return channel for the given channel UID or null of no channel was found
      */
     @Nullable
-    Channel getChannel(@NonNull ChannelUID channelUID);
+    Channel getChannel(ChannelUID channelUID);
 
     /**
      * Updates the configuration of a thing for the given UID.
@@ -61,7 +63,7 @@ public interface ThingRegistry extends Registry<Thing, ThingUID> {
      * @throws IllegalArgumentException if no thing with the given UID exists
      * @throws IllegalStateException if no handler is attached to the thing
      */
-    void updateConfiguration(@NonNull ThingUID thingUID, Map<@NonNull String, Object> configurationParameters);
+    void updateConfiguration(ThingUID thingUID, Map<String, Object> configurationParameters);
 
     /**
      * Initiates the removal process for the {@link Thing} specified by the given {@link ThingUID}.
@@ -77,6 +79,7 @@ public interface ThingRegistry extends Registry<Thing, ThingUID> {
      * @return the {@link Thing} that was removed, or null if no {@link Thing} with the given {@link ThingUID} exists
      */
     @Override
+    @Nullable
     Thing remove(ThingUID thingUID);
 
     /**
@@ -89,7 +92,7 @@ public interface ThingRegistry extends Registry<Thing, ThingUID> {
      * @return the {@link Thing} that was removed, or null if no {@link Thing} with the given {@link ThingUID} exists
      */
     @Nullable
-    Thing forceRemove(@NonNull ThingUID thingUID);
+    Thing forceRemove(ThingUID thingUID);
 
     /**
      * Creates a thing based on the given configuration properties
@@ -97,11 +100,12 @@ public interface ThingRegistry extends Registry<Thing, ThingUID> {
      * @param thingTypeUID thing type unique id
      * @param thingUID thing unique id which should be created. This id might be
      *            null.
-     * @param bridge the thing's bridge. Null if there is no bridge or if the thing
+     * @param bridgeUID the thing's bridge. Null if there is no bridge or if the thing
      *            is a bridge by itself.
      * @param configuration the configuration
      * @return the created thing
      */
-    Thing createThingOfType(@NonNull ThingTypeUID thingTypeUID, ThingUID thingUIDObject, ThingUID bridgeUID,
-            String label, Configuration configuration);
+    @Nullable
+    Thing createThingOfType(ThingTypeUID thingTypeUID, @Nullable ThingUID thingUID, @Nullable ThingUID bridgeUID,
+            @Nullable String label, Configuration configuration);
 }
