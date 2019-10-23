@@ -130,18 +130,19 @@ public class ConfigI18nLocalizationService {
         final List<ParameterOption> options = getLocalizedOptions(parameter.getOptions(), bundle, configDescriptionURI,
                 parameterName, locale);
 
-        final ConfigDescriptionParameter localizedParameter = ConfigDescriptionParameterBuilder
-                .create(parameterName, parameter.getType()).withMinimum(parameter.getMinimum())
-                .withMaximum(parameter.getMaximum()).withStepSize(parameter.getStepSize()).withPattern(pattern)
+        return ConfigDescriptionParameterBuilder.create(parameterName, parameter.getType())
+                .withMinimum(parameter.getMinimum()).withMaximum(parameter.getMaximum())
+                .withStepSize(parameter.getStepSize()).withPattern(pattern == null ? parameter.getPattern() : pattern)
                 .withRequired(parameter.isRequired()).withReadOnly(parameter.isReadOnly())
                 .withMultiple(parameter.isMultiple()).withContext(parameter.getContext())
-                .withDefault(parameter.getDefault()).withLabel(label).withDescription(description).withOptions(options)
+                .withDefault(parameter.getDefault()).withLabel(label == null ? parameter.getLabel() : label)
+                .withDescription(description == null ? parameter.getDescription() : description)
+                .withOptions(options == null || options.isEmpty() ? parameter.getOptions() : options)
                 .withFilterCriteria(parameter.getFilterCriteria()).withGroupName(parameter.getGroupName())
                 .withAdvanced(parameter.isAdvanced()).withVerify(parameter.isVerifyable())
                 .withLimitToOptions(parameter.getLimitToOptions()).withMultipleLimit(parameter.getMultipleLimit())
-                .withUnit(parameter.getUnit()).withUnitLabel(unitLabel).build();
-
-        return localizedParameter;
+                .withUnit(parameter.getUnit()).withUnitLabel(unitLabel == null ? parameter.getUnitLabel() : unitLabel)
+                .build();
     }
 
     /**
@@ -180,10 +181,8 @@ public class ConfigI18nLocalizationService {
         final String description = configDescriptionGroupI18nUtil.getGroupDescription(bundle, configDescriptionURI,
                 name, group.getDescription(), locale);
 
-        final ConfigDescriptionParameterGroup localizedGroup = new ConfigDescriptionParameterGroup(name,
-                group.getContext(), group.isAdvanced(), label, description);
-
-        return localizedGroup;
+        return new ConfigDescriptionParameterGroup(name, group.getContext(), group.isAdvanced(),
+                label == null ? group.getLabel() : label, description == null ? group.getDescription() : description);
     }
 
     /**
@@ -205,12 +204,10 @@ public class ConfigI18nLocalizationService {
 
         final List<ParameterOption> localizedOptions = new ArrayList<>();
         for (final ParameterOption option : originalOptions) {
+            final String label = configDescriptionI18nUtil.getParameterOptionLabel(bundle, configDescriptionURI,
+                    parameterName, option.getValue(), option.getLabel(), locale);
 
-            final String localizedLabel = configDescriptionI18nUtil.getParameterOptionLabel(bundle,
-                    configDescriptionURI, parameterName, /* key */option.getValue(), /* fallback */option.getLabel(),
-                    locale);
-            final ParameterOption localizedOption = new ParameterOption(option.getValue(), localizedLabel);
-            localizedOptions.add(localizedOption);
+            localizedOptions.add(new ParameterOption(option.getValue(), label == null ? option.getLabel() : label));
         }
         return localizedOptions;
     }

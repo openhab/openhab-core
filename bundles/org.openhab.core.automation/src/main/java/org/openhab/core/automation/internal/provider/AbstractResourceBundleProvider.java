@@ -384,6 +384,7 @@ public abstract class AbstractResourceBundleProvider<E> {
                         .collect(Collectors.toList());
             } catch (URISyntaxException e) {
                 logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);
+                return config;
             }
         }
         return Collections.emptyList();

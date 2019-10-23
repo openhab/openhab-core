@@ -88,15 +88,18 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
                 defModuleType.getConfigurationDescriptions(), ModuleTypeI18nUtil.MODULE_TYPE, uid, bundle, locale);
         if (defModuleType instanceof ActionType) {
             return createLocalizedActionType((ActionType) defModuleType, bundle, uid, locale,
-                    lconfigDescriptionParameters, llabel, ldescription);
+                    lconfigDescriptionParameters, llabel == null ? defModuleType.getLabel() : llabel,
+                    ldescription == null ? defModuleType.getDescription() : ldescription);
         }
         if (defModuleType instanceof ConditionType) {
             return createLocalizedConditionType((ConditionType) defModuleType, bundle, uid, locale,
-                    lconfigDescriptionParameters, llabel, ldescription);
+                    lconfigDescriptionParameters, llabel == null ? defModuleType.getLabel() : llabel,
+                    ldescription == null ? defModuleType.getDescription() : ldescription);
         }
         if (defModuleType instanceof TriggerType) {
             return createLocalizedTriggerType((TriggerType) defModuleType, bundle, uid, locale,
-                    lconfigDescriptionParameters, llabel, ldescription);
+                    lconfigDescriptionParameters, llabel != null ? llabel : defModuleType.getLabel(),
+                    ldescription == null ? defModuleType.getDescription() : ldescription);
         }
         return null;
     }
