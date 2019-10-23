@@ -15,12 +15,12 @@ package org.openhab.core.automation.internal.module.handler;
 import java.text.MessageFormat;
 
 import org.eclipse.smarthome.core.scheduler.CronScheduler;
+import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
 import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler implements
         String time = module.getConfiguration().get(CFG_TIME).toString();
         try {
             String[] parts = time.split(":");
-            expression = MessageFormat.format("* {1} {0} * * *", Integer.parseInt(parts[0]),
+            expression = MessageFormat.format("0 {1} {0} * * *", Integer.parseInt(parts[0]),
                     Integer.parseInt(parts[1]));
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new IllegalArgumentException("'time' parameter '" + time + "' is not in valid format 'hh:mm'.", e);
