@@ -67,6 +67,7 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
         implements RuleTemplateProvider {
 
     private final RuleTemplateI18nUtil ruleTemplateI18nUtil;
+    private final ModuleI18nUtil moduleI18nUtil;
 
     /**
      * This constructor is responsible for initializing the path to resources and tracking the managing service of the
@@ -78,6 +79,7 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
     public TemplateResourceBundleProvider(final @Reference TranslationProvider i18nProvider) {
         super(ROOT_DIRECTORY + "/templates/");
         this.ruleTemplateI18nUtil = new RuleTemplateI18nUtil(i18nProvider);
+        this.moduleI18nUtil = new ModuleI18nUtil(i18nProvider);
     }
 
     @Override
@@ -178,12 +180,12 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
             List<ConfigDescriptionParameter> lconfigDescriptions = getLocalizedConfigurationDescription(i18nProvider,
                     defTemplate.getConfigurationDescriptions(), bundle, uid, RuleTemplateI18nUtil.RULE_TEMPLATE,
                     locale);
-            List<Action> lactions = ModuleI18nUtil.getLocalizedModules(i18nProvider, defTemplate.getActions(), bundle,
-                    uid, RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
-            List<Condition> lconditions = ModuleI18nUtil.getLocalizedModules(i18nProvider, defTemplate.getConditions(),
-                    bundle, uid, RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
-            List<Trigger> ltriggers = ModuleI18nUtil.getLocalizedModules(i18nProvider, defTemplate.getTriggers(),
-                    bundle, uid, RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
+            List<Action> lactions = moduleI18nUtil.getLocalizedModules(defTemplate.getActions(), bundle, uid,
+                    RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
+            List<Condition> lconditions = moduleI18nUtil.getLocalizedModules(defTemplate.getConditions(), bundle, uid,
+                    RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
+            List<Trigger> ltriggers = moduleI18nUtil.getLocalizedModules(defTemplate.getTriggers(), bundle, uid,
+                    RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
             return new RuleTemplate(uid, llabel, ldescription, defTemplate.getTags(), ltriggers, lconditions, lactions,
                     lconfigDescriptions, defTemplate.getVisibility());
         }
