@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.openhab.core.automation.module.provider.i18n.ModuleTypeI18nService;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.type.ModuleType;
@@ -90,17 +89,6 @@ public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProv
     @Override
     protected void removeParser(Parser<ModuleType> parser, Map<String, String> properties) {
         super.removeParser(parser, properties);
-    }
-
-    @Override
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        super.setTranslationProvider(i18nProvider);
-    }
-
-    @Override
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        super.unsetTranslationProvider(i18nProvider);
     }
 
     @Override

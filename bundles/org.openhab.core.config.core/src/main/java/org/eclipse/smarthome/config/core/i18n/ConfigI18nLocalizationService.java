@@ -98,6 +98,20 @@ public class ConfigI18nLocalizationService {
             final ConfigDescription configDescription, final ConfigDescriptionParameter parameter,
             final @Nullable Locale locale) {
         final URI configDescriptionURI = configDescription.getUID();
+        return getLocalizedConfigDescriptionParameter(bundle, configDescriptionURI, parameter, locale);
+    }
+
+    /**
+     * Localize a config description parameter.
+     *
+     * @param bundle the bundle the i18n resources are located
+     * @param configDescriptionURI the config description URI
+     * @param parameter the parameter that should be localized
+     * @param locale the locale it should be localized to
+     * @return a localized parameter on success, a non-localized one on error (e.g. no translation is found).
+     */
+    public ConfigDescriptionParameter getLocalizedConfigDescriptionParameter(final Bundle bundle,
+            final URI configDescriptionURI, final ConfigDescriptionParameter parameter, final @Nullable Locale locale) {
         final String parameterName = parameter.getName();
 
         final String label = configDescriptionI18nUtil.getParameterLabel(bundle, configDescriptionURI, parameterName,
@@ -142,6 +156,21 @@ public class ConfigI18nLocalizationService {
             final ConfigDescription configDescription, final ConfigDescriptionParameterGroup group,
             final @Nullable Locale locale) {
         final URI configDescriptionURI = configDescription.getUID();
+        return getLocalizedConfigDescriptionGroup(bundle, configDescriptionURI, group, locale);
+    }
+
+    /**
+     * Localize a config description parameter group.
+     *
+     * @param bundle the bundle the i18n resources are located
+     * @param configDescriptionURI the config description URI
+     * @param group the parameter group that should be localized
+     * @param locale the locale it should be localized to
+     * @return a localized parameter group on success, a non-localized one on error (e.g. no translation is found).
+     */
+    public ConfigDescriptionParameterGroup getLocalizedConfigDescriptionGroup(final Bundle bundle,
+            final URI configDescriptionURI, final ConfigDescriptionParameterGroup group,
+            final @Nullable Locale locale) {
         final String name = group.getName();
 
         final String label = configDescriptionGroupI18nUtil.getGroupLabel(bundle, configDescriptionURI, name,

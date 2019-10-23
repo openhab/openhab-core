@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
+import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
@@ -76,8 +77,10 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      */
     @Activate
-    public TemplateResourceBundleProvider(final @Reference TranslationProvider i18nProvider) {
+    public TemplateResourceBundleProvider(final @Reference ConfigI18nLocalizationService configI18nService,
+            final @Reference TranslationProvider i18nProvider) {
         super(ROOT_DIRECTORY + "/templates/");
+        this.configI18nService = configI18nService;
         this.ruleTemplateI18nUtil = new RuleTemplateI18nUtil(i18nProvider);
         this.moduleI18nUtil = new ModuleI18nUtil(i18nProvider);
     }
@@ -103,17 +106,6 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
     @Override
     protected void removeParser(Parser<RuleTemplate> parser, Map<String, String> properties) {
         super.removeParser(parser, properties);
-    }
-
-    @Override
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        super.setTranslationProvider(i18nProvider);
-    }
-
-    @Override
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        super.unsetTranslationProvider(i18nProvider);
     }
 
     @Override
@@ -166,7 +158,7 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @return the localized {@link Template}.
      */
     private @Nullable RuleTemplate getPerLocale(@Nullable RuleTemplate defTemplate, @Nullable Locale locale) {
-        if (locale == null || defTemplate == null || i18nProvider == null) {
+        if (locale == null || defTemplate == null) {
             return defTemplate;
         }
         String uid = defTemplate.getUID();
@@ -177,7 +169,7 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
                     locale);
             String ldescription = ruleTemplateI18nUtil.getLocalizedRuleTemplateDescription(bundle, uid,
                     defTemplate.getDescription(), locale);
-            List<ConfigDescriptionParameter> lconfigDescriptions = getLocalizedConfigurationDescription(i18nProvider,
+            List<ConfigDescriptionParameter> lconfigDescriptions = getLocalizedConfigurationDescription(
                     defTemplate.getConfigurationDescriptions(), bundle, uid, RuleTemplateI18nUtil.RULE_TEMPLATE,
                     locale);
             List<Action> lactions = moduleI18nUtil.getLocalizedModules(defTemplate.getActions(), bundle, uid,

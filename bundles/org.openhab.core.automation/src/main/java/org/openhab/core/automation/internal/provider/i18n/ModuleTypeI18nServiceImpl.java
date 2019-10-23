@@ -54,18 +54,14 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
 
     private final Logger logger = LoggerFactory.getLogger(ModuleTypeI18nServiceImpl.class);
 
-    /**
-     * This field holds a reference to the service instance for internationalization support within the platform.
-     */
-    private final ConfigI18nLocalizationService localizationService;
-
+    private final ConfigI18nLocalizationService configI18nService;
     private final ModuleTypeI18nUtil moduleTypeI18nUtil;
     private final ModuleI18nUtil moduleI18nUtil;
 
     @Activate
-    public ModuleTypeI18nServiceImpl(final @Reference TranslationProvider i18nProvider,
-            final @Reference ConfigI18nLocalizationService localizationService) {
-        this.localizationService = localizationService;
+    public ModuleTypeI18nServiceImpl(final @Reference ConfigI18nLocalizationService configI18nService,
+            final @Reference TranslationProvider i18nProvider) {
+        this.configI18nService = configI18nService;
         this.moduleTypeI18nUtil = new ModuleTypeI18nUtil(i18nProvider);
         this.moduleI18nUtil = new ModuleI18nUtil(i18nProvider);
     }
@@ -109,7 +105,7 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
             List<ConfigDescriptionParameter> parameters, String prefix, String uid, Bundle bundle,
             @Nullable Locale locale) {
         try {
-            return localizationService
+            return configI18nService
                     .getLocalizedConfigDescription(bundle,
                             new ConfigDescription(new URI(prefix + ":" + uid + ".name"), parameters), locale)
                     .getParameters();
