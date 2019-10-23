@@ -60,11 +60,14 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
     private final TranslationProvider i18nProvider;
     private final ConfigI18nLocalizationService localizationService;
 
+    private final ModuleTypeI18nUtil moduleTypeI18nUtil;
+
     @Activate
     public ModuleTypeI18nServiceImpl(final @Reference TranslationProvider i18nProvider,
             final @Reference ConfigI18nLocalizationService localizationService) {
         this.i18nProvider = i18nProvider;
         this.localizationService = localizationService;
+        this.moduleTypeI18nUtil = new ModuleTypeI18nUtil(i18nProvider);
     }
 
     /**
@@ -81,9 +84,8 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
             return defModuleType;
         }
         String uid = defModuleType.getUID();
-        String llabel = ModuleTypeI18nUtil.getLocalizedModuleTypeLabel(i18nProvider, bundle, uid,
-                defModuleType.getLabel(), locale);
-        String ldescription = ModuleTypeI18nUtil.getLocalizedModuleTypeDescription(i18nProvider, bundle, uid,
+        String llabel = moduleTypeI18nUtil.getLocalizedModuleTypeLabel(bundle, uid, defModuleType.getLabel(), locale);
+        String ldescription = moduleTypeI18nUtil.getLocalizedModuleTypeDescription(bundle, uid,
                 defModuleType.getDescription(), locale);
 
         List<ConfigDescriptionParameter> lconfigDescriptionParameters = getLocalizedConfigDescriptionParameters(
@@ -132,10 +134,8 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
     private @Nullable ActionType createLocalizedActionType(ActionType at, Bundle bundle, String moduleTypeUID,
             @Nullable Locale locale, @Nullable List<ConfigDescriptionParameter> lconfigDescriptions,
             @Nullable String llabel, @Nullable String ldescription) {
-        List<Input> inputs = ModuleTypeI18nUtil.getLocalizedInputs(i18nProvider, at.getInputs(), bundle, moduleTypeUID,
-                locale);
-        List<Output> outputs = ModuleTypeI18nUtil.getLocalizedOutputs(i18nProvider, at.getOutputs(), bundle,
-                moduleTypeUID, locale);
+        List<Input> inputs = moduleTypeI18nUtil.getLocalizedInputs(at.getInputs(), bundle, moduleTypeUID, locale);
+        List<Output> outputs = moduleTypeI18nUtil.getLocalizedOutputs(at.getOutputs(), bundle, moduleTypeUID, locale);
         ActionType lat = null;
         if (at instanceof CompositeActionType) {
             List<Action> modules = ModuleI18nUtil.getLocalizedModules(i18nProvider,
@@ -165,8 +165,7 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
     private @Nullable ConditionType createLocalizedConditionType(ConditionType ct, Bundle bundle, String moduleTypeUID,
             @Nullable Locale locale, @Nullable List<ConfigDescriptionParameter> lconfigDescriptions,
             @Nullable String llabel, @Nullable String ldescription) {
-        List<Input> inputs = ModuleTypeI18nUtil.getLocalizedInputs(i18nProvider, ct.getInputs(), bundle, moduleTypeUID,
-                locale);
+        List<Input> inputs = moduleTypeI18nUtil.getLocalizedInputs(ct.getInputs(), bundle, moduleTypeUID, locale);
         ConditionType lct = null;
         if (ct instanceof CompositeConditionType) {
             List<Condition> modules = ModuleI18nUtil.getLocalizedModules(i18nProvider,
@@ -196,8 +195,7 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
     private @Nullable TriggerType createLocalizedTriggerType(TriggerType tt, Bundle bundle, String moduleTypeUID,
             @Nullable Locale locale, @Nullable List<ConfigDescriptionParameter> lconfigDescriptions,
             @Nullable String llabel, @Nullable String ldescription) {
-        List<Output> outputs = ModuleTypeI18nUtil.getLocalizedOutputs(i18nProvider, tt.getOutputs(), bundle,
-                moduleTypeUID, locale);
+        List<Output> outputs = moduleTypeI18nUtil.getLocalizedOutputs(tt.getOutputs(), bundle, moduleTypeUID, locale);
         TriggerType ltt = null;
         if (tt instanceof CompositeTriggerType) {
             List<Trigger> modules = ModuleI18nUtil.getLocalizedModules(i18nProvider,
