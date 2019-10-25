@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.binding.xml.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.xml.AbstractXmlConfigDescriptionProvider;
 import org.eclipse.smarthome.config.xml.osgi.XmlDocumentProvider;
@@ -36,14 +38,15 @@ import org.slf4j.LoggerFactory;
  *
  * @see BindingInfoXmlProviderFactory
  */
+@NonNullByDefault
 public class BindingInfoXmlProvider implements XmlDocumentProvider<BindingInfoXmlResult> {
 
     private Logger logger = LoggerFactory.getLogger(BindingInfoXmlProvider.class);
 
-    private Bundle bundle;
+    private final Bundle bundle;
 
-    private XmlBindingInfoProvider bindingInfoProvider;
-    private AbstractXmlConfigDescriptionProvider configDescriptionProvider;
+    private final XmlBindingInfoProvider bindingInfoProvider;
+    private final AbstractXmlConfigDescriptionProvider configDescriptionProvider;
 
     public BindingInfoXmlProvider(Bundle bundle, XmlBindingInfoProvider bindingInfoProvider,
             AbstractXmlConfigDescriptionProvider configDescriptionProvider) throws IllegalArgumentException {
@@ -60,26 +63,24 @@ public class BindingInfoXmlProvider implements XmlDocumentProvider<BindingInfoXm
         }
 
         this.bundle = bundle;
-
         this.bindingInfoProvider = bindingInfoProvider;
         this.configDescriptionProvider = configDescriptionProvider;
     }
 
     @Override
-    public synchronized void addingObject(BindingInfoXmlResult bindingInfoXmlResult) {
+    public synchronized void addingObject(@Nullable BindingInfoXmlResult bindingInfoXmlResult) {
         if (bindingInfoXmlResult != null) {
             ConfigDescription configDescription = bindingInfoXmlResult.getConfigDescription();
 
             if (configDescription != null) {
                 try {
-                    this.configDescriptionProvider.add(this.bundle, configDescription);
+                    configDescriptionProvider.add(bundle, configDescription);
                 } catch (Exception ex) {
-                    this.logger.error("Could not register ConfigDescription!", ex);
+                    logger.error("Could not register ConfigDescription!", ex);
                 }
             }
 
-            BindingInfo bindingInfo = bindingInfoXmlResult.getBindingInfo();
-            this.bindingInfoProvider.add(bundle, bindingInfo);
+            bindingInfoProvider.add(bundle, bindingInfoXmlResult.getBindingInfo());
         }
     }
 
@@ -93,5 +94,4 @@ public class BindingInfoXmlProvider implements XmlDocumentProvider<BindingInfoXm
         this.bindingInfoProvider.removeAll(bundle);
         this.configDescriptionProvider.removeAll(bundle);
     }
-
 }

@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.Identifiable;
 import org.eclipse.smarthome.core.i18n.LocalizedKey;
 import org.osgi.framework.Bundle;
@@ -48,7 +49,7 @@ public abstract class AbstractXmlBasedProvider<T_ID, T_OBJECT extends Identifiab
      * @param locale the target locale
      * @return a translated copy of the given object or <code>null</code> if translation was not possible.
      */
-    protected abstract T_OBJECT localize(Bundle bundle, T_OBJECT object, Locale locale);
+    protected abstract @Nullable T_OBJECT localize(Bundle bundle, T_OBJECT object, @Nullable Locale locale);
 
     /**
      * Adds an object to the internal list associated with the specified module.
@@ -104,7 +105,7 @@ public abstract class AbstractXmlBasedProvider<T_ID, T_OBJECT extends Identifiab
      * @param locale the locale
      * @return the object if found, <code>null</code> otherwise
      */
-    protected final T_OBJECT get(T_ID key, Locale locale) {
+    protected final @Nullable T_OBJECT get(T_ID key, @Nullable Locale locale) {
         for (Entry<Bundle, List<T_OBJECT>> objects : bundleObjectMap.entrySet()) {
             for (T_OBJECT object : objects.getValue()) {
                 if (key.equals(object.getUID())) {
@@ -121,7 +122,7 @@ public abstract class AbstractXmlBasedProvider<T_ID, T_OBJECT extends Identifiab
      * @param locale the locale
      * @return a collection containing all available objects. Never <code>null</code>
      */
-    protected final synchronized Collection<T_OBJECT> getAll(Locale locale) {
+    protected final synchronized Collection<T_OBJECT> getAll(@Nullable Locale locale) {
         List<T_OBJECT> ret = new LinkedList<>();
         Collection<Entry<Bundle, List<T_OBJECT>>> objectList = bundleObjectMap.entrySet();
         for (Entry<Bundle, List<T_OBJECT>> objects : objectList) {
@@ -164,7 +165,7 @@ public abstract class AbstractXmlBasedProvider<T_ID, T_OBJECT extends Identifiab
         }
     }
 
-    private T_OBJECT acquireLocalizedObject(Bundle bundle, T_OBJECT object, Locale locale) {
+    private T_OBJECT acquireLocalizedObject(Bundle bundle, T_OBJECT object, @Nullable Locale locale) {
         final LocalizedKey localizedKey = getLocalizedKey(object, locale);
 
         final T_OBJECT cacheEntry = localizedObjectCache.get(localizedKey);
@@ -181,7 +182,7 @@ public abstract class AbstractXmlBasedProvider<T_ID, T_OBJECT extends Identifiab
         }
     }
 
-    private LocalizedKey getLocalizedKey(T_OBJECT object, Locale locale) {
+    private LocalizedKey getLocalizedKey(T_OBJECT object, @Nullable Locale locale) {
         return new LocalizedKey(object.getUID(), locale != null ? locale.toLanguageTag() : null);
     }
 

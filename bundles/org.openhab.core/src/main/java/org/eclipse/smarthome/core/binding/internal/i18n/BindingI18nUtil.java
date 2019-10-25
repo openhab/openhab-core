@@ -10,10 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.i18n;
+package org.eclipse.smarthome.core.binding.internal.i18n;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.i18n.I18nUtil;
+import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 
 /**
@@ -23,6 +27,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 public class BindingI18nUtil {
 
     private final TranslationProvider i18nProvider;
@@ -31,20 +36,18 @@ public class BindingI18nUtil {
         this.i18nProvider = i18nProvider;
     }
 
-    public String getDescription(Bundle bundle, String bindingId, String defaultDescription, Locale locale) {
+    public @Nullable String getDescription(Bundle bundle, String bindingId, @Nullable String defaultDescription,
+            @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription, () -> inferKey(bindingId, "description"));
-
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
     }
 
-    public String getName(Bundle bundle, String bindingId, String defaultLabel, Locale locale) {
+    public @Nullable String getName(Bundle bundle, String bindingId, String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(bindingId, "name"));
-
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
     private String inferKey(String bindingId, String lastSegment) {
         return "binding." + bindingId + "." + lastSegment;
     }
-
 }

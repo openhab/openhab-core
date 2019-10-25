@@ -12,6 +12,7 @@
  */
 package org.eclipse.smarthome.config.xml.osgi;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.framework.Bundle;
 
 /**
@@ -27,6 +28,7 @@ import org.osgi.framework.Bundle;
  * @param <T> the result type of the conversion
  * @see XmlDocumentProvider
  */
+@NonNullByDefault
 public interface XmlDocumentProviderFactory<T> {
 
     /**
@@ -37,5 +39,4 @@ public interface XmlDocumentProviderFactory<T> {
      * @return the created provider for the specified module (must not be null)
      */
     XmlDocumentProvider<T> createDocumentProvider(Bundle bundle);
-
 }

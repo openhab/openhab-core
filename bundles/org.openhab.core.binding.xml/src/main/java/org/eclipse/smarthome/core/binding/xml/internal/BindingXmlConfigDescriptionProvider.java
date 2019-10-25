@@ -12,10 +12,12 @@
  */
 package org.eclipse.smarthome.core.binding.xml.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
 import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
 import org.eclipse.smarthome.config.xml.AbstractXmlConfigDescriptionProvider;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -25,22 +27,18 @@ import org.osgi.service.component.annotations.Reference;
  * @author Simon Kaufmann - Initial contribution
  */
 @Component(service = ConfigDescriptionProvider.class, immediate = true, property = { "esh.scope=core.xml.binding" })
+@NonNullByDefault
 public class BindingXmlConfigDescriptionProvider extends AbstractXmlConfigDescriptionProvider {
 
-    private ConfigI18nLocalizationService configI18nLocalizerService;
+    private final ConfigI18nLocalizationService configI18nService;
 
-    @Reference
-    public void setConfigI18nLocalizerService(ConfigI18nLocalizationService configI18nLocalizerService) {
-        this.configI18nLocalizerService = configI18nLocalizerService;
-    }
-
-    public void unsetConfigI18nLocalizerService(ConfigI18nLocalizationService configI18nLocalizerService) {
-        this.configI18nLocalizerService = null;
+    @Activate
+    public BindingXmlConfigDescriptionProvider(final @Reference ConfigI18nLocalizationService configI18nService) {
+        this.configI18nService = configI18nService;
     }
 
     @Override
     protected ConfigI18nLocalizationService getConfigI18nLocalizerService() {
-        return configI18nLocalizerService;
+        return configI18nService;
     }
-
 }

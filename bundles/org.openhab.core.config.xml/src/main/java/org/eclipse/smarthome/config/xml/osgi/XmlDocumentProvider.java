@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.config.xml.osgi;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.xml.internal.ConfigDescriptionReader;
 
 /**
@@ -24,6 +26,7 @@ import org.eclipse.smarthome.config.xml.internal.ConfigDescriptionReader;
  *
  * @param <T> the result type of the conversion
  */
+@NonNullByDefault
 public interface XmlDocumentProvider<T> {
 
     /**
@@ -31,7 +34,7 @@ public interface XmlDocumentProvider<T> {
      *
      * @param object the result object to be processed (could be null)
      */
-    void addingObject(T object);
+    void addingObject(@Nullable T object);
 
     /**
      * Signals that all available result objects from the XML processing of the
@@ -43,5 +46,4 @@ public interface XmlDocumentProvider<T> {
      * Releases any added result objects from the XML processing.
      */
     void release();
-
 }

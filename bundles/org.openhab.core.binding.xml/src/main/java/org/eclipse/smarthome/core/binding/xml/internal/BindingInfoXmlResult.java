@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.core.binding.xml.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
 import org.eclipse.smarthome.core.binding.BindingInfo;
@@ -24,12 +26,13 @@ import org.eclipse.smarthome.core.binding.BindingInfo;
  *
  * @author Michael Grammling - Initial contribution
  */
+@NonNullByDefault
 public class BindingInfoXmlResult {
 
     private BindingInfo bindingInfo;
-    private ConfigDescription configDescription;
+    private @Nullable ConfigDescription configDescription;
 
-    public BindingInfoXmlResult(BindingInfo bindingInfo, ConfigDescription configDescription)
+    public BindingInfoXmlResult(BindingInfo bindingInfo, @Nullable ConfigDescription configDescription)
             throws IllegalArgumentException {
         if (bindingInfo == null) {
             throw new IllegalArgumentException("The BindingInfo must not be null!");
@@ -40,16 +43,15 @@ public class BindingInfoXmlResult {
     }
 
     public BindingInfo getBindingInfo() {
-        return this.bindingInfo;
+        return bindingInfo;
     }
 
-    public ConfigDescription getConfigDescription() {
-        return this.configDescription;
+    public @Nullable ConfigDescription getConfigDescription() {
+        return configDescription;
     }
 
     @Override
     public String toString() {
         return "BindingInfoXmlResult [bindingInfo=" + bindingInfo + ", configDescription=" + configDescription + "]";
     }
-
 }
