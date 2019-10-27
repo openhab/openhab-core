@@ -57,7 +57,7 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
 
     private final BindingI18nLocalizationService bindingI18nService;
     private AbstractXmlConfigDescriptionProvider configDescriptionProvider;
-    private XmlDocumentBundleTracker<BindingInfoXmlResult> bindingInfoTracker;
+    private @Nullable XmlDocumentBundleTracker<BindingInfoXmlResult> bindingInfoTracker;
     private final ReadyService readyService;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(XmlDocumentBundleTracker.THREAD_POOL_NAME);
@@ -82,12 +82,16 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
 
     @Deactivate
     public void deactivate(ComponentContext componentContext) {
-        if (trackerJob != null && !trackerJob.isDone()) {
-            trackerJob.cancel(true);
+        Future<?> localTrackerJob = trackerJob;
+        if (localTrackerJob != null && !localTrackerJob.isDone()) {
+            localTrackerJob.cancel(true);
             trackerJob = null;
         }
-        bindingInfoTracker.close();
-        bindingInfoTracker = null;
+        XmlDocumentBundleTracker<BindingInfoXmlResult> localBindingInfoTracker = bindingInfoTracker;
+        if (localBindingInfoTracker != null) {
+            localBindingInfoTracker.close();
+            bindingInfoTracker = null;
+        }
     }
 
     @Override
