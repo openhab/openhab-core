@@ -15,6 +15,8 @@ package org.openhab.core.automation.integration.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.smarthome.core.storage.StorageService;
@@ -40,8 +42,14 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("deprecation")
 public class HostFragmentSupportTest extends JavaOSGiTest {
 
+    private static final Locale BULGARIAN = new Locale("bg");
+    private static final Locale DEFAULT = Locale.getDefault();
+    private static final Locale GERMAN = Locale.GERMANY;
+
+    private static final List<Locale> LOCALES = Arrays.asList(BULGARIAN, DEFAULT, GERMAN);
+
     private final Logger logger = LoggerFactory.getLogger(HostFragmentSupportTest.class);
-    private ModuleTypeRegistry moduleTypeRegistry;
+    private ModuleTypeRegistry registry;
     private PackageAdmin pkgAdmin;
 
     private static final String EXT = ".jar";
@@ -92,11 +100,11 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         registerVolatileStorageService();
 
         StorageService storageService = getService(StorageService.class);
-        moduleTypeRegistry = getService(ModuleTypeRegistry.class);
+        registry = getService(ModuleTypeRegistry.class);
         pkgAdmin = getService(PackageAdmin.class);
         waitForAssert(() -> {
             assertThat(storageService, is(notNullValue()));
-            assertThat(moduleTypeRegistry, is(notNullValue()));
+            assertThat(registry, is(notNullValue()));
             assertThat(pkgAdmin, is(notNullValue()));
         }, 9000, 1000);
 
@@ -111,6 +119,13 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
     @Override
     protected void registerVolatileStorageService() {
         registerService(AutomationIntegrationJsonTest.VOLATILE_STORAGE_SERVICE);
+    }
+
+    private void assertThatModuleAndLocalizationsAreNotNull(String uid) {
+        assertThat(registry.get(uid), is(notNullValue()));
+        for (Locale locale : LOCALES) {
+            assertThat(registry.get(uid, locale), is(notNullValue()));
+        }
     }
 
     @SuppressWarnings("null")
@@ -133,8 +148,8 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         // assert that the host and fragment resources are not loaded
         waitForAssert(() -> {
             assertThat(fragment.getState(), is(Bundle.INSTALLED));
-            assertThat(moduleTypeRegistry.get(trigger2), is(nullValue()));
-            assertThat(moduleTypeRegistry.get(condition2), is(nullValue()));
+            assertThat(registry.get(trigger2), is(nullValue()));
+            assertThat(registry.get(condition2), is(nullValue()));
         }, 3000, 200);
 
         // then install the host
@@ -147,31 +162,31 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(host.getState(), is(Bundle.ACTIVE));
             assertThat(fragment.getState(), is(Bundle.RESOLVED));
-            assertThat(moduleTypeRegistry.get(trigger1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger1).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger1, new Locale("bg")).getLabel(), is(trigger1LabelBG));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.GERMANY).getLabel(), is(trigger1LabelDE));
-            assertThat(moduleTypeRegistry.get(condition1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition1).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition1, new Locale("bg")).getLabel(), is(condition1LabelBG));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.GERMANY).getLabel(), is(condition1LabelDE));
-            assertThat(moduleTypeRegistry.get(action1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(action1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(action1).getLabel()));
-            assertThat(moduleTypeRegistry.get(action1, new Locale("bg")).getLabel(), is(action1LabelBG));
-            assertThat(moduleTypeRegistry.get(action1, Locale.GERMANY).getLabel(), is(action1LabelDE));
-            assertThat(moduleTypeRegistry.get(trigger2), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger2, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger2).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger2, new Locale("bg")).getLabel(), is(trigger2LabelBG));
-            assertThat(moduleTypeRegistry.get(trigger2, Locale.GERMANY).getLabel(), is(trigger2LabelDE));
-            assertThat(moduleTypeRegistry.get(condition2), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition2, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition2).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition2, new Locale("bg")).getLabel(), is(condition2LabelBG));
-            assertThat(moduleTypeRegistry.get(condition2, Locale.GERMANY).getLabel(), is(condition2LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(trigger1);
+            assertThat(registry.get(trigger1, DEFAULT).getLabel(), is(registry.get(trigger1).getLabel()));
+            assertThat(registry.get(trigger1, BULGARIAN).getLabel(), is(trigger1LabelBG));
+            assertThat(registry.get(trigger1, GERMAN).getLabel(), is(trigger1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition1);
+            assertThat(registry.get(condition1, DEFAULT).getLabel(), is(registry.get(condition1).getLabel()));
+            assertThat(registry.get(condition1, BULGARIAN).getLabel(), is(condition1LabelBG));
+            assertThat(registry.get(condition1, GERMAN).getLabel(), is(condition1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(action1);
+            assertThat(registry.get(action1, DEFAULT).getLabel(), is(registry.get(action1).getLabel()));
+            assertThat(registry.get(action1, BULGARIAN).getLabel(), is(action1LabelBG));
+            assertThat(registry.get(action1, GERMAN).getLabel(), is(action1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(trigger2);
+            assertThat(registry.get(trigger2, DEFAULT).getLabel(), is(registry.get(trigger2).getLabel()));
+            assertThat(registry.get(trigger2, BULGARIAN).getLabel(), is(trigger2LabelBG));
+            assertThat(registry.get(trigger2, GERMAN).getLabel(), is(trigger2LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition2);
+            assertThat(registry.get(condition2, DEFAULT).getLabel(), is(registry.get(condition2).getLabel()));
+            assertThat(registry.get(condition2, BULGARIAN).getLabel(), is(condition2LabelBG));
+            assertThat(registry.get(condition2, GERMAN).getLabel(), is(condition2LabelDE));
         }, 10000, 200);
 
         // first uninstall the fragment
@@ -188,23 +203,23 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
 
         waitForAssert(() -> {
             // assert that the host is updated and only its resources are available
-            assertThat(moduleTypeRegistry.get(trigger1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger1).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger1, new Locale("bg")).getLabel(), is(trigger1LabelBG));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.GERMANY).getLabel(), is(trigger1LabelDE));
-            assertThat(moduleTypeRegistry.get(condition1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition1).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition1, new Locale("bg")).getLabel(), is(condition1LabelBG));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.GERMANY).getLabel(), is(condition1LabelDE));
-            assertThat(moduleTypeRegistry.get(action1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(action1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(action1).getLabel()));
-            assertThat(moduleTypeRegistry.get(action1, new Locale("bg")).getLabel(), is(action1LabelBG));
-            assertThat(moduleTypeRegistry.get(action1, Locale.GERMANY).getLabel(), is(action1LabelDE));
-            assertThat(moduleTypeRegistry.get(trigger2), is(nullValue()));
-            assertThat(moduleTypeRegistry.get(condition2), is(nullValue()));
+            assertThatModuleAndLocalizationsAreNotNull(trigger1);
+            assertThat(registry.get(trigger1, DEFAULT).getLabel(), is(registry.get(trigger1).getLabel()));
+            assertThat(registry.get(trigger1, BULGARIAN).getLabel(), is(trigger1LabelBG));
+            assertThat(registry.get(trigger1, GERMAN).getLabel(), is(trigger1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition1);
+            assertThat(registry.get(condition1, DEFAULT).getLabel(), is(registry.get(condition1).getLabel()));
+            assertThat(registry.get(condition1, BULGARIAN).getLabel(), is(condition1LabelBG));
+            assertThat(registry.get(condition1, GERMAN).getLabel(), is(condition1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(action1);
+            assertThat(registry.get(action1, DEFAULT).getLabel(), is(registry.get(action1).getLabel()));
+            assertThat(registry.get(action1, BULGARIAN).getLabel(), is(action1LabelBG));
+            assertThat(registry.get(action1, GERMAN).getLabel(), is(action1LabelDE));
+
+            assertThat(registry.get(trigger2), is(nullValue()));
+            assertThat(registry.get(condition2), is(nullValue()));
         }, 3000, 200);
 
         // then uninstall the host
@@ -213,9 +228,9 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         // assert that the host resources also are removed
         waitForAssert(() -> {
             assertThat(host.getState(), is(Bundle.UNINSTALLED));
-            assertThat(moduleTypeRegistry.get(trigger1), is(nullValue()));
-            assertThat(moduleTypeRegistry.get(condition1), is(nullValue()));
-            assertThat(moduleTypeRegistry.get(action1), is(nullValue()));
+            assertThat(registry.get(trigger1), is(nullValue()));
+            assertThat(registry.get(condition1), is(nullValue()));
+            assertThat(registry.get(action1), is(nullValue()));
         }, 3000, 200);
     }
 
@@ -240,8 +255,8 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         // assert that the host and fragment resources are not loaded
         waitForAssert(() -> {
             assertThat(fragment.getState(), is(Bundle.INSTALLED));
-            assertThat(moduleTypeRegistry.get(trigger2), is(nullValue()));
-            assertThat(moduleTypeRegistry.get(condition2), is(nullValue()));
+            assertThat(registry.get(trigger2), is(nullValue()));
+            assertThat(registry.get(condition2), is(nullValue()));
         }, 3000, 200);
 
         // then install the host
@@ -254,31 +269,31 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(host.getState(), is(Bundle.ACTIVE));
             assertThat(fragment.getState(), is(Bundle.RESOLVED));
-            assertThat(moduleTypeRegistry.get(trigger1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger1).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger1, new Locale("bg")).getLabel(), is(trigger1LabelBG));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.GERMANY).getLabel(), is(trigger1LabelDE));
-            assertThat(moduleTypeRegistry.get(condition1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition1).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition1, new Locale("bg")).getLabel(), is(condition1LabelBG));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.GERMANY).getLabel(), is(condition1LabelDE));
-            assertThat(moduleTypeRegistry.get(action1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(action1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(action1).getLabel()));
-            assertThat(moduleTypeRegistry.get(action1, new Locale("bg")).getLabel(), is(action1LabelBG));
-            assertThat(moduleTypeRegistry.get(action1, Locale.GERMANY).getLabel(), is(action1LabelDE));
-            assertThat(moduleTypeRegistry.get(trigger2), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger2, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger2).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger2, new Locale("bg")).getLabel(), is(trigger2LabelBG));
-            assertThat(moduleTypeRegistry.get(trigger2, Locale.GERMANY).getLabel(), is(trigger2LabelDE));
-            assertThat(moduleTypeRegistry.get(condition2), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition2, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition2).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition2, new Locale("bg")).getLabel(), is(condition2LabelBG));
-            assertThat(moduleTypeRegistry.get(condition2, Locale.GERMANY).getLabel(), is(condition2LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(trigger1);
+            assertThat(registry.get(trigger1, DEFAULT).getLabel(), is(registry.get(trigger1).getLabel()));
+            assertThat(registry.get(trigger1, BULGARIAN).getLabel(), is(trigger1LabelBG));
+            assertThat(registry.get(trigger1, GERMAN).getLabel(), is(trigger1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition1);
+            assertThat(registry.get(condition1, DEFAULT).getLabel(), is(registry.get(condition1).getLabel()));
+            assertThat(registry.get(condition1, BULGARIAN).getLabel(), is(condition1LabelBG));
+            assertThat(registry.get(condition1, GERMAN).getLabel(), is(condition1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(action1);
+            assertThat(registry.get(action1, DEFAULT).getLabel(), is(registry.get(action1).getLabel()));
+            assertThat(registry.get(action1, BULGARIAN).getLabel(), is(action1LabelBG));
+            assertThat(registry.get(action1, GERMAN).getLabel(), is(action1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(trigger2);
+            assertThat(registry.get(trigger2, DEFAULT).getLabel(), is(registry.get(trigger2).getLabel()));
+            assertThat(registry.get(trigger2, BULGARIAN).getLabel(), is(trigger2LabelBG));
+            assertThat(registry.get(trigger2, GERMAN).getLabel(), is(trigger2LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition2);
+            assertThat(registry.get(condition2, DEFAULT).getLabel(), is(registry.get(condition2).getLabel()));
+            assertThat(registry.get(condition2, BULGARIAN).getLabel(), is(condition2LabelBG));
+            assertThat(registry.get(condition2, GERMAN).getLabel(), is(condition2LabelDE));
         }, 3000, 200);
 
         // first update the fragment
@@ -294,31 +309,31 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(host.getState(), is(Bundle.ACTIVE));
             assertThat(fragment.getState(), is(Bundle.RESOLVED));
-            assertThat(moduleTypeRegistry.get(trigger1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger1).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger1, new Locale("bg")).getLabel(), is(trigger1LabelBG));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.GERMANY).getLabel(), is(trigger1LabelDE));
-            assertThat(moduleTypeRegistry.get(condition1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition1).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition1, new Locale("bg")).getLabel(), is(condition1LabelBG));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.GERMANY).getLabel(), is(condition1LabelDE));
-            assertThat(moduleTypeRegistry.get(action1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(action1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(action1).getLabel()));
-            assertThat(moduleTypeRegistry.get(action1, new Locale("bg")).getLabel(), is(action1LabelBG));
-            assertThat(moduleTypeRegistry.get(action1, Locale.GERMANY).getLabel(), is(action1LabelDE));
-            assertThat(moduleTypeRegistry.get(trigger2), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger2, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger2).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger2, new Locale("bg")).getLabel(), is(trigger2LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(trigger2, Locale.GERMANY).getLabel(), is(trigger2LabelUpdatedDE));
-            assertThat(moduleTypeRegistry.get(condition2), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition2, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition2).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition2, new Locale("bg")).getLabel(), is(condition2LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(condition2, Locale.GERMANY).getLabel(), is(condition2LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(trigger1);
+            assertThat(registry.get(trigger1, DEFAULT).getLabel(), is(registry.get(trigger1).getLabel()));
+            assertThat(registry.get(trigger1, BULGARIAN).getLabel(), is(trigger1LabelBG));
+            assertThat(registry.get(trigger1, GERMAN).getLabel(), is(trigger1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition1);
+            assertThat(registry.get(condition1, DEFAULT).getLabel(), is(registry.get(condition1).getLabel()));
+            assertThat(registry.get(condition1, BULGARIAN).getLabel(), is(condition1LabelBG));
+            assertThat(registry.get(condition1, GERMAN).getLabel(), is(condition1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(action1);
+            assertThat(registry.get(action1, DEFAULT).getLabel(), is(registry.get(action1).getLabel()));
+            assertThat(registry.get(action1, BULGARIAN).getLabel(), is(action1LabelBG));
+            assertThat(registry.get(action1, GERMAN).getLabel(), is(action1LabelDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(trigger2);
+            assertThat(registry.get(trigger2, DEFAULT).getLabel(), is(registry.get(trigger2).getLabel()));
+            assertThat(registry.get(trigger2, BULGARIAN).getLabel(), is(trigger2LabelUpdatedBG));
+            assertThat(registry.get(trigger2, GERMAN).getLabel(), is(trigger2LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition2);
+            assertThat(registry.get(condition2, DEFAULT).getLabel(), is(registry.get(condition2).getLabel()));
+            assertThat(registry.get(condition2, BULGARIAN).getLabel(), is(condition2LabelUpdatedBG));
+            assertThat(registry.get(condition2, GERMAN).getLabel(), is(condition2LabelUpdatedDE));
         }, 3000, 200);
 
         // then update the host
@@ -333,31 +348,31 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(host.getState(), is(Bundle.ACTIVE));
             assertThat(fragment.getState(), is(Bundle.RESOLVED));
-            assertThat(moduleTypeRegistry.get(trigger1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger1).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger1, new Locale("bg")).getLabel(), is(trigger1LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.GERMANY).getLabel(), is(trigger1LabelUpdatedDE));
-            assertThat(moduleTypeRegistry.get(condition1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition1).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition1, new Locale("bg")).getLabel(), is(condition1LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.GERMANY).getLabel(), is(condition1LabelUpdatedDE));
-            assertThat(moduleTypeRegistry.get(action1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(action1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(action1).getLabel()));
-            assertThat(moduleTypeRegistry.get(action1, new Locale("bg")).getLabel(), is(action1LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(action1, Locale.GERMANY).getLabel(), is(action1LabelUpdatedDE));
-            assertThat(moduleTypeRegistry.get(trigger2), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger2, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger2).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger2, new Locale("bg")).getLabel(), is(trigger2LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(trigger2, Locale.GERMANY).getLabel(), is(trigger2LabelUpdatedDE));
-            assertThat(moduleTypeRegistry.get(condition2), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition2, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition2).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition2, new Locale("bg")).getLabel(), is(condition2LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(condition2, Locale.GERMANY).getLabel(), is(condition2LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(trigger1);
+            assertThat(registry.get(trigger1, DEFAULT).getLabel(), is(registry.get(trigger1).getLabel()));
+            assertThat(registry.get(trigger1, BULGARIAN).getLabel(), is(trigger1LabelUpdatedBG));
+            assertThat(registry.get(trigger1, GERMAN).getLabel(), is(trigger1LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition1);
+            assertThat(registry.get(condition1, DEFAULT).getLabel(), is(registry.get(condition1).getLabel()));
+            assertThat(registry.get(condition1, BULGARIAN).getLabel(), is(condition1LabelUpdatedBG));
+            assertThat(registry.get(condition1, GERMAN).getLabel(), is(condition1LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(action1);
+            assertThat(registry.get(action1, DEFAULT).getLabel(), is(registry.get(action1).getLabel()));
+            assertThat(registry.get(action1, BULGARIAN).getLabel(), is(action1LabelUpdatedBG));
+            assertThat(registry.get(action1, GERMAN).getLabel(), is(action1LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(trigger2);
+            assertThat(registry.get(trigger2, DEFAULT).getLabel(), is(registry.get(trigger2).getLabel()));
+            assertThat(registry.get(trigger2, BULGARIAN).getLabel(), is(trigger2LabelUpdatedBG));
+            assertThat(registry.get(trigger2, GERMAN).getLabel(), is(trigger2LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition2);
+            assertThat(registry.get(condition2, DEFAULT).getLabel(), is(registry.get(condition2).getLabel()));
+            assertThat(registry.get(condition2, BULGARIAN).getLabel(), is(condition2LabelUpdatedBG));
+            assertThat(registry.get(condition2, GERMAN).getLabel(), is(condition2LabelUpdatedDE));
         }, 3000, 200);
 
         // first uninstall the fragment
@@ -372,23 +387,23 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
 
         // assert that the host is updated and only its resources are available
         waitForAssert(() -> {
-            assertThat(moduleTypeRegistry.get(trigger1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(trigger1).getLabel()));
-            assertThat(moduleTypeRegistry.get(trigger1, new Locale("bg")).getLabel(), is(trigger1LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(trigger1, Locale.GERMANY).getLabel(), is(trigger1LabelUpdatedDE));
-            assertThat(moduleTypeRegistry.get(condition1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(condition1).getLabel()));
-            assertThat(moduleTypeRegistry.get(condition1, new Locale("bg")).getLabel(), is(condition1LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(condition1, Locale.GERMANY).getLabel(), is(condition1LabelUpdatedDE));
-            assertThat(moduleTypeRegistry.get(action1), is(notNullValue()));
-            assertThat(moduleTypeRegistry.get(action1, Locale.getDefault()).getLabel(),
-                    is(moduleTypeRegistry.get(action1).getLabel()));
-            assertThat(moduleTypeRegistry.get(action1, new Locale("bg")).getLabel(), is(action1LabelUpdatedBG));
-            assertThat(moduleTypeRegistry.get(action1, Locale.GERMANY).getLabel(), is(action1LabelUpdatedDE));
-            assertThat(moduleTypeRegistry.get(trigger2), is(nullValue()));
-            assertThat(moduleTypeRegistry.get(condition2), is(nullValue()));
+            assertThatModuleAndLocalizationsAreNotNull(trigger1);
+            assertThat(registry.get(trigger1, DEFAULT).getLabel(), is(registry.get(trigger1).getLabel()));
+            assertThat(registry.get(trigger1, BULGARIAN).getLabel(), is(trigger1LabelUpdatedBG));
+            assertThat(registry.get(trigger1, GERMAN).getLabel(), is(trigger1LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(condition1);
+            assertThat(registry.get(condition1, DEFAULT).getLabel(), is(registry.get(condition1).getLabel()));
+            assertThat(registry.get(condition1, BULGARIAN).getLabel(), is(condition1LabelUpdatedBG));
+            assertThat(registry.get(condition1, GERMAN).getLabel(), is(condition1LabelUpdatedDE));
+
+            assertThatModuleAndLocalizationsAreNotNull(action1);
+            assertThat(registry.get(action1, DEFAULT).getLabel(), is(registry.get(action1).getLabel()));
+            assertThat(registry.get(action1, BULGARIAN).getLabel(), is(action1LabelUpdatedBG));
+            assertThat(registry.get(action1, GERMAN).getLabel(), is(action1LabelUpdatedDE));
+
+            assertThat(registry.get(trigger2), is(nullValue()));
+            assertThat(registry.get(condition2), is(nullValue()));
         }, 3000, 200);
 
         // then uninstall the host
@@ -397,9 +412,9 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
 
         // assert that the host resources also are removed
         waitForAssert(() -> {
-            assertThat(moduleTypeRegistry.get(trigger1), is(nullValue()));
-            assertThat(moduleTypeRegistry.get(condition1), is(nullValue()));
-            assertThat(moduleTypeRegistry.get(action1), is(nullValue()));
+            assertThat(registry.get(trigger1), is(nullValue()));
+            assertThat(registry.get(condition1), is(nullValue()));
+            assertThat(registry.get(action1), is(nullValue()));
         }, 3000, 200);
     }
 
