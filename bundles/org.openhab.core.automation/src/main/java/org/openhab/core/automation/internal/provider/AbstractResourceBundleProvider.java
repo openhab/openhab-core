@@ -376,11 +376,12 @@ public abstract class AbstractResourceBundleProvider<E> {
     protected List<ConfigDescriptionParameter> getLocalizedConfigurationDescription(
             @Nullable List<ConfigDescriptionParameter> config, Bundle bundle, String uid, String prefix,
             @Nullable Locale locale) {
-        if (config != null && configI18nService != null) {
+        ConfigI18nLocalizationService localConfigI18nService = configI18nService;
+        if (config != null && localConfigI18nService != null) {
             try {
                 URI uri = new URI(prefix + ":" + uid + ".name");
                 return config.stream()
-                        .map(p -> configI18nService.getLocalizedConfigDescriptionParameter(bundle, uri, p, locale))
+                        .map(p -> localConfigI18nService.getLocalizedConfigDescriptionParameter(bundle, uri, p, locale))
                         .collect(Collectors.toList());
             } catch (URISyntaxException e) {
                 logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);
