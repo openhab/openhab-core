@@ -15,6 +15,7 @@ package org.eclipse.smarthome.core.thing.xml.internal;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.xml.AbstractXmlBasedProvider;
 import org.eclipse.smarthome.core.thing.UID;
 import org.eclipse.smarthome.core.thing.i18n.ChannelTypeI18nLocalizationService;
@@ -22,6 +23,7 @@ import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -37,35 +39,26 @@ import org.osgi.service.component.annotations.Reference;
 @Component(property = { "esh.scope=core.xml.channels" })
 public class XmlChannelTypeProvider extends AbstractXmlBasedProvider<UID, ChannelType> implements ChannelTypeProvider {
 
-    private ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
+    private final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
+
+    @Activate
+    public XmlChannelTypeProvider(
+            final @Reference ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
+        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
+    }
 
     @Override
-    public ChannelType getChannelType(ChannelTypeUID channelTypeUID, Locale locale) {
+    public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
         return get(channelTypeUID, locale);
     }
 
     @Override
-    public synchronized Collection<ChannelType> getChannelTypes(Locale locale) {
+    public synchronized Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         return getAll(locale);
     }
 
-    @Reference
-    public void setChannelTypeI18nLocalizationService(
-            final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = channelTypeI18nLocalizationService;
-    }
-
-    public void unsetChannelTypeI18nLocalizationService(
-            final ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService) {
-        this.channelTypeI18nLocalizationService = null;
-    }
-
     @Override
-    protected ChannelType localize(Bundle bundle, ChannelType channelType, Locale locale) {
-        if (channelTypeI18nLocalizationService == null) {
-            return null;
-        }
+    protected @Nullable ChannelType localize(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
         return channelTypeI18nLocalizationService.createLocalizedChannelType(bundle, channelType, locale);
     }
-
 }

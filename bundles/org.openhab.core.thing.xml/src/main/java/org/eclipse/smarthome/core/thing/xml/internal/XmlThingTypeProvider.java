@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
 import org.eclipse.smarthome.config.xml.AbstractXmlBasedProvider;
 import org.eclipse.smarthome.config.xml.AbstractXmlConfigDescriptionProvider;
@@ -60,24 +61,28 @@ public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingTyp
     private static final String XML_DIRECTORY = "/ESH-INF/thing/";
     public static final String READY_MARKER = "esh.xmlThingTypes";
 
-    private ThingTypeI18nLocalizationService thingTypeI18nLocalizationService;
-    private AbstractXmlConfigDescriptionProvider configDescriptionProvider;
+    private final ThingTypeI18nLocalizationService thingTypeI18nLocalizationService;
     private XmlChannelTypeProvider channelTypeProvider;
     private XmlChannelGroupTypeProvider channelGroupTypeProvider;
-
-    private XmlDocumentBundleTracker<List<?>> thingTypeTracker;
-    private ReadyService readyService;
-
+    private AbstractXmlConfigDescriptionProvider configDescriptionProvider;
+    private @Nullable XmlDocumentBundleTracker<List<?>> thingTypeTracker;
+    private final ReadyService readyService;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(XmlDocumentBundleTracker.THREAD_POOL_NAME);
-    private Future<?> trackerJob;
+    private @Nullable Future<?> trackerJob;
+
+    @Activate
+    public XmlThingTypeProvider(final @Reference ThingTypeI18nLocalizationService thingTypeI18nLocalizationService,
+            final @Reference ReadyService readyService) {
+        this.thingTypeI18nLocalizationService = thingTypeI18nLocalizationService;
+        this.readyService = readyService;
+    }
 
     @Activate
     protected void activate(BundleContext bundleContext) {
         XmlDocumentReader<List<?>> thingTypeReader = new ThingDescriptionReader();
         thingTypeTracker = new XmlDocumentBundleTracker<>(bundleContext, XML_DIRECTORY, thingTypeReader, this,
                 READY_MARKER, readyService);
-
         trackerJob = scheduler.submit(() -> {
             thingTypeTracker.open();
         });
@@ -85,33 +90,26 @@ public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingTyp
 
     @Deactivate
     protected void deactivate() {
-        if (trackerJob != null && !trackerJob.isDone()) {
-            trackerJob.cancel(true);
+        Future<?> localTrackerJob = trackerJob;
+        if (localTrackerJob != null && !localTrackerJob.isDone()) {
+            localTrackerJob.cancel(true);
             trackerJob = null;
         }
-        thingTypeTracker.close();
-        thingTypeTracker = null;
+        XmlDocumentBundleTracker<List<?>> localThingTypeTracker = thingTypeTracker;
+        if (localThingTypeTracker != null) {
+            localThingTypeTracker.close();
+            thingTypeTracker = null;
+        }
     }
 
     @Override
-    public ThingType getThingType(ThingTypeUID thingTypeUID, Locale locale) {
+    public @Nullable ThingType getThingType(ThingTypeUID thingTypeUID, @Nullable Locale locale) {
         return get(thingTypeUID, locale);
     }
 
     @Override
-    public synchronized Collection<ThingType> getThingTypes(Locale locale) {
+    public synchronized Collection<ThingType> getThingTypes(@Nullable Locale locale) {
         return getAll(locale);
-    }
-
-    @Reference
-    public void setThingTypeI18nLocalizationService(
-            final ThingTypeI18nLocalizationService thingTypeI18nLocalizationService) {
-        this.thingTypeI18nLocalizationService = thingTypeI18nLocalizationService;
-    }
-
-    public void unsetThingTypeI18nLocalizationService(
-            final ThingTypeI18nLocalizationService thingTypeI18nLocalizationService) {
-        this.thingTypeI18nLocalizationService = null;
     }
 
     @Reference(target = "(esh.scope=core.xml.thing)")
@@ -141,20 +139,8 @@ public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingTyp
         this.channelGroupTypeProvider = null;
     }
 
-    @Reference
-    public void setReadyService(ReadyService readyService) {
-        this.readyService = readyService;
-    }
-
-    public void unsetReadyService(ReadyService readyService) {
-        this.readyService = null;
-    }
-
     @Override
-    protected ThingType localize(Bundle bundle, ThingType thingType, Locale locale) {
-        if (thingTypeI18nLocalizationService == null) {
-            return null;
-        }
+    protected @Nullable ThingType localize(Bundle bundle, ThingType thingType, @Nullable Locale locale) {
         return thingTypeI18nLocalizationService.createLocalizedThingType(bundle, thingType, locale);
     }
 
@@ -163,5 +149,4 @@ public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingTyp
         return new ThingTypeXmlProvider(bundle, configDescriptionProvider, this, channelTypeProvider,
                 channelGroupTypeProvider);
     }
-
 }

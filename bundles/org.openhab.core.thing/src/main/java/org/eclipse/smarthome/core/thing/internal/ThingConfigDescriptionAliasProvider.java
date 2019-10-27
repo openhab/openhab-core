@@ -14,7 +14,6 @@ package org.eclipse.smarthome.core.thing.internal;
 
 import java.net.URI;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionAliasProvider;
@@ -78,7 +77,7 @@ public class ThingConfigDescriptionAliasProvider implements ConfigDescriptionAli
     }
 
     @Override
-    public @Nullable URI getAlias(@NonNull URI uri) {
+    public @Nullable URI getAlias(URI uri) {
         // If this is not a concrete thing, then return
         if (uri.getScheme() == null) {
             return null;
