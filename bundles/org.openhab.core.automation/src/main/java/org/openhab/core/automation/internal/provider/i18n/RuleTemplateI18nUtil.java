@@ -14,6 +14,8 @@ package org.openhab.core.automation.internal.provider.i18n;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.I18nUtil;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.openhab.core.automation.template.RuleTemplate;
@@ -25,25 +27,31 @@ import org.osgi.framework.Bundle;
  *
  * @author Ana Dimova - Initial contribution
  */
+@NonNullByDefault
 public class RuleTemplateI18nUtil {
 
     public static final String RULE_TEMPLATE = "rule-template";
 
-    public static String getLocalizedRuleTemplateLabel(TranslationProvider i18nProvider, Bundle bundle,
-            String ruleTemplateUID, String defaultLabel, Locale locale) {
+    private final TranslationProvider i18nProvider;
+
+    public RuleTemplateI18nUtil(TranslationProvider i18nProvider) {
+        this.i18nProvider = i18nProvider;
+    }
+
+    public @Nullable String getLocalizedRuleTemplateLabel(Bundle bundle, String ruleTemplateUID,
+            @Nullable String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferRuleTemplateKey(ruleTemplateUID, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
-    public static String getLocalizedRuleTemplateDescription(TranslationProvider i18nProvider, Bundle bundle,
-            String ruleTemplateUID, String defaultDescription, Locale locale) {
+    public @Nullable String getLocalizedRuleTemplateDescription(Bundle bundle, String ruleTemplateUID,
+            @Nullable String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferRuleTemplateKey(ruleTemplateUID, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
     }
 
-    private static String inferRuleTemplateKey(String ruleTemplateUID, String lastSegment) {
+    private String inferRuleTemplateKey(String ruleTemplateUID, String lastSegment) {
         return RULE_TEMPLATE + "." + ruleTemplateUID + "." + lastSegment;
     }
-
 }

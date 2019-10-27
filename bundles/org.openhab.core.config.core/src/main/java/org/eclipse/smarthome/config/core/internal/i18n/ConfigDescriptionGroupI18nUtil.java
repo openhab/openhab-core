@@ -10,11 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.i18n;
+package org.eclipse.smarthome.config.core.internal.i18n;
 
 import java.net.URI;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.I18nUtil;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
@@ -26,6 +28,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Chris Jackson - Initial contribution
  */
+@NonNullByDefault
 public class ConfigDescriptionGroupI18nUtil {
 
     private final TranslationProvider i18nProvider;
@@ -34,15 +37,15 @@ public class ConfigDescriptionGroupI18nUtil {
         this.i18nProvider = i18nProvider;
     }
 
-    public String getGroupDescription(Bundle bundle, URI configDescriptionURI, String groupName,
-            String defaultDescription, Locale locale) {
+    public @Nullable String getGroupDescription(Bundle bundle, URI configDescriptionURI, String groupName,
+            @Nullable String defaultDescription, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultDescription,
                 () -> inferKey(configDescriptionURI, groupName, "description"));
         return i18nProvider.getText(bundle, key, defaultDescription, locale);
     }
 
-    public String getGroupLabel(Bundle bundle, URI configDescriptionURI, String groupName, String defaultLabel,
-            Locale locale) {
+    public @Nullable String getGroupLabel(Bundle bundle, URI configDescriptionURI, String groupName,
+            @Nullable String defaultLabel, @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferKey(configDescriptionURI, groupName, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }

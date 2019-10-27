@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
+import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.i18n.TranslationProvider;
@@ -66,14 +67,22 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class TemplateResourceBundleProvider extends AbstractResourceBundleProvider<RuleTemplate>
         implements RuleTemplateProvider {
 
+    private final RuleTemplateI18nUtil ruleTemplateI18nUtil;
+    private final ModuleI18nUtil moduleI18nUtil;
+
     /**
      * This constructor is responsible for initializing the path to resources and tracking the managing service of the
      * {@link ModuleType}s and the managing service of the {@link RuleTemplates}s.
      *
      * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      */
-    public TemplateResourceBundleProvider() {
+    @Activate
+    public TemplateResourceBundleProvider(final @Reference ConfigI18nLocalizationService configI18nService,
+            final @Reference TranslationProvider i18nProvider) {
         super(ROOT_DIRECTORY + "/templates/");
+        this.configI18nService = configI18nService;
+        this.ruleTemplateI18nUtil = new RuleTemplateI18nUtil(i18nProvider);
+        this.moduleI18nUtil = new ModuleI18nUtil(i18nProvider);
     }
 
     @Override
@@ -97,17 +106,6 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
     @Override
     protected void removeParser(Parser<RuleTemplate> parser, Map<String, String> properties) {
         super.removeParser(parser, properties);
-    }
-
-    @Override
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        super.setTranslationProvider(i18nProvider);
-    }
-
-    @Override
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        super.unsetTranslationProvider(i18nProvider);
     }
 
     @Override
@@ -160,26 +158,26 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @return the localized {@link Template}.
      */
     private @Nullable RuleTemplate getPerLocale(@Nullable RuleTemplate defTemplate, @Nullable Locale locale) {
-        if (locale == null || defTemplate == null || i18nProvider == null) {
+        if (locale == null || defTemplate == null) {
             return defTemplate;
         }
         String uid = defTemplate.getUID();
         Bundle bundle = getBundle(uid);
 
         if (bundle != null && defTemplate instanceof RuleTemplate) {
-            String llabel = RuleTemplateI18nUtil.getLocalizedRuleTemplateLabel(i18nProvider, bundle, uid,
-                    defTemplate.getLabel(), locale);
-            String ldescription = RuleTemplateI18nUtil.getLocalizedRuleTemplateDescription(i18nProvider, bundle, uid,
+            String llabel = ruleTemplateI18nUtil.getLocalizedRuleTemplateLabel(bundle, uid, defTemplate.getLabel(),
+                    locale);
+            String ldescription = ruleTemplateI18nUtil.getLocalizedRuleTemplateDescription(bundle, uid,
                     defTemplate.getDescription(), locale);
-            List<ConfigDescriptionParameter> lconfigDescriptions = getLocalizedConfigurationDescription(i18nProvider,
+            List<ConfigDescriptionParameter> lconfigDescriptions = getLocalizedConfigurationDescription(
                     defTemplate.getConfigurationDescriptions(), bundle, uid, RuleTemplateI18nUtil.RULE_TEMPLATE,
                     locale);
-            List<Action> lactions = ModuleI18nUtil.getLocalizedModules(i18nProvider, defTemplate.getActions(), bundle,
-                    uid, RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
-            List<Condition> lconditions = ModuleI18nUtil.getLocalizedModules(i18nProvider, defTemplate.getConditions(),
-                    bundle, uid, RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
-            List<Trigger> ltriggers = ModuleI18nUtil.getLocalizedModules(i18nProvider, defTemplate.getTriggers(),
-                    bundle, uid, RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
+            List<Action> lactions = moduleI18nUtil.getLocalizedModules(defTemplate.getActions(), bundle, uid,
+                    RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
+            List<Condition> lconditions = moduleI18nUtil.getLocalizedModules(defTemplate.getConditions(), bundle, uid,
+                    RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
+            List<Trigger> ltriggers = moduleI18nUtil.getLocalizedModules(defTemplate.getTriggers(), bundle, uid,
+                    RuleTemplateI18nUtil.RULE_TEMPLATE, locale);
             return new RuleTemplate(uid, llabel, ldescription, defTemplate.getTags(), ltriggers, lconditions, lactions,
                     lconfigDescriptions, defTemplate.getVisibility());
         }

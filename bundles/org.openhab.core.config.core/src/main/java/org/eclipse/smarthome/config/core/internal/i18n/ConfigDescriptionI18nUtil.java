@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.i18n;
+package org.eclipse.smarthome.config.core.internal.i18n;
 
 import java.net.URI;
 import java.util.Locale;
@@ -100,5 +100,4 @@ public class ConfigDescriptionI18nUtil {
         }
         return false;
     }
-
 }

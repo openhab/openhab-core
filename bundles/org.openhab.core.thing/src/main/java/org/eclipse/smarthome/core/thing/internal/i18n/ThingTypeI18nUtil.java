@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.i18n;
+package org.eclipse.smarthome.core.thing.internal.i18n;
 
 import java.util.Locale;
 
@@ -170,5 +170,4 @@ public class ThingTypeI18nUtil {
         return "thing-type." + thingTypeUID.getBindingId() + "." + thingTypeUID.getId() + ".channel." + channel.getId()
                 + "." + lastSegment;
     }
-
 }

@@ -21,6 +21,7 @@ import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.internal.i18n.ChannelGroupI18nUtil;
 import org.eclipse.smarthome.core.thing.internal.i18n.ChannelI18nUtil;
+import org.eclipse.smarthome.core.thing.internal.i18n.ThingTypeI18nUtil;
 import org.eclipse.smarthome.core.thing.type.BridgeType;
 import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupDefinition;

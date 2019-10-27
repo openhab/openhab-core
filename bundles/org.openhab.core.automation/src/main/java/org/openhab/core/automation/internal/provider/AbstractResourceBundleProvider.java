@@ -30,16 +30,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.config.core.i18n.ConfigDescriptionI18nUtil;
+import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
 import org.eclipse.smarthome.core.common.registry.Provider;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
@@ -83,10 +81,7 @@ public abstract class AbstractResourceBundleProvider<E> {
      */
     protected static final String ROOT_DIRECTORY = "ESH-INF/automation";
 
-    /**
-     * This field holds a reference to the service instance for internationalization support within the platform.
-     */
-    protected @NonNullByDefault({}) TranslationProvider i18nProvider;
+    protected @Nullable ConfigI18nLocalizationService configI18nService;
 
     /**
      * This field keeps instance of {@link Logger} that is used for logging.
@@ -213,14 +208,6 @@ public abstract class AbstractResourceBundleProvider<E> {
         String parserType = properties.get(Parser.FORMAT);
         parserType = parserType == null ? Parser.FORMAT_JSON : parserType;
         parsers.remove(parserType);
-    }
-
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = i18nProvider;
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = null;
     }
 
     /**
@@ -386,60 +373,22 @@ public abstract class AbstractResourceBundleProvider<E> {
         return null;
     }
 
-    protected List<ConfigDescriptionParameter> getLocalizedConfigurationDescription(TranslationProvider i18nProvider,
+    protected List<ConfigDescriptionParameter> getLocalizedConfigurationDescription(
             @Nullable List<ConfigDescriptionParameter> config, Bundle bundle, String uid, String prefix,
             @Nullable Locale locale) {
-        List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
-        if (config != null) {
-            ConfigDescriptionI18nUtil util = new ConfigDescriptionI18nUtil(i18nProvider);
-            for (ConfigDescriptionParameter parameter : config) {
-                String parameterName = parameter.getName();
-                URI uri = null;
-                try {
-                    uri = new URI(prefix + ":" + uid + ".name");
-                } catch (URISyntaxException e) {
-                    logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);
-                    return Collections.emptyList();
-                }
-                String llabel = parameter.getLabel();
-                if (llabel != null) {
-                    llabel = util.getParameterLabel(bundle, uri, parameterName, llabel, locale);
-                }
-                String ldescription = parameter.getDescription();
-                if (ldescription != null) {
-                    ldescription = util.getParameterDescription(bundle, uri, parameterName, ldescription, locale);
-                }
-                String lpattern = parameter.getPattern();
-                if (lpattern != null) {
-                    lpattern = util.getParameterPattern(bundle, uri, parameterName, lpattern, locale);
-                }
-                List<ParameterOption> loptions = parameter.getOptions();
-                if (loptions != null && !loptions.isEmpty()) {
-                    for (ParameterOption option : loptions) {
-                        String label = util.getParameterOptionLabel(bundle, uri, parameterName, option.getValue(),
-                                option.getLabel(), locale);
-                        option = new ParameterOption(option.getValue(), label);
-                    }
-                }
-                String lunitLabel = parameter.getUnitLabel();
-                if (lunitLabel != null) {
-                    lunitLabel = util.getParameterUnitLabel(bundle, uri, parameterName, parameter.getUnit(), lunitLabel,
-                            locale);
-                }
-                configDescriptions.add(ConfigDescriptionParameterBuilder.create(parameterName, parameter.getType())
-                        .withMinimum(parameter.getMinimum()).withMaximum(parameter.getMaximum())
-                        .withStepSize(parameter.getStepSize()).withPattern(lpattern)
-                        .withRequired(parameter.isRequired()).withMultiple(parameter.isMultiple())
-                        .withReadOnly(parameter.isReadOnly()).withContext(parameter.getContext())
-                        .withDefault(parameter.getDefault()).withLabel(llabel).withDescription(ldescription)
-                        .withFilterCriteria(parameter.getFilterCriteria()).withGroupName(parameter.getGroupName())
-                        .withAdvanced(parameter.isAdvanced()).withOptions(loptions)
-                        .withLimitToOptions(parameter.getLimitToOptions())
-                        .withMultipleLimit(parameter.getMultipleLimit()).withUnit(parameter.getUnit())
-                        .withUnitLabel(lunitLabel).build());
+        ConfigI18nLocalizationService localConfigI18nService = configI18nService;
+        if (config != null && localConfigI18nService != null) {
+            try {
+                URI uri = new URI(prefix + ":" + uid + ".name");
+                return config.stream()
+                        .map(p -> localConfigI18nService.getLocalizedConfigDescriptionParameter(bundle, uri, p, locale))
+                        .collect(Collectors.toList());
+            } catch (URISyntaxException e) {
+                logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);
+                return config;
             }
         }
-        return configDescriptions;
+        return Collections.emptyList();
     }
 
     /**
