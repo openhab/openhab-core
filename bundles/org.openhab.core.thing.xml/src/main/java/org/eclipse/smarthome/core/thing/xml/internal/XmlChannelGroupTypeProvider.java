@@ -15,6 +15,7 @@ package org.eclipse.smarthome.core.thing.xml.internal;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.xml.AbstractXmlBasedProvider;
 import org.eclipse.smarthome.core.thing.UID;
 import org.eclipse.smarthome.core.thing.i18n.ChannelGroupTypeI18nLocalizationService;
@@ -22,6 +23,7 @@ import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -35,36 +37,29 @@ import org.osgi.service.component.annotations.Reference;
 public class XmlChannelGroupTypeProvider extends AbstractXmlBasedProvider<UID, ChannelGroupType>
         implements ChannelGroupTypeProvider {
 
-    private ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService;
+    private final ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService;
+
+    @Activate
+    public XmlChannelGroupTypeProvider(
+            final @Reference ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService) {
+        this.channelGroupTypeI18nLocalizationService = channelGroupTypeI18nLocalizationService;
+    }
 
     @Override
-    public ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID, Locale locale) {
+    public @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID,
+            @Nullable Locale locale) {
         return get(channelGroupTypeUID, locale);
     }
 
     @Override
-    public Collection<ChannelGroupType> getChannelGroupTypes(Locale locale) {
+    public Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
         return getAll(locale);
     }
 
-    @Reference
-    public void setChannelGroupTypeI18nLocalizationService(
-            final ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService) {
-        this.channelGroupTypeI18nLocalizationService = channelGroupTypeI18nLocalizationService;
-    }
-
-    public void unsetChannelGroupTypeI18nLocalizationService(
-            final ChannelGroupTypeI18nLocalizationService channelGroupTypeI18nLocalizationService) {
-        this.channelGroupTypeI18nLocalizationService = null;
-    }
-
     @Override
-    protected ChannelGroupType localize(Bundle bundle, ChannelGroupType channelGroupType, Locale locale) {
-        if (channelGroupTypeI18nLocalizationService == null) {
-            return null;
-        }
+    protected @Nullable ChannelGroupType localize(Bundle bundle, ChannelGroupType channelGroupType,
+            @Nullable Locale locale) {
         return channelGroupTypeI18nLocalizationService.createLocalizedChannelGroupType(bundle, channelGroupType,
                 locale);
     }
-
 }

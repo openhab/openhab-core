@@ -304,7 +304,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     }
 
     @Override
-    public @Nullable Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
+    public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
         final List<ChannelType> allChannelTypes = new ArrayList<>();
         final Bundle bundle = bundleResolver.resolveBundle(DefaultSystemChannelTypeProvider.class);
 
