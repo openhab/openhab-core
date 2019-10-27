@@ -32,7 +32,6 @@ public interface ChannelTypeProvider {
     /**
      * @see ChannelTypeRegistry#getChannelTypes(Locale)
      */
-    @Nullable
     Collection<ChannelType> getChannelTypes(@Nullable Locale locale);
 
     /**
@@ -54,7 +53,7 @@ public interface ChannelTypeProvider {
      * @deprecated The {@link ChannelGroupTypeProvider} is now to be implemented/used instead.
      */
     @Deprecated
-    default @Nullable Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
+    default Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
         return Collections.emptyList();
     }
 }

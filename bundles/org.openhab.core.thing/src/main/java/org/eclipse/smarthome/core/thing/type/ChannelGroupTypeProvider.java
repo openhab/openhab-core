@@ -37,6 +37,5 @@ public interface ChannelGroupTypeProvider {
     /**
      * @see ChannelTypeRegistry#getChannelGroupTypes(Locale)
      */
-    @Nullable
     Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale);
 }
