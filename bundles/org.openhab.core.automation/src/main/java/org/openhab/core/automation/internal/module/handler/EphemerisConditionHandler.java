@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -74,17 +75,18 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
 
     @Override
     public boolean isSatisfied(Map<String, Object> inputs) {
+        ZonedDateTime target = ZonedDateTime.now().plusDays(offset);
         switch (module.getTypeUID()) {
             case HOLIDAY_MODULE_TYPE_ID:
-                return ephemerisManager.isBankHoliday(offset);
+                return ephemerisManager.isBankHoliday(target);
             case WEEKEND_MODULE_TYPE_ID:
-                return ephemerisManager.isWeekend(offset);
+                return ephemerisManager.isWeekend(target);
             case WEEKDAY_MODULE_TYPE_ID:
-                return !ephemerisManager.isWeekend(offset);
+                return !ephemerisManager.isWeekend(target);
             case DAYSET_MODULE_TYPE_ID:
                 final String dayset = this.dayset;
                 if (dayset != null) {
-                    return ephemerisManager.isInDayset(dayset, offset);
+                    return ephemerisManager.isInDayset(dayset, target);
                 }
                 break;
         }
