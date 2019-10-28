@@ -19,6 +19,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -32,6 +34,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Michael Grammling - Initial contribution, added locale support
  */
 @Component(immediate = true, service = BindingInfoRegistry.class)
+@NonNullByDefault
 public class BindingInfoRegistry {
 
     private final Collection<BindingInfoProvider> bindingInfoProviders = new CopyOnWriteArrayList<>();
@@ -39,13 +42,13 @@ public class BindingInfoRegistry {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addBindingInfoProvider(BindingInfoProvider bindingInfoProvider) {
         if (bindingInfoProvider != null) {
-            this.bindingInfoProviders.add(bindingInfoProvider);
+            bindingInfoProviders.add(bindingInfoProvider);
         }
     }
 
     protected void removeBindingInfoProvider(BindingInfoProvider bindingInfoProvider) {
         if (bindingInfoProvider != null) {
-            this.bindingInfoProviders.remove(bindingInfoProvider);
+            bindingInfoProviders.remove(bindingInfoProvider);
         }
     }
 
@@ -56,7 +59,7 @@ public class BindingInfoRegistry {
      * @param id the ID to be looked for (could be null or empty)
      * @return a binding information object (could be null)
      */
-    public BindingInfo getBindingInfo(String id) {
+    public @Nullable BindingInfo getBindingInfo(@Nullable String id) {
         return getBindingInfo(id, null);
     }
 
@@ -68,15 +71,13 @@ public class BindingInfoRegistry {
      * @param locale the locale to be used for the binding information (could be null)
      * @return a localized binding information object (could be null)
      */
-    public BindingInfo getBindingInfo(String id, Locale locale) {
-        for (BindingInfoProvider bindingInfoProvider : this.bindingInfoProviders) {
+    public @Nullable BindingInfo getBindingInfo(@Nullable String id, @Nullable Locale locale) {
+        for (BindingInfoProvider bindingInfoProvider : bindingInfoProviders) {
             BindingInfo bindingInfo = bindingInfoProvider.getBindingInfo(id, locale);
-
             if (bindingInfo != null) {
                 return bindingInfo;
             }
         }
-
         return null;
     }
 
@@ -96,15 +97,12 @@ public class BindingInfoRegistry {
      * @return a localized set of all binding information this registry contains
      *         (not null, could be empty)
      */
-    public Set<BindingInfo> getBindingInfos(Locale locale) {
-        Set<BindingInfo> allBindingInfos = new LinkedHashSet<>(10);
-
-        for (BindingInfoProvider bindingInfoProvider : this.bindingInfoProviders) {
+    public Set<BindingInfo> getBindingInfos(@Nullable Locale locale) {
+        Set<BindingInfo> allBindingInfos = new LinkedHashSet<>(bindingInfoProviders.size());
+        for (BindingInfoProvider bindingInfoProvider : bindingInfoProviders) {
             Set<BindingInfo> bindingInfos = bindingInfoProvider.getBindingInfos(locale);
             allBindingInfos.addAll(bindingInfos);
         }
-
         return Collections.unmodifiableSet(allBindingInfos);
     }
-
 }

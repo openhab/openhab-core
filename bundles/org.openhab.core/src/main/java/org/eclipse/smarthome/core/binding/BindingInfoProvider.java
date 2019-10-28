@@ -15,6 +15,9 @@ package org.eclipse.smarthome.core.binding;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link BindingInfoProvider} is a service interface providing {@link BindingInfo} objects. All registered
  * {@link BindingInfoProvider} services are tracked by the {@link BindingInfoRegistry} and provided as one common
@@ -24,6 +27,7 @@ import java.util.Set;
  *
  * @see BindingInfoRegistry
  */
+@NonNullByDefault
 public interface BindingInfoProvider {
 
     /**
@@ -34,15 +38,15 @@ public interface BindingInfoProvider {
      * @param locale the locale to be used for the binding information (could be null)
      * @return a localized binding information object (could be null)
      */
-    BindingInfo getBindingInfo(String id, Locale locale);
+    @Nullable
+    BindingInfo getBindingInfo(@Nullable String id, @Nullable Locale locale);
 
     /**
      * Returns all binding information in the specified locale (language) this provider contains.
      *
      * @param locale the locale to be used for the binding information (could be null)
      * @return a localized set of all binding information this provider contains
-     *         (not null, could be empty)
+     *         (could be empty)
      */
-    Set<BindingInfo> getBindingInfos(Locale locale);
-
+    Set<BindingInfo> getBindingInfos(@Nullable Locale locale);
 }

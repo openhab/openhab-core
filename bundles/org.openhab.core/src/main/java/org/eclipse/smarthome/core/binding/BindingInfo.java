@@ -14,6 +14,8 @@ package org.eclipse.smarthome.core.binding;
 
 import java.net.URI;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.Identifiable;
 
 /**
@@ -27,17 +29,19 @@ import org.eclipse.smarthome.core.common.registry.Identifiable;
  * @author Michael Grammling - Initial contribution
  * @author Andre Fuechsel - Made author tag optional
  */
+@NonNullByDefault
 public class BindingInfo implements Identifiable<String> {
 
     /**
      * The default service ID prefix.
      */
     public static final String DEFAULT_SERVICE_ID_PREFIX = "binding.";
+
     private String id;
     private String name;
-    private String description;
-    private String author;
-    private URI configDescriptionURI;
+    private @Nullable String description;
+    private @Nullable String author;
+    private @Nullable URI configDescriptionURI;
     private String serviceId;
 
     /**
@@ -46,13 +50,13 @@ public class BindingInfo implements Identifiable<String> {
      * @param id the identifier for the binding (must neither be null, nor empty)
      * @param name a human readable name for the binding (must neither be null, nor empty)
      * @param description a human readable description for the binding (could be null or empty)
-     * @param author the author of the binding (must neither be null, nor empty)
+     * @param author the author of the binding (could be null or empty)
      * @param serviceId the service id of the main service of the binding (can be null)
      * @param configDescriptionURI the link to a concrete ConfigDescription (could be null)
-     * @throws IllegalArgumentException if the identifier, the name or the author is null or empty
+     * @throws IllegalArgumentException if the identifier or the name are null or empty
      */
-    public BindingInfo(String id, String name, String description, String author, String serviceId,
-            URI configDescriptionURI) throws IllegalArgumentException {
+    public BindingInfo(String id, String name, @Nullable String description, @Nullable String author,
+            @Nullable String serviceId, @Nullable URI configDescriptionURI) throws IllegalArgumentException {
         if ((id == null) || (id.isEmpty())) {
             throw new IllegalArgumentException("The ID must neither be null nor empty!");
         }
@@ -76,7 +80,7 @@ public class BindingInfo implements Identifiable<String> {
      */
     @Override
     public String getUID() {
-        return this.id;
+        return id;
     }
 
     /**
@@ -85,7 +89,7 @@ public class BindingInfo implements Identifiable<String> {
      * @return a human readable name for the binding (neither null, nor empty)
      */
     public String getName() {
-        return this.name;
+        return name;
     }
 
     /**
@@ -94,8 +98,8 @@ public class BindingInfo implements Identifiable<String> {
      *
      * @return a human readable description for the binding (could be null or empty)
      */
-    public String getDescription() {
-        return this.description;
+    public @Nullable String getDescription() {
+        return description;
     }
 
     /**
@@ -103,14 +107,14 @@ public class BindingInfo implements Identifiable<String> {
      *
      * @return the author of the binding (could be null or empty)
      */
-    public String getAuthor() {
-        return this.author;
+    public @Nullable String getAuthor() {
+        return author;
     }
 
     /**
      * Returns the service ID of the bindings main service, that can be configured.
      *
-     * @return service ID or null if no service is configured
+     * @return service ID
      */
     public String getServiceId() {
         return serviceId;
@@ -121,14 +125,13 @@ public class BindingInfo implements Identifiable<String> {
      *
      * @return the link to a concrete ConfigDescription (could be null)
      */
-    public URI getConfigDescriptionURI() {
-        return this.configDescriptionURI;
+    public @Nullable URI getConfigDescriptionURI() {
+        return configDescriptionURI;
     }
 
     @Override
     public String toString() {
-        return "BindingInfoImpl [id=" + id + ", name=" + name + ", description=" + description + ", author=" + author
+        return "BindingInfo [id=" + id + ", name=" + name + ", description=" + description + ", author=" + author
                 + ", configDescriptionURI=" + configDescriptionURI + "]";
     }
-
 }

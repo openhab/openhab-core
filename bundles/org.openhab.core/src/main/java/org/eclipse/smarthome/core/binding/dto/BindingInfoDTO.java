@@ -35,5 +35,4 @@ public class BindingInfoDTO {
         this.description = description;
         this.configDescriptionURI = configDescriptionURI;
     }
-
 }

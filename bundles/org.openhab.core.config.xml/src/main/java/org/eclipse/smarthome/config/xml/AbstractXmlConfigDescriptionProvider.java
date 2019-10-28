@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
 import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
@@ -41,21 +42,19 @@ public abstract class AbstractXmlConfigDescriptionProvider extends AbstractXmlBa
         implements ConfigDescriptionProvider {
 
     @Override
-    public synchronized Collection<ConfigDescription> getConfigDescriptions(Locale locale) {
+    public synchronized Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
         return getAll(locale);
     }
 
     @Override
-    public synchronized ConfigDescription getConfigDescription(URI uri, Locale locale) {
+    public synchronized @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
         return get(uri, locale);
     }
 
     @Override
-    protected ConfigDescription localize(Bundle bundle, ConfigDescription configDescription, Locale locale) {
+    protected @Nullable ConfigDescription localize(Bundle bundle, ConfigDescription configDescription,
+            @Nullable Locale locale) {
         ConfigI18nLocalizationService configI18nLocalizerService = getConfigI18nLocalizerService();
-        if (configI18nLocalizerService == null) {
-            return null;
-        }
         return configI18nLocalizerService.getLocalizedConfigDescription(bundle, configDescription, locale);
     }
 

@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
 import org.eclipse.smarthome.config.xml.AbstractXmlBasedProvider;
 import org.eclipse.smarthome.config.xml.AbstractXmlConfigDescriptionProvider;
@@ -27,9 +28,8 @@ import org.eclipse.smarthome.config.xml.osgi.XmlDocumentProviderFactory;
 import org.eclipse.smarthome.config.xml.util.XmlDocumentReader;
 import org.eclipse.smarthome.core.binding.BindingInfo;
 import org.eclipse.smarthome.core.binding.BindingInfoProvider;
+import org.eclipse.smarthome.core.binding.i18n.BindingI18nLocalizationService;
 import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.i18n.BindingI18nUtil;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
 import org.eclipse.smarthome.core.service.ReadyService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
@@ -55,19 +55,24 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
     private static final String XML_DIRECTORY = "/ESH-INF/binding/";
     public static final String READY_MARKER = "esh.xmlBindingInfo";
 
-    private BindingI18nUtil bindingI18nUtil;
+    private final BindingI18nLocalizationService bindingI18nService;
     private AbstractXmlConfigDescriptionProvider configDescriptionProvider;
-    private XmlDocumentBundleTracker<BindingInfoXmlResult> bindingInfoTracker;
-    private ReadyService readyService;
-
-    private ScheduledExecutorService scheduler = ThreadPoolManager
+    private @Nullable XmlDocumentBundleTracker<BindingInfoXmlResult> bindingInfoTracker;
+    private final ReadyService readyService;
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(XmlDocumentBundleTracker.THREAD_POOL_NAME);
-    private Future<?> trackerJob;
+    private @Nullable Future<?> trackerJob;
+
+    @Activate
+    public XmlBindingInfoProvider(final @Reference BindingI18nLocalizationService bindingI18nService,
+            final @Reference ReadyService readyService) {
+        this.bindingI18nService = bindingI18nService;
+        this.readyService = readyService;
+    }
 
     @Activate
     public void activate(ComponentContext componentContext) {
         XmlDocumentReader<BindingInfoXmlResult> bindingInfoReader = new BindingInfoReader();
-
         bindingInfoTracker = new XmlDocumentBundleTracker<>(componentContext.getBundleContext(), XML_DIRECTORY,
                 bindingInfoReader, this, READY_MARKER, readyService);
         trackerJob = scheduler.submit(() -> {
@@ -77,31 +82,26 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
 
     @Deactivate
     public void deactivate(ComponentContext componentContext) {
-        if (trackerJob != null && !trackerJob.isDone()) {
-            trackerJob.cancel(true);
+        Future<?> localTrackerJob = trackerJob;
+        if (localTrackerJob != null && !localTrackerJob.isDone()) {
+            localTrackerJob.cancel(true);
             trackerJob = null;
         }
-        bindingInfoTracker.close();
-        bindingInfoTracker = null;
+        XmlDocumentBundleTracker<BindingInfoXmlResult> localBindingInfoTracker = bindingInfoTracker;
+        if (localBindingInfoTracker != null) {
+            localBindingInfoTracker.close();
+            bindingInfoTracker = null;
+        }
     }
 
     @Override
-    public synchronized BindingInfo getBindingInfo(String id, Locale locale) {
-        return get(id, locale);
+    public synchronized @Nullable BindingInfo getBindingInfo(@Nullable String id, @Nullable Locale locale) {
+        return id == null ? null : get(id, locale);
     }
 
     @Override
-    public synchronized Set<BindingInfo> getBindingInfos(Locale locale) {
+    public synchronized Set<BindingInfo> getBindingInfos(@Nullable Locale locale) {
         return new HashSet<>(getAll(locale));
-    }
-
-    @Reference
-    public void setTranslationProvider(TranslationProvider i18nProvider) {
-        this.bindingI18nUtil = new BindingI18nUtil(i18nProvider);
-    }
-
-    public void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.bindingI18nUtil = null;
     }
 
     @Reference(target = "(esh.scope=core.xml.binding)")
@@ -113,32 +113,13 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
         this.configDescriptionProvider = null;
     }
 
-    @Reference
-    public void setReadyService(ReadyService readyService) {
-        this.readyService = readyService;
-    }
-
-    public void unsetReadyService(ReadyService readyService) {
-        this.readyService = null;
-    }
-
     @Override
-    protected BindingInfo localize(Bundle bundle, BindingInfo bindingInfo, Locale locale) {
-        if (this.bindingI18nUtil == null) {
-            return null;
-        }
-
-        String name = this.bindingI18nUtil.getName(bundle, bindingInfo.getUID(), bindingInfo.getName(), locale);
-        String description = this.bindingI18nUtil.getDescription(bundle, bindingInfo.getUID(),
-                bindingInfo.getDescription(), locale);
-
-        return new BindingInfo(bindingInfo.getUID(), name, description, bindingInfo.getAuthor(),
-                bindingInfo.getServiceId(), bindingInfo.getConfigDescriptionURI());
+    protected @Nullable BindingInfo localize(Bundle bundle, BindingInfo bindingInfo, @Nullable Locale locale) {
+        return bindingI18nService.createLocalizedBindingInfo(bundle, bindingInfo, locale);
     }
 
     @Override
     public XmlDocumentProvider<BindingInfoXmlResult> createDocumentProvider(Bundle bundle) {
         return new BindingInfoXmlProvider(bundle, this, configDescriptionProvider);
     }
-
 }
