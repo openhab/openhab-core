@@ -64,3 +64,4 @@ Require-Bundle: org.antlr.runtime,\
  org.eclipse.xtext.xbase;visibility:=reexport,\
  org.eclipse.xtext;visibility:=reexport,\
  org.objectweb.asm;resolution:=optional
+-includeresource: resources
