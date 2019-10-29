@@ -57,8 +57,8 @@ public interface EphemerisManager {
      *
      * @param date observed day
      * @param source :
-     *            If a String, absolute or relative path to the file on local file system
-     *            If an URL, bundle resource file containing holiday definitions
+     *            can be a String, absolute or relative path to the file on local file system
+     *            can be an URL, bundle resource file containing holiday definitions
      * @return whether the day is bank holiday or not
      * @throws FileNotFoundException
      */
@@ -78,9 +78,8 @@ public interface EphemerisManager {
      *
      * @param date observed day
      * @param source :
-     *            If a String, absolute or relative path to the file on local file system
-     *            If an URL, bundle resource file containing holiday definitions
-     *            If null, default country file provided by the package
+     *            can be a String, absolute or relative path to the file on local file system
+     *            can be an URL, bundle resource file containing holiday definitions
      * @return name of the day or null if no corresponding entry
      * @throws FileNotFoundException
      */
@@ -101,9 +100,8 @@ public interface EphemerisManager {
      *
      * @param startDate first day of the time window
      * @param source :
-     *            If a String, absolute or relative path to the file on local file system
-     *            If an URL, bundle resource file containing holiday definitions
-     *            If null, default country file provided by the package
+     *            can be a String, absolute or relative path to the file on local file system
+     *            can be an URL, bundle resource file containing holiday definitions
      * @return next coming holiday
      * @throws FileNotFoundException
      */
@@ -134,9 +132,8 @@ public interface EphemerisManager {
      * @param from first day of the time window
      * @param searchedHoliday name of the searched holiday
      * @param source :
-     *            If a String, absolute or relative path to the file on local file system
-     *            If an URL, bundle resource file containing holiday definitions
-     *            If null, default country file provided by the package
+     *            can be a String, absolute or relative path to the file on local file system
+     *            can be an URL, bundle resource file containing holiday definitions
      * @return difference in days, -1 if not found
      * @throws FileNotFoundException
      */
