@@ -91,8 +91,8 @@ Fragment-Host: org.openhab.core.model.core
 	org.ops4j.pax.web.pax-web-jetty;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-spi;version='[7.2.3,7.2.4)',\
-	org.threeten.extra;version='[1.4.0,1.4.1)',\
-	jollyday;version='[0.5.8,0.5.9)',\
+	org.threeten.extra;version='[1.5.0,1.5.1)',\
+	jollyday;version='[0.5.9,0.5.10)',\
 	org.openhab.core.model.item.runtime;version='[2.5.0,2.5.1)',\
 	tec.uom.lib.uom-lib-common;version='[1.0.3,1.0.4)',\
 	tec.uom.se;version='[1.0.10,1.0.11)',\
