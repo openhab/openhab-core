@@ -157,9 +157,9 @@
   </feature>
 
   <feature name="openhab.tp-jollyday" description="Jollyday library" version="${project.version}">
-    <capability>openhab.tp;feature=jollyday;version=0.5.8</capability>
-    <bundle>mvn:org.threeten/threeten-extra/1.4</bundle>
-    <bundle>mvn:de.jollyday/jollyday/0.5.8</bundle>
+    <capability>openhab.tp;feature=jollyday;version=0.5.9</capability>
+    <bundle>mvn:org.threeten/threeten-extra/1.5.0</bundle>
+    <bundle>mvn:de.jollyday/jollyday/0.5.9</bundle>
   </feature>
 
   <feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
