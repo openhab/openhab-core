@@ -39,4 +39,5 @@ Fragment-Host: org.openhab.core.config.dispatch
 	org.openhab.core.test;version='[2.5.0,2.5.1)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\
 	tec.uom.lib.uom-lib-common;version='[1.0.3,1.0.4)',\
-	tec.uom.se;version='[1.0.10,1.0.11)'
+	tec.uom.se;version='[1.0.10,1.0.11)',\
+	org.openhab.core.storage.json;version='[2.5.0,2.5.1)'

@@ -1,16 +1,16 @@
 Bundle-SymbolicName: ${project.artifactId}
-Export-Package: org.eclipse.smarthome.model,\
- org.eclipse.smarthome.model.formatting,\
- org.eclipse.smarthome.model.generator,\
- org.eclipse.smarthome.model.parser.antlr,\
- org.eclipse.smarthome.model.parser.antlr.internal,\
- org.eclipse.smarthome.model.scoping,\
- org.eclipse.smarthome.model.serializer,\
- org.eclipse.smarthome.model.services,\
- org.eclipse.smarthome.model.sitemap,\
- org.eclipse.smarthome.model.sitemap.impl,\
- org.eclipse.smarthome.model.sitemap.util,\
- org.eclipse.smarthome.model.validation
+Export-Package: org.eclipse.smarthome.model.sitemap,\
+ org.eclipse.smarthome.model.sitemap.formatting,\
+ org.eclipse.smarthome.model.sitemap.generator,\
+ org.eclipse.smarthome.model.sitemap.parser.antlr,\
+ org.eclipse.smarthome.model.sitemap.parser.antlr.internal,\
+ org.eclipse.smarthome.model.sitemap.scoping,\
+ org.eclipse.smarthome.model.sitemap.serializer,\
+ org.eclipse.smarthome.model.sitemap.services,\
+ org.eclipse.smarthome.model.sitemap.sitemap,\
+ org.eclipse.smarthome.model.sitemap.sitemap.impl,\
+ org.eclipse.smarthome.model.sitemap.sitemap.util,\
+ org.eclipse.smarthome.model.sitemap.validation
 Import-Package: org.apache.commons.lang,\
  org.apache.log4j,\
  org.eclipse.jdt.annotation;resolution:=optional,\

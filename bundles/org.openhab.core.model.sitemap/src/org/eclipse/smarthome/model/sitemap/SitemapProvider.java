@@ -14,9 +14,11 @@ package org.eclipse.smarthome.model.sitemap;
 
 import java.util.Set;
 
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
+import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
 
 @NonNullByDefault
 public interface SitemapProvider {
