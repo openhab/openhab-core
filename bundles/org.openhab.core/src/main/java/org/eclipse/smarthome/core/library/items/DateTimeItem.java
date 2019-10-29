@@ -20,8 +20,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.items.GenericItem;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
@@ -41,13 +39,9 @@ public class DateTimeItem extends GenericItem {
 
     static {
         acceptedDataTypes.add(DateTimeType.class);
-        acceptedDataTypes.add(DecimalType.class);
-        acceptedDataTypes.add(StringType.class);
         acceptedDataTypes.add(UnDefType.class);
 
         acceptedCommandTypes.add(RefreshType.class);
-        acceptedCommandTypes.add(DecimalType.class);
-        acceptedCommandTypes.add(StringType.class);
         acceptedCommandTypes.add(DateTimeType.class);
     }
 
