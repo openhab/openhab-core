@@ -15,12 +15,11 @@ package org.eclipse.smarthome.model.script.actions;
 import java.io.FileNotFoundException;
 import java.time.ZonedDateTime;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.model.script.engine.action.ActionDoc;
 import org.eclipse.smarthome.model.script.internal.engine.action.EphemerisActionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.istack.Nullable;
 
 /**
  * The static methods of this class are made available as functions in the scripts.

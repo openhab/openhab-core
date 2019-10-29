@@ -41,7 +41,7 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
 
     private final EphemerisManager ephemerisManager;
     private final @Nullable String dayset;
-    private final int offset;
+    private final ZonedDateTime target;
 
     public EphemerisConditionHandler(Condition condition, EphemerisManager ephemerisManager) {
         super(condition);
@@ -50,7 +50,8 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
         this.dayset = DAYSET_MODULE_TYPE_ID.equals(module.getTypeUID())
                 ? getValidStringConfigParameter(DAYSET, module.getConfiguration(), module.getId())
                 : null;
-        this.offset = getValidIntegerConfigParameter(OFFSET, module.getConfiguration(), module.getId());
+        int offset = getValidIntegerConfigParameter(OFFSET, module.getConfiguration(), module.getId());
+        target = ZonedDateTime.now().plusDays(offset);
     }
 
     private static int getValidIntegerConfigParameter(String parameter, Configuration config, String moduleId) {
@@ -75,7 +76,6 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
 
     @Override
     public boolean isSatisfied(Map<String, Object> inputs) {
-        ZonedDateTime target = ZonedDateTime.now().plusDays(offset);
         switch (module.getTypeUID()) {
             case HOLIDAY_MODULE_TYPE_ID:
                 return ephemerisManager.isBankHoliday(target);
