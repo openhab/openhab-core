@@ -15,7 +15,6 @@ package org.eclipse.smarthome.core.ephemeris.internal;
 import static org.eclipse.smarthome.core.ephemeris.internal.EphemerisManagerImpl.*;
 import static org.junit.Assert.*;
 
-import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URL;
 import java.time.DayOfWeek;
@@ -301,21 +300,17 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         ZonedDateTime today = ZonedDateTime.of(2019, 10, 28, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
         ZonedDateTime theDay = ZonedDateTime.of(2019, 10, 31, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
 
-        try {
-            boolean vacation = ephemerisManager.isBankHoliday(theDay, url);
-            assertEquals(true, vacation);
+        boolean vacation = ephemerisManager.isBankHoliday(theDay, url);
+        assertEquals(true, vacation);
 
-            long delay = ephemerisManager.getDaysUntil(today, "Halloween", url);
-            assertEquals(3, delay);
+        long delay = ephemerisManager.getDaysUntil(today, "Halloween", url);
+        assertEquals(3, delay);
 
-            String next = ephemerisManager.getNextBankHoliday(today, url);
-            assertEquals("Halloween", next);
+        String next = ephemerisManager.getNextBankHoliday(today, url);
+        assertEquals("Halloween", next);
 
-            String result = ephemerisManager.getBankHolidayName(theDay, url);
-            assertEquals("Halloween", result);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        String result = ephemerisManager.getBankHolidayName(theDay, url);
+        assertEquals("Halloween", result);
     }
 
 }

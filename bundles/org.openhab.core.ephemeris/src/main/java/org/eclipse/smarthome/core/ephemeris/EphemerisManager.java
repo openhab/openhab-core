@@ -13,6 +13,7 @@
 package org.eclipse.smarthome.core.ephemeris;
 
 import java.io.FileNotFoundException;
+import java.net.URL;
 import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -56,13 +57,20 @@ public interface EphemerisManager {
      * Tests given day status against given userfile
      *
      * @param date observed day
-     * @param source :
-     *            can be a String, absolute or relative path to the file on local file system
-     *            can be an URL, bundle resource file containing holiday definitions
+     * @param url bundle resource file containing holiday definitions
+     * @return whether the day is bank holiday or not
+     */
+    boolean isBankHoliday(ZonedDateTime date, URL resource);
+
+    /**
+     * Tests given day status against given userfile
+     *
+     * @param date observed day
+     * @param source absolute or relative path to the file on local file system
      * @return whether the day is bank holiday or not
      * @throws FileNotFoundException
      */
-    boolean isBankHoliday(ZonedDateTime date, Object source) throws FileNotFoundException;
+    boolean isBankHoliday(ZonedDateTime date, String filename) throws FileNotFoundException;
 
     /**
      * Get given day name from given userfile
@@ -77,14 +85,22 @@ public interface EphemerisManager {
      * Get given day name from given userfile
      *
      * @param date observed day
-     * @param source :
-     *            can be a String, absolute or relative path to the file on local file system
-     *            can be an URL, bundle resource file containing holiday definitions
+     * @param url bundle resource file containing holiday definitions
+     * @return name of the day or null if no corresponding entry
+     */
+    @Nullable
+    String getBankHolidayName(ZonedDateTime date, URL resource);
+
+    /**
+     * Get given day name from given userfile
+     *
+     * @param date observed day
+     * @param source absolute or relative path to the file on local file system
      * @return name of the day or null if no corresponding entry
      * @throws FileNotFoundException
      */
     @Nullable
-    String getBankHolidayName(ZonedDateTime date, Object source) throws FileNotFoundException;
+    String getBankHolidayName(ZonedDateTime date, String filename) throws FileNotFoundException;
 
     /**
      * Gets the first next to come holiday in a 1 year time window
@@ -99,14 +115,22 @@ public interface EphemerisManager {
      * Gets the first next to come holiday in a 1 year time window
      *
      * @param startDate first day of the time window
-     * @param source :
-     *            can be a String, absolute or relative path to the file on local file system
-     *            can be an URL, bundle resource file containing holiday definitions
+     * @param url bundle resource file containing holiday definitions
+     * @return next coming holiday
+     */
+    @Nullable
+    String getNextBankHoliday(ZonedDateTime startDate, URL resource);
+
+    /**
+     * Gets the first next to come holiday in a 1 year time window
+     *
+     * @param startDate first day of the time window
+     * @param source absolute or relative path to the file on local file system
      * @return next coming holiday
      * @throws FileNotFoundException
      */
     @Nullable
-    String getNextBankHoliday(ZonedDateTime startDate, Object source) throws FileNotFoundException;
+    String getNextBankHoliday(ZonedDateTime startDate, String filename) throws FileNotFoundException;
 
     /**
      * Gets the localized holiday description
@@ -131,11 +155,19 @@ public interface EphemerisManager {
      *
      * @param from first day of the time window
      * @param searchedHoliday name of the searched holiday
-     * @param source :
-     *            can be a String, absolute or relative path to the file on local file system
-     *            can be an URL, bundle resource file containing holiday definitions
+     * @param url bundle resource file containing holiday definitions
+     * @return difference in days, -1 if not found
+     */
+    long getDaysUntil(ZonedDateTime from, String searchedHoliday, URL resource);
+
+    /**
+     * Gets the number of days until searchedHoliday in user file
+     *
+     * @param from first day of the time window
+     * @param searchedHoliday name of the searched holiday
+     * @param source absolute or relative path to the file on local file system
      * @return difference in days, -1 if not found
      * @throws FileNotFoundException
      */
-    long getDaysUntil(ZonedDateTime from, String searchedHoliday, Object source) throws FileNotFoundException;
+    long getDaysUntil(ZonedDateTime from, String searchedHoliday, String filename) throws FileNotFoundException;
 }

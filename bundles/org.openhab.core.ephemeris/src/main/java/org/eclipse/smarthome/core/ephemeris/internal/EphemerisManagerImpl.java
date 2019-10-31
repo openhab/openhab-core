@@ -227,15 +227,6 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         });
     }
 
-    private Object castSource(Object source) throws FileNotFoundException {
-        if (source.getClass() == String.class) {
-            return getUrl((String) source);
-        } else if (source.getClass() == URL.class) {
-            return source;
-        }
-        throw new FileNotFoundException("Source is not a valid file or URL");
-    }
-
     private List<Holiday> getHolidays(ZonedDateTime from, int span, HolidayManager holidayManager) {
         LocalDate fromDate = from.toLocalDate();
         LocalDate toDate = from.plusDays(span).toLocalDate();
@@ -255,11 +246,16 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     @Override
-    public long getDaysUntil(ZonedDateTime from, String searchedHoliday, Object source) throws FileNotFoundException {
-        List<Holiday> sortedHolidays = getHolidays(from, 366, getHolidayManager(castSource(source)));
+    public long getDaysUntil(ZonedDateTime from, String searchedHoliday, URL resource) {
+        List<Holiday> sortedHolidays = getHolidays(from, 366, getHolidayManager(resource));
         Optional<Holiday> result = sortedHolidays.stream()
                 .filter(holiday -> searchedHoliday.equalsIgnoreCase(holiday.getPropertiesKey())).findFirst();
         return result.isPresent() ? from.toLocalDate().until(result.get().getDate(), ChronoUnit.DAYS) : -1;
+    }
+
+    @Override
+    public long getDaysUntil(ZonedDateTime from, String searchedHoliday, String filename) throws FileNotFoundException {
+        return getDaysUntil(from, searchedHoliday, getUrl(filename));
     }
 
     private @Nullable String getFirstBankHolidayKey(ZonedDateTime from, int span, HolidayManager holidayManager) {
@@ -273,8 +269,13 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     @Override
-    public boolean isBankHoliday(ZonedDateTime date, Object source) throws FileNotFoundException {
-        return !getHolidays(date, 0, getHolidayManager(castSource(source))).isEmpty();
+    public boolean isBankHoliday(ZonedDateTime date, URL resource) {
+        return !getHolidays(date, 0, getHolidayManager(resource)).isEmpty();
+    }
+
+    @Override
+    public boolean isBankHoliday(ZonedDateTime date, String filename) throws FileNotFoundException {
+        return isBankHoliday(date, getUrl(filename));
     }
 
     @Override
@@ -299,8 +300,13 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     @Override
-    public @Nullable String getBankHolidayName(ZonedDateTime date, Object source) throws FileNotFoundException {
-        return getFirstBankHolidayKey(date, 0, getHolidayManager(castSource(source)));
+    public @Nullable String getBankHolidayName(ZonedDateTime date, URL resource) {
+        return getFirstBankHolidayKey(date, 0, getHolidayManager(resource));
+    }
+
+    @Override
+    public @Nullable String getBankHolidayName(ZonedDateTime date, String filename) throws FileNotFoundException {
+        return getBankHolidayName(date, getUrl(filename));
     }
 
     @Override
@@ -309,8 +315,13 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     @Override
-    public @Nullable String getNextBankHoliday(ZonedDateTime from, Object source) throws FileNotFoundException {
-        return getFirstBankHolidayKey(from, 365, getHolidayManager(castSource(source)));
+    public @Nullable String getNextBankHoliday(ZonedDateTime from, URL resource) {
+        return getFirstBankHolidayKey(from, 365, getHolidayManager(resource));
+    }
+
+    @Override
+    public @Nullable String getNextBankHoliday(ZonedDateTime from, String filename) throws FileNotFoundException {
+        return getNextBankHoliday(from, getUrl(filename));
     }
 
     private void addDayset(String setName, Iterable<?> values) {
