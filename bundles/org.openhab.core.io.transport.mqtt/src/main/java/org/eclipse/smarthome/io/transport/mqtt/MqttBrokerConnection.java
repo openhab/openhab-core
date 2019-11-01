@@ -445,7 +445,6 @@ public class MqttBrokerConnection {
      *
      * @param lastWill The last will object or null.
      */
-    @Deprecated
     public void setLastWill(@Nullable MqttWillAndTestament lastWill) {
         this.lastWill = lastWill;
     }
