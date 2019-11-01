@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.items.ManagedItemProvider.PersistedItem;
+import org.eclipse.smarthome.core.items.ManagedItemProvider.PersistedItemInstanceCreator;
 import org.eclipse.smarthome.core.storage.DeletableStorage;
 import org.eclipse.smarthome.core.storage.Storage;
 import org.mapdb.DB;
@@ -67,7 +69,8 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
         this.db = db;
         this.classLoader = classLoader;
         this.map = db.createTreeMap(name).makeOrGet();
-        this.mapper = new GsonBuilder().registerTypeAdapterFactory(new PropertiesTypeAdapterFactory()).create();
+        this.mapper = new GsonBuilder().registerTypeAdapterFactory(new PropertiesTypeAdapterFactory())
+                .registerTypeAdapter(PersistedItem.class, new PersistedItemInstanceCreator()).create();
     }
 
     @Override

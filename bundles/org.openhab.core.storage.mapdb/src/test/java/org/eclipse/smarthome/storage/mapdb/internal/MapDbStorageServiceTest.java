@@ -26,6 +26,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.storage.DeletableStorage;
 import org.eclipse.smarthome.core.storage.Storage;
 import org.hamcrest.Matchers;
@@ -174,8 +175,8 @@ public class MapDbStorageServiceTest {
     @Test
     public void serializationDeserialization() {
         Assert.assertThat(storage.getKeys().size(), Matchers.equalTo(0));
-        storage.put(KEY_1, new PersistedItem("String", Arrays.asList("LIGHT", "GROUND_FLOOR")));
-        storage.put(KEY_2, new PersistedItem("Number", Arrays.asList("TEMPERATURE", "OUTSIDE")));
+        storage.put(KEY_1, new PersistedItem(CoreItemFactory.STRING, Arrays.asList("LIGHT", "GROUND_FLOOR")));
+        storage.put(KEY_2, new PersistedItem(CoreItemFactory.NUMBER, Arrays.asList("TEMPERATURE", "OUTSIDE")));
         Assert.assertThat(storage.getKeys().size(), Matchers.equalTo(2));
         final Object persistedObject = storage.get(KEY_1);
         Assert.assertThat(persistedObject, Matchers.instanceOf(PersistedItem.class));
@@ -194,25 +195,26 @@ public class MapDbStorageServiceTest {
 
         Assert.assertEquals(0, storage.getKeys().size());
 
-        persistedObject = storage.put(KEY_1, new PersistedItem("String", Arrays.asList("LIGHT", "GROUND_FLOOR")));
+        persistedObject = storage.put(KEY_1,
+                new PersistedItem(CoreItemFactory.STRING, Arrays.asList("LIGHT", "GROUND_FLOOR")));
         Assert.assertEquals(1, storage.getKeys().size());
         Assert.assertNull(persistedObject);
 
         persistedObject = storage.get(KEY_1);
         Assert.assertTrue(persistedObject instanceof PersistedItem);
         persistedItem = (PersistedItem) persistedObject;
-        Assert.assertEquals("String", persistedItem.itemType);
+        Assert.assertEquals(CoreItemFactory.STRING, persistedItem.itemType);
 
-        persistedObject = storage.put(KEY_1, new PersistedItem("Number", Arrays.asList("TEMPERATURE")));
+        persistedObject = storage.put(KEY_1, new PersistedItem(CoreItemFactory.NUMBER, Arrays.asList("TEMPERATURE")));
         Assert.assertTrue(persistedObject instanceof PersistedItem);
         persistedItem = (PersistedItem) persistedObject;
         Assert.assertEquals(1, storage.getKeys().size());
-        Assert.assertEquals("String", persistedItem.itemType);
+        Assert.assertEquals(CoreItemFactory.STRING, persistedItem.itemType);
 
         persistedObject = storage.get(KEY_1);
         Assert.assertTrue(persistedObject instanceof PersistedItem);
         persistedItem = (PersistedItem) persistedObject;
-        Assert.assertEquals("Number", persistedItem.itemType);
+        Assert.assertEquals(CoreItemFactory.NUMBER, persistedItem.itemType);
 
         storage.remove(KEY_1);
         Assert.assertEquals(0, storage.getKeys().size());
