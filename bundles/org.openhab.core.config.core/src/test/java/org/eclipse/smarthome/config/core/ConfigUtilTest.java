@@ -17,7 +17,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -36,32 +35,74 @@ public class ConfigUtilTest {
     private final ConfigDescriptionParameterBuilder configDescriptionParameterBuilder1 = ConfigDescriptionParameterBuilder
             .create("p1", DECIMAL).withMultiple(true).withMultipleLimit(7);
     private final ConfigDescriptionParameterBuilder configDescriptionParameterBuilder2 = ConfigDescriptionParameterBuilder
-            .create("p2", TEXT).withMultiple(true).withMultipleLimit(7);
+            .create("p2", TEXT).withMultiple(true).withMultipleLimit(2);
 
     @Test
     public void verifyNormalizeDefaultTypeForTextReturnsString() {
-        assertThat(ConfigUtil.normalizeDefaultType(TEXT, "foo"), is("foo"));
-        assertThat(ConfigUtil.normalizeDefaultType(TEXT, "1.0"), is("1.0"));
+        assertThat(ConfigUtil.getDefaultValueAsCorrectType(
+                ConfigDescriptionParameterBuilder.create("test", TEXT).withDefault("foo").build()), is("foo"));
+        assertThat(ConfigUtil.getDefaultValueAsCorrectType(
+                ConfigDescriptionParameterBuilder.create("test", TEXT).withDefault("1.0").build()), is("1.0"));
     }
 
     @Test
     public void verifyNormalizeDefaultTypeForBooleanReturnsBoolean() {
-        assertThat(ConfigUtil.normalizeDefaultType(BOOLEAN, "true"), is(Boolean.TRUE));
-        assertThat(ConfigUtil.normalizeDefaultType(BOOLEAN, "YES"), is(Boolean.FALSE));
+        assertThat(
+                ConfigUtil.getDefaultValueAsCorrectType(
+                        ConfigDescriptionParameterBuilder.create("test", BOOLEAN).withDefault("true").build()),
+                is(Boolean.TRUE));
+        assertThat(
+                ConfigUtil.getDefaultValueAsCorrectType(
+                        ConfigDescriptionParameterBuilder.create("test", BOOLEAN).withDefault("YES").build()),
+                is(Boolean.FALSE));
     }
 
     @Test
     public void verifyNormalizeDefaultTypeForIntegerReturnsIntegerOrNull() {
-        assertThat(ConfigUtil.normalizeDefaultType(INTEGER, "1"), is(BigInteger.ONE));
-        assertThat(ConfigUtil.normalizeDefaultType(INTEGER, "1.2"), is(nullValue()));
-        assertThat(ConfigUtil.normalizeDefaultType(INTEGER, "foo"), is(nullValue()));
+        assertThat(
+                ConfigUtil.getDefaultValueAsCorrectType(
+                        ConfigDescriptionParameterBuilder.create("test", INTEGER).withDefault("1").build()),
+                is(BigDecimal.ONE));
+        assertThat(
+                ConfigUtil.getDefaultValueAsCorrectType(
+                        ConfigDescriptionParameterBuilder.create("test", INTEGER).withDefault("1.2").build()),
+                is(BigDecimal.ONE));
+        assertThat(
+                ConfigUtil.getDefaultValueAsCorrectType(
+                        ConfigDescriptionParameterBuilder.create("test", INTEGER).withDefault("foo").build()),
+                is(nullValue()));
     }
 
     @Test
     public void verifyNormalizeDefaultTypeForDecimalReturnsimalBigDecOrNull() {
-        assertThat(ConfigUtil.normalizeDefaultType(DECIMAL, "1"), is(BigDecimal.ONE));
-        assertThat(ConfigUtil.normalizeDefaultType(DECIMAL, "1.2"), is(new BigDecimal("1.2")));
-        assertThat(ConfigUtil.normalizeDefaultType(DECIMAL, "foo"), is(nullValue()));
+        assertThat(
+                ConfigUtil.getDefaultValueAsCorrectType(
+                        ConfigDescriptionParameterBuilder.create("test", DECIMAL).withDefault("1").build()),
+                is(BigDecimal.ONE));
+        assertThat(
+                ConfigUtil.getDefaultValueAsCorrectType(
+                        ConfigDescriptionParameterBuilder.create("test", DECIMAL).withDefault("1.2").build()),
+                is(new BigDecimal("1.2")));
+        assertThat(
+                ConfigUtil.getDefaultValueAsCorrectType(
+                        ConfigDescriptionParameterBuilder.create("test", DECIMAL).withDefault("foo").build()),
+                is(nullValue()));
+    }
+
+    @Test
+    public void verifyGetNumberOfDecimalPlacesWorksCorrectly() {
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("0.001")), is(3));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("0.01")), is(2));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("0.1")), is(1));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("1.000")), is(0));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("1.00")), is(0));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("1.0")), is(0));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(BigDecimal.ONE), is(0));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("10")), is(0));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("100")), is(0));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("100.1")), is(1));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("100.01")), is(2));
+        assertThat(ConfigUtil.getNumberOfDecimalPlaces(new BigDecimal("100.001")), is(3));
     }
 
     @Test

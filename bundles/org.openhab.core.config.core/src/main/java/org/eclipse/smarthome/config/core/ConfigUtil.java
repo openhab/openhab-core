@@ -13,7 +13,6 @@
 package org.eclipse.smarthome.config.core;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,16 +47,20 @@ public class ConfigUtil {
     private static final String DEFAULT_LIST_DELIMITER = ",";
 
     /**
-     * Maps the provided (default) value of the given {@link Type} to the corresponding Java type.
+     * Maps the provided (default) value of the given {@link ConfigDescriptionParameter} to the corresponding Java type.
      *
      * In case the provided value is supposed to be a number and cannot be converted into the target type correctly,
      * this method will return <code>null</code> while logging a warning.
      *
-     * @param parameterType the {@link Type} of the value (must not be null)
-     * @param defaultValue the value that should be converted (must not be null)
+     * @param parameter the {@link ConfigDescriptionParameter} wich default value should be normalized (must not be
+     *            null)
      * @return the given value as the corresponding Java type or <code>null</code> if the value could not be converted
      */
-    public static @Nullable Object normalizeDefaultType(Type parameterType, String defaultValue) {
+    public static @Nullable Object getDefaultValueAsCorrectType(ConfigDescriptionParameter parameter) {
+        return getDefaultValueAsCorrectType(parameter.getName(), parameter.getType(), parameter.getDefault());
+    }
+
+    static @Nullable Object getDefaultValueAsCorrectType(String parameterName, Type parameterType, String defaultValue) {
         try {
             switch (parameterType) {
                 case TEXT:
@@ -65,17 +68,29 @@ public class ConfigUtil {
                 case BOOLEAN:
                     return Boolean.parseBoolean(defaultValue);
                 case INTEGER:
-                    return new BigInteger(defaultValue);
+                    BigDecimal value = new BigDecimal(defaultValue);
+                    if (getNumberOfDecimalPlaces(value) > 0) {
+                        LoggerFactory.getLogger(ConfigUtil.class).warn(
+                                "Default value for parameter '{}' of type 'INTEGER' seems not to be an integer value: {}",
+                                parameterName, defaultValue);
+                        return value.setScale(0, BigDecimal.ROUND_DOWN);
+                    }
+                    return value;
                 case DECIMAL:
                     return new BigDecimal(defaultValue);
                 default:
                     return null;
             }
         } catch (NumberFormatException e) {
-            LoggerFactory.getLogger(ConfigUtil.class).warn("Could not parse default value '{}' as type '{}': {}",
-                    defaultValue, parameterType, e.getMessage(), e);
+            LoggerFactory.getLogger(ConfigUtil.class).warn(
+                    "Could not parse default value '{}' as type '{}' for paramerter '{}': {}", defaultValue,
+                    parameterType, parameterName, e.getMessage(), e);
             return null;
         }
+    }
+
+    static int getNumberOfDecimalPlaces(BigDecimal bigDecimal) {
+        return Math.max(0, bigDecimal.stripTrailingZeros().scale());
     }
 
     /**
@@ -93,23 +108,26 @@ public class ConfigUtil {
                 if (defaultValue != null && configuration.get(parameter.getName()) == null) {
                     if (parameter.isMultiple()) {
                         if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                            List<Object> values = Arrays.asList(defaultValue //
-                                    .split(DEFAULT_LIST_DELIMITER))//
-                                    .stream()//
-                                    .map(v -> v.trim())//
-                                    .filter(v -> !v.isEmpty())//
-                                    .map(v -> ConfigUtil.normalizeDefaultType(parameter.getType(), v))//
-                                    .filter(v -> v != null)//
-                                    .collect(Collectors.toList());
+                            List<Object> values = Arrays.asList(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream()
+                                    .map(v -> v.trim()).filter(v -> !v.isEmpty())
+                                    .map(v -> ConfigUtil.getDefaultValueAsCorrectType(parameter.getName(),
+                                            parameter.getType(), v))
+                                    .filter(v -> v != null).collect(Collectors.toList());
+                            Integer multipleLimit = parameter.getMultipleLimit();
+                            if (multipleLimit != null && values.size() > multipleLimit.intValue()) {
+                                LoggerFactory.getLogger(ConfigUtil.class).warn(
+                                        "Number of default values ({}) for parameter '{}' is greater than multiple limit ({})",
+                                        values.size(), parameter.getName(), multipleLimit);
+                            }
                             configuration.put(parameter.getName(), values);
                         } else {
-                            Object value = ConfigUtil.normalizeDefaultType(parameter.getType(), defaultValue);
+                            Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
                             if (value != null) {
                                 configuration.put(parameter.getName(), Arrays.asList(value));
                             }
                         }
                     } else {
-                        Object value = ConfigUtil.normalizeDefaultType(parameter.getType(), defaultValue);
+                        Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
                         if (value != null) {
                             configuration.put(parameter.getName(), value);
                         }
