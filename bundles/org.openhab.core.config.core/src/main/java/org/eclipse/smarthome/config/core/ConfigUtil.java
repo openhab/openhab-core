@@ -49,10 +49,10 @@ public class ConfigUtil {
     /**
      * Maps the provided (default) value of the given {@link ConfigDescriptionParameter} to the corresponding Java type.
      *
-     * In case the provided value is supposed to be a number and cannot be converted into the target type correctly,
-     * this method will return <code>null</code> while logging a warning.
+     * In case the provided (default) value is supposed to be a number and cannot be converted into the target type
+     * correctly, this method will return <code>null</code> while logging a warning.
      *
-     * @param parameter the {@link ConfigDescriptionParameter} wich default value should be normalized (must not be
+     * @param parameter the {@link ConfigDescriptionParameter} which default value should be normalized (must not be
      *            null)
      * @return the given value as the corresponding Java type or <code>null</code> if the value could not be converted
      */
@@ -60,7 +60,8 @@ public class ConfigUtil {
         return getDefaultValueAsCorrectType(parameter.getName(), parameter.getType(), parameter.getDefault());
     }
 
-    static @Nullable Object getDefaultValueAsCorrectType(String parameterName, Type parameterType, String defaultValue) {
+    static @Nullable Object getDefaultValueAsCorrectType(String parameterName, Type parameterType,
+            String defaultValue) {
         try {
             switch (parameterType) {
                 case TEXT:
@@ -83,7 +84,7 @@ public class ConfigUtil {
             }
         } catch (NumberFormatException e) {
             LoggerFactory.getLogger(ConfigUtil.class).warn(
-                    "Could not parse default value '{}' as type '{}' for paramerter '{}': {}", defaultValue,
+                    "Could not parse default value '{}' as type '{}' for parameter '{}': {}", defaultValue,
                     parameterType, parameterName, e.getMessage(), e);
             return null;
         }
