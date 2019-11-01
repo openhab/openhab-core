@@ -15,6 +15,9 @@ package org.eclipse.smarthome.core.audio;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is an audio source, which can provide a continuous live stream of audio.
  * Its main use is for microphones and other "line-in" sources and it can be registered as a service in order to make
@@ -22,6 +25,7 @@ import java.util.Set;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface AudioSource {
 
     /**
@@ -37,7 +41,7 @@ public interface AudioSource {
      * @param locale the locale to provide the label for
      * @return a localized string to be used in UIs
      */
-    String getLabel(Locale locale);
+    String getLabel(@Nullable Locale locale);
 
     /**
      * Obtain the audio formats supported by this AudioSource

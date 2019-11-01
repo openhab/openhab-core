@@ -26,6 +26,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.config.core.ConfigOptionProvider;
 import org.eclipse.smarthome.config.core.ConfigurableService;
@@ -60,6 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort audio sink and source options
  */
+@NonNullByDefault
 @Component(immediate = true, configurationPid = "org.eclipse.smarthome.audio", property = { //
         Constants.SERVICE_PID + "=org.eclipse.smarthome.audio", //
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
@@ -82,8 +85,8 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     /**
      * default settings filled through the service configuration
      */
-    private String defaultSource;
-    private String defaultSink;
+    private @Nullable String defaultSource;
+    private @Nullable String defaultSink;
 
     @Activate
     protected void activate(Map<String, Object> config) {
@@ -95,7 +98,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Modified
-    void modified(Map<String, Object> config) {
+    void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
             this.defaultSource = config.containsKey(CONFIG_DEFAULT_SOURCE)
                     ? config.get(CONFIG_DEFAULT_SOURCE).toString()
@@ -106,17 +109,17 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public void play(AudioStream audioStream) {
+    public void play(@Nullable AudioStream audioStream) {
         play(audioStream, null);
     }
 
     @Override
-    public void play(AudioStream audioStream, String sinkId) {
+    public void play(@Nullable AudioStream audioStream, @Nullable String sinkId) {
         play(audioStream, sinkId, null);
     }
 
     @Override
-    public void play(AudioStream audioStream, String sinkId, PercentType volume) {
+    public void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
             PercentType oldVolume = null;
@@ -162,17 +165,17 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public void playFile(String fileName, PercentType volume) throws AudioException {
+    public void playFile(String fileName, @Nullable PercentType volume) throws AudioException {
         playFile(fileName, null, volume);
     }
 
     @Override
-    public void playFile(String fileName, String sinkId) throws AudioException {
+    public void playFile(String fileName, @Nullable String sinkId) throws AudioException {
         playFile(fileName, sinkId, null);
     }
 
     @Override
-    public void playFile(String fileName, String sinkId, PercentType volume) throws AudioException {
+    public void playFile(String fileName, @Nullable String sinkId, @Nullable PercentType volume) throws AudioException {
         Objects.requireNonNull(fileName, "File cannot be played as fileName is null.");
 
         File file = new File(
@@ -182,18 +185,18 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public void stream(String url) throws AudioException {
+    public void stream(@Nullable String url) throws AudioException {
         stream(url, null);
     }
 
     @Override
-    public void stream(String url, String sinkId) throws AudioException {
+    public void stream(@Nullable String url, @Nullable String sinkId) throws AudioException {
         AudioStream audioStream = url != null ? new URLAudioStream(url) : null;
         play(audioStream, sinkId, null);
     }
 
     @Override
-    public PercentType getVolume(String sinkId) throws IOException {
+    public PercentType getVolume(@Nullable String sinkId) throws IOException {
         AudioSink sink = getSink(sinkId);
 
         if (sink != null) {
@@ -203,7 +206,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public void setVolume(PercentType volume, String sinkId) throws IOException {
+    public void setVolume(PercentType volume, @Nullable String sinkId) throws IOException {
         AudioSink sink = getSink(sinkId);
 
         if (sink != null) {
@@ -212,7 +215,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public AudioSource getSource() {
+    public @Nullable AudioSource getSource() {
         AudioSource source = null;
         if (defaultSource != null) {
             source = audioSources.get(defaultSource);
@@ -233,7 +236,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public AudioSink getSink() {
+    public @Nullable AudioSink getSink() {
         AudioSink sink = null;
         if (defaultSink != null) {
             sink = audioSinks.get(defaultSink);
@@ -268,7 +271,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public AudioSink getSink(String sinkId) {
+    public @Nullable AudioSink getSink(@Nullable String sinkId) {
         return (sinkId == null) ? getSink() : audioSinks.get(sinkId);
     }
 
@@ -287,7 +290,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     }
 
     @Override
-    public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
         if (uri.toString().equals(CONFIG_URI)) {
             final Locale safeLocale = locale != null ? locale : Locale.getDefault();
             if (CONFIG_DEFAULT_SOURCE.equals(param)) {

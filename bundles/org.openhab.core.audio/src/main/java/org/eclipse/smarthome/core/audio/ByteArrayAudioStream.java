@@ -16,16 +16,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is an implementation of a {@link FixedLengthAudioStream}, which is based on a simple byte array.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class ByteArrayAudioStream extends FixedLengthAudioStream {
 
-    private byte[] bytes;
-    private AudioFormat format;
-    private ByteArrayInputStream stream;
+    private final byte[] bytes;
+    private final AudioFormat format;
+    private final ByteArrayInputStream stream;
 
     public ByteArrayAudioStream(byte[] bytes, AudioFormat format) {
         this.bytes = bytes;

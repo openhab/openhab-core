@@ -17,6 +17,7 @@ import java.util.Hashtable;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public abstract class BaseSmartHomeServlet extends HttpServlet {
 
     private static final long serialVersionUID = 6020752826735599455L;
@@ -40,7 +42,7 @@ public abstract class BaseSmartHomeServlet extends HttpServlet {
     /**
      * Http service.
      */
-    protected HttpService httpService;
+    protected @NonNullByDefault({}) HttpService httpService;
 
     protected void setHttpService(HttpService httpService) {
         this.httpService = httpService;

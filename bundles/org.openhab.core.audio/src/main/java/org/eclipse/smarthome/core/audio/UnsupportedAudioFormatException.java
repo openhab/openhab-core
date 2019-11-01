@@ -12,50 +12,55 @@
  */
 package org.eclipse.smarthome.core.audio;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Thrown when a requested format is not supported by an {@link AudioSource}
  * or {@link AudioSink} implementation
- * 
+ *
  * @author Harald Kuhn - Initial contribution
  * @author Kelly Davis - Modified to match discussion in #584
  */
+@NonNullByDefault
 public class UnsupportedAudioFormatException extends AudioException {
 
     private static final long serialVersionUID = 1L;
 
-   /**
-    * Unsupported {@link AudioFormat}
-    */
-    private AudioFormat unsupportedFormat;
+    /**
+     * Unsupported {@link AudioFormat}
+     */
+    private @Nullable AudioFormat unsupportedFormat;
 
-   /**
-    * Constructs a new exception with the specified detail message, unsupported format, and cause.
-    *
-    * @param message Detail message
-    * @param unsupportedFormat Unsupported format
-    * @param cause The cause 
-    */
-    public UnsupportedAudioFormatException(String message, AudioFormat unsupportedFormat, Throwable cause) {
+    /**
+     * Constructs a new exception with the specified detail message, unsupported format, and cause.
+     *
+     * @param message Detail message
+     * @param unsupportedFormat Unsupported format
+     * @param cause The cause
+     */
+    public UnsupportedAudioFormatException(String message, @Nullable AudioFormat unsupportedFormat,
+            @Nullable Throwable cause) {
         super(message, cause);
         this.unsupportedFormat = unsupportedFormat;
     }
 
-   /**
-    * Constructs a new exception with the specified detail message and unsupported format.
-    *
-    * @param message Detail message
-    * @param unsupportedFormat Unsupported format
-    */
-    public UnsupportedAudioFormatException(String message, AudioFormat unsupportedFormat) {
+    /**
+     * Constructs a new exception with the specified detail message and unsupported format.
+     *
+     * @param message Detail message
+     * @param unsupportedFormat Unsupported format
+     */
+    public UnsupportedAudioFormatException(String message, @Nullable AudioFormat unsupportedFormat) {
         this(message, unsupportedFormat, null);
     }
 
-   /**
-    * Gets the unsupported format
-    *
-    * @return The unsupported format
-    */
-    public AudioFormat getUnsupportedFormat() {
+    /**
+     * Gets the unsupported format
+     *
+     * @return The unsupported format
+     */
+    public @Nullable AudioFormat getUnsupportedFormat() {
         return unsupportedFormat;
     }
 }

@@ -23,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.audio.utils.AudioStreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Refactored to not require a source
  * @author Christoph Weitkamp - Refactored use of filename extension
  */
+@NonNullByDefault
 public class URLAudioStream extends AudioStream {
 
     private static final Pattern PLS_STREAM_PATTERN = Pattern.compile("^File[0-9]=(.+)$");
@@ -48,12 +51,9 @@ public class URLAudioStream extends AudioStream {
     private final InputStream inputStream;
     private String url;
 
-    private Socket shoutCastSocket;
+    private @Nullable Socket shoutCastSocket;
 
     public URLAudioStream(String url) throws AudioException {
-        if (url == null) {
-            throw new IllegalArgumentException("url must not be null!");
-        }
         this.url = url;
         this.audioFormat = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, false, 16, null, null);
         this.inputStream = createInputStream();
@@ -96,14 +96,15 @@ public class URLAudioStream extends AudioStream {
                 // Java does not parse non-standard headers used by SHOUTCast
                 int port = streamUrl.getPort() > 0 ? streamUrl.getPort() : 80;
                 // Manipulate User-Agent to receive a stream
-                shoutCastSocket = new Socket(streamUrl.getHost(), port);
+                Socket socket = new Socket(streamUrl.getHost(), port);
+                shoutCastSocket = socket;
 
-                OutputStream os = shoutCastSocket.getOutputStream();
+                OutputStream os = socket.getOutputStream();
                 String userAgent = "WinampMPEG/5.09";
                 String req = "GET / HTTP/1.0\r\nuser-agent: " + userAgent
                         + "\r\nIcy-MetaData: 1\r\nConnection: keep-alive\r\n\r\n";
                 os.write(req.getBytes());
-                return shoutCastSocket.getInputStream();
+                return socket.getInputStream();
             } else {
                 // getInputStream() method is more error-proof than openStream(),
                 // because openStream() does openConnection().getInputStream(),

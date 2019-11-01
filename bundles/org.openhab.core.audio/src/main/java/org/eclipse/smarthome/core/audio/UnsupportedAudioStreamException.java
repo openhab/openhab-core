@@ -12,13 +12,16 @@
  */
 package org.eclipse.smarthome.core.audio;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Thrown when a requested {@link AudioStream} is not supported by an {@link AudioSource} or {@link AudioSink}
  * implementation
- * 
+ *
  * @author Christoph Weitkamp - Initial contribution
- * 
  */
+@NonNullByDefault
 public class UnsupportedAudioStreamException extends AudioException {
 
     private static final long serialVersionUID = 1L;
@@ -26,7 +29,7 @@ public class UnsupportedAudioStreamException extends AudioException {
     /**
      * Unsupported {@link AudioStream}
      */
-    private Class<? extends AudioStream> unsupportedAudioStreamClass;
+    private @Nullable Class<? extends @Nullable AudioStream> unsupportedAudioStreamClass;
 
     /**
      * Constructs a new exception with the specified detail message, unsupported format, and cause.
@@ -35,8 +38,8 @@ public class UnsupportedAudioStreamException extends AudioException {
      * @param unsupportedAudioStreamClass The unsupported audio stream class
      * @param cause The cause
      */
-    public UnsupportedAudioStreamException(String message, Class<? extends AudioStream> unsupportedAudioStreamClass,
-            Throwable cause) {
+    public UnsupportedAudioStreamException(String message,
+            @Nullable Class<? extends @Nullable AudioStream> unsupportedAudioStreamClass, @Nullable Throwable cause) {
         super(message, cause);
         this.unsupportedAudioStreamClass = unsupportedAudioStreamClass;
     }
@@ -47,7 +50,8 @@ public class UnsupportedAudioStreamException extends AudioException {
      * @param message The message
      * @param unsupportedAudioStreamClass The unsupported audio stream class
      */
-    public UnsupportedAudioStreamException(String message, Class<? extends AudioStream> unsupportedAudioStreamClass) {
+    public UnsupportedAudioStreamException(String message,
+            @Nullable Class<? extends @Nullable AudioStream> unsupportedAudioStreamClass) {
         this(message, unsupportedAudioStreamClass, null);
     }
 
@@ -56,7 +60,7 @@ public class UnsupportedAudioStreamException extends AudioException {
      *
      * @return The unsupported audio stream class
      */
-    public Class<? extends AudioStream> getUnsupportedAudioStreamClass() {
+    public @Nullable Class<? extends @Nullable AudioStream> getUnsupportedAudioStreamClass() {
         return unsupportedAudioStreamClass;
     }
 }

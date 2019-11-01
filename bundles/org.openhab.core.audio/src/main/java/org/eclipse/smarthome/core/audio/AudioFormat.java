@@ -14,6 +14,9 @@ package org.eclipse.smarthome.core.audio;
 
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * An audio format definition
  *
@@ -21,6 +24,7 @@ import java.util.Set;
  * @author Kelly Davis - Modified to match discussion in #584
  * @author Kai Kreuzer - Moved class, included constants, added toString
  */
+@NonNullByDefault
 public class AudioFormat {
 
     // generic mp3 format without any further constraints
@@ -111,36 +115,36 @@ public class AudioFormat {
     /**
      * Codec
      */
-    private final String codec;
+    private final @Nullable String codec;
 
     /**
      * Container
      */
-    private final String container;
+    private final @Nullable String container;
 
     /**
      * Big endian or little endian
      */
-    private final Boolean bigEndian;
+    private final @Nullable Boolean bigEndian;
 
     /**
      * Bit depth
      *
      * @see <a href="http://bit.ly/1OTydad">Bit Depth</a>
      */
-    private final Integer bitDepth;
+    private final @Nullable Integer bitDepth;
 
     /**
      * Bit rate
      *
      * @see <a href="http://bit.ly/1OTy5rk">Bit Rate</a>
      */
-    private final Integer bitRate;
+    private final @Nullable Integer bitRate;
 
     /**
      * Sample frequency
      */
-    private final Long frequency;
+    private final @Nullable Long frequency;
 
     /**
      * Constructs an instance with the specified properties.
@@ -161,8 +165,8 @@ public class AudioFormat {
      * @param bitRate The bit rate of the audio
      * @param frequency The frequency at which the audio was sampled
      */
-    public AudioFormat(String container, String codec, Boolean bigEndian, Integer bitDepth, Integer bitRate,
-            Long frequency) {
+    public AudioFormat(@Nullable String container, @Nullable String codec, @Nullable Boolean bigEndian,
+            @Nullable Integer bitDepth, @Nullable Integer bitRate, @Nullable Long frequency) {
         this.container = container;
         this.codec = codec;
         this.bigEndian = bigEndian;
@@ -176,7 +180,7 @@ public class AudioFormat {
      *
      * @return The codec
      */
-    public String getCodec() {
+    public @Nullable String getCodec() {
         return codec;
     }
 
@@ -185,7 +189,7 @@ public class AudioFormat {
      *
      * @return The container
      */
-    public String getContainer() {
+    public @Nullable String getContainer() {
         return container;
     }
 
@@ -194,7 +198,7 @@ public class AudioFormat {
      *
      * @return If format is big endian
      */
-    public Boolean isBigEndian() {
+    public @Nullable Boolean isBigEndian() {
         return bigEndian;
     }
 
@@ -204,7 +208,7 @@ public class AudioFormat {
      * @see <a href="http://bit.ly/1OTydad">Bit Depth</a>
      * @return Bit depth
      */
-    public Integer getBitDepth() {
+    public @Nullable Integer getBitDepth() {
         return bitDepth;
     }
 
@@ -214,7 +218,7 @@ public class AudioFormat {
      * @see <a href="http://bit.ly/1OTy5rk">Bit Rate</a>
      * @return Bit rate
      */
-    public Integer getBitRate() {
+    public @Nullable Integer getBitRate() {
         return bitRate;
     }
 
@@ -223,7 +227,7 @@ public class AudioFormat {
      *
      * @return The frequency
      */
-    public Long getFrequency() {
+    public @Nullable Long getFrequency() {
         return frequency;
     }
 
@@ -233,7 +237,7 @@ public class AudioFormat {
      * This AudioFormat is compatible with the passed AudioFormat if both have
      * the same value for all non-null members of this instance.
      */
-    public boolean isCompatible(AudioFormat audioFormat) {
+    public boolean isCompatible(@Nullable AudioFormat audioFormat) {
         if (audioFormat == null) {
             return false;
         }
@@ -265,7 +269,7 @@ public class AudioFormat {
      * @param outputs the supported audio formats of an audio sink
      * @return the best matching format or null, if source and sink are incompatible
      */
-    public static AudioFormat getBestMatch(Set<AudioFormat> inputs, Set<AudioFormat> outputs) {
+    public static @Nullable AudioFormat getBestMatch(Set<AudioFormat> inputs, Set<AudioFormat> outputs) {
         AudioFormat preferredFormat = getPreferredFormat(inputs);
         if (preferredFormat != null) {
             for (AudioFormat output : outputs) {
@@ -291,7 +295,7 @@ public class AudioFormat {
      * @return The preferred AudioFormat or null if none could be determined. A passed concrete format is preferred
      *         adding default values to an abstract AudioFormat in the passed set.
      */
-    public static AudioFormat getPreferredFormat(Set<AudioFormat> audioFormats) {
+    public static @Nullable AudioFormat getPreferredFormat(Set<AudioFormat> audioFormats) {
         // Return the first concrete AudioFormat found
         for (AudioFormat currentAudioFormat : audioFormats) {
             // Check if currentAudioFormat is abstract
@@ -387,7 +391,7 @@ public class AudioFormat {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof AudioFormat) {
             AudioFormat format = (AudioFormat) obj;
             if (!(null == getCodec() ? null == format.getCodec() : getCodec().equals(format.getCodec()))) {

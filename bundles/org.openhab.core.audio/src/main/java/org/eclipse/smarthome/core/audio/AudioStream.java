@@ -14,6 +14,8 @@ package org.eclipse.smarthome.core.audio;
 
 import java.io.InputStream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Wrapper for a source of audio data.
  *
@@ -26,6 +28,7 @@ import java.io.InputStream;
  * @author Kelly Davis - Modified to match discussion in #584
  * @author Kai Kreuzer - Refactored to be only a temporary instance for the stream
  */
+@NonNullByDefault
 public abstract class AudioStream extends InputStream {
 
     /**

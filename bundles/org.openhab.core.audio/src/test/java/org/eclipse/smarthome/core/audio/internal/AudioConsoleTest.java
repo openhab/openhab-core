@@ -76,16 +76,15 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
     @Before
     public void setUp() throws IOException {
         fileHandler = new BundledSoundFileHandler();
-        audioManager = new AudioManagerImpl();
         audioSink = new AudioSinkFake();
-        audioManager.addAudioSink(audioSink);
 
-        audioConsoleCommandExtension = new AudioConsoleCommandExtension();
-        audioConsoleCommandExtension.setAudioManager(audioManager);
+        audioManager = new AudioManagerImpl();
+        audioManager.addAudioSink(audioSink);
 
         LocaleProvider localeProvider = mock(LocaleProvider.class);
         when(localeProvider.getLocale()).thenReturn(Locale.getDefault());
-        audioConsoleCommandExtension.setLocaleProvider(localeProvider);
+
+        audioConsoleCommandExtension = new AudioConsoleCommandExtension(audioManager, localeProvider);
     }
 
     @After
