@@ -12,6 +12,7 @@
  */
 package org.eclipse.smarthome.core.audio;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.audio.internal.AudioServlet;
 
 /**
@@ -21,6 +22,7 @@ import org.eclipse.smarthome.core.audio.internal.AudioServlet;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface AudioHTTPServer {
 
     /**

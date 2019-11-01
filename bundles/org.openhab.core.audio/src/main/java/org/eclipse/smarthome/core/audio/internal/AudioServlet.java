@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.audio.AudioException;
 import org.eclipse.smarthome.core.audio.AudioFormat;
 import org.eclipse.smarthome.core.audio.AudioHTTPServer;
@@ -46,6 +48,7 @@ import org.osgi.service.http.HttpService;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 @Component
 public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
 
@@ -79,7 +82,7 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
         super.unsetHttpService(httpService);
     }
 
-    private InputStream prepareInputStream(final String streamId, final HttpServletResponse resp)
+    private @Nullable InputStream prepareInputStream(final String streamId, final HttpServletResponse resp)
             throws AudioException {
         final AudioStream stream;
         final boolean multiAccess;
@@ -125,7 +128,8 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
+            throws ServletException, IOException {
         removeTimedOutStreams();
 
         final String streamId = StringUtils.substringBefore(StringUtils.substringAfterLast(req.getRequestURI(), "/"),

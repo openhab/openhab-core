@@ -20,6 +20,8 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.audio.AudioException;
 import org.eclipse.smarthome.core.audio.AudioManager;
 import org.eclipse.smarthome.core.audio.AudioSink;
@@ -29,6 +31,7 @@ import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.io.console.Console;
 import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
 import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -40,6 +43,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort audio sink and source options
  */
+@NonNullByDefault
 @Component(service = ConsoleCommandExtension.class)
 public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
@@ -48,11 +52,15 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
     static final String SUBCMD_SOURCES = "sources";
     static final String SUBCMD_SINKS = "sinks";
 
-    private AudioManager audioManager;
-    private LocaleProvider localeProvider;
+    private final AudioManager audioManager;
+    private final LocaleProvider localeProvider;
 
-    public AudioConsoleCommandExtension() {
+    @Activate
+    public AudioConsoleCommandExtension(final @Reference AudioManager audioManager,
+            final @Reference LocaleProvider localeProvider) {
         super("audio", "Commands around audio enablement features.");
+        this.audioManager = audioManager;
+        this.localeProvider = localeProvider;
     }
 
     @Override
@@ -66,7 +74,6 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         "streams the sound from the url through the optionally specified audio sink(s)"),
                 buildCommandUsage(SUBCMD_SOURCES, "lists the audio sources"),
                 buildCommandUsage(SUBCMD_SINKS, "lists the audio sinks") });
-
     }
 
     @Override
@@ -152,16 +159,15 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
             default:
                 break;
         }
-
     }
 
-    private void playOnSinks(String pattern, String fileName, PercentType volume, Console console) {
+    private void playOnSinks(String pattern, String fileName, @Nullable PercentType volume, Console console) {
         for (String sinkId : audioManager.getSinkIds(pattern)) {
             playOnSink(sinkId, fileName, volume, console);
         }
     }
 
-    private void playOnSink(String sinkId, String fileName, PercentType volume, Console console) {
+    private void playOnSink(@Nullable String sinkId, String fileName, @Nullable PercentType volume, Console console) {
         try {
             audioManager.playFile(fileName, sinkId, volume);
         } catch (AudioException e) {
@@ -188,30 +194,12 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
     }
 
-    private void streamOnSink(String sinkId, String url, Console console) {
+    private void streamOnSink(@Nullable String sinkId, String url, Console console) {
         try {
             audioManager.stream(url, sinkId);
         } catch (AudioException e) {
             console.println(e.getMessage());
         }
-    }
-
-    @Reference
-    protected void setAudioManager(AudioManager audioManager) {
-        this.audioManager = audioManager;
-    }
-
-    protected void unsetAudioManager(AudioManager audioManager) {
-        this.audioManager = null;
-    }
-
-    @Reference
-    protected void setLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = null;
     }
 
 }

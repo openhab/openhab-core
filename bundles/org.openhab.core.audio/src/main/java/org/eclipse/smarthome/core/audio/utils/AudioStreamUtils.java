@@ -12,27 +12,26 @@
  */
 package org.eclipse.smarthome.core.audio.utils;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Some general filename and extension utilities.
- * 
+ *
  * @author Christoph Weitkamp - Initial contribution
- * 
  */
+@NonNullByDefault
 public class AudioStreamUtils {
 
     public static final String EXTENSION_SEPARATOR = ".";
 
     /**
      * Gets the base name of a filename.
-     * 
+     *
      * @param filename the filename to query
      * @return the base name of the file or an empty string if none exists or {@code null} if the filename is
      *         {@code null}
      */
     public static String getBaseName(String filename) {
-        if (filename == null) {
-            return null;
-        }
         final int index = filename.lastIndexOf(EXTENSION_SEPARATOR);
         if (index == -1) {
             return filename;
@@ -43,15 +42,12 @@ public class AudioStreamUtils {
 
     /**
      * Gets the extension of a filename.
-     * 
+     *
      * @param filename the filename to retrieve the extension of
      * @return the extension of the file or an empty string if none exists or {@code null} if the filename is
      *         {@code null}
      */
     public static String getExtension(String filename) {
-        if (filename == null) {
-            return null;
-        }
         final int index = filename.lastIndexOf(EXTENSION_SEPARATOR);
         if (index == -1) {
             return "";
@@ -62,19 +58,13 @@ public class AudioStreamUtils {
 
     /**
      * Checks if the extension of a filename matches the given.
-     * 
+     *
      * @param filename the filename to check the extension of
      * @param extension the extension to check for
      * @return {@code true} if the filename has the specified extension
      */
     public static boolean isExtension(String filename, String extension) {
-        if (filename == null) {
-            return false;
-        }
-        if (extension == null || extension.isEmpty()) {
-            return false;
-        }
-        return getExtension(filename).equals(extension);
+        return !extension.isEmpty() && getExtension(filename).equals(extension);
     }
 
 }

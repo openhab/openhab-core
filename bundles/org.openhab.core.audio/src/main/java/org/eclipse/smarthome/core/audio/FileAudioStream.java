@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.audio.utils.AudioStreamUtils;
 
 /**
@@ -28,6 +29,7 @@ import org.eclipse.smarthome.core.audio.utils.AudioStreamUtils;
  * @author Kai Kreuzer - Refactored to take a file as input
  * @author Christoph Weitkamp - Refactored use of filename extension
  */
+@NonNullByDefault
 public class FileAudioStream extends FixedLengthAudioStream {
 
     public static final String WAV_EXTENSION = "wav";

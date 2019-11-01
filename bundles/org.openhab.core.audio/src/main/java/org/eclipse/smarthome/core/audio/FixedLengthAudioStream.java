@@ -14,12 +14,15 @@ package org.eclipse.smarthome.core.audio;
 
 import java.io.InputStream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is an {@link AudioStream}, which can provide information about its absolute length and is able to provide
  * cloned streams.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public abstract class FixedLengthAudioStream extends AudioStream {
 
     /**
