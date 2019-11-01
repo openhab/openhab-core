@@ -14,17 +14,21 @@ package org.eclipse.smarthome.config.core;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.eclipse.smarthome.config.core.internal.normalization.Normalizer;
 import org.eclipse.smarthome.config.core.internal.normalization.NormalizerFactory;
 import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
+import org.slf4j.LoggerFactory;
 
 /**
  * The configuration admin service provides us with a map of key->values. Values can be any
@@ -39,10 +43,105 @@ import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
  * @author Thomas Höfer - Minor changes for type normalization based on config description
  */
 public class ConfigUtil {
+
+    private static final String DEFAULT_LIST_DELIMITER = ",";
+
+    /**
+     * Maps the provided (default) value of the given {@link ConfigDescriptionParameter} to the corresponding Java type.
+     *
+     * In case the provided (default) value is supposed to be a number and cannot be converted into the target type
+     * correctly, this method will return <code>null</code> while logging a warning.
+     *
+     * @param parameter the {@link ConfigDescriptionParameter} which default value should be normalized (must not be
+     *            null)
+     * @return the given value as the corresponding Java type or <code>null</code> if the value could not be converted
+     */
+    public static @Nullable Object getDefaultValueAsCorrectType(ConfigDescriptionParameter parameter) {
+        return getDefaultValueAsCorrectType(parameter.getName(), parameter.getType(), parameter.getDefault());
+    }
+
+    static @Nullable Object getDefaultValueAsCorrectType(String parameterName, Type parameterType,
+            String defaultValue) {
+        try {
+            switch (parameterType) {
+                case TEXT:
+                    return defaultValue;
+                case BOOLEAN:
+                    return Boolean.parseBoolean(defaultValue);
+                case INTEGER:
+                    BigDecimal value = new BigDecimal(defaultValue);
+                    if (getNumberOfDecimalPlaces(value) > 0) {
+                        LoggerFactory.getLogger(ConfigUtil.class).warn(
+                                "Default value for parameter '{}' of type 'INTEGER' seems not to be an integer value: {}",
+                                parameterName, defaultValue);
+                        return value.setScale(0, BigDecimal.ROUND_DOWN);
+                    }
+                    return value;
+                case DECIMAL:
+                    return new BigDecimal(defaultValue);
+                default:
+                    return null;
+            }
+        } catch (NumberFormatException e) {
+            LoggerFactory.getLogger(ConfigUtil.class).warn(
+                    "Could not parse default value '{}' as type '{}' for parameter '{}': {}", defaultValue,
+                    parameterType, parameterName, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    static int getNumberOfDecimalPlaces(BigDecimal bigDecimal) {
+        return Math.max(0, bigDecimal.stripTrailingZeros().scale());
+    }
+
+    /**
+     * Applies the default values from a give {@link ConfigDescription} to the given {@link Configuration}.
+     *
+     * @param configuration the {@link Configuration} where the default values should be added (must not be null)
+     * @param configDescription the {@link ConfigDescription} where the default values are located (may be null, but
+     *            method won't have any effect then)
+     */
+    public static void applyDefaultConfiguration(Configuration configuration,
+            @Nullable ConfigDescription configDescription) {
+        if (configDescription != null) {
+            for (ConfigDescriptionParameter parameter : configDescription.getParameters()) {
+                String defaultValue = parameter.getDefault();
+                if (defaultValue != null && configuration.get(parameter.getName()) == null) {
+                    if (parameter.isMultiple()) {
+                        if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
+                            List<Object> values = Arrays.asList(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream()
+                                    .map(v -> v.trim()).filter(v -> !v.isEmpty())
+                                    .map(v -> ConfigUtil.getDefaultValueAsCorrectType(parameter.getName(),
+                                            parameter.getType(), v))
+                                    .filter(v -> v != null).collect(Collectors.toList());
+                            Integer multipleLimit = parameter.getMultipleLimit();
+                            if (multipleLimit != null && values.size() > multipleLimit.intValue()) {
+                                LoggerFactory.getLogger(ConfigUtil.class).warn(
+                                        "Number of default values ({}) for parameter '{}' is greater than multiple limit ({})",
+                                        values.size(), parameter.getName(), multipleLimit);
+                            }
+                            configuration.put(parameter.getName(), values);
+                        } else {
+                            Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
+                            if (value != null) {
+                                configuration.put(parameter.getName(), Arrays.asList(value));
+                            }
+                        }
+                    } else {
+                        Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
+                        if (value != null) {
+                            configuration.put(parameter.getName(), value);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Normalizes the types to the ones allowed for configurations.
      *
-     * @param configuration the configuration that needs to be normalzed
+     * @param configuration the configuration that needs to be normalized
      * @return normalized configuration
      */
     public static Map<String, Object> normalizeTypes(Map<String, Object> configuration) {

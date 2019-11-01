@@ -12,7 +12,6 @@
  */
 package org.eclipse.smarthome.model.thing.internal
 
-import java.math.BigDecimal
 import java.util.ArrayList
 import java.util.Collection
 import java.util.HashSet
@@ -22,8 +21,8 @@ import java.util.Set
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry
+import org.eclipse.smarthome.config.core.ConfigUtil
 import org.eclipse.smarthome.config.core.Configuration
 import org.eclipse.smarthome.core.common.registry.AbstractProvider
 import org.eclipse.smarthome.core.i18n.LocaleProvider
@@ -40,9 +39,9 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory
 import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder
 import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder
+import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
 import org.eclipse.smarthome.core.thing.type.ChannelDefinition
 import org.eclipse.smarthome.core.thing.type.ChannelKind
-import org.eclipse.smarthome.core.thing.type.ChannelType
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry
 import org.eclipse.smarthome.core.thing.type.ChannelTypeUID
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry
@@ -60,7 +59,6 @@ import org.osgi.service.component.annotations.Component
 import org.osgi.service.component.annotations.Reference
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
 
 /**
  * {@link ThingProvider} implementation which computes *.things files.
@@ -346,7 +344,6 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
         modelChannels.forEach [
             if (addedChannelIds.add(id)) {
                 var ChannelKind parsedKind = ChannelKind.STATE
-
                 var ChannelTypeUID channelTypeUID
                 var String itemType
                 var label = it.label
@@ -362,7 +359,11 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                             label = resolvedChannelType.label
                         }
                         autoUpdatePolicy = resolvedChannelType.autoUpdatePolicy
-                        applyDefaultConfiguration(configuration, resolvedChannelType)
+                        if (resolvedChannelType.configDescriptionURI !== null) {
+                            ConfigUtil.applyDefaultConfiguration(configuration,
+                                configDescriptionRegistry.getConfigDescription(
+                                resolvedChannelType.configDescriptionURI))
+                        }
                     } else {
                         logger.error("Channel type {} could not be resolved.", channelTypeUID.asString)
                     }
@@ -394,45 +395,6 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
             }
         ]
         channels
-    }
-
-    def private applyDefaultConfiguration(Configuration configuration, ChannelType channelType) {
-        if (configDescriptionRegistry !== null && configuration !== null) {
-            if (channelType.configDescriptionURI !== null) {
-                val configDescription = configDescriptionRegistry.getConfigDescription(channelType.configDescriptionURI)
-                if (configDescription !== null) {
-                    configDescription.parameters.filter [
-                        ^default !== null && configuration.get(name) === null
-                    ].forEach [
-                        val value = getDefaultValueAsCorrectType(type, ^default)
-                        if (value !== null) {
-                            configuration.put(name, value);
-                        }
-                    ]
-                }
-            }
-        }
-    }
-
-    def private Object getDefaultValueAsCorrectType(Type parameterType, String defaultValue) {
-        try {
-            switch (parameterType) {
-                case TEXT:
-                    return defaultValue
-                case BOOLEAN:
-                    return Boolean.parseBoolean(defaultValue)
-                case INTEGER:
-                    return new BigDecimal(defaultValue)
-                case DECIMAL:
-                    return new BigDecimal(defaultValue)
-                default:
-                    return null
-            }
-        } catch (NumberFormatException ex) {
-            logger.warn("Could not parse default value '{}' as type '{}': {}", defaultValue, parameterType,
-                ex.getMessage(), ex);
-            return null;
-        }
     }
 
     def private createConfiguration(ModelPropertyContainer propertyContainer) {

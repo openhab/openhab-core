@@ -63,7 +63,8 @@ import org.mockito.stubbing.Answer;
 /**
  * ThingFactoryTest is a test for the ThingFactory class.
  *
- * @author Dennis Nobel - Initial contribution, added test for different default types
+ * @author Dennis Nobel - Initial contribution
+ * @author Dennis Nobel - Added test for different default types
  * @author Alex Tugarev - Adapted for constructor modification of ConfigDescriptionParameter
  * @author Thomas Höfer - Thing type constructor modified because of thing properties introduction
  * @author Wouter Born - Migrate tests from Groovy to Java
@@ -190,7 +191,18 @@ public class ThingFactoryTest extends JavaOSGiTest {
                                 .withDefault("invalid").withLabel("label").withDescription("description")
                                 .withLimitToOptions(true).build();
 
-                        List<ConfigDescriptionParameter> parameters = Stream.of(p1, p2, p3, p4).collect(toList());
+                        ConfigDescriptionParameter p5 = ConfigDescriptionParameterBuilder
+                                .create("p5", ConfigDescriptionParameter.Type.DECIMAL).withContext("context")
+                                .withDefault("2.3").withLabel("label").withDescription("description").withMultiple(true)
+                                .withLimitToOptions(true).build();
+
+                        ConfigDescriptionParameter p6 = ConfigDescriptionParameterBuilder
+                                .create("p6", ConfigDescriptionParameter.Type.DECIMAL).withContext("context")
+                                .withDefault("2.3,2.4,2.5").withLabel("label").withDescription("description")
+                                .withMultiple(true).withLimitToOptions(true).build();
+
+                        List<ConfigDescriptionParameter> parameters = Stream.of(p1, p2, p3, p4, p5, p6)
+                                .collect(toList());
 
                         return new ConfigDescription(uri, parameters);
                     }
@@ -204,6 +216,14 @@ public class ThingFactoryTest extends JavaOSGiTest {
         assertThat(((BigDecimal) thing.getConfiguration().get("p2")).compareTo(new BigDecimal("5")), is(0));
         assertThat(((BigDecimal) thing.getConfiguration().get("p3")).compareTo(new BigDecimal("2.3")), is(0));
         assertThat(thing.getConfiguration().get("p4"), is(nullValue()));
+        assertThat(thing.getConfiguration().get("p5"), is(instanceOf(List.class)));
+        assertThat(((List<?>) thing.getConfiguration().get("p5")).size(), is(1));
+        assertThat(((List<?>) thing.getConfiguration().get("p5")).get(0), is(instanceOf(BigDecimal.class)));
+        assertThat(
+                ((BigDecimal) ((List<?>) thing.getConfiguration().get("p5")).get(0)).compareTo(new BigDecimal("2.3")),
+                is(0));
+        assertThat(thing.getConfiguration().get("p6"), is(instanceOf(List.class)));
+        assertThat(((List<?>) thing.getConfiguration().get("p6")).size(), is(3));
         assertThat(thing.getProperties().size(), is(0));
     }
 

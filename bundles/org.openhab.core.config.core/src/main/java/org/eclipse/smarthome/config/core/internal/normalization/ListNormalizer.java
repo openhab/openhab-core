@@ -24,7 +24,7 @@ import java.util.List;
  */
 final class ListNormalizer extends AbstractNormalizer {
 
-    private Normalizer delegate;
+    private final Normalizer delegate;
 
     ListNormalizer(Normalizer delegate) {
         this.delegate = delegate;

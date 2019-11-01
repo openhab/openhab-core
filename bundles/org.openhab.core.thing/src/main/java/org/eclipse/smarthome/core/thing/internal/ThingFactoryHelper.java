@@ -12,16 +12,14 @@
  */
 package org.eclipse.smarthome.core.thing.internal;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
+import org.eclipse.smarthome.config.core.ConfigUtil;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -148,28 +146,27 @@ public class ThingFactoryHelper {
             return null;
         }
 
-        ChannelUID channelUID = new ChannelUID(thingUID, groupId, channelDefinition.getId());
-        ChannelBuilder channelBuilder = createChannelBuilder(channelUID, type, configDescriptionRegistry);
+        final ChannelUID channelUID = new ChannelUID(thingUID, groupId, channelDefinition.getId());
+        final ChannelBuilder channelBuilder = createChannelBuilder(channelUID, type, configDescriptionRegistry);
 
         // If we want to override the label, add it...
         final String label = channelDefinition.getLabel();
         if (label != null) {
-            channelBuilder = channelBuilder.withLabel(label);
+            channelBuilder.withLabel(label);
         }
 
         // If we want to override the description, add it...
         final String description = channelDefinition.getDescription();
         if (description != null) {
-            channelBuilder = channelBuilder.withDescription(description);
+            channelBuilder.withDescription(description);
         }
 
-        channelBuilder = channelBuilder.withProperties(channelDefinition.getProperties());
-        return channelBuilder.build();
+        return channelBuilder.withProperties(channelDefinition.getProperties()).build();
     }
 
     static ChannelBuilder createChannelBuilder(ChannelUID channelUID, ChannelType channelType,
             ConfigDescriptionRegistry configDescriptionRegistry) {
-        ChannelBuilder channelBuilder = ChannelBuilder.create(channelUID, channelType.getItemType()) //
+        final ChannelBuilder channelBuilder = ChannelBuilder.create(channelUID, channelType.getItemType()) //
                 .withType(channelType.getUID()) //
                 .withDefaultTags(channelType.getTags()) //
                 .withKind(channelType.getKind()) //
@@ -178,93 +175,52 @@ public class ThingFactoryHelper {
 
         String description = channelType.getDescription();
         if (description != null) {
-            channelBuilder = channelBuilder.withDescription(description);
+            channelBuilder.withDescription(description);
         }
 
         // Initialize channel configuration with default-values
-        URI channelConfigDescriptionURI = channelType.getConfigDescriptionURI();
-        if (configDescriptionRegistry != null && channelConfigDescriptionURI != null) {
-            ConfigDescription cd = configDescriptionRegistry.getConfigDescription(channelConfigDescriptionURI);
-            if (cd != null) {
-                Configuration config = new Configuration();
-                for (ConfigDescriptionParameter param : cd.getParameters()) {
-                    String defaultValue = param.getDefault();
-                    if (defaultValue != null) {
-                        Object value = getDefaultValueAsCorrectType(param.getType(), defaultValue);
-                        if (value != null) {
-                            config.put(param.getName(), value);
-                        }
-                    }
-                }
-                channelBuilder = channelBuilder.withConfiguration(config);
-            }
+        if (channelType.getConfigDescriptionURI() != null) {
+            final Configuration configuration = new Configuration();
+            applyDefaultConfiguration(configuration, channelType, configDescriptionRegistry);
+            channelBuilder.withConfiguration(configuration);
         }
 
         return channelBuilder;
     }
 
     /**
-     * Map the provided (default) value of the given {@link Type} to the corresponding Java type.
-     *
-     * In case the provided value is supposed to be a number and cannot be converted into the target type correctly,
-     * this method will return <code>null</code> while logging a warning.
-     *
-     * @param parameterType the {@link Type} of the value
-     * @param defaultValue the value that should be converted
-     * @return the given value as the corresponding Java type or <code>null</code> if the value could not be converted
-     */
-    public static Object getDefaultValueAsCorrectType(Type parameterType, String defaultValue) {
-        try {
-            switch (parameterType) {
-                case TEXT:
-                    return defaultValue;
-                case BOOLEAN:
-                    return Boolean.parseBoolean(defaultValue);
-                case INTEGER:
-                    return new BigDecimal(defaultValue);
-                case DECIMAL:
-                    return new BigDecimal(defaultValue);
-                default:
-                    return null;
-            }
-        } catch (NumberFormatException ex) {
-            LoggerFactory.getLogger(ThingFactoryHelper.class).warn(
-                    "Could not parse default value '{}' as type '{}': {}", defaultValue, parameterType, ex.getMessage(),
-                    ex);
-            return null;
-        }
-    }
-
-    /**
      * Apply the {@link ThingType}'s default values to the given {@link Configuration}.
      *
-     * @param configuration the {@link Configuration} where the default values should be added (may be null,
-     *            but method won't have any effect then)
+     * @param configuration the {@link Configuration} where the default values should be added (must not be null)
      * @param thingType the {@link ThingType} where to look for the default values (must not be null)
      * @param configDescriptionRegistry the {@link ConfigDescriptionRegistry} to use (may be null, but method won't have
      *            any effect then)
      */
     public static void applyDefaultConfiguration(Configuration configuration, ThingType thingType,
-            ConfigDescriptionRegistry configDescriptionRegistry) {
-        if (configDescriptionRegistry != null && configuration != null) {
-            // Set default values to thing-configuration
-            if (thingType.getConfigDescriptionURI() != null) {
-                ConfigDescription thingConfigDescription = configDescriptionRegistry
-                        .getConfigDescription(thingType.getConfigDescriptionURI());
-                if (thingConfigDescription != null) {
-                    for (ConfigDescriptionParameter parameter : thingConfigDescription.getParameters()) {
-                        String defaultValue = parameter.getDefault();
-                        if (defaultValue != null && configuration.get(parameter.getName()) == null) {
-                            Object value = ThingFactoryHelper.getDefaultValueAsCorrectType(parameter.getType(),
-                                    defaultValue);
-                            if (value != null) {
-                                configuration.put(parameter.getName(), value);
-                            }
-                        }
-                    }
-                }
-            }
+            @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
+        URI configDescriptionURI = thingType.getConfigDescriptionURI();
+        if (configDescriptionURI != null && configDescriptionRegistry != null) {
+            // Set default values to thing configuration
+            ConfigUtil.applyDefaultConfiguration(configuration,
+                    configDescriptionRegistry.getConfigDescription(configDescriptionURI));
         }
     }
 
+    /**
+     * Apply the {@link ChannelType}'s default values to the given {@link Configuration}.
+     *
+     * @param configuration the {@link Configuration} where the default values should be added (must not be null)
+     * @param channelType the {@link ChannelType} where to look for the default values (must not be null)
+     * @param configDescriptionRegistry the {@link ConfigDescriptionRegistry} to use (may be null, but method won't have
+     *            any effect then)
+     */
+    public static void applyDefaultConfiguration(Configuration configuration, ChannelType channelType,
+            @Nullable ConfigDescriptionRegistry configDescriptionRegistry) {
+        URI configDescriptionURI = channelType.getConfigDescriptionURI();
+        if (configDescriptionURI != null && configDescriptionRegistry != null) {
+            // Set default values to channel configuration
+            ConfigUtil.applyDefaultConfiguration(configuration,
+                    configDescriptionRegistry.getConfigDescription(configDescriptionURI));
+        }
+    }
 }
