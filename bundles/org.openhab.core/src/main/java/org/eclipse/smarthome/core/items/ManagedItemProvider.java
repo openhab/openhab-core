@@ -12,6 +12,7 @@
  */
 package org.eclipse.smarthome.core.items;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +25,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.AbstractManagedProvider;
 import org.eclipse.smarthome.core.items.ManagedItemProvider.PersistedItem;
 import org.eclipse.smarthome.core.items.dto.GroupFunctionDTO;
@@ -37,6 +39,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.InstanceCreator;
 
 /**
  * {@link ManagedItemProvider} is an OSGi service, that allows to add or remove
@@ -53,38 +57,35 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = { ItemProvider.class, ManagedItemProvider.class })
 public class ManagedItemProvider extends AbstractManagedProvider<Item, String, PersistedItem> implements ItemProvider {
 
+    @NonNullByDefault
     public static class PersistedItem {
 
-        public PersistedItem(@NonNull String itemType) {
+        public PersistedItem(String itemType) {
             this.itemType = itemType;
         }
 
-        public String baseItemType;
-
-        public List<String> groupNames;
-
-        public @NonNull String itemType;
-
-        public Set<String> tags;
-
-        public String label;
-
-        public String category;
-
-        public String functionName;
-
-        public List<String> functionParams;
-
-        public String dimension;
-
+        public @Nullable String baseItemType;
+        public @Nullable List<String> groupNames;
+        public String itemType;
+        public @Nullable Set<String> tags;
+        public @Nullable String label;
+        public @Nullable String category;
+        public @Nullable String functionName;
+        public @Nullable List<String> functionParams;
+        public @Nullable String dimension;
     }
 
-    private static final @NonNull String ITEM_TYPE_GROUP = "Group";
+    public static class PersistedItemInstanceCreator implements InstanceCreator<PersistedItem> {
+
+        @Override
+        public PersistedItem createInstance(Type type) {
+            return new PersistedItem("");
+        }
+    }
 
     private final Logger logger = LoggerFactory.getLogger(ManagedItemProvider.class);
 
     private final Collection<ItemFactory> itemFactories = new CopyOnWriteArrayList<>();
-
     private final Map<String, PersistedItem> failedToCreate = new ConcurrentHashMap<>();
 
     @Activate
@@ -103,19 +104,19 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         Item item = get(itemName);
         if (recursive && item instanceof GroupItem) {
             for (String member : getMemberNamesRecursively((GroupItem) item, getAll())) {
-                this.remove(member);
+                remove(member);
             }
         }
         if (item != null) {
-            this.remove(item.getName());
+            remove(item.getName());
             return item;
         } else {
             return null;
         }
     }
 
-    private List<@NonNull String> getMemberNamesRecursively(GroupItem groupItem, Collection<Item> allItems) {
-        List<@NonNull String> memberNames = new ArrayList<>();
+    private List<String> getMemberNamesRecursively(GroupItem groupItem, Collection<Item> allItems) {
+        List<String> memberNames = new ArrayList<>();
         for (Item item : allItems) {
             if (item.getGroupNames().contains(groupItem.getName())) {
                 memberNames.add(item.getName());
@@ -127,8 +128,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         return memberNames;
     }
 
-    private Item createItem(@NonNull String itemType, @NonNull String itemName) {
-        for (ItemFactory factory : this.itemFactories) {
+    private Item createItem(String itemType, String itemName) {
+        for (ItemFactory factory : itemFactories) {
             Item item = factory.createItem(itemType, itemName);
             if (item != null) {
                 return item;
@@ -147,7 +148,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
      * @param item the Item to translate the name
      * @return the translated ItemTypeName understandable by the {@link ItemFactory}s
      */
-    private @NonNull String toItemFactoryName(Item item) {
+    private String toItemFactoryName(Item item) {
         return item.getType();
     }
 
@@ -197,7 +198,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     protected Item toElement(String itemName, PersistedItem persistedItem) {
         Item item = null;
 
-        if (persistedItem.itemType.equals(ITEM_TYPE_GROUP)) {
+        if (persistedItem.itemType.equals(GroupItem.TYPE)) {
             if (persistedItem.baseItemType != null) {
                 Item baseItem = createItem(persistedItem.baseItemType, itemName);
                 if (persistedItem.functionName != null) {
@@ -259,7 +260,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     @Override
     protected PersistedItem toPersistableElement(Item item) {
         PersistedItem persistedItem = new PersistedItem(
-                item instanceof GroupItem ? ITEM_TYPE_GROUP : toItemFactoryName(item));
+                item instanceof GroupItem ? GroupItem.TYPE : toItemFactoryName(item));
 
         if (item instanceof GroupItem) {
             GroupItem groupItem = (GroupItem) item;
@@ -292,5 +293,4 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
             }
         }
     }
-
 }

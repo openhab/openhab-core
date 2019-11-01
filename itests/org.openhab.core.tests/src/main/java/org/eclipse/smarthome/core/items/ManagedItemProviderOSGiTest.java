@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.smarthome.core.items.ManagedItemProvider.PersistedItem;
+import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.eclipse.smarthome.core.library.items.StringItem;
 import org.eclipse.smarthome.core.library.items.SwitchItem;
@@ -119,7 +120,7 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         itemProvider.add(new StringItem("Item"));
         Item result = itemProvider.update(new SwitchItem("Item"));
 
-        assertThat(result.getType(), is("String"));
+        assertThat(result.getType(), is(CoreItemFactory.STRING));
 
         itemProvider.remove("Item");
 
