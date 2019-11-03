@@ -31,6 +31,11 @@ import org.junit.Test;
 
 import com.google.gson.JsonObject;
 
+/**
+ * Tests {@link JSONResponse}.
+ *
+ * @author Henning Treu - Initial contribution
+ */
 public class JSONResponseTest {
 
     private static final String ENTITY_VALUE = "entityValue";

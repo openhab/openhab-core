@@ -272,7 +272,7 @@ public class QueueingThreadPoolExecutorTest {
         return new Runnable10s();
     }
 
-    private static abstract class AbstractRunnable implements Runnable {
+    private abstract static class AbstractRunnable implements Runnable {
         private static AtomicInteger runs = new AtomicInteger(0);
 
         protected final Logger logger = LoggerFactory.getLogger(AbstractRunnable.class);

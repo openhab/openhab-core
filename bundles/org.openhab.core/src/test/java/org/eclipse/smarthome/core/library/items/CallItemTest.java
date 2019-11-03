@@ -26,7 +26,6 @@ public class CallItemTest {
 
     @Test
     public void testSetStringListType() {
-
         StringListType callType1 = new StringListType("0699222222", "0179999998");
         CallItem callItem1 = new CallItem("testItem");
 

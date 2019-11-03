@@ -34,6 +34,11 @@ import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.mockito.Mock;
 
+/**
+ * Tests {@link UpnpIOServiceImpl}.
+ *
+ * @author Andre Fuechsel - Initial contribution
+ */
 public class UpnpIOServiceTest {
 
     private static final String UDN_1_STRING = "UDN";
@@ -90,7 +95,7 @@ public class UpnpIOServiceTest {
     }
 
     @Test
-    public void testIsRegistered_everythingEmptyInitially() {
+    public void testIsRegisteredEverythingEmptyInitially() {
         assertTrue(upnpIoService.isRegistered(upnpIoParticipant));
         assertThatEverythingIsEmpty();
     }

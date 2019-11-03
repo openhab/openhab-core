@@ -65,7 +65,7 @@ public class InboxPredicatesTest {
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
     private static final Map<String, Object> PROPS2 = Collections.singletonMap(PROP2, PROP_VAL2);
 
-    private static final List<DiscoveryResultImpl> results = Arrays.asList(
+    private static final List<DiscoveryResultImpl> RESULTS = Arrays.asList(
             new DiscoveryResultImpl(THING_TYPE_UID11, THING_UID11, null, PROPS1, PROP1, "label",
                     DiscoveryResult.TTL_UNLIMITED),
             new DiscoveryResultImpl(THING_TYPE_UID11, THING_UID12, null, PROPS1, null, "label",
@@ -77,95 +77,95 @@ public class InboxPredicatesTest {
 
     @Before
     public void setUp() throws Exception {
-        results.get(3).setFlag(DiscoveryResultFlag.IGNORED);
+        RESULTS.get(3).setFlag(DiscoveryResultFlag.IGNORED);
     }
 
     @Test
     public void testForBinding() {
-        assertThat(results.stream().filter(forBinding(BINDING_ID1)).collect(Collectors.toList()).size(), is(3));
+        assertThat(RESULTS.stream().filter(forBinding(BINDING_ID1)).collect(Collectors.toList()).size(), is(3));
 
-        assertThat(results.stream().filter(forBinding(BINDING_ID2)).collect(Collectors.toList()).size(), is(1));
-        assertThat(results.stream().filter(forBinding(BINDING_ID2)).collect(Collectors.toList()).get(0),
-                is(equalTo(results.get(3))));
+        assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).collect(Collectors.toList()).size(), is(1));
+        assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).collect(Collectors.toList()).get(0),
+                is(equalTo(RESULTS.get(3))));
 
-        assertThat(results.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.NEW))
+        assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.NEW))
                 .collect(Collectors.toList()).size(), is(0));
 
-        assertThat(results.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.IGNORED))
+        assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.IGNORED))
                 .collect(Collectors.toList()).size(), is(1));
-        assertThat(results.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.IGNORED))
-                .collect(Collectors.toList()).get(0), is(equalTo(results.get(3))));
+        assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.IGNORED))
+                .collect(Collectors.toList()).get(0), is(equalTo(RESULTS.get(3))));
     }
 
     @Test
     public void testForThingTypeUID() {
-        assertThat(results.stream().filter(forThingTypeUID(THING_TYPE_UID11)).collect(Collectors.toList()).size(),
+        assertThat(RESULTS.stream().filter(forThingTypeUID(THING_TYPE_UID11)).collect(Collectors.toList()).size(),
                 is(2));
 
-        assertThat(results.stream().filter(forThingTypeUID(THING_TYPE_UID12)).collect(Collectors.toList()).size(),
+        assertThat(RESULTS.stream().filter(forThingTypeUID(THING_TYPE_UID12)).collect(Collectors.toList()).size(),
                 is(1));
-        assertThat(results.stream().filter(forThingTypeUID(THING_TYPE_UID12)).collect(Collectors.toList()).get(0),
-                is(equalTo(results.get(2))));
+        assertThat(RESULTS.stream().filter(forThingTypeUID(THING_TYPE_UID12)).collect(Collectors.toList()).get(0),
+                is(equalTo(RESULTS.get(2))));
     }
 
     @Test
     public void testForThingUID() {
-        assertThat(results.stream().filter(forThingUID(THING_UID11)).collect(Collectors.toList()).size(), is(1));
-        assertThat(results.stream().filter(forThingUID(THING_UID11)).collect(Collectors.toList()).get(0),
-                is(equalTo(results.get(0))));
+        assertThat(RESULTS.stream().filter(forThingUID(THING_UID11)).collect(Collectors.toList()).size(), is(1));
+        assertThat(RESULTS.stream().filter(forThingUID(THING_UID11)).collect(Collectors.toList()).get(0),
+                is(equalTo(RESULTS.get(0))));
 
-        assertThat(results.stream().filter(forThingUID(THING_UID12)).collect(Collectors.toList()).size(), is(2));
-        assertThat(results.stream().filter(forThingUID(THING_UID12)).filter(forThingTypeUID(THING_TYPE_UID12))
+        assertThat(RESULTS.stream().filter(forThingUID(THING_UID12)).collect(Collectors.toList()).size(), is(2));
+        assertThat(RESULTS.stream().filter(forThingUID(THING_UID12)).filter(forThingTypeUID(THING_TYPE_UID12))
                 .collect(Collectors.toList()).size(), is(1));
-        assertThat(results.stream().filter(forThingUID(THING_UID12)).filter(forThingTypeUID(THING_TYPE_UID12))
-                .collect(Collectors.toList()).get(0), is(equalTo(results.get(2))));
+        assertThat(RESULTS.stream().filter(forThingUID(THING_UID12)).filter(forThingTypeUID(THING_TYPE_UID12))
+                .collect(Collectors.toList()).get(0), is(equalTo(RESULTS.get(2))));
     }
 
     @Test
     public void testWithFlag() {
-        assertThat(results.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()).size(),
+        assertThat(RESULTS.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()).size(),
                 is(3));
-        assertThat(results.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList()).size(),
+        assertThat(RESULTS.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList()).size(),
                 is(1));
-        assertThat(results.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList()).get(0),
-                is(equalTo(results.get(3))));
+        assertThat(RESULTS.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList()).get(0),
+                is(equalTo(RESULTS.get(3))));
     }
 
     @Test
     public void testWithProperty() {
-        assertThat(results.stream().filter(withProperty(PROP1, PROP_VAL1)).collect(Collectors.toList()).size(), is(2));
-        assertThat(results.stream().filter(withProperty(PROP2, PROP_VAL2)).collect(Collectors.toList()).size(), is(4));
-        assertThat(results.stream().filter(withProperty(PROP1, PROP_VAL2)).collect(Collectors.toList()).size(), is(0));
-        assertThat(results.stream().filter(withProperty(PROP2, PROP_VAL1)).collect(Collectors.toList()).size(), is(0));
-        assertThat(results.stream().filter(withProperty(null, PROP_VAL1)).collect(Collectors.toList()).size(), is(0));
+        assertThat(RESULTS.stream().filter(withProperty(PROP1, PROP_VAL1)).collect(Collectors.toList()).size(), is(2));
+        assertThat(RESULTS.stream().filter(withProperty(PROP2, PROP_VAL2)).collect(Collectors.toList()).size(), is(4));
+        assertThat(RESULTS.stream().filter(withProperty(PROP1, PROP_VAL2)).collect(Collectors.toList()).size(), is(0));
+        assertThat(RESULTS.stream().filter(withProperty(PROP2, PROP_VAL1)).collect(Collectors.toList()).size(), is(0));
+        assertThat(RESULTS.stream().filter(withProperty(null, PROP_VAL1)).collect(Collectors.toList()).size(), is(0));
     }
 
     @Test
     public void testWithRepresentationProperty() {
-        assertThat(results.stream().filter(withRepresentationProperty(PROP1)).collect(Collectors.toList()).size(),
+        assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP1)).collect(Collectors.toList()).size(),
                 is(1));
-        assertThat(results.stream().filter(withRepresentationProperty(PROP1)).collect(Collectors.toList()).get(0),
-                is(equalTo(results.get(0))));
-        assertThat(results.stream().filter(withRepresentationProperty(PROP2)).collect(Collectors.toList()).size(),
+        assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP1)).collect(Collectors.toList()).get(0),
+                is(equalTo(RESULTS.get(0))));
+        assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP2)).collect(Collectors.toList()).size(),
                 is(1));
-        assertThat(results.stream().filter(withRepresentationProperty(PROP2)).collect(Collectors.toList()).get(0),
-                is(equalTo(results.get(2))));
+        assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP2)).collect(Collectors.toList()).get(0),
+                is(equalTo(RESULTS.get(2))));
     }
 
     @Test
     public void testWithRepresentationPropertyValue() {
         assertThat(
-                results.stream().filter(withRepresentationPropertyValue(PROP_VAL1)).collect(Collectors.toList()).size(),
+                RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL1)).collect(Collectors.toList()).size(),
                 is(1));
         assertThat(
-                results.stream().filter(withRepresentationPropertyValue(PROP_VAL1)).collect(Collectors.toList()).get(0),
-                is(equalTo(results.get(0))));
+                RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL1)).collect(Collectors.toList()).get(0),
+                is(equalTo(RESULTS.get(0))));
         assertThat(
-                results.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).collect(Collectors.toList()).size(),
+                RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).collect(Collectors.toList()).size(),
                 is(1));
         assertThat(
-                results.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).collect(Collectors.toList()).get(0),
-                is(equalTo(results.get(2))));
+                RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).collect(Collectors.toList()).get(0),
+                is(equalTo(RESULTS.get(2))));
     }
 
 }

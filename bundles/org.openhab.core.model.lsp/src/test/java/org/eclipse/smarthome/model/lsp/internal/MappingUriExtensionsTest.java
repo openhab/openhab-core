@@ -114,7 +114,7 @@ public class MappingUriExtensionsTest {
     }
 
     @Test
-    public void testToPath_emfURI() {
+    public void testToPathEmfURI() {
         MappingUriExtensions mapper = createMapper();
         mapper.toUri(request);
 

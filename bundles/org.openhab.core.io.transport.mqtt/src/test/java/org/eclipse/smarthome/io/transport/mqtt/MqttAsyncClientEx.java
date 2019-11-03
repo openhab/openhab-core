@@ -73,7 +73,6 @@ public class MqttAsyncClientEx extends MqttAsyncClient {
     @Override
     public IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean retained, Object userContext,
             IMqttActionListener callback) throws MqttException, MqttPersistenceException {
-
         if (connection.publishSuccess) {
             callback.onSuccess(getToken(userContext, callback, topic));
         } else {

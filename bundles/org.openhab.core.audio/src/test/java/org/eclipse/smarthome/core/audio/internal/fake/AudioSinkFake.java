@@ -33,6 +33,7 @@ import org.eclipse.smarthome.core.library.types.PercentType;
 /**
  * An {@link AudioSink} fake used for the tests.
  *
+ * @author Petar Valchev - Initial contribution
  * @author Christoph Weitkamp - Added examples for getSupportedFormats() and getSupportedStreams()
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Migrate tests from Groovy to Java

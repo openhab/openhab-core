@@ -68,20 +68,20 @@ public class ThingBuilderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testWithChannel_duplicates() {
+    public void testWithChannelDuplicates() {
         thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
         thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testWithChannels_duplicatesCollections() {
+    public void testWithChannelsDuplicatesCollections() {
         thingBuilder.withChannels(Arrays.asList( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build()));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testWithChannels_duplicatesVararg() {
+    public void testWithChannelsDuplicatesVararg() {
         thingBuilder.withChannels( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
@@ -99,7 +99,7 @@ public class ThingBuilderTest {
     }
 
     @Test
-    public void testWithoutChannel_missing() {
+    public void testWithoutChannelMissing() {
         thingBuilder.withChannels( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build());
@@ -108,7 +108,7 @@ public class ThingBuilderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testWithChannel_wrongThing() {
+    public void testWithChannelWrongThing() {
         thingBuilder.withChannel(
                 ChannelBuilder.create(new ChannelUID(new ThingUID(THING_TYPE_UID, "wrong"), "channel1"), "").build());
     }

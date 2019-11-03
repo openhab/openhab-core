@@ -28,11 +28,16 @@ import org.junit.Test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+/**
+ * Tests {@link Stream2JSONInputStream}.
+ *
+ * @author Henning Treu - Initial contribution
+ */
 public class Stream2JSONInputStreamTest {
 
     private Stream2JSONInputStream collection2InputStream;
 
-    private final Gson GSON = new GsonBuilder().create();
+    private static final Gson GSON = new GsonBuilder().create();
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailForNullSource() throws IOException {

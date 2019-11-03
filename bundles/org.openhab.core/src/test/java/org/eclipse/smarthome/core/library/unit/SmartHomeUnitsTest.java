@@ -45,7 +45,7 @@ public class SmartHomeUnitsTest {
     private static final double DEFAULT_ERROR = 0.0000000000000001d;
 
     @Test
-    public void testinHg2PascalConversion() {
+    public void testInHg2PascalConversion() {
         Quantity<Pressure> inHg = Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.INCH_OF_MERCURY);
 
         assertThat(inHg.to(SIUnits.PASCAL), is(Quantities.getQuantity(new BigDecimal("3386.388"), SIUnits.PASCAL)));
@@ -54,7 +54,7 @@ public class SmartHomeUnitsTest {
     }
 
     @Test
-    public void test_inHg_UnitSymbol() {
+    public void testInHgUnitSymbol() {
         assertThat(ImperialUnits.INCH_OF_MERCURY.getSymbol(), is("inHg"));
         assertThat(ImperialUnits.INCH_OF_MERCURY.toString(), is("inHg"));
     }
@@ -77,7 +77,7 @@ public class SmartHomeUnitsTest {
     }
 
     @Test
-    public void test_mmHg_UnitSymbol() {
+    public void testMmHgUnitSymbol() {
         assertThat(SmartHomeUnits.MILLIMETRE_OF_MERCURY.getSymbol(), is("mmHg"));
         assertThat(SmartHomeUnits.MILLIMETRE_OF_MERCURY.toString(), is("mmHg"));
     }
@@ -98,7 +98,7 @@ public class SmartHomeUnitsTest {
     }
 
     @Test
-    public void test_hPa_UnitSymbol() {
+    public void testHpaUnitSymbol() {
         assertThat(HECTO(SIUnits.PASCAL).toString(), is("hPa"));
     }
 
@@ -164,7 +164,7 @@ public class SmartHomeUnitsTest {
     }
 
     @Test
-    public void test_knot_UnitSymbol() {
+    public void testKnotUnitSymbol() {
         assertThat(SmartHomeUnits.KNOT.getSymbol(), is("kn"));
         assertThat(SmartHomeUnits.KNOT.toString(), is("kn"));
     }
@@ -206,25 +206,25 @@ public class SmartHomeUnitsTest {
     }
 
     @Test
-    public void test_fahrenheit_UnitSymbol() {
+    public void testFahrenheitUnitSymbol() {
         assertThat(ImperialUnits.FAHRENHEIT.getSymbol(), is("°F"));
         assertThat(ImperialUnits.FAHRENHEIT.toString(), is("°F"));
     }
 
     @Test
-    public void test_inch_UnitSymbol() {
+    public void testInchUnitSymbol() {
         assertThat(ImperialUnits.INCH.getSymbol(), is("in"));
         assertThat(ImperialUnits.INCH.toString(), is("in"));
     }
 
     @Test
-    public void test_mile_UnitSymbol() {
+    public void testMileUnitSymbol() {
         assertThat(ImperialUnits.MILE.getSymbol(), is("mi"));
         assertThat(ImperialUnits.MILE.toString(), is("mi"));
     }
 
     @Test
-    public void test_one_UnitSymbol() {
+    public void testOneUnitSymbol() {
         assertThat(SmartHomeUnits.ONE.getSymbol(), is(""));
 
         Quantity<Dimensionless> one1 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.ONE);
@@ -262,8 +262,8 @@ public class SmartHomeUnitsTest {
 
     @Test
     public void testMicrogramPerCubicMeter2KilogramPerCubicMeter() {
-        Quantity<Density> one_kg_m3 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.KILOGRAM_PER_CUBICMETRE);
-        Quantity<Density> converted = one_kg_m3.to(SmartHomeUnits.MICROGRAM_PER_CUBICMETRE);
+        Quantity<Density> oneKgM3 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.KILOGRAM_PER_CUBICMETRE);
+        Quantity<Density> converted = oneKgM3.to(SmartHomeUnits.MICROGRAM_PER_CUBICMETRE);
         assertThat(converted.getValue().doubleValue(), is(closeTo(1000000000, DEFAULT_ERROR)));
     }
 
@@ -279,8 +279,8 @@ public class SmartHomeUnitsTest {
 
     @Test
     public void testMicrowattPerSquareCentimetre2KilogramPerSquareCentiMetre() {
-        Quantity<Intensity> one_mw_cm2 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.IRRADIANCE);
-        Quantity<Intensity> converted = one_mw_cm2.to(SmartHomeUnits.MICROWATT_PER_SQUARE_CENTIMETRE);
+        Quantity<Intensity> oneMwCm2 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.IRRADIANCE);
+        Quantity<Intensity> converted = oneMwCm2.to(SmartHomeUnits.MICROWATT_PER_SQUARE_CENTIMETRE);
         assertThat(converted.getValue().doubleValue(), is(closeTo(0.01, DEFAULT_ERROR)));
     }
 

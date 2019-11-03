@@ -241,8 +241,7 @@ public class DateTimeTypeTest {
     /**
      * setup Test class with current parameter map.
      *
-     * @param parameterMap
-     *            parameter map
+     * @param parameterMap parameter map
      */
     public DateTimeTypeTest(ParameterSet parameterSet) {
         this.parameterSet = parameterSet;

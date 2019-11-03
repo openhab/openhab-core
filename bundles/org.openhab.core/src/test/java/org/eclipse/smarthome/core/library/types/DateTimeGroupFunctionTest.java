@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author Robert Michalak
+ * @author Robert Michalak - Initial contribution
  */
 public class DateTimeGroupFunctionTest {
 
@@ -44,7 +44,6 @@ public class DateTimeGroupFunctionTest {
 
     @Test
     public void testLatestFunction() {
-
         ZonedDateTime expectedDateTime = ZonedDateTime.now();
         items.add(new TestItem("TestItem1", new DateTimeType(expectedDateTime)));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));
@@ -61,7 +60,6 @@ public class DateTimeGroupFunctionTest {
 
     @Test
     public void testEarliestFunction() {
-
         ZonedDateTime expectedDateTime = ZonedDateTime.now();
         items.add(new TestItem("TestItem1", new DateTimeType(expectedDateTime)));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));

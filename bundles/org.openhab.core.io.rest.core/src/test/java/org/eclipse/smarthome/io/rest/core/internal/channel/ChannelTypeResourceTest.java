@@ -62,7 +62,7 @@ public class ChannelTypeResourceTest {
     }
 
     @Test
-    public void getAll_shouldRetrieveAllChannelTypes() throws Exception {
+    public void getAllShouldRetrieveAllChannelTypes() throws Exception {
         channelTypeResource.getAll(null);
         verify(channelTypeRegistry).getChannelTypes(any(Locale.class));
     }

@@ -28,18 +28,18 @@ public class PercentTypeTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void MoreThan100() {
+    public void moreThan100() {
         new PercentType("100.2");
     }
 
     @Test
-    public void DoubleValue() {
+    public void doubleValue() {
         PercentType pt = new PercentType("0.0001");
         assertEquals("0.0001", pt.toString());
     }
 
     @Test
-    public void IntValue() {
+    public void intValue() {
         PercentType pt = new PercentType(100);
         assertEquals("100", pt.toString());
     }

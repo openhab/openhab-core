@@ -33,14 +33,14 @@ public class JavaTestTest {
     }
 
     @Test
-    public void waitForAssertShouldRunAfterLastCall_whenAssertionSucceeds() {
+    public void waitForAssertShouldRunAfterLastCallWhenAssertionSucceeds() {
         Runnable afterLastCall = mock(Runnable.class);
         javaTest.waitForAssert(() -> assertTrue(true), null, afterLastCall, 100, 50);
         verify(afterLastCall, times(1)).run();
     }
 
     @Test
-    public void waitForAssertShouldRunAfterLastCall_whenAssertionFails() {
+    public void waitForAssertShouldRunAfterLastCallWhenAssertionFails() {
         Runnable afterLastCall = mock(Runnable.class);
         try {
             javaTest.waitForAssert(() -> assertTrue(false), null, afterLastCall, 100, 50);

@@ -34,14 +34,14 @@ import org.osgi.framework.Bundle;
 public class ResourceBundleClassLoaderTest {
 
     static URL createTmpTestPropetiesFile(Path root, String relativeFile) throws Exception {
-        Path file = Paths.get(relativeFile);
-        Path fileDir = file.getParent();
+        Path filePath = Paths.get(relativeFile);
+        Path dirPath = filePath.getParent();
 
-        new File(root.toFile(), fileDir.toString()).mkdirs();
-        File _file = new File(root.toFile(), relativeFile);
-        _file.createNewFile();
+        new File(root.toFile(), dirPath.toString()).mkdirs();
+        File file = new File(root.toFile(), relativeFile);
+        file.createNewFile();
 
-        return _file.toURL();
+        return file.toURL();
     }
 
     @Test

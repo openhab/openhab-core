@@ -72,7 +72,7 @@ public class ItemEventFactoryTest {
             RawType.DEFAULT_MIME_TYPE);
 
     @Test
-    public void testCreateEvent_ItemCommandEvent_OnOffType() throws Exception {
+    public void testCreateEventItemCommandEventOnOffType() throws Exception {
         Event event = factory.createEvent(ITEM_COMMAND_EVENT_TYPE, ITEM_COMMAND_EVENT_TOPIC, ITEM_COMMAND_EVENT_PAYLOAD,
                 SOURCE);
 
@@ -88,7 +88,7 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateCommandEvent_OnOffType() throws Exception {
+    public void testCreateCommandEventOnOffType() throws Exception {
         ItemCommandEvent event = ItemEventFactory.createCommandEvent(ITEM_NAME, ITEM_COMMAND, SOURCE);
 
         assertEquals(ITEM_COMMAND_EVENT_TYPE, event.getType());
@@ -101,7 +101,7 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateEvent_ItemCommandEvent_RefreshType() throws Exception {
+    public void testCreateEventItemCommandEventRefreshType() throws Exception {
         Event event = factory.createEvent(ITEM_COMMAND_EVENT_TYPE, ITEM_COMMAND_EVENT_TOPIC,
                 ITEM_REFRESH_COMMAND_EVENT_PAYLOAD, SOURCE);
 
@@ -116,7 +116,7 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateEvent_ItemStateEvent_UnDefType() throws Exception {
+    public void testCreateEventItemStateEventUnDefType() throws Exception {
         Event event = factory.createEvent(ITEM_STATE_EVENT_TYPE, ITEM_STATE_EVENT_TOPIC, ITEM_UNDEF_STATE_EVENT_PAYLOAD,
                 SOURCE);
 
@@ -132,7 +132,7 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateEvent_GroupItemStateChangedEvent() throws Exception {
+    public void testCreateEventGroupItemStateChangedEvent() throws Exception {
         Event event = factory.createEvent(GROUPITEM_CHANGED_EVENT_TYPE, GROUPITEM_STATE_CHANGED_EVENT_TOPIC,
                 ITEM_STATE_CHANGED_EVENT_PAYLOAD, SOURCE);
 
@@ -150,7 +150,7 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateEvent_ItemStateEvent_OnOffType() throws Exception {
+    public void testCreateEventItemStateEventOnOffType() throws Exception {
         Event event = factory.createEvent(ITEM_STATE_EVENT_TYPE, ITEM_STATE_EVENT_TOPIC, ITEM_STATE_EVENT_PAYLOAD,
                 SOURCE);
 
@@ -166,7 +166,7 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateEvent_ItemStatePredictedEvent_OnOffType() throws Exception {
+    public void testCreateEventItemStatePredictedEventOnOffType() throws Exception {
         Event event = factory.createEvent(ITEM_STATE_PREDICTED_EVENT_TYPE, ITEM_STATE_PREDICTED_EVENT_TOPIC,
                 ITEM_STATE_PREDICTED_EVENT_PAYLOAD, SOURCE);
 
@@ -181,7 +181,7 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateStateEvent_OnOffType() {
+    public void testCreateStateEventOnOffType() {
         ItemStateEvent event = ItemEventFactory.createStateEvent(ITEM_NAME, ITEM_STATE, SOURCE);
 
         assertThat(event.getType(), is(ITEM_STATE_EVENT_TYPE));
@@ -194,7 +194,7 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateEvent_ItemAddedEvent() throws Exception {
+    public void testCreateEventItemAddedEvent() throws Exception {
         Event event = factory.createEvent(ITEM_ADDED_EVENT_TYPE, ITEM_ADDED_EVENT_TOPIC, ITEM_ADDED_EVENT_PAYLOAD,
                 null);
 
@@ -220,19 +220,19 @@ public class ItemEventFactoryTest {
     }
 
     @Test
-    public void testCreateGroupStateChangedEvent_RawType() throws Exception {
-        GroupItemStateChangedEvent giEvent_source = ItemEventFactory.createGroupStateChangedEvent(GROUP_NAME, ITEM_NAME,
+    public void testCreateGroupStateChangedEventRawType() throws Exception {
+        GroupItemStateChangedEvent giEventSource = ItemEventFactory.createGroupStateChangedEvent(GROUP_NAME, ITEM_NAME,
                 NEW_RAW_ITEM_STATE, RAW_ITEM_STATE);
 
-        Event giEvent_parsed = factory.createEvent(giEvent_source.getType(), giEvent_source.getTopic(),
-                giEvent_source.getPayload(), giEvent_source.getSource());
+        Event giEventParsed = factory.createEvent(giEventSource.getType(), giEventSource.getTopic(),
+                giEventSource.getPayload(), giEventSource.getSource());
 
-        assertEquals(GroupItemStateChangedEvent.class, giEvent_parsed.getClass());
-        GroupItemStateChangedEvent groupItemStateChangedEvent = (GroupItemStateChangedEvent) giEvent_parsed;
+        assertEquals(GroupItemStateChangedEvent.class, giEventParsed.getClass());
+        GroupItemStateChangedEvent groupItemStateChangedEvent = (GroupItemStateChangedEvent) giEventParsed;
 
         assertEquals(GROUPITEM_CHANGED_EVENT_TYPE, groupItemStateChangedEvent.getType());
         assertEquals(GROUPITEM_STATE_CHANGED_EVENT_TOPIC, groupItemStateChangedEvent.getTopic());
-        assertEquals(giEvent_source.getPayload(), groupItemStateChangedEvent.getPayload());
+        assertEquals(giEventSource.getPayload(), groupItemStateChangedEvent.getPayload());
         assertEquals(GROUP_NAME, groupItemStateChangedEvent.getItemName());
         assertEquals(ITEM_NAME, groupItemStateChangedEvent.getMemberName());
         assertNull(groupItemStateChangedEvent.getSource());

@@ -103,7 +103,7 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testConfigUpdateNormalization_guessType() {
+    public void testConfigUpdateNormalizationGuessType() {
         Map<String, Object> props = new HashMap<>();
         props.put("foo", 1);
         Configuration config = new Configuration(props);
@@ -121,7 +121,7 @@ public class PersistentInboxTest {
     }
 
     @Test
-    public void testConfigUpdateNormalization_withConfigDescription() throws Exception {
+    public void testConfigUpdateNormalizationWithConfigDescription() throws Exception {
         Map<String, Object> props = new HashMap<>();
         props.put("foo", "1");
         Configuration config = new Configuration(props);

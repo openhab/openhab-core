@@ -35,9 +35,9 @@ import org.junit.Test;
  */
 public class AudioServletTest extends AbstractAudioServletTest {
 
-    private final String MEDIA_TYPE_AUDIO_WAV = "audio/wav";
-    private final String MEDIA_TYPE_AUDIO_OGG = "audio/ogg";
-    private final String MEDIA_TYPE_AUDIO_MPEG = "audio/mpeg";
+    private static final String MEDIA_TYPE_AUDIO_WAV = "audio/wav";
+    private static final String MEDIA_TYPE_AUDIO_OGG = "audio/ogg";
+    private static final String MEDIA_TYPE_AUDIO_MPEG = "audio/mpeg";
 
     private final byte[] testByteArray = new byte[] { 0, 1, 2 };
 

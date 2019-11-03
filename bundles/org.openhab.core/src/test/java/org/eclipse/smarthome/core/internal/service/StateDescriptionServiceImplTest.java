@@ -21,8 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.internal.service.StateDescriptionServiceImpl;
 import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.eclipse.smarthome.core.types.StateDescription;
 import org.eclipse.smarthome.core.types.StateDescriptionFragment;
@@ -36,7 +34,7 @@ import org.junit.Test;
 /**
  * Tests for the StateDescriptionService implementation
  *
- * @author Lyubomir Papazov
+ * @author Lyubomir Papazov - Initial contribution
  */
 @SuppressWarnings({ "deprecation", "null" })
 public class StateDescriptionServiceImplTest {
@@ -62,7 +60,7 @@ public class StateDescriptionServiceImplTest {
     }
 
     @Test
-    public void legacy_testServiceWithOneStateDescriptionProvider() {
+    public void legacyTestServiceWithOneStateDescriptionProvider() {
         StateDescriptionProvider stateDescriptionProviderDefault = mock(StateDescriptionProvider.class);
         when(stateDescriptionProviderDefault.getRank()).thenReturn(STATE_DESCRIPTION_PROVIDER_DEFAULT_SERVICE_RANKING);
         StateDescription stateDescription = new StateDescription(STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE,
@@ -83,7 +81,7 @@ public class StateDescriptionServiceImplTest {
     }
 
     @Test
-    public void legacy_testMinValueMaxValueStepAndPatternTwoDescriptionProviders() {
+    public void legacyTestMinValueMaxValueStepAndPatternTwoDescriptionProviders() {
         StateDescription stateDescription1 = new StateDescription(new BigDecimal("-1"), new BigDecimal("-1"),
                 new BigDecimal("-1"), "pattern1", false, null);
         StateDescription stateDescription2 = new StateDescription(new BigDecimal("-2"), new BigDecimal("-2"),
@@ -100,7 +98,7 @@ public class StateDescriptionServiceImplTest {
     }
 
     @Test
-    public void legacy_testIsReadOnlyWhenTwoDescriptionProvidersHigherRankingIsNotReadOnly() {
+    public void legacyTestIsReadOnlyWhenTwoDescriptionProvidersHigherRankingIsNotReadOnly() {
         StateDescription stateDescription1 = new StateDescription(null, null, null, null, false, null);
         StateDescription stateDescription2 = new StateDescription(null, null, null, null, true, null);
 
@@ -112,7 +110,7 @@ public class StateDescriptionServiceImplTest {
     }
 
     @Test
-    public void legacy_testIsReadOnlyWhenTwoDescriptionProvidersHigherRankingIsReadOnly() {
+    public void legacyTestIsReadOnlyWhenTwoDescriptionProvidersHigherRankingIsReadOnly() {
         StateDescription stateDescription1 = new StateDescription(null, null, null, null, true, null);
         StateDescription stateDescription2 = new StateDescription(null, null, null, null, false, null);
 
@@ -124,7 +122,7 @@ public class StateDescriptionServiceImplTest {
     }
 
     @Test
-    public void legacy_testOptionsWhenTwoDescriptionProvidersHigherRankingProvidesOptions() {
+    public void legacyTestOptionsWhenTwoDescriptionProvidersHigherRankingProvidesOptions() {
         StateDescription stateDescription1 = new StateDescription(null, null, null, null, false,
                 Arrays.asList(new StateOption("value", "label")));
         StateDescription stateDescription2 = new StateDescription(null, null, null, null, false,
@@ -138,7 +136,7 @@ public class StateDescriptionServiceImplTest {
     }
 
     @Test
-    public void legacy_testOptionsWhenTwoDescriptionProvidersHigherRankingDoesntProvideOptions() {
+    public void legacyTestOptionsWhenTwoDescriptionProvidersHigherRankingDoesntProvideOptions() {
         StateDescription stateDescription1 = new StateDescription(null, null, null, null, false,
                 Collections.emptyList());
         StateDescription stateDescription2 = new StateDescription(null, null, null, null, false,
@@ -156,7 +154,7 @@ public class StateDescriptionServiceImplTest {
         StateDescription stateDescription = new StateDescription(null, null, null, "pattern", false, null);
         registerStateDescriptionProvider(stateDescription, 1);
 
-        List<@NonNull StateOption> options = Arrays.asList(new StateOption("value", "label"));
+        List<StateOption> options = Arrays.asList(new StateOption("value", "label"));
         StateDescriptionFragment stateDescriptionFragment = StateDescriptionFragmentBuilder.create()
                 .withMinimum(BigDecimal.ZERO).withMaximum(BigDecimal.TEN).withOptions(options).build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment, 1);
@@ -172,18 +170,16 @@ public class StateDescriptionServiceImplTest {
 
     @Test
     public void testFragmentProviderOrder() {
-        List<@NonNull StateOption> options = Arrays.asList(new StateOption("value", "label"));
+        List<StateOption> options = Arrays.asList(new StateOption("value", "label"));
 
-        StateDescriptionFragment firstFragment = StateDescriptionFragmentBuilder.create()
-                .withMinimum(BigDecimal.ZERO) //
+        StateDescriptionFragment firstFragment = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO) //
                 .withMaximum(BigDecimal.TEN) //
                 .withPattern("pattern") //
                 .withReadOnly(Boolean.TRUE) //
                 .withOptions(options).build();
         registerStateDescriptionFragmentProvider(firstFragment, -1);
 
-        StateDescriptionFragment secondFragment = StateDescriptionFragmentBuilder.create()
-                .withMinimum(BigDecimal.ONE) //
+        StateDescriptionFragment secondFragment = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ONE) //
                 .withMaximum(BigDecimal.ONE) //
                 .withStep(BigDecimal.ONE) //
                 .withPattern("base_pattern") //

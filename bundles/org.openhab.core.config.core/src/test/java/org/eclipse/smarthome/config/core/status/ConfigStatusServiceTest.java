@@ -64,11 +64,11 @@ public class ConfigStatusServiceTest extends JavaTest {
 
     private static final String ARGS = "args";
 
-    private final ConfigStatusMessage PARAM1_MSG1 = ConfigStatusMessage.Builder.information(PARAM1)
+    private static final ConfigStatusMessage PARAM1_MSG1 = ConfigStatusMessage.Builder.information(PARAM1)
             .withMessageKeySuffix(MSG_KEY1).build();
-    private final ConfigStatusMessage PARAM2_MSG2 = ConfigStatusMessage.Builder.warning(PARAM2)
+    private static final ConfigStatusMessage PARAM2_MSG2 = ConfigStatusMessage.Builder.warning(PARAM2)
             .withMessageKeySuffix(MSG_KEY2).withStatusCode(1).withArguments(ARGS).build();
-    private final ConfigStatusMessage PARAM3_MSG3 = ConfigStatusMessage.Builder.error(PARAM3)
+    private static final ConfigStatusMessage PARAM3_MSG3 = ConfigStatusMessage.Builder.error(PARAM3)
             .withMessageKeySuffix(MSG_KEY3).withStatusCode(2).withArguments(ARGS).build();
 
     private final Collection<ConfigStatusMessage> messagesEntity1 = new ArrayList<>();

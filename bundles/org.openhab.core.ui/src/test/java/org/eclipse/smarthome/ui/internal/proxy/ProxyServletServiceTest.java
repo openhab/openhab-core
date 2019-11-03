@@ -63,7 +63,7 @@ public class ProxyServletServiceTest {
     private static final String VALID_IMAGE_URL = "https://www.eclipse.org/smarthome/test.jpg";
     private static final String VALID_VIDEO_URL = "https://www.eclipse.org/smarthome/test.mp4";
 
-    static private ProxyServletService service;
+    private static ProxyServletService service;
 
     private ItemUIRegistry itemUIRegistry;
     private ModelRepository modelRepository;
