@@ -13,6 +13,7 @@
 package org.eclipse.smarthome.core.types;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -131,6 +132,21 @@ public class StateDescriptionFragmentBuilder {
      */
     public StateDescriptionFragmentBuilder withReadOnly(Boolean readOnly) {
         this.readOnly = readOnly;
+        return this;
+    }
+
+    /**
+     * Ass a {@link StateOption} for the resulting {@link StateDescriptionFragment}.
+     *
+     * @param option a {@link StateOption} for the resulting {@link StateDescriptionFragment}.
+     * @return this builder.
+     */
+    @SuppressWarnings("null")
+    public StateDescriptionFragmentBuilder withOption(StateOption option) {
+        if (options == null) {
+            options = new ArrayList<>();
+        }
+        options.add(option);
         return this;
     }
 

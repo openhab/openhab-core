@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -68,8 +69,15 @@ public class StateDescriptionFragmentBuilderTest {
     }
 
     @Test
+    public void builderWithOption() {
+        StateOption option = new StateOption("value", "label");
+        assertThat(builder.withOption(option).build().getOptions(), is(Arrays.asList(option)));
+    }
+
+    @Test
     public void builderWithOptions() {
-        List<StateOption> options = Collections.singletonList(new StateOption("value", "label"));
+        List<StateOption> options = Arrays.asList(new StateOption("value1", "label1"),
+                new StateOption("value2", "label2"));
         assertThat(builder.withOptions(options).build().getOptions(), is(options));
     }
 
@@ -101,7 +109,7 @@ public class StateDescriptionFragmentBuilderTest {
         assertThat(fragment1.getStep(), is(not(fragment2.getStep())));
         assertThat(fragment1.getPattern(), is(not(fragment2.getPattern())));
         assertThat(fragment1.isReadOnly(), is(not(fragment2.isReadOnly())));
-        assertThat(fragment1.getOptions().size(), is(not(fragment2.getOptions().size())));
+        assertThat(fragment1.getOptions(), is(not(fragment2.getOptions())));
     }
 
 }

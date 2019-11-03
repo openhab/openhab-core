@@ -15,6 +15,7 @@ package org.eclipse.smarthome.core.types;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.internal.types.CommandDescriptionImpl;
 
 /**
@@ -22,6 +23,7 @@ import org.eclipse.smarthome.core.internal.types.CommandDescriptionImpl;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class CommandDescriptionBuilder {
 
     private final List<CommandOption> commandOptions = new ArrayList<>();
@@ -57,7 +59,7 @@ public class CommandDescriptionBuilder {
      * @return this builder.
      */
     public CommandDescriptionBuilder withCommandOption(CommandOption commandOption) {
-        this.commandOptions.add(commandOption);
+        commandOptions.add(commandOption);
         return this;
     }
 
@@ -68,7 +70,8 @@ public class CommandDescriptionBuilder {
      * @return this builder.
      */
     public CommandDescriptionBuilder withCommandOptions(List<CommandOption> commandOptions) {
-        commandOptions.forEach(co -> this.commandOptions.add(co));
+        this.commandOptions.clear();
+        this.commandOptions.addAll(commandOptions);
         return this;
     }
 }
