@@ -126,18 +126,18 @@ public class ThingHelperTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void assertThatNoDuplicateChannelsCanBeAdded() {
-        ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "test");
-        ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "test");
+        ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
+        ThingUID thingUID = new ThingUID(thingTypeUID, "test");
 
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannels(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(),
-                        ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build())
+        Thing thing = ThingBuilder.create(thingTypeUID, thingUID)
+                .withChannels(ChannelBuilder.create(new ChannelUID(thingUID, "channel1"), "").build(),
+                        ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build())
                 .build();
 
         ThingHelper
                 .addChannelsToThing(thing,
-                        Stream.of(ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build(),
-                                ChannelBuilder.create(new ChannelUID(THING_UID, "channel3"), "").build())
+                        Stream.of(ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build(),
+                                ChannelBuilder.create(new ChannelUID(thingUID, "channel3"), "").build())
                                 .collect(toList()));
     }
 }

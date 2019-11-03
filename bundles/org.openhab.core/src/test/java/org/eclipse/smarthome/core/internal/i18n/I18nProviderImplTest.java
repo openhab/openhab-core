@@ -70,7 +70,6 @@ public class I18nProviderImplTest {
 
     @Before
     public void setup() {
-
         initMocks(this);
         initialConfig = buildInitialConfig();
         when(componentContext.getProperties()).thenReturn(initialConfig);

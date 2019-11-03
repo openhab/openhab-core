@@ -37,13 +37,13 @@ import org.junit.Test;
 public class UnitUtilsTest {
 
     @Test
-    public void forBaseUnitsOfDifferentSystems_shouldBeTrue() {
+    public void forBaseUnitsOfDifferentSystemsShouldBeTrue() {
         assertTrue(UnitUtils.isDifferentMeasurementSystem(SIUnits.CELSIUS, ImperialUnits.FAHRENHEIT));
         assertTrue(UnitUtils.isDifferentMeasurementSystem(ImperialUnits.MILES_PER_HOUR, SIUnits.KILOMETRE_PER_HOUR));
     }
 
     @Test
-    public void forBaseUnitsOfSameSystem_ShouldBeFalse() {
+    public void forBaseUnitsOfSameSystemShouldBeFalse() {
         assertFalse(UnitUtils.isDifferentMeasurementSystem(CENTI(SIUnits.METRE), SIUnits.METRE));
         assertFalse(UnitUtils.isDifferentMeasurementSystem(SIUnits.METRE, MILLI(SIUnits.METRE)));
         assertFalse(UnitUtils.isDifferentMeasurementSystem(CENTI(SIUnits.METRE), MILLI(SIUnits.METRE)));
@@ -52,13 +52,13 @@ public class UnitUtilsTest {
     }
 
     @Test
-    public void forDerivedUnitsOfDifferentSystems_shouldBeTrue() {
+    public void forDerivedUnitsOfDifferentSystemsShouldBeTrue() {
         assertTrue(UnitUtils.isDifferentMeasurementSystem(CENTI(SIUnits.METRE), ImperialUnits.INCH));
         assertTrue(UnitUtils.isDifferentMeasurementSystem(ImperialUnits.MILE, KILO(SIUnits.METRE)));
     }
 
     @Test
-    public void whenValidDimensionIsGiven_shouldCreateQuantityClass() {
+    public void whenValidDimensionIsGivenShouldCreateQuantityClass() {
         Class<? extends Quantity<?>> temperature = UnitUtils.parseDimension("Temperature");
         assertNotNull(temperature);
         assertTrue(Temperature.class.isAssignableFrom(temperature));

@@ -53,27 +53,27 @@ public class ThingTypeBuilderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenThingTypeIdAndBindingIdBlank_shouldFail() {
+    public void whenThingTypeIdAndBindingIdBlankShouldFail() {
         ThingTypeBuilder.instance("", "", LABEL).build();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenThingTypeIdBlank_shouldFail() {
+    public void whenThingTypeIdBlankShouldFail() {
         ThingTypeBuilder.instance(BINDING_ID, "", LABEL).build();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenBindingIdBlank_shouldFail() {
+    public void whenBindingIdBlankShouldFail() {
         ThingTypeBuilder.instance("", THING_TYPE_ID, LABEL).build();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenLabelBlank_shouldFail() {
+    public void whenLabelBlankShouldFail() {
         ThingTypeBuilder.instance(THING_TYPE_ID, BINDING_ID, "").build();
     }
 
     @Test
-    public void withLabelAndThingTypeUID_shouldCreateThingType() {
+    public void withLabelAndThingTypeUIDShouldCreateThingType() {
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID(BINDING_ID, THING_TYPE_ID), LABEL).build();
 
         assertThat(thingType.getBindingId(), is(BINDING_ID));
@@ -83,7 +83,7 @@ public class ThingTypeBuilderTest {
     }
 
     @Test
-    public void withLabelAndThingTypeIdAndBindingID_shouldCreateThingType() {
+    public void withLabelAndThingTypeIdAndBindingIDShouldCreateThingType() {
         ThingType thingType = builder.build();
 
         assertThat(thingType.getBindingId(), is(BINDING_ID));
@@ -93,42 +93,42 @@ public class ThingTypeBuilderTest {
     }
 
     @Test
-    public void withLabelAndThingTypeIdAndBindingID_shouldSetListed() {
+    public void withLabelAndThingTypeIdAndBindingIDShouldSetListed() {
         ThingType thingType = builder.build();
 
         assertThat(thingType.isListed(), is(true));
     }
 
     @Test
-    public void withDescription_shouldSetDescription() {
+    public void withDescriptionShouldSetDescription() {
         ThingType thingType = builder.withDescription(DESCRIPTION).build();
 
         assertThat(thingType.getDescription(), is(DESCRIPTION));
     }
 
     @Test
-    public void withCategory_shouldSetCategory() {
+    public void withCategoryShouldSetCategory() {
         ThingType thingType = builder.withCategory(CATEGORY).build();
 
         assertThat(thingType.getCategory(), is(CATEGORY));
     }
 
     @Test
-    public void withListed_shouldBeListed() {
+    public void withListedShouldBeListed() {
         ThingType thingType = builder.isListed(false).build();
 
         assertThat(thingType.isListed(), is(false));
     }
 
     @Test
-    public void withRepresentationProperty_shouldSetRepresentationProperty() {
+    public void withRepresentationPropertyShouldSetRepresentationProperty() {
         ThingType thingType = builder.withRepresentationProperty(REPRESENTATION_PROPERTY).build();
 
         assertThat(thingType.getRepresentationProperty(), is(REPRESENTATION_PROPERTY));
     }
 
     @Test
-    public void withChannelDefinitions_shouldSetUnmodifiableChannelDefinitions() {
+    public void withChannelDefinitionsShouldSetUnmodifiableChannelDefinitions() {
         ThingType thingType = builder.withChannelDefinitions(mockList(ChannelDefinition.class, 2)).build();
 
         assertThat(thingType.getChannelDefinitions(), is(hasSize(2)));
@@ -141,7 +141,7 @@ public class ThingTypeBuilderTest {
     }
 
     @Test
-    public void withChannelGroupDefinitions_shouldSetUnmodifiableChannelGroupDefinitions() {
+    public void withChannelGroupDefinitionsShouldSetUnmodifiableChannelGroupDefinitions() {
         ThingType thingType = builder.withChannelGroupDefinitions(mockList(ChannelGroupDefinition.class, 2)).build();
 
         assertThat(thingType.getChannelGroupDefinitions(), is(hasSize(2)));
@@ -154,7 +154,7 @@ public class ThingTypeBuilderTest {
     }
 
     @Test
-    public void withProperties_shouldSetUnmodifiableProperties() {
+    public void withPropertiesShouldSetUnmodifiableProperties() {
         ThingType thingType = builder.withProperties(mockProperties()).build();
 
         assertThat(thingType.getProperties().entrySet(), is(hasSize(2)));
@@ -167,14 +167,14 @@ public class ThingTypeBuilderTest {
     }
 
     @Test
-    public void withConfigDescriptionURI_shouldSetConfigDescriptionURI() throws Exception {
+    public void withConfigDescriptionURIShouldSetConfigDescriptionURI() throws Exception {
         ThingType thingType = builder.withConfigDescriptionURI(new URI(CONF_URI)).build();
 
         assertThat(thingType.getConfigDescriptionURI(), is(new URI(CONF_URI)));
     }
 
     @Test
-    public void withExtensibleChannelTypeIds_shouldSetUnmodifiableExtensibleChannelTypeIds() {
+    public void withExtensibleChannelTypeIdsShouldSetUnmodifiableExtensibleChannelTypeIds() {
         ThingType thingType = builder
                 .withExtensibleChannelTypeIds(Arrays.asList(new String[] { "channelTypeId1", "channelTypeId2" }))
                 .build();
@@ -189,7 +189,7 @@ public class ThingTypeBuilderTest {
     }
 
     @Test
-    public void withSupportedBridgeTypeUIDs_shouldSetUnmodifiableSupportedBridgeTypeUIDs() {
+    public void withSupportedBridgeTypeUIDsShouldSetUnmodifiableSupportedBridgeTypeUIDs() {
         ThingType thingType = builder.withSupportedBridgeTypeUIDs(Arrays.asList(new String[] { "bridgeTypeUID1" }))
                 .build();
 

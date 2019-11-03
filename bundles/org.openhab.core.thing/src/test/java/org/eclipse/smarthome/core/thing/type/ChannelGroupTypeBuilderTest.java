@@ -43,12 +43,12 @@ public class ChannelGroupTypeBuilderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenLabelIsBlankForState_shouldFail() {
+    public void whenLabelIsBlankForStateShouldFail() {
         ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_UID, "");
     }
 
     @Test
-    public void withLabelAndChannelGroupTypeUID_shouldCreateChannelGroupType() {
+    public void withLabelAndChannelGroupTypeUIDShouldCreateChannelGroupType() {
         ChannelGroupType channelGroupType = builder.build();
 
         assertEquals(CHANNEL_GROUP_TYPE_UID, channelGroupType.getUID());
@@ -63,28 +63,28 @@ public class ChannelGroupTypeBuilderTest {
     }
 
     @Test
-    public void isAdvanced_shouldSetAdvanced() {
+    public void isAdvancedShouldSetAdvanced() {
         ChannelGroupType channelGroupType = builder.isAdvanced(true).build();
 
         assertTrue(channelGroupType.isAdvanced());
     }
 
     @Test
-    public void withDescription_shouldSetDescription() {
+    public void withDescriptionShouldSetDescription() {
         ChannelGroupType channelGroupType = builder.withDescription(DESCRIPTION).build();
 
         assertEquals(DESCRIPTION, channelGroupType.getDescription());
     }
 
     @Test
-    public void withCategory_shouldSetCategory() {
+    public void withCategoryShouldSetCategory() {
         ChannelGroupType channelGroupType = builder.withCategory(CATEGORY).build();
 
         assertEquals(CATEGORY, channelGroupType.getCategory());
     }
 
     @Test
-    public void withChannelDefinitions_shouldSetUnmodifiableChannelDefinitions() {
+    public void withChannelDefinitionsShouldSetUnmodifiableChannelDefinitions() {
         ChannelGroupType channelGroupType = builder.withChannelDefinitions(mockList(ChannelDefinition.class, 2))
                 .build();
 

@@ -28,7 +28,7 @@ import org.junit.Test;
 public class RollershutterItemTest {
 
     @Test
-    public void setState_stateDown_returnPercent100() {
+    public void setStateStateDownReturnPercent100() {
         RollershutterItem sut = new RollershutterItem("Test");
         State state = UpDownType.DOWN;
         sut.setState(state);
@@ -36,7 +36,7 @@ public class RollershutterItemTest {
     }
 
     @Test
-    public void setState_stateUp_returnPercent0() {
+    public void setStateStateUpReturnPercent0() {
         RollershutterItem sut = new RollershutterItem("Test");
         State state = UpDownType.UP;
         sut.setState(state);
@@ -44,7 +44,7 @@ public class RollershutterItemTest {
     }
 
     @Test
-    public void setState_statePercent50_returnPercent50() {
+    public void setStateStatePercent50ReturnPercent50() {
         RollershutterItem sut = new RollershutterItem("Test");
         State state = new PercentType(50);
         sut.setState(state);
@@ -52,7 +52,7 @@ public class RollershutterItemTest {
     }
 
     @Test
-    public void setState_stateHSB50_returnPercent50() {
+    public void setStateStateHSB50ReturnPercent50() {
         // HSB supported because it is a sub-type of PercentType
         RollershutterItem sut = new RollershutterItem("Test");
         State state = new HSBType("5,23,42");
@@ -61,7 +61,7 @@ public class RollershutterItemTest {
     }
 
     @Test
-    public void setState_stateUndef() {
+    public void setStateStateUndef() {
         RollershutterItem sut = new RollershutterItem("Test");
         StateUtil.testUndefStates(sut);
     }

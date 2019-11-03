@@ -31,7 +31,6 @@ public class ItemDTOMapperTest {
 
     @Test
     public void testMapFunctionWithNumberItemAndCountFunction() {
-
         // testing Group:Number:Count(".*hello.*")
         NumberItem item1 = new NumberItem("item1");
 
@@ -44,7 +43,6 @@ public class ItemDTOMapperTest {
         assertThat(gFunc, instanceOf(ArithmeticGroupFunction.Count.class));
         assertThat(gFunc.getParameters().length, is(1));
         assertThat(gFunc.getParameters()[0], instanceOf(StringType.class));
-
     }
 
 }

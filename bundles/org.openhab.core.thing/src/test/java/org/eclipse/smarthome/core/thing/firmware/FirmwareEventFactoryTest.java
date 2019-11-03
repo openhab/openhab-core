@@ -45,11 +45,9 @@ public class FirmwareEventFactoryTest extends JavaTest {
 
     @Test
     public void testSupportedEventTypes() {
-
         Set<String> supportedEventTypes = eventFactory.getSupportedEventTypes();
         assertThat(supportedEventTypes, containsInAnyOrder(FirmwareStatusInfoEvent.TYPE,
                 FirmwareUpdateProgressInfoEvent.TYPE, FirmwareUpdateResultInfoEvent.TYPE));
-
     }
 
     @Test(expected = IllegalArgumentException.class)

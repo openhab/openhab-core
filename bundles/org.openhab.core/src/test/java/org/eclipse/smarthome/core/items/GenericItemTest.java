@@ -79,19 +79,19 @@ public class GenericItemTest {
     @Test(expected = IllegalArgumentException.class)
     public void testAddGroupNameWithNull() {
         TestItem item = new TestItem("member1");
-        item.addGroupName(NULL());
+        item.addGroupName(toNull());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddGroupNamesWithNull() {
         TestItem item = new TestItem("member1");
-        item.addGroupNames(Arrays.asList("group-a", NULL(), "group-b"));
+        item.addGroupNames(Arrays.asList("group-a", toNull(), "group-b"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testRemoveGroupNameWithNull() {
         TestItem item = new TestItem("member1");
-        item.removeGroupName(NULL());
+        item.removeGroupName(toNull());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class GenericItemTest {
     public void testGetStateAsWithNull() {
         TestItem item = new TestItem("member1");
         item.setState(StringType.valueOf("Hello World"));
-        assertNull(item.getStateAs(NULL()));
+        assertNull(item.getStateAs(toNull()));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class GenericItemTest {
      *
      * @return always {@code null}
      */
-    private <T> T NULL() {
+    private <T> T toNull() {
         return null; // :-P
     }
 

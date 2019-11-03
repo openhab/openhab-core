@@ -73,17 +73,17 @@ public class MetadataSelectorMatcherTest {
     }
 
     @Test
-    public void nullSelector_shouldReturnEmptySet() {
+    public void nullSelectorShouldReturnEmptySet() {
         assertThat(matcher.filterNamespaces(null, null), is(Collections.emptySet()));
     }
 
     @Test
-    public void emptySelector_shouldReturnEmptySet() {
+    public void emptySelectorShouldReturnEmptySet() {
         assertThat(matcher.filterNamespaces("", null), is(Collections.emptySet()));
     }
 
     @Test
-    public void specificSelector_shouldReturnSpecificNamespace() {
+    public void specificSelectorShouldReturnSpecificNamespace() {
         assertThat(matcher.filterNamespaces("alexa", null), hasSize(1));
         assertThat(matcher.filterNamespaces("alexa", null), hasItem("alexa"));
         assertThat(matcher.filterNamespaces("magic", null), hasSize(1));
@@ -95,13 +95,13 @@ public class MetadataSelectorMatcherTest {
     }
 
     @Test
-    public void regularExpression_shouldMatchSubset() {
+    public void regularExpressionShouldMatchSubset() {
         assertThat(matcher.filterNamespaces(".*", null), hasSize(4));
         assertThat(matcher.filterNamespaces("magic.?", null), hasSize(2));
     }
 
     @Test
-    public void nonConfigDescriptionSelector_shouldBeResult() {
+    public void nonConfigDescriptionSelectorShouldBeResult() {
         assertThat(matcher.filterNamespaces("magic, foo, bar", null), hasItems("magic", "foo", "bar"));
     }
 }

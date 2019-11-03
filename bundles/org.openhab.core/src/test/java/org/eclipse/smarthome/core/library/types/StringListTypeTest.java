@@ -21,20 +21,21 @@ import org.junit.Test;
  * @author Kai Kreuzer - added tests for valueOf and toFullString
  */
 public class StringListTypeTest {
+
     @Test
-    public void testSerializedEquals_simple() {
-        final int DEST_IDX = 0;
-        final int ORIG_IDX = 1;
+    public void testSerializedEqualsSimple() {
+        final int destIdx = 0;
+        final int origIdx = 1;
 
         StringListType call1 = new StringListType("0179999998", "0699222222");
         StringListType call2 = new StringListType("0699222222,0179999998");
 
-        assertEquals(call1.getValue(ORIG_IDX), call2.getValue(DEST_IDX));
+        assertEquals(call1.getValue(origIdx), call2.getValue(destIdx));
         assertEquals(call2.toString(), "0699222222,0179999998");
     }
 
     @Test
-    public void testSerializedEquals_withEscapedEntries() {
+    public void testSerializedEqualsWithEscapedEntries() {
         String serialized = "value1,value2,value=with=foo,value\\,with\\,foo,,\\,\\,foo";
         StringListType call4 = new StringListType(serialized);
 
@@ -87,7 +88,7 @@ public class StringListTypeTest {
     }
 
     @Test
-    public void testValueOf_simple() {
+    public void testValueOfSimple() {
         StringListType abc = StringListType.valueOf("a,b,c");
         assertEquals("a", abc.getValue(0));
         assertEquals("b", abc.getValue(1));
@@ -95,7 +96,7 @@ public class StringListTypeTest {
     }
 
     @Test
-    public void testValueOf_withEscapedEntries() {
+    public void testValueOfWithEscapedEntries() {
         StringListType abC = StringListType.valueOf("a\\,b,c");
         assertEquals("a,b", abC.getValue(0));
         assertEquals("c", abC.getValue(1));

@@ -151,14 +151,14 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_noLink() {
+    public void testAutoUpdateNoLink() {
         aum.receiveCommand(event, item);
 
         assertStateEvent("AFTER", AutoUpdateManager.EVENT_SOURCE);
     }
 
     @Test
-    public void testAutoUpdate_noPolicy() {
+    public void testAutoUpdateNoPolicy() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
 
         aum.receiveCommand(event, item);
@@ -167,7 +167,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_noPolicy_thingOFFLINE() {
+    public void testAutoUpdateNoPolicyThingOFFLINE() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_OFFLINE_1));
 
         aum.receiveCommand(event, item);
@@ -176,7 +176,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_noPolicy_thingOFFLINE_and_thingONLINE() {
+    public void testAutoUpdateNoPolicyThingOFFLINEandThingONLINE() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_OFFLINE_1));
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
 
@@ -186,7 +186,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_noPolicy_thingONLINE_and_thingOFFLINE() {
+    public void testAutoUpdateNoPolicyThingONLINEandThingOFFLINE() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         links.add(new ItemChannelLink("test", CHANNEL_UID_OFFLINE_1));
 
@@ -196,7 +196,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_noPolicy_noHandler() {
+    public void testAutoUpdateNoPolicyNoHandler() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_HANDLER_MISSING));
 
         aum.receiveCommand(event, item);
@@ -205,7 +205,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_noPolicy_noThing() {
+    public void testAutoUpdateNoPolicyNoThing() {
         links.add(new ItemChannelLink("test", new ChannelUID(new ThingUID("test::missing"), "gone")));
 
         aum.receiveCommand(event, item);
@@ -214,7 +214,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_noPolicy_noChannel() {
+    public void testAutoUpdateNoPolicyNoChannel() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_GONE));
 
         aum.receiveCommand(event, item);
@@ -223,7 +223,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_policyVETO_thingONLINE() {
+    public void testAutoUpdatePolicyVETOThingONLINE() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_1, AutoUpdatePolicy.VETO);
 
@@ -233,7 +233,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_policyRECOMMEND() {
+    public void testAutoUpdatePolicyRECOMMEND() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_1, AutoUpdatePolicy.RECOMMEND);
 
@@ -243,7 +243,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_policyVETObeatsDEFAULT() {
+    public void testAutoUpdatePolicyVETObeatsDEFAULT() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_2));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_1, AutoUpdatePolicy.VETO);
@@ -255,7 +255,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_policyVETObeatsRECOMMEND() {
+    public void testAutoUpdatePolicyVETObeatsRECOMMEND() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_2));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_1, AutoUpdatePolicy.VETO);
@@ -267,7 +267,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_policyDEFAULTbeatsRECOMMEND() {
+    public void testAutoUpdatePolicyDEFAULTbeatsRECOMMEND() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_2));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_1, AutoUpdatePolicy.DEFAULT);
@@ -279,7 +279,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_errorInvalidatesVETO() {
+    public void testAutoUpdateErrorInvalidatesVETO() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_GONE));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_1, AutoUpdatePolicy.RECOMMEND);
@@ -291,7 +291,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_errorInvalidatesVETO2() {
+    public void testAutoUpdateErrorInvalidatesVETO2() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_GONE));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_1, AutoUpdatePolicy.DEFAULT);
@@ -303,7 +303,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_errorInvalidatesDEFAULT() {
+    public void testAutoUpdateErrorInvalidatesDEFAULT() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_GONE));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_1, AutoUpdatePolicy.RECOMMEND);
@@ -315,7 +315,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_multipleErrors() {
+    public void testAutoUpdateMultipleErrors() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_GONE));
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_GONE));
         setAutoUpdatePolicy(CHANNEL_UID_ONLINE_GONE, AutoUpdatePolicy.DEFAULT);
@@ -326,7 +326,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_disabled() {
+    public void testAutoUpdateDisabled() {
         aum.modified(Collections.singletonMap(AutoUpdateManager.PROPERTY_ENABLED, "false"));
 
         aum.receiveCommand(event, item);
@@ -335,7 +335,7 @@ public class AutoUpdateManagerTest {
     }
 
     @Test
-    public void testAutoUpdate_sendOptimisticUpdates() {
+    public void testAutoUpdateSendOptimisticUpdates() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
         aum.modified(Collections.singletonMap(AutoUpdateManager.PROPERTY_SEND_OPTIMISTIC_UPDATES, "true"));
 

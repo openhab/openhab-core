@@ -21,6 +21,9 @@ import java.util.Arrays;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.junit.Test;
 
+/**
+ * @author Christoph Knauf - Initial contribution
+ */
 public class ConfigDescriptionParameterBuilderTest {
 
     @Test

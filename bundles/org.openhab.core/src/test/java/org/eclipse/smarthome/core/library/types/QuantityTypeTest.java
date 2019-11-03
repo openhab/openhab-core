@@ -208,27 +208,27 @@ public class QuantityTypeTest {
     }
 
     @Test
-    public void testMultiply_Number() {
+    public void testMultiplyNumber() {
         assertThat(new QuantityType<>("2 m").multiply(BigDecimal.valueOf(2)), is(new QuantityType<>("4 m")));
     }
 
     @Test
-    public void testMultiply_QuantityType() {
+    public void testMultiplyQuantityType() {
         assertThat(new QuantityType<>("2 m").multiply(new QuantityType<>("4 cm")), is(new QuantityType<>("8 m·cm")));
     }
 
     @Test
-    public void testDivide_Number() {
+    public void testDivideNumber() {
         assertThat(new QuantityType<>("4 m").divide(BigDecimal.valueOf(2)), is(new QuantityType<>("2 m")));
     }
 
     @Test
-    public void testDivide_QuantityType() {
+    public void testDivideQuantityType() {
         assertThat(new QuantityType<>("4 m").divide(new QuantityType<>("2 cm")), is(new QuantityType<>("2 m/cm")));
     }
 
     @Test(expected = ArithmeticException.class)
-    public void testDivide_Zero() {
+    public void testDivideZero() {
         new QuantityType<>("4 m").divide(QuantityType.ZERO);
     }
 

@@ -23,12 +23,12 @@ import org.junit.Test;
 public class XmlHelperTest {
 
     @Test
-    public void whenUIDContainsDot_shouldBeconvcertedToColon() {
+    public void whenUIDContainsDotShouldBeconvcertedToColon() {
         assertThat(XmlHelper.getSystemUID("system.test"), is("system:test"));
     }
 
     @Test
-    public void whenNoPrefixIsGiven_shouldPrependSystemPrefix() {
+    public void whenNoPrefixIsGivenShouldPrependSystemPrefix() {
         assertThat(XmlHelper.getSystemUID("test"), is("system:test"));
     }
 }

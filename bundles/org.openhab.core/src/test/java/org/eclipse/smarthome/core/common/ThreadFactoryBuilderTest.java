@@ -99,7 +99,6 @@ public class ThreadFactoryBuilderTest {
         UncaughtExceptionHandler handler = new UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-
             }
         };
 

@@ -138,7 +138,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenNoSitemapProvidersAreSet_ShouldReturnEmptyList() {
+    public void whenNoSitemapProvidersAreSetShouldReturnEmptyList() {
         sitemapResource.removeSitemapProvider(sitemapProvider);
         Response sitemaps = sitemapResource.getSitemaps();
 
@@ -147,7 +147,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenSitemapsAreProvided_ShouldReturnSitemapBeans() {
+    public void whenSitemapsAreProvidedShouldReturnSitemapBeans() {
         Response sitemaps = sitemapResource.getSitemaps();
 
         assertThat((Collection<?>) sitemaps.getEntity(), hasSize(1));
@@ -159,7 +159,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenLongPolling_ShouldObserveItems() {
+    public void whenLongPollingShouldObserveItems() {
         new Thread(() -> {
             try {
                 Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
@@ -180,7 +180,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenLongPolling_ShouldObserveItemsFromVisibilityRules() {
+    public void whenLongPollingShouldObserveItemsFromVisibilityRules() {
         new Thread(() -> {
             try {
                 Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
@@ -201,7 +201,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenLongPolling_ShouldObserveItemsFromLabelColorConditions() {
+    public void whenLongPollingShouldObserveItemsFromLabelColorConditions() {
         new Thread(() -> {
             try {
                 Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
@@ -222,7 +222,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenLongPolling_ShouldObserveItemsFromValueColorConditions() {
+    public void whenLongPollingShouldObserveItemsFromValueColorConditions() {
         new Thread(() -> {
             try {
                 Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
@@ -243,7 +243,7 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
-    public void whenGetPageData_ShouldReturnPageBean() throws ItemNotFoundException {
+    public void whenGetPageDataShouldReturnPageBean() throws ItemNotFoundException {
         item.setState(new PercentType(50));
         configureItemUIRegistry(item.getState(), OnOffType.ON);
 

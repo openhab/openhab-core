@@ -42,7 +42,7 @@ public class ChannelTypeBuilderTest {
     private static final String LABEL = "label";
     private static final String TAG = "tag";
     private static final List<String> TAGS = Arrays.asList("TAG1", "TAG2");
-    private static URI CONFIGDESCRIPTION_URI;
+    private static URI configDescriptionUri;
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("bindingId", "channelId");
     private static final StateDescription STATE_DESCRIPTION = new StateDescription(BigDecimal.ZERO, new BigDecimal(100),
             BigDecimal.ONE, "%s", false, null);
@@ -55,29 +55,29 @@ public class ChannelTypeBuilderTest {
 
     @Before
     public void setup() throws URISyntaxException {
-        CONFIGDESCRIPTION_URI = new URI("config:dummy");
+        configDescriptionUri = new URI("config:dummy");
         // set up a valid basic ChannelTypeBuilder
         stateBuilder = ChannelTypeBuilder.state(CHANNEL_TYPE_UID, LABEL, ITEM_TYPE);
         triggerBuilder = ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, LABEL);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenLabelIsBlankForState_shouldFail() {
+    public void whenLabelIsBlankForStateShouldFail() {
         ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "", ITEM_TYPE);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenItemTypeIsBlankForState_shouldFail() {
+    public void whenItemTypeIsBlankForStateShouldFail() {
         ChannelTypeBuilder.state(CHANNEL_TYPE_UID, LABEL, "");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenLabelIsBlankForTrigger_shouldFail() {
+    public void whenLabelIsBlankForTriggerShouldFail() {
         ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, "");
     }
 
     @Test
-    public void withLabelAndChannelTypeUID_shouldCreateChannelType() {
+    public void withLabelAndChannelTypeUIDShouldCreateChannelType() {
         ChannelType channelType = stateBuilder.build();
 
         assertThat(channelType.getUID(), is(CHANNEL_TYPE_UID));
@@ -94,56 +94,56 @@ public class ChannelTypeBuilderTest {
     }
 
     @Test
-    public void isAdvanced_shouldSetAdvanced() {
+    public void isAdvancedShouldSetAdvanced() {
         ChannelType channelType = stateBuilder.isAdvanced(true).build();
 
         assertThat(channelType.isAdvanced(), is(true));
     }
 
     @Test
-    public void withDescription_shouldSetDescription() {
+    public void withDescriptionShouldSetDescription() {
         ChannelType channelType = stateBuilder.withDescription(DESCRIPTION).build();
 
         assertThat(channelType.getDescription(), is(DESCRIPTION));
     }
 
     @Test
-    public void withCategory_shouldSetCategory() {
+    public void withCategoryShouldSetCategory() {
         ChannelType channelType = stateBuilder.withCategory(CATEGORY).build();
 
         assertThat(channelType.getCategory(), is(CATEGORY));
     }
 
     @Test
-    public void withConfigDescriptionURI_shouldSetConfigDescriptionURI() {
-        ChannelType channelType = stateBuilder.withConfigDescriptionURI(CONFIGDESCRIPTION_URI).build();
+    public void withConfigDescriptionURIShouldSetConfigDescriptionURI() {
+        ChannelType channelType = stateBuilder.withConfigDescriptionURI(configDescriptionUri).build();
 
-        assertThat(channelType.getConfigDescriptionURI(), is(CONFIGDESCRIPTION_URI));
+        assertThat(channelType.getConfigDescriptionURI(), is(configDescriptionUri));
     }
 
     @Test
-    public void withTags_shouldSetTag() {
+    public void withTagsShouldSetTag() {
         ChannelType channelType = stateBuilder.withTag(TAG).build();
 
         assertThat(channelType.getTags(), is(hasSize(1)));
     }
 
     @Test
-    public void withTags_shouldSetTags() {
+    public void withTagsShouldSetTags() {
         ChannelType channelType = stateBuilder.withTags(TAGS).build();
 
         assertThat(channelType.getTags(), is(hasSize(2)));
     }
 
     @Test
-    public void withStateDescription_shouldSetStateDescription() {
+    public void withStateDescriptionShouldSetStateDescription() {
         ChannelType channelType = stateBuilder.withStateDescription(STATE_DESCRIPTION).build();
 
         assertThat(channelType.getState(), is(STATE_DESCRIPTION));
     }
 
     @Test
-    public void withEventDescription_shouldSetEventDescription() {
+    public void withEventDescriptionShouldSetEventDescription() {
         ChannelType channelType = triggerBuilder.withEventDescription(EVENT_DESCRIPTION).build();
 
         assertThat(channelType.getEvent(), is(EVENT_DESCRIPTION));

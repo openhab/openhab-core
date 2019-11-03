@@ -70,7 +70,7 @@ public class MetadataRegistryImplTest {
     }
 
     @Test
-    public void testGet_empty() throws Exception {
+    public void testGetEmpty() throws Exception {
         MetadataKey key = new MetadataKey("namespace", "itemName");
 
         Metadata res = registry.get(key);

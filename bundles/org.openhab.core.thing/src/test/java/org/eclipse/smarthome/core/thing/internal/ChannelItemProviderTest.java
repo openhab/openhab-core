@@ -83,13 +83,13 @@ public class ChannelItemProviderTest {
     }
 
     @Test
-    public void testItemCreation_notThere() throws Exception {
+    public void testItemCreationNotThere() throws Exception {
         provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
         verify(listener, only()).added(same(provider), same(ITEM));
     }
 
     @Test
-    public void testItemCreation_alreadyExists() throws Exception {
+    public void testItemCreationAlreadyExists() throws Exception {
         when(itemRegistry.get(eq(ITEM_NAME))).thenReturn(ITEM);
 
         provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
@@ -97,7 +97,7 @@ public class ChannelItemProviderTest {
     }
 
     @Test
-    public void testItemRemoval_linkRemoved() throws Exception {
+    public void testItemRemovalLinkRemoved() throws Exception {
         provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
 
         resetAndPrepareListener();
@@ -108,7 +108,7 @@ public class ChannelItemProviderTest {
     }
 
     @Test
-    public void testItemRemoval_itemFromOtherProvider() throws Exception {
+    public void testItemRemovalItemFromOtherProvider() throws Exception {
         provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
 
         resetAndPrepareListener();

@@ -58,7 +58,7 @@ public class ArithmeticGroupFunctionTest {
     }
 
     @Test
-    public void testOrFunction_negative() {
+    public void testOrFunctionNegative() {
         items.add(new TestItem("TestItem1", OpenClosedType.CLOSED));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));
         items.add(new TestItem("TestItem3", OpenClosedType.CLOSED));
@@ -72,7 +72,7 @@ public class ArithmeticGroupFunctionTest {
     }
 
     @Test
-    public void testOrFunction_justsOneItem() {
+    public void testOrFunctionJustsOneItem() {
         items.add(new TestItem("TestItem1", UnDefType.UNDEF));
 
         function = new ArithmeticGroupFunction.Or(OpenClosedType.OPEN, OpenClosedType.CLOSED);
@@ -82,7 +82,7 @@ public class ArithmeticGroupFunctionTest {
     }
 
     @Test
-    public void testOrFunction_differntTypes() {
+    public void testOrFunctionDifferentTypes() {
         DimmerItem dimmer1 = new DimmerItem("TestDimmer1");
         dimmer1.setState(new PercentType("42"));
         DimmerItem dimmer2 = new DimmerItem("TestDimmer2");
@@ -120,7 +120,7 @@ public class ArithmeticGroupFunctionTest {
     }
 
     @Test
-    public void testNOrFunction_negative() {
+    public void testNOrFunctionNegative() {
         items.add(new TestItem("TestItem1", OpenClosedType.CLOSED));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));
         items.add(new TestItem("TestItem3", OpenClosedType.CLOSED));
@@ -146,7 +146,7 @@ public class ArithmeticGroupFunctionTest {
     }
 
     @Test
-    public void testAndFunction_negative() {
+    public void testAndFunctionNegative() {
         items.add(new TestItem("TestItem1", OpenClosedType.OPEN));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));
         items.add(new TestItem("TestItem3", OpenClosedType.OPEN));
@@ -160,7 +160,7 @@ public class ArithmeticGroupFunctionTest {
     }
 
     @Test
-    public void testAndFunction_justsOneItem() {
+    public void testAndFunctionJustsOneItem() {
         items.add(new TestItem("TestItem1", UnDefType.UNDEF));
 
         function = new ArithmeticGroupFunction.And(OpenClosedType.OPEN, OpenClosedType.CLOSED);
@@ -182,7 +182,7 @@ public class ArithmeticGroupFunctionTest {
     }
 
     @Test
-    public void testNAndFunction_negative() {
+    public void testNAndFunctionNegative() {
         items.add(new TestItem("TestItem1", OpenClosedType.OPEN));
         items.add(new TestItem("TestItem2", OpenClosedType.OPEN));
         items.add(new TestItem("TestItem3", OpenClosedType.CLOSED));

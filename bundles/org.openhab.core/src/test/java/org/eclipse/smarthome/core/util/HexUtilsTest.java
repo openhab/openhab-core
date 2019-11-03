@@ -25,40 +25,40 @@ import org.junit.Test;
 public class HexUtilsTest {
 
     @Test
-    public void test_bytesToHex_noParams() {
+    public void testBytesToHexNoParams() {
         byte[] bytes = "ABCD".getBytes();
         String result = HexUtils.bytesToHex(bytes);
         assertEquals("41424344", result);
     }
 
     @Test
-    public void test_hexToBytes_noParams() {
+    public void testHexToBytesNoParams() {
         byte[] result = HexUtils.hexToBytes("41424344");
         assertEquals("ABCD", new String(result));
     }
 
     @Test
-    public void test_bytesToHex_withDelimiter() {
+    public void testBytesToHexWithDelimiter() {
         byte[] bytes = "ABCD".getBytes();
         String result = HexUtils.bytesToHex(bytes, " ");
         assertEquals("41 42 43 44", result);
     }
 
     @Test
-    public void test_hexToBytes_withDelimiter() {
+    public void testHexToBytesWithDelimiter() {
         byte[] result = HexUtils.hexToBytes("41 42 43 44", " ");
         assertEquals("ABCD", new String(result));
     }
 
     @Test
-    public void test_bytesToHex_withMultiCharDelimiter() {
+    public void testBytesToHexWithMultiCharDelimiter() {
         byte[] bytes = "ABCD".getBytes();
         String result = HexUtils.bytesToHex(bytes, "-:-");
         assertEquals("41-:-42-:-43-:-44", result);
     }
 
     @Test
-    public void test_hexToBytes_withMultiCharDelimiter() {
+    public void testHexToBytesWithMultiCharDelimiter() {
         byte[] result = HexUtils.hexToBytes("41-:-42-:-43-:-44", "-:-");
         assertEquals("ABCD", new String(result));
     }

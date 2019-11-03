@@ -75,7 +75,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
     }
 
     @Test
-    public void testGetConfigDescriptions_noOptions() {
+    public void testGetConfigDescriptionsNoOptions() {
         service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
 
         Collection<ConfigDescription> res = service.getConfigDescriptions(Locale.ENGLISH);
@@ -93,7 +93,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
     }
 
     @Test
-    public void testGetConfigDescriptions_withOptions() {
+    public void testGetConfigDescriptionsWithOptions() {
         service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
 
         Collection<ConfigDescription> res = service.getConfigDescriptions(Locale.ENGLISH);
@@ -113,7 +113,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
     }
 
     @Test
-    public void testGetConfigDescription_wrongScheme() {
+    public void testGetConfigDescriptionWrongScheme() {
         service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
         service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
 
@@ -121,7 +121,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
     }
 
     @Test
-    public void testGetConfigDescription_valueDescription() {
+    public void testGetConfigDescriptionValueDescription() {
         service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
         service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
 
@@ -137,7 +137,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
     }
 
     @Test
-    public void testGetConfigDescription_valueDescriptionNonExistingNamespace() {
+    public void testGetConfigDescriptionValueDescriptionNonExistingNamespace() {
         service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
         service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
 
@@ -146,7 +146,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
     }
 
     @Test
-    public void testGetConfigDescription_propertiesDescription() {
+    public void testGetConfigDescriptionPropertiesDescription() {
         service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
         service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
 
@@ -163,7 +163,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
     }
 
     @Test
-    public void testGetConfigDescription_propertiesDescriptionNonExistingNamespace() {
+    public void testGetConfigDescriptionPropertiesDescriptionNonExistingNamespace() {
         service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
         service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
 
@@ -172,7 +172,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
     }
 
     @Test
-    public void testGetConfigDescription_propertiesDescriptionNonExistingValue() {
+    public void testGetConfigDescriptionPropertiesDescriptionNonExistingValue() {
         service.addMetadataConfigDescriptionProvider(mockProviderRestricted);
         service.addMetadataConfigDescriptionProvider(mockProviderLiberal);
 

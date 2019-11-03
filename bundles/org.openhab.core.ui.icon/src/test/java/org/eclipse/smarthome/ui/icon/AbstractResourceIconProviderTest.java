@@ -40,7 +40,6 @@ public class AbstractResourceIconProviderTest {
 
     @Before
     public void setUp() {
-
         provider = new AbstractResourceIconProvider() {
             @Override
             protected InputStream getResource(String iconset, String resourceName) {
