@@ -582,14 +582,14 @@ public class MqttBrokerConnection {
      */
     protected CompletableFuture<Boolean> subscribeRaw(String topic) {
         logger.trace("subscribeRaw message consumer for topic '{}' from broker '{}'", topic, host);
-        CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
-        final MqttAsyncClientWrapper client = this.client;
-        if (client != null && client.getState().isConnected()) {
-            client.subscribe(topic, qos, clientCallback).whenComplete((s, t) -> {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        final MqttAsyncClientWrapper mqttClient = this.client;
+        if (mqttClient != null && mqttClient.getState().isConnected()) {
+            mqttClient.subscribe(topic, qos, clientCallback).whenComplete((s, t) -> {
                 if (t == null) {
                     future.complete(true);
                 } else {
-                    logger.info("Error subscribing to topic {}", topic, t);
+                    logger.warn("Failed subscribing to topic {}", topic, t);
                     future.completeExceptionally(new MqttException(t));
                 }
             });
@@ -621,9 +621,9 @@ public class MqttBrokerConnection {
             // Remove from subscriber list
             subscribers.remove(topic);
             // No more subscribers to this topic. Unsubscribe topic on the broker
-            MqttAsyncClientWrapper client = this.client;
-            if (client != null) {
-                return unsubscribeRaw(client, topic);
+            MqttAsyncClientWrapper mqttClient = this.client;
+            if (mqttClient != null) {
+                return unsubscribeRaw(mqttClient, topic);
             } else {
                 return CompletableFuture.completedFuture(false);
             }

@@ -38,14 +38,15 @@ import io.netty.handler.ssl.util.SimpleTrustManagerFactory;
 @NonNullByDefault
 public class CustomTrustManagerFactory extends SimpleTrustManagerFactory {
     private final Logger logger = LoggerFactory.getLogger(CustomTrustManagerFactory.class);
-    private TrustManager[] tm;
+    private final TrustManager[] trustManagers;
 
-    public CustomTrustManagerFactory(TrustManager[] tm) {
-        this.tm = tm;
+    public CustomTrustManagerFactory(TrustManager[] trustManagers) {
+        this.trustManagers = trustManagers;
     }
 
     @Deprecated
     public CustomTrustManagerFactory(SSLContextProvider contextProvider) {
+        TrustManager[] tm;
         try {
             SSLContext ctx = contextProvider.getContext();
 
@@ -63,8 +64,9 @@ public class CustomTrustManagerFactory extends SimpleTrustManagerFactory {
             tm = new TrustManager[] { (X509TrustManager) trustManagerObj };
         } catch (IllegalAccessException | NoSuchFieldException | ConfigurationException e) {
             logger.warn("using default insecure trustmanager, could not extract trustmanager from SSL context:", e);
+            tm = InsecureTrustManagerFactory.INSTANCE.getTrustManagers();
         }
-        tm = InsecureTrustManagerFactory.INSTANCE.getTrustManagers();
+        trustManagers = tm;
     }
 
     @Override
@@ -77,7 +79,7 @@ public class CustomTrustManagerFactory extends SimpleTrustManagerFactory {
 
     @Override
     protected TrustManager[] engineGetTrustManagers() {
-        return tm;
+        return trustManagers;
     }
 
 }

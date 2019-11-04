@@ -40,10 +40,9 @@ import com.hivemq.client.mqtt.mqtt5.message.unsubscribe.Mqtt5Unsubscribe;
  *
  * @author Jan N. Klug - Initial contribution
  */
-
 @NonNullByDefault
 public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
-    private Mqtt5AsyncClient client;
+    private final Mqtt5AsyncClient client;
 
     public Mqtt5AsyncClientWrapper(String host, int port, String clientId, Protocol protocol, boolean secure,
             ConnectionCallback connectionCallback, @Nullable TrustManagerFactory trustManagerFactory) {

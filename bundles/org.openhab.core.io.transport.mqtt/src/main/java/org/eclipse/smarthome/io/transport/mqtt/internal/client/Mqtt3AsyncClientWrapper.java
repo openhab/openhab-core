@@ -39,10 +39,9 @@ import com.hivemq.client.mqtt.mqtt3.message.unsubscribe.Mqtt3Unsubscribe;
  *
  * @author Jan N. Klug - Initial contribution
  */
-
 @NonNullByDefault
 public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
-    private Mqtt3AsyncClient client;
+    private final Mqtt3AsyncClient client;
 
     public Mqtt3AsyncClientWrapper(String host, int port, String clientId, Protocol protocol, boolean secure,
             ConnectionCallback connectionCallback, @Nullable TrustManagerFactory trustManagerFactory) {
