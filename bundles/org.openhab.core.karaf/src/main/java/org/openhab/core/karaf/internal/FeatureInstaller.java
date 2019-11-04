@@ -39,6 +39,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.eclipse.smarthome.config.core.ConfigurableService;
 import org.eclipse.smarthome.core.events.Event;
 import org.eclipse.smarthome.core.events.EventPublisher;
 import org.eclipse.smarthome.core.extension.ExtensionEventFactory;
@@ -56,19 +57,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This service reads addons.cfg and installs listed addons (= Karaf features) and the selected package.
+ * This service reads addons.cfg and installs listed add-ons (= Karaf features) and the selected package.
  * It furthermore allows configuration of the base package through the Paper UI as well as administrating Karaf to
  * access remote repos and certain feature repos like for legacy or experimental features.
  *
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(name = "org.openhab.addons", service = { FeatureInstaller.class, ConfigurationListener.class }, property = {
-        "service.config.description.uri:String=system:addons", //
-        "service.config.label:String=Add-on Management", //
-        "service.config.category:String=system" //
-})
+        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
+        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Add-on Management",
+        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + "system:addons" })
 public class FeatureInstaller implements ConfigurationListener {
 
+    public static final String EXTENSION_TYPE_ACTION = "action";
+    public static final String EXTENSION_TYPE_BINDING = "binding";
+    public static final String EXTENSION_TYPE_MISC = "misc";
+    public static final String EXTENSION_TYPE_PERSISTENCE = "persistence";
+    public static final String EXTENSION_TYPE_TRANSFORMATION = "transformation";
+    public static final String EXTENSION_TYPE_UI = "ui";
+    public static final String EXTENSION_TYPE_VOICE = "voice";
+
+    public static final String SIMPLE_PACKAGE = "simple";
     public static final String MINIMAL_PACKAGE = "minimal";
     private static final String CFG_REMOTE = "remote";
     private static final String CFG_LEGACY = "legacy";
@@ -81,16 +90,17 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String PREFIX = "openhab-";
     public static final String PREFIX_PACKAGE = "package-";
 
-    public static final String[] ADDON_TYPES = new String[] { "binding", "ui", "persistence", "action", "voice",
-            "transformation", "misc" };
+    public static final String[] EXTENSION_TYPES = new String[] { EXTENSION_TYPE_ACTION, EXTENSION_TYPE_BINDING,
+            EXTENSION_TYPE_MISC, EXTENSION_TYPE_PERSISTENCE, EXTENSION_TYPE_TRANSFORMATION, EXTENSION_TYPE_UI,
+            EXTENSION_TYPE_VOICE };
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
     private String onlineRepoUrl = null;
     private URI legacyAddonsUrl = null;
 
-    private FeaturesService featuresService;
-    private ConfigurationAdmin configurationAdmin;
+    private final ConfigurationAdmin configurationAdmin;
+    private final FeaturesService featuresService;
     private static EventPublisher eventPublisher;
 
     private ScheduledExecutorService scheduler;
@@ -100,22 +110,11 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private static String currentPackage = null;
 
-    @Reference
-    protected void setFeaturesService(FeaturesService featuresService) {
-        this.featuresService = featuresService;
-    }
-
-    protected void unsetFeaturesService(FeaturesService featuresService) {
-        this.featuresService = null;
-    }
-
-    @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+    @Activate
+    public FeatureInstaller(final @Reference ConfigurationAdmin configurationAdmin,
+            final @Reference FeaturesService featuresService) {
         this.configurationAdmin = configurationAdmin;
-    }
-
-    protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = null;
+        this.featuresService = featuresService;
     }
 
     @Reference
@@ -379,7 +378,7 @@ public class FeatureInstaller implements ConfigurationListener {
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)
 
-        for (String type : ADDON_TYPES) {
+        for (String type : EXTENSION_TYPES) {
             Object install = config.get(type);
             if (install instanceof String) {
                 String[] entries = ((String) install).split(",");
