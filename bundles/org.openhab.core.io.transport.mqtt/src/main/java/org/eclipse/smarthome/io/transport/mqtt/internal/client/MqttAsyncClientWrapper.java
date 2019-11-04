@@ -52,7 +52,7 @@ public abstract class MqttAsyncClientWrapper {
             case 2:
                 return MqttQos.EXACTLY_ONCE;
             default:
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("QoS needs to be 0, 1 or 2.");
         }
     }
 }
