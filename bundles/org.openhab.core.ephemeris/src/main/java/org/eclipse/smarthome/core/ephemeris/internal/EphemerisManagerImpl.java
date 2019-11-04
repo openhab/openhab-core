@@ -24,9 +24,11 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -57,6 +60,7 @@ import de.jollyday.Holiday;
 import de.jollyday.HolidayManager;
 import de.jollyday.ManagerParameter;
 import de.jollyday.ManagerParameters;
+import de.jollyday.util.ResourceUtil;
 
 /**
  * This service provides functionality around ephemeris services and is the central service to be used directly by
@@ -92,6 +96,10 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
     private final List<String> countryParameters = new ArrayList<>();
+    /**
+     * Utility for accessing resources.
+     */
+    private final ResourceUtil resourceUtil = new ResourceUtil();
 
     private final LocaleProvider localeProvider;
 
@@ -198,6 +206,18 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         return null;
     }
 
+    private URL getUrl(String filename) throws FileNotFoundException {
+        if (Files.exists(Paths.get(filename))) {
+            try {
+                return new URL("file:" + filename);
+            } catch (MalformedURLException e) {
+                throw new FileNotFoundException(e.getMessage());
+            }
+        } else {
+            throw new FileNotFoundException(filename);
+        }
+    }
+
     private HolidayManager getHolidayManager(Object managerKey) {
         return holidayManagers.computeIfAbsent(managerKey, key -> {
             final ManagerParameter parameters = managerKey.getClass() == String.class
@@ -207,45 +227,64 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         });
     }
 
-    private Optional<Holiday> getHoliday(ZonedDateTime date) {
-        HolidayManager manager = getHolidayManager(country);
-        LocalDate localDate = date.toLocalDate();
+    private List<Holiday> getHolidays(ZonedDateTime from, int span, HolidayManager holidayManager) {
+        LocalDate fromDate = from.toLocalDate();
+        LocalDate toDate = from.plusDays(span).toLocalDate();
 
-        Set<Holiday> holidays = manager.getHolidays(localDate, localDate, countryParameters.toArray(new String[0]));
-        return holidays.isEmpty() ? Optional.empty() : Optional.of(holidays.iterator().next());
-    }
-
-    private boolean isBankHoliday(ZonedDateTime date) {
-        Optional<Holiday> holiday = getHoliday(date);
-        return holiday.isPresent();
+        Set<Holiday> days = holidayManager.getHolidays(fromDate, toDate, countryParameters.toArray(new String[0]));
+        List<Holiday> sortedHolidays = days.stream().sorted(Comparator.comparing(Holiday::getDate))
+                .collect(Collectors.toList());
+        return sortedHolidays;
     }
 
     @Override
-    public boolean isBankHoliday(int offset) {
-        return isBankHoliday(ZonedDateTime.now().plusDays(offset));
+    public long getDaysUntil(ZonedDateTime from, String searchedHoliday) {
+        List<Holiday> sortedHolidays = getHolidays(from, 366, getHolidayManager(country));
+        Optional<Holiday> result = sortedHolidays.stream()
+                .filter(holiday -> searchedHoliday.equalsIgnoreCase(holiday.getPropertiesKey())).findFirst();
+        return result.isPresent() ? from.toLocalDate().until(result.get().getDate(), ChronoUnit.DAYS) : -1;
     }
 
     @Override
-    public boolean isBankHoliday(int offset, String filename) throws FileNotFoundException {
-        Optional<String> holiday = getHolidayUserFile(ZonedDateTime.now().plusDays(offset), filename);
-        return holiday.isPresent();
+    public long getDaysUntil(ZonedDateTime from, String searchedHoliday, URL resource) {
+        List<Holiday> sortedHolidays = getHolidays(from, 366, getHolidayManager(resource));
+        Optional<Holiday> result = sortedHolidays.stream()
+                .filter(holiday -> searchedHoliday.equalsIgnoreCase(holiday.getPropertiesKey())).findFirst();
+        return result.isPresent() ? from.toLocalDate().until(result.get().getDate(), ChronoUnit.DAYS) : -1;
     }
 
     @Override
-    public boolean isWeekend(int offset) {
-        return isWeekend(ZonedDateTime.now().plusDays(offset));
+    public long getDaysUntil(ZonedDateTime from, String searchedHoliday, String filename) throws FileNotFoundException {
+        return getDaysUntil(from, searchedHoliday, getUrl(filename));
     }
 
-    private boolean isWeekend(ZonedDateTime date) {
+    private @Nullable String getFirstBankHolidayKey(ZonedDateTime from, int span, HolidayManager holidayManager) {
+        Optional<Holiday> holiday = getHolidays(from, span, holidayManager).stream().findFirst();
+        return holiday.map(p -> p.getPropertiesKey()).orElse(null);
+    }
+
+    @Override
+    public boolean isBankHoliday(ZonedDateTime date) {
+        return !getHolidays(date, 0, getHolidayManager(country)).isEmpty();
+    }
+
+    @Override
+    public boolean isBankHoliday(ZonedDateTime date, URL resource) {
+        return !getHolidays(date, 0, getHolidayManager(resource)).isEmpty();
+    }
+
+    @Override
+    public boolean isBankHoliday(ZonedDateTime date, String filename) throws FileNotFoundException {
+        return isBankHoliday(date, getUrl(filename));
+    }
+
+    @Override
+    public boolean isWeekend(ZonedDateTime date) {
         return isInDayset(CONFIG_DAYSET_WEEKEND, date);
     }
 
     @Override
-    public boolean isInDayset(String daysetName, int offset) {
-        return isInDayset(daysetName, ZonedDateTime.now().plusDays(offset));
-    }
-
-    private boolean isInDayset(String daysetName, ZonedDateTime date) {
+    public boolean isInDayset(String daysetName, ZonedDateTime date) {
         if (daysets.containsKey(daysetName)) {
             DayOfWeek dow = date.getDayOfWeek();
             return daysets.get(daysetName).contains(dow);
@@ -255,34 +294,34 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         }
     }
 
-    private String getBankHolidayName(ZonedDateTime date) {
-        Optional<Holiday> holiday = getHoliday(date);
-        return holiday.map(p -> p.getDescription(localeProvider.getLocale())).orElse(null);
+    @Override
+    public @Nullable String getBankHolidayName(ZonedDateTime date) {
+        return getFirstBankHolidayKey(date, 0, getHolidayManager(country));
     }
 
     @Override
-    public @Nullable String getBankHolidayName(int offset) {
-        return getBankHolidayName(ZonedDateTime.now().plusDays(offset));
-    }
-
-    private Optional<String> getHolidayUserFile(ZonedDateTime date, String filename) throws FileNotFoundException {
-        if (Files.exists(Paths.get(filename))) {
-            try {
-                URL url = new URL("file:" + filename);
-                Set<Holiday> days = getHolidayManager(url).getHolidays(date.toLocalDate(), date.toLocalDate());
-                return days.isEmpty() ? Optional.empty() : Optional.of(days.iterator().next().getPropertiesKey());
-            } catch (MalformedURLException e) {
-                throw new FileNotFoundException(e.getMessage());
-            }
-        } else {
-            throw new FileNotFoundException();
-        }
+    public @Nullable String getBankHolidayName(ZonedDateTime date, URL resource) {
+        return getFirstBankHolidayKey(date, 0, getHolidayManager(resource));
     }
 
     @Override
-    public @Nullable String getBankHolidayName(int offset, String filename) throws FileNotFoundException {
-        Optional<String> holiday = getHolidayUserFile(ZonedDateTime.now().plusDays(offset), filename);
-        return holiday.isPresent() ? holiday.get() : null;
+    public @Nullable String getBankHolidayName(ZonedDateTime date, String filename) throws FileNotFoundException {
+        return getBankHolidayName(date, getUrl(filename));
+    }
+
+    @Override
+    public @Nullable String getNextBankHoliday(ZonedDateTime from) {
+        return getFirstBankHolidayKey(from, 365, getHolidayManager(country));
+    }
+
+    @Override
+    public @Nullable String getNextBankHoliday(ZonedDateTime from, URL resource) {
+        return getFirstBankHolidayKey(from, 365, getHolidayManager(resource));
+    }
+
+    @Override
+    public @Nullable String getNextBankHoliday(ZonedDateTime from, String filename) throws FileNotFoundException {
+        return getNextBankHoliday(from, getUrl(filename));
     }
 
     private void addDayset(String setName, Iterable<?> values) {
@@ -359,4 +398,10 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             throw new IllegalArgumentException("Unable to parse property - token is empty.");
         }
     }
+
+    @Override
+    public @Nullable String getHolidayDescription(@Nullable String holiday) {
+        return holiday != null ? resourceUtil.getHolidayDescription(localeProvider.getLocale(), holiday) : null;
+    }
+
 }

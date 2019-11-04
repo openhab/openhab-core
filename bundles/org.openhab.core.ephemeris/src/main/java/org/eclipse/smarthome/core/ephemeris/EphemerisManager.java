@@ -13,6 +13,8 @@
 package org.eclipse.smarthome.core.ephemeris;
 
 import java.io.FileNotFoundException;
+import java.net.URL;
+import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -27,57 +29,145 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface EphemerisManager {
 
     /**
-     * Tests given day (related to today) status against configured weekend days
+     * Tests given day status against configured weekend days
      *
-     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
+     * @param date observed day
      * @return whether the day is on weekend
      */
-    boolean isWeekend(int offset);
+    boolean isWeekend(ZonedDateTime date);
 
     /**
-     * Tests given day (related to today) status against configured dayset
+     * Tests given day status against configured dayset
      *
      * @param daysetName name of the requested dayset, without prefix
-     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
-     * @return whether the day is on weekend
+     * @param date observed day
+     * @return whether the day is in the dayset
      */
-    boolean isInDayset(String daysetName, int offset);
+    boolean isInDayset(String daysetName, ZonedDateTime date);
 
     /**
-     * Tests given day status against official bank holidays
+     * Tests given day status
      *
-     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
+     * @param date observed day
      * @return whether the day is bank holiday or not
      */
-    boolean isBankHoliday(int offset);
+    boolean isBankHoliday(ZonedDateTime date);
 
     /**
      * Tests given day status against given userfile
      *
-     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
-     * @param filename absolute or relative path to the file on local file system
+     * @param date observed day
+     * @param url bundle resource file containing holiday definitions
      * @return whether the day is bank holiday or not
-     * @throws FileNotFoundException if given file does not exist
      */
-    boolean isBankHoliday(int offset, String filename) throws FileNotFoundException;
+    boolean isBankHoliday(ZonedDateTime date, URL resource);
 
     /**
-     * Get given day bank holiday name
+     * Tests given day status against given userfile
      *
-     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
-     * @return name of the bank holiday or null if no bank holiday
+     * @param date observed day
+     * @param source absolute or relative path to the file on local file system
+     * @return whether the day is bank holiday or not
+     * @throws FileNotFoundException
      */
-    @Nullable
-    String getBankHolidayName(int offset);
+    boolean isBankHoliday(ZonedDateTime date, String filename) throws FileNotFoundException;
 
     /**
      * Get given day name from given userfile
      *
-     * @param offset Today +/- offset days (+1 = tomorrow, -1 = yesterday)
-     * @param filename absolute or relative path to the file on local file system
+     * @param date observed day
      * @return name of the day or null if no corresponding entry
-     * @throws FileNotFoundException if given file does not exist
      */
     @Nullable
-    String getBankHolidayName(int offset, String filename) throws FileNotFoundException;
+    String getBankHolidayName(ZonedDateTime date);
+
+    /**
+     * Get given day name from given userfile
+     *
+     * @param date observed day
+     * @param url bundle resource file containing holiday definitions
+     * @return name of the day or null if no corresponding entry
+     */
+    @Nullable
+    String getBankHolidayName(ZonedDateTime date, URL resource);
+
+    /**
+     * Get given day name from given userfile
+     *
+     * @param date observed day
+     * @param source absolute or relative path to the file on local file system
+     * @return name of the day or null if no corresponding entry
+     * @throws FileNotFoundException
+     */
+    @Nullable
+    String getBankHolidayName(ZonedDateTime date, String filename) throws FileNotFoundException;
+
+    /**
+     * Gets the first next to come holiday in a 1 year time window
+     *
+     * @param startDate first day of the time window
+     * @return next coming holiday
+     */
+    @Nullable
+    String getNextBankHoliday(ZonedDateTime startDate);
+
+    /**
+     * Gets the first next to come holiday in a 1 year time window
+     *
+     * @param startDate first day of the time window
+     * @param url bundle resource file containing holiday definitions
+     * @return next coming holiday
+     */
+    @Nullable
+    String getNextBankHoliday(ZonedDateTime startDate, URL resource);
+
+    /**
+     * Gets the first next to come holiday in a 1 year time window
+     *
+     * @param startDate first day of the time window
+     * @param source absolute or relative path to the file on local file system
+     * @return next coming holiday
+     * @throws FileNotFoundException
+     */
+    @Nullable
+    String getNextBankHoliday(ZonedDateTime startDate, String filename) throws FileNotFoundException;
+
+    /**
+     * Gets the localized holiday description
+     *
+     * @param holidayName code of searched holiday
+     * @return localized holiday description
+     */
+    @Nullable
+    String getHolidayDescription(@Nullable String holiday);
+
+    /**
+     * Gets the number of days until searchedHoliday
+     *
+     * @param from first day of the time window
+     * @param searchedHoliday name of the searched holiday
+     * @return difference in days, -1 if not found
+     */
+    long getDaysUntil(ZonedDateTime from, String searchedHoliday);
+
+    /**
+     * Gets the number of days until searchedHoliday in user file
+     *
+     * @param from first day of the time window
+     * @param searchedHoliday name of the searched holiday
+     * @param url bundle resource file containing holiday definitions
+     * @return difference in days, -1 if not found
+     */
+    long getDaysUntil(ZonedDateTime from, String searchedHoliday, URL resource);
+
+    /**
+     * Gets the number of days until searchedHoliday in user file
+     *
+     * @param from first day of the time window
+     * @param searchedHoliday name of the searched holiday
+     * @param source absolute or relative path to the file on local file system
+     * @return difference in days, -1 if not found
+     * @throws FileNotFoundException
+     */
+    long getDaysUntil(ZonedDateTime from, String searchedHoliday, String filename) throws FileNotFoundException;
 }

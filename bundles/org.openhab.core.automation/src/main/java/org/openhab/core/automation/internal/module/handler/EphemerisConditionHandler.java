@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,7 +41,7 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
 
     private final EphemerisManager ephemerisManager;
     private final @Nullable String dayset;
-    private final int offset;
+    private final ZonedDateTime target;
 
     public EphemerisConditionHandler(Condition condition, EphemerisManager ephemerisManager) {
         super(condition);
@@ -49,7 +50,8 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
         this.dayset = DAYSET_MODULE_TYPE_ID.equals(module.getTypeUID())
                 ? getValidStringConfigParameter(DAYSET, module.getConfiguration(), module.getId())
                 : null;
-        this.offset = getValidIntegerConfigParameter(OFFSET, module.getConfiguration(), module.getId());
+        int offset = getValidIntegerConfigParameter(OFFSET, module.getConfiguration(), module.getId());
+        target = ZonedDateTime.now().plusDays(offset);
     }
 
     private static int getValidIntegerConfigParameter(String parameter, Configuration config, String moduleId) {
@@ -76,15 +78,15 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
     public boolean isSatisfied(Map<String, Object> inputs) {
         switch (module.getTypeUID()) {
             case HOLIDAY_MODULE_TYPE_ID:
-                return ephemerisManager.isBankHoliday(offset);
+                return ephemerisManager.isBankHoliday(target);
             case WEEKEND_MODULE_TYPE_ID:
-                return ephemerisManager.isWeekend(offset);
+                return ephemerisManager.isWeekend(target);
             case WEEKDAY_MODULE_TYPE_ID:
-                return !ephemerisManager.isWeekend(offset);
+                return !ephemerisManager.isWeekend(target);
             case DAYSET_MODULE_TYPE_ID:
                 final String dayset = this.dayset;
                 if (dayset != null) {
-                    return ephemerisManager.isInDayset(dayset, offset);
+                    return ephemerisManager.isInDayset(dayset, target);
                 }
                 break;
         }

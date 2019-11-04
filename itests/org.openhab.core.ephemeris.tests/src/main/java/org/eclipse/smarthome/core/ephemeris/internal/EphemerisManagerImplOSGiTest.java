@@ -16,7 +16,10 @@ import static org.eclipse.smarthome.core.ephemeris.internal.EphemerisManagerImpl
 import static org.junit.Assert.*;
 
 import java.net.URI;
+import java.net.URL;
 import java.time.DayOfWeek;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +44,7 @@ import org.junit.Test;
  */
 @NonNullByDefault
 public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
-
+    private static final String INTERNAL_DAYSET = "internal";
     private static final URI CONFIG_URI = URI.create("system:ephemeris");
     private static final String COUNTRY_AUSTRALIA_KEY = "au";
     private static final String COUNTRY_AUSTRALIA_NAME = "Australia";
@@ -233,4 +236,81 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         assertFalse(options.isEmpty());
         assertEquals(ephemerisManager.cities.get(REGION_TASMANIA_KEY), options);
     }
+
+    @Test
+    public void testWeekends() {
+        ZonedDateTime monday = ZonedDateTime.of(2019, 10, 28, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+        ZonedDateTime sunday = ZonedDateTime.of(2019, 10, 27, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+        ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + INTERNAL_DAYSET,
+                Stream.of("Monday", "Tuesday").collect(Collectors.toList())));
+        assertEquals(true, ephemerisManager.isWeekend(sunday));
+        assertEquals(false, ephemerisManager.isWeekend(monday));
+        assertEquals(true, ephemerisManager.isInDayset(INTERNAL_DAYSET, monday));
+        assertEquals(false, ephemerisManager.isInDayset(INTERNAL_DAYSET, sunday));
+    }
+
+    @Test
+    public void testIsBankHoliday() {
+        ZonedDateTime newyearsday = ZonedDateTime.of(2019, 01, 01, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+        ZonedDateTime secondday = ZonedDateTime.of(2019, 01, 02, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+
+        boolean vacation = ephemerisManager.isBankHoliday(newyearsday);
+        assertEquals(true, vacation);
+
+        vacation = ephemerisManager.isBankHoliday(secondday);
+        assertEquals(false, vacation);
+    }
+
+    @Test
+    public void testGetBankHoliday() {
+        ZonedDateTime theDay = ZonedDateTime.of(2019, 01, 01, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+
+        boolean vacation = ephemerisManager.isBankHoliday(theDay);
+        assertEquals(true, vacation);
+
+        String code = ephemerisManager.getBankHolidayName(theDay);
+        assertEquals("NEW_YEAR", code);
+
+        String name = ephemerisManager.getHolidayDescription(code);
+        assertNotNull(name);
+    }
+
+    @Test
+    public void testNextBankHoliday() {
+        ZonedDateTime today = ZonedDateTime.of(2019, 12, 28, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+        long delay = ephemerisManager.getDaysUntil(today, "NONEXISTING");
+        assertEquals(-1, delay);
+
+        String next = ephemerisManager.getNextBankHoliday(today);
+        assertEquals("NEW_YEAR", next);
+        if (next != null) {
+            String description = ephemerisManager.getHolidayDescription(next);
+            assertNotNull(description);
+
+            delay = ephemerisManager.getDaysUntil(today, next);
+            assertEquals(4, delay);
+        }
+
+    }
+
+    @Test
+    public void testUserFile() {
+        URL url = bundleContext.getBundle().getResource("events.xml");
+
+        ZonedDateTime today = ZonedDateTime.of(2019, 10, 28, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+        ZonedDateTime theDay = ZonedDateTime.of(2019, 10, 31, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
+
+        boolean vacation = ephemerisManager.isBankHoliday(theDay, url);
+        assertEquals(true, vacation);
+
+        long delay = ephemerisManager.getDaysUntil(today, "Halloween", url);
+        assertEquals(3, delay);
+
+        String next = ephemerisManager.getNextBankHoliday(today, url);
+        assertEquals("Halloween", next);
+
+        String result = ephemerisManager.getBankHolidayName(theDay, url);
+        assertEquals("Halloween", result);
+    }
+
 }
