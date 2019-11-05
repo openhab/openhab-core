@@ -70,9 +70,9 @@ public class DefaultChartProvider implements ChartProvider {
 
     private final Logger logger = LoggerFactory.getLogger(DefaultChartProvider.class);
 
-    private TimeZoneProvider timeZoneProvider;
-    protected ItemUIRegistry itemUIRegistry;
-    private PersistenceServiceRegistry persistenceServiceRegistry;
+    private final TimeZoneProvider timeZoneProvider;
+    protected final ItemUIRegistry itemUIRegistry;
+    private final PersistenceServiceRegistry persistenceServiceRegistry;
 
     private int legendPosition = 0;
 
@@ -83,31 +83,13 @@ public class DefaultChartProvider implements ChartProvider {
 
     public static final int DPI_DEFAULT = 96;
 
-    @Reference
-    public void setItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = itemUIRegistry;
-    }
-
-    public void unsetItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = null;
-    }
-
-    @Reference
-    protected void setPersistenceServiceRegistry(PersistenceServiceRegistry persistenceServiceRegistry) {
-        this.persistenceServiceRegistry = persistenceServiceRegistry;
-    }
-
-    protected void unsetPersistenceServiceRegistry(PersistenceServiceRegistry persistenceServiceRegistry) {
-        this.persistenceServiceRegistry = null;
-    }
-
-    @Reference
-    public void setTimeZoneProvider(TimeZoneProvider timeZoneProvider) {
+    @Activate
+    public DefaultChartProvider(final @Reference TimeZoneProvider timeZoneProvider,
+            final @Reference ItemUIRegistry itemUIRegistry,
+            final @Reference PersistenceServiceRegistry persistenceServiceRegistry) {
         this.timeZoneProvider = timeZoneProvider;
-    }
-
-    public void unsetTimeZoneProvider(TimeZoneProvider timeZoneProvider) {
-        this.timeZoneProvider = null;
+        this.itemUIRegistry = itemUIRegistry;
+        this.persistenceServiceRegistry = persistenceServiceRegistry;
     }
 
     @Activate
@@ -296,16 +278,11 @@ public class DefaultChartProvider implements ChartProvider {
         Color color = chartTheme.getLineColor(seriesCounter);
 
         // Get the item label
-        String label = null;
-        if (itemUIRegistry != null) {
-            // Get the item label
-            label = itemUIRegistry.getLabel(item.getName());
-            if (label != null && label.contains("[") && label.contains("]")) {
-                label = label.substring(0, label.indexOf('['));
-            }
-        }
+        String label = itemUIRegistry.getLabel(item.getName());
         if (label == null) {
             label = item.getName();
+        } else if (label.contains("[") && label.contains("]")) {
+            label = label.substring(0, label.indexOf('['));
         }
 
         Iterable<HistoricItem> result;
