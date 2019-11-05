@@ -8,11 +8,6 @@ Fragment-Host: org.openhab.core.thing
     bnd.identity;id='org.openhab.core.config.xml',\
     bnd.identity;id='org.openhab.core.thing.xml'
 
-# We would like to use the "volatile" storage only
--runblacklist: \
-    bnd.identity;id='org.openhab.core.storage.json',\
-    bnd.identity;id='org.openhab.core.storage.mapdb'
-
 #
 # done
 #

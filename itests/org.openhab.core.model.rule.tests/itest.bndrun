@@ -7,11 +7,6 @@ Fragment-Host: org.openhab.core.model.rule.runtime
     bnd.identity;id='org.openhab.core.model.rule.tests',\
     bnd.identity;id='org.openhab.core.model.rule.runtime'
 
-# We would like to use the "volatile" storage only
--runblacklist: \
-    bnd.identity;id='org.openhab.core.storage.json',\
-    bnd.identity;id='org.openhab.core.storage.mapdb'
-
 #
 # done
 #
@@ -103,4 +98,5 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	org.objectweb.asm.commons;version='[7.1.0,7.1.1)',\
 	org.objectweb.asm.tree;version='[7.1.0,7.1.1)',\
 	jollyday;version='[0.5.8,0.5.9)',\
-	org.threeten.extra;version='[1.4.0,1.4.1)'
+	org.threeten.extra;version='[1.4.0,1.4.1)',\
+	org.openhab.core.model.item.runtime;version='[2.5.0,2.5.1)'
