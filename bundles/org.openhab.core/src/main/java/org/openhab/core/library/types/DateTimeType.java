@@ -169,7 +169,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
      * @throws ZoneRulesException if the converted zone region ID cannot be found
      */
     public DateTimeType toLocaleZone() throws DateTimeException, ZoneRulesException {
-        return toZone(ZoneId.systemDefault());
+        return toZone(TimeZone.getDefault().toZoneId());
     }
 
     /**
@@ -254,7 +254,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
                     date = ZonedDateTime.parse(value, PARSER_TZ);
                 } catch (DateTimeParseException tzException) {
                     LocalDateTime localDateTime = LocalDateTime.parse(value, PARSER);
-                    date = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+                    date = ZonedDateTime.of(localDateTime, TimeZone.getDefault().toZoneId());
                 }
             }
         }
