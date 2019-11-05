@@ -215,8 +215,8 @@
   <feature name="openhab-core-io-transport-mqtt" version="${project.version}">
     <feature>openhab-core-base</feature>
 
-    <requirement>openhab.tp;filter:="(feature=paho)"</requirement>
-    <feature dependency="true">openhab.tp-paho</feature>
+    <requirement>openhab.tp;filter:="(feature=hivemqclient)"</requirement>
+    <feature dependency="true">openhab.tp-hivemqclient</feature>
 
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mqtt/${project.version}</bundle>
   </feature>

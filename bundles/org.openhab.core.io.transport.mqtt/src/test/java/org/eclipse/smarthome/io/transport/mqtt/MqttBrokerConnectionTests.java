@@ -28,22 +28,25 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.smarthome.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
 import org.eclipse.smarthome.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
 import org.eclipse.smarthome.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 
+import com.hivemq.client.mqtt.lifecycle.MqttClientDisconnectedContext;
+import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
+
 /**
  * Tests the MqttBrokerConnection class
  *
  * @author David Graeff - Initial contribution
+ * @author Jan N. Klug - adjusted to HiveMQ client
  */
 public class MqttBrokerConnectionTests {
     @Test
-    public void subscribeBeforeOnlineThenConnect() throws ConfigurationException, MqttException, InterruptedException,
-            ExecutionException, TimeoutException, org.eclipse.paho.client.mqttv3.MqttException {
+    public void subscribeBeforeOnlineThenConnect()
+            throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false,
                 "MqttBrokerConnectionTests");
 
@@ -55,14 +58,16 @@ public class MqttBrokerConnectionTests {
         assertTrue(connection.hasSubscribers());
         assertThat(connection.connectionState(), is(MqttConnectionState.CONNECTED));
 
+        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload("hello".getBytes())
+                .build();
         // Test if subscription is active
-        connection.clientCallback.messageArrived("homie/device123/$name", new MqttMessage("hello".getBytes()));
+        connection.clientCallback.messageArrived(publishMessage);
         verify(subscriber).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
     }
 
     @Test
-    public void subscribeToWildcardTopic() throws ConfigurationException, MqttException, InterruptedException,
-            ExecutionException, TimeoutException, org.eclipse.paho.client.mqttv3.MqttException {
+    public void subscribeToWildcardTopic()
+            throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false,
                 "MqttBrokerConnectionTests");
 
@@ -80,7 +85,9 @@ public class MqttBrokerConnectionTests {
         assertTrue(connection.hasSubscribers());
         assertThat(connection.connectionState(), is(MqttConnectionState.CONNECTED));
 
-        connection.clientCallback.messageArrived("homie/device123/$name", new MqttMessage("hello".getBytes()));
+        Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload("hello".getBytes())
+                .build();
+        connection.clientCallback.messageArrived(publishMessage);
 
         verify(subscriber).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
         verify(subscriber2).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
@@ -88,8 +95,8 @@ public class MqttBrokerConnectionTests {
     }
 
     @Test
-    public void subscriber() throws ConfigurationException, MqttException, InterruptedException, ExecutionException,
-            TimeoutException, org.eclipse.paho.client.mqttv3.MqttException {
+    public void subscriber()
+            throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false,
                 "MqttBrokerConnectionTests");
 
@@ -116,7 +123,7 @@ public class MqttBrokerConnectionTests {
 
         // Add subscriber (while connected)
         CompletableFuture<Boolean> future = connection.subscribe("topic", subscriber);
-        verify(connection.client).subscribe(any(), anyInt(), any(), any());
+        verify(connection.client).subscribe(any(), anyInt(), any());
         assertTrue(future.get(200, TimeUnit.MILLISECONDS));
 
         // Remove subscriber (while connected)
@@ -155,11 +162,9 @@ public class MqttBrokerConnectionTests {
         // Fake a disconnect
         connection.setReconnectStrategy(mockPolicy);
         doReturn(MqttConnectionState.DISCONNECTED).when(connection).connectionState();
-        IMqttToken token = mock(IMqttToken.class);
-        when(token.getException()).thenReturn(new org.eclipse.paho.client.mqttv3.MqttException(1));
 
         connection.isConnecting = true; /* Pretend that start did something */
-        connection.connectionCallback.onFailure(token, null);
+        connection.connectionCallback.onDisconnected(new Throwable("disconnected"));
 
         // Check lostConnect
         verify(mockPolicy).lostConnection();
@@ -168,7 +173,7 @@ public class MqttBrokerConnectionTests {
         assertTrue(mockPolicy.isReconnecting());
 
         // Fake connection established
-        connection.connectionCallback.onSuccess(token);
+        connection.connectionCallback.onConnected(null);
         assertFalse(mockPolicy.isReconnecting());
     }
 
@@ -221,8 +226,8 @@ public class MqttBrokerConnectionTests {
 
         CompletableFuture<Boolean> future = connection.start();
         verify(connection.connectionCallback).createFuture();
-        verify(connection.connectionCallback, times(0)).onSuccess(any());
-        verify(connection.connectionCallback, times(0)).onFailure(any(), any());
+        verify(connection.connectionCallback, times(0)).onConnected(any());
+        verify(connection.connectionCallback, times(0)).onDisconnected(any(MqttClientDisconnectedContext.class));
         assertNotNull(connection.timeoutFuture);
 
         assertThat(future.get(70, TimeUnit.MILLISECONDS), is(false));
@@ -245,17 +250,13 @@ public class MqttBrokerConnectionTests {
 
         // Cause a success callback
         connection.connectionStateOverwrite = MqttConnectionState.CONNECTED;
-        connection.connectionCallback.onSuccess(null);
+        connection.connectionCallback.onConnected(null);
         verify(connectionObserver, times(1)).connectionStateChanged(eq(MqttConnectionState.CONNECTED), isNull());
 
-        // Cause a failure callback with a mocked token
-        IMqttToken token = mock(IMqttToken.class);
-        org.eclipse.paho.client.mqttv3.MqttException testException = new org.eclipse.paho.client.mqttv3.MqttException(
-                1);
-        when(token.getException()).thenReturn(testException);
+        Exception testException = new Exception("test message");
 
         connection.connectionStateOverwrite = MqttConnectionState.DISCONNECTED;
-        connection.connectionCallback.onFailure(token, null);
+        connection.connectionCallback.onDisconnected(testException);
         verify(connectionObserver, times(1)).connectionStateChanged(eq(MqttConnectionState.DISCONNECTED),
                 eq(testException));
 
@@ -318,7 +319,6 @@ public class MqttBrokerConnectionTests {
         assertEquals(1, connection.getQos());
 
         // Check for default ssl context provider and reconnect policy
-        assertNotNull(connection.getSSLContextProvider());
         assertNotNull(connection.getReconnectStrategy());
 
         assertThat(connection.connectionState(), equalTo(MqttConnectionState.DISCONNECTED));
@@ -326,8 +326,8 @@ public class MqttBrokerConnectionTests {
 
     @SuppressWarnings("null")
     @Test
-    public void gracefulStop() throws ConfigurationException, MqttException, InterruptedException, ExecutionException,
-            TimeoutException, org.eclipse.paho.client.mqttv3.MqttException {
+    public void gracefulStop()
+            throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
         MqttBrokerConnectionEx connection = spy(
                 new MqttBrokerConnectionEx("123.123.123.123", null, false, "MqttBrokerConnectionTests"));
 
@@ -340,7 +340,7 @@ public class MqttBrokerConnectionTests {
         assertThat(connection.hasSubscribers(), is(true));
 
         // Let's observe the internal connection client
-        MqttAsyncClientEx client = (MqttAsyncClientEx) connection.client;
+        MqttAsyncClientWrapper client = connection.client;
 
         // Stop
         CompletableFuture<Boolean> future = connection.stop();
@@ -353,7 +353,7 @@ public class MqttBrokerConnectionTests {
         future.get(1000, TimeUnit.MILLISECONDS);
 
         verify(connection).unsubscribeAll();
-        verify(client).disconnect(anyLong(), any(), any());
+        verify(client).disconnect();
 
         // Subscribers should be removed
         assertThat(connection.hasSubscribers(), is(false));

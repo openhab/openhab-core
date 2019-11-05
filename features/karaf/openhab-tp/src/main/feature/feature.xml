@@ -57,6 +57,18 @@
     <bundle>mvn:org.eclipse.orbit.bundles/com.google.gson/2.8.2.v20180104-1110</bundle>
   </feature>
 
+  <feature name="openhab.tp-hivemqclient" description="MQTT Client" version="${project.version}">
+    <capability>openhab.tp;feature=hivemqclient;version=1.1.1</capability>
+    <feature prerequisite="true">wrap</feature>
+    <feature dependency="true">openhab.tp-netty</feature>
+    <bundle dependency="true">mvn:org.jctools/jctools-core/2.1.2</bundle>
+    <bundle dependency="true">mvn:io.reactivex.rxjava2/rxjava/2.2.5</bundle>
+    <bundle dependency="true">mvn:org.reactivestreams/reactive-streams/1.0.2</bundle>
+    <bundle dependency="true">wrap:mvn:com.google.dagger/dagger/2.20</bundle>
+    <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
+    <bundle>mvn:com.hivemq/hivemq-mqtt-client/1.1.2</bundle>
+  </feature>
+
   <feature name="openhab.tp-httpclient" version="${project.version}">
     <capability>openhab.tp;feature=httpclient;version=${jetty.version}</capability>
     <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
@@ -188,12 +200,6 @@
     <capability>openhab.tp;feature=mapdb;version=1.0.9</capability>
 
     <bundle dependency="true">mvn:org.mapdb/mapdb/1.0.9</bundle>
-  </feature>
-
-  <feature name="openhab.tp-paho" description="MQTT v3 Client" version="${project.version}">
-    <capability>openhab.tp;feature=paho;version=1.2.1</capability>
-
-    <bundle>mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.1</bundle>
   </feature>
 
   <feature name="openhab.tp-serial-javacomm" version="${project.version}">

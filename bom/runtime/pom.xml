@@ -450,11 +450,11 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Paho MQTT -->
+    <!-- HiveMQ MQTT client-->
     <dependency>
-      <groupId>org.eclipse.paho</groupId>
-      <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-      <version>1.2.1</version>
+      <groupId>com.hivemq</groupId>
+      <artifactId>hivemq-mqtt-client</artifactId>
+      <version>1.1.2</version>
       <scope>compile</scope>
     </dependency>
 
