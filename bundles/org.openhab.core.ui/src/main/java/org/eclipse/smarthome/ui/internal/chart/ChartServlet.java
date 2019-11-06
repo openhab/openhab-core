@@ -17,11 +17,15 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -32,9 +36,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.BooleanUtils;
+import org.eclipse.smarthome.config.core.ConfigurableService;
 import org.eclipse.smarthome.core.items.ItemNotFoundException;
 import org.eclipse.smarthome.io.http.servlet.SmartHomeServlet;
 import org.eclipse.smarthome.ui.chart.ChartProvider;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -64,8 +70,10 @@ import org.osgi.service.http.HttpService;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
 @Component(immediate = true, service = ChartServlet.class, configurationPid = "org.eclipse.smarthome.chart", property = {
-        "service.pid=org.eclipse.smarthome.chart", "service.config.description.uri=system:chart",
-        "service.config.label=Charts", "service.config.category=system" })
+        Constants.SERVICE_PID + "=org.eclipse.smarthome.chart",
+        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
+        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Charts",
+        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + "system:chart" })
 public class ChartServlet extends SmartHomeServlet {
 
     private static final long serialVersionUID = 7700873790924746422L;
@@ -82,59 +90,35 @@ public class ChartServlet extends SmartHomeServlet {
     // The URI of this servlet
     public static final String SERVLET_NAME = "/chart";
 
-    protected static final Map<String, Long> PERIODS = new HashMap<>();
+    protected static final Map<String, Long> PERIODS = Collections.unmodifiableMap(Stream.of( //
+            new SimpleEntry<>("h", 3600000L), new SimpleEntry<>("4h", 14400000L), //
+            new SimpleEntry<>("8h", 28800000L), new SimpleEntry<>("12h", 43200000L), //
+            new SimpleEntry<>("D", 86400000L), new SimpleEntry<>("2D", 172800000L), //
+            new SimpleEntry<>("3D", 259200000L), new SimpleEntry<>("W", 604800000L), //
+            new SimpleEntry<>("2W", 1209600000L), new SimpleEntry<>("M", 2592000000L), //
+            new SimpleEntry<>("2M", 5184000000L), new SimpleEntry<>("4M", 10368000000L), //
+            new SimpleEntry<>("Y", 31536000000L)//
+    ).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
-    static {
-        PERIODS.put("h", 3600000L);
-        PERIODS.put("4h", 14400000L);
-        PERIODS.put("8h", 28800000L);
-        PERIODS.put("12h", 43200000L);
-        PERIODS.put("D", 86400000L);
-        PERIODS.put("2D", 172800000L);
-        PERIODS.put("3D", 259200000L);
-        PERIODS.put("W", 604800000L);
-        PERIODS.put("2W", 1209600000L);
-        PERIODS.put("M", 2592000000L);
-        PERIODS.put("2M", 5184000000L);
-        PERIODS.put("4M", 10368000000L);
-        PERIODS.put("Y", 31536000000L);
-    }
+    protected static final Map<String, ChartProvider> CHART_PROVIDERS = new ConcurrentHashMap<>();
 
-    protected static Map<String, ChartProvider> chartProviders = new ConcurrentHashMap<>();
-
-    @Override
-    @Reference
-    public void setHttpService(HttpService httpService) {
+    @Activate
+    public ChartServlet(final @Reference HttpService httpService, final @Reference HttpContext httpContext) {
         super.setHttpService(httpService);
-    }
-
-    @Override
-    public void unsetHttpService(HttpService httpService) {
-        super.unsetHttpService(httpService);
-    }
-
-    @Override
-    @Reference
-    public void setHttpContext(HttpContext httpContext) {
         super.setHttpContext(httpContext);
-    }
-
-    @Override
-    public void unsetHttpContext(HttpContext httpContext) {
-        super.unsetHttpContext(httpContext);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addChartProvider(ChartProvider provider) {
-        chartProviders.put(provider.getName(), provider);
+        CHART_PROVIDERS.put(provider.getName(), provider);
     }
 
     public void removeChartProvider(ChartProvider provider) {
-        chartProviders.remove(provider.getName());
+        CHART_PROVIDERS.remove(provider.getName());
     }
 
     public static Map<String, ChartProvider> getChartProviders() {
-        return chartProviders;
+        return CHART_PROVIDERS;
     }
 
     @Activate
@@ -209,7 +193,7 @@ public class ChartServlet extends SmartHomeServlet {
         }
     }
 
-    @SuppressWarnings({ "null" })
+    @SuppressWarnings("null")
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         logger.debug("Received incoming chart request: {}", req);

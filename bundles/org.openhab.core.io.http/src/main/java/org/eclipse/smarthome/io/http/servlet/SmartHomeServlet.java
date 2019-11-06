@@ -12,6 +12,7 @@
  */
 package org.eclipse.smarthome.io.http.servlet;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.service.http.HttpContext;
 
 /**
@@ -19,6 +20,7 @@ import org.osgi.service.http.HttpContext;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public abstract class SmartHomeServlet extends BaseSmartHomeServlet {
 
     private static final long serialVersionUID = 6854521240046714164L;
@@ -26,7 +28,7 @@ public abstract class SmartHomeServlet extends BaseSmartHomeServlet {
     /**
      * Http context.
      */
-    protected HttpContext httpContext;
+    protected @NonNullByDefault({}) HttpContext httpContext;
 
     protected void setHttpContext(HttpContext httpContext) {
         this.httpContext = httpContext;
