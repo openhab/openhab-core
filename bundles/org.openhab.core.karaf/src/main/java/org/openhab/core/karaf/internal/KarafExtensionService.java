@@ -27,15 +27,15 @@ import org.apache.karaf.features.FeaturesService;
 import org.eclipse.smarthome.core.extension.Extension;
 import org.eclipse.smarthome.core.extension.ExtensionService;
 import org.eclipse.smarthome.core.extension.ExtensionType;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This service is an implementation of an ESH {@link ExtensionService} using the Karaf
- * features service. This exposes all openHAB addons through the rest api and allows
- * UIs to dynamically install and uninstall them.
+ * This service is an implementation of an openHAB {@link ExtensionService} using the Karaf features service. This
+ * exposes all openHAB add-ons through the REST API and allows UIs to dynamically install and uninstall them.
  *
  * @author Kai Kreuzer - Initial contribution
  */
@@ -44,25 +44,25 @@ public class KarafExtensionService implements ExtensionService {
 
     private final Logger logger = LoggerFactory.getLogger(KarafExtensionService.class);
 
-    private FeaturesService featuresService;
-    private FeatureInstaller featureInstaller;
+    private final List<ExtensionType> typeList = new ArrayList<>(FeatureInstaller.EXTENSION_TYPES.length);
 
-    @Reference
-    protected void setFeatureInstaller(FeatureInstaller featureInstaller) {
+    private final FeaturesService featuresService;
+    private final FeatureInstaller featureInstaller;
+
+    @Activate
+    public KarafExtensionService(final @Reference FeatureInstaller featureInstaller,
+            final @Reference FeaturesService featuresService) {
         this.featureInstaller = featureInstaller;
-    }
-
-    protected void unsetFeatureInstaller(FeatureInstaller featureInstaller) {
-        this.featureInstaller = null;
-    }
-
-    @Reference
-    protected void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
-    }
-
-    protected void unsetFeaturesService(FeaturesService featureService) {
-        this.featuresService = null;
+        typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_BINDING, "Bindings"));
+        typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"));
+        typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_VOICE, "Voice"));
+        if (!FeatureInstaller.SIMPLE_PACKAGE.equals(featureInstaller.getCurrentPackage())) {
+            typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_ACTION, "Actions"));
+            typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_PERSISTENCE, "Persistence"));
+            typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION, "Transformations"));
+            typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_UI, "User Interfaces"));
+        }
     }
 
     @Override
@@ -71,10 +71,10 @@ public class KarafExtensionService implements ExtensionService {
         try {
             for (Feature feature : featuresService.listFeatures()) {
                 if (feature.getName().startsWith(FeatureInstaller.PREFIX)
-                        && Arrays.asList(FeatureInstaller.ADDON_TYPES).contains(getType(feature.getName()))) {
+                        && Arrays.asList(FeatureInstaller.EXTENSION_TYPES).contains(getType(feature.getName()))) {
                     Extension extension = getExtension(feature);
                     // for simple packaging, we filter out all openHAB 1 add-ons as they cannot be used through the UI
-                    if (!"simple".equals(featureInstaller.getCurrentPackage())
+                    if (!FeatureInstaller.SIMPLE_PACKAGE.equals(featureInstaller.getCurrentPackage())
                             || !extension.getVersion().startsWith("1.")) {
                         extensions.add(extension);
                     }
@@ -114,12 +114,30 @@ public class KarafExtensionService implements ExtensionService {
         String label = feature.getDescription();
         String version = feature.getVersion();
         String link = null;
-        if (type.equals("binding")) {
-            link = "https://www.openhab.org/addons/bindings/" + name + "/";
-        } else if (type.equals("action")) {
-            link = "https://www.openhab.org/addons/actions/" + name + "/";
-        } else if (type.equals("persistence")) {
-            link = "https://www.openhab.org/addons/persistence/" + name + "/";
+        switch (type) {
+            case FeatureInstaller.EXTENSION_TYPE_ACTION:
+                link = "https://www.openhab.org/addons/actions/" + name + "/";
+                break;
+            case FeatureInstaller.EXTENSION_TYPE_BINDING:
+                link = "https://www.openhab.org/addons/bindings/" + name + "/";
+                break;
+            case FeatureInstaller.EXTENSION_TYPE_MISC:
+                // Not possible to define URL
+                break;
+            case FeatureInstaller.EXTENSION_TYPE_PERSISTENCE:
+                link = "https://www.openhab.org/addons/persistence/" + name + "/";
+                break;
+            case FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION:
+                link = "https://www.openhab.org/addons/transformations/" + name + "/";
+                break;
+            case FeatureInstaller.EXTENSION_TYPE_UI:
+                // Not possible to define URL
+                break;
+            case FeatureInstaller.EXTENSION_TYPE_VOICE:
+                link = "https://www.openhab.org/addons/voice/" + name + "/";
+                break;
+            default:
+                break;
         }
         boolean installed = featuresService.isInstalled(feature);
         return new Extension(extId, type, label, version, link, installed);
@@ -127,16 +145,6 @@ public class KarafExtensionService implements ExtensionService {
 
     @Override
     public List<ExtensionType> getTypes(Locale locale) {
-        List<ExtensionType> typeList = new ArrayList<>(6);
-        typeList.add(new ExtensionType("binding", "Bindings"));
-        if (!"simple".equals(featureInstaller.getCurrentPackage())) {
-            typeList.add(new ExtensionType("ui", "User Interfaces"));
-            typeList.add(new ExtensionType("persistence", "Persistence"));
-            typeList.add(new ExtensionType("action", "Actions"));
-            typeList.add(new ExtensionType("transformation", "Transformations"));
-        }
-        typeList.add(new ExtensionType("voice", "Voice"));
-        typeList.add(new ExtensionType("misc", "Misc"));
         return typeList;
     }
 
@@ -156,17 +164,14 @@ public class KarafExtensionService implements ExtensionService {
     }
 
     private String getType(String name) {
-        if (name.startsWith(FeatureInstaller.PREFIX)) {
-            name = name.substring(FeatureInstaller.PREFIX.length());
-            return StringUtils.substringBefore(name, "-");
-        }
-        return StringUtils.substringBefore(name, "-");
+        return StringUtils.substringBefore(
+                name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name,
+                "-");
     }
 
     private String getName(String name) {
-        if (name.startsWith(FeatureInstaller.PREFIX)) {
-            name = name.substring(FeatureInstaller.PREFIX.length());
-        }
-        return StringUtils.substringAfter(name, "-");
+        return StringUtils.substringAfter(
+                name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name,
+                "-");
     }
 }
