@@ -15,7 +15,7 @@ package org.eclipse.smarthome.ui.items;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.model.sitemap.Widget;
+import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
 
 /**
  * This interface describes the methods that need to be implemented by a provider that

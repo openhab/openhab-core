@@ -15,10 +15,11 @@
   <name>openHAB Core :: BOM :: Compile Model</name>
 
   <properties>
+    <classgraph.version>4.8.35.v20190528-1517</classgraph.version>
     <emf.1.version>2.12.0</emf.1.version>
     <emf.3.version>2.11.0</emf.3.version>
-    <emf.mwe.version>1.4.0</emf.mwe.version>
-    <emf.mwe2.version>2.10.0</emf.mwe2.version>
+    <emf.mwe.version>1.5.0</emf.mwe.version>
+    <emf.mwe2.version>2.11.0</emf.mwe2.version>
   </properties>
 
   <dependencies>
@@ -87,10 +88,22 @@
       <scope>compile</scope>
       <exclusions>
         <exclusion>
+          <groupId>io.github.classgraph</groupId>
+          <artifactId>classgraph</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>org.eclipse.platform</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <!-- Xtext is using a classgraph artifact from Eclipse Orbit -->
+    <!-- Karaf feature validation fails when using classgraph from Maven Central -->
+    <dependency>
+      <groupId>org.eclipse.orbit.bundles</groupId>
+      <artifactId>io.github.classgraph</artifactId>
+      <version>${classgraph.version}</version>
     </dependency>
 
     <!--Xbase -->

@@ -52,7 +52,7 @@
           <mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
           <cleanupDaemonThreads>false</cleanupDaemonThreads>
           <arguments>
-            <argument>file://${project.basedir}/src/org/eclipse/smarthome/model/GenerateSitemap.mwe2</argument>
+            <argument>file://${project.basedir}/src/org/eclipse/smarthome/model/sitemap/GenerateSitemap.mwe2</argument>
             <argument>-p</argument>
             <argument>rootPath=/${project.basedir}/..</argument>
           </arguments>

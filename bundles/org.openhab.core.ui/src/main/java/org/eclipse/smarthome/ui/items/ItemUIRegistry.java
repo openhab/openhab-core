@@ -22,9 +22,9 @@ import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemRegistry;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.model.sitemap.LinkableWidget;
-import org.eclipse.smarthome.model.sitemap.Sitemap;
-import org.eclipse.smarthome.model.sitemap.Widget;
+import org.eclipse.smarthome.model.sitemap.sitemap.LinkableWidget;
+import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
+import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
 
 /**
  * This interface is used by a service which combines the core item registry

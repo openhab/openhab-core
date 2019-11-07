@@ -12,8 +12,8 @@
  */
 package org.eclipse.smarthome.model.sitemap.runtime.internal;
 
-import org.eclipse.smarthome.model.SitemapStandaloneSetup;
 import org.eclipse.smarthome.model.core.ModelParser;
+import org.eclipse.smarthome.model.sitemap.SitemapStandaloneSetup;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

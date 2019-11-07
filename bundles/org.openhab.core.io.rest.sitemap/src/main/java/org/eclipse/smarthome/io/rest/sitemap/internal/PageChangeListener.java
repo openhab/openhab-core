@@ -32,11 +32,11 @@ import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTOMapper;
 import org.eclipse.smarthome.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
-import org.eclipse.smarthome.model.sitemap.Chart;
-import org.eclipse.smarthome.model.sitemap.ColorArray;
-import org.eclipse.smarthome.model.sitemap.Frame;
-import org.eclipse.smarthome.model.sitemap.VisibilityRule;
-import org.eclipse.smarthome.model.sitemap.Widget;
+import org.eclipse.smarthome.model.sitemap.sitemap.Chart;
+import org.eclipse.smarthome.model.sitemap.sitemap.ColorArray;
+import org.eclipse.smarthome.model.sitemap.sitemap.Frame;
+import org.eclipse.smarthome.model.sitemap.sitemap.VisibilityRule;
+import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
 import org.eclipse.smarthome.ui.items.ItemUIRegistry;
 
 /**
