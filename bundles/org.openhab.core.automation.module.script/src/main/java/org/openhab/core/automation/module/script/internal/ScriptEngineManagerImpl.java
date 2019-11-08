@@ -12,12 +12,14 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
@@ -145,6 +147,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         } else {
             ScriptEngine engine = container.getScriptEngine();
             try {
+                tryExtractAndInjectFilename(engineIdentifier, engine);
                 engine.eval(scriptData);
 
                 if (engine instanceof Invocable) {
@@ -160,6 +163,17 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             } catch (Exception ex) {
                 logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
             }
+        }
+    }
+
+    private void tryExtractAndInjectFilename(String engineIdentifier, ScriptEngine engine) {
+        try {
+            File maybeScriptFile = new File(engineIdentifier);
+            if(maybeScriptFile.isFile()) {
+                engine.getContext().setAttribute(ScriptEngine.FILENAME, maybeScriptFile.getName(), ScriptContext.ENGINE_SCOPE);
+            }
+        } catch (Exception e) {
+            logger.warn("Failure whilst inserting script filename: {}" + e.getMessage());
         }
     }
 
