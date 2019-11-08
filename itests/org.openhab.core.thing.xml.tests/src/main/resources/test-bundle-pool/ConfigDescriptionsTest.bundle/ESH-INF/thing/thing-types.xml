@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="hue"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+<thing:thing-descriptions bindingId="hue" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description-1.0.0.xsd">
 
 	<!-- HUE Bridge -->
@@ -52,40 +52,40 @@
 			<channel id="color_temperature" typeId="color_temperature" />
 		</channels>
 	</thing-type>
-	
-	
+
+
 	<!-- Dummy thing type -->
 	<thing-type id="dummy">
 		<label>Dummy thing</label>
-		
-        <channels>
-           <channel id="color" typeId="color" />
-        </channels>
-        
+
+		<channels>
+			<channel id="color" typeId="color" />
+		</channels>
+
 		<config-description>
-			
+
 			<parameter name="unit" type="text">
 				<label>Unit</label>
 				<description>Specifies the unit of the data. Valid values are "us" or "metric".</description>
 				<default>metric</default>
-				
+
 				<options>
 					<option value="us">US</option>
 					<option value="metric">Metric</option>
 				</options>
 			</parameter>
-			
+
 			<parameter name="color-alarming-light" type="text" multiple="true">
-		        <context>item</context>
-		        <filter>
-		            <criteria name="tags">alarm, light</criteria>
-		            <criteria name="type">color</criteria>
-		            <criteria name="binding-id">hue</criteria>
-		        </filter>
+				<context>item</context>
+				<filter>
+					<criteria name="tags">alarm, light</criteria>
+					<criteria name="type">color</criteria>
+					<criteria name="binding-id">hue</criteria>
+				</filter>
 			</parameter>
-			
+
 		</config-description>
-		
+
 	</thing-type>
 
 	<!-- HUE Lamp Color Channel -->
@@ -94,7 +94,8 @@
 		<item-type>ColorItem</item-type>
 		<label>HUE Lamp Color</label>
 		<description>The color channel allows to control the color of the hue
-			lamp. It is also possible to dim values and switch the lamp on and
+			lamp. It is also possible to dim values and
+			switch the lamp on and
 			off.
 		</description>
 

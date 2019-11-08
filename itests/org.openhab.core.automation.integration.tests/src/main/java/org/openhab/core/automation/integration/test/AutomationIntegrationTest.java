@@ -105,7 +105,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         logger.info("@Before.begin");
 
         getService(ItemRegistry.class);
-        
+
         ItemProvider itemProvider = new ItemProvider() {
             @Override
             public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
