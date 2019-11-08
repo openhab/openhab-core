@@ -38,9 +38,9 @@ import org.osgi.service.component.annotations.Reference;
 public class SerialCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String CMD_SERIAL = "serial";
-    private static final String SUBCMD_IDENTIFIER_ALL = "identifier-all";
-    private static final String SUBCMD_IDENTIFIER_NAME = "identifier-name";
-    private static final String SUBCMD_PORT_CREATORS = "port-creators";
+    private static final String SUBCMD_IDENTIFIER_ALL = "identifiers";
+    private static final String SUBCMD_IDENTIFIER_NAME = "identifier";
+    private static final String SUBCMD_PORT_CREATORS = "creators";
 
     private SerialPortManager serialPortManager;
     private SerialPortRegistry serialPortRegistry;
@@ -95,7 +95,7 @@ public class SerialCommandExtension extends AbstractConsoleCommandExtension {
         return Arrays.asList(new String[] { //
                 buildCommandUsage(SUBCMD_IDENTIFIER_ALL, "lists all identifiers"), //
                 buildCommandUsage(SUBCMD_IDENTIFIER_NAME, "lists a specific identifier"), //
-                buildCommandUsage(SUBCMD_PORT_CREATORS, "get details about the port creators") //
+                buildCommandUsage(SUBCMD_PORT_CREATORS, "gets details about the port creators") //
         });
     }
 
