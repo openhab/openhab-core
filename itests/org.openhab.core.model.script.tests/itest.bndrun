@@ -70,7 +70,6 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.core.test;version='[2.5.0,2.5.1)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\
 	org.openhab.core.model.script.runtime;version='[2.5.0,2.5.1)',\
-	jollyday;version='[0.5.9,0.5.10)',\
 	org.apache.felix.configadmin;version='[1.9.8,1.9.9)',\
 	org.eclipse.equinox.event;version='[1.4.300,1.4.301)',\
 	org.openhab.core.ephemeris;version='[2.5.0,2.5.1)',\
@@ -81,7 +80,6 @@ Fragment-Host: org.openhab.core.model.script
 	org.ops4j.pax.web.pax-web-jetty;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-spi;version='[7.2.3,7.2.4)',\
-	org.threeten.extra;version='[1.5.0,1.5.1)',\
 	tec.uom.lib.uom-lib-common;version='[1.0.3,1.0.4)',\
 	tec.uom.se;version='[1.0.10,1.0.11)',\
 	com.google.guava;version='[27.1.0,27.1.1)',\
@@ -98,5 +96,7 @@ Fragment-Host: org.openhab.core.model.script
 	org.objectweb.asm;version='[7.1.0,7.1.1)',\
 	org.objectweb.asm.commons;version='[7.1.0,7.1.1)',\
 	org.objectweb.asm.tree;version='[7.1.0,7.1.1)',\
-	org.openhab.core.model.persistence.runtime;version='[2.5.0,2.5.1)',\
-	org.openhab.core.storage.json;version='[2.5.0,2.5.1)'
+	jollyday;version='[0.5.8,0.5.9)',\
+	org.threeten.extra;version='[1.4.0,1.4.1)',\
+	org.openhab.core.storage.json;version='[2.5.0,2.5.1)',\
+	org.openhab.core.model.rule.runtime;version='[2.5.0,2.5.1)'
