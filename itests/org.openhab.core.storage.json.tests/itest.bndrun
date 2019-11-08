@@ -1,4 +1,4 @@
--include: ../itest-common.bndrun
+-include: ../itest-include.bndrun
 
 Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.storage.json

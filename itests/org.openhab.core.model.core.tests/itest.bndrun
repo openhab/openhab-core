@@ -92,7 +92,6 @@ Fragment-Host: org.openhab.core.model.core
 	org.openhab.core.model.script;version='[2.5.0,2.5.1)',\
 	org.openhab.core.model.script.runtime;version='[2.5.0,2.5.1)',\
 	org.openhab.core.scheduler;version='[2.5.0,2.5.1)',\
-	org.openhab.core.storage.json;version='[2.5.0,2.5.1)',\
 	org.openhab.core.transform;version='[2.5.0,2.5.1)',\
 	org.openhab.core.voice;version='[2.5.0,2.5.1)',\
 	org.ops4j.pax.swissbox.optional.jcl;version='[1.8.2,1.8.3)',\
@@ -100,5 +99,5 @@ Fragment-Host: org.openhab.core.model.core
 	org.ops4j.pax.web.pax-web-jetty;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[7.2.3,7.2.4)',\
 	org.ops4j.pax.web.pax-web-spi;version='[7.2.3,7.2.4)',\
-	org.threeten.extra;version='[1.4.0,1.4.1)',\
-	org.openhab.core.model.rule.runtime;version='[2.5.0,2.5.1)'
+	org.openhab.core.model.item.runtime;version='[2.5.0,2.5.1)',\
+	org.threeten.extra;version='[1.4.0,1.4.1)'

@@ -7,11 +7,6 @@ Fragment-Host: org.openhab.core.io.rest.core
 	bnd.identity;id='org.openhab.core.io.rest.core.tests',\
 	bnd.identity;id='com.eclipsesource.jaxrs.jersey-all'
 
-# If we would like to use a storage at all, we will use the "volatile" storage.
--runblacklist: \
-    bnd.identity;id='org.openhab.core.storage.json',\
-    bnd.identity;id='org.openhab.core.storage.mapdb'
-
 #
 # done
 #
