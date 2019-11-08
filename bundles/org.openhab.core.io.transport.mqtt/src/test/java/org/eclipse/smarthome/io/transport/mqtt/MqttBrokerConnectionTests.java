@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
 import org.eclipse.smarthome.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
 import org.eclipse.smarthome.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
+import org.eclipse.smarthome.test.java.JavaTest;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 
@@ -43,7 +44,7 @@ import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
  * @author David Graeff - Initial contribution
  * @author Jan N. Klug - adjusted to HiveMQ client
  */
-public class MqttBrokerConnectionTests {
+public class MqttBrokerConnectionTests extends JavaTest {
     @Test
     public void subscribeBeforeOnlineThenConnect()
             throws ConfigurationException, MqttException, InterruptedException, ExecutionException, TimeoutException {
@@ -168,8 +169,7 @@ public class MqttBrokerConnectionTests {
 
         // Check lostConnect
         verify(mockPolicy).lostConnection();
-        Thread.sleep(10);
-        verify(connection).start();
+        waitForAssert(() -> verify(connection).start());
         assertTrue(mockPolicy.isReconnecting());
 
         // Fake connection established
