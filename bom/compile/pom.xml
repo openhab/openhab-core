@@ -282,7 +282,9 @@
     <dependency>
       <groupId>de.jollyday</groupId>
       <artifactId>jollyday</artifactId>
-      <version>0.5.9</version>
+      <!-- Upgrading to 0.5.9 causes Java 11 builds to fail -->
+      <!-- On Java 11 the bundle requires JAXB 2.3 whereas we depend on JAXB 2.2 for Java 8 compatibility -->
+      <version>0.5.8</version>
       <scope>compile</scope>
     </dependency>
 
