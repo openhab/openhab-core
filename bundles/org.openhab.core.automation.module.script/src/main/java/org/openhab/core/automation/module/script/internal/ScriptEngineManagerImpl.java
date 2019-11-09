@@ -14,6 +14,9 @@ package org.openhab.core.automation.module.script.internal;
 
 import java.io.File;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,9 +171,14 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     private void tryExtractAndInjectFilename(String engineIdentifier, ScriptEngine engine) {
         try {
-            File maybeScriptFile = new File(engineIdentifier);
-            if (maybeScriptFile.isFile()) {
-                engine.getContext().setAttribute(ScriptEngine.FILENAME, maybeScriptFile.getName(), ScriptContext.ENGINE_SCOPE);
+            if(engine.getContext().getAttribute(ScriptEngine.FILENAME) == null) {
+                URI fileURI = new URL(engineIdentifier).toURI();
+                if ("file".equals(fileURI.getScheme())) {
+                    File maybeScriptFile = Paths.get(fileURI).toFile();
+                    if (maybeScriptFile.isFile()) {
+                        engine.getContext().setAttribute(ScriptEngine.FILENAME, maybeScriptFile.getName(), ScriptContext.ENGINE_SCOPE);
+                    }
+                }
             }
         } catch (Exception e) {
             logger.warn("Failure while adding file name for script '{}' to the ScriptEngine: {}", engineIdentifier, e.getMessage());
