@@ -169,11 +169,11 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     private void tryExtractAndInjectFilename(String engineIdentifier, ScriptEngine engine) {
         try {
             File maybeScriptFile = new File(engineIdentifier);
-            if(maybeScriptFile.isFile()) {
+            if (maybeScriptFile.isFile()) {
                 engine.getContext().setAttribute(ScriptEngine.FILENAME, maybeScriptFile.getName(), ScriptContext.ENGINE_SCOPE);
             }
         } catch (Exception e) {
-            logger.warn("Failure whilst inserting script filename: {}" + e.getMessage());
+            logger.warn("Failure while adding file name for script '{}' to the ScriptEngine: {}", engineIdentifier, e.getMessage());
         }
     }
 
