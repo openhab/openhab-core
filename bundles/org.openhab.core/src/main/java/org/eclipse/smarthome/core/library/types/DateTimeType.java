@@ -13,8 +13,10 @@
 package org.eclipse.smarthome.core.library.types;
 
 import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -37,6 +39,7 @@ import org.eclipse.smarthome.core.types.State;
  * @author Jan N. Klug - add ability to use time or date only
  * @author Wouter Born - increase parsing and formatting precision
  * @author Laurent Garnier - added methods toLocaleZone and toZone
+ * @author Gaël L'hopital - added ability to use second and milliseconds unix time
  */
 @NonNullByDefault
 public class DateTimeType implements PrimitiveType, State, Command {
@@ -100,11 +103,23 @@ public class DateTimeType implements PrimitiveType, State, Command {
                 try {
                     date = parse("1970-01-01T" + zonedValue);
                 } catch (DateTimeParseException timeOnlyException) {
-                    // date only
-                    if (zonedValue.length() == 10) {
-                        date = parse(zonedValue + "T00:00:00");
-                    } else {
-                        date = parse(zonedValue.substring(0, 10) + "T00:00:00" + zonedValue.substring(10));
+                    try {
+                        Long epoch = Long.valueOf(zonedValue);
+                        Instant i;
+                        // Assume that below 12 digits we're in seconds
+                        if (zonedValue.length() < 12) {
+                            i = Instant.ofEpochSecond(epoch);
+                        } else {
+                            i = Instant.ofEpochMilli(epoch);
+                        }
+                        date = ZonedDateTime.ofInstant(i, ZoneOffset.UTC);
+                    } catch (NumberFormatException notANumberException) {
+                        // date only
+                        if (zonedValue.length() == 10) {
+                            date = parse(zonedValue + "T00:00:00");
+                        } else {
+                            date = parse(zonedValue.substring(0, 10) + "T00:00:00" + zonedValue.substring(10));
+                        }
                     }
                 }
             }
@@ -207,7 +222,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((getZonedDateTime() == null) ? 0 : getZonedDateTime().hashCode());
+        result = prime * result + getZonedDateTime().hashCode();
         return result;
     }
 
@@ -223,14 +238,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
             return false;
         }
         DateTimeType other = (DateTimeType) obj;
-        if (zonedDateTime == null) {
-            if (other.zonedDateTime != null) {
-                return false;
-            }
-        } else if (zonedDateTime.compareTo(other.zonedDateTime) != 0) {
-            return false;
-        }
-        return true;
+        return zonedDateTime.compareTo(other.zonedDateTime) == 0;
     }
 
     private ZonedDateTime parse(String value) throws DateTimeParseException {

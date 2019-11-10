@@ -42,6 +42,7 @@ import org.junit.runners.Parameterized.Parameters;
  * @author Gaël L'hopital - Added Timezone and Milliseconds
  * @author Erdoan Hadzhiyusein - Added ZonedDateTime tests
  * @author Laurent Garnier - Enhanced tests
+ * @author Gaël L'hopital - added ability to use second and milliseconds unix time
  */
 @NonNullByDefault
 @RunWith(Parameterized.class)
@@ -302,6 +303,18 @@ public class DateTimeTypeTest {
         assertThat(zdt1, is(zdt2));
         assertThat(zdt1, is(zdt3.withZoneSameInstant(zdt1.getZone())));
         assertThat(zdt2, is(zdt3.withZoneSameInstant(zdt2.getZone())));
+    }
+
+    @Test
+    public void epochTest() {
+        DateTimeType zdtEpoch = new DateTimeType("1970-01-01T00:00:00+0000");
+        DateTimeType zdtStandard = new DateTimeType("2014-03-30T10:58:47+0000");
+        DateTimeType epochSecond = new DateTimeType("0");
+        DateTimeType epochStandard = new DateTimeType("1396177127");
+        DateTimeType epochMilliseconds = new DateTimeType("000000000000");
+        assertThat(epochSecond, is(zdtEpoch));
+        assertThat(epochMilliseconds, is(zdtEpoch));
+        assertThat(epochStandard, is(zdtStandard));
     }
 
     @Test

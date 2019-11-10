@@ -96,7 +96,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + value.hashCode();
         return result;
     }
 
@@ -112,14 +112,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
             return false;
         }
         DecimalType other = (DecimalType) obj;
-        if (value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (value.compareTo(other.value) != 0) {
-            return false;
-        }
-        return true;
+        return value.compareTo(other.value) == 0;
     }
 
     @Override
@@ -176,6 +169,8 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         } else if (target == HSBType.class) {
             return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO,
                     new PercentType(this.toBigDecimal().multiply(BigDecimal.valueOf(100)))));
+        } else if (target == DateTimeType.class) {
+            return target.cast(new DateTimeType(value.toString()));
         } else {
             return defaultConversion(target);
         }

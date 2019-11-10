@@ -38,7 +38,7 @@ public class DateTimeItem extends GenericItem {
     private static List<Class<? extends Command>> acceptedCommandTypes = new ArrayList<>();
 
     static {
-        acceptedDataTypes.add((DateTimeType.class));
+        acceptedDataTypes.add(DateTimeType.class);
         acceptedDataTypes.add(UnDefType.class);
 
         acceptedCommandTypes.add(RefreshType.class);
@@ -66,7 +66,13 @@ public class DateTimeItem extends GenericItem {
     @Override
     public void setState(State state) {
         if (isAcceptedState(acceptedDataTypes, state)) {
-            super.setState(state);
+            // try conversion
+            State convertedState = state.as(DateTimeType.class);
+            if (convertedState != null) {
+                applyState(convertedState);
+            } else {
+                applyState(state);
+            }
         } else {
             logSetTypeError(state);
         }
