@@ -15,8 +15,8 @@
   <description>openHAB Core Features</description>
 
   <properties>
-    <jetty.version>9.4.18.v20190429</jetty.version>
-    <jna.version>4.5.2</jna.version>
+    <jetty.version>9.4.20.v20190813</jetty.version>
+    <jna.version>5.4.0</jna.version>
   </properties>
 
   <build>
