@@ -29,6 +29,7 @@ public interface SystemProfiles {
     ProfileTypeUID DEFAULT = new ProfileTypeUID(SYSTEM_SCOPE, "default");
     ProfileTypeUID FOLLOW = new ProfileTypeUID(SYSTEM_SCOPE, "follow");
     ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
+    ProfileTypeUID ROUND = new ProfileTypeUID(SYSTEM_SCOPE, "round");
     ProfileTypeUID RAWBUTTON_ON_OFF_SWITCH = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-on-off-switch");
     ProfileTypeUID RAWBUTTON_TOGGLE_PLAYER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-player");
     ProfileTypeUID RAWBUTTON_TOGGLE_ROLLERSHUTTER = new ProfileTypeUID(SYSTEM_SCOPE, "rawbutton-toggle-rollershutter");
@@ -48,6 +49,10 @@ public interface SystemProfiles {
     StateProfileType FOLLOW_TYPE = ProfileTypeBuilder.newState(FOLLOW, "Follow").build();
 
     StateProfileType OFFSET_TYPE = ProfileTypeBuilder.newState(OFFSET, "Offset")
+            .withSupportedItemTypes(CoreItemFactory.NUMBER).withSupportedItemTypesOfChannel(CoreItemFactory.NUMBER)
+            .build();
+
+    StateProfileType ROUND_TYPE = ProfileTypeBuilder.newState(ROUND, "Round")
             .withSupportedItemTypes(CoreItemFactory.NUMBER).withSupportedItemTypesOfChannel(CoreItemFactory.NUMBER)
             .build();
 
