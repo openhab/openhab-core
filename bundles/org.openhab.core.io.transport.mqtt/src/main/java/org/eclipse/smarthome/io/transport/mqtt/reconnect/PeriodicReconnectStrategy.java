@@ -43,7 +43,7 @@ public class PeriodicReconnectStrategy extends AbstractReconnectStrategy {
      * Use a default 60s reconnect frequency and try the first reconnect after 10s.
      */
     public PeriodicReconnectStrategy() {
-        this(10000, 60000);
+        this(60000, 10000);
     }
 
     /**
