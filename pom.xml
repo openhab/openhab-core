@@ -46,7 +46,7 @@
   </scm>
 
   <issueManagement>
-    <system>Github</system>
+    <system>GitHub</system>
     <url>https://github.com/openhab/openhab-core/issues</url>
   </issueManagement>
 
@@ -69,7 +69,7 @@
     <maven.compiler.target>${oh.java.version}</maven.compiler.target>
     <maven.compiler.compilerVersion>${oh.java.version}</maven.compiler.compilerVersion>
 
-    <bnd.version>4.2.0</bnd.version>
+    <bnd.version>4.3.0</bnd.version>
     <karaf.compile.version>4.2.1</karaf.compile.version>
     <karaf.tooling.version>4.2.7</karaf.tooling.version>
     <sat.version>0.8.0</sat.version>

@@ -19,4 +19,14 @@
     <module>karaf</module>
   </modules>
 
+  <dependencies>
+    <!-- BOM, so features are build after bundles in parallel builds -->
+    <dependency>
+      <groupId>org.openhab.core.bom</groupId>
+      <artifactId>org.openhab.core.bom.openhab-core</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+
 </project>
