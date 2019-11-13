@@ -83,14 +83,14 @@ public final class SmartHomeUnits extends CustomUnits {
 
     // Alphabetical ordered by Unit.
     public static final Unit<Acceleration> METRE_PER_SQUARE_SECOND = addUnit(Units.METRE_PER_SQUARE_SECOND);
-    public static final Unit<Acceleration> STANDARD_GRAVITY = addUnit(
-            SmartHomeUnits.METRE_PER_SQUARE_SECOND.multiply((9.80665)));
+    public static final Unit<Acceleration> STANDARD_GRAVITY = addUnit(METRE_PER_SQUARE_SECOND.multiply(9.80665));
     public static final Unit<AmountOfSubstance> MOLE = addUnit(Units.MOLE);
-    public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(new TransformedUnit<AmountOfSubstance>("°dH",
-            (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE),
-            RationalConverter.of(5.6, 1)));
+    @SuppressWarnings("unchecked")
+    public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(
+            new TransformedUnit<>("°dH", (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE),
+                    RationalConverter.of(5.6, 1)));
     public static final Unit<Angle> DEGREE_ANGLE = addUnit(new TransformedUnit<>(Units.RADIAN,
-            new PiMultiplierConverter().concatenate(new RationalConverter(1, 180))));
+            new PiMultiplierConverter().concatenate(new RationalConverter(BigInteger.ONE, BigInteger.valueOf(180)))));
     public static final Unit<Angle> RADIAN = addUnit(Units.RADIAN);
     public static final Unit<ArealDensity> DOBSON_UNIT = addUnit(
             new ProductUnit<ArealDensity>(MetricPrefix.MILLI(Units.MOLE).multiply(0.4462).divide(Units.METRE.pow(2))));
@@ -98,13 +98,13 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<Density> KILOGRAM_PER_CUBICMETRE = addUnit(
             new ProductUnit<Density>(Units.KILOGRAM.divide(Units.METRE.pow(3))));
     public static final Unit<Density> MICROGRAM_PER_CUBICMETRE = addUnit(new TransformedUnit<>(KILOGRAM_PER_CUBICMETRE,
-            new RationalConverter(BigInteger.valueOf(1), BigInteger.valueOf(1000000000))));
+            new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000000))));
     public static final Unit<Dimensionless> ONE = addUnit(AbstractUnit.ONE);
     public static final Unit<Dimensionless> PERCENT = addUnit(Units.PERCENT);
     public static final Unit<Dimensionless> PARTS_PER_MILLION = addUnit(
-            new TransformedUnit<>(ONE, new RationalConverter(1, 1000000)));
-    public static final Unit<Dimensionless> DECIBEL = addUnit(
-            ONE.transform(new LogConverter(10).inverse().concatenate(RationalConverter.of(1d, 10d))));
+            new TransformedUnit<>(ONE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000))));
+    public static final Unit<Dimensionless> DECIBEL = addUnit(ONE.transform(
+            new LogConverter(10).inverse().concatenate(new RationalConverter(BigInteger.ONE, BigInteger.TEN))));
     public static final Unit<ElectricCurrent> AMPERE = addUnit(Units.AMPERE);
     public static final Unit<ElectricCapacitance> FARAD = addUnit(Units.FARAD);
     public static final Unit<ElectricCharge> COULOMB = addUnit(Units.COULOMB);
@@ -113,8 +113,8 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<ElectricPotential> VOLT = addUnit(Units.VOLT);
     public static final Unit<ElectricResistance> OHM = addUnit(Units.OHM);
     public static final Unit<Energy> JOULE = addUnit(Units.JOULE);
-    public static final Unit<Energy> WATT_SECOND = addUnit(new ProductUnit<Energy>(Units.WATT.multiply(Units.SECOND)));
-    public static final Unit<Energy> WATT_HOUR = addUnit(new ProductUnit<Energy>(Units.WATT.multiply(Units.HOUR)));
+    public static final Unit<Energy> WATT_SECOND = addUnit(new ProductUnit<>(Units.WATT.multiply(Units.SECOND)));
+    public static final Unit<Energy> WATT_HOUR = addUnit(new ProductUnit<>(Units.WATT.multiply(Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
     public static final Unit<Power> KILOVAR = addUnit(MetricPrefix.KILO(new BaseUnit<Power>("var")));
@@ -125,27 +125,27 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<Intensity> IRRADIANCE = addUnit(
             new AlternateUnit<Intensity>(Units.WATT.divide(Units.SQUARE_METRE), "W/m2"));
     public static final Unit<Intensity> MICROWATT_PER_SQUARE_CENTIMETRE = addUnit(
-            new TransformedUnit<>(IRRADIANCE, new RationalConverter(BigInteger.valueOf(100), BigInteger.valueOf(1))));
+            new TransformedUnit<>(IRRADIANCE, new RationalConverter(BigInteger.valueOf(100), BigInteger.ONE)));
     public static final Unit<Illuminance> LUX = addUnit(Units.LUX);
     public static final Unit<LuminousFlux> LUMEN = addUnit(Units.LUMEN);
     public static final Unit<LuminousIntensity> CANDELA = addUnit(Units.CANDELA);
     public static final Unit<MagneticFlux> WEBER = addUnit(Units.WEBER);
     public static final Unit<MagneticFluxDensity> TESLA = addUnit(Units.TESLA);
     public static final Unit<Power> WATT = addUnit(Units.WATT);
-    public static final Unit<Power> DECIBEL_MILLIWATTS = new TransformedUnit<>("dBm",
-            MetricPrefix.MILLI(SmartHomeUnits.WATT), new ExpConverter(10.0).concatenate(new MultiplyConverter(0.1)));
+    public static final Unit<Power> DECIBEL_MILLIWATTS = new TransformedUnit<>("dBm", MetricPrefix.MILLI(WATT),
+            new ExpConverter(10.0).concatenate(new MultiplyConverter(0.1)));
     public static final Unit<Pressure> MILLIMETRE_OF_MERCURY = addUnit(new TransformedUnit<>("mmHg", Units.PASCAL,
             new RationalConverter(BigInteger.valueOf(133322368), BigInteger.valueOf(1000000))));
     public static final Unit<Pressure> BAR = addUnit(new TransformedUnit<>("bar", Units.PASCAL,
-            new RationalConverter(BigInteger.valueOf(100000), BigInteger.valueOf(1))));
+            new RationalConverter(BigInteger.valueOf(100000), BigInteger.ONE)));
     public static final Unit<Pressure> MILLIBAR = addUnit(MetricPrefix.MILLI(BAR));
     public static final Unit<Radioactivity> BECQUEREL = addUnit(Units.BECQUEREL);
     public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(Units.GRAY);
     public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(Units.SIEVERT);
-    public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(
-            new TransformedUnit<>("mm/h", Units.KILOMETRE_PER_HOUR, new RationalConverter(1l, 1000000l)));
-    public static final Unit<Speed> INCHES_PER_HOUR = addUnit(
-            new TransformedUnit<>("in/h", ImperialUnits.MILES_PER_HOUR, new RationalConverter(1l, 63360l)));
+    public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(new TransformedUnit<>("mm/h",
+            Units.KILOMETRE_PER_HOUR, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000))));
+    public static final Unit<Speed> INCHES_PER_HOUR = addUnit(new TransformedUnit<>("in/h",
+            ImperialUnits.MILES_PER_HOUR, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(63360))));
     public static final Unit<Speed> METRE_PER_SECOND = addUnit(Units.METRE_PER_SECOND);
     public static final Unit<Speed> KNOT = addUnit(new TransformedUnit<>("kn", Units.KILOMETRE_PER_HOUR,
             new RationalConverter(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
@@ -168,7 +168,7 @@ public final class SmartHomeUnits extends CustomUnits {
             new ProductUnit<VolumetricFlowRate>(Units.CUBIC_METRE.divide(Units.HOUR)));
     public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_DAY = addUnit(
             new ProductUnit<VolumetricFlowRate>(Units.CUBIC_METRE.divide(Units.DAY)));
-    public static final Unit<DataAmount> BIT = addUnit(new AlternateUnit<DataAmount>(ONE, "bit"));
+    public static final Unit<DataAmount> BIT = addUnit(new AlternateUnit<>(ONE, "bit"));
     public static final Unit<DataAmount> MEGABIT = addUnit(MetricPrefix.MEGA(BIT));
     public static final Unit<DataAmount> KILOBIT = addUnit(MetricPrefix.KILO(BIT));
     public static final Unit<DataAmount> GIGABIT = addUnit(MetricPrefix.GIGA(BIT));
