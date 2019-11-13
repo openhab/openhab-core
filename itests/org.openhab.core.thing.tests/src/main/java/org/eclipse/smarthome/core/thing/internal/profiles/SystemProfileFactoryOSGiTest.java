@@ -74,7 +74,7 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
     @Test
     public void systemProfileTypesAndUidsShouldBeAvailable() {
         Collection<ProfileTypeUID> systemProfileTypeUIDs = profileFactory.getSupportedProfileTypeUIDs();
-        assertEquals(15, systemProfileTypeUIDs.size());
+        assertEquals(16, systemProfileTypeUIDs.size());
 
         Collection<ProfileType> systemProfileTypes = profileFactory.getProfileTypes(null);
         assertEquals(systemProfileTypeUIDs.size(), systemProfileTypes.size());
