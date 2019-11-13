@@ -28,7 +28,7 @@ import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.unit.Units;
 
 /**
- * Delegate SI units to {@link Units} to hide this dependency from the rest of ESH.
+ * Delegate SI units to {@link Units} to hide this dependency from the rest of openHAB.
  * See members of {@link Units} for a detailed description.
  *
  * @author Henning Treu - Initial contribution
