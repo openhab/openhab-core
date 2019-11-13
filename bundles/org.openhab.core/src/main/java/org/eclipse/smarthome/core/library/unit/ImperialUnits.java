@@ -41,38 +41,32 @@ public final class ImperialUnits extends CustomUnits {
 
     private static final ImperialUnits INSTANCE = new ImperialUnits();
 
-    /** Additionally defined units to be used in ESH **/
-
+    /** Additionally defined units to be used in openHAB **/
     public static final Unit<Pressure> INCH_OF_MERCURY = addUnit(new TransformedUnit<>("inHg", Units.PASCAL,
             new RationalConverter(BigInteger.valueOf(3386388), BigInteger.valueOf(1000))));
 
     public static final Unit<Temperature> FAHRENHEIT = addUnit(new TransformedUnit<>("°F", Units.KELVIN,
             new RationalConverter(BigInteger.valueOf(5), BigInteger.valueOf(9)).concatenate(new AddConverter(459.67))));
 
-    public static final Unit<Speed> MILES_PER_HOUR = addUnit(
-            new TransformedUnit<>("mph", Units.KILOMETRE_PER_HOUR, new RationalConverter(1609344l, 1000000l)));
+    public static final Unit<Speed> MILES_PER_HOUR = addUnit(new TransformedUnit<>("mph", Units.KILOMETRE_PER_HOUR,
+            new RationalConverter(BigInteger.valueOf(1609344), BigInteger.valueOf(1000000))));
 
     /** Length **/
-    public static final Unit<Length> INCH = addUnit(
-            new TransformedUnit<>("in", Units.METRE, new RationalConverter(254l, 10000l)));
+    public static final Unit<Length> INCH = addUnit(new TransformedUnit<>("in", Units.METRE,
+            new RationalConverter(BigInteger.valueOf(254), BigInteger.valueOf(10000))));
 
-    public static final Unit<Length> FOOT = addUnit(
-            new TransformedUnit<>("ft", ImperialUnits.INCH, new MultiplyConverter(12.0)));
+    public static final Unit<Length> FOOT = addUnit(new TransformedUnit<>("ft", INCH, new MultiplyConverter(12.0)));
 
-    public static final Unit<Length> YARD = addUnit(
-            new TransformedUnit<>("yd", ImperialUnits.FOOT, new MultiplyConverter(3.0)));
+    public static final Unit<Length> YARD = addUnit(new TransformedUnit<>("yd", FOOT, new MultiplyConverter(3.0)));
 
-    public static final Unit<Length> CHAIN = addUnit(
-            new TransformedUnit<>("ch", ImperialUnits.YARD, new MultiplyConverter(22.0)));
+    public static final Unit<Length> CHAIN = addUnit(new TransformedUnit<>("ch", YARD, new MultiplyConverter(22.0)));
 
     public static final Unit<Length> FURLONG = addUnit(
-            new TransformedUnit<>("fur", ImperialUnits.CHAIN, new MultiplyConverter(10.0)));
+            new TransformedUnit<>("fur", CHAIN, new MultiplyConverter(10.0)));
 
-    public static final Unit<Length> MILE = addUnit(
-            new TransformedUnit<>("mi", ImperialUnits.FURLONG, new MultiplyConverter(8.0)));
+    public static final Unit<Length> MILE = addUnit(new TransformedUnit<>("mi", FURLONG, new MultiplyConverter(8.0)));
 
-    public static final Unit<Length> LEAGUE = addUnit(
-            new TransformedUnit<>("lea", ImperialUnits.MILE, new MultiplyConverter(3.0)));
+    public static final Unit<Length> LEAGUE = addUnit(new TransformedUnit<>("lea", MILE, new MultiplyConverter(3.0)));
 
     public static final Unit<Length> SQUARE_FOOT = addUnit(new ProductUnit<>(FOOT.multiply(FOOT)));
     public static final Unit<Length> CUBIC_FOOT = addUnit(new ProductUnit<>(SQUARE_FOOT.multiply(FOOT)));
@@ -116,5 +110,4 @@ public final class ImperialUnits extends CustomUnits {
         INSTANCE.units.add(unit);
         return unit;
     }
-
 }
