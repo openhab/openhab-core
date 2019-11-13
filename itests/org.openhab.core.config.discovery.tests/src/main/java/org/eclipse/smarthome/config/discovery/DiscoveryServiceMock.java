@@ -15,17 +15,16 @@ package org.eclipse.smarthome.config.discovery;
 import java.util.Collections;
 import java.util.Random;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
 import org.eclipse.smarthome.config.discovery.internal.DiscoveryResultImpl;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 
 /**
- * The {@link DiscoveryServiceMock} is a mock for a {@link DiscoveryService}
- * which can simulate a working and faulty discovery.<br>
- * If this mock is configured to be faulty, an exception is thrown if the
- * discovery is enforced or aborted.
+ * The {@link DiscoveryServiceMock} is a mock for a {@link
+ * org.eclipse.smarthome.config.discovery.DiscoveryService} which can simulate a working and faulty
+ * discovery.<br>
+ * If this mock is configured to be faulty, an exception is thrown if the discovery is enforced or
+ * aborted.
  *
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation

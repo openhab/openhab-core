@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="hue"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
-	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 org.eclipse.smarthome.thing-description.xsd">
+<thing:thing-descriptions bindingId="hue" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
 	<!-- HUE Bridge -->
 	<bridge-type id="bridge">
@@ -18,9 +18,7 @@
 			<parameter name="username" type="text">
 				<context>password</context>
 				<label>Username</label>
-				<description>Name of a registered hue bridge user, that allows to
-					access the API.
-				</description>
+				<description>Name of a registered hue bridge user, that allows to access the API.</description>
 			</parameter>
 		</config-description>
 	</bridge-type>
@@ -45,10 +43,8 @@
 
 		<item-type>ColorItem</item-type>
 		<label>HUE Lamp Color</label>
-		<description>The color channel allows to control the color of the hue
-			lamp. It is also possible to dim values and switch the lamp on and
-			off.
-		</description>
+		<description>The color channel allows to control the color of the hue lamp. It is also possible to dim values and
+			switch the lamp on and off.</description>
 
 		<config-description>
 			<parameter name="lastDimValue" type="boolean" />
