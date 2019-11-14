@@ -118,7 +118,7 @@ public class HttpUtil {
                 try {
                     proxyPort = Integer.valueOf(proxyPortString);
                 } catch (NumberFormatException e) {
-                    LOGGER.warn("'{}' is not a valid proxy port - using port 80 instead");
+                    LOGGER.warn("'{}' is not a valid proxy port - using port 80 instead", proxyPortString);
                 }
             }
             proxyUser = System.getProperty("http.proxyUser");
