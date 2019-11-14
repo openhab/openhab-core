@@ -608,7 +608,7 @@ public class NetUtil implements NetworkAddressService {
             }
             NetworkAddressChangeListener safeListener = safeCaller.create(listener, NetworkAddressChangeListener.class)
                     .withTimeout(15000)
-                    .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception {}", exception))
+                    .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception", exception))
                     .build();
             safeListener.onChanged(unmodifiableAddedList, unmodifiableRemovedList);
         }
@@ -625,7 +625,7 @@ public class NetUtil implements NetworkAddressService {
                 }
                 NetworkAddressChangeListener safeListener = safeCaller
                         .create(listener, NetworkAddressChangeListener.class).withTimeout(15000)
-                        .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception {}", exception))
+                        .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception", exception))
                         .build();
                 safeListener.onPrimaryAddressChanged(oldPrimaryAddress, newPrimaryAddress);
             }
