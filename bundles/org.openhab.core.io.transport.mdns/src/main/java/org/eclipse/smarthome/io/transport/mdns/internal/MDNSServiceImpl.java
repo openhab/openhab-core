@@ -17,10 +17,10 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.io.transport.mdns.MDNSClient;
 import org.eclipse.smarthome.io.transport.mdns.MDNSService;
 import org.eclipse.smarthome.io.transport.mdns.ServiceDescription;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -37,43 +37,36 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true)
 public class MDNSServiceImpl implements MDNSService {
-
     private final Logger logger = LoggerFactory.getLogger(MDNSServiceImpl.class);
-    private MDNSClient mdnsClient;
+
+    private @Nullable MDNSClient mdnsClient;
 
     private final Set<ServiceDescription> servicesToRegisterQueue = new CopyOnWriteArraySet<>();
-
-    public MDNSServiceImpl() {
-    }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     protected void setMDNSClient(MDNSClient client) {
         this.mdnsClient = client;
         // register queued services
         if (!servicesToRegisterQueue.isEmpty()) {
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    logger.debug("Registering {} queued services", servicesToRegisterQueue.size());
-                    for (ServiceDescription description : servicesToRegisterQueue) {
-                        try {
-                            MDNSClient localClient = mdnsClient;
-                            if (localClient != null) {
-                                localClient.registerService(description);
-                            } else {
-                                break;
-                            }
-                        } catch (IOException e) {
-                            logger.error("{}", e.getMessage());
-                        } catch (IllegalStateException e) {
-                            logger.debug("Not registering service {}, because service is already deactivated!",
-                                    description.serviceType);
+            Executors.newSingleThreadExecutor().execute(() -> {
+                logger.debug("Registering {} queued services", servicesToRegisterQueue.size());
+                for (ServiceDescription description : servicesToRegisterQueue) {
+                    try {
+                        MDNSClient localClient = mdnsClient;
+                        if (localClient != null) {
+                            localClient.registerService(description);
+                        } else {
+                            break;
                         }
+                    } catch (IOException e) {
+                        logger.error("{}", e.getMessage());
+                    } catch (IllegalStateException e) {
+                        logger.debug("Not registering service {}, because service is already deactivated!",
+                                description.serviceType);
                     }
-                    servicesToRegisterQueue.clear();
                 }
-            };
-            Executors.newSingleThreadExecutor().execute(runnable);
+                servicesToRegisterQueue.clear();
+            });
         }
     }
 
@@ -84,25 +77,21 @@ public class MDNSServiceImpl implements MDNSService {
 
     @Override
     public void registerService(final ServiceDescription description) {
-        if (mdnsClient == null) {
-            // queue the service to register it as soon as the mDNS client is
-            // available
+        MDNSClient localClient = mdnsClient;
+        if (localClient == null) {
+            // queue the service to register it as soon as the mDNS client is available
             servicesToRegisterQueue.add(description);
         } else {
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mdnsClient.registerService(description);
-                    } catch (IOException e) {
-                        logger.error("{}", e.getMessage());
-                    } catch (IllegalStateException e) {
-                        logger.debug("Not registering service {}, because service is already deactivated!",
-                                description.serviceType);
-                    }
+            Executors.newSingleThreadExecutor().execute(() -> {
+                try {
+                    localClient.registerService(description);
+                } catch (IOException e) {
+                    logger.error("{}", e.getMessage());
+                } catch (IllegalStateException e) {
+                    logger.debug("Not registering service {}, because service is already deactivated!",
+                            description.serviceType);
                 }
-            };
-            Executors.newSingleThreadExecutor().execute(runnable);
+            });
         }
     }
 
@@ -122,10 +111,6 @@ public class MDNSServiceImpl implements MDNSService {
         }
     }
 
-    @Activate
-    public void activate() {
-    }
-
     @Deactivate
     public void deactivate() {
         unregisterAllServices();
@@ -134,5 +119,4 @@ public class MDNSServiceImpl implements MDNSService {
             logger.debug("mDNS service has been stopped");
         }
     }
-
 }

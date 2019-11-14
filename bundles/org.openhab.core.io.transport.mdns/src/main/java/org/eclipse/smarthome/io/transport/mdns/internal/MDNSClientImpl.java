@@ -56,7 +56,12 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
 
     private final Set<ServiceDescription> activeServices = ConcurrentHashMap.newKeySet();
 
-    private NetworkAddressService networkAddressService;
+    private final NetworkAddressService networkAddressService;
+
+    @Activate
+    public MDNSClientImpl(final @Reference NetworkAddressService networkAddressService) {
+        this.networkAddressService = networkAddressService;
+    }
 
     private Set<InetAddress> getAllInetAddresses() {
         final Set<InetAddress> addresses = new HashSet<>();
@@ -132,6 +137,7 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
 
     @Activate
     protected void activate() {
+        networkAddressService.addNetworkAddressChangeListener(this);
         start();
     }
 
@@ -152,6 +158,7 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     public void deactivate() {
         close();
         activeServices.clear();
+        networkAddressService.removeNetworkAddressChangeListener(this);
     }
 
     @Override
@@ -272,16 +279,5 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
         logger.debug("ip address change: added {}, removed {}", added, removed);
         close();
         start();
-    }
-
-    @Reference
-    protected void setNetworkAddressService(NetworkAddressService networkAddressService) {
-        this.networkAddressService = networkAddressService;
-        networkAddressService.addNetworkAddressChangeListener(this);
-    }
-
-    protected void unsetNetworkAddressService(NetworkAddressService networkAddressService) {
-        networkAddressService.removeNetworkAddressChangeListener(this);
-        this.networkAddressService = null;
     }
 }
