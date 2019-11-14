@@ -85,8 +85,7 @@ public class UpnpIOServiceTest {
         when(upnpServiceMock.getRegistry()).thenReturn(upnpRegistry);
         when(upnpServiceMock.getControlPoint()).thenReturn(controlPoint);
 
-        upnpIoService = new UpnpIOServiceImpl();
-        upnpIoService.setUpnpService(upnpServiceMock);
+        upnpIoService = new UpnpIOServiceImpl(upnpServiceMock);
     }
 
     @Test
