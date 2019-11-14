@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -207,7 +206,7 @@ public class MqttBrokerConnection {
     }
 
     /**
-     * Create a new MQTT3 client connection to a server with the given protocol, mqtt client version,  host and port.
+     * Create a new MQTT3 client connection to a server with the given protocol, mqtt client version, host and port.
      *
      * @param protocol The transport protocol
      * @param host A host name or address
@@ -265,7 +264,8 @@ public class MqttBrokerConnection {
      * state to the MQTT broker changed.
      *
      * The reconnect strategy will not be informed if the initial connection to the broker
-     * timed out. You need a timeout executor additionally, see {@link #setTimeoutExecutor(ScheduledExecutorService, int)}.
+     * timed out. You need a timeout executor additionally, see
+     * {@link #setTimeoutExecutor(ScheduledExecutorService, int)}.
      *
      * @param reconnectStrategy The reconnect strategy. May not be null.
      */
