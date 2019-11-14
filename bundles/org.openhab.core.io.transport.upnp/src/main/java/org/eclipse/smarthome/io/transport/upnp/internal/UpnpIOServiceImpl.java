@@ -48,7 +48,9 @@ import org.jupnp.model.types.UDAServiceId;
 import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +77,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     private static final int DEFAULT_POLLING_INTERVAL = 60;
     private static final String POOL_NAME = "upnp-io";
 
-    private UpnpService upnpService;
+    private final UpnpService upnpService;
 
     final Set<UpnpIOParticipant> participants = new CopyOnWriteArraySet<>();
     final Map<UpnpIOParticipant, ScheduledFuture> pollingJobs = new ConcurrentHashMap<>();
@@ -194,24 +196,22 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
         }
     }
 
+    @Activate
+    public UpnpIOServiceImpl(final @Reference UpnpService upnpService) {
+        this.upnpService = upnpService;
+    }
+
+    @Activate
     public void activate() {
         logger.debug("Starting UPnP IO service...");
         upnpService.getRegistry().getRemoteDevices().forEach(device -> informParticipants(device, true));
         upnpService.getRegistry().addListener(this);
     }
 
+    @Deactivate
     public void deactivate() {
         logger.debug("Stopping UPnP IO service...");
         upnpService.getRegistry().removeListener(this);
-    }
-
-    @Reference
-    protected void setUpnpService(UpnpService upnpService) {
-        this.upnpService = upnpService;
-    }
-
-    protected void unsetUpnpService(UpnpService upnpService) {
-        this.upnpService = null;
     }
 
     private Device getDevice(UpnpIOParticipant participant) {
