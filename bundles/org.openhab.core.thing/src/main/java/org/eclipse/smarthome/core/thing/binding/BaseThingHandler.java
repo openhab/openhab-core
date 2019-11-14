@@ -37,7 +37,6 @@ import org.eclipse.smarthome.core.thing.util.ThingHandlerHelper;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,9 +66,6 @@ public abstract class BaseThingHandler implements ThingHandler {
     protected final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(THING_HANDLER_THREADPOOL_NAME);
 
-    @Deprecated // this must not be used by bindings!
-    protected @NonNullByDefault({}) BundleContext bundleContext;
-
     protected Thing thing;
 
     private @Nullable ThingHandlerCallback callback;
@@ -81,14 +77,6 @@ public abstract class BaseThingHandler implements ThingHandler {
      */
     public BaseThingHandler(Thing thing) {
         this.thing = thing;
-    }
-
-    public void setBundleContext(final BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
-
-    public void unsetBundleContext(final BundleContext bundleContext) {
-        this.bundleContext = null;
     }
 
     @Override
