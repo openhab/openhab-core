@@ -45,16 +45,13 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class MqttBrokerConnectionServiceInstance {
     private final Logger logger = LoggerFactory.getLogger(MqttBrokerConnectionServiceInstance.class);
+
     private @Nullable MqttBrokerConnection connection;
-    private @Nullable MqttService mqttService;
+    private final MqttService mqttService;
 
-    @Reference
-    public void setMqttService(MqttService service) {
-        mqttService = service;
-    }
-
-    public void unsetMqttService(MqttService service) {
-        mqttService = null;
+    @Activate
+    public MqttBrokerConnectionServiceInstance(final @Reference MqttService mqttService) {
+        this.mqttService = mqttService;
     }
 
     /**
@@ -68,8 +65,7 @@ public class MqttBrokerConnectionServiceInstance {
         }
 
         final MqttServiceImpl service = (MqttServiceImpl) mqttService;
-
-        if (configMap == null || configMap.isEmpty() || service == null) {
+        if (configMap == null || configMap.isEmpty()) {
             return;
         }
 

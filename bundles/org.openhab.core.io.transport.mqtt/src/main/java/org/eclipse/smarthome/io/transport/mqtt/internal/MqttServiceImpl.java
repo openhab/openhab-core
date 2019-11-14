@@ -40,9 +40,8 @@ import org.slf4j.LoggerFactory;
  * @author David Graeff - Added/Removed observer interface, Add/Remove/Enumerate broker connections.
  * @author Markus Rathgeb - Synchronize access to broker connections
  */
-@Component(immediate = true, service = {
-        MqttService.class }, configurationPid = "org.eclipse.smarthome.mqtt", property = {
-                Constants.SERVICE_PID + "=org.eclipse.smarthome.mqtt" })
+@Component(immediate = true, service = MqttService.class, configurationPid = "org.eclipse.smarthome.mqtt", property = {
+        Constants.SERVICE_PID + "=org.eclipse.smarthome.mqtt" })
 @NonNullByDefault
 public class MqttServiceImpl implements MqttService {
     private final Logger logger = LoggerFactory.getLogger(MqttServiceImpl.class);
