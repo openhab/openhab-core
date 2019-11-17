@@ -15,8 +15,8 @@
   <name>openHAB Core :: BOM :: Runtime</name>
 
   <properties>
-    <pax.web.version>7.2.3</pax.web.version>
-    <jetty.version>9.4.11.v20180605</jetty.version>
+    <pax.web.version>7.2.11</pax.web.version>
+    <jetty.version>9.4.20.v20190813</jetty.version>
   </properties>
 
   <dependencies>
