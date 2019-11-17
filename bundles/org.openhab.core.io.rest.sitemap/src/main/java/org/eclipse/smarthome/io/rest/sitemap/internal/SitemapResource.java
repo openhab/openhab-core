@@ -230,7 +230,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     @GET
-    @Path("/{sitemapname: [a-zA-Z_0-9]*}")
+    @Path("/{sitemapname: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get sitemap by name.", response = SitemapDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
@@ -248,7 +248,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     }
 
     @GET
-    @Path("/{sitemapname: [a-zA-Z_0-9]*}/{pageid: [a-zA-Z_0-9]*}")
+    @Path("/{sitemapname: [a-zA-Z_0-9]+}/{pageid: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Polls the data for a sitemap.", response = PageDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
@@ -317,7 +317,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      *         connection.
      */
     @GET
-    @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]*}/")
+    @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}/")
     @Produces(SseFeature.SERVER_SENT_EVENTS)
     @ApiOperation(value = "Get sitemap events.", response = EventOutput.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
