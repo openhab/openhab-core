@@ -3,10 +3,17 @@
 Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.config.discovery.usbserial
 
--runrequires: bnd.identity;id='org.openhab.core.config.discovery.usbserial.tests'
+# We would like to use a mock instead of a real "UsbSerialDiscovery" service
+# implementation like the "PollingUsbSerialScanner" provided by the linuxsysfs bundle.
+# Add the capability that we provide / mock such a service and
+# additionally blacklist the linuxsysfs bundle to ensure our one is preferred.
 
-# We would like to use a mock instead of the "PollingUsbSerialScanner" in tests
-# So make sure 'org.openhab.core.config.discovery.usbserial.linuxsysfs' is not in runbundles
+Provide-Capability: \
+    osgi.service;objectClass:List<String>="org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscovery"
+-runblacklist: \
+    bnd.identity;id='org.openhab.core.config.discovery.usbserial.linuxsysfs'
+
+-runrequires: bnd.identity;id='org.openhab.core.config.discovery.usbserial.tests'
 
 #
 # done
