@@ -41,10 +41,11 @@
   </feature>
 
   <feature name="openhab.tp-coap" description="Californium CoAP library" version="${project.version}">
-    <capability>openhab.tp;feature=coap;version=1.0.7</capability>
-    <bundle>mvn:org.eclipse.californium/californium-osgi/1.0.7</bundle>
-    <bundle>mvn:org.eclipse.californium/element-connector/1.0.7</bundle>
-    <bundle>mvn:org.eclipse.californium/scandium/1.0.7</bundle>
+    <capability>openhab.tp;feature=coap;version=2.0.0-RC1</capability>
+    <bundle>mvn:org.eclipse.californium/californium-osgi/2.0.0-RC1</bundle>
+    <bundle>mvn:org.eclipse.californium/californium-core/2.0.0-RC1</bundle>
+    <bundle>mvn:org.eclipse.californium/element-connector/2.0.0-RC1</bundle>
+    <bundle>mvn:org.eclipse.californium/scandium/2.0.0-RC1</bundle>
   </feature>
 
   <feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
