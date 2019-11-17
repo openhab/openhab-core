@@ -73,7 +73,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
      * @param componentContext component context (must not be null)
      */
     protected void activate(ComponentContext componentContext) {
-        this.bundleContext = componentContext.getBundleContext();
+        bundleContext = componentContext.getBundleContext();
         thingTypeRegistryServiceTracker = new ServiceTracker<>(bundleContext, ThingTypeRegistry.class.getName(), null);
         thingTypeRegistryServiceTracker.open();
         configDescriptionRegistryServiceTracker = new ServiceTracker<>(bundleContext,
@@ -132,7 +132,6 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
             throw new IllegalStateException(
                     "Created handler of bridge '" + thing.getUID() + "' must implement the BridgeHandler interface.");
         }
-        setHandlerContext(thingHandler);
         registerConfigStatusProvider(thing, thingHandler);
         registerFirmwareUpdateHandler(thing, thingHandler);
         registerServices(thing, thingHandler);
@@ -174,7 +173,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                 if (!serviceNames.isEmpty()) {
                     String[] serviceNamesArray = serviceNames.toArray(new String[serviceNames.size()]);
 
-                    ServiceRegistration<?> serviceReg = this.bundleContext.registerService(serviceNamesArray,
+                    ServiceRegistration<?> serviceReg = bundleContext.registerService(serviceNamesArray,
                             serviceInstance, null);
 
                     if (serviceReg != null) {
@@ -219,16 +218,6 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
      */
     protected abstract @Nullable ThingHandler createHandler(Thing thing);
 
-    private void setHandlerContext(ThingHandler thingHandler) {
-        if (thingHandler instanceof BaseThingHandler) {
-            if (bundleContext == null) {
-                throw new IllegalStateException(
-                        "Base thing handler factory has not been properly initialized. Did you forget to call super.activate()?");
-            }
-            ((BaseThingHandler) thingHandler).setBundleContext(bundleContext);
-        }
-    }
-
     private void registerConfigStatusProvider(Thing thing, ThingHandler thingHandler) {
         if (thingHandler instanceof ConfigStatusProvider) {
             ServiceRegistration<ConfigStatusProvider> serviceRegistration = registerAsService(thingHandler,
@@ -257,7 +246,6 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
         ThingHandler thingHandler = thing.getHandler();
         if (thingHandler != null) {
             removeHandler(thingHandler);
-            unsetBundleContext(thingHandler);
         }
         unregisterConfigStatusProvider(thing);
         unregisterFirmwareUpdateHandler(thing);
@@ -273,12 +261,6 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
      */
     protected void removeHandler(ThingHandler thingHandler) {
         // can be overridden
-    }
-
-    private void unsetBundleContext(ThingHandler thingHandler) {
-        if (thingHandler instanceof BaseThingHandler) {
-            ((BaseThingHandler) thingHandler).unsetBundleContext(bundleContext);
-        }
     }
 
     private void unregisterConfigStatusProvider(Thing thing) {
