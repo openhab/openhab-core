@@ -50,5 +50,4 @@ Fragment-Host: org.openhab.core.config.discovery.usbserial
 	org.eclipse.jetty.security;version='[9.4.20,9.4.21)',\
 	org.eclipse.jetty.server;version='[9.4.20,9.4.21)',\
 	org.eclipse.jetty.servlet;version='[9.4.20,9.4.21)',\
-	org.eclipse.jetty.util;version='[9.4.20,9.4.21)',\
-	org.openhab.core.config.discovery.usbserial.linuxsysfs;version='[2.5.0,2.5.1)'
+	org.eclipse.jetty.util;version='[9.4.20,9.4.21)'
