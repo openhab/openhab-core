@@ -236,7 +236,7 @@ public class ItemResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}")
+    @Path("/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Gets a single item.", response = EnrichedItemDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = EnrichedItemDTO.class),
@@ -276,7 +276,7 @@ public class ItemResource implements RESTResource {
      */
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}/state")
+    @Path("/{itemname: [a-zA-Z_0-9]+}/state")
     @Produces(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Gets the state of an item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
@@ -301,7 +301,7 @@ public class ItemResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}/state")
+    @Path("/{itemname: [a-zA-Z_0-9]+}/state")
     @Consumes(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Updates the state of an item.")
     @ApiResponses(value = { @ApiResponse(code = 202, message = "Accepted"),
@@ -341,7 +341,7 @@ public class ItemResource implements RESTResource {
 
     @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}")
+    @Path("/{itemname: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Sends a command to an item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
@@ -388,7 +388,7 @@ public class ItemResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemName: [a-zA-Z_0-9]*}/members/{memberItemName: [a-zA-Z_0-9]*}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/members/{memberItemName: [a-zA-Z_0-9]+}")
     @ApiOperation(value = "Adds a new member to a group item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item or member item not found or item is not of type group item."),
@@ -426,7 +426,7 @@ public class ItemResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemName: [a-zA-Z_0-9]*}/members/{memberItemName: [a-zA-Z_0-9]*}")
+    @Path("/{itemName: [a-zA-Z_0-9]+}/members/{memberItemName: [a-zA-Z_0-9]+}")
     @ApiOperation(value = "Removes an existing member from a group item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item or member item not found or item is not of type group item."),
@@ -464,7 +464,7 @@ public class ItemResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}")
+    @Path("/{itemname: [a-zA-Z_0-9]+}")
     @ApiOperation(value = "Removes an item from the registry.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found or item is not editable.") })
@@ -478,7 +478,7 @@ public class ItemResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}/tags/{tag}")
+    @Path("/{itemname: [a-zA-Z_0-9]+}/tags/{tag}")
     @ApiOperation(value = "Adds a tag to an item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found."),
@@ -504,7 +504,7 @@ public class ItemResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}/tags/{tag}")
+    @Path("/{itemname: [a-zA-Z_0-9]+}/tags/{tag}")
     @ApiOperation(value = "Removes a tag from an item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found."),
@@ -530,7 +530,7 @@ public class ItemResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}/metadata/{namespace}")
+    @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Adds metadata to an item.")
     @ApiResponses(value = { //
@@ -570,7 +570,7 @@ public class ItemResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}/metadata/{namespace}")
+    @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
     @ApiOperation(value = "Removes metadata from an item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found."),
@@ -610,7 +610,7 @@ public class ItemResource implements RESTResource {
      */
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]*}")
+    @Path("/{itemname: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Adds a new item to the registry or updates the existing item.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),

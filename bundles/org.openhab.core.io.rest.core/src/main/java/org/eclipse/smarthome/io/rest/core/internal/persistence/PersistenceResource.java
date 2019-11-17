@@ -162,7 +162,7 @@ public class PersistenceResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/items/{itemname: [a-zA-Z_0-9]*}")
+    @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Gets item persistence data from the persistence service.", response = ItemHistoryDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ItemHistoryDTO.class),
@@ -184,7 +184,7 @@ public class PersistenceResource implements RESTResource {
 
     @DELETE
     @RolesAllowed({ Role.ADMIN })
-    @Path("/items/{itemname: [a-zA-Z_0-9]*}")
+    @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete item data from a specific persistence service.", response = String.class, responseContainer = "List")
     @ApiResponses(value = {
@@ -203,7 +203,7 @@ public class PersistenceResource implements RESTResource {
 
     @PUT
     @RolesAllowed({ Role.ADMIN })
-    @Path("/items/{itemname: [a-zA-Z_0-9]*}")
+    @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Stores item persistence data into the persistence service.", response = ItemHistoryDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ItemHistoryDTO.class),

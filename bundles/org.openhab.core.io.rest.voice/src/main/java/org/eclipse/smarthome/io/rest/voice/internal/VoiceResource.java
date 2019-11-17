@@ -107,7 +107,7 @@ public class VoiceResource implements RESTResource {
     }
 
     @GET
-    @Path("/interpreters/{id: [a-zA-Z_0-9]*}")
+    @Path("/interpreters/{id: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gets a single interpreter.", response = HumanLanguageInterpreterDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
@@ -126,7 +126,7 @@ public class VoiceResource implements RESTResource {
     }
 
     @POST
-    @Path("/interpreters/{id: [a-zA-Z_0-9]*}")
+    @Path("/interpreters/{id: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Sends a text to a given human language interpreter.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
