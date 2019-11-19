@@ -15,7 +15,6 @@ package org.eclipse.smarthome.core.thing.internal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
 import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
 import org.eclipse.smarthome.core.i18n.LocaleProvider;
@@ -59,6 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Höfer - Added modified operation
  */
 @Component(configurationPid = "org.eclipse.smarthome.channelitemprovider", immediate = true)
+@NonNullByDefault
 public class ChannelItemProvider implements ItemProvider {
 
     private static final long INITIALIZATION_DELAY_NANOS = TimeUnit.SECONDS.toNanos(2);
@@ -66,19 +68,30 @@ public class ChannelItemProvider implements ItemProvider {
     private final Logger logger = LoggerFactory.getLogger(ChannelItemProvider.class);
 
     private final Set<ProviderChangeListener<Item>> listeners = new HashSet<>();
-
-    private LocaleProvider localeProvider;
-    private ThingRegistry thingRegistry;
-    private ItemChannelLinkRegistry linkRegistry;
-    private ItemRegistry itemRegistry;
     private final Set<ItemFactory> itemFactories = new HashSet<>();
-    private Map<String, Item> items = null;
-    private ChannelTypeRegistry channelTypeRegistry;
+    private @Nullable Map<String, Item> items;
+
+    private final LocaleProvider localeProvider;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ItemRegistry itemRegistry;
+    private final ItemChannelLinkRegistry linkRegistry;
 
     private boolean enabled = true;
     private volatile boolean initialized = false;
     private volatile long lastUpdate = System.nanoTime();
-    private ScheduledExecutorService executor;
+    private @Nullable ScheduledExecutorService executor;
+
+    @Activate
+    public ChannelItemProvider(final @Reference LocaleProvider localeProvider,
+            final @Reference ChannelTypeRegistry channelTypeRegistry, final @Reference ThingRegistry thingRegistry,
+            final @Reference ItemRegistry itemRegistry, final @Reference ItemChannelLinkRegistry linkRegistry) {
+        this.localeProvider = localeProvider;
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.thingRegistry = thingRegistry;
+        this.itemRegistry = itemRegistry;
+        this.linkRegistry = linkRegistry;
+    }
 
     @Override
     public Collection<Item> getAll() {
@@ -103,15 +116,6 @@ public class ChannelItemProvider implements ItemProvider {
         listeners.remove(listener);
     }
 
-    @Reference
-    protected void setLocaleProvider(final LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(final LocaleProvider localeProvider) {
-        this.localeProvider = null;
-    }
-
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     protected void addItemFactory(ItemFactory itemFactory) {
         this.itemFactories.add(itemFactory);
@@ -119,42 +123,6 @@ public class ChannelItemProvider implements ItemProvider {
 
     protected void removeItemFactory(ItemFactory itemFactory) {
         this.itemFactories.remove(itemFactory);
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry linkRegistry) {
-        this.linkRegistry = linkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry linkRegistry) {
-        this.linkRegistry = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
     }
 
     @Activate
@@ -245,15 +213,15 @@ public class ChannelItemProvider implements ItemProvider {
     }
 
     private void addRegistryChangeListeners() {
-        this.linkRegistry.addRegistryChangeListener(linkRegistryListener);
-        this.itemRegistry.addRegistryHook(itemRegistryListener);
-        this.thingRegistry.addRegistryChangeListener(thingRegistryListener);
+        linkRegistry.addRegistryChangeListener(linkRegistryListener);
+        itemRegistry.addRegistryHook(itemRegistryListener);
+        thingRegistry.addRegistryChangeListener(thingRegistryListener);
     }
 
     private void removeRegistryChangeListeners() {
-        this.itemRegistry.removeRegistryHook(itemRegistryListener);
-        this.linkRegistry.removeRegistryChangeListener(linkRegistryListener);
-        this.thingRegistry.removeRegistryChangeListener(thingRegistryListener);
+        itemRegistry.removeRegistryHook(itemRegistryListener);
+        linkRegistry.removeRegistryChangeListener(linkRegistryListener);
+        thingRegistry.removeRegistryChangeListener(thingRegistryListener);
     }
 
     private void createItemForLink(ItemChannelLink link) {
@@ -292,7 +260,7 @@ public class ChannelItemProvider implements ItemProvider {
         }
     }
 
-    private String getCategory(Channel channel) {
+    private @Nullable String getCategory(Channel channel) {
         if (channel.getChannelTypeUID() != null) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID(),
                     localeProvider.getLocale());
@@ -303,13 +271,13 @@ public class ChannelItemProvider implements ItemProvider {
         return null;
     }
 
-    private String getLabel(Channel channel) {
+    private @Nullable String getLabel(Channel channel) {
         if (channel.getLabel() != null) {
             return channel.getLabel();
         } else {
-            final Locale locale = localeProvider.getLocale();
             if (channel.getChannelTypeUID() != null) {
-                final ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID(), locale);
+                final ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID(),
+                        localeProvider.getLocale());
                 if (channelType != null) {
                     return channelType.getLabel();
                 }
@@ -336,7 +304,7 @@ public class ChannelItemProvider implements ItemProvider {
         return enabled;
     }
 
-    RegistryChangeListener<Thing> thingRegistryListener = new RegistryChangeListener<Thing>() {
+    final RegistryChangeListener<Thing> thingRegistryListener = new RegistryChangeListener<Thing>() {
 
         @Override
         public void added(Thing element) {
@@ -355,7 +323,11 @@ public class ChannelItemProvider implements ItemProvider {
             if (!initialized) {
                 return;
             }
-            removeItem(element.getUID().toString());
+            for (Channel channel : element.getChannels()) {
+                for (ItemChannelLink link : linkRegistry.getLinks(channel.getUID())) {
+                    removeItem(link.getItemName());
+                }
+            }
         }
 
         @Override
@@ -365,7 +337,7 @@ public class ChannelItemProvider implements ItemProvider {
         }
     };
 
-    RegistryChangeListener<ItemChannelLink> linkRegistryListener = new RegistryChangeListener<ItemChannelLink>() {
+    final RegistryChangeListener<ItemChannelLink> linkRegistryListener = new RegistryChangeListener<ItemChannelLink>() {
 
         @Override
         public void added(ItemChannelLink element) {
@@ -391,7 +363,7 @@ public class ChannelItemProvider implements ItemProvider {
         }
     };
 
-    RegistryHook<Item> itemRegistryListener = new RegistryHook<Item>() {
+    final RegistryHook<Item> itemRegistryListener = new RegistryHook<Item>() {
 
         @Override
         public void beforeAdding(Item element) {
@@ -435,7 +407,6 @@ public class ChannelItemProvider implements ItemProvider {
                 }
             }
         }
-
     };
 
 }
