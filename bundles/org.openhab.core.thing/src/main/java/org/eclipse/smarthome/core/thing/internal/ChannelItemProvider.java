@@ -336,7 +336,7 @@ public class ChannelItemProvider implements ItemProvider {
         return enabled;
     }
 
-    RegistryChangeListener<Thing> thingRegistryListener = new RegistryChangeListener<Thing>() {
+    final RegistryChangeListener<Thing> thingRegistryListener = new RegistryChangeListener<Thing>() {
 
         @Override
         public void added(Thing element) {
@@ -355,7 +355,11 @@ public class ChannelItemProvider implements ItemProvider {
             if (!initialized) {
                 return;
             }
-            removeItem(element.getUID().toString());
+            for (Channel channel : element.getChannels()) {
+                for (ItemChannelLink link : linkRegistry.getLinks(channel.getUID())) {
+                    removeItem(link.getItemName());
+                }
+            }
         }
 
         @Override
@@ -365,7 +369,7 @@ public class ChannelItemProvider implements ItemProvider {
         }
     };
 
-    RegistryChangeListener<ItemChannelLink> linkRegistryListener = new RegistryChangeListener<ItemChannelLink>() {
+    final RegistryChangeListener<ItemChannelLink> linkRegistryListener = new RegistryChangeListener<ItemChannelLink>() {
 
         @Override
         public void added(ItemChannelLink element) {
@@ -391,7 +395,7 @@ public class ChannelItemProvider implements ItemProvider {
         }
     };
 
-    RegistryHook<Item> itemRegistryListener = new RegistryHook<Item>() {
+    final RegistryHook<Item> itemRegistryListener = new RegistryHook<Item>() {
 
         @Override
         public void beforeAdding(Item element) {
@@ -435,7 +439,6 @@ public class ChannelItemProvider implements ItemProvider {
                 }
             }
         }
-
     };
 
 }

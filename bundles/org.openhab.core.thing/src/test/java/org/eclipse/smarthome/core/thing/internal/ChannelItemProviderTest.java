@@ -46,7 +46,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 /**
- *
  * @author Simon Kaufmann - Initial contribution
  */
 public class ChannelItemProviderTest {
@@ -59,7 +58,7 @@ public class ChannelItemProviderTest {
 
     private static final String ITEM_NAME = "test";
     private static final NumberItem ITEM = new NumberItem(ITEM_NAME);
-    // private static final ItemChannelLink LINK = new ItemChannelLink(ITEM_NAME, CHANNEL_UID);
+    private static final ItemChannelLink LINK = new ItemChannelLink(ITEM_NAME, CHANNEL_UID);
 
     @Mock
     private ItemRegistry itemRegistry;
@@ -77,7 +76,7 @@ public class ChannelItemProviderTest {
     private ChannelItemProvider provider;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         initMocks(this);
 
         provider = createProvider();
@@ -112,7 +111,7 @@ public class ChannelItemProviderTest {
 
     @Test
     public void testItemRemovalFromThingLinkRemoved() {
-        provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+        provider.linkRegistryListener.added(LINK);
 
         resetAndPrepareListener();
 
@@ -122,33 +121,33 @@ public class ChannelItemProviderTest {
     }
 
     @Test
-    public void testItemCreationFromLinkNotThere() throws Exception {
-        provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+    public void testItemCreationFromLinkNotThere() {
+        provider.linkRegistryListener.added(LINK);
         verify(listener, only()).added(same(provider), same(ITEM));
     }
 
     @Test
-    public void testItemCreationFromLinkAlreadyExists() throws Exception {
+    public void testItemCreationFromLinkAlreadyExists() {
         when(itemRegistry.get(eq(ITEM_NAME))).thenReturn(ITEM);
 
-        provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+        provider.linkRegistryListener.added(LINK);
         verify(listener, never()).added(same(provider), same(ITEM));
     }
 
     @Test
-    public void testItemRemovalFromLinkLinkRemoved() throws Exception {
-        provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+    public void testItemRemovalFromLinkLinkRemoved() {
+        provider.linkRegistryListener.added(LINK);
 
         resetAndPrepareListener();
 
-        provider.linkRegistryListener.removed(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+        provider.linkRegistryListener.removed(LINK);
         verify(listener, never()).added(same(provider), same(ITEM));
         verify(listener, only()).removed(same(provider), same(ITEM));
     }
 
     @Test
-    public void testItemRemovalItemFromOtherProvider() throws Exception {
-        provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+    public void testItemRemovalItemFromOtherProvider() {
+        provider.linkRegistryListener.added(LINK);
 
         resetAndPrepareListener();
 
@@ -174,7 +173,7 @@ public class ChannelItemProviderTest {
         props.put("enabled", "true");
         provider.activate(props);
 
-        provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+        provider.linkRegistryListener.added(LINK);
         verify(listener, never()).added(same(provider), same(ITEM));
         verify(linkRegistry, never()).getAll();
 
@@ -184,7 +183,7 @@ public class ChannelItemProviderTest {
 
         Thread.sleep(100);
 
-        provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+        provider.linkRegistryListener.added(LINK);
         verify(listener, never()).added(same(provider), same(ITEM));
         verify(linkRegistry, never()).getAll();
     }
@@ -193,18 +192,17 @@ public class ChannelItemProviderTest {
     private void resetAndPrepareListener() {
         reset(listener);
         doAnswer(invocation -> {
-            // this is crucial as it mimicks the real ItemRegistry's behavior
+            // this is crucial as it mimics the real ItemRegistry's behavior
             provider.itemRegistryListener.afterRemoving((Item) invocation.getArguments()[1]);
             return null;
         }).when(listener).removed(same(provider), any(Item.class));
         doAnswer(invocation -> {
-            // this is crucial as it mimicks the real ItemRegistry's behavior
+            // this is crucial as it mimics the real ItemRegistry's behavior
             provider.itemRegistryListener.beforeAdding((Item) invocation.getArguments()[1]);
             return null;
         }).when(listener).added(same(provider), any(Item.class));
         when(linkRegistry.getBoundChannels(eq(ITEM_NAME))).thenReturn(Collections.singleton(CHANNEL_UID));
-        when(linkRegistry.getLinks(eq(CHANNEL_UID)))
-                .thenReturn(Collections.singleton(new ItemChannelLink(ITEM_NAME, CHANNEL_UID)));
+        when(linkRegistry.getLinks(eq(CHANNEL_UID))).thenReturn(Collections.singleton(LINK));
     }
 
     private ChannelItemProvider createProvider() {
