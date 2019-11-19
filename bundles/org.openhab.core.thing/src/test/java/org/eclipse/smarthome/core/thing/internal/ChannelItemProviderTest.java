@@ -206,14 +206,10 @@ public class ChannelItemProviderTest {
     }
 
     private ChannelItemProvider createProvider() {
-        ChannelItemProvider provider = new ChannelItemProvider();
-        provider.setItemRegistry(itemRegistry);
-        provider.setThingRegistry(thingRegistry);
-        provider.setItemChannelLinkRegistry(linkRegistry);
+        ChannelItemProvider provider = new ChannelItemProvider(localeProvider, mock(ChannelTypeRegistry.class),
+                thingRegistry, itemRegistry, linkRegistry);
         provider.addItemFactory(itemFactory);
-        provider.setLocaleProvider(localeProvider);
         provider.addProviderChangeListener(listener);
-        provider.setChannelTypeRegistry(mock(ChannelTypeRegistry.class));
         return provider;
     }
 

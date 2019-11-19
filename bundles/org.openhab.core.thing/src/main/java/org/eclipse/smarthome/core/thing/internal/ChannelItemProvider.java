@@ -71,16 +71,27 @@ public class ChannelItemProvider implements ItemProvider {
     private final Set<ItemFactory> itemFactories = new HashSet<>();
     private @Nullable Map<String, Item> items;
 
-    private @NonNullByDefault({}) LocaleProvider localeProvider;
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
-    private @NonNullByDefault({}) ItemRegistry itemRegistry;
-    private @NonNullByDefault({}) ItemChannelLinkRegistry linkRegistry;
+    private final LocaleProvider localeProvider;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ItemRegistry itemRegistry;
+    private final ItemChannelLinkRegistry linkRegistry;
 
     private boolean enabled = true;
     private volatile boolean initialized = false;
     private volatile long lastUpdate = System.nanoTime();
     private @Nullable ScheduledExecutorService executor;
+
+    @Activate
+    public ChannelItemProvider(final @Reference LocaleProvider localeProvider,
+            final @Reference ChannelTypeRegistry channelTypeRegistry, final @Reference ThingRegistry thingRegistry,
+            final @Reference ItemRegistry itemRegistry, final @Reference ItemChannelLinkRegistry linkRegistry) {
+        this.localeProvider = localeProvider;
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.thingRegistry = thingRegistry;
+        this.itemRegistry = itemRegistry;
+        this.linkRegistry = linkRegistry;
+    }
 
     @Override
     public Collection<Item> getAll() {
@@ -105,15 +116,6 @@ public class ChannelItemProvider implements ItemProvider {
         listeners.remove(listener);
     }
 
-    @Reference
-    protected void setLocaleProvider(final LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(final LocaleProvider localeProvider) {
-        this.localeProvider = null;
-    }
-
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     protected void addItemFactory(ItemFactory itemFactory) {
         this.itemFactories.add(itemFactory);
@@ -121,42 +123,6 @@ public class ChannelItemProvider implements ItemProvider {
 
     protected void removeItemFactory(ItemFactory itemFactory) {
         this.itemFactories.remove(itemFactory);
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry linkRegistry) {
-        this.linkRegistry = linkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry linkRegistry) {
-        this.linkRegistry = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
     }
 
     @Activate
