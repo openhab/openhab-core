@@ -29,10 +29,15 @@ import org.eclipse.smarthome.core.i18n.LocaleProvider;
 import org.eclipse.smarthome.core.items.Item;
 import org.eclipse.smarthome.core.items.ItemFactory;
 import org.eclipse.smarthome.core.items.ItemRegistry;
+import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.library.items.NumberItem;
+import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingRegistry;
+import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
+import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
 import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
@@ -46,9 +51,15 @@ import org.mockito.Mock;
  */
 public class ChannelItemProviderTest {
 
-    private static final String ITEM_NAME = "test";
     private static final ChannelUID CHANNEL_UID = new ChannelUID("test:test:test:test");
+    private static final Channel CHANNEL = ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.NUMBER).build();
+
+    private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test:test");
+    private static final Thing THING = ThingBuilder.create(THING_TYPE_UID, "test").withChannel(CHANNEL).build();
+
+    private static final String ITEM_NAME = "test";
     private static final NumberItem ITEM = new NumberItem(ITEM_NAME);
+    // private static final ItemChannelLink LINK = new ItemChannelLink(ITEM_NAME, CHANNEL_UID);
 
     @Mock
     private ItemRegistry itemRegistry;
@@ -76,20 +87,48 @@ public class ChannelItemProviderTest {
         props.put("initialDelay", "false");
         provider.activate(props);
 
-        when(thingRegistry.getChannel(same(CHANNEL_UID)))
-                .thenReturn(ChannelBuilder.create(CHANNEL_UID, "Number").build());
-        when(itemFactory.createItem("Number", ITEM_NAME)).thenReturn(ITEM);
+        when(thingRegistry.getChannel(same(CHANNEL_UID))).thenReturn(CHANNEL);
+        when(itemFactory.createItem(CoreItemFactory.NUMBER, ITEM_NAME)).thenReturn(ITEM);
         when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
     }
 
     @Test
-    public void testItemCreationNotThere() throws Exception {
+    public void testItemCreationFromThingNotThere() {
+        resetAndPrepareListener();
+
+        provider.thingRegistryListener.added(THING);
+        verify(listener, only()).added(same(provider), same(ITEM));
+    }
+
+    @Test
+    public void testItemCreationFromThingAlreadyExists() {
+        when(itemRegistry.get(eq(ITEM_NAME))).thenReturn(ITEM);
+
+        resetAndPrepareListener();
+
+        provider.thingRegistryListener.added(THING);
+        verify(listener, never()).added(same(provider), same(ITEM));
+    }
+
+    @Test
+    public void testItemRemovalFromThingLinkRemoved() {
+        provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
+
+        resetAndPrepareListener();
+
+        provider.thingRegistryListener.removed(THING);
+        verify(listener, never()).added(same(provider), same(ITEM));
+        verify(listener, only()).removed(same(provider), same(ITEM));
+    }
+
+    @Test
+    public void testItemCreationFromLinkNotThere() throws Exception {
         provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
         verify(listener, only()).added(same(provider), same(ITEM));
     }
 
     @Test
-    public void testItemCreationAlreadyExists() throws Exception {
+    public void testItemCreationFromLinkAlreadyExists() throws Exception {
         when(itemRegistry.get(eq(ITEM_NAME))).thenReturn(ITEM);
 
         provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
@@ -97,7 +136,7 @@ public class ChannelItemProviderTest {
     }
 
     @Test
-    public void testItemRemovalLinkRemoved() throws Exception {
+    public void testItemRemovalFromLinkLinkRemoved() throws Exception {
         provider.linkRegistryListener.added(new ItemChannelLink(ITEM_NAME, CHANNEL_UID));
 
         resetAndPrepareListener();
@@ -177,7 +216,6 @@ public class ChannelItemProviderTest {
         provider.setLocaleProvider(localeProvider);
         provider.addProviderChangeListener(listener);
         provider.setChannelTypeRegistry(mock(ChannelTypeRegistry.class));
-
         return provider;
     }
 
