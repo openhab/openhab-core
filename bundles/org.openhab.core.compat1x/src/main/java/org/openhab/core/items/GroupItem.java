@@ -12,13 +12,10 @@
  */
 package org.openhab.core.items;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.collections.ListUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.slf4j.Logger;
@@ -135,7 +132,8 @@ public class GroupItem extends GenericItem implements StateChangeListener {
                     acceptedDataTypes = ListUtils.intersection(acceptedDataTypes, item.getAcceptedDataTypes());
                 }
             }
-            return acceptedDataTypes == null ? ListUtils.EMPTY_LIST : acceptedDataTypes;
+            return acceptedDataTypes == null ? Collections.EMPTY_LIST : acceptedDataTypes;
+
         }
     }
 
@@ -161,7 +159,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
                     acceptedCommandTypes = ListUtils.intersection(acceptedCommandTypes, item.getAcceptedCommandTypes());
                 }
             }
-            return acceptedCommandTypes == null ? ListUtils.EMPTY_LIST : acceptedCommandTypes;
+            return acceptedCommandTypes == null ? Collections.EMPTY_LIST : acceptedCommandTypes;
         }
     }
 

@@ -58,9 +58,9 @@
 
     <!-- Apache Commons -->
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.2.1</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>4.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
