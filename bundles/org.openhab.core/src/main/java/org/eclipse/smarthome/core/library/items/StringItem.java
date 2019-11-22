@@ -43,7 +43,7 @@ public class StringItem extends GenericItem {
     static {
         acceptedDataTypes.add(UnDefType.class);
         acceptedDataTypes.add(StringType.class);
-        acceptedDataTypes.add((DateTimeType.class));
+        acceptedDataTypes.add(DateTimeType.class);
 
         acceptedCommandTypes.add(RefreshType.class);
         acceptedCommandTypes.add(StringType.class);
