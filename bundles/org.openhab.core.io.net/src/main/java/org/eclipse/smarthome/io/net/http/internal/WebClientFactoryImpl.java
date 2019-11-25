@@ -388,10 +388,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         } catch (NoSuchAlgorithmException | KeyManagementException ex) {
             throw new HttpClientInitializationException("Cannot create an TLS context!", ex);
         }
-        // Exclude weak / insecure ciphers
-        sslContextFactory.addExcludeCipherSuites("^.*_(MD5|SHA|SHA1)$");
-        // Exclude ciphers that don't support forward secrecy
-        sslContextFactory.addExcludeCipherSuites("^TLS_RSA_.*$");
         return sslContextFactory;
     }
 
@@ -416,8 +412,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
         }
 
-        String excludeCipherSuites[] = { "^.*_(MD5)$" };
-        sslContextFactory.setExcludeCipherSuites(excludeCipherSuites);
         return sslContextFactory;
     }
 
