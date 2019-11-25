@@ -104,10 +104,11 @@ public class DateTimeType implements PrimitiveType, State, Command {
                     date = parse("1970-01-01T" + zonedValue);
                 } catch (DateTimeParseException timeOnlyException) {
                     try {
-                        Long epoch = Long.valueOf(zonedValue);
+                        long epoch = Double.valueOf(zonedValue).longValue();
+                        int length = (int) (Math.log10(epoch >= 0 ? epoch : epoch * -1) + 1);
                         Instant i;
                         // Assume that below 12 digits we're in seconds
-                        if (zonedValue.length() < 12) {
+                        if (length < 12) {
                             i = Instant.ofEpochSecond(epoch);
                         } else {
                             i = Instant.ofEpochMilli(epoch);
