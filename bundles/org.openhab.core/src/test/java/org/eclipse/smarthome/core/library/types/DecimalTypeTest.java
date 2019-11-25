@@ -121,6 +121,12 @@ public class DecimalTypeTest {
     public void testConversionToDateTimeType() {
         assertEquals(new DateTimeType("2014-03-30T10:58:47+0000"),
                 new DecimalType("1396177127").as(DateTimeType.class));
+        assertEquals(new DateTimeType("1969-12-31T23:59:59+0000"), new DecimalType("-1").as(DateTimeType.class));
+        assertEquals(new DateTimeType("1970-01-01T00:00:00+0000"), DecimalType.ZERO.as(DateTimeType.class));
+        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"), new DecimalType("1").as(DateTimeType.class));
+        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"), new DecimalType("1.0").as(DateTimeType.class));
+        assertEquals(new DateTimeType("1970-01-01T00:00:01+0000"), new DecimalType("1.5").as(DateTimeType.class));
+        assertEquals(new DateTimeType("1969-12-31T23:59:59+0000"), new DecimalType("-1.0").as(DateTimeType.class));
     }
 
     @Test
