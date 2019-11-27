@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.i18n.LocalizedKey;
+import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ChannelTypeBuilder;
@@ -66,7 +67,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * with values 0, 1, 2, 3 or 4, 0 being worst strength and 4 being best strength.
      */
     public static final ChannelType SYSTEM_CHANNEL_SIGNAL_STRENGTH = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "signal-strength"), "Signal Strength", "Number")
+            .state(new ChannelTypeUID(BINDING_ID, "signal-strength"), "Signal Strength", CoreItemFactory.NUMBER)
             .withCategory("QualityOfService")
             .withStateDescription(new StateDescription(BigDecimal.ZERO, new BigDecimal(4), BigDecimal.ONE, null, true,
                     Arrays.asList(new StateOption("0", "no signal"), new StateOption("1", "weak"),
@@ -79,8 +80,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * on (low battery) and off (battery ok).
      */
     public static final ChannelType SYSTEM_CHANNEL_LOW_BATTERY = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "low-battery"), "Low Battery", "Switch").withCategory("Battery")
-            .withStateDescription(
+            .state(new ChannelTypeUID(BINDING_ID, "low-battery"), "Low Battery", CoreItemFactory.SWITCH)
+            .withCategory("Battery").withStateDescription(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
             .build();
 
@@ -88,7 +89,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Battery level default system wide {@link ChannelType}. Represents the battery level as a percentage.
      */
     public static final ChannelType SYSTEM_CHANNEL_BATTERY_LEVEL = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "battery-level"), "Battery Level", "Number").withCategory("Battery")
+            .state(new ChannelTypeUID(BINDING_ID, "battery-level"), "Battery Level", CoreItemFactory.NUMBER)
+            .withCategory("Battery")
             .withStateDescription(
                     new StateDescription(BigDecimal.ZERO, new BigDecimal(100), BigDecimal.ONE, "%.0f %%", true, null))
             .build();
@@ -137,14 +139,14 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Power: default system wide {@link ChannelType} which allows turning off (potentially on) a device
      */
     public static final ChannelType SYSTEM_POWER = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "power"), "Power", "Switch")
+            .state(new ChannelTypeUID(BINDING_ID, "power"), "Power", CoreItemFactory.SWITCH)
             .withDescription("Device is operable when channel has state ON").build();
 
     /**
      * Location: default system wide {@link ChannelType} which displays a location
      */
     public static final ChannelType SYSTEM_LOCATION = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "location"), "Location", "Location")
+            .state(new ChannelTypeUID(BINDING_ID, "location"), "Location", CoreItemFactory.LOCATION)
             .withDescription("Location in lat./lon./height coordinates")
             .withStateDescription(StateDescriptionFragmentBuilder.create().withReadOnly(true)
                     .withPattern("%2$s°N %3$s°E %1$sm").build().toStateDescription())
@@ -154,7 +156,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Motion: default system wide {@link ChannelType} which indications whether motion was detected (state ON)
      */
     public static final ChannelType SYSTEM_MOTION = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "motion"), "Motion", "Switch")
+            .state(new ChannelTypeUID(BINDING_ID, "motion"), "Motion", CoreItemFactory.SWITCH)
             .withDescription("Motion detected by the device").withCategory("Motion").withStateDescription(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
             .build();
@@ -163,7 +165,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Brightness: default system wide {@link ChannelType} which allows changing the brightness from 0-100%
      */
     public static final ChannelType SYSTEM_BRIGHTNESS = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "brightness"), "Brightness", "Dimmer")
+            .state(new ChannelTypeUID(BINDING_ID, "brightness"), "Brightness", CoreItemFactory.DIMMER)
             .withDescription("Controls the brightness and switches the light on and off").withCategory("DimmableLight")
             .withStateDescription(
                     new StateDescription(BigDecimal.ZERO, new BigDecimal(100), null, "%d %%", false, null))
@@ -173,14 +175,14 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Color: default system wide {@link ChannelType} which allows changing the color
      */
     public static final ChannelType SYSTEM_COLOR = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "color"), "Color", "Color")
+            .state(new ChannelTypeUID(BINDING_ID, "color"), "Color", CoreItemFactory.COLOR)
             .withDescription("Controls the color of the light").withCategory("ColorLight").build();
 
     /**
      * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature
      */
     public static final ChannelType SYSTEM_COLOR_TEMPERATURE = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "color-temperature"), "Color Temperature", "Dimmer")
+            .state(new ChannelTypeUID(BINDING_ID, "color-temperature"), "Color Temperature", CoreItemFactory.DIMMER)
             .withDescription("Controls the color temperature of the light").withCategory("ColorLight")
             .withStateDescription(new StateDescription(BigDecimal.ZERO, new BigDecimal(100), null, "%d", false, null))
             .build();
@@ -191,7 +193,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Volume: default system wide {@link ChannelType} which allows changing the audio volume from 0-100%
      */
     public static final ChannelType SYSTEM_VOLUME = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "volume"), "Volume", "Dimmer")
+            .state(new ChannelTypeUID(BINDING_ID, "volume"), "Volume", CoreItemFactory.DIMMER)
             .withDescription("Change the sound volume of a device")
             .withStateDescription(
                     new StateDescription(BigDecimal.ZERO, new BigDecimal(100), null, "%d %%", false, null))
@@ -201,21 +203,21 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Mute: default system wide {@link ChannelType} which allows muting and un-muting audio
      */
     public static final ChannelType SYSTEM_MUTE = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "mute"), "Mute", "Switch").withDescription("Mute audio of the device")
-            .withCategory("SoundVolume").build();
+            .state(new ChannelTypeUID(BINDING_ID, "mute"), "Mute", CoreItemFactory.SWITCH)
+            .withDescription("Mute audio of the device").withCategory("SoundVolume").build();
 
     /**
      * Media-control: system wide {@link ChannelType} which controls a media player
      */
     public static final ChannelType SYSTEM_MEDIA_CONTROL = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "media-control"), "Media Control", "Player")
+            .state(new ChannelTypeUID(BINDING_ID, "media-control"), "Media Control", CoreItemFactory.PLAYER)
             .withCategory("MediaControl").build();
 
     /**
      * Media-title: default system wide {@link ChannelType} which displays the title of a (played) song
      */
     public static final ChannelType SYSTEM_MEDIA_TITLE = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "media-title"), "Media Title", "String")
+            .state(new ChannelTypeUID(BINDING_ID, "media-title"), "Media Title", CoreItemFactory.STRING)
             .withDescription("Title of a (played) media file").withStateDescription(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
             .build();
@@ -224,7 +226,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Media-artist: default system wide {@link ChannelType} which displays the artist of a (played) song
      */
     public static final ChannelType SYSTEM_MEDIA_ARTIST = ChannelTypeBuilder
-            .state(new ChannelTypeUID(BINDING_ID, "media-artist"), "Media Artist", "String")
+            .state(new ChannelTypeUID(BINDING_ID, "media-artist"), "Media Artist", CoreItemFactory.STRING)
             .withDescription("Artist of a (played) media file").withStateDescription(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
             .build();
@@ -282,13 +284,23 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
                     .build().toStateDescription())
             .build();
 
+    /**
+     * Rollershutter: system wide {@link ChannelType} which allows controlling rollershutters or blinds
+     */
+    public static final ChannelType SYSTEM_ROLLERSHUTTER = ChannelTypeBuilder
+            .state(new ChannelTypeUID(BINDING_ID, "rollershutter"), "Rollershutter / Blinds",
+                    CoreItemFactory.ROLLERSHUTTER)
+            .withDescription("Controls the position of rollershutter or blinds").withCategory("Blinds").build();
+
     private static final Collection<ChannelType> CHANNEL_TYPES = Collections
-            .unmodifiableList(Stream.of(SYSTEM_CHANNEL_SIGNAL_STRENGTH, SYSTEM_CHANNEL_LOW_BATTERY,
-                    SYSTEM_CHANNEL_BATTERY_LEVEL, SYSTEM_TRIGGER, SYSTEM_RAWBUTTON, SYSTEM_BUTTON, SYSTEM_RAWROCKER,
-                    SYSTEM_POWER, SYSTEM_LOCATION, SYSTEM_MOTION, SYSTEM_BRIGHTNESS, SYSTEM_COLOR,
-                    SYSTEM_COLOR_TEMPERATURE, SYSTEM_VOLUME, SYSTEM_MUTE, SYSTEM_MEDIA_CONTROL, SYSTEM_MEDIA_TITLE,
-                    SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED, SYSTEM_OUTDOOR_TEMPERATURE,
-                    SYSTEM_ATMOSPHERIC_HUMIDITY, SYSTEM_BAROMETRIC_PRESSURE).collect(Collectors.toList()));
+            .unmodifiableList(Stream
+                    .of(SYSTEM_CHANNEL_SIGNAL_STRENGTH, SYSTEM_CHANNEL_LOW_BATTERY, SYSTEM_CHANNEL_BATTERY_LEVEL,
+                            SYSTEM_TRIGGER, SYSTEM_RAWBUTTON, SYSTEM_BUTTON, SYSTEM_RAWROCKER, SYSTEM_POWER,
+                            SYSTEM_LOCATION, SYSTEM_MOTION, SYSTEM_BRIGHTNESS, SYSTEM_COLOR, SYSTEM_COLOR_TEMPERATURE,
+                            SYSTEM_VOLUME, SYSTEM_MUTE, SYSTEM_MEDIA_CONTROL, SYSTEM_MEDIA_TITLE, SYSTEM_MEDIA_ARTIST,
+                            SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED, SYSTEM_OUTDOOR_TEMPERATURE,
+                            SYSTEM_ATMOSPHERIC_HUMIDITY, SYSTEM_BAROMETRIC_PRESSURE, SYSTEM_ROLLERSHUTTER)
+                    .collect(Collectors.toList()));
 
     private final Map<LocalizedKey, @Nullable ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 
@@ -344,9 +356,6 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     }
 
     private @Nullable ChannelType localize(Bundle bundle, ChannelType channelType, @Nullable Locale locale) {
-        if (channelTypeI18nLocalizationService == null) {
-            return null;
-        }
         return channelTypeI18nLocalizationService.createLocalizedChannelType(bundle, channelType, locale);
     }
 

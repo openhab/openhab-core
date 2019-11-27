@@ -34,6 +34,7 @@ import org.junit.Test;
  */
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
+    private static final int NUMBER_OF_DEFAULT_SYSTEM_CHANNEL_TYPES = 24;
     private static final ChannelTypeUID SIGNAL_STRENGTH_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID,
             "signal-strength");
     private static final ChannelTypeUID LOW_BATTERY_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID, "low-battery");
@@ -65,6 +66,8 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
             "atmospheric-humidity");
     private static final ChannelTypeUID BAROMETRIC_PRESSURE_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID,
             "barometric-pressure");
+    private static final ChannelTypeUID ROLLERSHUTTER_CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID,
+            "rollershutter");
 
     private ChannelTypeProvider systemChannelTypeProvider;
 
@@ -78,7 +81,8 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
     @Test
     public void systemChannelTypesShouldBeAvailable() {
         Collection<ChannelType> sytemChannelTypes = systemChannelTypeProvider.getChannelTypes(null);
-        assertEquals(23, sytemChannelTypes.size());
+        assertNotNull(sytemChannelTypes);
+        assertEquals(NUMBER_OF_DEFAULT_SYSTEM_CHANNEL_TYPES, sytemChannelTypes.size());
 
         assertNotNull(systemChannelTypeProvider.getChannelType(SIGNAL_STRENGTH_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(LOW_BATTERY_CHANNEL_TYPE_UID, null));
@@ -103,12 +107,14 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         assertNotNull(systemChannelTypeProvider.getChannelType(OUTDOOR_TEMPERATURE_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(ATMOSPHERIC_HUMIDITY_CHANNEL_TYPE_UID, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(BAROMETRIC_PRESSURE_CHANNEL_TYPE_UID, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(ROLLERSHUTTER_CHANNEL_TYPE_UID, null));
     }
 
     @Test
     public void systemChannelTypesShouldBeTranslatedProperly() {
         Collection<ChannelType> localizedChannelTypes = systemChannelTypeProvider.getChannelTypes(Locale.GERMAN);
-        assertEquals(23, localizedChannelTypes.size());
+        assertNotNull(localizedChannelTypes);
+        assertEquals(NUMBER_OF_DEFAULT_SYSTEM_CHANNEL_TYPES, localizedChannelTypes.size());
 
         ChannelType signalStrengthChannelType = systemChannelTypeProvider
                 .getChannelType(SIGNAL_STRENGTH_CHANNEL_TYPE_UID, Locale.GERMAN);
