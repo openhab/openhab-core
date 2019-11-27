@@ -45,6 +45,8 @@ import org.mockito.Mock;
  */
 public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
+    private static final int NUMBER_OF_DEFAULT_SYSTEM_PROFILES = 16;
+
     private final Map<String, Object> properties = new HashMap<String, Object>() {
         private static final long serialVersionUID = 1L;
         {
@@ -74,7 +76,7 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
     @Test
     public void systemProfileTypesAndUidsShouldBeAvailable() {
         Collection<ProfileTypeUID> systemProfileTypeUIDs = profileFactory.getSupportedProfileTypeUIDs();
-        assertEquals(15, systemProfileTypeUIDs.size());
+        assertEquals(NUMBER_OF_DEFAULT_SYSTEM_PROFILES, systemProfileTypeUIDs.size());
 
         Collection<ProfileType> systemProfileTypes = profileFactory.getProfileTypes(null);
         assertEquals(systemProfileTypeUIDs.size(), systemProfileTypes.size());
