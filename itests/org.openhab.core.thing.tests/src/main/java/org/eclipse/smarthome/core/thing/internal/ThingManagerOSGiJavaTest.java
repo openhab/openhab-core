@@ -683,7 +683,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(storage.containsKey(THING_UID.getAsString()), is(false));
             assertThat(thing.getStatus(), is(ThingStatus.UNINITIALIZED));
-            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED));
+            assertThat(thing.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.HANDLER_MISSING_ERROR));
         }, SafeCaller.DEFAULT_TIMEOUT - 100, 50);
     }
 
