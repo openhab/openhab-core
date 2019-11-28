@@ -1057,7 +1057,7 @@ public class ThingManagerImpl
                 initializeHandler(thing);
             } else {
                 logger.debug(
-                        "Not registering a handler at this point. The thing types of bundle {} are not fully loaded yet.",
+                        "Not registering a handler at this point. The thing types of bundle '{}' are not fully loaded yet.",
                         identifier);
             }
         } else {
@@ -1214,6 +1214,11 @@ public class ThingManagerImpl
             } else {
                 // No handler registered. Try to register handler and initialize the thing.
                 registerAndInitializeHandler(thing, findThingHandlerFactory(thing.getThingTypeUID()));
+                // Check if registration was successful
+                if (!hasBridge(thing) && !isHandlerRegistered(thing)) {
+                    setThingStatus(thing,
+                            buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_MISSING_ERROR));
+                }
             }
         } else {
             if (!thing.isEnabled()) {
