@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -160,22 +159,30 @@ public class FolderObserver extends AbstractWatchService {
 
     @Override
     protected Kind<?>[] getWatchEventKinds(Path directory) {
-        if (directory != null && MapUtils.isNotEmpty(folderFileExtMap)) {
+        if (directory != null && isNotEmpty(folderFileExtMap)) {
             String folderName = directory.getFileName().toString();
-            if (this.folderFileExtMap.containsKey(folderName)) {
+            if (folderFileExtMap.containsKey(folderName)) {
                 return new Kind<?>[] { ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
             }
         }
         return null;
     }
 
+    private boolean isEmpty(final Map<?, ?> map) {
+        return map == null || map.isEmpty();
+    }
+
+    private boolean isNotEmpty(final Map<?, ?> map) {
+        return !isEmpty(map);
+    }
+
     private void addModelsToRepo() {
-        if (MapUtils.isNotEmpty(this.folderFileExtMap)) {
-            Iterator<String> iterator = this.folderFileExtMap.keySet().iterator();
+        if (isNotEmpty(folderFileExtMap)) {
+            Iterator<String> iterator = folderFileExtMap.keySet().iterator();
             while (iterator.hasNext()) {
                 String folderName = iterator.next();
 
-                final String[] validExtension = this.folderFileExtMap.get(folderName);
+                final String[] validExtension = folderFileExtMap.get(folderName);
                 if (validExtension != null && validExtension.length > 0) {
                     File folder = getFile(folderName);
 
@@ -194,7 +201,7 @@ public class FolderObserver extends AbstractWatchService {
     }
 
     private void deleteModelsFromRepo() {
-        Set<String> folders = this.folderFileExtMap.keySet();
+        Set<String> folders = folderFileExtMap.keySet();
         for (String folder : folders) {
             Iterable<String> models = modelRepo.getAllModelNamesOfType(folder);
             if (models != null) {
@@ -256,7 +263,7 @@ public class FolderObserver extends AbstractWatchService {
     }
 
     private File getFileByFileExtMap(Map<String, String[]> folderFileExtMap, String filename) {
-        if (StringUtils.isNotBlank(filename) && MapUtils.isNotEmpty(folderFileExtMap)) {
+        if (StringUtils.isNotBlank(filename) && isNotEmpty(folderFileExtMap)) {
             String extension = getExtension(filename);
             if (StringUtils.isNotBlank(extension)) {
                 Set<Entry<String, String[]>> entries = folderFileExtMap.entrySet();
@@ -270,7 +277,6 @@ public class FolderObserver extends AbstractWatchService {
                 }
             }
         }
-
         return null;
     }
 

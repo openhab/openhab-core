@@ -13,6 +13,7 @@
 package org.eclipse.smarthome.core.thing.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,7 +23,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.iterators.ArrayIterator;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.thing.Bridge;
@@ -128,10 +128,7 @@ public class ThingHelper {
      * @throws IllegalArgumentException in case there are duplicate channels found
      */
     public static void ensureUniqueChannels(final Channel[] channels) {
-        @SuppressWarnings("unchecked")
-        final Iterator<Channel> it = new ArrayIterator(channels);
-
-        ensureUniqueChannels(it, new HashSet<>(channels.length));
+        ensureUniqueChannels(Arrays.stream(channels).iterator(), new HashSet<>(channels.length));
     }
 
     /**
