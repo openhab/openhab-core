@@ -504,7 +504,7 @@ public class FeatureInstaller implements ConfigurationListener {
             Feature[] features = featuresService.listInstalledFeatures();
             if (isInstalled(features, name)) {
                 featuresService.uninstallFeature(name);
-                logger.info("Uninstalled '{}'", name);
+                logger.debug("Uninstalled '{}'", name);
                 postUninstalledEvent(name);
                 return true;
             }
