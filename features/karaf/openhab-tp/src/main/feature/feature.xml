@@ -60,12 +60,11 @@
 
   <feature name="openhab.tp-hivemqclient" description="MQTT Client" version="${project.version}">
     <capability>openhab.tp;feature=hivemqclient;version=1.1.1</capability>
-    <feature prerequisite="true">wrap</feature>
     <feature dependency="true">openhab.tp-netty</feature>
     <bundle dependency="true">mvn:org.jctools/jctools-core/2.1.2</bundle>
     <bundle dependency="true">mvn:io.reactivex.rxjava2/rxjava/2.2.5</bundle>
     <bundle dependency="true">mvn:org.reactivestreams/reactive-streams/1.0.2</bundle>
-    <bundle dependency="true">wrap:mvn:com.google.dagger/dagger/2.20</bundle>
+    <bundle dependency="true">mvn:org.openhab.osgiify/com.google.dagger/2.20</bundle>
     <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
     <bundle>mvn:com.hivemq/hivemq-mqtt-client/1.1.2</bundle>
   </feature>
