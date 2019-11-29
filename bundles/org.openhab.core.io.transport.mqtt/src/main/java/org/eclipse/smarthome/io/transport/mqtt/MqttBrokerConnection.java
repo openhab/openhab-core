@@ -387,7 +387,7 @@ public class MqttBrokerConnection {
      * @param qos level.
      */
     public void setQos(int qos) {
-        if (qos < 0 || qos > 3) {
+        if (qos < 0 || qos > 2) {
             throw new IllegalArgumentException();
         }
         this.qos = qos;
