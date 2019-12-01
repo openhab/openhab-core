@@ -627,7 +627,7 @@ public class MqttBrokerConnection {
             // No more subscribers to this topic. Unsubscribe topic on the broker
             MqttAsyncClientWrapper mqttClient = this.client;
             if (mqttClient != null) {
-                logger.trace("Subscriber list is empty after removing {}, unsubscribing topic {} from connection", subscriber topic);
+                logger.trace("Subscriber list is empty after removing {}, unsubscribing topic {} from connection", subscriber, topic);
                 return unsubscribeRaw(mqttClient, topic);
             } else {
                 return CompletableFuture.completedFuture(false);
