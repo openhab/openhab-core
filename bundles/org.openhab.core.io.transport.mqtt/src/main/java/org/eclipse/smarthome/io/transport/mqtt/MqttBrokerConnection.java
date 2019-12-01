@@ -173,9 +173,10 @@ public class MqttBrokerConnection {
             // If we tried to connect via start(), use the reconnect strategy to try it again
             if (connection.isConnecting) {
                 connection.isConnecting = false;
-                if (connection.reconnectStrategy != null) {
-                    connection.reconnectStrategy.lostConnection();
-                }
+            }
+
+            if (connection.reconnectStrategy != null) {
+                connection.reconnectStrategy.lostConnection();
             }
         }
 
@@ -562,6 +563,7 @@ public class MqttBrokerConnection {
         if (client.getState().isConnected()) {
             client.subscribe(topic, qos, clientCallback).whenComplete((s, t) -> {
                 if (t == null) {
+                    logger.trace("Subscribed {} to topic {}", subscriber, topic);
                     future.complete(true);
                 } else {
                     future.completeExceptionally(new MqttException(t));
@@ -580,6 +582,7 @@ public class MqttBrokerConnection {
      * @param topic The topic to subscribe to.
      * @return Completes with true if successful. Exceptionally otherwise.
      */
+    @Deprecated
     protected CompletableFuture<Boolean> subscribeRaw(String topic) {
         logger.trace("subscribeRaw message consumer for topic '{}' from broker '{}'", topic, host);
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -612,10 +615,12 @@ public class MqttBrokerConnection {
         synchronized (subscribers) {
             final @Nullable List<MqttMessageSubscriber> list = subscribers.get(topic);
             if (list == null) {
+                logger.trace("Tried to unsubscribe {} from topic {}, but subscriber list is empty", subscriber, topic);
                 return CompletableFuture.completedFuture(true);
             }
             list.remove(subscriber);
             if (!list.isEmpty()) {
+                logger.trace("Removed {} from topic subscribers for topic {}, but other subscribers present", subscriber, topic);
                 return CompletableFuture.completedFuture(true);
             }
             // Remove from subscriber list
@@ -623,6 +628,7 @@ public class MqttBrokerConnection {
             // No more subscribers to this topic. Unsubscribe topic on the broker
             MqttAsyncClientWrapper mqttClient = this.client;
             if (mqttClient != null) {
+                logger.trace("Subscriber list is empty after removing {}, unsubscribing topic {} from connection", subscriber topic);
                 return unsubscribeRaw(mqttClient, topic);
             } else {
                 return CompletableFuture.completedFuture(false);
