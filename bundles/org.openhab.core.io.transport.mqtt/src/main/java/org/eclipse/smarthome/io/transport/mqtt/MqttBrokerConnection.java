@@ -582,7 +582,6 @@ public class MqttBrokerConnection {
      * @param topic The topic to subscribe to.
      * @return Completes with true if successful. Exceptionally otherwise.
      */
-    @Deprecated
     protected CompletableFuture<Boolean> subscribeRaw(String topic) {
         logger.trace("subscribeRaw message consumer for topic '{}' from broker '{}'", topic, host);
         CompletableFuture<Boolean> future = new CompletableFuture<>();
