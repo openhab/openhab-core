@@ -1,0 +1,7 @@
+Bundle-SymbolicName: ${project.artifactId}
+DynamicImport-Package: *
+Import-Package: org.openhab.core.automation.module.script
+-includeresource: @jython-standalone-2.7.[0-9a-z]*.jar; lib:=true
+-includeresource.resources: -src/main/resources
+-fixupmessages: "Classes found in the wrong directory",\
+    "The default package '.' is not permitted by the Import-Package syntax"; restrict:=error; is:=warning

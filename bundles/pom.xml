@@ -21,6 +21,7 @@
     <module>org.openhab.core.automation.module.media</module>
     <module>org.openhab.core.automation.module.script</module>
     <module>org.openhab.core.automation.module.script.rulesupport</module>
+    <module>org.openhab.core.automation.module.script.scriptenginefactory.jython</module>
     <module>org.openhab.core.automation.rest</module>
     <module>org.openhab.core.config.core</module>
     <module>org.openhab.core.config.discovery</module>

@@ -1,0 +1,30 @@
+"""
+Set the default values used when performing an area action on any Item that
+does not have these values set in its metadata.
+
+* low_lux_trigger: the lux level at which lights should turn ON/OFF,
+* brightness: the dimming level for setting DimmerItems (anything greater than
+  zero will turn on a SwitchItem)
+* hue and saturation: for ColorItems
+* lux_item_name: the name of the Item to use for current outside lux or solar
+  radiation levels
+
+An easy way to get solar radiation values is an Item linked to the
+``astro:sun:local:radiation#diffuse`` Channel from the Astro binding. This
+Channel provides a smoother curve than the direct and total Channels. The
+defaults set for color provide a warm white. By setting a high value for
+low_lux_trigger, the lights will always turn on, which works well for areas
+without windows, like closets.
+
+Number:Intensity   Sun_Radiation_Diffuse  "Solar Radiation (diffuse) [%.0f W/m\u00B2]"    <sun>    {channel="astro:sun:local:radiation#diffuse"}
+"""
+area_triggers_and_actions_dict = {
+    #"lux_item_name": "Sun_Radiation_Diffuse",
+    "default_levels": {
+        "low_lux_trigger": 99999,
+        "hue": 30,
+        "saturation": 100,
+        "brightness": 98
+    },
+    "default_action_function": "light_action"
+}

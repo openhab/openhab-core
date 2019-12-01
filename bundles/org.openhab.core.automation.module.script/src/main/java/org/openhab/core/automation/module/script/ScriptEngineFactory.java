@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -32,7 +31,7 @@ import org.openhab.core.automation.module.script.internal.provider.ScriptModuleT
 @NonNullByDefault
 public interface ScriptEngineFactory {
 
-    static final ScriptEngineManager ENGINE_MANAGER = new ScriptEngineManager();
+    static final javax.script.ScriptEngineManager ENGINE_MANAGER = new javax.script.ScriptEngineManager();
 
     /**
      * This method returns a list of file extensions and MimeTypes that are supported by the ScriptEngine, e.g. py,
