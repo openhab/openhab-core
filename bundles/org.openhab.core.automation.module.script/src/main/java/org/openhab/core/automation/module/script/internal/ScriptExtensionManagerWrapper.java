@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.internal;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
@@ -56,7 +57,7 @@ public class ScriptExtensionManagerWrapper {
         return manager.getDefaultPresets();
     }
 
-    public void importPreset(String preset) {
-        manager.importPreset(preset, container.getFactory(), container.getScriptEngine(), container.getIdentifier());
+    public Map<String, Object> importPreset(String preset) {
+        return manager.importPreset(preset, container.getFactory(), container.getScriptEngine(), container.getIdentifier());
     }
 }
