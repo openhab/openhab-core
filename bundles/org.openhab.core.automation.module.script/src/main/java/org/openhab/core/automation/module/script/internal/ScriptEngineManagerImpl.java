@@ -150,7 +150,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         } else {
             ScriptEngine engine = container.getScriptEngine();
             try {
-                tryExtractAndInjectFilename(engineIdentifier, engine);
+                injectFilename(engineIdentifier, engine);
                 engine.eval(scriptData);
 
                 if (engine instanceof Invocable) {
@@ -169,14 +169,14 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         }
     }
 
-    private void tryExtractAndInjectFilename(String engineIdentifier, ScriptEngine engine) {
+    private void injectFilename(String engineIdentifier, ScriptEngine engine) {
         try {
             if(engine.getContext().getAttribute(ScriptEngine.FILENAME) == null) {
                 URI fileURI = new URL(engineIdentifier).toURI();
                 if ("file".equals(fileURI.getScheme())) {
-                    File maybeScriptFile = Paths.get(fileURI).toFile();
-                    if (maybeScriptFile.isFile()) {
-                        engine.getContext().setAttribute(ScriptEngine.FILENAME, maybeScriptFile.getName(), ScriptContext.ENGINE_SCOPE);
+                    File scriptFile = Paths.get(fileURI).toFile();
+                    if (scriptFile.isFile()) {
+                        engine.getContext().setAttribute(ScriptEngine.FILENAME, scriptFile.getName(), ScriptContext.ENGINE_SCOPE);
                     } else {
                         logger.debug("engineIdentifier '{}' is not a file", engineIdentifier);
                     }
