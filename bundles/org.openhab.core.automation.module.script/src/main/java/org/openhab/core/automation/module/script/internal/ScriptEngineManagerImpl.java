@@ -177,6 +177,8 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     File maybeScriptFile = Paths.get(fileURI).toFile();
                     if (maybeScriptFile.isFile()) {
                         engine.getContext().setAttribute(ScriptEngine.FILENAME, maybeScriptFile.getName(), ScriptContext.ENGINE_SCOPE);
+                    } else {
+                        logger.debug("engineIdentifier '{}' is not a file", engineIdentifier);
                     }
                 }
             }
