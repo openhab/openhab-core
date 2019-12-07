@@ -12,6 +12,8 @@
  */
 package org.eclipse.smarthome.io.transport.mqtt.internal.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -21,27 +23,100 @@ import org.eclipse.smarthome.io.transport.mqtt.internal.ClientCallback;
 
 import com.hivemq.client.mqtt.MqttClientState;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * The {@link AbstractMqttAsyncClient} is the base class for async client wrappers
+ * The {@link MqttAsyncClientWrapper} is the base class for async client wrappers
  *
  * @author Jan N. Klug - Initial contribution
  */
 
 @NonNullByDefault
 public abstract class MqttAsyncClientWrapper {
+    private final Logger logger = LoggerFactory.getLogger(MqttAsyncClientWrapper.class);
+    private final List<String> subscribedTopics = new ArrayList<>();
+
+    /**
+     * connect this client
+     *
+     * @param lwt last-will and testament (optional)
+     * @param keepAliveInterval keep-alive interval in ms
+     * @param username username (optional)
+     * @param password password (optional)
+     * @return a CompletableFuture (exceptionally on fail)
+     */
     public abstract CompletableFuture<?> connect(@Nullable MqttWillAndTestament lwt, int keepAliveInterval,
             @Nullable String username, @Nullable String password);
 
+    /**
+     * disconnect this client
+     *
+     * @return a CompletableFuture (exceptionally on fail)
+     */
     public abstract CompletableFuture<Void> disconnect();
 
+    /**
+     * get the connection state of this client
+     *
+     * @return the client state
+     */
     public abstract MqttClientState getState();
 
-    public abstract CompletableFuture<?> subscribe(String topic, int qos, ClientCallback clientCallback);
+    /**
+     * subscribe a client callback to a topic (keeps track of subscriptions)
+     *
+     * @param topic the topic
+     * @param qos QoS for this subscription
+     * @param clientCallback the client callback that need
+     * @return a CompletableFuture (exceptionally on fail)
+     */
+    public CompletableFuture<Boolean> subscribe(String topic, int qos, ClientCallback clientCallback) {
+        subscribedTopics.add(topic);
+        return internalSubscribe(topic, qos, clientCallback).thenApply(s -> {
+            logger.trace("successfully subscribed {} to topic {}", this, topic);
+            return true;
+        });
+    }
 
-    public abstract CompletableFuture<?> unsubscribe(String topic);
+    /**
+     * subscribe a client callback to a topic (keeps track of subscriptions)
+     *
+     * @param topic the topic
+     * @return a CompletableFuture (exceptionally on fail)
+     */
+    public CompletableFuture<Boolean> unsubscribe(String topic) {
+        subscribedTopics.remove(topic);
+        return internalUnsubscribe(topic).thenApply(s -> {
+            logger.trace("successfully unsubscribed {} from topic {}", this, topic);
+            return true;
+        });
+    }
 
+    /**
+     * publish a message
+     *
+     * @param topic the topic
+     * @param payload the message as byte array
+     * @param retain whether this message should be retained
+     * @param qos the QoS level of this message
+     * @return a CompletableFuture (exceptionally on fail)
+     */
     public abstract CompletableFuture<?> publish(String topic, byte[] payload, boolean retain, int qos);
+
+    /**
+     * check if this client is subscribed to a topic
+     *
+     * @param topic the topic
+     * @return true if subscribed
+     */
+    public boolean isSubscribed(String topic) {
+        return subscribedTopics.contains(topic);
+    }
+
+    protected abstract CompletableFuture<?> internalSubscribe(String topic, int qos, ClientCallback clientCallback);
+
+    protected abstract CompletableFuture<?> internalUnsubscribe(String topic);
 
     protected MqttQos getMqttQosFromInt(int qos) {
         switch (qos) {

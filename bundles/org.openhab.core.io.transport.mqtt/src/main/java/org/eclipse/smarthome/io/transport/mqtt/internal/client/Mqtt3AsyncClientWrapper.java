@@ -56,7 +56,7 @@ public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
         }
 
         client = clientBuilder.buildAsync();
-    };
+    }
 
     @Override
     public MqttClientState getState() {
@@ -64,14 +64,14 @@ public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
     }
 
     @Override
-    public CompletableFuture<?> subscribe(String topic, int qos, ClientCallback clientCallback) {
+    public CompletableFuture<?> internalSubscribe(String topic, int qos, ClientCallback clientCallback) {
         Mqtt3Subscribe subscribeMessage = Mqtt3Subscribe.builder().topicFilter(topic).qos(getMqttQosFromInt(qos))
                 .build();
         return client.subscribe(subscribeMessage, clientCallback::messageArrived);
     }
 
     @Override
-    public CompletableFuture<?> unsubscribe(String topic) {
+    public CompletableFuture<?> internalUnsubscribe(String topic) {
         Mqtt3Unsubscribe unsubscribeMessage = Mqtt3Unsubscribe.builder().topicFilter(topic).build();
         return client.unsubscribe(unsubscribeMessage);
     }
