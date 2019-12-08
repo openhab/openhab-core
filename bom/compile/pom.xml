@@ -88,6 +88,23 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- Californium -->
+    <dependency>
+      <groupId>org.eclipse.californium</groupId>
+      <artifactId>californium-core</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.californium</groupId>
+      <artifactId>scandium</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.californium</groupId>
+      <artifactId>element-connector</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+
     <!-- EclipseSource JAX RS -->
     <dependency>
       <groupId>com.eclipsesource.jaxrs</groupId>
