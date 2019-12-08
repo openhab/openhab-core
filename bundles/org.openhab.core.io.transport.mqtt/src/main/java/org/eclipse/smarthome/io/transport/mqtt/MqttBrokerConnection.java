@@ -18,12 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.TrustManager;
@@ -107,8 +102,7 @@ public class MqttBrokerConnection {
     protected @Nullable MqttAsyncClientWrapper client;
     protected boolean isConnecting = false;
     protected final List<MqttConnectionObserver> connectionObservers = new CopyOnWriteArrayList<>();
-
-    protected final Map<String, TopicSubscribers> subscribers = new HashMap<>();
+    protected final Map<String, TopicSubscribers> subscribers = new ConcurrentHashMap<>();
 
     // Connection timeout handling
     protected final AtomicReference<@Nullable ScheduledFuture<?>> timeoutFuture = new AtomicReference<>(null);
@@ -560,21 +554,14 @@ public class MqttBrokerConnection {
             return future;
         }
         if (client.getState().isConnected()) {
-            if (!client.isSubscribed(topic)) {
-                // "real" subscription for first subscriber
-                client.subscribe(topic, qos, clientCallback).whenComplete((s, t) -> {
-                    if (t == null) {
-                        logger.trace("Subscribed {} to topic {}", subscriber, topic);
-                        future.complete(true);
-                    } else {
-                        future.completeExceptionally(new MqttException(t));
-                    }
-                });
-            } else {
-                // client already subscribed
-                logger.trace("Subscribed {} to topic {} (follow-up subscription)", subscriber, topic);
-                future.complete(true);
-            }
+            client.subscribe(topic, qos, clientCallback).whenComplete((s, t) -> {
+                if (t == null) {
+                    future.complete(true);
+                } else {
+                    logger.warn("Failed subscribing to topic {}", topic, t);
+                    future.completeExceptionally(new MqttException(t));
+                }
+            });
         } else {
             // The subscription will be performed on connecting.
             future.complete(false);
@@ -634,7 +621,7 @@ public class MqttBrokerConnection {
             // No more subscribers to this topic. Unsubscribe topic on the broker
             MqttAsyncClientWrapper mqttClient = this.client;
             if (mqttClient != null) {
-                logger.trace("Subscriber list is empty after removing {}, unsubscribing topic {} from connection",
+                logger.trace("Subscriber list is empty after removing {}, unsubscribing topic {} from client",
                         subscriber, topic);
                 return unsubscribeRaw(mqttClient, topic);
             } else {

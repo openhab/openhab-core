@@ -12,9 +12,9 @@
  */
 package org.eclipse.smarthome.io.transport.mqtt.internal.client;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class MqttAsyncClientWrapper {
     private final Logger logger = LoggerFactory.getLogger(MqttAsyncClientWrapper.class);
-    private final List<String> subscribedTopics = new ArrayList<>();
+    private final Set<ClientCallback> subscriptions = ConcurrentHashMap.newKeySet();
 
     /**
      * connect this client
@@ -72,23 +72,29 @@ public abstract class MqttAsyncClientWrapper {
      * @return a CompletableFuture (exceptionally on fail)
      */
     public CompletableFuture<Boolean> subscribe(String topic, int qos, ClientCallback clientCallback) {
-        subscribedTopics.add(topic);
-        return internalSubscribe(topic, qos, clientCallback).thenApply(s -> {
-            logger.trace("successfully subscribed {} to topic {}", this, topic);
-            return true;
-        });
+        boolean needsSubscription = subscriptions.add(clientCallback);
+        if (needsSubscription) {
+            logger.trace("Trying to subscribe {} to topic {}", this, topic);
+            return internalSubscribe(topic, qos, clientCallback).thenApply(s -> {
+                logger.trace("Successfully subscribed {} to topic {}", this, topic);
+                return true;
+            });
+        } else {
+            logger.trace("{} already subscribed to topic {}", this, topic);
+            return CompletableFuture.completedFuture(true);
+        }
     }
 
     /**
-     * subscribe a client callback to a topic (keeps track of subscriptions)
+     * unsubscribes from a topic (keeps track of subscriptions)
      *
      * @param topic the topic
      * @return a CompletableFuture (exceptionally on fail)
      */
     public CompletableFuture<Boolean> unsubscribe(String topic) {
-        subscribedTopics.remove(topic);
+        subscriptions.remove(topic);
         return internalUnsubscribe(topic).thenApply(s -> {
-            logger.trace("successfully unsubscribed {} from topic {}", this, topic);
+            logger.trace("Successfully unsubscribed {} from topic {}", this, topic);
             return true;
         });
     }
@@ -103,16 +109,6 @@ public abstract class MqttAsyncClientWrapper {
      * @return a CompletableFuture (exceptionally on fail)
      */
     public abstract CompletableFuture<?> publish(String topic, byte[] payload, boolean retain, int qos);
-
-    /**
-     * check if this client is subscribed to a topic
-     *
-     * @param topic the topic
-     * @return true if subscribed
-     */
-    public boolean isSubscribed(String topic) {
-        return subscribedTopics.contains(topic);
-    }
 
     protected abstract CompletableFuture<?> internalSubscribe(String topic, int qos, ClientCallback clientCallback);
 
