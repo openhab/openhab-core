@@ -14,7 +14,7 @@ package org.eclipse.smarthome.io.transport.mqtt.internal.client;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class MqttAsyncClientWrapper {
     private final Logger logger = LoggerFactory.getLogger(MqttAsyncClientWrapper.class);
-    private final Set<ClientCallback> subscriptions = new CopyOnWriteArraySet<>();
+    private final Set<ClientCallback> subscriptions = ConcurrentHashMap.newKeySet();
 
     /**
      * connect this client
