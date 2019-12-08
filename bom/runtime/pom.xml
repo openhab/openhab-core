@@ -390,6 +390,23 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- Californium -->
+    <dependency>
+      <groupId>org.eclipse.californium</groupId>
+      <artifactId>californium-core</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.californium</groupId>
+      <artifactId>scandium</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.californium</groupId>
+      <artifactId>element-connector</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+
     <!-- Gson -->
     <dependency>
       <groupId>org.eclipse.orbit.bundles</groupId>
