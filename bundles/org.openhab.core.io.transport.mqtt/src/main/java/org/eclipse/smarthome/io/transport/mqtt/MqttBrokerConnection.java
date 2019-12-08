@@ -18,12 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.TrustManager;
@@ -107,8 +102,7 @@ public class MqttBrokerConnection {
     protected @Nullable MqttAsyncClientWrapper client;
     protected boolean isConnecting = false;
     protected final List<MqttConnectionObserver> connectionObservers = new CopyOnWriteArrayList<>();
-
-    protected final Map<String, TopicSubscribers> subscribers = new HashMap<>();
+    protected final Map<String, TopicSubscribers> subscribers = new ConcurrentHashMap<>();
 
     // Connection timeout handling
     protected final AtomicReference<@Nullable ScheduledFuture<?>> timeoutFuture = new AtomicReference<>(null);
