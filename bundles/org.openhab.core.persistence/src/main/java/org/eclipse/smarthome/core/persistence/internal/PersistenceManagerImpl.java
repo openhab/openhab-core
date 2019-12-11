@@ -284,10 +284,8 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
                                         genericItem.setState(historicItem.getState());
                                         genericItem.addStateChangeListener(this);
                                         logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
-                                                new Object[] {
-                                                        DateFormat.getDateTimeInstance()
-                                                                .format(historicItem.getTimestamp()),
-                                                        item.getName(), historicItem.getState().toString() });
+                                                DateFormat.getDateTimeInstance().format(historicItem.getTimestamp()),
+                                                item.getName(), historicItem.getState().toString());
                                         return;
                                     }
                                 }
