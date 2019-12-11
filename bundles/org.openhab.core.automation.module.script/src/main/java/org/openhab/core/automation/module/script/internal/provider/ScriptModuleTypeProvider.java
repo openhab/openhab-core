@@ -16,11 +16,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang.StringUtils;
+import javax.script.ScriptEngine;
+
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
@@ -53,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public class ScriptModuleTypeProvider implements ModuleTypeProvider {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptModuleTypeProvider.class);
-    private final List<ParameterOption> parameterOptions = new CopyOnWriteArrayList<>();
+    private final Map<String, String> parameterOptions = new TreeMap<>();
 
     @SuppressWarnings("unchecked")
     @Override
@@ -97,10 +99,14 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
      * @return a list of {#link ConfigurationDescriptionParameter}s
      */
     private List<ConfigDescriptionParameter> getConfigDescriptions(Locale locale) {
+        List<ParameterOption> parameterOptionsList = new ArrayList<>();
+        for (Map.Entry<String, String> entry : parameterOptions.entrySet()) {
+            parameterOptionsList.add(new ParameterOption(entry.getKey(), entry.getValue()));
+        }
         final ConfigDescriptionParameter scriptType = ConfigDescriptionParameterBuilder.create("type", Type.TEXT)
                 .withRequired(true).withReadOnly(true).withMultiple(false).withLabel("Script Type")
-                .withDescription("the scripting language used").withOptions(parameterOptions).withLimitToOptions(true)
-                .build();
+                .withDescription("the scripting language used").withOptions(parameterOptionsList)
+                .withLimitToOptions(true).build();
         final ConfigDescriptionParameter script = ConfigDescriptionParameterBuilder.create("script", Type.TEXT)
                 .withRequired(true).withReadOnly(false).withMultiple(false).withLabel("Script").withContext("script")
                 .withDescription("the script to execute").build();
@@ -128,26 +134,30 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
     }
 
     /**
-     * As {@link ScriptEngineFactory}s are added/changed, this method will create the {@link ParameterOption}s
+     * As {@link ScriptEngineFactory}s are added/removed, this method will create the {@link ParameterOption}s
      * that are available when selecting a script type in a ScriptActionType or ScriptConditionType.
      */
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
-        parameterOptions.clear();
-        for (javax.script.ScriptEngineFactory f : ScriptEngineFactory.ENGINE_MANAGER.getEngineFactories()) {
-            String languageName = String.format("%s (%s)", StringUtils.capitalize(f.getLanguageName()),
-                    f.getLanguageVersion());
+        ScriptEngine scriptEngine = engineFactory.createScriptEngine(engineFactory.getScriptTypes().get(0));
+        if (scriptEngine != null) {
             List<String> mimeTypes = new ArrayList<>();
 
-            mimeTypes.addAll(f.getMimeTypes());
+            javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
+            String languageName = String.format("%s (%s)",
+                    factory.getLanguageName().substring(0, 1).toUpperCase() + factory.getLanguageName().substring(1),
+                    factory.getLanguageVersion());
+            mimeTypes.addAll(factory.getMimeTypes());
             String preferredMimeType = mimeTypes.get(0);
             mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || mimeType.contains("x-"));
             if (!mimeTypes.isEmpty()) {
                 preferredMimeType = mimeTypes.get(0);
             }
-            parameterOptions.add(new ParameterOption(preferredMimeType, languageName));
+            parameterOptions.put(preferredMimeType, languageName);
+            logger.trace("ParameterOptions: {}", parameterOptions);
+        } else {
+            logger.trace("setScriptEngineFactory: engine was null");
         }
-        logger.trace("ParameterOptions: {}", parameterOptions);
     }
 
     public void unsetScriptEngineFactory(ScriptEngineFactory scriptEngineFactory) {

@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.automation.module.script.AbstractScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.osgi.service.component.annotations.Component;
 

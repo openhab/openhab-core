@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.internal;
+package org.openhab.core.automation.module.script;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +22,6 @@ import javax.script.ScriptEngine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractScriptEngineFactory implements ScriptEngineFactory {
 
-    protected final Logger logger = LoggerFactory.getLogger(AbstractScriptEngineFactory.class);
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public List<String> getScriptTypes() {
@@ -65,5 +64,4 @@ public abstract class AbstractScriptEngineFactory implements ScriptEngineFactory
         }
         return scriptEngine;
     }
-
 }

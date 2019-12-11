@@ -70,12 +70,20 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 this.genericSupport.put(scriptType, engineFactory);
             }
         }
-        logger.debug("Added {}", engineFactory.getClass().getSimpleName());
-        for (javax.script.ScriptEngineFactory f : ScriptEngineFactory.ENGINE_MANAGER.getEngineFactories()) {
-            logger.debug(
-                    "ScriptEngineFactory details for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
-                    f.getEngineName(), f.getEngineVersion(), f.getLanguageName(), f.getLanguageVersion(),
-                    f.getExtensions(), f.getNames(), f.getMimeTypes());
+        if (!engineFactory.getScriptTypes().isEmpty()) {
+            ScriptEngine scriptEngine = engineFactory.createScriptEngine(engineFactory.getScriptTypes().get(0));
+            if (scriptEngine != null) {
+                javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
+                logger.debug(
+                        "Initialized a {} ScriptEngineFactory for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
+                        (isCustomFactory(engineFactory)) ? "custom" : "generic", factory.getEngineName(),
+                        factory.getEngineVersion(), factory.getLanguageName(), factory.getLanguageVersion(),
+                        factory.getExtensions(), factory.getNames(), factory.getMimeTypes());
+            } else {
+                logger.trace("addScriptEngineFactory: engine was null");
+            }
+        } else {
+            logger.trace("addScriptEngineFactory: scriptTypes was empty");
         }
     }
 
@@ -126,7 +134,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                     logger.debug("Added ScriptEngine for language '{}' with identifier: {}", scriptType,
                             engineIdentifier);
                 } else {
-                    logger.error("ScriptEngine for language '{}' could not be found for identifier: {}", scriptType,
+                    logger.error("ScriptEngine for language '{}' could not be created for identifier: {}", scriptType,
                             engineIdentifier);
                 }
             } catch (Exception ex) {
@@ -193,7 +201,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     /**
      * This method will find and return a {@link ScriptEngineFactory} capable of executing a script of the given type,
-     * if one exists.
+     * if one exists. Custom ScriptEngineFactories are preferred over generic.
      *
      * @param scriptType a file extension (script) or MimeType (ScriptAction or ScriptCondition)
      * @return {@link ScriptEngineFactory} or null
