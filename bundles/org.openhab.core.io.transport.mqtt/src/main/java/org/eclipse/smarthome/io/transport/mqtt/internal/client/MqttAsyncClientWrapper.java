@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class MqttAsyncClientWrapper {
     private final Logger logger = LoggerFactory.getLogger(MqttAsyncClientWrapper.class);
-    private final Set<ClientCallback> subscriptions = ConcurrentHashMap.newKeySet();
+    private final Set<String> subscriptions = ConcurrentHashMap.newKeySet();
 
     /**
      * connect this client
@@ -72,7 +72,7 @@ public abstract class MqttAsyncClientWrapper {
      * @return a CompletableFuture (exceptionally on fail)
      */
     public CompletableFuture<Boolean> subscribe(String topic, int qos, ClientCallback clientCallback) {
-        boolean needsSubscription = subscriptions.add(clientCallback);
+        boolean needsSubscription = subscriptions.add(topic);
         if (needsSubscription) {
             logger.trace("Trying to subscribe {} to topic {}", this, topic);
             return internalSubscribe(topic, qos, clientCallback).thenApply(s -> {
