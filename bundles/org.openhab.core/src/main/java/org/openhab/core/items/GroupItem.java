@@ -88,10 +88,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     @Override
     public void dispose() {
         super.dispose();
-        for (Item member : getMembers()) {
-            unregisterStateListener(member);
-        }
-        members.clear();
+        removeAllMembers();
     }
 
     /**
@@ -218,6 +215,16 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         }
         members.remove(item);
         unregisterStateListener(item);
+    }
+
+    /**
+     * Removes all items from the members of this group item.
+     */
+    public void removeAllMembers() {
+        for (Item member : getMembers()) {
+            unregisterStateListener(member);
+        }
+        members.clear();
     }
 
     @Override
