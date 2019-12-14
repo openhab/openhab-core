@@ -134,7 +134,6 @@ public class ItemResource implements RESTResource {
     private @NonNullByDefault({}) DTOMapper dtoMapper;
     private @NonNullByDefault({}) MetadataSelectorMatcher metadataSelectorMatcher;
     private @NonNullByDefault({}) ItemBuilderFactory itemBuilderFactory;
-
     private @NonNullByDefault({}) LocaleService localeService;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)

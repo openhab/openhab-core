@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.smarthome.config.core.ConfigDescription;
+import org.eclipse.smarthome.config.core.ConfigDescriptionBuilder;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.core.items.MetadataRegistry;
 import org.junit.Before;
@@ -55,19 +56,16 @@ public class MetadataSelectorMatcherTest {
         when(configDescriptionRegistry.getConfigDescriptions(null)).thenReturn(mockConfigDescriptions());
         when(metadataRegistry.isInternalNamespace(anyString())).thenReturn(false);
 
-        matcher = new MetadataSelectorMatcher();
-
-        matcher.setConfigDescriptionRegistry(configDescriptionRegistry);
-        matcher.setMetadataRegistry(metadataRegistry);
+        matcher = new MetadataSelectorMatcher(metadataRegistry, configDescriptionRegistry);
     }
 
     private Collection<ConfigDescription> mockConfigDescriptions() throws Exception {
         List<ConfigDescription> configDescriptions = new ArrayList<>();
 
-        configDescriptions.add(new ConfigDescription(new URI("metadata:magic")));
-        configDescriptions.add(new ConfigDescription(new URI("metadata:magic2")));
-        configDescriptions.add(new ConfigDescription(new URI("metadata:homekit")));
-        configDescriptions.add(new ConfigDescription(new URI("metadata:alexa")));
+        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:magic")).build());
+        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:magic2")).build());
+        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:homekit")).build());
+        configDescriptions.add(ConfigDescriptionBuilder.create(new URI("metadata:alexa")).build());
 
         return configDescriptions;
     }
