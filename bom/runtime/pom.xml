@@ -14,10 +14,17 @@
 
   <name>openHAB Core :: BOM :: Runtime</name>
 
-  <properties>
-    <pax.web.version>7.2.11</pax.web.version>
-    <jetty.version>9.4.20.v20190813</jetty.version>
-  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.openhab.core.bom</groupId>
+        <artifactId>org.openhab.core.bom.runtime-index</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- BEG: Slightly modified EnRoute implementation index artifacts -->
@@ -26,16 +33,12 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
-      <version>3.13.100</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Declarative Services -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr</artifactId>
-      <version>2.1.10</version>
-      <scope>compile</scope>
       <exclusions>
         <exclusion>
           <groupId>org.codehaus.mojo</groupId>
@@ -48,58 +51,42 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configadmin</artifactId>
-      <version>1.9.8</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Metatype -->
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.metatype</artifactId>
-      <version>1.4.500</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.metatype</artifactId>
-      <version>1.4.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Event Admin -->
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.event</artifactId>
-      <version>1.4.300</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.event</artifactId>
-      <version>1.4.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Log Stream Service -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.log</artifactId>
-      <version>1.4.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.log.stream</artifactId>
-      <version>1.0.100</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Http Servlet 3.1 API with contract -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.servlet-api</artifactId>
-      <version>1.1.2</version>
-      <scope>compile</scope>
       <exclusions>
         <exclusion>
           <groupId>org.apache.tomcat</groupId>
@@ -112,134 +99,100 @@
     <dependency>
       <groupId>org.apache.aries.jax.rs</groupId>
       <artifactId>org.apache.aries.jax.rs.whiteboard</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- JAX-RS 2.1 API with contract -->
     <dependency>
       <groupId>org.apache.aries.spec</groupId>
       <artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- JAX-B 2.2 API -->
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.2</artifactId>
-      <version>2.9.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.jaxb-impl</artifactId>
-      <version>2.2.11_1</version>
     </dependency>
 
     <!-- Java-Activation 1.1 API -->
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
-      <version>2.9.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Stax 1.2 API -->
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.stax-api-1.2</artifactId>
-      <version>2.9.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- JAX-WS 2.2 API -->
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jaxws-api-2.2</artifactId>
-      <version>2.9.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- SAAJ 1.3 API -->
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.saaj-api-1.3</artifactId>
-      <version>2.9.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.saaj-impl</artifactId>
-      <version>1.3.23_2</version>
     </dependency>
 
     <!-- OSGi Function -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.function</artifactId>
-      <version>1.1.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- OSGi Promise -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
-      <version>1.1.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- OSGi PushStream -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.pushstream</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- OSGi Converter -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.converter</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- OSGi Transaction Control -->
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-service-xa</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-provider-jdbc-xa</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-provider-jpa-xa</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- OSGi Configurator -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configurator</artifactId>
-      <version>1.0.6</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- OSGi JPA Service -->
     <dependency>
       <groupId>org.apache.aries.jpa</groupId>
       <artifactId>org.apache.aries.jpa.container</artifactId>
-      <version>2.7.0</version>
-      <scope>compile</scope>
       <exclusions>
         <exclusion>
           <groupId>org.apache.aries.jpa.javax.persistence</groupId>
@@ -251,28 +204,20 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.jdbc</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Several implementations need to log using SLF4J -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.25</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
-      <version>1.2.3</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- END: Slightly modified EnRoute implementation index artifacts -->
@@ -283,34 +228,28 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>4.3.4</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole.plugins.ds</artifactId>
-      <version>2.0.8</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.inventory</artifactId>
-      <version>1.0.4</version>
     </dependency>
 
     <!-- The Gogo Shell -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.shell</artifactId>
-      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
-      <version>1.0.10</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.command</artifactId>
-      <version>1.0.2</version>
       <exclusions>
         <exclusion>
           <groupId>org.osgi</groupId>
@@ -329,8 +268,6 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.log</artifactId>
-      <version>1.2.0</version>
-      <scope>compile</scope>
       <exclusions>
         <exclusion>
           <groupId>org.osgi</groupId>
@@ -341,8 +278,6 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.logback</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
     </dependency>
     <!-- END: logging -->
 
@@ -350,129 +285,94 @@
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
-      <version>3.2.1</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-exec</artifactId>
-      <version>1.1</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.3.3</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
-      <version>3.1_7</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.2</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <version>2.6</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
-      <version>3.3</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Californium -->
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>californium-core</artifactId>
-      <version>2.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>scandium</artifactId>
-      <version>2.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.californium</groupId>
       <artifactId>element-connector</artifactId>
-      <version>2.0.0</version>
     </dependency>
 
     <!-- Gson -->
     <dependency>
       <groupId>org.eclipse.orbit.bundles</groupId>
       <artifactId>com.google.gson</artifactId>
-      <version>2.8.2.v20180104-1110</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- JBBP -->
     <dependency>
       <groupId>com.igormaznitsa</groupId>
       <artifactId>jbbp</artifactId>
-      <version>1.4.1</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- JmDNS -->
     <dependency>
       <groupId>org.jmdns</groupId>
       <artifactId>jmdns</artifactId>
-      <version>3.5.5</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- jUPnP -->
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>2.5.2</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- MapDB -->
     <dependency>
       <groupId>org.mapdb</groupId>
       <artifactId>mapdb</artifactId>
-      <version>1.0.9</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Measurement -->
     <dependency>
       <groupId>javax.measure</groupId>
       <artifactId>unit-api</artifactId>
-      <version>1.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tec.uom</groupId>
       <artifactId>uom-se</artifactId>
-      <version>1.0.10</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tec.uom.lib</groupId>
       <artifactId>uom-lib-common</artifactId>
-      <version>1.0.3</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- HiveMQ MQTT client-->
     <dependency>
       <groupId>com.hivemq</groupId>
       <artifactId>hivemq-mqtt-client</artifactId>
-      <version>1.1.2</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- All serial transports -->
@@ -484,54 +384,38 @@
       <!-- See: https://github.com/openhab/openhab-core/issues/750 -->
       <!-- <groupId>com.neuronrobotics</groupId> -->
       <!-- <version>3.15.0</version> -->
-      <version>3.15.0.OH2</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- XStream -->
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.xstream</artifactId>
-      <version>1.4.7_1</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Pax Web -->
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-api</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-extender-whiteboard</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-jetty</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-jsp</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-runtime</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-spi</artifactId>
-      <version>${pax.web.version}</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Persistence -->
@@ -557,247 +441,168 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-client</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-continuation</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-deploy</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-http</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-io</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jaas</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jmx</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jndi</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-plus</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-proxy</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-rewrite</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-security</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jaspi</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-servlet</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-servlets</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-util</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-util-ajax</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-webapp</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>websocket-api</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>websocket-client</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>websocket-common</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>javax-websocket-client-impl</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>javax-websocket-server-impl</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>websocket-server</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.websocket</groupId>
       <artifactId>websocket-servlet</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-xml</artifactId>
-      <version>${jetty.version}</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Xbean -->
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.12</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.12</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Google Commons / Guava -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>27.1-jre</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- EMF, Xtext -->
     <dependency>
       <groupId>de.maggu2810.p2redist</groupId>
       <artifactId>org.antlr.runtime</artifactId>
-      <version>3.2.0.v201101311130</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.orbit.bundles</groupId>
       <artifactId>io.github.classgraph</artifactId>
-      <version>4.8.35.v20190528-1517</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.common</artifactId>
-      <version>2.12.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore</artifactId>
-      <version>2.12.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore.change</artifactId>
-      <version>2.11.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-      <version>2.12.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtend</groupId>
       <artifactId>org.eclipse.xtend.lib</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtend</groupId>
       <artifactId>org.eclipse.xtend.lib.macro</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.common.types</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
       <exclusions>
         <exclusion>
           <groupId>io.github.classgraph</groupId>
@@ -808,8 +613,6 @@
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.ide</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
       <exclusions>
         <exclusion>
           <groupId>com.google.code.gson</groupId>
@@ -820,90 +623,62 @@
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.util</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.xbase</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.xbase.ide</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-      <version>2.19.0</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>hk2-api</artifactId>
-      <version>2.4.0-b34</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2.external</groupId>
       <artifactId>aopalliance-repackaged</artifactId>
-      <version>2.4.0-b34</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2.external</groupId>
       <artifactId>javax.inject</artifactId>
-      <version>2.4.0-b34</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>hk2-locator</artifactId>
-      <version>2.4.0-b34</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>osgi-resource-locator</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>hk2-utils</artifactId>
-      <version>2.4.0-b34</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>7.1</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- Joda Time -->
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
-      <version>2.9.2</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- ... -->
     <dependency>
       <groupId>com.eclipsesource.jaxrs</groupId>
       <artifactId>publisher</artifactId>
-      <version>5.3.1</version>
-      <scope>compile</scope>
     </dependency>
 
     <!-- jollyday -->
@@ -912,8 +687,6 @@
       <artifactId>jollyday</artifactId>
       <!-- Upgrading to 0.5.9 and adding compile scope causes Java 11 builds to fail -->
       <!-- On Java 11 the bundle requires JAXB 2.3 whereas we depend on JAXB 2.2 for Java 8 compatibility -->
-      <version>0.5.8</version>
-      <!-- <scope>compile</scope> -->
     </dependency>
 
   </dependencies>

@@ -69,7 +69,7 @@
     <maven.compiler.target>${oh.java.version}</maven.compiler.target>
     <maven.compiler.compilerVersion>${oh.java.version}</maven.compiler.compilerVersion>
 
-    <bnd.version>4.3.0</bnd.version>
+    <bnd.version>4.3.1</bnd.version>
     <karaf.compile.version>4.2.1</karaf.compile.version>
     <karaf.tooling.version>4.2.7</karaf.tooling.version>
     <sat.version>0.8.0</sat.version>
@@ -139,7 +139,7 @@ Import-Package: \\
   org.openhab.*,\\
   org.eclipse.smarthome.*
 -sources: false
--contract: *
+-noclassforname: true
 -includeresource: -${.}/NOTICE, -${.}/*.xsd]]></bnd>
             <!-- Bundle-SymbolicName: ${project.groupId}.${project.artifactId} -->
           </configuration>
@@ -154,41 +154,6 @@ Import-Package: \\
         <!-- Required to make the maven-jar-plugin pick up the bnd generated manifest. Also avoid packaging empty Jars -->
         <!-- Moved... -->
 
-        <!-- Setup the indexer for running and testing -->
-        <plugin>
-          <groupId>biz.aQute.bnd</groupId>
-          <artifactId>bnd-indexer-maven-plugin</artifactId>
-          <version>${bnd.version}</version>
-          <configuration>
-            <localURLs>REQUIRED</localURLs>
-            <attach>false</attach>
-          </configuration>
-          <executions>
-            <execution>
-              <id>index</id>
-              <goals>
-                <goal>index</goal>
-              </goals>
-              <configuration>
-                <indexName>${project.artifactId}</indexName>
-              </configuration>
-            </execution>
-            <execution>
-              <id>test-index</id>
-              <goals>
-                <goal>index</goal>
-              </goals>
-              <configuration>
-                <indexName>${project.artifactId}</indexName>
-                <outputFile>${project.build.directory}/test-index.xml</outputFile>
-                <scopes>
-                  <scope>test</scope>
-                </scopes>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
         <!-- Define the version of the resolver plugin we use -->
         <plugin>
           <groupId>biz.aQute.bnd</groupId>
@@ -197,6 +162,7 @@ Import-Package: \\
           <configuration>
             <failOnChanges>false</failOnChanges>
             <bndruns></bndruns>
+            <includeDependencyManagement>true</includeDependencyManagement>
           </configuration>
           <executions>
             <execution>
@@ -215,6 +181,7 @@ Import-Package: \\
           <configuration>
             <resolve>true</resolve>
             <failOnChanges>true</failOnChanges>
+            <includeDependencyManagement>true</includeDependencyManagement>
           </configuration>
           <executions>
             <execution>
@@ -230,6 +197,14 @@ Import-Package: \\
           <groupId>biz.aQute.bnd</groupId>
           <artifactId>bnd-testing-maven-plugin</artifactId>
           <version>${bnd.version}</version>
+          <configuration>
+            <includeDependencyManagement>true</includeDependencyManagement>
+            <scopes>
+              <scope>compile</scope>
+              <scope>runtime</scope>
+              <scope>test</scope>
+            </scopes>
+          </configuration>
           <executions>
             <execution>
               <goals>
@@ -510,20 +485,6 @@ Import-Package: \\
                 </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
-                    <groupId>biz.aQute.bnd</groupId>
-                    <artifactId>bnd-indexer-maven-plugin</artifactId>
-                    <versionRange>[3.1.0,)</versionRange>
-                    <goals>
-                      <goal>index</goal>
-                      <goal>local-index</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
                     <groupId>org.commonjava.maven.plugins</groupId>
                     <artifactId>directory-maven-plugin</artifactId>
                     <versionRange>[0.3.1,)</versionRange>
@@ -757,6 +718,11 @@ Import-Package: \\
               <groupId>biz.aQute.bnd</groupId>
               <artifactId>bnd-resolver-maven-plugin</artifactId>
               <version>${bnd.version}</version>
+              <configuration>
+                <failOnChanges>false</failOnChanges>
+                <reportOptional>false</reportOptional>
+                <includeDependencyManagement>true</includeDependencyManagement>
+              </configuration>
               <executions>
                 <execution>
                   <goals>

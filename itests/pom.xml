@@ -111,6 +111,32 @@
         </file>
       </activation>
 
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.openhab.core.bom</groupId>
+            <artifactId>org.openhab.core.bom.test-index</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.openhab.core.bom</groupId>
+            <artifactId>org.openhab.core.bom.openhab-core-index</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.openhab.core.bom</groupId>
+            <artifactId>org.openhab.core.bom.runtime-index</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+
       <dependencies>
         <dependency>
           <groupId>org.openhab.core.bom</groupId>
@@ -118,24 +144,16 @@
           <type>pom</type>
           <scope>provided</scope>
         </dependency>
-
         <dependency>
           <groupId>org.openhab.core.bom</groupId>
-          <artifactId>org.openhab.core.bom.test-index</artifactId>
+          <artifactId>org.openhab.core.bom.openhab-core</artifactId>
           <version>${project.version}</version>
           <type>pom</type>
           <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.openhab.core.bom</groupId>
-          <artifactId>org.openhab.core.bom.openhab-core-index</artifactId>
-          <version>${project.version}</version>
-          <type>pom</type>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.openhab.core.bom</groupId>
-          <artifactId>org.openhab.core.bom.runtime-index</artifactId>
+          <artifactId>org.openhab.core.bom.runtime</artifactId>
           <version>${project.version}</version>
           <type>pom</type>
           <scope>provided</scope>
@@ -153,18 +171,16 @@
           </plugin>
           <plugin>
             <groupId>biz.aQute.bnd</groupId>
-            <artifactId>bnd-indexer-maven-plugin</artifactId>
-            <configuration>
-              <includeJar>true</includeJar>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>biz.aQute.bnd</groupId>
             <artifactId>bnd-testing-maven-plugin</artifactId>
             <configuration>
               <bndruns>
                 <bndrun>itest.bndrun</bndrun>
               </bndruns>
+              <scopes>
+                <scope>compile</scope>
+                <scope>runtime</scope>
+                <scope>test</scope>
+              </scopes>
             </configuration>
           </plugin>
           <plugin>
@@ -174,6 +190,11 @@
               <bndruns>
                 <bndrun>itest.bndrun</bndrun>
               </bndruns>
+              <scopes>
+                <scope>compile</scope>
+                <scope>runtime</scope>
+                <scope>test</scope>
+              </scopes>
             </configuration>
           </plugin>
         </plugins>

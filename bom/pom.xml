@@ -18,12 +18,12 @@
   <modules>
     <module>compile</module>
     <module>compile-model</module>
-    <module>runtime</module>
     <module>runtime-index</module>
-    <module>test</module>
+    <module>runtime</module>
     <module>test-index</module>
-    <module>openhab-core</module>
+    <module>test</module>
     <module>openhab-core-index</module>
+    <module>openhab-core</module>
   </modules>
 
 </project>
