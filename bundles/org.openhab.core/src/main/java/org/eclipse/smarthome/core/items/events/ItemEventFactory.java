@@ -304,6 +304,16 @@ public class ItemEventFactory extends AbstractEventFactory {
         return new ItemStateChangedEvent(topic, payload, itemName, newState, oldState);
     }
 
+    /**
+     * Creates a group item state changed event.
+     *
+     * @param itemName the name of the group item to send the state changed event for
+     * @param memberName the name of the member causing the group item state change
+     * @param newState the new state to send
+     * @param oldState the old state of the group item
+     * @return the created group item state changed event
+     * @throws IllegalArgumentException if itemName or state is null
+     */
     public static GroupItemStateChangedEvent createGroupStateChangedEvent(String itemName, String memberName,
             State newState, State oldState) {
         assertValidArguments(itemName, memberName, newState, "state");

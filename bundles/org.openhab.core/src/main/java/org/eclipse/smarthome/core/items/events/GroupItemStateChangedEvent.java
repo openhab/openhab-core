@@ -15,8 +15,7 @@ package org.eclipse.smarthome.core.items.events;
 import org.eclipse.smarthome.core.types.State;
 
 /**
- * {@link GroupItemStateChangedEvent}s can be used to deliver group item state changes through the openHAB
- * event bus. In
+ * {@link GroupItemStateChangedEvent}s can be used to deliver group item state changes through the openHAB event bus. In
  * contrast to the {@link GroupItemStateEvent} the {@link GroupItemStateChangedEvent} is only sent if the state changed.
  * State events must be created with the {@link ItemEventFactory}.
  *
@@ -53,4 +52,5 @@ public class GroupItemStateChangedEvent extends ItemStateChangedEvent {
     public String toString() {
         return String.format("%s through %s", super.toString(), memberName);
     }
+
 }
