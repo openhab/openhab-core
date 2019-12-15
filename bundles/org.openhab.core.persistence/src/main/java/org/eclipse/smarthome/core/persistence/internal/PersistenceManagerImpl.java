@@ -383,8 +383,8 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
 
     private void startEventHandling(final String serviceName) {
         synchronized (persistenceServiceConfigs) {
-            if (persistenceServiceConfigs.containsKey(serviceName)) {
-                final PersistenceServiceConfiguration config = persistenceServiceConfigs.get(serviceName);
+            final PersistenceServiceConfiguration config = persistenceServiceConfigs.get(serviceName);
+            if (config != null) {
                 for (SimpleItemConfiguration itemConfig : config.getConfigs()) {
                     if (hasStrategy(config, itemConfig, SimpleStrategy.Globals.RESTORE)) {
                         for (Item item : getAllItems(itemConfig)) {
