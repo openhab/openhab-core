@@ -17,6 +17,7 @@ import java.util.Properties;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.smarthome.io.net.http.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class HTTP {
     static public String sendHttpGetRequest(String url, int timeout) {
         String response = null;
         try {
-            return HttpUtil.executeUrl("GET", url, timeout);
+            return HttpUtil.executeUrl(HttpMethod.GET.name(), url, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -72,9 +73,9 @@ public class HTTP {
      */
     public static String sendHttpGetRequest(String url, Map<String, String> headers, int timeout) {
         try {
-            Properties h = new Properties();
-            h.putAll(headers);
-            return HttpUtil.executeUrl("GET", url, h, null, null, timeout);
+            Properties headerProperties = new Properties();
+            headerProperties.putAll(headers);
+            return HttpUtil.executeUrl(HttpMethod.GET.name(), url, headerProperties, null, null, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -101,7 +102,7 @@ public class HTTP {
     static public String sendHttpPutRequest(String url, int timeout) {
         String response = null;
         try {
-            response = HttpUtil.executeUrl("PUT", url, timeout);
+            response = HttpUtil.executeUrl(HttpMethod.PUT.name(), url, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -134,7 +135,7 @@ public class HTTP {
     static public String sendHttpPutRequest(String url, String contentType, String content, int timeout) {
         String response = null;
         try {
-            response = HttpUtil.executeUrl("PUT", url, IOUtils.toInputStream(content), contentType, timeout);
+            response = HttpUtil.executeUrl(HttpMethod.PUT.name(), url, IOUtils.toInputStream(content), contentType, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -153,9 +154,9 @@ public class HTTP {
      */
     static public String sendHttpPutRequest(String url, String contentType, String content, Map<String, String> headers, int timeout) {
         try {
-            Properties h = new Properties();
-            h.putAll(headers);
-            return HttpUtil.executeUrl("PUT", url, h, IOUtils.toInputStream(content), contentType, timeout);
+            Properties headerProperties = new Properties();
+            headerProperties.putAll(headers);
+            return HttpUtil.executeUrl(HttpMethod.PUT.name(), url, headerProperties, IOUtils.toInputStream(content), contentType, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -182,7 +183,7 @@ public class HTTP {
     static public String sendHttpPostRequest(String url, int timeout) {
         String response = null;
         try {
-            response = HttpUtil.executeUrl("POST", url, timeout);
+            response = HttpUtil.executeUrl(HttpMethod.POST.name(), url, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -215,7 +216,7 @@ public class HTTP {
     static public String sendHttpPostRequest(String url, String contentType, String content, int timeout) {
         String response = null;
         try {
-            response = HttpUtil.executeUrl("POST", url, IOUtils.toInputStream(content), contentType, timeout);
+            response = HttpUtil.executeUrl(HttpMethod.POST.name(), url, IOUtils.toInputStream(content), contentType, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -234,9 +235,9 @@ public class HTTP {
      */
     public static String sendHttpPostRequest(String url, String contentType, String content, Map<String, String> headers, int timeout) {
         try {
-            Properties h = new Properties();
-            h.putAll(headers);
-            return HttpUtil.executeUrl("POST", url, h, IOUtils.toInputStream(content), contentType, timeout);
+            Properties headerProperties = new Properties();
+            headerProperties.putAll(headers);
+            return HttpUtil.executeUrl(HttpMethod.POST.name(), url, headerProperties, IOUtils.toInputStream(content), contentType, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -263,7 +264,7 @@ public class HTTP {
     static public String sendHttpDeleteRequest(String url, int timeout) {
         String response = null;
         try {
-            response = HttpUtil.executeUrl("DELETE", url, timeout);
+            response = HttpUtil.executeUrl(HttpMethod.DELETE.name(), url, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -280,9 +281,9 @@ public class HTTP {
      */
     static public String sendHttpDeleteRequest(String url, Map<String, String> headers, int timeout) {
         try {
-            Properties h = new Properties();
-            h.putAll(headers);
-            return HttpUtil.executeUrl("DELETE", url, h, null, null, timeout);
+            Properties headerProperties = new Properties();
+            headerProperties.putAll(headers);
+            return HttpUtil.executeUrl(HttpMethod.DELETE.name(), url, headerProperties, null, null, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
