@@ -12,7 +12,7 @@
  */
 package org.eclipse.smarthome.core.items;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.ManagedProvider;
 import org.eclipse.smarthome.core.storage.StorageService;
 
@@ -23,6 +23,7 @@ import org.eclipse.smarthome.core.storage.StorageService;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface ManagedMetadataProvider extends ManagedProvider<Metadata, MetadataKey>, MetadataProvider {
 
     /**
@@ -30,6 +31,6 @@ public interface ManagedMetadataProvider extends ManagedProvider<Metadata, Metad
      *
      * @param itemname the name of the item for which the metadata is to be removed.
      */
-    void removeItemMetadata(@NonNull String name);
+    void removeItemMetadata(String name);
 
 }

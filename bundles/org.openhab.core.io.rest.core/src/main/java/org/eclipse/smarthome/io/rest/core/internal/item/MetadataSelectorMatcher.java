@@ -23,10 +23,13 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
 import org.eclipse.smarthome.core.common.AbstractUID;
 import org.eclipse.smarthome.core.items.MetadataRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -36,14 +39,21 @@ import org.osgi.service.component.annotations.Reference;
  * @author Henning Treu - Initial contribution
  */
 @Component(service = MetadataSelectorMatcher.class)
+@NonNullByDefault
 public class MetadataSelectorMatcher {
 
     private static final String METADATA_SCHEME = "metadata";
     private static final String METADATA_SCHEME_PREFIX = METADATA_SCHEME + ":";
 
-    private MetadataRegistry metadataRegistry;
+    private final MetadataRegistry metadataRegistry;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
 
-    private ConfigDescriptionRegistry configDescriptionRegistry;
+    @Activate
+    public MetadataSelectorMatcher(final @Reference MetadataRegistry metadataRegistry,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
+        this.metadataRegistry = metadataRegistry;
+        this.configDescriptionRegistry = configDescriptionRegistry;
+    }
 
     /**
      * Filter existing metadata namespaces against the given namespaeSelector. The given String might consist of a comma
@@ -53,7 +63,7 @@ public class MetadataSelectorMatcher {
      * @param locale the locale for config descriptions with the scheme "metadata".
      * @return a {@link Set} of matching namespaces.
      */
-    public Set<String> filterNamespaces(String namespaceSelector, Locale locale) {
+    public Set<String> filterNamespaces(@Nullable String namespaceSelector, @Nullable Locale locale) {
         if (namespaceSelector == null || namespaceSelector.isEmpty()) {
             return Collections.emptySet();
         } else {
@@ -81,21 +91,4 @@ public class MetadataSelectorMatcher {
         }
     }
 
-    @Reference
-    protected void setMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = metadataRegistry;
-    }
-
-    protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
-    }
-
-    @Reference
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = null;
-    }
 }

@@ -34,8 +34,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Component(immediate = true, service = MetadataRegistry.class)
 @NonNullByDefault
-@Component(immediate = true, service = { MetadataRegistry.class })
 public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey, MetadataProvider>
         implements MetadataRegistry {
 

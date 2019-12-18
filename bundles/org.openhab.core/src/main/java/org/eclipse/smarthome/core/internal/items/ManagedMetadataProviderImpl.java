@@ -12,7 +12,7 @@
  */
 package org.eclipse.smarthome.core.internal.items;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.common.registry.AbstractManagedProvider;
 import org.eclipse.smarthome.core.items.ManagedMetadataProvider;
 import org.eclipse.smarthome.core.items.Metadata;
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true, service = { MetadataProvider.class, ManagedMetadataProvider.class })
+@NonNullByDefault
 public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadata, MetadataKey, Metadata>
         implements ManagedMetadataProvider {
 
@@ -50,12 +51,12 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
     }
 
     @Override
-    protected @NonNull String keyToString(@NonNull MetadataKey key) {
+    protected String keyToString(MetadataKey key) {
         return key.toString();
     }
 
     @Override
-    protected Metadata toElement(@NonNull String key, @NonNull Metadata persistableElement) {
+    protected Metadata toElement(String key, Metadata persistableElement) {
         return persistableElement;
     }
 
@@ -70,7 +71,7 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
      * @param itemname the name of the item for which the metadata is to be removed.
      */
     @Override
-    public void removeItemMetadata(@NonNull String name) {
+    public void removeItemMetadata(String name) {
         logger.debug("Removing all metadata for item {}", name);
         getAll().stream().filter(MetadataPredicates.ofItem(name)).map(Metadata::getUID).forEach(this::remove);
     }

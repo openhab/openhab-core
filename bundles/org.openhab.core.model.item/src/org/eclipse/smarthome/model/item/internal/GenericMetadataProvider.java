@@ -40,8 +40,8 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@NonNullByDefault
 @Component(service = { MetadataProvider.class, GenericMetadataProvider.class })
+@NonNullByDefault
 public class GenericMetadataProvider extends AbstractProvider<Metadata> implements MetadataProvider {
 
     private final Set<Metadata> metadata = new HashSet<>();
