@@ -252,18 +252,15 @@ public abstract class GenericItem implements ActiveItem {
         clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         for (final StateChangeListener listener : clonedListeners) {
-            pool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        listener.stateUpdated(GenericItem.this, newState);
-                        if (newState != null && !newState.equals(oldState)) {
-                            listener.stateChanged(GenericItem.this, oldState, newState);
-                        }
-                    } catch (Exception e) {
-                        logger.warn("failed notifying listener '{}' about state update of item {}: {}", listener,
-                                GenericItem.this.getName(), e.getMessage(), e);
+            pool.execute(() -> {
+                try {
+                    listener.stateUpdated(GenericItem.this, newState);
+                    if (newState != null && !newState.equals(oldState)) {
+                        listener.stateChanged(GenericItem.this, oldState, newState);
                     }
+                } catch (Exception e) {
+                    logger.warn("failed notifying listener '{}' about state update of item {}: {}", listener,
+                            GenericItem.this.getName(), e.getMessage(), e);
                 }
             });
         }
