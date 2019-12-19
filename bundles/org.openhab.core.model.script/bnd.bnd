@@ -45,6 +45,7 @@ Import-Package: \
  javax.measure.*,\
  org.apache.*,\
  org.eclipse.jdt.annotation;resolution:=optional,\
+ org.eclipse.jetty.http.*,\
  org.eclipse.xtext.xbase.lib,\
  org.joda.*,\
  org.osgi.*,\
