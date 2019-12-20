@@ -468,27 +468,6 @@
     <bundle>mvn:net.java.dev.jna/jna-platform/${jna.version}</bundle>
   </feature>
 
-  <feature name="openhab-runtime-compat1x" description="Compatibility layer for openHAB 1 add-ons" version="${project.version}">
-    <feature>openhab-runtime-base</feature>
-    <feature>openhab-core-model-item</feature>
-    <feature>openhab-core-model-persistence</feature>
-    <feature>openhab-core-model-script</feature>
-    <feature>openhab-core-model-sitemap</feature>
-    <feature>openhab-core-ui</feature>
-
-    <!-- Allow to add external dependencies here instead in the target platform. -->
-    <!-- The compat1x feature is a special one to get old OH1 running. -->
-    <!-- We do not want to pollute the normal target platform with such legacy dependencies. -->
-    <bundle dependency="true">mvn:commons-net/commons-net/3.3</bundle>
-    <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-httpclient/3.1_7</bundle>
-    <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.2.3</bundle>
-    <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.2.3</bundle>
-    <bundle>mvn:org.codehaus.jackson/jackson-core-asl/1.9.2</bundle>
-    <bundle>mvn:org.codehaus.jackson/jackson-mapper-asl/1.9.2</bundle>
-
-    <bundle>mvn:org.openhab.core.bundles/org.openhab.core.compat1x/${project.version}</bundle>
-  </feature>
-
   <feature name="openhab-transport-coap" description="CoAP Transport" version="${project.version}">
     <feature>openhab-core-io-transport-coap</feature>
   </feature>
