@@ -216,7 +216,7 @@ public interface OAuthClientService extends AutoCloseable {
      * @throws IOException Web/ network issues etc.
      * @throws OAuthErrorException For OAUTH error responses.
      * @throws OAuthException For other exceptions.
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.2>Implicit Grant - rfc6749 section-4.2</a>
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.2">Implicit Grant - rfc6749 section-4.2</a>
      */
     AccessTokenResponse getAccessTokenByImplicit(@Nullable String redirectURI, @Nullable String scope,
             @Nullable String state) throws OAuthException, IOException, OAuthResponseException;
