@@ -20,16 +20,16 @@ import org.eclipse.xtext.xbase.scoping.XImportSectionNamespaceScopeProvider;
 
 public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNamespaceScopeProvider {
 
-    public static final QualifiedName CORE_LIBRARY_TYPES_PACKAGE = QualifiedName.create("org", "eclipse", "smarthome",
+    public static final QualifiedName CORE_LIBRARY_TYPES_PACKAGE = QualifiedName.create("org", "openhab",
             "core", "library", "types");
-    public static final QualifiedName CORE_LIBRARY_ITEMS_PACKAGE = QualifiedName.create("org", "eclipse", "smarthome",
+    public static final QualifiedName CORE_LIBRARY_ITEMS_PACKAGE = QualifiedName.create("org", "openhab",
             "core", "library", "items");
-    public static final QualifiedName CORE_ITEMS_PACKAGE = QualifiedName.create("org", "eclipse", "smarthome", "core",
+    public static final QualifiedName CORE_ITEMS_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "items");
-    public static final QualifiedName CORE_PERSISTENCE_PACKAGE = QualifiedName.create("org", "eclipse", "smarthome",
+    public static final QualifiedName CORE_PERSISTENCE_PACKAGE = QualifiedName.create("org", "openhab",
             "core", "persistence");
-    public static final QualifiedName MODEL_SCRIPT_ACTIONS_PACKAGE = QualifiedName.create("org", "eclipse", "smarthome",
-            "model", "script", "actions");
+    public static final QualifiedName MODEL_SCRIPT_ACTIONS_PACKAGE = QualifiedName.create("org", "openhab",
+            "core", "model", "script", "actions");
     public static final QualifiedName JODA_TIME_PACKAGE = QualifiedName.create("org", "joda", "time");
 
     @Override
