@@ -5,8 +5,8 @@
 
   <extension point="org.eclipse.emf.ecore.generated_package">
     <package 
-       uri = "http://www.eclipse.org/smarthome/model/Items" 
-       class = "org.eclipse.smarthome.model.items.ItemsPackage"
+       uri = "https://openhab.org/model/Items" 
+       class = "org.openhab.core.model.items.ItemsPackage"
        genModel = "model/generated/Items.genmodel" /> 
 	
   </extension>

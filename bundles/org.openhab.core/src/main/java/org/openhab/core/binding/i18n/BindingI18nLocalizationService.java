@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.binding.i18n;
+package org.openhab.core.binding.i18n;
 
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.binding.BindingInfo;
-import org.eclipse.smarthome.core.binding.internal.i18n.BindingI18nUtil;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
+import org.openhab.core.binding.BindingInfo;
+import org.openhab.core.binding.internal.i18n.BindingI18nUtil;
+import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.icon;
+package org.openhab.core.ui.icon;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.ui.icon.IconSet.Format;
+import org.openhab.core.ui.icon.IconSet.Format;
 import org.junit.Before;
 import org.junit.Test;
 

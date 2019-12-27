@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.internal;
+package org.openhab.core.io.http.internal;
 
 import java.io.IOException;
 import java.net.URL;
@@ -24,8 +24,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.smarthome.io.http.Handler;
-import org.eclipse.smarthome.io.http.WrappingHttpContext;
+import org.openhab.core.io.http.Handler;
+import org.openhab.core.io.http.WrappingHttpContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.testsupport.hue;
+package org.openhab.core.model.thing.testsupport.hue;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -21,10 +21,10 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.osgi.service.component.annotations.Component;
 
 /**

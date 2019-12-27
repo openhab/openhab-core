@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.common.registry;
+package org.openhab.core.common.registry;
 
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.storage.StorageService;
 
 /**
  * {@link DefaultAbstractManagedProvider} is a specific {@link AbstractManagedProvider} implementation, where the stored

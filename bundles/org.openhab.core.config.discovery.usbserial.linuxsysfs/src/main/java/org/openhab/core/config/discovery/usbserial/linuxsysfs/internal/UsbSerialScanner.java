@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.internal;
+package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
 import java.io.IOException;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 
 /**
  * Implementations of this interface scan for serial ports provided by USB devices.

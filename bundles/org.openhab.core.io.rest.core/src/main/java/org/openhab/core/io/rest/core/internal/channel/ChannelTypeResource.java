@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.channel;
+package org.openhab.core.io.rest.core.internal.channel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,24 +30,24 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.thing.dto.ChannelTypeDTO;
-import org.eclipse.smarthome.core.thing.profiles.ProfileType;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeRegistry;
-import org.eclipse.smarthome.core.thing.profiles.TriggerProfileType;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
+import org.openhab.core.auth.Role;
+import org.openhab.core.thing.dto.ChannelTypeDTO;
+import org.openhab.core.thing.profiles.ProfileType;
+import org.openhab.core.thing.profiles.ProfileTypeRegistry;
+import org.openhab.core.thing.profiles.TriggerProfileType;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

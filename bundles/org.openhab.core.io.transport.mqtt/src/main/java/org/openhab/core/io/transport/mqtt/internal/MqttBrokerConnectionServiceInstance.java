@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.internal;
+package org.openhab.core.io.transport.mqtt.internal;
 
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnectionConfig;
-import org.eclipse.smarthome.io.transport.mqtt.MqttException;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnectionConfig;
+import org.openhab.core.io.transport.mqtt.MqttException;
+import org.openhab.core.io.transport.mqtt.MqttService;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author David Graeff - Initial contribution
  */
-@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MqttBrokerConnectionServiceInstance.class, configurationPid = "org.eclipse.smarthome.mqttbroker")
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MqttBrokerConnectionServiceInstance.class, configurationPid = "org.openhab.core.mqttbroker")
 @NonNullByDefault
 public class MqttBrokerConnectionServiceInstance {
     private final Logger logger = LoggerFactory.getLogger(MqttBrokerConnectionServiceInstance.class);

@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.voice.internal;
+package org.openhab.core.io.rest.voice.internal;
 
-import org.eclipse.smarthome.core.voice.Voice;
+import org.openhab.core.voice.Voice;
 
 /**
  * Mapper class that maps {@link Voice} instanced to their respective DTOs.

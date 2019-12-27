@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal;
+package org.openhab.core.magic.binding.internal;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.*;
@@ -18,8 +18,8 @@ import static org.junit.Assert.*;
 import java.net.URI;
 import java.util.Collection;
 
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.magic.binding.MagicService;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.magic.binding.MagicService;
 import org.junit.Before;
 import org.junit.Test;
 

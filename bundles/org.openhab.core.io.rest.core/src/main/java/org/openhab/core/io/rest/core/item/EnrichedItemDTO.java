@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.item;
+package org.openhab.core.io.rest.core.item;
 
 import java.util.Map;
 
-import org.eclipse.smarthome.core.items.dto.ItemDTO;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.items.dto.ItemDTO;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.StateDescription;
 
 /**
  * This is an enriched data transfer object that is used to serialize items with dynamic data like the state, the state

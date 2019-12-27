@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.internal.metadata;
+package org.openhab.core.magic.internal.metadata;
 
 import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.config.core.metadata.MetadataConfigDescriptionProvider;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.config.core.metadata.MetadataConfigDescriptionProvider;
 import org.osgi.service.component.annotations.Component;
 
 /**

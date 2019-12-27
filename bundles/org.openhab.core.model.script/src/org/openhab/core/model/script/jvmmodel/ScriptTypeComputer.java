@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.jvmmodel;
+package org.openhab.core.model.script.jvmmodel;
 
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.model.script.script.QuantityLiteral;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.model.script.script.QuantityLiteral;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState;
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeExpectation;

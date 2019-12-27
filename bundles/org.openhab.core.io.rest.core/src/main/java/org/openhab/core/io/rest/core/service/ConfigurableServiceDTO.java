@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.service;
+package org.openhab.core.io.rest.core.service;
 
 /**
  * {@link ConfigurableServiceDTO} is a data transfer object for configurable services.

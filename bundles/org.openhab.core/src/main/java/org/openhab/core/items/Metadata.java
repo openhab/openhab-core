@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Identifiable;
+import org.openhab.core.common.registry.Identifiable;
 
 /**
  * This is a data class for storing meta-data for a given item and namespace.

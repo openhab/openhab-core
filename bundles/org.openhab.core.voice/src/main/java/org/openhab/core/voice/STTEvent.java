@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice;
+package org.openhab.core.voice;
 
 /**
  * A tagging interface for speech-to-text events.

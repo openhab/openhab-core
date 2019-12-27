@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.auth.internal;
+package org.openhab.core.io.http.auth.internal;
 
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.smarthome.core.auth.Authentication;
-import org.eclipse.smarthome.io.http.Handler;
-import org.eclipse.smarthome.io.http.HandlerContext;
-import org.eclipse.smarthome.io.http.HandlerPriorities;
+import org.openhab.core.auth.Authentication;
+import org.openhab.core.io.http.Handler;
+import org.openhab.core.io.http.HandlerContext;
+import org.openhab.core.io.http.HandlerPriorities;
 import org.osgi.service.component.annotations.Component;
 
 /**

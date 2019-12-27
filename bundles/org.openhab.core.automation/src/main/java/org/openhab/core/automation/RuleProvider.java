@@ -13,7 +13,7 @@
 package org.openhab.core.automation;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.Provider;
+import org.openhab.core.common.registry.Provider;
 
 /**
  * This class is responsible for providing {@link Rule}s. {@link RuleProvider}s are tracked by the {@link RuleRegistry}

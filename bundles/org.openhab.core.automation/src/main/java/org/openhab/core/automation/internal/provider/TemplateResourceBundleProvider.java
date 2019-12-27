@@ -20,11 +20,11 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
-import org.eclipse.smarthome.core.common.registry.Provider;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.i18n.ConfigI18nLocalizationService;
+import org.openhab.core.common.registry.Provider;
+import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Trigger;

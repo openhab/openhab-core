@@ -10,24 +10,24 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal.text;
+package org.openhab.core.voice.internal.text;
 
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
-import org.eclipse.smarthome.core.library.types.NextPreviousType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PlayPauseType;
-import org.eclipse.smarthome.core.library.types.RewindFastforwardType;
-import org.eclipse.smarthome.core.library.types.StopMoveType;
-import org.eclipse.smarthome.core.library.types.UpDownType;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.voice.text.AbstractRuleBasedInterpreter;
-import org.eclipse.smarthome.core.voice.text.Expression;
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.NextPreviousType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PlayPauseType;
+import org.openhab.core.library.types.RewindFastforwardType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.UpDownType;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.voice.text.AbstractRuleBasedInterpreter;
+import org.openhab.core.voice.text.Expression;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

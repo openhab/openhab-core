@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence.internal;
+package org.openhab.core.persistence.internal;
 
 import java.text.DateFormat;
 import java.util.Collection;
@@ -24,31 +24,31 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.SafeCaller;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.ItemRegistryChangeListener;
-import org.eclipse.smarthome.core.items.StateChangeListener;
-import org.eclipse.smarthome.core.persistence.FilterCriteria;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceManager;
-import org.eclipse.smarthome.core.persistence.PersistenceService;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceConfiguration;
-import org.eclipse.smarthome.core.persistence.QueryablePersistenceService;
-import org.eclipse.smarthome.core.persistence.SimpleItemConfiguration;
-import org.eclipse.smarthome.core.persistence.config.SimpleAllConfig;
-import org.eclipse.smarthome.core.persistence.config.SimpleConfig;
-import org.eclipse.smarthome.core.persistence.config.SimpleGroupConfig;
-import org.eclipse.smarthome.core.persistence.config.SimpleItemConfig;
-import org.eclipse.smarthome.core.persistence.strategy.SimpleCronStrategy;
-import org.eclipse.smarthome.core.persistence.strategy.SimpleStrategy;
-import org.eclipse.smarthome.core.scheduler.CronScheduler;
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.common.SafeCaller;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.ItemRegistryChangeListener;
+import org.openhab.core.items.StateChangeListener;
+import org.openhab.core.persistence.FilterCriteria;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceManager;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.SimpleItemConfiguration;
+import org.openhab.core.persistence.config.SimpleAllConfig;
+import org.openhab.core.persistence.config.SimpleConfig;
+import org.openhab.core.persistence.config.SimpleGroupConfig;
+import org.openhab.core.persistence.config.SimpleItemConfig;
+import org.openhab.core.persistence.strategy.SimpleCronStrategy;
+import org.openhab.core.persistence.strategy.SimpleStrategy;
+import org.openhab.core.scheduler.CronScheduler;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

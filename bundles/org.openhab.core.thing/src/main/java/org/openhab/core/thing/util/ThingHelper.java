@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.util;
+package org.openhab.core.thing.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,19 +24,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.UID;
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.dto.ChannelDTO;
-import org.eclipse.smarthome.core.thing.dto.ChannelDTOMapper;
-import org.eclipse.smarthome.core.thing.dto.ThingDTO;
-import org.eclipse.smarthome.core.thing.internal.BridgeImpl;
-import org.eclipse.smarthome.core.thing.internal.ThingImpl;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.UID;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.dto.ChannelDTO;
+import org.openhab.core.thing.dto.ChannelDTOMapper;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.internal.BridgeImpl;
+import org.openhab.core.thing.internal.ThingImpl;
 
 /**
  * {@link ThingHelper} provides a utility method to create and bind items.

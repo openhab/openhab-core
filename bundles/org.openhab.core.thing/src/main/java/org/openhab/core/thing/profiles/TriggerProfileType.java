@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.profiles;
+package org.openhab.core.thing.profiles;
 
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
  * Describes a {@link TriggerProfile} type.

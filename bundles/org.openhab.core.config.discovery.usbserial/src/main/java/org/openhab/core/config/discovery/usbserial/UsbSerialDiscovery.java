@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial;
+package org.openhab.core.config.discovery.usbserial;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.usbserial.internal.UsbSerialDiscoveryService;
+import org.openhab.core.config.discovery.usbserial.internal.UsbSerialDiscoveryService;
 
 /**
  * Interface for implementations for discovering serial ports provided by a USB device. An implementation of this

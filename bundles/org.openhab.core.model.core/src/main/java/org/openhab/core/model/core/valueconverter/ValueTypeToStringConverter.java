@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.core.valueconverter;
+package org.openhab.core.model.core.valueconverter;
 
 import java.math.BigDecimal;
 

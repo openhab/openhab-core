@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.normalization;
+package org.openhab.core.config.core.internal.normalization;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
  * The normalizer for {@link ConfigDescriptionParameter.Type#INTEGER}. All different number formats will get converted

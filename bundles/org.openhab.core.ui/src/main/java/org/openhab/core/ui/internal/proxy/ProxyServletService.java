@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.internal.proxy;
+package org.openhab.core.ui.internal.proxy;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,14 +31,14 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.StringUtil;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.sitemap.sitemap.Image;
-import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
-import org.eclipse.smarthome.model.sitemap.sitemap.Video;
-import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
-import org.eclipse.smarthome.ui.items.ItemUIRegistry;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.sitemap.sitemap.Image;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
+import org.openhab.core.model.sitemap.sitemap.Video;
+import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author John Cocula - added optional Image/Video item= support; refactored to allow use of later spec servlet
  */
-@Component(immediate = true, property = { "service.pid=org.eclipse.smarthome.proxy" })
+@Component(immediate = true, property = { "service.pid=org.openhab.core.proxy" })
 public class ProxyServletService extends HttpServlet {
 
     /** the alias for this servlet */

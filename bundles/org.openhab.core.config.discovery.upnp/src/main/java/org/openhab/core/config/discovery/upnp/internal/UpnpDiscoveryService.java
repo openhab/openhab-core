@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.upnp.internal;
+package org.openhab.core.config.discovery.upnp.internal;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,15 +19,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant;
-import org.eclipse.smarthome.core.net.CidrAddress;
-import org.eclipse.smarthome.core.net.NetworkAddressChangeListener;
-import org.eclipse.smarthome.core.net.NetworkAddressService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.openhab.core.net.CidrAddress;
+import org.openhab.core.net.NetworkAddressChangeListener;
+import org.openhab.core.net.NetworkAddressService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.jupnp.UpnpService;
 import org.jupnp.model.meta.LocalDevice;
 import org.jupnp.model.meta.RemoteDevice;
@@ -58,7 +58,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     private final Logger logger = LoggerFactory.getLogger(UpnpDiscoveryService.class);
 
     @Deprecated
-    private final Set<org.eclipse.smarthome.config.discovery.UpnpDiscoveryParticipant> oldParticipants = new CopyOnWriteArraySet<>();
+    private final Set<org.openhab.core.config.discovery.UpnpDiscoveryParticipant> oldParticipants = new CopyOnWriteArraySet<>();
 
     private final Set<UpnpDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
@@ -120,7 +120,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     @Deprecated
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addUpnpDiscoveryParticipant_old(
-            org.eclipse.smarthome.config.discovery.UpnpDiscoveryParticipant participant) {
+            org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant) {
         this.oldParticipants.add(participant);
 
         if (upnpService != null) {
@@ -136,7 +136,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
 
     @Deprecated
     protected void removeUpnpDiscoveryParticipant_old(
-            org.eclipse.smarthome.config.discovery.UpnpDiscoveryParticipant participant) {
+            org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant) {
         this.oldParticipants.remove(participant);
     }
 
@@ -146,7 +146,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
         for (UpnpDiscoveryParticipant participant : participants) {
             supportedThingTypes.addAll(participant.getSupportedThingTypeUIDs());
         }
-        for (org.eclipse.smarthome.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
             supportedThingTypes.addAll(participant.getSupportedThingTypeUIDs());
         }
         return supportedThingTypes;
@@ -192,7 +192,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
             }
         }
-        for (org.eclipse.smarthome.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
             try {
                 DiscoveryResult result = participant.createResult(device);
                 if (result != null) {
@@ -216,7 +216,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
             }
         }
-        for (org.eclipse.smarthome.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
             try {
                 ThingUID thingUID = participant.getThingUID(device);
                 if (thingUID != null) {

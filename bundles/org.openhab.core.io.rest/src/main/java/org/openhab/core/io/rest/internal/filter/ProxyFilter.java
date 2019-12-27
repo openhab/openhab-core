@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.internal.filter;
+package org.openhab.core.io.rest.internal.filter;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @PreMatching
-@Component(configurationPid = "org.eclipse.smarthome.io.rest.proxyfilter", immediate = true, service = ProxyFilter.class)
+@Component(configurationPid = "org.openhab.core.io.rest.proxyfilter", immediate = true, service = ProxyFilter.class)
 public class ProxyFilter implements ContainerRequestFilter {
 
     static final String PROTO_PROXY_HEADER = "x-forwarded-proto";

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items.events;
+package org.openhab.core.items.events;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,17 +20,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.events.AbstractEventFactory;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFactory;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.dto.ItemDTO;
-import org.eclipse.smarthome.core.items.dto.ItemDTOMapper;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.events.AbstractEventFactory;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFactory;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.dto.ItemDTO;
+import org.openhab.core.items.dto.ItemDTOMapper;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
+import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -44,7 +44,7 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private static final String TYPE_POSTFIX = "Type";
 
-    private static final String CORE_LIBRARY_PACKAGE = "org.eclipse.smarthome.core.library.types.";
+    private static final String CORE_LIBRARY_PACKAGE = "org.openhab.core.library.types.";
 
     private static final String ITEM_COMAND_EVENT_TOPIC = "smarthome/items/{itemName}/command";
 

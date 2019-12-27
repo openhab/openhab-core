@@ -16,7 +16,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
+import org.openhab.core.common.registry.RegistryChangeListener;
 
 /**
  * This class is responsible to provide a {@link RegistryChangeListener} logic. A instance of it is added to

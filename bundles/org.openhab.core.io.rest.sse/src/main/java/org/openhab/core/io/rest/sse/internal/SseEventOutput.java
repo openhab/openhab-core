@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sse.internal;
+package org.openhab.core.io.rest.sse.internal;
 
 import java.io.IOException;
 import java.util.List;
 
-import org.eclipse.smarthome.io.rest.sse.beans.EventBean;
-import org.eclipse.smarthome.io.rest.sse.internal.util.SseUtil;
+import org.openhab.core.io.rest.sse.beans.EventBean;
+import org.openhab.core.io.rest.sse.internal.util.SseUtil;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 

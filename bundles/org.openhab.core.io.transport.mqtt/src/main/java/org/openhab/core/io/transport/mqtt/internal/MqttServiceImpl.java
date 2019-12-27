@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.internal;
+package org.openhab.core.io.transport.mqtt.internal;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,12 +21,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnectionConfig;
-import org.eclipse.smarthome.io.transport.mqtt.MqttException;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.eclipse.smarthome.io.transport.mqtt.MqttServiceObserver;
-import org.eclipse.smarthome.io.transport.mqtt.MqttWillAndTestament;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnectionConfig;
+import org.openhab.core.io.transport.mqtt.MqttException;
+import org.openhab.core.io.transport.mqtt.MqttService;
+import org.openhab.core.io.transport.mqtt.MqttServiceObserver;
+import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.annotations.Component;
@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
  * @author David Graeff - Added/Removed observer interface, Add/Remove/Enumerate broker connections.
  * @author Markus Rathgeb - Synchronize access to broker connections
  */
-@Component(immediate = true, service = MqttService.class, configurationPid = "org.eclipse.smarthome.mqtt", property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.mqtt" })
+@Component(immediate = true, service = MqttService.class, configurationPid = "org.openhab.core.mqtt", property = {
+        Constants.SERVICE_PID + "=org.openhab.core.mqtt" })
 @NonNullByDefault
 public class MqttServiceImpl implements MqttService {
     private final Logger logger = LoggerFactory.getLogger(MqttServiceImpl.class);

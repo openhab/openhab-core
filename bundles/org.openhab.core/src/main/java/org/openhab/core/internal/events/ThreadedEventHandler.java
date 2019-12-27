@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.events;
+package org.openhab.core.internal.events;
 
 import java.io.Closeable;
 import java.util.Collections;
@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.events.EventFactory;
-import org.eclipse.smarthome.core.events.EventSubscriber;
+import org.openhab.core.events.EventFactory;
+import org.openhab.core.events.EventSubscriber;
 import org.osgi.service.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

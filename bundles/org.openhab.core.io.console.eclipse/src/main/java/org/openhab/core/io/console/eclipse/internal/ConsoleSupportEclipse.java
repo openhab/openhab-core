@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.eclipse.internal;
+package org.openhab.core.io.console.eclipse.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,9 +24,9 @@ import java.util.TreeMap;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.ConsoleInterpreter;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleInterpreter;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

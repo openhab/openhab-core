@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.item.internal;
+package org.openhab.core.model.item.internal;
 
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -31,32 +31,32 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFilter;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupFunction;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemProvider;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.items.MetadataRegistry;
-import org.eclipse.smarthome.core.items.events.AbstractItemRegistryEvent;
-import org.eclipse.smarthome.core.items.events.ItemAddedEvent;
-import org.eclipse.smarthome.core.items.events.ItemRemovedEvent;
-import org.eclipse.smarthome.core.items.events.ItemUpdatedEvent;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.library.items.SwitchItem;
-import org.eclipse.smarthome.core.library.types.ArithmeticGroupFunction;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.model.core.EventType;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemProvider;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.items.events.AbstractItemRegistryEvent;
+import org.openhab.core.items.events.ItemAddedEvent;
+import org.openhab.core.items.events.ItemRemovedEvent;
+import org.openhab.core.items.events.ItemUpdatedEvent;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.ArithmeticGroupFunction;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.model.core.EventType;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

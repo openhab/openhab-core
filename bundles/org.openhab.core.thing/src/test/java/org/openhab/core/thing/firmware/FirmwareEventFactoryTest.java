@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.firmware;
+package org.openhab.core.thing.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
@@ -19,11 +19,11 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.firmware.ProgressStep;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.events.Event;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.firmware.ProgressStep;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
 

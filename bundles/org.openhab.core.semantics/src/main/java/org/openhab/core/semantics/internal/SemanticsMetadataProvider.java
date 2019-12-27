@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics.internal;
+package org.openhab.core.semantics.internal;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,21 +22,21 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.AbstractProvider;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.ItemRegistryChangeListener;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.items.MetadataProvider;
-import org.eclipse.smarthome.core.semantics.SemanticTags;
-import org.eclipse.smarthome.core.semantics.model.Equipment;
-import org.eclipse.smarthome.core.semantics.model.Location;
-import org.eclipse.smarthome.core.semantics.model.Point;
-import org.eclipse.smarthome.core.semantics.model.Property;
-import org.eclipse.smarthome.core.semantics.model.Tag;
-import org.eclipse.smarthome.core.semantics.model.TagInfo;
+import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.ItemRegistryChangeListener;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataProvider;
+import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.semantics.model.Equipment;
+import org.openhab.core.semantics.model.Location;
+import org.openhab.core.semantics.model.Point;
+import org.openhab.core.semantics.model.Property;
+import org.openhab.core.semantics.model.Tag;
+import org.openhab.core.semantics.model.TagInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

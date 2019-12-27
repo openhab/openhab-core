@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.events;
+package org.openhab.core.thing.events;
 
-import org.eclipse.smarthome.core.events.AbstractEvent;
-import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.openhab.core.events.AbstractEvent;
+import org.openhab.core.thing.ChannelUID;
 
 /**
  * {@link ChannelTriggeredEvent}s can be used to deliver triggers through the openHAB event bus.

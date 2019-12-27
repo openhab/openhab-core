@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.test;
+package org.openhab.core.model.thing.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -22,18 +22,18 @@ import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLinkProvider;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.thing.internal.GenericItemChannelLinkProvider;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkProvider;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.thing.internal.GenericItemChannelLinkProvider;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

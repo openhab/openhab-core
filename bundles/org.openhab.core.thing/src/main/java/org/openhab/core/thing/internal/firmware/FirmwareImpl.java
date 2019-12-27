@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.firmware;
+package org.openhab.core.thing.internal.firmware;
 
-import static org.eclipse.smarthome.core.thing.Thing.*;
+import static org.openhab.core.thing.Thing.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,10 +27,10 @@ import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareRestriction;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.firmware.Firmware;
+import org.openhab.core.thing.binding.firmware.FirmwareRestriction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

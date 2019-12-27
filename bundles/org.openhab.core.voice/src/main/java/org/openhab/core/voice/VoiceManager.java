@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice;
+package org.openhab.core.voice;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -18,11 +18,11 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioSource;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationException;
 
 /**
  * This service provides functionality around voice services and is the central service to be used directly by others.

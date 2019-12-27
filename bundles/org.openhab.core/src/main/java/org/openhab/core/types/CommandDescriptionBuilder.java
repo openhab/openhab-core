@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.types;
+package org.openhab.core.types;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.internal.types.CommandDescriptionImpl;
+import org.openhab.core.internal.types.CommandDescriptionImpl;
 
 /**
  * Used to build instances of {@link CommandDescription}.

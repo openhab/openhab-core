@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.text;
+package org.openhab.core.voice.text;
 
 /**
  * An exception used by {@link HumanLanguageInterpreter}s, if an error occurs.

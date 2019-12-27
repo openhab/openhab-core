@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.common;
+package org.openhab.core.common;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.StringStartsWith.startsWith;

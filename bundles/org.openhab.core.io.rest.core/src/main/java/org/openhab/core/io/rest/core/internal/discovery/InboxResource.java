@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.discovery;
+package org.openhab.core.io.rest.core.internal.discovery;
 
 import java.util.stream.Stream;
 
@@ -30,16 +30,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
-import org.eclipse.smarthome.config.discovery.dto.DiscoveryResultDTO;
-import org.eclipse.smarthome.config.discovery.dto.DiscoveryResultDTOMapper;
-import org.eclipse.smarthome.config.discovery.inbox.Inbox;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.io.rest.JSONResponse;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.openhab.core.config.discovery.DiscoveryResultFlag;
+import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
+import org.openhab.core.config.discovery.dto.DiscoveryResultDTOMapper;
+import org.openhab.core.config.discovery.inbox.Inbox;
+import org.openhab.core.auth.Role;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

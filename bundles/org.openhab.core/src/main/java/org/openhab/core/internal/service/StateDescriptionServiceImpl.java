@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.service;
+package org.openhab.core.internal.service;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,13 +21,13 @@ import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.internal.types.StateDescriptionFragmentImpl;
-import org.eclipse.smarthome.core.service.StateDescriptionService;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateDescriptionFragment;
-import org.eclipse.smarthome.core.types.StateDescriptionFragmentProvider;
-import org.eclipse.smarthome.core.types.StateDescriptionProvider;
-import org.eclipse.smarthome.core.types.StateOption;
+import org.openhab.core.internal.types.StateDescriptionFragmentImpl;
+import org.openhab.core.service.StateDescriptionService;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.StateDescriptionFragmentProvider;
+import org.openhab.core.types.StateDescriptionProvider;
+import org.openhab.core.types.StateOption;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

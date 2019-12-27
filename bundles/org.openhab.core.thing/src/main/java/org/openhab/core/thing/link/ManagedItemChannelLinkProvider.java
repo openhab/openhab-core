@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link;
+package org.openhab.core.thing.link;
 
 import java.util.Collection;
 
-import org.eclipse.smarthome.core.common.registry.DefaultAbstractManagedProvider;
-import org.eclipse.smarthome.core.storage.StorageService;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.common.registry.DefaultAbstractManagedProvider;
+import org.openhab.core.storage.StorageService;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

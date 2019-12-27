@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.service;
+package org.openhab.core.io.rest.core.internal.service;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -26,9 +26,9 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
-import org.eclipse.smarthome.io.rest.core.service.ConfigurableServiceDTO;
-import org.eclipse.smarthome.test.AsyncResultWrapper;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.io.rest.core.service.ConfigurableServiceDTO;
+import org.openhab.core.test.AsyncResultWrapper;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.cm.Configuration;
@@ -135,7 +135,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
 
         response = configurableServiceResource.deleteConfiguration("id");
         assertThat(response.getStatus(), is(200));
-        assertThat(((org.eclipse.smarthome.config.core.Configuration) response.getEntity()).getProperties().get("a"),
+        assertThat(((org.openhab.core.config.core.Configuration) response.getEntity()).getProperties().get("a"),
                 is(equalTo("c")));
 
         response = configurableServiceResource.getConfiguration("id");

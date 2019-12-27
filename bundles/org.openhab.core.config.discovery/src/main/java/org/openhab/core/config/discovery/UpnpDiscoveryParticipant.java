@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery;
+package org.openhab.core.config.discovery;
 
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.jupnp.model.meta.RemoteDevice;
 
 /**
@@ -26,7 +26,7 @@ import org.jupnp.model.meta.RemoteDevice;
  * UPnP scans.
  *
  * @author Kai Kreuzer - Initial contribution
- * @deprecated use org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant instead.
+ * @deprecated use org.openhab.core.config.discovery.upnp.UpnpDiscoveryParticipant instead.
  */
 @Deprecated
 @NonNullByDefault

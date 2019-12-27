@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio.internal;
+package org.openhab.core.audio.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertThat;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioFormat;
 import org.junit.Test;
 
 /**

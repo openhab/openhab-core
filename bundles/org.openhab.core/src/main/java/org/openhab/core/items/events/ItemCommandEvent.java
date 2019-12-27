@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items.events;
+package org.openhab.core.items.events;
 
-import org.eclipse.smarthome.core.events.AbstractEvent;
-import org.eclipse.smarthome.core.types.Command;
+import org.openhab.core.events.AbstractEvent;
+import org.openhab.core.types.Command;
 
 /**
  * {@link ItemCommandEvent}s can be used to deliver commands through the openHAB event bus.

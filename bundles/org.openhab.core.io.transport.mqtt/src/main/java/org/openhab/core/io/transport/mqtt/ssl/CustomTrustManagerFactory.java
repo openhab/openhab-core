@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.ssl;
+package org.openhab.core.io.transport.mqtt.ssl;
 
 import java.lang.reflect.Field;
 import java.security.KeyStore;
@@ -22,7 +22,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mqtt.sslcontext.SSLContextProvider;
+import org.openhab.core.io.transport.mqtt.sslcontext.SSLContextProvider;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

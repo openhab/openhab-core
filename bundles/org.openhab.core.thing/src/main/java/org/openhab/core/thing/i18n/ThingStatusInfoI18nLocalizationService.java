@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.i18n;
+package org.openhab.core.thing.i18n;
 
 import java.util.Arrays;
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.i18n.I18nUtil;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.util.BundleResolver;
+import org.openhab.core.i18n.I18nUtil;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

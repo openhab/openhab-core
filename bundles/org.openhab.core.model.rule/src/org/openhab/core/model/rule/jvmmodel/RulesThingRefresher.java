@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.jvmmodel;
+package org.openhab.core.model.rule.jvmmodel;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingRegistryChangeListener;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingRegistryChangeListener;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.script.engine.action.ActionService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

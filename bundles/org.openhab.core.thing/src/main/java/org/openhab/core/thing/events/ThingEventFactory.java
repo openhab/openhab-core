@@ -10,23 +10,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.events;
+package org.openhab.core.thing.events;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.events.AbstractEventFactory;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFactory;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.dto.ThingDTO;
-import org.eclipse.smarthome.core.thing.dto.ThingDTOMapper;
-import org.eclipse.smarthome.core.types.Type;
+import org.openhab.core.events.AbstractEventFactory;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFactory;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.dto.ThingDTOMapper;
+import org.openhab.core.types.Type;
 import org.osgi.service.component.annotations.Component;
 
 /**

@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.firmware;
+package org.openhab.core.thing.firmware;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.AbstractEvent;
+import org.openhab.core.events.AbstractEvent;
 
 /**
  * The {@link FirmwareUpdateProgressInfoEvent} is sent if there is a new progress step for a firmware update. It is

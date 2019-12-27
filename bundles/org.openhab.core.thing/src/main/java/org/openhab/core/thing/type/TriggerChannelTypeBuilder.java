@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.types.EventDescription;
+import org.openhab.core.types.EventDescription;
 
 /**
  * Interface for builders for {@link ChannelType}s of kind TRIGGER

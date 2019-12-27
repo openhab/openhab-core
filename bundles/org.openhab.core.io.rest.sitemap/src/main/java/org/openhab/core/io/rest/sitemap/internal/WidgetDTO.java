@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sitemap.internal;
+package org.openhab.core.io.rest.sitemap.internal;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTO;
+import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
 
 /**
  * This is a data transfer object that is used to serialize widgets.

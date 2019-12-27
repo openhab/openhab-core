@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.net.http.internal;
+package org.openhab.core.io.net.http.internal;
 
 import java.security.AccessController;
 import java.security.KeyManagementException;
@@ -31,11 +31,11 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.smarthome.io.net.http.ExtensibleTrustManager;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
-import org.eclipse.smarthome.io.net.http.HttpClientInitializationException;
-import org.eclipse.smarthome.io.net.http.TrustManagerProvider;
-import org.eclipse.smarthome.io.net.http.WebSocketFactory;
+import org.openhab.core.io.net.http.ExtensibleTrustManager;
+import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.io.net.http.HttpClientInitializationException;
+import org.openhab.core.io.net.http.TrustManagerProvider;
+import org.openhab.core.io.net.http.WebSocketFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - added web socket support
  * @author Martin van Wingerden - Add support for ESHTrustManager
  */
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.webclient")
+@Component(immediate = true, configurationPid = "org.openhab.core.webclient")
 @NonNullByDefault
 public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory {
 

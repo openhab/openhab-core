@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.profiles;
+package org.openhab.core.thing.internal.profiles;
 
-import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.RAWROCKER_REWIND_FASTFORWARD;
+import static org.openhab.core.thing.profiles.SystemProfiles.RAWROCKER_REWIND_FASTFORWARD;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.items.PlayerItem;
-import org.eclipse.smarthome.core.library.types.RewindFastforwardType;
-import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
-import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.TriggerProfile;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.library.items.PlayerItem;
+import org.openhab.core.library.types.RewindFastforwardType;
+import org.openhab.core.thing.CommonTriggerEvents;
+import org.openhab.core.thing.profiles.ProfileCallback;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
+import org.openhab.core.thing.profiles.TriggerProfile;
+import org.openhab.core.types.State;
 
 /**
  * The {@link RawRockerRewindFastforwardProfile} transforms rocker switch channel events into REWIND and FASTFORWARD

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.extension;
+package org.openhab.core.extension;
 
 /**
  * This class defines an extension.

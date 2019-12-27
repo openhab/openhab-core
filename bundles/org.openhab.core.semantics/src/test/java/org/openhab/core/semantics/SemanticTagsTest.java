@@ -10,22 +10,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics;
+package org.openhab.core.semantics;
 
 import static org.junit.Assert.*;
 
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.semantics.model.Location;
-import org.eclipse.smarthome.core.semantics.model.equipment.CleaningRobot;
-import org.eclipse.smarthome.core.semantics.model.location.Bathroom;
-import org.eclipse.smarthome.core.semantics.model.location.Kitchen;
-import org.eclipse.smarthome.core.semantics.model.location.Room;
-import org.eclipse.smarthome.core.semantics.model.point.Measurement;
-import org.eclipse.smarthome.core.semantics.model.property.Temperature;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.semantics.model.Location;
+import org.openhab.core.semantics.model.equipment.CleaningRobot;
+import org.openhab.core.semantics.model.location.Bathroom;
+import org.openhab.core.semantics.model.location.Kitchen;
+import org.openhab.core.semantics.model.location.Room;
+import org.openhab.core.semantics.model.point.Measurement;
+import org.openhab.core.semantics.model.property.Temperature;
 import org.junit.Before;
 import org.junit.Test;
 

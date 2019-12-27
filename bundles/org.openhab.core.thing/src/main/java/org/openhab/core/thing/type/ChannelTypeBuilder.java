@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
 import java.net.URI;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.internal.type.StateChannelTypeBuilderImpl;
-import org.eclipse.smarthome.core.thing.internal.type.TriggerChannelTypeBuilderImpl;
+import org.openhab.core.thing.internal.type.StateChannelTypeBuilderImpl;
+import org.openhab.core.thing.internal.type.TriggerChannelTypeBuilderImpl;
 
 /**
  * Interface for ChannelTypeBuilder

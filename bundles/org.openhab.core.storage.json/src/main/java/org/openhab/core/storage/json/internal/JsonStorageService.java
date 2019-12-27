@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.storage.json.internal;
+package org.openhab.core.storage.json.internal;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -21,10 +21,10 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.core.storage.Storage;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -38,8 +38,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Chris Jackson - Initial contribution
  */
-@Component(name = "org.eclipse.smarthome.storage.json", property = { //
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.storage.json", //
+@Component(name = "org.openhab.core.storage.json", property = { //
+        Constants.SERVICE_PID + "=org.openhab.core.storage.json", //
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Json Storage", //
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=system:json_storage", //

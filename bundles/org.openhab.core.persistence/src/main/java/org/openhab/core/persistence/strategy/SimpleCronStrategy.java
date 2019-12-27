@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence.strategy;
+package org.openhab.core.persistence.strategy;
 
 /**
  * This class holds a cron expression based strategy to persist items.

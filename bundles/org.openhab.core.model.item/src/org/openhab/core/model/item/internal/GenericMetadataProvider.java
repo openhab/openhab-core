@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.item.internal;
+package org.openhab.core.model.item.internal;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -25,11 +25,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.emf.codegen.ecore.templates.edit.ItemProvider;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.AbstractProvider;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.items.MetadataPredicates;
-import org.eclipse.smarthome.core.items.MetadataProvider;
+import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataPredicates;
+import org.openhab.core.items.MetadataProvider;
 import org.osgi.service.component.annotations.Component;
 
 /**

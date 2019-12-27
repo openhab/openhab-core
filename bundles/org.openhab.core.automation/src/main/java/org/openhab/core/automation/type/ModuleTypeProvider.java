@@ -17,7 +17,7 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Provider;
+import org.openhab.core.common.registry.Provider;
 
 /**
  * This interface has to be implemented by all providers of {@link ModuleType}s.

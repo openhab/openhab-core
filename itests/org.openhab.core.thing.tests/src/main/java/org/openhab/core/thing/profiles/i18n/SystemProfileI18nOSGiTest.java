@@ -10,19 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.profiles.i18n;
+package org.openhab.core.thing.profiles.i18n;
 
-import static org.eclipse.smarthome.core.thing.profiles.SystemProfiles.*;
+import static org.openhab.core.thing.profiles.SystemProfiles.*;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
-import org.eclipse.smarthome.core.thing.internal.profiles.SystemProfileFactory;
-import org.eclipse.smarthome.core.thing.profiles.ProfileType;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.thing.internal.profiles.SystemProfileFactory;
+import org.openhab.core.thing.profiles.ProfileType;
+import org.openhab.core.thing.profiles.ProfileTypeProvider;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 

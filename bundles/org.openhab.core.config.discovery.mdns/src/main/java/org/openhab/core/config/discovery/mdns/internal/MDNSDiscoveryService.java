@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.mdns.internal;
+package org.openhab.core.config.discovery.mdns.internal;
 
 import java.time.Duration;
 import java.util.HashSet;
@@ -25,13 +25,13 @@ import javax.jmdns.ServiceListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.io.transport.mdns.MDNSClient;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
@@ -55,7 +55,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private final Logger logger = LoggerFactory.getLogger(MDNSDiscoveryService.class);
 
     @Deprecated
-    private final Set<org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant> oldParticipants = new CopyOnWriteArraySet<>();
+    private final Set<org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant> oldParticipants = new CopyOnWriteArraySet<>();
 
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
@@ -72,7 +72,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
             for (MDNSDiscoveryParticipant participant : participants) {
                 mdnsClient.addServiceListener(participant.getServiceType(), this);
             }
-            for (org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
+            for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
                 mdnsClient.addServiceListener(participant.getServiceType(), this);
             }
         }
@@ -82,7 +82,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         for (MDNSDiscoveryParticipant participant : participants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
-        for (org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
         this.mdnsClient = null;
@@ -99,7 +99,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         for (MDNSDiscoveryParticipant participant : participants) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
-        for (org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
         startScan(true);
@@ -110,7 +110,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         for (MDNSDiscoveryParticipant participant : participants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
-        for (org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
     }
@@ -163,7 +163,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 }
             }
         }
-        for (org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             long start = System.currentTimeMillis();
             ServiceInfo[] services;
             if (isBackground) {
@@ -200,7 +200,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     @Deprecated
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addMDNSDiscoveryParticipant_old(
-            org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
+            org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
         this.oldParticipants.add(participant);
         if (mdnsClient != null && isBackgroundDiscoveryEnabled()) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
@@ -209,7 +209,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Deprecated
     protected void removeMDNSDiscoveryParticipant_old(
-            org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
+            org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
         this.oldParticipants.remove(participant);
         if (mdnsClient != null) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
@@ -222,7 +222,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         for (MDNSDiscoveryParticipant participant : participants) {
             supportedThingTypes.addAll(participant.getSupportedThingTypeUIDs());
         }
-        for (org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             supportedThingTypes.addAll(participant.getSupportedThingTypeUIDs());
         }
         return supportedThingTypes;
@@ -247,7 +247,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 }
             }
         }
-        for (org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
+        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             if (participant.getServiceType().equals(serviceEvent.getType())) {
                 try {
                     ThingUID thingUID = participant.getThingUID(serviceEvent.getInfo());
@@ -280,7 +280,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                     }
                 }
             }
-            for (org.eclipse.smarthome.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
+            for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
                 if (participant.getServiceType().equals(serviceEvent.getType())) {
                     try {
                         DiscoveryResult result = participant.createResult(serviceEvent.getInfo());

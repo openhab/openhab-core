@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing;
+package org.openhab.core.thing;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
+import org.openhab.core.common.registry.RegistryChangeListener;
 
 /**
  * {@link ThingRegistryChangeListener} can be implemented to listen for things

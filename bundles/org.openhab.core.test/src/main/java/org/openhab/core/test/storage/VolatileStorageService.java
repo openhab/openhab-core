@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.test.storage;
+package org.openhab.core.test.storage;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.smarthome.core.storage.Storage;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageService;
 
 /**
  * The {@link VolatileStorageService} returns {@link VolatileStorage}s

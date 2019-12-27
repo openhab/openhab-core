@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.status;
+package org.openhab.core.config.core.status;
 
 /**
  * The {@link ConfigStatusCallback} interface is a callback interface to propagate a new configuration status for an

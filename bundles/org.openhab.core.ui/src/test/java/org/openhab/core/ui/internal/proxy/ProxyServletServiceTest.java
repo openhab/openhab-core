@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.internal.proxy;
+package org.openhab.core.ui.internal.proxy;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -25,15 +25,15 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.StringUtil;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.sitemap.sitemap.Image;
-import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
-import org.eclipse.smarthome.model.sitemap.sitemap.Switch;
-import org.eclipse.smarthome.model.sitemap.sitemap.Video;
-import org.eclipse.smarthome.ui.items.ItemUIRegistry;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.sitemap.sitemap.Image;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
+import org.openhab.core.model.sitemap.sitemap.Switch;
+import org.openhab.core.model.sitemap.sitemap.Video;
+import org.openhab.core.ui.items.ItemUIRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,10 +58,10 @@ public class ProxyServletServiceTest {
     private static final String ITEM_NAME_VALID_VIDEO_URL = "itemValidVideoUrl";
 
     private static final String INVALID_URL = "test";
-    private static final String ITEM_VALID_IMAGE_URL = "https://www.eclipse.org/smarthome/item.jpg";
-    private static final String ITEM_VALID_VIDEO_URL = "https://www.eclipse.org/smarthome/item.mp4";
-    private static final String VALID_IMAGE_URL = "https://www.eclipse.org/smarthome/test.jpg";
-    private static final String VALID_VIDEO_URL = "https://www.eclipse.org/smarthome/test.mp4";
+    private static final String ITEM_VALID_IMAGE_URL = "https://openhab.org/item.jpg";
+    private static final String ITEM_VALID_VIDEO_URL = "https://openhab.org/item.mp4";
+    private static final String VALID_IMAGE_URL = "https://openhab.org/test.jpg";
+    private static final String VALID_VIDEO_URL = "https://openhab.org/test.mp4";
 
     private static ProxyServletService service;
 

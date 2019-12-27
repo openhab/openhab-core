@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.storage.json.internal;
+package org.openhab.core.storage.json.internal;
 
 import java.lang.reflect.Type;
 import java.util.Map;

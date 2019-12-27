@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.actions;
+package org.openhab.core.model.script.actions;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
-import org.eclipse.smarthome.model.script.engine.action.ActionDoc;
-import org.eclipse.smarthome.model.script.engine.action.ParamDoc;
-import org.eclipse.smarthome.model.script.internal.engine.action.VoiceActionService;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.model.script.engine.action.ActionDoc;
+import org.openhab.core.model.script.engine.action.ParamDoc;
+import org.openhab.core.model.script.internal.engine.action.VoiceActionService;
 
 /**
  * The static methods of this class are made available as functions in the scripts.

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.config;
+package org.openhab.core.io.rest.core.config;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
-import org.eclipse.smarthome.config.core.dto.FilterCriteriaDTO;
-import org.eclipse.smarthome.config.core.dto.ParameterOptionDTO;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
+import org.openhab.core.config.core.dto.FilterCriteriaDTO;
+import org.openhab.core.config.core.dto.ParameterOptionDTO;
 
 /**
  * This is an enriched data transfer object that is used to serialize config descriptions parameters with a list of

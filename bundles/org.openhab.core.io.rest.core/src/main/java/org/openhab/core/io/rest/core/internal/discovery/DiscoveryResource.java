@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.discovery;
+package org.openhab.core.io.rest.core.internal.discovery;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -26,10 +26,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry;
-import org.eclipse.smarthome.config.discovery.ScanListener;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
+import org.openhab.core.config.discovery.ScanListener;
+import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

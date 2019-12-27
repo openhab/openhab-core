@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.ManagedProvider;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.common.registry.ManagedProvider;
+import org.openhab.core.storage.StorageService;
 
 /**
  * {@link ManagedMetadataProvider} is an OSGi service interface that allows to add or remove

@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.rfc147.internal.extension;
+package org.openhab.core.io.console.rfc147.internal.extension;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.ConsoleInterpreter;
-import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
-import org.eclipse.smarthome.io.console.rfc147.internal.ConsoleCommandsContainer;
-import org.eclipse.smarthome.io.console.rfc147.internal.ConsoleSupportRfc147;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleInterpreter;
+import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
+import org.openhab.core.io.console.rfc147.internal.ConsoleCommandsContainer;
+import org.openhab.core.io.console.rfc147.internal.ConsoleSupportRfc147;
 
 /**
  *

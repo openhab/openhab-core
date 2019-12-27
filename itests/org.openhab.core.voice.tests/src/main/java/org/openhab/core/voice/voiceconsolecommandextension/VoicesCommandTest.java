@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.voiceconsolecommandextension;
+package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.voice.internal.SinkStub;
-import org.eclipse.smarthome.core.voice.internal.TTSServiceStub;
-import org.eclipse.smarthome.core.voice.internal.VoiceStub;
+import org.openhab.core.voice.internal.SinkStub;
+import org.openhab.core.voice.internal.TTSServiceStub;
+import org.openhab.core.voice.internal.VoiceStub;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;

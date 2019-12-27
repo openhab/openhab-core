@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio.utils;
+package org.openhab.core.audio.utils;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 

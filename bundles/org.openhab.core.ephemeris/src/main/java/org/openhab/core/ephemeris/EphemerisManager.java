@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.ephemeris;
+package org.openhab.core.ephemeris;
 
 import java.io.FileNotFoundException;
 import java.net.URL;

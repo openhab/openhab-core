@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core;
+package org.openhab.core.config.core;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -177,7 +177,7 @@ public class ConfigDescriptionParameter {
      *             <li>if the name is null or empty, or the type is null</li>
      *             <li>if a unit or a unit label is provided for a parameter having type text or boolean</li>
      *             <li>if an invalid unit was given (cp.
-     *             https://www.eclipse.org/smarthome/documentation/development/bindings/xml-reference.html for the list
+     *             https://openhab.org/documentation/development/bindings/xml-reference.html for the list
      *             of valid units)</li>
      *             </ul>
      */

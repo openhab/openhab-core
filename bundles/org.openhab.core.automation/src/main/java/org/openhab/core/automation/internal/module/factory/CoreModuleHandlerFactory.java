@@ -15,8 +15,8 @@ package org.openhab.core.automation.internal.module.factory;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.ItemRegistry;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;

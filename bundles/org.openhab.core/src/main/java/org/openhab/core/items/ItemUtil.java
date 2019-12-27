@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.internal.service.BundleResolverImpl;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.internal.service.BundleResolverImpl;
+import org.openhab.core.types.State;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 

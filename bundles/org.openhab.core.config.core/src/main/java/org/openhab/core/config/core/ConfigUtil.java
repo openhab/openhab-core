@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core;
+package org.openhab.core.config.core;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -24,10 +24,10 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.internal.normalization.Normalizer;
-import org.eclipse.smarthome.config.core.internal.normalization.NormalizerFactory;
-import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.internal.normalization.Normalizer;
+import org.openhab.core.config.core.internal.normalization.NormalizerFactory;
+import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.slf4j.LoggerFactory;
 
 /**

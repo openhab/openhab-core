@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.lsp.internal;
+package org.openhab.core.model.lsp.internal;
 
 import java.util.concurrent.ExecutorService;
 
 import org.eclipse.lsp4j.services.LanguageServer;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.model.script.ScriptServiceUtil;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.engine.ScriptEngine;
 import org.eclipse.xtext.ide.ExecutorServiceProvider;
 import org.eclipse.xtext.ide.server.DefaultProjectDescriptionFactory;
 import org.eclipse.xtext.ide.server.ILanguageServerShutdownAndExitHandler;

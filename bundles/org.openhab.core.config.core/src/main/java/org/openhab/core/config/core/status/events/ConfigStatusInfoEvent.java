@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.status.events;
+package org.openhab.core.config.core.status.events;
 
-import org.eclipse.smarthome.config.core.status.ConfigStatusInfo;
-import org.eclipse.smarthome.core.events.AbstractEvent;
+import org.openhab.core.config.core.status.ConfigStatusInfo;
+import org.openhab.core.events.AbstractEvent;
 
 import com.google.gson.Gson;
 

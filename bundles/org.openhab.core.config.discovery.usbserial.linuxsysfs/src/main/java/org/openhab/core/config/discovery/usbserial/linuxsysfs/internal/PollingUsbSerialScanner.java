@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.internal;
+package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
 import static java.lang.Long.parseLong;
 
@@ -26,11 +26,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscovery;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscoveryListener;
-import org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
-import org.eclipse.smarthome.core.common.ThreadFactoryBuilder;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscovery;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
+import org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
+import org.openhab.core.common.ThreadFactoryBuilder;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

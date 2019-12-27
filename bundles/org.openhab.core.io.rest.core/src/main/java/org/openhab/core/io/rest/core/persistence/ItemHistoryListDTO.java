@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.persistence;
+package org.openhab.core.io.rest.core.persistence;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.smarthome.core.persistence.dto.ItemHistoryDTO;
+import org.openhab.core.persistence.dto.ItemHistoryDTO;
 
 /**
  * This is a java bean that is used to serialize item lists.

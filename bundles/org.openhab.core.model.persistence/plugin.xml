@@ -5,8 +5,8 @@
 
   <extension point="org.eclipse.emf.ecore.generated_package">
     <package 
-       uri = "http://www.eclipse.org/smarthome/model/Persistence" 
-       class = "org.eclipse.smarthome.model.persistence.persistence.PersistencePackage"
+       uri = "https://openhab.org/model/Persistence" 
+       class = "org.openhab.core.model.persistence.persistence.PersistencePackage"
        genModel = "model/generated/Persistence.genmodel" /> 
 	
   </extension>

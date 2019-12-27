@@ -17,7 +17,7 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Registry;
+import org.openhab.core.common.registry.Registry;
 
 /**
  * This interface provides functionality to get available {@link Template}s. The {@link Template} can be returned

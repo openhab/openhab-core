@@ -1,2 +1,2 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.eclipse.smarthome.core.transform.internal.TransformationActivator
+Bundle-Activator: org.openhab.core.transform.internal.TransformationActivator

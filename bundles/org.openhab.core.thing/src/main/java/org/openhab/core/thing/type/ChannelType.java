@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
 import java.net.URI;
 import java.util.Collections;
@@ -18,11 +18,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.EventDescription;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.EventDescription;
+import org.openhab.core.types.StateDescription;
 
 /**
  * The {@link ChannelType} describes a concrete type of a {@link Channel}.

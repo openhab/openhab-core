@@ -1,4 +1,4 @@
 Bundle-SymbolicName: ${project.artifactId}
 
 # We can provide that capability if someone calls the (not so) magic function
-Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse.smarthome.core.storage.StorageService"
+Provide-Capability: osgi.service;objectClass:List<String>="org.openhab.core.storage.StorageService"

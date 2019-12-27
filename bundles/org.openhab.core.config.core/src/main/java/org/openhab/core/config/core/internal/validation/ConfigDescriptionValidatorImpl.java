@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.validation;
+package org.openhab.core.config.core.internal.validation;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
-import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
-import org.eclipse.smarthome.config.core.validation.ConfigValidationMessage;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
+import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.config.core.validation.ConfigValidationMessage;
+import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

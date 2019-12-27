@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.auth;
+package org.openhab.core.internal.auth;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.smarthome.core.auth.Authentication;
-import org.eclipse.smarthome.core.auth.AuthenticationException;
-import org.eclipse.smarthome.core.auth.AuthenticationManager;
-import org.eclipse.smarthome.core.auth.AuthenticationProvider;
-import org.eclipse.smarthome.core.auth.Credentials;
-import org.eclipse.smarthome.core.auth.UnsupportedCredentialsException;
+import org.openhab.core.auth.Authentication;
+import org.openhab.core.auth.AuthenticationException;
+import org.openhab.core.auth.AuthenticationManager;
+import org.openhab.core.auth.AuthenticationProvider;
+import org.openhab.core.auth.Credentials;
+import org.openhab.core.auth.UnsupportedCredentialsException;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

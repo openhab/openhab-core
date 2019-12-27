@@ -29,8 +29,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
 import org.openhab.core.automation.dto.RuleTemplateDTOMapper;
 import org.openhab.core.automation.template.RuleTemplate;

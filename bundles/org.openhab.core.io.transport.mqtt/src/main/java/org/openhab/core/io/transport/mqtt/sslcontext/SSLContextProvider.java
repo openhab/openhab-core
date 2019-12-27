@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.sslcontext;
+package org.openhab.core.io.transport.mqtt.sslcontext;
 
 import javax.net.ssl.SSLContext;
 
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
 import org.osgi.service.cm.ConfigurationException;
 
 /**

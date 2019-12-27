@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.internal.resources.beans;
+package org.openhab.core.io.rest.internal.resources.beans;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.i18n;
+package org.openhab.core.internal.i18n;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.HECTO;
+import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 
 import java.text.MessageFormat;
 import java.time.DateTimeException;
@@ -37,16 +37,16 @@ import javax.measure.spi.SystemOfUnits;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.i18n.LocationProvider;
-import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.library.dimension.Intensity;
-import org.eclipse.smarthome.core.library.types.PointType;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.LocationProvider;
+import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.SmartHomeUnits;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -76,8 +76,8 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone
  */
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.i18n", property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.i18n", //
+@Component(immediate = true, configurationPid = "org.openhab.core.i18n", property = {
+        Constants.SERVICE_PID + "=org.openhab.core.i18n", //
         "service.config.label=Regional Settings", //
         "service.config.category=system", //
         "service.config.description.uri=system:i18n" })

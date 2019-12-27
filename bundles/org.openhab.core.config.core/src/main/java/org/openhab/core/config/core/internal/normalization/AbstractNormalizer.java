@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.normalization;
+package org.openhab.core.config.core.internal.normalization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

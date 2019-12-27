@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal;
+package org.openhab.core.thing.internal;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistryChangeListener;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistryChangeListener;
 
 /**
  * A {@link ThingTracker} can be used to track added and removed things. In

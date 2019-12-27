@@ -15,8 +15,8 @@ package org.openhab.core.automation.module.timer.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
-import org.eclipse.smarthome.test.storage.VolatileStorageService;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.test.storage.VolatileStorageService;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.automation.RuleRegistry;

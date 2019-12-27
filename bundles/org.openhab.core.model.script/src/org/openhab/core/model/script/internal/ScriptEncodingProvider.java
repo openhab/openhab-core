@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.internal;
+package org.openhab.core.model.script.internal;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

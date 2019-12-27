@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.internal;
+package org.openhab.core.io.transport.mqtt.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.ConfigurableService;
+import org.openhab.core.config.core.ConfigurableService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
@@ -24,7 +24,7 @@ import org.osgi.service.component.annotations.Component;
  * @author David Graeff - Initial contribution
  */
 @Component(immediate = true, service = MqttBrokerConnectionServiceInstanceMarker.class, property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.mqttbroker",
+        Constants.SERVICE_PID + "=org.openhab.core.mqttbroker",
         ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=true",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=MQTT system broker connection",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=MQTT",

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library;
+package org.openhab.core.library;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -21,8 +21,8 @@ import java.util.List;
 
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.library.items.NumberItem;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.library.items.NumberItem;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -16,9 +16,9 @@ import java.io.OutputStreamWriter;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.ConfigurationDeserializer;
-import org.eclipse.smarthome.config.core.ConfigurationSerializer;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.ConfigurationDeserializer;
+import org.openhab.core.config.core.ConfigurationSerializer;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.type.CompositeActionType;
 import org.openhab.core.automation.type.CompositeConditionType;

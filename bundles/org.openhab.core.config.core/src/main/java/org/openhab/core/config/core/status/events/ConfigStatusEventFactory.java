@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.status.events;
+package org.openhab.core.config.core.status.events;
 
 import java.util.Collections;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.status.ConfigStatusInfo;
-import org.eclipse.smarthome.core.events.AbstractEventFactory;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFactory;
+import org.openhab.core.config.core.status.ConfigStatusInfo;
+import org.openhab.core.events.AbstractEventFactory;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFactory;
 import org.osgi.service.component.annotations.Component;
 
 /**

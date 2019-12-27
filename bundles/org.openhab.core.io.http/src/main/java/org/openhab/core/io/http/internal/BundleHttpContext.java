@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.internal;
+package org.openhab.core.io.http.internal;
 
 import java.net.URL;
 

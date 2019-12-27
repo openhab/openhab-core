@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.types;
+package org.openhab.core.library.types;
 
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -28,9 +28,9 @@ import java.util.TimeZone;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.PrimitiveType;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.PrimitiveType;
+import org.openhab.core.types.State;
 
 /**
  *

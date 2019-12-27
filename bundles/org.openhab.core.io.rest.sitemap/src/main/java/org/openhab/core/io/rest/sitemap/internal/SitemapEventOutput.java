@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sitemap.internal;
+package org.openhab.core.io.rest.sitemap.internal;
 
 import java.io.IOException;
 
-import org.eclipse.smarthome.io.rest.sitemap.SitemapSubscriptionService;
+import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.slf4j.Logger;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.voiceconsolecommandextension;
+package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.eclipse.smarthome.core.voice.internal.HumanLanguageInterpreterStub;
-import org.eclipse.smarthome.core.voice.internal.TTSServiceStub;
-import org.eclipse.smarthome.core.voice.internal.VoiceStub;
+import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
+import org.openhab.core.voice.internal.TTSServiceStub;
+import org.openhab.core.voice.internal.VoiceStub;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.cm.Configuration;
@@ -61,7 +61,7 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
         config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        String pid = "org.eclipse.smarthome.voice";
+        String pid = "org.openhab.core.voice";
         Configuration configuration = configAdmin.getConfiguration(pid);
         configuration.update(config);
     }

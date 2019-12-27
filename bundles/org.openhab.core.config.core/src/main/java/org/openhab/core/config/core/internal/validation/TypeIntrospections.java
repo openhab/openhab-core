@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.validation;
+package org.openhab.core.config.core.internal.validation;
 
 import java.math.BigDecimal;
 import java.util.AbstractMap.SimpleEntry;
@@ -20,7 +20,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
  * The {@link TypeIntrospections} provides a corresponding {@link TypeIntrospection} for each config description

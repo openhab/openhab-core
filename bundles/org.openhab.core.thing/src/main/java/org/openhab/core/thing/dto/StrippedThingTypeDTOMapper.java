@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.dto;
+package org.openhab.core.thing.dto;
 
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.thing.type.BridgeType;
-import org.eclipse.smarthome.core.thing.type.ThingType;
+import org.openhab.core.thing.type.BridgeType;
+import org.openhab.core.thing.type.ThingType;
 
 /**
  * The {@link StrippedThingTypeDTOMapper} is an utility class to map things into stripped thing type data transfer

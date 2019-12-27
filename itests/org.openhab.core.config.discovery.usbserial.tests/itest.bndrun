@@ -9,7 +9,7 @@ Fragment-Host: org.openhab.core.config.discovery.usbserial
 # additionally blacklist the linuxsysfs bundle to ensure our one is preferred.
 
 Provide-Capability: \
-    osgi.service;objectClass:List<String>="org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscovery"
+    osgi.service;objectClass:List<String>="org.openhab.core.config.discovery.usbserial.UsbSerialDiscovery"
 -runblacklist: \
     bnd.identity;id='org.openhab.core.config.discovery.usbserial.linuxsysfs'
 

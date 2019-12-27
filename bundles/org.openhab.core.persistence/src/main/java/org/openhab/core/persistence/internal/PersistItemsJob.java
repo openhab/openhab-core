@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence.internal;
+package org.openhab.core.persistence.internal;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.persistence.PersistenceService;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceConfiguration;
-import org.eclipse.smarthome.core.persistence.SimpleItemConfiguration;
-import org.eclipse.smarthome.core.persistence.strategy.SimpleStrategy;
-import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
+import org.openhab.core.items.Item;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.SimpleItemConfiguration;
+import org.openhab.core.persistence.strategy.SimpleStrategy;
+import org.openhab.core.scheduler.SchedulerRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

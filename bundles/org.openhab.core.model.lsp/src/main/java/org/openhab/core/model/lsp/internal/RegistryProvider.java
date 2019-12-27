@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.lsp.internal;
+package org.openhab.core.model.lsp.internal;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.smarthome.model.ide.ItemsIdeSetup;
-import org.eclipse.smarthome.model.persistence.ide.PersistenceIdeSetup;
-import org.eclipse.smarthome.model.rule.ide.RulesIdeSetup;
-import org.eclipse.smarthome.model.script.ScriptServiceUtil;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
-import org.eclipse.smarthome.model.script.ide.ScriptIdeSetup;
-import org.eclipse.smarthome.model.sitemap.ide.SitemapIdeSetup;
-import org.eclipse.smarthome.model.thing.ide.ThingIdeSetup;
+import org.openhab.core.model.ide.ItemsIdeSetup;
+import org.openhab.core.model.persistence.ide.PersistenceIdeSetup;
+import org.openhab.core.model.rule.ide.RulesIdeSetup;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.engine.ScriptEngine;
+import org.openhab.core.model.script.ide.ScriptIdeSetup;
+import org.openhab.core.model.sitemap.ide.SitemapIdeSetup;
+import org.openhab.core.model.thing.ide.ThingIdeSetup;
 import org.eclipse.xtext.XtextPackage;
 import org.eclipse.xtext.resource.FileExtensionProvider;
 import org.eclipse.xtext.resource.IResourceFactory;

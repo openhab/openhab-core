@@ -23,11 +23,11 @@ import java.util.stream.Stream;
 
 import javax.script.ScriptEngine;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;

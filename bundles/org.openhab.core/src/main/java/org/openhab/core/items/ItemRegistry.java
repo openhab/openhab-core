@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Registry;
-import org.eclipse.smarthome.core.internal.items.ItemBuilderImpl;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
+import org.openhab.core.common.registry.Registry;
+import org.openhab.core.internal.items.ItemBuilderImpl;
+import org.openhab.core.library.CoreItemFactory;
 import org.slf4j.LoggerFactory;
 
 /**

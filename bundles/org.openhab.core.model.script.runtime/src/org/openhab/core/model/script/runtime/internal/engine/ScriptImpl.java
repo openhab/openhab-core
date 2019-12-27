@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.runtime.internal.engine;
+package org.openhab.core.model.script.runtime.internal.engine;
 
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.smarthome.model.script.engine.Script;
-import org.eclipse.smarthome.model.script.engine.ScriptExecutionException;
+import org.openhab.core.model.script.engine.Script;
+import org.openhab.core.model.script.engine.ScriptExecutionException;
 import org.eclipse.xtext.resource.IResourceServiceProvider;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;

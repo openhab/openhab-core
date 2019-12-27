@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-module org.eclipse.smarthome.model.sitemap.GenerateSitemap
+module org.openhab.core.model.sitemap.GenerateSitemap
 
 import org.eclipse.xtext.xtext.generator.*
 import org.eclipse.xtext.xtext.generator.model.project.*
 
 var rootPath = ".."
 var projectName = "org.openhab.core.model.sitemap"
-var languageName = "org.eclipse.smarthome.model.sitemap.Sitemap"
+var languageName = "org.openhab.core.model.sitemap.Sitemap"
 var fileExtensions = "sitemap"
 var generateXtendStub = true
 var encoding = "UTF-8"

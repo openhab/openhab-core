@@ -145,7 +145,7 @@
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth.basic/${project.version}</bundle>
 
     <feature>openhab-core-io-http-auth</feature>
-    <config name="org.eclipse.smarthome.auth">
+    <config name="org.openhab.core.auth">
       enabled = true
     </config>
   </feature>
@@ -223,8 +223,8 @@
 
   <feature name="openhab-core-io-transport-serial" version="${project.version}">
     <feature>openhab-core-base</feature>
-    <requirement>osgi.service;filter:="(objectClass=org.eclipse.smarthome.io.transport.serial.SerialPortManager)"</requirement>
-    <requirement>osgi.service;filter:="(objectClass=org.eclipse.smarthome.io.transport.serial.SerialPortProvider)"</requirement>
+    <requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortManager)"</requirement>
+    <requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortProvider)"</requirement>
     <feature dependency="true">openhab-core-io-transport-serial-rxtx</feature>
 
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
@@ -451,10 +451,10 @@
     <!-- <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
     <bundle start-level="90">mvn:org.openhab.core.bundles/org.openhab.core.boot/${project.version}</bundle>
     <bundle>mvn:org.openhab.core.bundles/org.openhab.core.karaf/${project.version}</bundle>
-    <config name="org.eclipse.smarthome.audio">
+    <config name="org.openhab.core.audio">
       defaultSink = enhancedjavasound
     </config>
-    <config name="org.eclipse.smarthome.voice">
+    <config name="org.openhab.core.voice">
       defaultHLI = rulehli
     </config>
   </feature>

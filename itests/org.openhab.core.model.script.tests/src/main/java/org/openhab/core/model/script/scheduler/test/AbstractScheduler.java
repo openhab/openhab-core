@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.scheduler.test;
+package org.openhab.core.model.script.scheduler.test;
 
 import java.util.Date;
 import java.util.List;

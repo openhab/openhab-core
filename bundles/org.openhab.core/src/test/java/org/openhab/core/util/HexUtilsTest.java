@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.util;
+package org.openhab.core.util;
 
 import static org.junit.Assert.assertEquals;
 

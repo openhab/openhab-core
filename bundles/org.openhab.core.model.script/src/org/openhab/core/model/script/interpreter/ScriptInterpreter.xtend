@@ -10,19 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.interpreter;
+package org.openhab.core.model.script.interpreter;
 
 import com.google.inject.Inject
-import org.eclipse.smarthome.core.items.Item
-import org.eclipse.smarthome.core.items.ItemNotFoundException
-import org.eclipse.smarthome.core.items.ItemRegistry
-import org.eclipse.smarthome.core.library.types.QuantityType
-import org.eclipse.smarthome.core.types.Type
-import org.eclipse.smarthome.model.script.engine.ScriptError
-import org.eclipse.smarthome.model.script.engine.ScriptExecutionException
-import org.eclipse.smarthome.model.script.lib.NumberExtensions
-import org.eclipse.smarthome.model.script.scoping.StateAndCommandProvider
-import org.eclipse.smarthome.model.script.script.QuantityLiteral
+import org.openhab.core.items.Item
+import org.openhab.core.items.ItemNotFoundException
+import org.openhab.core.items.ItemRegistry
+import org.openhab.core.library.types.QuantityType
+import org.openhab.core.types.Type
+import org.openhab.core.model.script.engine.ScriptError
+import org.openhab.core.model.script.engine.ScriptExecutionException
+import org.openhab.core.model.script.lib.NumberExtensions
+import org.openhab.core.model.script.scoping.StateAndCommandProvider
+import org.openhab.core.model.script.script.QuantityLiteral
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmIdentifiableElement
 import org.eclipse.xtext.naming.QualifiedName

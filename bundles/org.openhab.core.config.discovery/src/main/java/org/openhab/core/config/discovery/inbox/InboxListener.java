@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.inbox;
+package org.openhab.core.config.discovery.inbox;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResult;
 
 /**
  * The {@link InboxListener} interface for receiving {@link Inbox} events.

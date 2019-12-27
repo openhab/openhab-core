@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
-import org.eclipse.smarthome.core.common.registry.Identifiable;
+import org.openhab.core.common.registry.Identifiable;
 
 /**
  * A listener to be informed before entities are added respectively after they are removed.

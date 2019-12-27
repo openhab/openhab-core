@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.internal;
+package org.openhab.core.io.transport.mqtt.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnectionEx;
-import org.eclipse.smarthome.io.transport.mqtt.MqttService;
-import org.eclipse.smarthome.io.transport.mqtt.MqttServiceObserver;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnectionEx;
+import org.openhab.core.io.transport.mqtt.MqttService;
+import org.openhab.core.io.transport.mqtt.MqttServiceObserver;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.osgi.service.cm.ConfigurationException;

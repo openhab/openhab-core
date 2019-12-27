@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.runtime.internal.engine;
+package org.openhab.core.model.script.runtime.internal.engine;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,14 +23,14 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.smarthome.model.core.ModelParser;
-import org.eclipse.smarthome.model.script.ScriptServiceUtil;
-import org.eclipse.smarthome.model.script.ScriptStandaloneSetup;
-import org.eclipse.smarthome.model.script.engine.Script;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
-import org.eclipse.smarthome.model.script.engine.ScriptExecutionException;
-import org.eclipse.smarthome.model.script.engine.ScriptParsingException;
-import org.eclipse.smarthome.model.script.runtime.ScriptRuntime;
+import org.openhab.core.model.core.ModelParser;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.ScriptStandaloneSetup;
+import org.openhab.core.model.script.engine.Script;
+import org.openhab.core.model.script.engine.ScriptEngine;
+import org.openhab.core.model.script.engine.ScriptExecutionException;
+import org.openhab.core.model.script.engine.ScriptParsingException;
+import org.openhab.core.model.script.runtime.ScriptRuntime;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;

@@ -19,7 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 
-import org.eclipse.smarthome.core.service.AbstractWatchService;
+import org.openhab.core.service.AbstractWatchService;
 
 /**
  * This class is an implementation of {@link AbstractWatchService} which is responsible for tracking changes in file

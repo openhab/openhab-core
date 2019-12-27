@@ -10,34 +10,34 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.persistence.internal;
+package org.openhab.core.model.persistence.internal;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.smarthome.core.persistence.PersistenceManager;
-import org.eclipse.smarthome.core.persistence.PersistenceService;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceConfiguration;
-import org.eclipse.smarthome.core.persistence.SimpleFilter;
-import org.eclipse.smarthome.core.persistence.SimpleItemConfiguration;
-import org.eclipse.smarthome.core.persistence.config.SimpleAllConfig;
-import org.eclipse.smarthome.core.persistence.config.SimpleConfig;
-import org.eclipse.smarthome.core.persistence.config.SimpleGroupConfig;
-import org.eclipse.smarthome.core.persistence.config.SimpleItemConfig;
-import org.eclipse.smarthome.core.persistence.strategy.SimpleCronStrategy;
-import org.eclipse.smarthome.core.persistence.strategy.SimpleStrategy;
-import org.eclipse.smarthome.model.core.EventType;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
-import org.eclipse.smarthome.model.persistence.persistence.AllConfig;
-import org.eclipse.smarthome.model.persistence.persistence.CronStrategy;
-import org.eclipse.smarthome.model.persistence.persistence.Filter;
-import org.eclipse.smarthome.model.persistence.persistence.GroupConfig;
-import org.eclipse.smarthome.model.persistence.persistence.ItemConfig;
-import org.eclipse.smarthome.model.persistence.persistence.PersistenceConfiguration;
-import org.eclipse.smarthome.model.persistence.persistence.PersistenceModel;
-import org.eclipse.smarthome.model.persistence.persistence.Strategy;
+import org.openhab.core.persistence.PersistenceManager;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.SimpleFilter;
+import org.openhab.core.persistence.SimpleItemConfiguration;
+import org.openhab.core.persistence.config.SimpleAllConfig;
+import org.openhab.core.persistence.config.SimpleConfig;
+import org.openhab.core.persistence.config.SimpleGroupConfig;
+import org.openhab.core.persistence.config.SimpleItemConfig;
+import org.openhab.core.persistence.strategy.SimpleCronStrategy;
+import org.openhab.core.persistence.strategy.SimpleStrategy;
+import org.openhab.core.model.core.EventType;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.model.persistence.persistence.AllConfig;
+import org.openhab.core.model.persistence.persistence.CronStrategy;
+import org.openhab.core.model.persistence.persistence.Filter;
+import org.openhab.core.model.persistence.persistence.GroupConfig;
+import org.openhab.core.model.persistence.persistence.ItemConfig;
+import org.openhab.core.model.persistence.persistence.PersistenceConfiguration;
+import org.openhab.core.model.persistence.persistence.PersistenceModel;
+import org.openhab.core.model.persistence.persistence.Strategy;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

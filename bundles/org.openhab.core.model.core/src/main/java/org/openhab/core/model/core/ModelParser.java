@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.core;
+package org.openhab.core.model.core;
 
 /**
  * This interface has to be implemented by services that register an EMF model parser

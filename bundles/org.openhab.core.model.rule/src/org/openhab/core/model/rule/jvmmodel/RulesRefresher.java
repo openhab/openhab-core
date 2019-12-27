@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.jvmmodel;
+package org.openhab.core.model.rule.jvmmodel;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.script.engine.action.ActionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

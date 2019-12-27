@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link;
+package org.openhab.core.thing.link;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.items.Item;
+import org.openhab.core.thing.ChannelUID;
 
 /**
  * {@link ItemChannelLink} defines a link between an {@link Item} and a {@link Channel}.

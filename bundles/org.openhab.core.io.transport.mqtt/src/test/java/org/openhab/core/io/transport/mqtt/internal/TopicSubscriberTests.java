@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.internal;
+package org.openhab.core.io.transport.mqtt.internal;
 
 import static org.junit.Assert.*;
 

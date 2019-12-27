@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.net.http.internal;
+package org.openhab.core.io.net.http.internal;
 
 import java.net.Socket;
 import java.security.cert.CertificateException;
@@ -29,9 +29,9 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 
-import org.eclipse.smarthome.io.net.http.ExtensibleTrustManager;
-import org.eclipse.smarthome.io.net.http.TlsCertificateProvider;
-import org.eclipse.smarthome.io.net.http.TlsTrustManagerProvider;
+import org.openhab.core.io.net.http.ExtensibleTrustManager;
+import org.openhab.core.io.net.http.TlsCertificateProvider;
+import org.openhab.core.io.net.http.TlsTrustManagerProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

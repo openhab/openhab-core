@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.storage.mapdb.internal;
+package org.openhab.core.storage.mapdb.internal;
 
 import java.io.File;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.storage.DeletableStorage;
-import org.eclipse.smarthome.core.storage.DeletableStorageService;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.storage.DeletableStorage;
+import org.openhab.core.storage.DeletableStorageService;
+import org.openhab.core.storage.StorageService;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.osgi.service.component.annotations.Activate;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Alex Tugarev - Added getStorage for name only
  * @author Markus Rathgeb - Use {@link DeletableStorageService}
  */
-@Component(name = "org.eclipse.smarthome.storage.mapdb", immediate = true, service = { StorageService.class,
+@Component(name = "org.openhab.core.storage.mapdb", immediate = true, service = { StorageService.class,
         DeletableStorageService.class }, property = "storage.format=mapdb")
 @NonNullByDefault
 public class MapDbStorageService implements DeletableStorageService {

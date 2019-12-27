@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.test.internal.java;
+package org.openhab.core.test.internal.java;
 
 import static java.util.stream.Collectors.*;
 

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.cache;
+package org.openhab.core.cache;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.Test;
 
 /**

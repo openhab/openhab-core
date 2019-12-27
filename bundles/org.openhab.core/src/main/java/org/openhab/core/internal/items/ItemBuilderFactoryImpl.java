@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemBuilder;
-import org.eclipse.smarthome.core.items.ItemBuilderFactory;
-import org.eclipse.smarthome.core.items.ItemFactory;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilder;
+import org.openhab.core.items.ItemBuilderFactory;
+import org.openhab.core.items.ItemFactory;
+import org.openhab.core.library.CoreItemFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -57,7 +57,7 @@ public class ItemBuilderFactoryImpl implements ItemBuilderFactory {
         itemFactories.remove(itemFactory);
     }
 
-    @Reference(target = "(component.name=org.eclipse.smarthome.core.library.CoreItemFactory)")
+    @Reference(target = "(component.name=org.openhab.core.library.CoreItemFactory)")
     protected void setCoreItemFactory(ItemFactory coreItemFactory) {
         itemFactories.add(coreItemFactory);
     }

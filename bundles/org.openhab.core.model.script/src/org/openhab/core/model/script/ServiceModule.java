@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script;
+package org.openhab.core.model.script;
 
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.script.engine.IActionServiceProvider;
-import org.eclipse.smarthome.model.script.engine.IThingActionsProvider;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
-import org.eclipse.smarthome.model.script.internal.engine.ServiceTrackerActionServiceProvider;
-import org.eclipse.smarthome.model.script.internal.engine.ServiceTrackerThingActionsProvider;
-import org.eclipse.smarthome.model.script.script.Script;
-import org.eclipse.smarthome.model.script.script.impl.ScriptImpl;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.script.engine.IActionServiceProvider;
+import org.openhab.core.model.script.engine.IThingActionsProvider;
+import org.openhab.core.model.script.engine.ScriptEngine;
+import org.openhab.core.model.script.internal.engine.ServiceTrackerActionServiceProvider;
+import org.openhab.core.model.script.internal.engine.ServiceTrackerThingActionsProvider;
+import org.openhab.core.model.script.script.Script;
+import org.openhab.core.model.script.script.impl.ScriptImpl;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console;
+package org.openhab.core.io.console;
 
 /**
  * This interface must be implemented by consoles which want to use the {@link ConsoleInterpreter}.

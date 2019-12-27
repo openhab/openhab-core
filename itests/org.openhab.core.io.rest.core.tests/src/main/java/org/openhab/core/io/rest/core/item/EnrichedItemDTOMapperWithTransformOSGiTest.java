@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.item;
+package org.openhab.core.io.rest.core.item;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -20,12 +20,12 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.math.BigDecimal;
 import java.util.Collections;
 
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.service.StateDescriptionService;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateOption;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.service.StateDescriptionService;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

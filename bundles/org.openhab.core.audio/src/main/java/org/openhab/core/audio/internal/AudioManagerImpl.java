@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio.internal;
+package org.openhab.core.audio.internal;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -28,20 +28,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioSource;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.FileAudioStream;
-import org.eclipse.smarthome.core.audio.URLAudioStream;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioFormatException;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioStreamException;
-import org.eclipse.smarthome.core.library.types.PercentType;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.FileAudioStream;
+import org.openhab.core.audio.URLAudioStream;
+import org.openhab.core.audio.UnsupportedAudioFormatException;
+import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.library.types.PercentType;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -63,8 +63,8 @@ import org.slf4j.LoggerFactory;
  * @author Wouter Born - Sort audio sink and source options
  */
 @NonNullByDefault
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.audio", property = { //
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.audio", //
+@Component(immediate = true, configurationPid = "org.openhab.core.audio", property = { //
+        Constants.SERVICE_PID + "=org.openhab.core.audio", //
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + AudioManagerImpl.CONFIG_URI, //
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Audio" //

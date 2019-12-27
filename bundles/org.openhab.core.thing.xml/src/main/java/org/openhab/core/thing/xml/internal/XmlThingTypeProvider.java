@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.internal;
+package org.openhab.core.thing.xml.internal;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,22 +19,22 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
-import org.eclipse.smarthome.config.xml.AbstractXmlBasedProvider;
-import org.eclipse.smarthome.config.xml.AbstractXmlConfigDescriptionProvider;
-import org.eclipse.smarthome.config.xml.osgi.XmlDocumentBundleTracker;
-import org.eclipse.smarthome.config.xml.osgi.XmlDocumentProvider;
-import org.eclipse.smarthome.config.xml.osgi.XmlDocumentProviderFactory;
-import org.eclipse.smarthome.config.xml.util.XmlDocumentReader;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.service.ReadyService;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.UID;
-import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
-import org.eclipse.smarthome.core.thing.i18n.ThingTypeI18nLocalizationService;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ThingType;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.xml.AbstractXmlBasedProvider;
+import org.openhab.core.config.xml.AbstractXmlConfigDescriptionProvider;
+import org.openhab.core.config.xml.osgi.XmlDocumentBundleTracker;
+import org.openhab.core.config.xml.osgi.XmlDocumentProvider;
+import org.openhab.core.config.xml.osgi.XmlDocumentProviderFactory;
+import org.openhab.core.config.xml.util.XmlDocumentReader;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.service.ReadyService;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.UID;
+import org.openhab.core.thing.binding.ThingTypeProvider;
+import org.openhab.core.thing.i18n.ThingTypeI18nLocalizationService;
+import org.openhab.core.thing.type.ChannelGroupTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ThingType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;

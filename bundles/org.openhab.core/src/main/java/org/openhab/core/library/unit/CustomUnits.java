@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.unit;
+package org.openhab.core.library.unit;
 
 import tec.uom.se.AbstractSystemOfUnits;
 

@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.firmware;
+package org.openhab.core.thing.firmware;
 
 import java.util.Collection;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.binding.firmware.Firmware;
 
 /**
  * The {@link FirmwareRegistry} is registered as an OSGi service and is responsible for tracking all

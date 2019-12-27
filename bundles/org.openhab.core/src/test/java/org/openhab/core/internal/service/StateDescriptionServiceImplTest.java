@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.service;
+package org.openhab.core.internal.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -21,13 +21,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateDescriptionFragment;
-import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
-import org.eclipse.smarthome.core.types.StateDescriptionFragmentProvider;
-import org.eclipse.smarthome.core.types.StateDescriptionProvider;
-import org.eclipse.smarthome.core.types.StateOption;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.StateDescriptionFragmentProvider;
+import org.openhab.core.types.StateDescriptionProvider;
+import org.openhab.core.types.StateOption;
 import org.junit.Before;
 import org.junit.Test;
 

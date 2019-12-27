@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics.internal;
+package org.openhab.core.semantics.internal;
 
 import java.util.HashSet;
 import java.util.List;
@@ -20,20 +20,20 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemPredicates;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.items.MetadataRegistry;
-import org.eclipse.smarthome.core.semantics.SemanticTags;
-import org.eclipse.smarthome.core.semantics.SemanticsPredicates;
-import org.eclipse.smarthome.core.semantics.SemanticsService;
-import org.eclipse.smarthome.core.semantics.model.Equipment;
-import org.eclipse.smarthome.core.semantics.model.Location;
-import org.eclipse.smarthome.core.semantics.model.Point;
-import org.eclipse.smarthome.core.semantics.model.Tag;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemPredicates;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.semantics.SemanticsPredicates;
+import org.openhab.core.semantics.SemanticsService;
+import org.openhab.core.semantics.model.Equipment;
+import org.openhab.core.semantics.model.Location;
+import org.openhab.core.semantics.model.Point;
+import org.openhab.core.semantics.model.Tag;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

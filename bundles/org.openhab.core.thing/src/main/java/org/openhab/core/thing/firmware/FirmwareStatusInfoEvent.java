@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.firmware;
+package org.openhab.core.thing.firmware;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.AbstractEvent;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.events.AbstractEvent;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * The {@link FirmwareStatusInfoEvent} is sent if the {@link FirmwareStatusInfo} of a {@link Thing} has been changed.

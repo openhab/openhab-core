@@ -22,8 +22,8 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
-import org.eclipse.smarthome.core.common.registry.Provider;
+import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Provider;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.CompositeActionType;
 import org.openhab.core.automation.type.CompositeConditionType;

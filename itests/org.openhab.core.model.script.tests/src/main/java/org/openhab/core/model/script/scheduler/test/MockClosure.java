@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.scheduler.test;
+package org.openhab.core.model.script.scheduler.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.joda.time.Instant.now;
 import static org.junit.Assert.assertThat;
 
-import org.eclipse.smarthome.model.script.actions.Timer;
+import org.openhab.core.model.script.actions.Timer;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 

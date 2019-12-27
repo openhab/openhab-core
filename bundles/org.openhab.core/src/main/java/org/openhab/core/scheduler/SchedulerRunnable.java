@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.scheduler;
+package org.openhab.core.scheduler;
 
 /**
  * Runnable that can throw checked exceptions.

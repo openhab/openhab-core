@@ -1,2 +1,2 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.eclipse.smarthome.io.rest.sse.internal.SseActivator
+Bundle-Activator: org.openhab.core.io.rest.sse.internal.SseActivator

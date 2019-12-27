@@ -19,7 +19,7 @@ import java.net.URL;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;

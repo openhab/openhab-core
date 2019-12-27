@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.voiceconsolecommandextension;
+package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.voice.VoiceManager;
-import org.eclipse.smarthome.core.voice.internal.AudioManagerStub;
-import org.eclipse.smarthome.core.voice.internal.AudioSourceStub;
-import org.eclipse.smarthome.core.voice.internal.ConsoleStub;
-import org.eclipse.smarthome.core.voice.internal.SinkStub;
-import org.eclipse.smarthome.core.voice.internal.VoiceConsoleCommandExtension;
-import org.eclipse.smarthome.core.voice.internal.VoiceManagerImpl;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.internal.AudioManagerStub;
+import org.openhab.core.voice.internal.AudioSourceStub;
+import org.openhab.core.voice.internal.ConsoleStub;
+import org.openhab.core.voice.internal.SinkStub;
+import org.openhab.core.voice.internal.VoiceConsoleCommandExtension;
+import org.openhab.core.voice.internal.VoiceManagerImpl;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 
 /**

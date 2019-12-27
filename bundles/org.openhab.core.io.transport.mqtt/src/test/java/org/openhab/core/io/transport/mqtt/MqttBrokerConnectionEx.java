@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt;
+package org.openhab.core.io.transport.mqtt;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
+import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
 
 import com.hivemq.client.mqtt.MqttClientState;
 

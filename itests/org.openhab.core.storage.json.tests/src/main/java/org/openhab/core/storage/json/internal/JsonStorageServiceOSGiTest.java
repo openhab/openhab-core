@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.storage.json.internal;
+package org.openhab.core.storage.json.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.storage.Storage;
-import org.eclipse.smarthome.core.storage.StorageService;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageService;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

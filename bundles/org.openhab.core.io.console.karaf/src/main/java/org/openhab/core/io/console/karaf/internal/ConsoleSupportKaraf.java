@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.karaf.internal;
+package org.openhab.core.io.console.karaf.internal;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import java.util.Map;
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.SessionFactory;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

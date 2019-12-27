@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.service;
+package org.openhab.core.magic.service;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
-@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MagicMultiInstanceService.class, configurationPid = "org.eclipse.smarthome.magicMultiInstance")
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MagicMultiInstanceService.class, configurationPid = "org.openhab.core.magicMultiInstance")
 public class MagicMultiInstanceService {
 
     private final Logger logger = LoggerFactory.getLogger(MagicMultiInstanceService.class);

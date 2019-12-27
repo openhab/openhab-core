@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.types;
+package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.types.State;
 
 /**
  * The PercentType extends the {@link DecimalType} by putting constraints for its value on top (0-100).

@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.scheduler;
+package org.openhab.core.internal.scheduler;
 
 import java.time.Duration;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.scheduler.PeriodicScheduler;
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
-import org.eclipse.smarthome.core.scheduler.Scheduler;
-import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
+import org.openhab.core.scheduler.PeriodicScheduler;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.scheduler.Scheduler;
+import org.openhab.core.scheduler.SchedulerRunnable;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

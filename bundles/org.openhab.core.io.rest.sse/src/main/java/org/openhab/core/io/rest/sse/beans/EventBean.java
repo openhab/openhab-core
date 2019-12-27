@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sse.beans;
+package org.openhab.core.io.rest.sse.beans;
 
 /**
  * Event bean for broadcasted events.

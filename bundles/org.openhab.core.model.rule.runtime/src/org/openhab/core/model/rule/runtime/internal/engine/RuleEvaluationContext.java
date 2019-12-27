@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.runtime.internal.engine;
+package org.openhab.core.model.rule.runtime.internal.engine;
 
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;

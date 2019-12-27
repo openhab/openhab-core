@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal.firmware;
+package org.openhab.core.magic.binding.internal.firmware;
 
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareBuilder;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareProvider;
-import org.eclipse.smarthome.magic.binding.MagicBindingConstants;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.binding.firmware.Firmware;
+import org.openhab.core.thing.binding.firmware.FirmwareBuilder;
+import org.openhab.core.thing.firmware.FirmwareProvider;
+import org.openhab.core.magic.binding.MagicBindingConstants;
 import org.osgi.service.component.annotations.Component;
 
 /**

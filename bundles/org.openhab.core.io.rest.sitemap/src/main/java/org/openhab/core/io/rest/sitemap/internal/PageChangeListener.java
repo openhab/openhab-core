@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sitemap.internal;
+package org.openhab.core.io.rest.sitemap.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,22 +22,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.StateChangeListener;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.io.rest.core.item.EnrichedItemDTOMapper;
-import org.eclipse.smarthome.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
-import org.eclipse.smarthome.model.sitemap.sitemap.Chart;
-import org.eclipse.smarthome.model.sitemap.sitemap.ColorArray;
-import org.eclipse.smarthome.model.sitemap.sitemap.Frame;
-import org.eclipse.smarthome.model.sitemap.sitemap.VisibilityRule;
-import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
-import org.eclipse.smarthome.ui.items.ItemUIRegistry;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.StateChangeListener;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.types.State;
+import org.openhab.core.io.rest.core.item.EnrichedItemDTOMapper;
+import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
+import org.openhab.core.model.sitemap.sitemap.Chart;
+import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Frame;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
+import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.ui.items.ItemUIRegistry;
 
 /**
  * This is a class that listens on item state change events and creates sitemap events for a dedicated sitemap page.

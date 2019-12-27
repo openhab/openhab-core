@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.icon.internal;
+package org.openhab.core.ui.icon.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,9 +26,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.io.http.servlet.SmartHomeServlet;
-import org.eclipse.smarthome.ui.icon.IconProvider;
-import org.eclipse.smarthome.ui.icon.IconSet.Format;
+import org.openhab.core.io.http.servlet.SmartHomeServlet;
+import org.openhab.core.ui.icon.IconProvider;
+import org.openhab.core.ui.icon.IconSet.Format;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

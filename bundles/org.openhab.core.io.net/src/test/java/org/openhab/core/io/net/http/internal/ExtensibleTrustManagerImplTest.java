@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.net.http.internal;
+package org.openhab.core.io.net.http.internal;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -30,7 +30,7 @@ import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.lang.reflect.FieldUtils;
-import org.eclipse.smarthome.io.net.http.TlsTrustManagerProvider;
+import org.openhab.core.io.net.http.TlsTrustManagerProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

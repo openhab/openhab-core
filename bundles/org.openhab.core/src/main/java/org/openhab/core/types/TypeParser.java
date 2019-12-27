@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.types;
+package org.openhab.core.types;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,7 +29,7 @@ public final class TypeParser {
     private TypeParser() {
     }
 
-    private static final String CORE_LIBRARY_PACKAGE = "org.eclipse.smarthome.core.library.types.";
+    private static final String CORE_LIBRARY_PACKAGE = "org.openhab.core.library.types.";
 
     /**
      * Parses a string into a type.

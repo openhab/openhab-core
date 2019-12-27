@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.sitemap;
+package org.openhab.core.model.sitemap;
 
 import java.util.Set;
 
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
-import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
+import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
 
 @NonNullByDefault
 public interface SitemapProvider {

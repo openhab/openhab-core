@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.net.http.internal;
+package org.openhab.core.io.net.http.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -37,7 +37,7 @@ import javax.net.ssl.SSLHandshakeException;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.smarthome.io.net.http.TrustManagerProvider;
+import org.openhab.core.io.net.http.TrustManagerProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

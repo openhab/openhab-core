@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence;
+package org.openhab.core.persistence;
 
 import java.util.Date;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.items.Item;
+import org.openhab.core.types.State;
 
 /**
  * This class provides an interface to the a {@link PersistenceService} to allow data to be stored

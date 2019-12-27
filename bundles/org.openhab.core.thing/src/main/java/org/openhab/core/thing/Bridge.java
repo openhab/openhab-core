@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing;
+package org.openhab.core.thing;
 
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
+import org.openhab.core.thing.binding.BridgeHandler;
 
 /**
  * A {@link Bridge} is a {@link Thing} that connects other {@link Thing}s.

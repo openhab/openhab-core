@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt;
+package org.openhab.core.io.transport.mqtt;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,16 +26,16 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mqtt.internal.ClientCallback;
-import org.eclipse.smarthome.io.transport.mqtt.internal.TopicSubscribers;
-import org.eclipse.smarthome.io.transport.mqtt.internal.client.Mqtt3AsyncClientWrapper;
-import org.eclipse.smarthome.io.transport.mqtt.internal.client.Mqtt5AsyncClientWrapper;
-import org.eclipse.smarthome.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
-import org.eclipse.smarthome.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
-import org.eclipse.smarthome.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
-import org.eclipse.smarthome.io.transport.mqtt.ssl.CustomTrustManagerFactory;
-import org.eclipse.smarthome.io.transport.mqtt.sslcontext.CustomSSLContextProvider;
-import org.eclipse.smarthome.io.transport.mqtt.sslcontext.SSLContextProvider;
+import org.openhab.core.io.transport.mqtt.internal.ClientCallback;
+import org.openhab.core.io.transport.mqtt.internal.TopicSubscribers;
+import org.openhab.core.io.transport.mqtt.internal.client.Mqtt3AsyncClientWrapper;
+import org.openhab.core.io.transport.mqtt.internal.client.Mqtt5AsyncClientWrapper;
+import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
+import org.openhab.core.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
+import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
+import org.openhab.core.io.transport.mqtt.ssl.CustomTrustManagerFactory;
+import org.openhab.core.io.transport.mqtt.sslcontext.CustomSSLContextProvider;
+import org.openhab.core.io.transport.mqtt.sslcontext.SSLContextProvider;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

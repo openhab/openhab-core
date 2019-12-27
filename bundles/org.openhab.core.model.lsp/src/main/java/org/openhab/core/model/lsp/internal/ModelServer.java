@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.lsp.internal;
+package org.openhab.core.model.lsp.internal;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,10 +23,10 @@ import java.util.concurrent.Future;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.model.script.ScriptServiceUtil;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.engine.ScriptEngine;
 import org.eclipse.xtext.ide.server.LanguageServerImpl;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -51,7 +51,7 @@ import com.google.inject.Injector;
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=misc" })
 public class ModelServer {
 
-    static final String CONFIG_PID = "org.eclipse.smarthome.lsp";
+    static final String CONFIG_PID = "org.openhab.core.lsp";
     private static final String KEY_PORT = "port";
     private static final int DEFAULT_PORT = 5007;
     private final ExecutorService pool = ThreadPoolManager.getPool("lsp");

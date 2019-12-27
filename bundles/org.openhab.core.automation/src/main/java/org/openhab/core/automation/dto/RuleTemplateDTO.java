@@ -15,7 +15,7 @@ package org.openhab.core.automation.dto;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.automation.Visibility;
 
 /**

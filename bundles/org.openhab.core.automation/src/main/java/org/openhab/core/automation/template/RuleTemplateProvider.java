@@ -15,8 +15,8 @@ package org.openhab.core.automation.template;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.Provider;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
+import org.openhab.core.common.registry.Provider;
+import org.openhab.core.common.registry.ProviderChangeListener;
 
 /**
  * This interface provides basic functionality for managing {@link RuleTemplate}s. It can be used for

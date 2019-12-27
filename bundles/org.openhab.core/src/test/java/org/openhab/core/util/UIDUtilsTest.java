@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.util;
+package org.openhab.core.util;
 
 import java.util.function.Consumer;
 
-import org.eclipse.smarthome.core.common.AbstractUID;
+import org.openhab.core.common.AbstractUID;
 import org.hamcrest.core.IsEqual;
 import org.junit.Assert;
 import org.junit.Test;

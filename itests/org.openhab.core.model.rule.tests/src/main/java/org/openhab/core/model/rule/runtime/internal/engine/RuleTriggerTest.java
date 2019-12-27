@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.runtime.internal.engine;
+package org.openhab.core.model.rule.runtime.internal.engine;
 
 import static org.junit.Assert.*;
 
@@ -18,15 +18,15 @@ import java.io.ByteArrayInputStream;
 import java.util.Iterator;
 import java.util.function.Function;
 
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.rule.rules.ChangedEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.CommandEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.EventEmittedTrigger;
-import org.eclipse.smarthome.model.rule.rules.EventTrigger;
-import org.eclipse.smarthome.model.rule.rules.Rule;
-import org.eclipse.smarthome.model.rule.runtime.RuleEngine;
-import org.eclipse.smarthome.model.rule.runtime.internal.engine.RuleTriggerManager.TriggerTypes;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.rule.rules.ChangedEventTrigger;
+import org.openhab.core.model.rule.rules.CommandEventTrigger;
+import org.openhab.core.model.rule.rules.EventEmittedTrigger;
+import org.openhab.core.model.rule.rules.EventTrigger;
+import org.openhab.core.model.rule.rules.Rule;
+import org.openhab.core.model.rule.runtime.RuleEngine;
+import org.openhab.core.model.rule.runtime.internal.engine.RuleTriggerManager.TriggerTypes;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 

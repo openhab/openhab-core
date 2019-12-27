@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link.events;
+package org.openhab.core.thing.link.events;
 
-import org.eclipse.smarthome.core.events.AbstractEvent;
-import org.eclipse.smarthome.core.thing.link.dto.ItemChannelLinkDTO;
+import org.openhab.core.events.AbstractEvent;
+import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 
 /**
  * {@link AbstractItemChannelLinkRegistryEvent} is an abstract class for item channel link events.

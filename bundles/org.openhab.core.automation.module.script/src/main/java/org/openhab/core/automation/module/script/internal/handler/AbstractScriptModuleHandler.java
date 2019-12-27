@@ -22,7 +22,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;

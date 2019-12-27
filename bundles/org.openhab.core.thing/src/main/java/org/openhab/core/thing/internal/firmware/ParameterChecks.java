@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.firmware;
+package org.openhab.core.thing.internal.firmware;
 
 import org.eclipse.jdt.annotation.Nullable;
 

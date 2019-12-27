@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics.model.location;
+package org.openhab.core.semantics.model.location;
 
 import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.semantics.model.Location;
+import org.openhab.core.semantics.model.Location;
 
 /**
  * This class provides a stream of all defined locations.

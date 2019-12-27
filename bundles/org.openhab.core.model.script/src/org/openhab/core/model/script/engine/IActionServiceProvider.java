@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.engine;
+package org.openhab.core.model.script.engine;
 
 import java.util.List;
 
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
+import org.openhab.core.model.script.engine.action.ActionService;
 
 public interface IActionServiceProvider {
 

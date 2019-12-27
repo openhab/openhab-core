@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml;
+package org.openhab.core.config.xml;
 
 import java.net.URI;
 import java.util.Collection;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
-import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.core.i18n.ConfigI18nLocalizationService;
 import org.osgi.framework.Bundle;
 
 /**

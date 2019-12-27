@@ -5,8 +5,8 @@
 
   <extension point="org.eclipse.emf.ecore.generated_package">
     <package 
-       uri = "http://www.eclipse.org/smarthome/model/Rules" 
-       class = "org.eclipse.smarthome.model.rule.rules.RulesPackage"
+       uri = "https://openhab.org/model/Rules" 
+       class = "org.openhab.core.model.rule.rules.RulesPackage"
        genModel = "model/generated/Rules.genmodel" /> 
 	
   </extension>

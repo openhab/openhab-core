@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence;
+package org.openhab.core.persistence;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.types.State;
 
 /**
  * This class is used to define a filter for queries to a {@link PersistenceService}.

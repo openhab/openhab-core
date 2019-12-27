@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.i18n;
+package org.openhab.core.i18n;
 
 import java.util.Objects;
 

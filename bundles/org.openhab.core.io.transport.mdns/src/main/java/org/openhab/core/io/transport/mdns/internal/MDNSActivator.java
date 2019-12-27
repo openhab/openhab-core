@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mdns.internal;
+package org.openhab.core.io.transport.mdns.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.common;
+package org.openhab.core.internal.common;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.eclipse.smarthome.core.common.QueueingThreadPoolExecutor;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.common.QueueingThreadPoolExecutor;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

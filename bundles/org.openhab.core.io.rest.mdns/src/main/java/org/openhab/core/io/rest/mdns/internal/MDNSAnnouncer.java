@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.mdns.internal;
+package org.openhab.core.io.rest.mdns.internal;
 
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.net.HttpServiceUtil;
-import org.eclipse.smarthome.io.rest.RESTConstants;
-import org.eclipse.smarthome.io.transport.mdns.MDNSService;
-import org.eclipse.smarthome.io.transport.mdns.ServiceDescription;
+import org.openhab.core.net.HttpServiceUtil;
+import org.openhab.core.io.rest.RESTConstants;
+import org.openhab.core.io.transport.mdns.MDNSService;
+import org.openhab.core.io.transport.mdns.ServiceDescription;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -34,8 +34,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Use HTTP service utility functions
  */
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.mdns", property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.mdns" //
+@Component(immediate = true, configurationPid = "org.openhab.core.mdns", property = {
+        Constants.SERVICE_PID + "=org.openhab.core.mdns" //
 })
 public class MDNSAnnouncer {
 

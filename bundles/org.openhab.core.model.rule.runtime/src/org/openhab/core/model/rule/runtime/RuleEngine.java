@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.runtime;
+package org.openhab.core.model.rule.runtime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.profile;
+package org.openhab.core.io.rest.core.internal.profile;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -28,20 +28,20 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.items.ItemUtil;
-import org.eclipse.smarthome.core.thing.profiles.ProfileType;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeRegistry;
-import org.eclipse.smarthome.core.thing.profiles.StateProfileType;
-import org.eclipse.smarthome.core.thing.profiles.TriggerProfileType;
-import org.eclipse.smarthome.core.thing.profiles.dto.ProfileTypeDTO;
-import org.eclipse.smarthome.core.thing.profiles.dto.ProfileTypeDTOMapper;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.openhab.core.auth.Role;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.thing.profiles.ProfileType;
+import org.openhab.core.thing.profiles.ProfileTypeRegistry;
+import org.openhab.core.thing.profiles.StateProfileType;
+import org.openhab.core.thing.profiles.TriggerProfileType;
+import org.openhab.core.thing.profiles.dto.ProfileTypeDTO;
+import org.openhab.core.thing.profiles.dto.ProfileTypeDTOMapper;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

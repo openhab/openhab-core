@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model
+package org.openhab.core.model
 
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
@@ -26,7 +26,7 @@ class ItemsStandaloneSetup extends ItemsStandaloneSetupGenerated {
     }
     
     def static void unregister() {
-        EPackage.Registry.INSTANCE.remove("http://www.eclipse.org/smarthome/model/Items");
+        EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Items");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("items");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("items");
     }

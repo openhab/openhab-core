@@ -10,21 +10,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.internal;
+package org.openhab.core.model.script.internal;
 
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.ItemUtil;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationException;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(immediate = true, service = HumanLanguageInterpreter.class, configurationPid = "org.eclipse.smarthome.rulehli", property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.rulehli",
+@Component(immediate = true, service = HumanLanguageInterpreter.class, configurationPid = "org.openhab.core.rulehli", property = {
+        Constants.SERVICE_PID + "=org.openhab.core.rulehli",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=voice",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Rule Voice Interpreter",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + RuleHumanLanguageInterpreter.CONFIG_URI })

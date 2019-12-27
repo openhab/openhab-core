@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.internal;
+package org.openhab.core.io.http.internal;
 
-import org.eclipse.smarthome.io.http.HttpContextFactoryService;
-import org.eclipse.smarthome.io.http.WrappingHttpContext;
+import org.openhab.core.io.http.HttpContextFactoryService;
+import org.openhab.core.io.http.WrappingHttpContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

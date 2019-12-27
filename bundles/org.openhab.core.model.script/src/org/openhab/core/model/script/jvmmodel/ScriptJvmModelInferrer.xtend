@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.jvmmodel
+package org.openhab.core.model.script.jvmmodel
 
 import com.google.inject.Inject
 import java.util.Set
-import org.eclipse.smarthome.core.items.ItemRegistry
-import org.eclipse.smarthome.model.script.scoping.StateAndCommandProvider
-import org.eclipse.smarthome.model.script.script.Script
+import org.openhab.core.items.ItemRegistry
+import org.openhab.core.model.script.scoping.StateAndCommandProvider
+import org.openhab.core.model.script.script.Script
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder

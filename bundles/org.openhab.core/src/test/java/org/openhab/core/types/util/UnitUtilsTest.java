@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.types.util;
+package org.openhab.core.types.util;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.*;
+import static org.openhab.core.library.unit.MetricPrefix.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
@@ -24,11 +24,11 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Power;
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.smarthome.core.library.dimension.Intensity;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.SmartHomeUnits;
 import org.junit.Test;
 
 /**

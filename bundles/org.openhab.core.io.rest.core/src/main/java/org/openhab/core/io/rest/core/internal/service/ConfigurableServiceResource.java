@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.service;
+package org.openhab.core.io.rest.core.internal.service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -35,17 +35,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
-import org.eclipse.smarthome.config.core.ConfigUtil;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.core.config.ConfigurationService;
-import org.eclipse.smarthome.io.rest.core.internal.RESTCoreActivator;
-import org.eclipse.smarthome.io.rest.core.service.ConfigurableServiceDTO;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.core.config.ConfigurationService;
+import org.openhab.core.io.rest.core.internal.RESTCoreActivator;
+import org.openhab.core.io.rest.core.service.ConfigurableServiceDTO;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;

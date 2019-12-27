@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial;
+package org.openhab.core.config.discovery.usbserial;
 
 import static java.util.Objects.requireNonNull;
 

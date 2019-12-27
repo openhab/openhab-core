@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.net;
+package org.openhab.core.net;
 
 import java.net.InetAddress;
 import java.net.InterfaceAddress;

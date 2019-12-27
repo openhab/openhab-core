@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics;
+package org.openhab.core.semantics;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,16 +27,16 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.semantics.model.Property;
-import org.eclipse.smarthome.core.semantics.model.Tag;
-import org.eclipse.smarthome.core.semantics.model.TagInfo;
-import org.eclipse.smarthome.core.semantics.model.equipment.Equipments;
-import org.eclipse.smarthome.core.semantics.model.location.Locations;
-import org.eclipse.smarthome.core.semantics.model.point.Measurement;
-import org.eclipse.smarthome.core.semantics.model.point.Points;
-import org.eclipse.smarthome.core.semantics.model.property.Properties;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.items.Item;
+import org.openhab.core.semantics.model.Property;
+import org.openhab.core.semantics.model.Tag;
+import org.openhab.core.semantics.model.TagInfo;
+import org.openhab.core.semantics.model.equipment.Equipments;
+import org.openhab.core.semantics.model.location.Locations;
+import org.openhab.core.semantics.model.point.Measurement;
+import org.openhab.core.semantics.model.point.Points;
+import org.openhab.core.semantics.model.property.Properties;
+import org.openhab.core.types.StateDescription;
 
 /**
  * This is a class that gives static access to the semantic tag library.
@@ -128,7 +128,7 @@ public class SemanticTags {
             if (stateDescription != null && stateDescription.isReadOnly()) {
                 return Measurement.class;
             } else {
-                return org.eclipse.smarthome.core.semantics.model.point.Control.class;
+                return org.openhab.core.semantics.model.point.Control.class;
             }
         } else {
             return null;

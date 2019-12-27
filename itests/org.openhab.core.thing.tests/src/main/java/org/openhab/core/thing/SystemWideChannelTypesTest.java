@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing;
+package org.openhab.core.thing;
 
-import static org.eclipse.smarthome.core.thing.DefaultSystemChannelTypeProvider.BINDING_ID;
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.BINDING_ID;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.types.StateOption;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 

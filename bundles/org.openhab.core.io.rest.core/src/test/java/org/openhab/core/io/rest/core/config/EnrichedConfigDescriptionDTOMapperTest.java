@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.config;
+package org.openhab.core.io.rest.core.config;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -19,12 +19,12 @@ import static org.junit.Assert.assertThat;
 import java.net.URI;
 import java.util.Arrays;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.junit.Test;
 
 /**

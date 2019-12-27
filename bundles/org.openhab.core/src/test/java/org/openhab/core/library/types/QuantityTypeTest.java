@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.types;
+package org.openhab.core.library.types;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.CENTI;
+import static org.openhab.core.library.unit.MetricPrefix.CENTI;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
@@ -25,13 +25,13 @@ import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.smarthome.core.library.dimension.DataAmount;
-import org.eclipse.smarthome.core.library.dimension.DataTransferRate;
-import org.eclipse.smarthome.core.library.dimension.Density;
-import org.eclipse.smarthome.core.library.dimension.Intensity;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
+import org.openhab.core.library.dimension.DataAmount;
+import org.openhab.core.library.dimension.DataTransferRate;
+import org.openhab.core.library.dimension.Density;
+import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.SmartHomeUnits;
 import org.junit.Test;
 
 import tec.uom.se.quantity.QuantityDimension;

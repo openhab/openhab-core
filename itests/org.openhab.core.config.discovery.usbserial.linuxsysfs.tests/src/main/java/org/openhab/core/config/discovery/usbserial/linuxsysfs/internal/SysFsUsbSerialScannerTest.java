@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.internal;
+package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
 import static java.lang.Integer.toHexString;
 import static java.nio.file.Files.*;
 import static java.nio.file.attribute.PosixFilePermission.*;
 import static java.util.Arrays.asList;
-import static org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.internal.SysfsUsbSerialScanner.*;
+import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.SysfsUsbSerialScanner.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;

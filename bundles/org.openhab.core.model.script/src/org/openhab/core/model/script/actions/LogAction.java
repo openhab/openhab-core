@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.actions;
+package org.openhab.core.model.script.actions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +23,13 @@ import org.slf4j.LoggerFactory;
  */
 public class LogAction {
 
-    private static final String LOGGER_NAME_PREFIX = "org.eclipse.smarthome.model.script.";
+    private static final String LOGGER_NAME_PREFIX = "org.openhab.core.model.script.";
 
     /**
      * Creates the Log-Entry <code>format</code> with level <code>DEBUG</code> and logs under the loggers name
-     * <code>org.eclipse.smarthome.model.script.&lt;loggerName&gt;</code>
+     * <code>org.openhab.core.model.script.&lt;loggerName&gt;</code>
      * 
-     * @param loggerName the name of the Logger which is prefixed with <code>org.eclipse.smarthome.model.script.</code>
+     * @param loggerName the name of the Logger which is prefixed with <code>org.openhab.core.model.script.</code>
      * @param format the Log-Statement which can contain placeholders '<code>{}</code>'
      * @param args the arguments to replace the placeholders contained in <code>format</code>
      * 
@@ -41,9 +41,9 @@ public class LogAction {
 
     /**
      * Creates the Log-Entry <code>format</code> with level <code>INFO</code> and logs under the loggers name
-     * <code>org.eclipse.smarthome.model.script.&lt;loggerName&gt;</code>
+     * <code>org.openhab.core.model.script.&lt;loggerName&gt;</code>
      * 
-     * @param loggerName the name of the Logger which is prefixed with <code>org.eclipse.smarthome.model.script.</code>
+     * @param loggerName the name of the Logger which is prefixed with <code>org.openhab.core.model.script.</code>
      * @param format the Log-Statement which can contain placeholders '<code>{}</code>'
      * @param args the arguments to replace the placeholders contained in <code>format</code>
      * 
@@ -55,9 +55,9 @@ public class LogAction {
 
     /**
      * Creates the Log-Entry <code>format</code> with level <code>WARN</code> and logs under the loggers name
-     * <code>org.eclipse.smarthome.model.script.&lt;loggerName&gt;</code>
+     * <code>org.openhab.core.model.script.&lt;loggerName&gt;</code>
      * 
-     * @param loggerName the name of the Logger which is prefixed with <code>org.eclipse.smarthome.model.script.</code>
+     * @param loggerName the name of the Logger which is prefixed with <code>org.openhab.core.model.script.</code>
      * @param format the Log-Statement which can contain placeholders '<code>{}</code>'
      * @param args the arguments to replace the placeholders contained in <code>format</code>
      * 
@@ -69,9 +69,9 @@ public class LogAction {
 
     /**
      * Creates the Log-Entry <code>format</code> with level <code>ERROR</code> and logs under the loggers name
-     * <code>org.eclipse.smarthome.model.script.&lt;loggerName&gt;</code>
+     * <code>org.openhab.core.model.script.&lt;loggerName&gt;</code>
      * 
-     * @param loggerName the name of the Logger which is prefixed with <code>org.eclipse.smarthome.model.script.</code>
+     * @param loggerName the name of the Logger which is prefixed with <code>org.openhab.core.model.script.</code>
      * @param format the Log-Statement which can contain placeholders '<code>{}</code>'
      * @param args the arguments to replace the placeholders contained in <code>format</code>
      * 

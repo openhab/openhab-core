@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.service;
+package org.openhab.core.internal.service;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 
-import org.eclipse.smarthome.core.service.ReadyMarker;
-import org.eclipse.smarthome.core.service.ReadyMarkerFilter;
-import org.eclipse.smarthome.core.service.ReadyService.ReadyTracker;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyMarkerFilter;
+import org.openhab.core.service.ReadyService.ReadyTracker;
 import org.junit.Test;
 
 /**

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.serializer;
+package org.openhab.core.model.thing.serializer;
 
 import java.util.List;
 

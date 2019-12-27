@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal;
+package org.openhab.core.thing.internal;
 
 import static java.util.stream.Collectors.toList;
 
@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.config.core.metadata.MetadataConfigDescriptionProvider;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.config.core.metadata.MetadataConfigDescriptionProvider;
 import org.osgi.service.component.annotations.Component;
 
 /**

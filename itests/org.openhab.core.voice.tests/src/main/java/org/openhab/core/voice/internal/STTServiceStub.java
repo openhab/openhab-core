@@ -10,19 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal;
+package org.openhab.core.voice.internal;
 
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.voice.STTException;
-import org.eclipse.smarthome.core.voice.STTListener;
-import org.eclipse.smarthome.core.voice.STTService;
-import org.eclipse.smarthome.core.voice.STTServiceHandle;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.voice.STTException;
+import org.openhab.core.voice.STTListener;
+import org.openhab.core.voice.STTService;
+import org.openhab.core.voice.STTServiceHandle;
 
 /**
  * A {@link STTService} stub used for the tests.

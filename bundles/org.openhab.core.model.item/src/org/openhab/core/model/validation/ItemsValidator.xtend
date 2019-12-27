@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.validation
+package org.openhab.core.model.validation
 
-import org.eclipse.smarthome.model.items.ModelItem
+import org.openhab.core.model.items.ModelItem
 import org.eclipse.xtext.validation.Check
-import org.eclipse.smarthome.model.items.ItemsPackage
-import org.eclipse.smarthome.core.types.util.UnitUtils
+import org.openhab.core.model.items.ItemsPackage
+import org.openhab.core.types.util.UnitUtils
 
 /**
  * Custom validation rules. 

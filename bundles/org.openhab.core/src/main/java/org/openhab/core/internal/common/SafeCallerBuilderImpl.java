@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.common;
+package org.openhab.core.internal.common;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
@@ -22,8 +22,8 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.SafeCaller;
-import org.eclipse.smarthome.core.common.SafeCallerBuilder;
+import org.openhab.core.common.SafeCaller;
+import org.openhab.core.common.SafeCallerBuilder;
 
 /**
  * Builder implementation to create safe-call wrapper objects.

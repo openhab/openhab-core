@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sitemap.internal;
+package org.openhab.core.io.rest.sitemap.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -34,21 +34,21 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.model.sitemap.SitemapProvider;
-import org.eclipse.smarthome.model.sitemap.sitemap.ColorArray;
-import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
-import org.eclipse.smarthome.model.sitemap.sitemap.VisibilityRule;
-import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
-import org.eclipse.smarthome.test.java.JavaTest;
-import org.eclipse.smarthome.ui.items.ItemUIRegistry;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
+import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.ui.items.ItemUIRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -311,7 +311,7 @@ public class SitemapResourceTest extends JavaTest {
         Widget w1 = mock(Widget.class);
         EClass sliderEClass = mock(EClass.class);
         when(sliderEClass.getName()).thenReturn("slider");
-        when(sliderEClass.getInstanceTypeName()).thenReturn("org.eclipse.smarthome.model.sitemap.Slider");
+        when(sliderEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Slider");
         when(w1.eClass()).thenReturn(sliderEClass);
         when(w1.getLabel()).thenReturn(WIDGET1_LABEL);
         when(w1.getItem()).thenReturn(ITEM_NAME);
@@ -344,7 +344,7 @@ public class SitemapResourceTest extends JavaTest {
         Widget w2 = mock(Widget.class);
         EClass switchEClass = mock(EClass.class);
         when(switchEClass.getName()).thenReturn("switch");
-        when(switchEClass.getInstanceTypeName()).thenReturn("org.eclipse.smarthome.model.sitemap.Switch");
+        when(switchEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Switch");
         when(w2.eClass()).thenReturn(switchEClass);
         when(w2.getLabel()).thenReturn(WIDGET2_LABEL);
         when(w2.getItem()).thenReturn(ITEM_NAME);

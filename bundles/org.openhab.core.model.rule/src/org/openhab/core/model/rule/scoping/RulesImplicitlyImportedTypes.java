@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.scoping;
+package org.openhab.core.model.rule.scoping;
 
-import org.eclipse.smarthome.model.script.scoping.ScriptImplicitlyImportedTypes;
+import org.openhab.core.model.script.scoping.ScriptImplicitlyImportedTypes;
 
 import com.google.inject.Singleton;
 

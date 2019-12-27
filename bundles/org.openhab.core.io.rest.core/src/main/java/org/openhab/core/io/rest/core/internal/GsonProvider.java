@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal;
+package org.openhab.core.io.rest.core.internal;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.testutil.i18n;
+package org.openhab.core.thing.testutil.i18n;
 
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
@@ -48,7 +48,7 @@ public class DefaultLocaleSetter {
     public void setDefaultLocale(Locale locale) throws IOException {
         assertThat(locale, is(notNullValue()));
 
-        Configuration config = configAdmin.getConfiguration("org.eclipse.smarthome.i18n", null);
+        Configuration config = configAdmin.getConfiguration("org.openhab.core.i18n", null);
         assertThat(config, is(notNullValue()));
 
         Dictionary<String, Object> properties = config.getProperties();

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml;
+package org.openhab.core.config.xml;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,13 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterGroup;
-import org.eclipse.smarthome.config.xml.util.ConverterAssertion;
-import org.eclipse.smarthome.config.xml.util.ConverterAttributeMapValidator;
-import org.eclipse.smarthome.config.xml.util.GenericUnmarshaller;
-import org.eclipse.smarthome.config.xml.util.NodeIterator;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
+import org.openhab.core.config.xml.util.ConverterAssertion;
+import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
+import org.openhab.core.config.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.xml.util.NodeIterator;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;

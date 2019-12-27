@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.test;
+package org.openhab.core.test;
 
 import java.io.IOException;
 import java.net.ServerSocket;

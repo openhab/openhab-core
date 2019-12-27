@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.inbox.events;
+package org.openhab.core.config.discovery.inbox.events;
 
-import org.eclipse.smarthome.config.discovery.dto.DiscoveryResultDTO;
-import org.eclipse.smarthome.config.discovery.inbox.Inbox;
-import org.eclipse.smarthome.core.events.AbstractEvent;
+import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
+import org.openhab.core.config.discovery.inbox.Inbox;
+import org.openhab.core.events.AbstractEvent;
 
 /**
  * Abstract implementation of an inbox event which will be posted by the {@link Inbox} for added, removed

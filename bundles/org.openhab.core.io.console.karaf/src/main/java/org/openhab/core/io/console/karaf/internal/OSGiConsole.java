@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.karaf.internal;
+package org.openhab.core.io.console.karaf.internal;
 
-import org.eclipse.smarthome.io.console.Console;
+import org.openhab.core.io.console.Console;
 
 /**
  *

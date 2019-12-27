@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.internal;
+package org.openhab.core.io.transport.mqtt.internal;
 
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.io.transport.mqtt.MqttMessageSubscriber;
+import org.openhab.core.io.transport.mqtt.MqttMessageSubscriber;
 
 /**
  * A list of all subscribers for a given topic. This object also stores a regex pattern for the topic, where

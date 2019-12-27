@@ -12,7 +12,7 @@
  */
 package org.openhab.core.automation.events;
 
-import org.eclipse.smarthome.core.events.AbstractEvent;
+import org.openhab.core.events.AbstractEvent;
 import org.openhab.core.automation.RuleStatusInfo;
 
 /**

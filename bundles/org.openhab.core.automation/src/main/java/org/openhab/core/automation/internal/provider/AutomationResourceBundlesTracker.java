@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.smarthome.core.common.registry.Provider;
+import org.openhab.core.common.registry.Provider;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.parser.Parser;

@@ -16,7 +16,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Identifiable;
+import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.automation.Visibility;
 
 /**

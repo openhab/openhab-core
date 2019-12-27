@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal;
+package org.openhab.core.voice.internal;
 
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.voice.Voice;
+import org.openhab.core.voice.Voice;
 
 /**
  * A {@link Voice} stub used for the tests.

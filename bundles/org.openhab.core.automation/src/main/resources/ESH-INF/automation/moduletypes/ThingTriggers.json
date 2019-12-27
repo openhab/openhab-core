@@ -55,13 +55,13 @@
 			"outputs": [
 				{
 					"name": "status",
-					"type": "org.eclipse.smarthome.core.thing.ThingStatus",
+					"type": "org.openhab.core.thing.ThingStatus",
 					"label": "Status",
 					"description": "The status of the thing."
 				},
 				{
 					"name": "event",
-					"type": "org.eclipse.smarthome.core.events.Event",
+					"type": "org.openhab.core.events.Event",
 					"label": "Event",
 					"description": "The event which was sent.",
 					"reference": "event"
@@ -161,19 +161,19 @@
 			"outputs": [
 				{
 					"name": "newStatus",
-					"type": "org.eclipse.smarthome.core.thing.ThingStatus",
+					"type": "org.openhab.core.thing.ThingStatus",
 					"label": "New Status",
 					"description": "The new status of the thing."
 				},
 				{
 					"name": "oldStatus",
-					"type": "org.eclipse.smarthome.core.thing.ThingStatus",
+					"type": "org.openhab.core.thing.ThingStatus",
 					"label": "Old Status",
 					"description": "The old status of the thing."
 				},
 				{
 					"name": "event",
-					"type": "org.eclipse.smarthome.core.events.Event",
+					"type": "org.openhab.core.events.Event",
 					"label": "Event",
 					"description": "The event which was sent.",
 					"reference": "event"

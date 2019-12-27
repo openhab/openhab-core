@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence.dto;
+package org.openhab.core.persistence.dto;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.types.State;
 
 /**
  * This is a java bean that is used to serialize items to JSON.

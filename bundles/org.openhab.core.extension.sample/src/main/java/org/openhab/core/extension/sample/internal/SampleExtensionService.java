@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.extension.sample.internal;
+package org.openhab.core.extension.sample.internal;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -22,12 +22,12 @@ import java.util.Random;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.extension.Extension;
-import org.eclipse.smarthome.core.extension.ExtensionEventFactory;
-import org.eclipse.smarthome.core.extension.ExtensionService;
-import org.eclipse.smarthome.core.extension.ExtensionType;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.extension.Extension;
+import org.openhab.core.extension.ExtensionEventFactory;
+import org.openhab.core.extension.ExtensionService;
+import org.openhab.core.extension.ExtensionType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

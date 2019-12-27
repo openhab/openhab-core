@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal.automation.modules;
+package org.openhab.core.magic.binding.internal.automation.modules;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.thing.binding.ThingActions;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicActionModuleThingHandler;
+import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.magic.binding.handler.MagicActionModuleThingHandler;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
 import org.openhab.core.automation.annotation.ActionScope;

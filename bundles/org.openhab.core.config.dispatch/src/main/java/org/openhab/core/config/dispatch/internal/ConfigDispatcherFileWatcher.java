@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.dispatch.internal;
+package org.openhab.core.config.dispatch.internal;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -19,8 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.service.AbstractWatchService;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.service.AbstractWatchService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.events;
+package org.openhab.core.thing.events;
 
-import org.eclipse.smarthome.core.events.AbstractEvent;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.dto.ThingDTO;
+import org.openhab.core.events.AbstractEvent;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.dto.ThingDTO;
 
 /**
  * Abstract implementation of a thing registry event which will be posted by a {@link ThingRegistry} for added, removed

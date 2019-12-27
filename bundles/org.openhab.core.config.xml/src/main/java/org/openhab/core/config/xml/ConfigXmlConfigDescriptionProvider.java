@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml;
+package org.openhab.core.config.xml;
 
 import java.util.List;
 import java.util.concurrent.Future;
@@ -18,17 +18,17 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
-import org.eclipse.smarthome.config.core.i18n.ConfigI18nLocalizationService;
-import org.eclipse.smarthome.config.xml.internal.ConfigDescriptionReader;
-import org.eclipse.smarthome.config.xml.internal.ConfigDescriptionXmlProvider;
-import org.eclipse.smarthome.config.xml.osgi.XmlDocumentBundleTracker;
-import org.eclipse.smarthome.config.xml.osgi.XmlDocumentProvider;
-import org.eclipse.smarthome.config.xml.osgi.XmlDocumentProviderFactory;
-import org.eclipse.smarthome.config.xml.util.XmlDocumentReader;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.service.ReadyService;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.core.i18n.ConfigI18nLocalizationService;
+import org.openhab.core.config.xml.internal.ConfigDescriptionReader;
+import org.openhab.core.config.xml.internal.ConfigDescriptionXmlProvider;
+import org.openhab.core.config.xml.osgi.XmlDocumentBundleTracker;
+import org.openhab.core.config.xml.osgi.XmlDocumentProvider;
+import org.openhab.core.config.xml.osgi.XmlDocumentProviderFactory;
+import org.openhab.core.config.xml.util.XmlDocumentReader;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.service.ReadyService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;

@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml;
+package org.openhab.core.config.xml;
 
-import org.eclipse.smarthome.config.core.FilterCriteria;
-import org.eclipse.smarthome.config.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.xml.util.GenericUnmarshaller;
 
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;

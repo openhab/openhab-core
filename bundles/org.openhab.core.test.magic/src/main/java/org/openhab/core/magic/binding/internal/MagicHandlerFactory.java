@@ -10,40 +10,40 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal;
+package org.openhab.core.magic.binding.internal;
 
-import static org.eclipse.smarthome.magic.binding.MagicBindingConstants.*;
+import static org.openhab.core.magic.binding.MagicBindingConstants.*;
 
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.magic.binding.handler.MagicActionModuleThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicBridgeHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicBridgedThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicChattyThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicColorLightHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicConfigurableThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicContactHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicDelayedOnlineHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicDimmableLightHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicDynamicStateDescriptionThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicExtensibleThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicFirmwareUpdateThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicImageHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicLocationThingHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicOnOffLightHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicOnlineOfflineHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicPlayerHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicRolllershutterHandler;
-import org.eclipse.smarthome.magic.binding.handler.MagicThermostatThingHandler;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.magic.binding.handler.MagicActionModuleThingHandler;
+import org.openhab.core.magic.binding.handler.MagicBridgeHandler;
+import org.openhab.core.magic.binding.handler.MagicBridgedThingHandler;
+import org.openhab.core.magic.binding.handler.MagicChattyThingHandler;
+import org.openhab.core.magic.binding.handler.MagicColorLightHandler;
+import org.openhab.core.magic.binding.handler.MagicConfigurableThingHandler;
+import org.openhab.core.magic.binding.handler.MagicContactHandler;
+import org.openhab.core.magic.binding.handler.MagicDelayedOnlineHandler;
+import org.openhab.core.magic.binding.handler.MagicDimmableLightHandler;
+import org.openhab.core.magic.binding.handler.MagicDynamicStateDescriptionThingHandler;
+import org.openhab.core.magic.binding.handler.MagicExtensibleThingHandler;
+import org.openhab.core.magic.binding.handler.MagicFirmwareUpdateThingHandler;
+import org.openhab.core.magic.binding.handler.MagicImageHandler;
+import org.openhab.core.magic.binding.handler.MagicLocationThingHandler;
+import org.openhab.core.magic.binding.handler.MagicOnOffLightHandler;
+import org.openhab.core.magic.binding.handler.MagicOnlineOfflineHandler;
+import org.openhab.core.magic.binding.handler.MagicPlayerHandler;
+import org.openhab.core.magic.binding.handler.MagicRolllershutterHandler;
+import org.openhab.core.magic.binding.handler.MagicThermostatThingHandler;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

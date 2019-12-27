@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.net.http;
+package org.openhab.core.io.net.http;
 
 /**
  * This exception is thrown, if an unexpected error occurs during initialization of the Jetty client

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link.dto;
+package org.openhab.core.thing.link.dto;
 
 /**
  * This is an abstract class for link data transfer object that is used to serialize links.

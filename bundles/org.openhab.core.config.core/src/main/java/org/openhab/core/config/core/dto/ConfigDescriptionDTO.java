@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.dto;
+package org.openhab.core.config.core.dto;
 
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescription;
 
 /**
  * {@link ConfigDescriptionDTO} is a data transfer object for {@link ConfigDescription}.

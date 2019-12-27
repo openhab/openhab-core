@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mdns;
+package org.openhab.core.io.transport.mdns;
 
 /**
  * This interface defines how to use JmDNS based service discovery

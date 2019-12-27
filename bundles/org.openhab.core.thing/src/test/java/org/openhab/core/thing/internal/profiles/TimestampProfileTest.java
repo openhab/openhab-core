@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.profiles;
+package org.openhab.core.thing.internal.profiles;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -18,11 +18,11 @@ import static org.mockito.Mockito.*;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.thing.profiles.ProfileCallback;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.thing.profiles.ProfileCallback;
+import org.openhab.core.types.State;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 

@@ -10,32 +10,32 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link;
+package org.openhab.core.thing.link;
 
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.common.registry.Provider;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
-import org.eclipse.smarthome.core.events.AbstractTypedEventSubscriber;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ManagedThingProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.events.ThingStatusInfoChangedEvent;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
-import org.eclipse.smarthome.core.thing.util.ThingHandlerHelper;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.common.registry.Provider;
+import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.events.AbstractTypedEventSubscriber;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.ManagedThingProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.events.ThingStatusInfoChangedEvent;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -57,10 +57,10 @@ import org.slf4j.LoggerFactory;
  *         ThingSetupManager)
  * @author Markus Rathgeb - Send link notification if item and link exists and unlink on the first removal
  */
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.links", service = { ThingLinkManager.class,
+@Component(immediate = true, configurationPid = "org.openhab.core.links", service = { ThingLinkManager.class,
         EventSubscriber.class }, property = { "service.config.description.uri:String=system:links",
                 "service.config.label:String=Item Linking", "service.config.category:String=system",
-                "service.pid:String=org.eclipse.smarthome.links" })
+                "service.pid:String=org.openhab.core.links" })
 @NonNullByDefault
 public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusInfoChangedEvent> {
 

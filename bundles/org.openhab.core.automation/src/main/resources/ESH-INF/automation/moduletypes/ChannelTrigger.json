@@ -30,7 +30,7 @@
 			"outputs": [
 				{
 					"name": "event",
-					"type": "org.eclipse.smarthome.core.events.Event",
+					"type": "org.openhab.core.events.Event",
 					"description": "the event of the channel trigger",
 					"label": "Event",
 					"reference": "channelEventTriggerId.event"

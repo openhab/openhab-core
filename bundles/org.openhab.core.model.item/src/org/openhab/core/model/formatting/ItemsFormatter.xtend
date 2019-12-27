@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.formatting
+package org.openhab.core.model.formatting
 
 import org.eclipse.xtext.formatting.impl.AbstractDeclarativeFormatter
 import org.eclipse.xtext.formatting.impl.FormattingConfig
 import com.google.inject.Inject
-import org.eclipse.smarthome.model.services.ItemsGrammarAccess
+import org.openhab.core.model.services.ItemsGrammarAccess
 
 /**
  * This class contains custom formatting description.

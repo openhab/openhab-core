@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.cache;
+package org.openhab.core.cache;
 
 import static org.junit.Assert.*;
 

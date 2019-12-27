@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.voiceconsolecommandextension;
+package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -21,16 +21,16 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.library.items.StringItem;
-import org.eclipse.smarthome.core.thing.ManagedThingProvider;
-import org.eclipse.smarthome.core.thing.ThingProvider;
-import org.eclipse.smarthome.core.voice.TTSService;
-import org.eclipse.smarthome.core.voice.internal.SinkStub;
-import org.eclipse.smarthome.core.voice.internal.TTSServiceStub;
-import org.eclipse.smarthome.core.voice.internal.VoiceStub;
-import org.eclipse.smarthome.test.storage.VolatileStorageService;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.thing.ManagedThingProvider;
+import org.openhab.core.thing.ThingProvider;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.internal.SinkStub;
+import org.openhab.core.voice.internal.TTSServiceStub;
+import org.openhab.core.voice.internal.VoiceStub;
+import org.openhab.core.test.storage.VolatileStorageService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,7 +112,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
             Dictionary<String, Object> config = new Hashtable<>();
             config.put(CONFIG_DEFAULT_TTS, defaultTTSService);
             ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-            String pid = "org.eclipse.smarthome.voice";
+            String pid = "org.openhab.core.voice";
             Configuration configuration = configAdmin.getConfiguration(pid);
             configuration.update(config);
         }

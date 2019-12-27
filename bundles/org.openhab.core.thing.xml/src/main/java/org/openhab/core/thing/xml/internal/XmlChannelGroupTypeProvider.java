@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.internal;
+package org.openhab.core.thing.xml.internal;
 
 import java.util.Collection;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.xml.AbstractXmlBasedProvider;
-import org.eclipse.smarthome.core.thing.UID;
-import org.eclipse.smarthome.core.thing.i18n.ChannelGroupTypeI18nLocalizationService;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
+import org.openhab.core.config.xml.AbstractXmlBasedProvider;
+import org.openhab.core.thing.UID;
+import org.openhab.core.thing.i18n.ChannelGroupTypeI18nLocalizationService;
+import org.openhab.core.thing.type.ChannelGroupType;
+import org.openhab.core.thing.type.ChannelGroupTypeProvider;
+import org.openhab.core.thing.type.ChannelGroupTypeUID;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

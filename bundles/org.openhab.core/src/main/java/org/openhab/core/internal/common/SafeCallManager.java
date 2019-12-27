@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.common;
+package org.openhab.core.internal.common;
 
 import java.util.concurrent.ExecutorService;
 

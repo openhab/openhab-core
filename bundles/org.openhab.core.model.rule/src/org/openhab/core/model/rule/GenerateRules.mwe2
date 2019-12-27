@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-module org.eclipse.smarthome.model.rule.GenerateRules
+module org.openhab.core.model.rule.GenerateRules
 
 import org.eclipse.xtext.xtext.generator.*
 import org.eclipse.xtext.xtext.generator.model.project.*
@@ -18,7 +18,7 @@ import org.eclipse.xtext.xtext.generator.model.project.*
 var rootPath = ".."
 var fileExtensions = "rules"
 var projectName = "org.openhab.core.model.rule"
-var languageName = "org.eclipse.smarthome.model.rule.Rules"
+var languageName = "org.openhab.core.model.rule.Rules"
 var generateXtendStub = true
 var encoding = "UTF-8"
 

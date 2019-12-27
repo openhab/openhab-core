@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.types;
+package org.openhab.core.types;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;

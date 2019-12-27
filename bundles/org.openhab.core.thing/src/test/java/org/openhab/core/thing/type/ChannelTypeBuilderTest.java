@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -22,10 +22,10 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
-import org.eclipse.smarthome.core.types.EventDescription;
-import org.eclipse.smarthome.core.types.EventOption;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.thing.CommonTriggerEvents;
+import org.openhab.core.types.EventDescription;
+import org.openhab.core.types.EventOption;
+import org.openhab.core.types.StateDescription;
 import org.junit.Before;
 import org.junit.Test;
 

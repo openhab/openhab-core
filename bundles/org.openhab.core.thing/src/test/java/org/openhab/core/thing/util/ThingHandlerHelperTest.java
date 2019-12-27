@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.util;
+package org.openhab.core.thing.util;
 
-import static org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder.create;
-import static org.eclipse.smarthome.core.thing.util.ThingHandlerHelper.isHandlerInitialized;
+import static org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder.create;
+import static org.openhab.core.thing.util.ThingHandlerHelper.isHandlerInitialized;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

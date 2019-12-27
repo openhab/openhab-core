@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.internal;
+package org.openhab.core.io.http.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.eclipse.smarthome.io.http.WrappingHttpContext;
+import org.openhab.core.io.http.WrappingHttpContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

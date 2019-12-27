@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.normalization;
+package org.openhab.core.config.core.internal.normalization;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
@@ -19,8 +19,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
  * The {@link NormalizerFactory} can be used in order to obtain the {@link Normalizer} for any concrete

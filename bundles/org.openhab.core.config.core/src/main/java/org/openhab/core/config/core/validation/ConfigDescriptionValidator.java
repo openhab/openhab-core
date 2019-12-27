@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.validation;
+package org.openhab.core.config.core.validation;
 
 import java.net.URI;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * The {@link ConfigDescriptionValidator} validates a given set of {@link Configuration} parameters against a

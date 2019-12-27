@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.internal.engine.action;
+package org.openhab.core.model.script.internal.engine.action;
 
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.model.script.actions.Audio;
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.model.script.actions.Audio;
+import org.openhab.core.model.script.engine.action.ActionService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

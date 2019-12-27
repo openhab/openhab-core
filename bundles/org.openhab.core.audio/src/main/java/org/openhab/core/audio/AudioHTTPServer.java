@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio;
+package org.openhab.core.audio;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.audio.internal.AudioServlet;
+import org.openhab.core.audio.internal.AudioServlet;
 
 /**
  * This is an interface that is implemented by {@link AudioServlet} and which allows exposing audio streams through

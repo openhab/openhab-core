@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.unit;
+package org.openhab.core.library.unit;
 
 import java.math.BigInteger;
 
@@ -49,12 +49,12 @@ import javax.measure.quantity.Volume;
 import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.dimension.ArealDensity;
-import org.eclipse.smarthome.core.library.dimension.DataAmount;
-import org.eclipse.smarthome.core.library.dimension.DataTransferRate;
-import org.eclipse.smarthome.core.library.dimension.Density;
-import org.eclipse.smarthome.core.library.dimension.Intensity;
-import org.eclipse.smarthome.core.library.dimension.VolumetricFlowRate;
+import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.DataAmount;
+import org.openhab.core.library.dimension.DataTransferRate;
+import org.openhab.core.library.dimension.Density;
+import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.VolumetricFlowRate;
 
 import tec.uom.se.AbstractUnit;
 import tec.uom.se.format.SimpleUnitFormat;

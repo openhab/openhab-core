@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.common;
+package org.openhab.core.internal.common;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -19,9 +19,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.SafeCaller;
-import org.eclipse.smarthome.core.common.SafeCallerBuilder;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
+import org.openhab.core.common.SafeCaller;
+import org.openhab.core.common.SafeCallerBuilder;
+import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Modified;
  * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
-@Component(configurationPid = "org.eclipse.smarthome.safecaller", immediate = true)
+@Component(configurationPid = "org.openhab.core.safecaller", immediate = true)
 public class SafeCallerImpl implements SafeCaller {
 
     private static final String SAFE_CALL_POOL_NAME = "safeCall";

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.scheduler;
+package org.openhab.core.internal.scheduler;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -30,11 +30,11 @@ import java.util.function.Consumer;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
-import org.eclipse.smarthome.core.scheduler.Scheduler;
-import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
-import org.eclipse.smarthome.core.scheduler.SchedulerTemporalAdjuster;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.scheduler.Scheduler;
+import org.openhab.core.scheduler.SchedulerRunnable;
+import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

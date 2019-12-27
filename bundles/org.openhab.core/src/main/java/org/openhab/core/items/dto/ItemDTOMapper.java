@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items.dto;
+package org.openhab.core.items.dto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +20,15 @@ import javax.measure.Quantity;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.internal.items.GroupFunctionHelper;
-import org.eclipse.smarthome.core.items.GroupFunction;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemBuilder;
-import org.eclipse.smarthome.core.items.ItemBuilderFactory;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.TypeParser;
+import org.openhab.core.internal.items.GroupFunctionHelper;
+import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilder;
+import org.openhab.core.items.ItemBuilderFactory;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.types.State;
+import org.openhab.core.types.TypeParser;
 import org.slf4j.LoggerFactory;
 
 /**

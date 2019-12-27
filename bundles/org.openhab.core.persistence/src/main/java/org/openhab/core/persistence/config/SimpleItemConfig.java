@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence.config;
+package org.openhab.core.persistence.config;
 
 /**
  * This class represents the configuration that identify item(s) by name.

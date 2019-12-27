@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.persistence.scoping;
+package org.openhab.core.model.persistence.scoping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
-import org.eclipse.smarthome.model.persistence.persistence.Strategy;
+import org.openhab.core.model.persistence.persistence.Strategy;
 import org.eclipse.xtext.resource.EObjectDescription;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
@@ -34,7 +34,7 @@ public class PersistenceGlobalScopeProvider extends AbstractGlobalScopeProvider 
     static protected Resource res = new ResourceImpl();
 
     static {
-        res.setURI(URI.createURI("virtual://eclipse.org/smarthome/persistence/strategy.global"));
+        res.setURI(URI.createURI("virtual://openhab.org/persistence/strategy.global"));
         res.getContents().add(GlobalStrategies.UPDATE);
         res.getContents().add(GlobalStrategies.CHANGE);
         res.getContents().add(GlobalStrategies.RESTORE);

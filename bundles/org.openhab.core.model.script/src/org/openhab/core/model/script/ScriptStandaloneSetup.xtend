@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script
+package org.openhab.core.model.script
 
 import com.google.inject.Guice
 import com.google.inject.Injector
-import org.eclipse.smarthome.model.script.engine.ScriptEngine
+import org.openhab.core.model.script.engine.ScriptEngine
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.resource.IResourceServiceProvider
@@ -67,7 +67,7 @@ class ScriptStandaloneSetup extends ScriptStandaloneSetupGenerated {
     }
     
     def static void unregister() {
-        EPackage.Registry.INSTANCE.remove("http://www.eclipse.org/smarthome/model/Script");
+        EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Script");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("script");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("script");
         

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.persistence
+package org.openhab.core.model.persistence
 
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
@@ -26,7 +26,7 @@ class PersistenceStandaloneSetup extends PersistenceStandaloneSetupGenerated {
     }
     
     def static void unregister() {
-        EPackage.Registry.INSTANCE.remove("http://www.eclipse.org/smarthome/model/Persistence");
+        EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Persistence");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("persist");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("persist");
     }

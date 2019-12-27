@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.runtime.internal;
+package org.openhab.core.model.rule.runtime.internal;
 
-import org.eclipse.smarthome.model.core.ModelParser;
-import org.eclipse.smarthome.model.rule.RulesStandaloneSetup;
-import org.eclipse.smarthome.model.script.ScriptServiceUtil;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
+import org.openhab.core.model.core.ModelParser;
+import org.openhab.core.model.rule.RulesStandaloneSetup;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.engine.ScriptEngine;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

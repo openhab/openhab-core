@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.internal;
+package org.openhab.core.thing.xml.internal;
 
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.xml.util.ConverterAttributeMapValidator;
-import org.eclipse.smarthome.config.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
+import org.openhab.core.config.xml.util.GenericUnmarshaller;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;

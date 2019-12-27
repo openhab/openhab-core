@@ -22,7 +22,7 @@ Its category should also be `RuleActions`.
 
 ### Thing
 
-For actions that need access to the logic of a `ThingHandler`, one has to implement a service which implements the `org.eclipse.smarthome.core.thing.binding.AnnotatedActionThingHandlerService` interface.
+For actions that need access to the logic of a `ThingHandler`, one has to implement a service which implements the `org.openhab.core.thing.binding.AnnotatedActionThingHandlerService` interface.
 The `ThingHandler` has to override the `Collection<Class> getServices()` method from the `BaseThingHandler` and return the class of the aforementioned service.
 The framework takes care of registering and un-registering of that service.
 
@@ -45,4 +45,4 @@ Within the implementation of the method, only those output names which are speci
 
 ## Examples
 
-For examples, please see the package `org.eclipse.smarthome.magic.binding.internal.automation.modules` inside the `org.eclipse.smarthome.magic` bundle.
+For examples, please see the package `org.openhab.core.magic.binding.internal.automation.modules` inside the `org.openhab.core.magic` bundle.

@@ -10,22 +10,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml;
+package org.openhab.core.config.xml;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
-import org.eclipse.smarthome.config.core.FilterCriteria;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.config.xml.util.ConverterAttributeMapValidator;
-import org.eclipse.smarthome.config.xml.util.ConverterValueMap;
-import org.eclipse.smarthome.config.xml.util.GenericUnmarshaller;
-import org.eclipse.smarthome.config.xml.util.NodeValue;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
+import org.openhab.core.config.xml.util.ConverterValueMap;
+import org.openhab.core.config.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.xml.util.NodeValue;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;

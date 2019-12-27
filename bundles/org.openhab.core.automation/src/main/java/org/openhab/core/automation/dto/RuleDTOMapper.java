@@ -12,8 +12,8 @@
  */
 package org.openhab.core.automation.dto;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.dto.RuleDTO;
 import org.openhab.core.automation.util.RuleBuilder;

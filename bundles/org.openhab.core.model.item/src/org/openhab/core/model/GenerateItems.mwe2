@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-module org.eclipse.smarthome.model.GenerateItems
+module org.openhab.core.model.GenerateItems
 
 import org.eclipse.xtext.xtext.generator.*
 import org.eclipse.xtext.xtext.generator.model.project.*
@@ -19,7 +19,7 @@ var rootPath = ".."
 
 var fileExtensions = "items"
 var projectName = "org.openhab.core.model.item"
-var languageName = "org.eclipse.smarthome.model.Items"
+var languageName = "org.openhab.core.model.Items"
 var generateXtendStub = true
 var encoding = "UTF-8"
 

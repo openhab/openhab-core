@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.i18n;
+package org.openhab.core.config.core.internal.i18n;
 
 import java.net.URI;
 import java.time.ZoneId;
@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
-import org.eclipse.smarthome.config.core.ParameterOption;
+import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ParameterOption;
 import org.osgi.service.component.annotations.Component;
 
 /**

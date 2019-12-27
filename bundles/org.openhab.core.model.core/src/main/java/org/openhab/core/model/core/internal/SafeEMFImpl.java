@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.core.internal;
+package org.openhab.core.model.core.internal;
 
 import java.util.function.Supplier;
 
-import org.eclipse.smarthome.model.core.SafeEMF;
+import org.openhab.core.model.core.SafeEMF;
 import org.osgi.service.component.annotations.Component;
 
 /**

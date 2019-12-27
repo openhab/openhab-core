@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio.internal;
+package org.openhab.core.audio.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -25,17 +25,17 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.function.BiFunction;
 
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioSource;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.ByteArrayAudioStream;
-import org.eclipse.smarthome.core.audio.FileAudioStream;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioStreamException;
-import org.eclipse.smarthome.core.audio.internal.fake.AudioSinkFake;
-import org.eclipse.smarthome.core.audio.internal.utils.BundledSoundFileHandler;
-import org.eclipse.smarthome.core.library.types.PercentType;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.ByteArrayAudioStream;
+import org.openhab.core.audio.FileAudioStream;
+import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.audio.internal.fake.AudioSinkFake;
+import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
+import org.openhab.core.library.types.PercentType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

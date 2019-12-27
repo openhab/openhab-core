@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.scoping;
+package org.openhab.core.model.script.scoping;
 
-import org.eclipse.smarthome.core.thing.binding.ThingActions;
-import org.eclipse.smarthome.model.script.ScriptServiceUtil;
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
+import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.engine.action.ActionService;
 
 /**
  * This is a special class loader that tries to resolve classes from available {@link ActionService}s,

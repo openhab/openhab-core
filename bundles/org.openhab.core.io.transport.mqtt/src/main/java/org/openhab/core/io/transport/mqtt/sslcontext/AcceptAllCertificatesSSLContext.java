@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.sslcontext;
+package org.openhab.core.io.transport.mqtt.sslcontext;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;

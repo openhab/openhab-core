@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.persistence.scoping;
+package org.openhab.core.model.persistence.scoping;
 
-import org.eclipse.smarthome.model.persistence.persistence.Strategy;
-import org.eclipse.smarthome.model.persistence.persistence.impl.StrategyImpl;
+import org.openhab.core.model.persistence.persistence.Strategy;
+import org.openhab.core.model.persistence.persistence.impl.StrategyImpl;
 
 /**
  * This class defines a few persistence strategies that are globally available to

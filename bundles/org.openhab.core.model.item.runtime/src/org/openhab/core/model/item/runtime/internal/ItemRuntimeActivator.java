@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.item.runtime.internal;
+package org.openhab.core.model.item.runtime.internal;
 
-import org.eclipse.smarthome.model.ItemsStandaloneSetup;
-import org.eclipse.smarthome.model.core.ModelParser;
+import org.openhab.core.model.ItemsStandaloneSetup;
+import org.openhab.core.model.core.ModelParser;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

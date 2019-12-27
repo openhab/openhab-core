@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.serial.internal;
+package org.openhab.core.io.transport.serial.internal;
 
 import java.net.URI;
 import java.util.Collection;
@@ -20,8 +20,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.io.transport.serial.ProtocolType.PathType;
-import org.eclipse.smarthome.io.transport.serial.SerialPortProvider;
+import org.openhab.core.io.transport.serial.ProtocolType.PathType;
+import org.openhab.core.io.transport.serial.SerialPortProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

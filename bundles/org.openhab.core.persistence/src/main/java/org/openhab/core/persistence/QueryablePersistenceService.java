@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence;
+package org.openhab.core.persistence;
 
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.Item;
+import org.openhab.core.items.Item;
 
 /**
  * A queryable persistence service which can be used to store and retrieve

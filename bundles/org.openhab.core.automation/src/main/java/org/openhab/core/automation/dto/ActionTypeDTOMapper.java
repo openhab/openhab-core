@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.CompositeActionType;
 

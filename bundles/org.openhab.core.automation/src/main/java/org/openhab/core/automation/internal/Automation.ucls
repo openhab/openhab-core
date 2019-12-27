@@ -3,7 +3,7 @@
   associations="true" dependencies="true" nesting-relationships="true" router="FAN">  
   <interface id="1" language="java" name="org.openhab.core.automation.RuleProvider" 
     project="org.openhab.core.automation.api" 
-    file="/org.openhab.core.automation.api/src/main/java/org/eclipse/smarthome/automation/RuleProvider.java" 
+    file="/org.openhab.core.automation.api/src/main/java/org/openhab/core/automation/RuleProvider.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="997" y="197"/>    
     <display autosize="false" stereotype="false" package="false" initial-value="false" signature="false" 
@@ -14,7 +14,7 @@
   </interface>  
   <interface id="2" language="java" name="org.openhab.core.automation.handler.ModuleHandlerFactory" 
     project="org.openhab.core.automation.api" 
-    file="/org.openhab.core.automation.api/src/main/java/org/eclipse/smarthome/automation/handler/ModuleHandlerFactory.java" 
+    file="/org.openhab.core.automation.api/src/main/java/org/openhab/core/automation/handler/ModuleHandlerFactory.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="580" y="72"/>    
     <display autosize="false" stereotype="false" package="false" initial-value="false" signature="false" 
@@ -25,7 +25,7 @@
   </interface>  
   <class id="3" language="java" name="org.openhab.core.automation.core.ManagedRuleProvider" 
     project="org.openhab.core.automation.core" 
-    file="/org.openhab.core.automation.core/src/main/java/org/eclipse/smarthome/automation/core/ManagedRuleProvider.java" 
+    file="/org.openhab.core.automation.core/src/main/java/org/openhab/core/automation/core/ManagedRuleProvider.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="883" y="29"/>    
     <display autosize="false" stereotype="false" package="false" initial-value="false" signature="false" 
@@ -36,7 +36,7 @@
   </class>  
   <interface id="4" language="java" name="org.openhab.core.automation.handler.ModuleHandler" 
     project="org.openhab.core.automation.api" 
-    file="/org.openhab.core.automation.api/src/main/java/org/eclipse/smarthome/automation/handler/ModuleHandler.java" 
+    file="/org.openhab.core.automation.api/src/main/java/org/openhab/core/automation/handler/ModuleHandler.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="371" y="-60"/>    
     <display autosize="false" stereotype="false" package="false" initial-value="false" signature="false" 
@@ -47,7 +47,7 @@
   </interface>  
   <class id="5" language="java" name="org.openhab.core.automation.core.internal.RuleEngineCallbackImpl.TriggerData" 
     project="org.openhab.core.automation.core" 
-    file="/org.openhab.core.automation.core/src/main/java/org/eclipse/smarthome/automation/core/internal/RuleEngineCallbackImpl.java" 
+    file="/org.openhab.core.automation.core/src/main/java/org/openhab/core/automation/core/internal/RuleEngineCallbackImpl.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="99" y="558"/>    
     <display autosize="false" stereotype="false" package="false" initial-value="false" signature="false" 
@@ -58,7 +58,7 @@
   </class>  
   <class id="6" language="java" name="org.openhab.core.automation.core.internal.RuleEngineCallbackImpl" 
     project="org.openhab.core.automation.core" 
-    file="/org.openhab.core.automation.core/src/main/java/org/eclipse/smarthome/automation/core/internal/RuleEngineCallbackImpl.java" 
+    file="/org.openhab.core.automation.core/src/main/java/org/openhab/core/automation/core/internal/RuleEngineCallbackImpl.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="102" y="257"/>    
     <display autosize="false" stereotype="false" package="false" initial-value="false" signature="false" 
@@ -69,7 +69,7 @@
   </class>  
   <class id="7" language="java" name="org.openhab.core.automation.core.internal.RuleEngineImpl" 
     project="org.openhab.core.automation.core" 
-    file="/org.openhab.core.automation.core/src/main/java/org/eclipse/smarthome/automation/core/internal/RuleEngineImpl.java" 
+    file="/org.openhab.core.automation.core/src/main/java/org/openhab/core/automation/core/internal/RuleEngineImpl.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="345" y="573"/>    
     <display autosize="false" stereotype="false" package="false" initial-value="false" signature="false" 
@@ -80,7 +80,7 @@
   </class>  
   <class id="8" language="java" name="org.openhab.core.automation.core.internal.RuleRegistryImpl" 
     project="org.openhab.core.automation.core" 
-    file="/org.openhab.core.automation.core/src/main/java/org/eclipse/smarthome/automation/core/internal/RuleRegistryImpl.java" 
+    file="/org.openhab.core.automation.core/src/main/java/org/openhab/core/automation/core/internal/RuleRegistryImpl.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="928" y="766"/>    
     <display autosize="false" stereotype="false" package="false" initial-value="false" signature="false" 

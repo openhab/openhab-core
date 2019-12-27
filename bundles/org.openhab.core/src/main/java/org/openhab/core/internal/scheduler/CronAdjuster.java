@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.scheduler;
+package org.openhab.core.internal.scheduler;
 
 import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
@@ -31,7 +31,7 @@ import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.scheduler.SchedulerTemporalAdjuster;
+import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 
 /**
  * This class creates a {@link TemporalAdjuster} that takes a temporal and adjust it to the next deadline based on a

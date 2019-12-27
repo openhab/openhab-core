@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.i18n;
+package org.openhab.core.internal.i18n;
 
-import static org.eclipse.smarthome.core.internal.i18n.I18nProviderImpl.*;
+import static org.openhab.core.internal.i18n.I18nProviderImpl.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.eclipse.smarthome.core.library.types.PointType;
+import org.openhab.core.library.types.PointType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

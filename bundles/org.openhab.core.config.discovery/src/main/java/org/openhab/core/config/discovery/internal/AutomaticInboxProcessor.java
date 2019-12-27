@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.internal;
+package org.openhab.core.config.discovery.internal;
 
-import static org.eclipse.smarthome.config.discovery.inbox.InboxPredicates.*;
+import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.util.List;
 import java.util.Map;
@@ -24,23 +24,23 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
-import org.eclipse.smarthome.config.discovery.inbox.Inbox;
-import org.eclipse.smarthome.config.discovery.inbox.InboxAutoApprovePredicate;
-import org.eclipse.smarthome.config.discovery.inbox.InboxListener;
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
-import org.eclipse.smarthome.core.events.AbstractTypedEventSubscriber;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.events.ThingStatusInfoChangedEvent;
-import org.eclipse.smarthome.core.thing.type.ThingType;
-import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultFlag;
+import org.openhab.core.config.discovery.inbox.Inbox;
+import org.openhab.core.config.discovery.inbox.InboxAutoApprovePredicate;
+import org.openhab.core.config.discovery.inbox.InboxListener;
+import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.events.AbstractTypedEventSubscriber;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.events.ThingStatusInfoChangedEvent;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -86,8 +86,8 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - added auto-approve functionality
  * @author Henning Sudbrock - added hook for selectively auto-approving inbox entries
  */
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.inbox", service = EventSubscriber.class, property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.inbox",
+@Component(immediate = true, configurationPid = "org.openhab.core.inbox", service = EventSubscriber.class, property = {
+        Constants.SERVICE_PID + "=org.openhab.core.inbox",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Inbox",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=system:inbox" })

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml.osgi;
+package org.openhab.core.config.xml.osgi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.framework.Bundle;

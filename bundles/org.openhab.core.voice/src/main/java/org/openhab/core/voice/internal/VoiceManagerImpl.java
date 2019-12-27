@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal;
+package org.openhab.core.voice.internal;
 
 import static java.util.stream.Collectors.*;
 
@@ -30,27 +30,27 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioSource;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioFormatException;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioStreamException;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.voice.KSService;
-import org.eclipse.smarthome.core.voice.STTService;
-import org.eclipse.smarthome.core.voice.TTSException;
-import org.eclipse.smarthome.core.voice.TTSService;
-import org.eclipse.smarthome.core.voice.Voice;
-import org.eclipse.smarthome.core.voice.VoiceManager;
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.UnsupportedAudioFormatException;
+import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.voice.KSService;
+import org.openhab.core.voice.STTService;
+import org.openhab.core.voice.TTSException;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.Voice;
+import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationException;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -71,8 +71,8 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort TTS options
  */
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.voice", property = { //
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.voice", //
+@Component(immediate = true, configurationPid = "org.openhab.core.voice", property = { //
+        Constants.SERVICE_PID + "=org.openhab.core.voice", //
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Voice", //
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + VoiceManagerImpl.CONFIG_URI //

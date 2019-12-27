@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial.internal;
+package org.openhab.core.config.discovery.usbserial.internal;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.smarthome.config.discovery.DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY;
+import static org.openhab.core.config.discovery.DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
@@ -27,15 +27,15 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryListener;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscovery;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscoveryParticipant;
-import org.eclipse.smarthome.config.discovery.usbserial.testutil.UsbSerialDeviceInformationGenerator;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.config.discovery.DiscoveryListener;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscovery;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryParticipant;
+import org.openhab.core.config.discovery.usbserial.testutil.UsbSerialDeviceInformationGenerator;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

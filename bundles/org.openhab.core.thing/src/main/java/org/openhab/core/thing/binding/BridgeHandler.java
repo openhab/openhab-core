@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding;
+package org.openhab.core.thing.binding;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
 
 /**
  * A {@link BridgeHandler} handles the communication between the openHAB framework and

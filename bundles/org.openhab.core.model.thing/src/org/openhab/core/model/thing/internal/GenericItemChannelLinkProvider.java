@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.internal;
+package org.openhab.core.model.thing.internal;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -20,13 +20,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.common.registry.AbstractProvider;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLinkProvider;
-import org.eclipse.smarthome.model.item.BindingConfigParseException;
-import org.eclipse.smarthome.model.item.BindingConfigReader;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkProvider;
+import org.openhab.core.model.item.BindingConfigParseException;
+import org.openhab.core.model.item.BindingConfigReader;
 import org.osgi.service.component.annotations.Component;
 
 /**

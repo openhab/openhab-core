@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.binding;
+package org.openhab.core.io.rest.core.internal.binding;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,18 +34,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
-import org.eclipse.smarthome.config.core.ConfigUtil;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.binding.BindingInfo;
-import org.eclipse.smarthome.core.binding.BindingInfoRegistry;
-import org.eclipse.smarthome.core.binding.dto.BindingInfoDTO;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
-import org.eclipse.smarthome.io.rest.core.config.ConfigurationService;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.auth.Role;
+import org.openhab.core.binding.BindingInfo;
+import org.openhab.core.binding.BindingInfoRegistry;
+import org.openhab.core.binding.dto.BindingInfoDTO;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

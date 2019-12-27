@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.item;
+package org.openhab.core.io.rest.core.item;
 
 import java.net.URI;
 import java.util.Collection;
@@ -20,16 +20,16 @@ import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.dto.ItemDTO;
-import org.eclipse.smarthome.core.items.dto.ItemDTOMapper;
-import org.eclipse.smarthome.core.transform.TransformationException;
-import org.eclipse.smarthome.core.transform.TransformationHelper;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
-import org.eclipse.smarthome.io.rest.core.internal.RESTCoreActivator;
-import org.eclipse.smarthome.io.rest.core.internal.item.ItemResource;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.dto.ItemDTO;
+import org.openhab.core.items.dto.ItemDTOMapper;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationHelper;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.io.rest.core.internal.RESTCoreActivator;
+import org.openhab.core.io.rest.core.internal.item.ItemResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
