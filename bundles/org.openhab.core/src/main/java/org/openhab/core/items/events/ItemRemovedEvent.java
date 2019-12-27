@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items.events;
+package org.openhab.core.items.events;
 
-import org.eclipse.smarthome.core.items.dto.ItemDTO;
+import org.openhab.core.items.dto.ItemDTO;
 
 /**
  * An {@link ItemRemovedEvent} notifies subscribers that an item has been removed.

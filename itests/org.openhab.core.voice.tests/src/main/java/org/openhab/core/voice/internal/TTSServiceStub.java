@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal;
+package org.openhab.core.voice.internal;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -20,11 +20,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.voice.TTSException;
-import org.eclipse.smarthome.core.voice.TTSService;
-import org.eclipse.smarthome.core.voice.Voice;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.voice.TTSException;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.Voice;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;

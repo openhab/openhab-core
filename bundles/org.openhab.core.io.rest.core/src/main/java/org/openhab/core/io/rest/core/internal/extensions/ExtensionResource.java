@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.extensions;
+package org.openhab.core.io.rest.core.internal.extensions;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,18 +36,18 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.extension.Extension;
-import org.eclipse.smarthome.core.extension.ExtensionEventFactory;
-import org.eclipse.smarthome.core.extension.ExtensionService;
-import org.eclipse.smarthome.core.extension.ExtensionType;
-import org.eclipse.smarthome.io.rest.JSONResponse;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.openhab.core.auth.Role;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.extension.Extension;
+import org.openhab.core.extension.ExtensionEventFactory;
+import org.openhab.core.extension.ExtensionService;
+import org.openhab.core.extension.ExtensionType;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

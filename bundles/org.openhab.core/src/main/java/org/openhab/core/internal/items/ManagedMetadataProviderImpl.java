@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.AbstractManagedProvider;
-import org.eclipse.smarthome.core.items.ManagedMetadataProvider;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.items.MetadataPredicates;
-import org.eclipse.smarthome.core.items.MetadataProvider;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.common.registry.AbstractManagedProvider;
+import org.openhab.core.items.ManagedMetadataProvider;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataPredicates;
+import org.openhab.core.items.MetadataProvider;
+import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

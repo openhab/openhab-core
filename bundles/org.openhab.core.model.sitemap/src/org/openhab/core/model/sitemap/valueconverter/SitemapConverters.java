@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.sitemap.valueconverter;
+package org.openhab.core.model.sitemap.valueconverter;
 
 import java.util.regex.Pattern;
 

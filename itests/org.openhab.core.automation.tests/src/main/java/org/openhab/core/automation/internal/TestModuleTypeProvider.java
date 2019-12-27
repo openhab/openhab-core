@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
+import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ConditionType;
 import org.openhab.core.automation.type.Input;

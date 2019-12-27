@@ -15,7 +15,7 @@ package org.openhab.core.automation;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;

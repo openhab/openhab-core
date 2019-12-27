@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal;
+package org.openhab.core.voice.internal;
 
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationException;
 
 /**
  * A {@link HumanLanguageInterpreter} stub used for the tests. Since the tests do not cover

@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.service;
+package org.openhab.core.service;
 
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.types.StateDescription;
 
 /**
  * Implementations of this service provide strategies for merging info from

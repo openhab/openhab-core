@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.actions;
+package org.openhab.core.model.script.actions;
 
 import java.io.IOException;
 import java.net.InetAddress;

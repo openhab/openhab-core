@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.validation;
+package org.openhab.core.config.core.internal.validation;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.internal.validation.TypeIntrospections.TypeIntrospection;
-import org.eclipse.smarthome.config.core.validation.ConfigValidationMessage;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.internal.validation.TypeIntrospections.TypeIntrospection;
+import org.openhab.core.config.core.validation.ConfigValidationMessage;
 
 /**
  * The {@link TypeValidator} validates if the given value can be assigned to the config description parameter according

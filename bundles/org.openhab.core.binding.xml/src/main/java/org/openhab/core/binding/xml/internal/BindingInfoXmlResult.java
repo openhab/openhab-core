@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.binding.xml.internal;
+package org.openhab.core.binding.xml.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
-import org.eclipse.smarthome.core.binding.BindingInfo;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.binding.BindingInfo;
 
 /**
  * The {@link BindingInfoXmlResult} is an intermediate XML conversion result object which

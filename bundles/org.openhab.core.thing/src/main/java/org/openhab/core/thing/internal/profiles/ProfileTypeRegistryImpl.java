@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.profiles;
+package org.openhab.core.thing.internal.profiles;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.smarthome.core.thing.profiles.ProfileType;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeProvider;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeRegistry;
+import org.openhab.core.thing.profiles.ProfileType;
+import org.openhab.core.thing.profiles.ProfileTypeProvider;
+import org.openhab.core.thing.profiles.ProfileTypeRegistry;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.dto;
+package org.openhab.core.config.discovery.dto;
 
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultFlag;
+import org.openhab.core.config.discovery.DiscoveryResultFlag;
 
 /**
  * This is a data transfer object that is used to serialize discovery results.

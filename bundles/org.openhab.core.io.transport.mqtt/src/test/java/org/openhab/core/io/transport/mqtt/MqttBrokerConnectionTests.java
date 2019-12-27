@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt;
+package org.openhab.core.io.transport.mqtt;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -28,10 +28,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
-import org.eclipse.smarthome.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
-import org.eclipse.smarthome.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
+import org.openhab.core.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
+import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 

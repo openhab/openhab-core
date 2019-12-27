@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.item.internal;
+package org.openhab.core.model.item.internal;
 
 import static org.junit.Assert.*;
 
 import java.util.Collection;
 
-import org.eclipse.smarthome.core.items.Metadata;
+import org.openhab.core.items.Metadata;
 import org.junit.Test;
 
 /**

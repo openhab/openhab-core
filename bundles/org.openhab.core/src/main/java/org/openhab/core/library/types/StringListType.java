@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.types;
+package org.openhab.core.library.types;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * This type can be used for items that are dealing with telephony functionality.

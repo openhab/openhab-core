@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml.osgi;
+package org.openhab.core.config.xml.osgi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.xml.internal.ConfigDescriptionReader;
+import org.openhab.core.config.xml.internal.ConfigDescriptionReader;
 
 /**
  * The {@link XmlDocumentProvider} is responsible managing any created objects

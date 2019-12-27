@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.testutil;
+package org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 
 /**
  * Generate simple instances of {@link UsbSerialDeviceInformation} that can be used in tests.

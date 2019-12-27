@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.actions;
+package org.openhab.core.model.script.actions;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.smarthome.io.net.http.HttpUtil;
+import org.openhab.core.io.net.http.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

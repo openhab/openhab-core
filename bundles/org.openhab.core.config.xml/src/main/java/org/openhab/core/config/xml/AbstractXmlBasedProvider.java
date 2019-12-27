@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml;
+package org.openhab.core.config.xml;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Identifiable;
-import org.eclipse.smarthome.core.i18n.LocalizedKey;
+import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.i18n.LocalizedKey;
 import org.osgi.framework.Bundle;
 
 /**

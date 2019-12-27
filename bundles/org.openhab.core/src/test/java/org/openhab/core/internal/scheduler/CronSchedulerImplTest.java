@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.scheduler;
+package org.openhab.core.internal.scheduler;
 
 import static org.junit.Assert.*;
 
@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.smarthome.core.scheduler.CronJob;
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.scheduler.CronJob;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.junit.Test;
 
 /**

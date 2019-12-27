@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.types;
+package org.openhab.core.library.types;
 
 import static org.junit.Assert.assertTrue;
 
@@ -20,12 +20,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupFunction;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.Item;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.junit.Before;
 import org.junit.Test;
 

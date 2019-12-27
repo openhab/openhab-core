@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core;
+package org.openhab.core.config.core;
 
 import static java.util.Collections.*;
-import static org.eclipse.smarthome.config.core.ConfigUtil.normalizeTypes;
+import static org.openhab.core.config.core.ConfigUtil.normalizeTypes;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.internal.ConfigMapper;
+import org.openhab.core.config.core.internal.ConfigMapper;
 
 /**
  * This class is a wrapper for configuration settings of {@link Thing}s.

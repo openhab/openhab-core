@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.rfc147.internal;
+package org.openhab.core.io.console.rfc147.internal;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
-import org.eclipse.smarthome.io.console.rfc147.internal.extension.HelpConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.io.console.rfc147.internal.extension.HelpConsoleCommandExtension;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;

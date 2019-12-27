@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.service;
+package org.openhab.core.service;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

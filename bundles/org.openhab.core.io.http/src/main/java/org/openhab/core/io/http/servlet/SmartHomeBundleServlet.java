@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.servlet;
+package org.openhab.core.io.http.servlet;
 
-import org.eclipse.smarthome.io.http.HttpContextFactoryService;
+import org.openhab.core.io.http.HttpContextFactoryService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;

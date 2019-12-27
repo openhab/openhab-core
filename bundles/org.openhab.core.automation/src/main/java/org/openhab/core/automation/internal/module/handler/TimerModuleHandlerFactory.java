@@ -15,7 +15,7 @@ package org.openhab.core.automation.internal.module.handler;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.eclipse.smarthome.core.scheduler.CronScheduler;
+import org.openhab.core.scheduler.CronScheduler;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Trigger;

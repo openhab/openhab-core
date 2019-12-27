@@ -12,7 +12,7 @@
  */
 package org.openhab.core.automation.dto;
 
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
 import org.openhab.core.automation.dto.ModuleTypeDTO;
 import org.openhab.core.automation.type.ModuleType;
 

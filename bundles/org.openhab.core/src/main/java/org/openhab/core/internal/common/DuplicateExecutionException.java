@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.common;
+package org.openhab.core.internal.common;
 
 /**
  * Denotes that there already is a thread occupied by the same context.

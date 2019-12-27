@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.common.osgi;
+package org.openhab.core.common.osgi;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

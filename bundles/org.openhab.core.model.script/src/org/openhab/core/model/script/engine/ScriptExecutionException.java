@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.engine;
+package org.openhab.core.model.script.engine;
 
 /**
  * Exception that is thrown on errors during script execution.

@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal;
+package org.openhab.core.thing.internal;
 
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.thing.profiles.ProfileContext;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.thing.profiles.ProfileContext;
 
 /**
  * {@link ProfileContext} implementation.

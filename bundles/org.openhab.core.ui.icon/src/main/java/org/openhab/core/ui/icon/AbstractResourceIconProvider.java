@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.icon;
+package org.openhab.core.ui.icon;
 
 import java.io.InputStream;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.ui.icon.IconSet.Format;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.ui.icon.IconSet.Format;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

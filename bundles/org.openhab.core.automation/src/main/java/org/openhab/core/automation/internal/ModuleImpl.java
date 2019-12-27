@@ -13,8 +13,8 @@
 package org.openhab.core.automation.internal;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.type.Input;

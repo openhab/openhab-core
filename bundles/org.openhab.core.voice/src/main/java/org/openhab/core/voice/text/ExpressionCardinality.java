@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.text;
+package org.openhab.core.voice.text;
 
 import java.util.ArrayList;
 import java.util.Arrays;

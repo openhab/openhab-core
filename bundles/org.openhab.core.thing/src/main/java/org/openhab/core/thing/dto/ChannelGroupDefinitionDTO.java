@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.dto;
+package org.openhab.core.thing.dto;
 
 import java.util.List;
 

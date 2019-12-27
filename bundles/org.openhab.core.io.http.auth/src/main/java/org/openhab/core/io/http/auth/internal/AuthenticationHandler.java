@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.auth.internal;
+package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -22,14 +22,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.smarthome.core.auth.Authentication;
-import org.eclipse.smarthome.core.auth.AuthenticationException;
-import org.eclipse.smarthome.core.auth.AuthenticationManager;
-import org.eclipse.smarthome.core.auth.Credentials;
-import org.eclipse.smarthome.io.http.Handler;
-import org.eclipse.smarthome.io.http.HandlerContext;
-import org.eclipse.smarthome.io.http.HandlerPriorities;
-import org.eclipse.smarthome.io.http.auth.CredentialsExtractor;
+import org.openhab.core.auth.Authentication;
+import org.openhab.core.auth.AuthenticationException;
+import org.openhab.core.auth.AuthenticationManager;
+import org.openhab.core.auth.Credentials;
+import org.openhab.core.io.http.Handler;
+import org.openhab.core.io.http.HandlerContext;
+import org.openhab.core.io.http.HandlerPriorities;
+import org.openhab.core.io.http.auth.CredentialsExtractor;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Łukasz Dywicki - Initial contribution.
  */
-@Component(configurationPid = "org.eclipse.smarthome.auth")
+@Component(configurationPid = "org.openhab.core.auth")
 public class AuthenticationHandler implements Handler {
 
     private static final String AUTHENTICATION_ENABLED = "enabled";

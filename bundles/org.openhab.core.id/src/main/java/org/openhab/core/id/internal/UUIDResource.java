@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.id.internal;
+package org.openhab.core.id.internal;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -19,9 +19,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.id.InstanceUUID;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.openhab.core.auth.Role;
+import org.openhab.core.id.InstanceUUID;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 
 import io.swagger.annotations.Api;

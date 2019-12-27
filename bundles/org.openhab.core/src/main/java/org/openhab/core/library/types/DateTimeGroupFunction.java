@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.types;
+package org.openhab.core.library.types;
 
 import java.time.ZonedDateTime;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.items.GroupFunction;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.Item;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * This interface is a container for group functions that require {@link DateTimeType}s for its calculations.

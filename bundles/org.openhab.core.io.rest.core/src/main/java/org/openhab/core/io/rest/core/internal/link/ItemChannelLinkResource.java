@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.link;
+package org.openhab.core.io.rest.core.internal.link;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,17 +29,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.link.AbstractLink;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
-import org.eclipse.smarthome.core.thing.link.ThingLinkManager;
-import org.eclipse.smarthome.core.thing.link.dto.ItemChannelLinkDTO;
-import org.eclipse.smarthome.io.rest.JSONResponse;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.auth.Role;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.link.AbstractLink;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.link.ThingLinkManager;
+import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

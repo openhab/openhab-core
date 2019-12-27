@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal;
+package org.openhab.core.voice.internal;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,18 +18,18 @@ import java.util.Locale;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.ItemNotUniqueException;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.voice.TTSService;
-import org.eclipse.smarthome.core.voice.Voice;
-import org.eclipse.smarthome.core.voice.VoiceManager;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemNotUniqueException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.Voice;
+import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

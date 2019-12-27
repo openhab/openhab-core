@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.internal.actions;
+package org.openhab.core.model.script.internal.actions;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 import java.util.Date;
 
-import org.eclipse.smarthome.model.script.actions.Timer;
+import org.openhab.core.model.script.actions.Timer;
 import org.joda.time.DateTime;
 import org.joda.time.base.AbstractInstant;
 import org.quartz.JobDataMap;

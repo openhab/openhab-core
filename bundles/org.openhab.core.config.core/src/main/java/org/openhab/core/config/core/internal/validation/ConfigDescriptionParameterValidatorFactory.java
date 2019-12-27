@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.validation;
+package org.openhab.core.config.core.internal.validation;
 
 /**
  * The {@link ConfigDescriptionParameterValidatorFactory} creates the corresponding

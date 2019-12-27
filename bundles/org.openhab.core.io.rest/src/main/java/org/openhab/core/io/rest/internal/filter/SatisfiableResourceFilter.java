@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.internal.filter;
+package org.openhab.core.io.rest.internal.filter;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 
 /**

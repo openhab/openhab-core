@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -19,16 +19,16 @@ import static org.mockito.Mockito.*;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.Item;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.UnDefType;
 import org.junit.Before;
 import org.junit.Test;
 

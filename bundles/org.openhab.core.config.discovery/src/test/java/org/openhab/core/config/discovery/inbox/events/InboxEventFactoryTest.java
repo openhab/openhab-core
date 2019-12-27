@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.inbox.events;
+package org.openhab.core.config.discovery.inbox.events;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.dto.DiscoveryResultDTOMapper;
-import org.eclipse.smarthome.config.discovery.internal.DiscoveryResultImpl;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.dto.DiscoveryResultDTOMapper;
+import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
+import org.openhab.core.events.Event;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.junit.Test;
 
 import com.google.gson.Gson;

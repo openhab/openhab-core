@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml.util;
+package org.openhab.core.config.xml.util;
 
 /**
  * The {@link NodeName} interface defines common features for all {@code Node}* classes.

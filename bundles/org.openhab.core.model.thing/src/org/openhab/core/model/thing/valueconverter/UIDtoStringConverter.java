@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.valueconverter;
+package org.openhab.core.model.thing.valueconverter;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.core.thing.UID;
+import org.openhab.core.thing.UID;
 import org.eclipse.xtext.conversion.IValueConverter;
 import org.eclipse.xtext.conversion.ValueConverterException;
 import org.eclipse.xtext.nodemodel.INode;

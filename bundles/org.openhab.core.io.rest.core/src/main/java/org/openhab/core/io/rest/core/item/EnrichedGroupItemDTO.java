@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.item;
+package org.openhab.core.io.rest.core.item;
 
-import org.eclipse.smarthome.core.items.dto.GroupFunctionDTO;
-import org.eclipse.smarthome.core.items.dto.GroupItemDTO;
-import org.eclipse.smarthome.core.items.dto.ItemDTO;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.items.dto.GroupFunctionDTO;
+import org.openhab.core.items.dto.GroupItemDTO;
+import org.openhab.core.items.dto.ItemDTO;
+import org.openhab.core.types.StateDescription;
 
 /**
  * This is an enriched data transfer object that is used to serialize group items.

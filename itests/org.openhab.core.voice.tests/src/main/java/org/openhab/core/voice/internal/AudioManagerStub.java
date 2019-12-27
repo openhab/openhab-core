@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal;
+package org.openhab.core.voice.internal;
 
 import java.util.Collections;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioSource;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.library.types.PercentType;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.library.types.PercentType;
 
 /**
  * Only the get source and get sink methods are used in the tests.

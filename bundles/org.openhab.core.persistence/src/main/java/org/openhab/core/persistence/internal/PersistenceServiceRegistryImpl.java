@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence.internal;
+package org.openhab.core.persistence.internal;
 
 import java.net.URI;
 import java.util.Collection;
@@ -22,11 +22,11 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.persistence.PersistenceService;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -41,8 +41,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(immediate = true, configurationPid = "org.eclipse.smarthome.persistence", property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.persistence",
+@Component(immediate = true, configurationPid = "org.openhab.core.persistence", property = {
+        Constants.SERVICE_PID + "=org.openhab.core.persistence",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Persistence",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + PersistenceServiceRegistryImpl.CONFIG_URI })

@@ -10,24 +10,24 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.console;
+package org.openhab.core.thing.internal.console;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareUpdateHandler;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareRegistry;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareStatusInfo;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateService;
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.firmware.Firmware;
+import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
+import org.openhab.core.thing.firmware.FirmwareRegistry;
+import org.openhab.core.thing.firmware.FirmwareStatusInfo;
+import org.openhab.core.thing.firmware.FirmwareUpdateService;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

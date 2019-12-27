@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.icon.internal;
+package org.openhab.core.ui.icon.internal;
 
-import static org.eclipse.smarthome.ui.icon.internal.IconServlet.*;
+import static org.openhab.core.ui.icon.internal.IconServlet.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -27,8 +27,8 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.smarthome.ui.icon.IconProvider;
-import org.eclipse.smarthome.ui.icon.IconSet.Format;
+import org.openhab.core.ui.icon.IconProvider;
+import org.openhab.core.ui.icon.IconSet.Format;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

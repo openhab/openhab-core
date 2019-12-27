@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -27,11 +27,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.AbstractManagedProvider;
-import org.eclipse.smarthome.core.items.ManagedItemProvider.PersistedItem;
-import org.eclipse.smarthome.core.items.dto.GroupFunctionDTO;
-import org.eclipse.smarthome.core.items.dto.ItemDTOMapper;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.common.registry.AbstractManagedProvider;
+import org.openhab.core.items.ManagedItemProvider.PersistedItem;
+import org.openhab.core.items.dto.GroupFunctionDTO;
+import org.openhab.core.items.dto.ItemDTOMapper;
+import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

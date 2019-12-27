@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
 /**
  * A binding's recommendation to the framework whether a state update should be automatically sent to an item if a

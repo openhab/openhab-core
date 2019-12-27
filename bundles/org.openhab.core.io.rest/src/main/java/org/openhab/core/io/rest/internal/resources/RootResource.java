@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.internal.resources;
+package org.openhab.core.io.rest.internal.resources;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,10 +27,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.io.rest.RESTConstants;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.internal.Constants;
-import org.eclipse.smarthome.io.rest.internal.resources.beans.RootBean;
+import org.openhab.core.io.rest.RESTConstants;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.internal.Constants;
+import org.openhab.core.io.rest.internal.resources.beans.RootBean;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @Path("/")
-@Component(service = RootResource.class, configurationPid = "org.eclipse.smarthome.io.rest.root")
+@Component(service = RootResource.class, configurationPid = "org.openhab.core.io.rest.root")
 public class RootResource {
 
     private final transient Logger logger = LoggerFactory.getLogger(RootResource.class);

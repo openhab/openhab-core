@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.auth.oauth2client.internal;
+package org.openhab.core.auth.oauth2client.internal;
 
 import org.eclipse.jdt.annotation.Nullable;
 

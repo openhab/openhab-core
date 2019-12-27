@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.transform;
+package org.openhab.core.transform;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -31,8 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;

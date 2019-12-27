@@ -13,7 +13,7 @@
 package org.openhab.core.automation;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.type.TriggerType;

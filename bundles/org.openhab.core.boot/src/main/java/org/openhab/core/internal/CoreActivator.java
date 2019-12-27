@@ -12,7 +12,7 @@
  */
 package org.openhab.core.internal;
 
-import org.eclipse.smarthome.model.rule.runtime.RuleEngine;
+import org.openhab.core.model.rule.runtime.RuleEngine;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;

@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.lib;
+package org.openhab.core.model.script.lib;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import javax.measure.quantity.Dimensionless;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.types.Type;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.types.Type;
 
 /**
  * This class contains all kinds of extensions to be used by scripts and not

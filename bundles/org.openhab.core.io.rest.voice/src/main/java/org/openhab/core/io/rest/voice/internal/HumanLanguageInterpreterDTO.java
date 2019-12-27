@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.voice.internal;
+package org.openhab.core.io.rest.voice.internal;
 
 import java.util.Set;
 
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
 
 /**
  * A DTO that is used on the REST API to provide infos about {@link HumanLanguageInterpreter} to UIs.

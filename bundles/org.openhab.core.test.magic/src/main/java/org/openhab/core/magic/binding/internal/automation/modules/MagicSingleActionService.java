@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal.automation.modules;
+package org.openhab.core.magic.binding.internal.automation.modules;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.ConfigurableService;
+import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
-@Component(configurationPid = "org.eclipse.smarthome.automation.action.magicSingleActionService", property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.automation.action.magicSingleActionService",
+@Component(configurationPid = "org.openhab.core.automation.action.magicSingleActionService", property = {
+        Constants.SERVICE_PID + "=org.openhab.core.automation.action.magicSingleActionService",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=automationAction:magicSingleAction",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Magic Single Action Service",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=RuleActions" })

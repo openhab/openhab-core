@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sitemap.internal;
+package org.openhab.core.io.rest.sitemap.internal;
 
 /**
  * This is a data transfer object that is used to serialize command mappings.

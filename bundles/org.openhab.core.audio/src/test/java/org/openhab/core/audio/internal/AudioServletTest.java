@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio.internal;
+package org.openhab.core.audio.internal;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -21,10 +21,10 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.FileAudioStream;
-import org.eclipse.smarthome.core.audio.internal.utils.BundledSoundFileHandler;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.FileAudioStream;
+import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
 import org.junit.Test;
 
 /**

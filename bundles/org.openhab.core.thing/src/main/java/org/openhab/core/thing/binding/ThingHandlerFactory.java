@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding;
+package org.openhab.core.thing.binding;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.status.ConfigStatusProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareUpdateHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.status.ConfigStatusProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
 
 /**
  * The {@link ThingHandlerFactory} is responsible for creating {@link Thing}s and {@link ThingHandler}s. Therefore the

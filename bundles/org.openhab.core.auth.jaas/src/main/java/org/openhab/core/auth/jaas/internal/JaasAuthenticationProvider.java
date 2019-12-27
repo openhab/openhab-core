@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.auth.jaas.internal;
+package org.openhab.core.auth.jaas.internal;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -26,11 +26,11 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.eclipse.smarthome.core.auth.Authentication;
-import org.eclipse.smarthome.core.auth.AuthenticationException;
-import org.eclipse.smarthome.core.auth.AuthenticationProvider;
-import org.eclipse.smarthome.core.auth.Credentials;
-import org.eclipse.smarthome.core.auth.UsernamePasswordCredentials;
+import org.openhab.core.auth.Authentication;
+import org.openhab.core.auth.AuthenticationException;
+import org.openhab.core.auth.AuthenticationProvider;
+import org.openhab.core.auth.Credentials;
+import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -45,7 +45,7 @@ import org.osgi.service.component.annotations.Modified;
  * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Removed ManagedService and used DS configuration instead
  */
-@Component(configurationPid = "org.eclipse.smarthome.jaas")
+@Component(configurationPid = "org.openhab.core.jaas")
 public class JaasAuthenticationProvider implements AuthenticationProvider {
 
     private String realmName;

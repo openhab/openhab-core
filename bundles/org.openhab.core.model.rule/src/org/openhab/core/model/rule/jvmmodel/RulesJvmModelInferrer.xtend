@@ -10,29 +10,29 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.jvmmodel
+package org.openhab.core.model.rule.jvmmodel
 
 import com.google.inject.Inject
 import java.util.Set
-import org.eclipse.smarthome.core.items.Item
-import org.eclipse.smarthome.core.items.ItemRegistry
-import org.eclipse.smarthome.core.thing.ThingRegistry
-import org.eclipse.smarthome.core.thing.events.ChannelTriggeredEvent
-import org.eclipse.smarthome.core.types.Command
-import org.eclipse.smarthome.core.types.State
-import org.eclipse.smarthome.model.rule.rules.ChangedEventTrigger
-import org.eclipse.smarthome.model.rule.rules.CommandEventTrigger
-import org.eclipse.smarthome.model.rule.rules.EventEmittedTrigger
-import org.eclipse.smarthome.model.rule.rules.EventTrigger
-import org.eclipse.smarthome.model.rule.rules.GroupMemberChangedEventTrigger
-import org.eclipse.smarthome.model.rule.rules.GroupMemberCommandEventTrigger
-import org.eclipse.smarthome.model.rule.rules.GroupMemberUpdateEventTrigger
-import org.eclipse.smarthome.model.rule.rules.Rule
-import org.eclipse.smarthome.model.rule.rules.RuleModel
-import org.eclipse.smarthome.model.rule.rules.ThingStateChangedEventTrigger
-import org.eclipse.smarthome.model.rule.rules.UpdateEventTrigger
-import org.eclipse.smarthome.model.script.jvmmodel.ScriptJvmModelInferrer
-import org.eclipse.smarthome.model.script.scoping.StateAndCommandProvider
+import org.openhab.core.items.Item
+import org.openhab.core.items.ItemRegistry
+import org.openhab.core.thing.ThingRegistry
+import org.openhab.core.thing.events.ChannelTriggeredEvent
+import org.openhab.core.types.Command
+import org.openhab.core.types.State
+import org.openhab.core.model.rule.rules.ChangedEventTrigger
+import org.openhab.core.model.rule.rules.CommandEventTrigger
+import org.openhab.core.model.rule.rules.EventEmittedTrigger
+import org.openhab.core.model.rule.rules.EventTrigger
+import org.openhab.core.model.rule.rules.GroupMemberChangedEventTrigger
+import org.openhab.core.model.rule.rules.GroupMemberCommandEventTrigger
+import org.openhab.core.model.rule.rules.GroupMemberUpdateEventTrigger
+import org.openhab.core.model.rule.rules.Rule
+import org.openhab.core.model.rule.rules.RuleModel
+import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger
+import org.openhab.core.model.rule.rules.UpdateEventTrigger
+import org.openhab.core.model.script.jvmmodel.ScriptJvmModelInferrer
+import org.openhab.core.model.script.scoping.StateAndCommandProvider
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder

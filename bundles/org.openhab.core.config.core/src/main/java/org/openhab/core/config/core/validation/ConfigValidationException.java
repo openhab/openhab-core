@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.validation;
+package org.openhab.core.config.core.validation;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -20,9 +20,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

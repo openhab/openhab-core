@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal.automation.modules;
+package org.openhab.core.magic.binding.internal.automation.modules;
 
-import org.eclipse.smarthome.config.core.ConfigurableService;
+import org.openhab.core.config.core.ConfigurableService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
@@ -22,7 +22,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Stefan Triller - Initial contribution
  */
 @Component(immediate = true, service = MagicMultiActionMarker.class, property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.MagicMultiAction",
+        Constants.SERVICE_PID + "=org.openhab.core.MagicMultiAction",
         ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=true",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=MagicMultiActionsService",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=RuleActions",

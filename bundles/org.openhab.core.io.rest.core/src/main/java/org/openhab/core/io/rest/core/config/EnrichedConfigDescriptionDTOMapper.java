@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.config;
+package org.openhab.core.io.rest.core.config;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
 
 /**
  * The {@link EnrichedConfigDescriptionDTOMapper} is a utility class to map {@link ConfigDescription}s to config

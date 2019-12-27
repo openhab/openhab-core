@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.engine.action;
+package org.openhab.core.model.script.engine.action;
 
 /**
  * This interface must be implemented by services that want to contribute script actions.

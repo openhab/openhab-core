@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.status;
+package org.openhab.core.config.core.status;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.config.core.status.ConfigStatusMessage.Type;
+import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 
 /**
  * The {@link ConfigStatusInfo} contains {@link ConfigStatusMessage}s to represent the current configuration status of

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.items;
+package org.openhab.core.ui.items;
 
 import javax.measure.Unit;
 
@@ -18,13 +18,13 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.model.sitemap.sitemap.LinkableWidget;
-import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
-import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.types.State;
+import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
+import org.openhab.core.model.sitemap.sitemap.Widget;
 
 /**
  * This interface is used by a service which combines the core item registry

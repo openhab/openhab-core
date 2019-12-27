@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding;
+package org.openhab.core.thing.binding;
 
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.status.ConfigStatusCallback;
-import org.eclipse.smarthome.config.core.status.ConfigStatusProvider;
-import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.status.ConfigStatusCallback;
+import org.openhab.core.config.core.status.ConfigStatusProvider;
+import org.openhab.core.thing.Thing;
 
 /**
  * The {@link ConfigStatusThingHandler} is an extension of {@link BaseThingHandler} that implements the

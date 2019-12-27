@@ -25,14 +25,14 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
-import org.eclipse.smarthome.core.common.registry.Provider;
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Provider;
+import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.storage.StorageService;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
@@ -247,21 +247,21 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     }
 
     /**
-     * @see RuleRegistryImpl#postEvent(org.eclipse.smarthome.core.events.Event)
+     * @see RuleRegistryImpl#postEvent(org.openhab.core.events.Event)
      */
     protected void postRuleAddedEvent(Rule rule) {
         postEvent(RuleEventFactory.createRuleAddedEvent(rule, SOURCE));
     }
 
     /**
-     * @see RuleRegistryImpl#postEvent(org.eclipse.smarthome.core.events.Event)
+     * @see RuleRegistryImpl#postEvent(org.openhab.core.events.Event)
      */
     protected void postRuleRemovedEvent(Rule rule) {
         postEvent(RuleEventFactory.createRuleRemovedEvent(rule, SOURCE));
     }
 
     /**
-     * @see RuleRegistryImpl#postEvent(org.eclipse.smarthome.core.events.Event)
+     * @see RuleRegistryImpl#postEvent(org.openhab.core.events.Event)
      */
     protected void postRuleUpdatedEvent(Rule rule, Rule oldRule) {
         postEvent(RuleEventFactory.createRuleUpdatedEvent(rule, oldRule, SOURCE));

@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.binding;
+package org.openhab.core.binding;
 
 import java.net.URI;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Identifiable;
+import org.openhab.core.common.registry.Identifiable;
 
 /**
  * The {@link BindingInfo} class contains general information about a binding.

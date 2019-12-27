@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.inbox;
+package org.openhab.core.config.discovery.inbox;
 
 import java.util.function.Predicate;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.internal.AutomaticInboxProcessor;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.internal.AutomaticInboxProcessor;
 import org.osgi.service.component.annotations.Component;
 
 /**

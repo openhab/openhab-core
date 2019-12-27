@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.dispatch.internal;
+package org.openhab.core.config.dispatch.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -27,8 +27,8 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

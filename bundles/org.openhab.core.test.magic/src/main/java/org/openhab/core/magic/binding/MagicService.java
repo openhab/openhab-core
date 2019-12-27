@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding;
+package org.openhab.core.magic.binding;
 
 import java.net.URI;
 
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ConfigOptionProvider;
 
 /**
  * A public interface for a service from this virtual bundle which is also a {@link ConfigOptionProvider}.

@@ -21,7 +21,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Locale;
 
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.Configuration;
 import org.junit.Test;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;

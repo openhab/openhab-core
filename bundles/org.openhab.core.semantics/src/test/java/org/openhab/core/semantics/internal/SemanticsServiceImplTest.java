@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics.internal;
+package org.openhab.core.semantics.internal;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,14 +21,14 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.MetadataRegistry;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.semantics.model.location.Bathroom;
-import org.eclipse.smarthome.core.semantics.model.location.LivingRoom;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.semantics.model.location.Bathroom;
+import org.openhab.core.semantics.model.location.LivingRoom;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

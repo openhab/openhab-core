@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.audio.internal;
+package org.openhab.core.io.rest.audio.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,13 +29,13 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioSource;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.io.rest.JSONResponse;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
+import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest;
+package org.openhab.core.io.rest;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.smarthome.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.types;
+package org.openhab.core.internal.types;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.CommandOption;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.CommandOption;
 
 /**
  * The {@link CommandDescriptionImpl} groups state command properties.

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding.firmware;
+package org.openhab.core.thing.binding.firmware;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 

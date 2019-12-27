@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.serial.internal;
+package org.openhab.core.io.transport.serial.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
+import org.openhab.core.io.transport.serial.SerialPortEvent;
 
 /**
  * Specific serial port event implementation.

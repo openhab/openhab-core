@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.test.storage;
+package org.openhab.core.test.storage;
 
 import java.util.Collection;
 import java.util.Map;
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.storage.Storage;
+import org.openhab.core.storage.Storage;
 
 /**
  * A {@link Storage} implementation which stores it's data in-memory.

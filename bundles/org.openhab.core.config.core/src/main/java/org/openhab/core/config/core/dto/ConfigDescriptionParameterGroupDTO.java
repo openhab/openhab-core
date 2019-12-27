@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.dto;
+package org.openhab.core.config.core.dto;
 
 /**
  * This is a data transfer object that is used to serialize options of a

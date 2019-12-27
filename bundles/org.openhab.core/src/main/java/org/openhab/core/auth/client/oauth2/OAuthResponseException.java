@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.auth.client.oauth2;
+package org.openhab.core.auth.client.oauth2;
 
 /**
  * This is an exception class for OAUTH specific errors. i.e. The error responses described in the

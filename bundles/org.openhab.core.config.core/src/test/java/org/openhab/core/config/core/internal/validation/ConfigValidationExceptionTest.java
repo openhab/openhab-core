@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.validation;
+package org.openhab.core.config.core.internal.validation;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
@@ -25,9 +25,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
-import org.eclipse.smarthome.config.core.validation.ConfigValidationMessage;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
+import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.config.core.validation.ConfigValidationMessage;
+import org.openhab.core.i18n.TranslationProvider;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;

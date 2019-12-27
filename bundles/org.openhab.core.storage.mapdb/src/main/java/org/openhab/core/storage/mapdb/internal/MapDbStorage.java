@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.storage.mapdb.internal;
+package org.openhab.core.storage.mapdb.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,10 +20,10 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.ManagedItemProvider.PersistedItem;
-import org.eclipse.smarthome.core.items.ManagedItemProvider.PersistedItemInstanceCreator;
-import org.eclipse.smarthome.core.storage.DeletableStorage;
-import org.eclipse.smarthome.core.storage.Storage;
+import org.openhab.core.items.ManagedItemProvider.PersistedItem;
+import org.openhab.core.items.ManagedItemProvider.PersistedItemInstanceCreator;
+import org.openhab.core.storage.DeletableStorage;
+import org.openhab.core.storage.Storage;
 import org.mapdb.DB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

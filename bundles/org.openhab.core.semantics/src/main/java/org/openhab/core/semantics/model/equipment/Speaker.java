@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics.model.equipment;
+package org.openhab.core.semantics.model.equipment;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.semantics.model.Equipment;
-import org.eclipse.smarthome.core.semantics.model.TagInfo;
+import org.openhab.core.semantics.model.Equipment;
+import org.openhab.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Speaker.

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http;
+package org.openhab.core.io.http;
 
 /**
  * Constants for making handlers in proper order.

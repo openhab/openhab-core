@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing
+package org.openhab.core.model.thing
 
-import org.eclipse.smarthome.model.thing.valueconverter.ThingValueConverters
+import org.openhab.core.model.thing.valueconverter.ThingValueConverters
 import org.eclipse.xtext.conversion.IValueConverterService
 import org.eclipse.xtext.linking.lazy.LazyURIEncoder
 import com.google.inject.Binder
@@ -21,13 +21,13 @@ import com.google.inject.name.Names
 /** 
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
-@SuppressWarnings("restriction") class ThingRuntimeModule extends org.eclipse.smarthome.model.thing.AbstractThingRuntimeModule {
+@SuppressWarnings("restriction") class ThingRuntimeModule extends org.openhab.core.model.thing.AbstractThingRuntimeModule {
     override Class<? extends IValueConverterService> bindIValueConverterService() {
         return ThingValueConverters
     }
 
     override Class<? extends org.eclipse.xtext.serializer.sequencer.ISyntacticSequencer> bindISyntacticSequencer() {
-        return org.eclipse.smarthome.model.thing.serializer.ThingSyntacticSequencerExtension
+        return org.openhab.core.model.thing.serializer.ThingSyntacticSequencerExtension
     }
 
     override void configureUseIndexFragmentsForLazyLinking(Binder binder) {

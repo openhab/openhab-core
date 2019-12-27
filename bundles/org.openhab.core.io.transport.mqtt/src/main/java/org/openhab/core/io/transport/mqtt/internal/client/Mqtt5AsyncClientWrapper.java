@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt.internal.client;
+package org.openhab.core.io.transport.mqtt.internal.client;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,10 +19,10 @@ import javax.net.ssl.TrustManagerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection.ConnectionCallback;
-import org.eclipse.smarthome.io.transport.mqtt.MqttBrokerConnection.Protocol;
-import org.eclipse.smarthome.io.transport.mqtt.MqttWillAndTestament;
-import org.eclipse.smarthome.io.transport.mqtt.internal.ClientCallback;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.ConnectionCallback;
+import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.Protocol;
+import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
+import org.openhab.core.io.transport.mqtt.internal.ClientCallback;
 
 import com.hivemq.client.mqtt.MqttClientState;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;

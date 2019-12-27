@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.events;
+package org.openhab.core.thing.events;
 
-import org.eclipse.smarthome.core.events.AbstractEvent;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.events.AbstractEvent;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * {@link ThingStatusInfoChangedEvent}s will be delivered through the openHAB event bus if the status of a

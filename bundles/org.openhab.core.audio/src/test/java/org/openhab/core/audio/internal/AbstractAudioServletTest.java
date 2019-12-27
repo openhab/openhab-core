@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio.internal;
+package org.openhab.core.audio.internal;
 
 import static org.junit.Assert.fail;
 
@@ -21,13 +21,13 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.ByteArrayAudioStream;
-import org.eclipse.smarthome.core.audio.FixedLengthAudioStream;
-import org.eclipse.smarthome.test.TestPortUtil;
-import org.eclipse.smarthome.test.TestServer;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.ByteArrayAudioStream;
+import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.test.TestPortUtil;
+import org.openhab.core.test.TestServer;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.After;
 import org.junit.Before;
 

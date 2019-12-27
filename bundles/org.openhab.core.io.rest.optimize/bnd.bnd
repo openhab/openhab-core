@@ -1,2 +1,2 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.eclipse.smarthome.io.rest.optimize.internal.Activator
+Bundle-Activator: org.openhab.core.io.rest.optimize.internal.Activator

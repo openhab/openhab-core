@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.sitemap.runtime.internal;
+package org.openhab.core.model.sitemap.runtime.internal;
 
-import org.eclipse.smarthome.model.core.ModelParser;
-import org.eclipse.smarthome.model.sitemap.SitemapStandaloneSetup;
+import org.openhab.core.model.core.ModelParser;
+import org.openhab.core.model.sitemap.SitemapStandaloneSetup;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

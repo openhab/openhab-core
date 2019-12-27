@@ -10,19 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script;
+package org.openhab.core.model.script;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.binding.ThingActions;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.script.engine.ScriptEngine;
+import org.openhab.core.model.script.engine.action.ActionService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

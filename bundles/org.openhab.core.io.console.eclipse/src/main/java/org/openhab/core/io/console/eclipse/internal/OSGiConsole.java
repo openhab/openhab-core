@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.eclipse.internal;
+package org.openhab.core.io.console.eclipse.internal;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.smarthome.io.console.Console;
+import org.openhab.core.io.console.Console;
 
 /**
  *

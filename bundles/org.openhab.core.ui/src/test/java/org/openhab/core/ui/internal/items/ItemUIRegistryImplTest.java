@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.internal.items;
+package org.openhab.core.ui.internal.items;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,31 +23,31 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.eclipse.emf.common.util.BasicEList;
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.library.items.ColorItem;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.HSBType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.StateOption;
-import org.eclipse.smarthome.core.types.UnDefType;
-import org.eclipse.smarthome.core.types.util.UnitUtils;
-import org.eclipse.smarthome.model.sitemap.sitemap.ColorArray;
-import org.eclipse.smarthome.model.sitemap.sitemap.Mapping;
-import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
-import org.eclipse.smarthome.model.sitemap.sitemap.SitemapFactory;
-import org.eclipse.smarthome.model.sitemap.sitemap.Slider;
-import org.eclipse.smarthome.model.sitemap.sitemap.Switch;
-import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
-import org.eclipse.smarthome.ui.items.ItemUIProvider;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.ColorItem;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.types.util.UnitUtils;
+import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Mapping;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
+import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
+import org.openhab.core.model.sitemap.sitemap.Slider;
+import org.openhab.core.model.sitemap.sitemap.Switch;
+import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.ui.items.ItemUIProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

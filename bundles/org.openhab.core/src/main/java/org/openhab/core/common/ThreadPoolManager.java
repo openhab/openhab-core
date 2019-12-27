@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.common;
+package org.openhab.core.common;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +22,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.core.internal.common.WrappedScheduledExecutorService;
+import org.openhab.core.internal.common.WrappedScheduledExecutorService;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The configuration can be done as
  * <br/>
- * {@code org.eclipse.smarthome.threadpool:<poolName>=<poolSize>}
+ * {@code org.openhab.core.threadpool:<poolName>=<poolSize>}
  * <br/>
  * All threads will time out after {@link THREAD_TIMEOUT}.
  *
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 @Component(configurationPid = ThreadPoolManager.CONFIGURATION_PID)
 public class ThreadPoolManager {
 
-    public static final String CONFIGURATION_PID = "org.eclipse.smarthome.threadpool";
+    public static final String CONFIGURATION_PID = "org.openhab.core.threadpool";
 
     /**
      * The common thread pool is reserved for occasional, light weight tasks that run quickly, and

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.testsupport.hue;
+package org.openhab.core.model.thing.testsupport.hue;
 
 import java.net.URI;
 import java.util.Collection;
@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinitionBuilder;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.core.thing.type.ThingType;
-import org.eclipse.smarthome.core.thing.type.ThingTypeBuilder;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.ThingTypeProvider;
+import org.openhab.core.thing.type.ChannelDefinition;
+import org.openhab.core.thing.type.ChannelDefinitionBuilder;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

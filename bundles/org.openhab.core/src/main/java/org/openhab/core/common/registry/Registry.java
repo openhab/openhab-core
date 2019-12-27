@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.common.registry;
+package org.openhab.core.common.registry;
 
 import java.util.Collection;
 import java.util.stream.Stream;

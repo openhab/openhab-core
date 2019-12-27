@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link;
+package org.openhab.core.thing.link;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,9 +21,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
-import org.eclipse.smarthome.core.common.registry.Provider;
-import org.eclipse.smarthome.core.thing.UID;
+import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Provider;
+import org.openhab.core.thing.UID;
 
 /**
  * {@link AbstractLinkRegistry} is an abstract class for link based registries,

@@ -10,23 +10,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.auth.oauth2client.test.internal.console;
+package org.openhab.core.auth.oauth2client.test.internal.console;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.smarthome.auth.oauth2client.test.internal.AbstractTestAgent;
-import org.eclipse.smarthome.auth.oauth2client.test.internal.AuthorizationCodeTestAgent;
-import org.eclipse.smarthome.auth.oauth2client.test.internal.ResourceOwnerTestAgent;
-import org.eclipse.smarthome.auth.oauth2client.test.internal.TestAgent;
-import org.eclipse.smarthome.core.auth.client.oauth2.AccessTokenResponse;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthClientService;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthException;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthResponseException;
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.auth.oauth2client.test.internal.AbstractTestAgent;
+import org.openhab.core.auth.oauth2client.test.internal.AuthorizationCodeTestAgent;
+import org.openhab.core.auth.oauth2client.test.internal.ResourceOwnerTestAgent;
+import org.openhab.core.auth.oauth2client.test.internal.TestAgent;
+import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.OAuthClientService;
+import org.openhab.core.auth.client.oauth2.OAuthException;
+import org.openhab.core.auth.client.oauth2.OAuthResponseException;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

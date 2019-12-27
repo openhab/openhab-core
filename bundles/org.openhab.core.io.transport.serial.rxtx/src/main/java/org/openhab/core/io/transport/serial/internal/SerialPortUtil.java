@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.serial.internal;
+package org.openhab.core.io.transport.serial.internal;
 
 import java.io.File;
 import java.util.Collections;

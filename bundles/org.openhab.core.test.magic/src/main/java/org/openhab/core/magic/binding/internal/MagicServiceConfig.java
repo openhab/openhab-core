@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal;
+package org.openhab.core.magic.binding.internal;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.eclipse.smarthome.magic.binding.MagicService;
+import org.openhab.core.magic.binding.MagicService;
 
 /**
  * Configuration holder object for {@link MagicService}

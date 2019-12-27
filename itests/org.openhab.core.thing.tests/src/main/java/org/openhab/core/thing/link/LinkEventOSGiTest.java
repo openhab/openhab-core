@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link;
+package org.openhab.core.thing.link;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFilter;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.link.events.ItemChannelLinkAddedEvent;
-import org.eclipse.smarthome.core.thing.link.events.ItemChannelLinkRemovedEvent;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.link.events.ItemChannelLinkAddedEvent;
+import org.openhab.core.thing.link.events.ItemChannelLinkRemovedEvent;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 

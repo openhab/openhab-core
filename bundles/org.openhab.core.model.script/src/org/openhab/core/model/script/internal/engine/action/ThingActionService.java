@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.internal.engine.action;
+package org.openhab.core.model.script.internal.engine.action;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingActions;
-import org.eclipse.smarthome.core.thing.binding.ThingActionsScope;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.model.script.actions.Things;
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.thing.binding.ThingActionsScope;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.model.script.actions.Things;
+import org.openhab.core.model.script.engine.action.ActionService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

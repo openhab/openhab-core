@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.actions;
+package org.openhab.core.model.script.actions;
 
 import java.io.FileNotFoundException;
 import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.model.script.engine.action.ActionDoc;
-import org.eclipse.smarthome.model.script.internal.engine.action.EphemerisActionService;
+import org.openhab.core.model.script.engine.action.ActionDoc;
+import org.openhab.core.model.script.internal.engine.action.EphemerisActionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

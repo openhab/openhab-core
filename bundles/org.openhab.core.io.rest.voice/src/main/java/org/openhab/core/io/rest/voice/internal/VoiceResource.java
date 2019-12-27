@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.voice.internal;
+package org.openhab.core.io.rest.voice.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,14 +33,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.voice.Voice;
-import org.eclipse.smarthome.core.voice.VoiceManager;
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
-import org.eclipse.smarthome.io.rest.JSONResponse;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.openhab.core.auth.Role;
+import org.openhab.core.voice.Voice;
+import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

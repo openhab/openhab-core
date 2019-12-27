@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.firmware;
+package org.openhab.core.thing.internal.firmware;
 
-import static org.eclipse.smarthome.core.thing.firmware.FirmwareStatusInfo.*;
+import static org.openhab.core.thing.firmware.FirmwareStatusInfo.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,29 +33,29 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.validation.ConfigDescriptionValidator;
-import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
-import org.eclipse.smarthome.core.common.SafeCaller;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFilter;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareUpdateBackgroundTransferHandler;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareUpdateHandler;
-import org.eclipse.smarthome.core.thing.events.ThingStatusInfoChangedEvent;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareEventFactory;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareRegistry;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareStatus;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareStatusInfo;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateService;
-import org.eclipse.smarthome.core.util.BundleResolver;
+import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
+import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.common.SafeCaller;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.firmware.Firmware;
+import org.openhab.core.thing.binding.firmware.FirmwareUpdateBackgroundTransferHandler;
+import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
+import org.openhab.core.thing.events.ThingStatusInfoChangedEvent;
+import org.openhab.core.thing.firmware.FirmwareEventFactory;
+import org.openhab.core.thing.firmware.FirmwareRegistry;
+import org.openhab.core.thing.firmware.FirmwareStatus;
+import org.openhab.core.thing.firmware.FirmwareStatusInfo;
+import org.openhab.core.thing.firmware.FirmwareUpdateService;
+import org.openhab.core.util.BundleResolver;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

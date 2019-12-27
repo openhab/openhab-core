@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.item;
+package org.openhab.core.model.item;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.model.item.internal.GenericItemProvider;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.model.item.internal.GenericItemProvider;
 
 /**
  * This interface must be implemented by services, which can parse the generic

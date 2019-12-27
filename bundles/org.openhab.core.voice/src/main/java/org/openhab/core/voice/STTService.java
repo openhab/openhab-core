@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice;
+package org.openhab.core.voice;
 
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioStream;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioStream;
 
 /**
  * This is the interface that a speech-to-text service has to implement.

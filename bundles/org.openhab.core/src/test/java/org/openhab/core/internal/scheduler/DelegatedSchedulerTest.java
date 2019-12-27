@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.scheduler;
+package org.openhab.core.internal.scheduler;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

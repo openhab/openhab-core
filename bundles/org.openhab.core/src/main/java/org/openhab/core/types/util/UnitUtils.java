@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.types.util;
+package org.openhab.core.types.util;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -30,10 +30,10 @@ import javax.measure.spi.SystemOfUnits;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.internal.library.unit.UnitInitializer;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
+import org.openhab.core.internal.library.unit.UnitInitializer;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.SmartHomeUnits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class UnitUtils {
     public static final String UNIT_PERCENT_FORMAT_STRING = "%%";
 
     private static final String JAVAX_MEASURE_QUANTITY_PREFIX = "javax.measure.quantity.";
-    private static final String FRAMEWORK_DIMENSION_PREFIX = "org.eclipse.smarthome.core.library.dimension.";
+    private static final String FRAMEWORK_DIMENSION_PREFIX = "org.openhab.core.library.dimension.";
 
     private static final Collection<Class<? extends SystemOfUnits>> ALL_SYSTEM_OF_UNITS = Arrays.asList(SIUnits.class,
             ImperialUnits.class, SmartHomeUnits.class, Units.class);
@@ -68,10 +68,10 @@ public class UnitUtils {
     /**
      * Parses a String denoting a dimension (e.g. Length, Temperature, Mass,..) into a {@link Class} instance of an
      * interface from {@link javax.measure.Quantity}. The interfaces reside in {@code javax.measure.quantity} and
-     * framework specific interfaces in {@code org.eclipse.smarthome.core.library.dimension}.
+     * framework specific interfaces in {@code org.openhab.core.library.dimension}.
      *
      * @param dimension the simple name of an interface from the package {@code javax.measure.quantity} or
-     *            {@code org.eclipse.smarthome.core.library.dimension}.
+     *            {@code org.openhab.core.library.dimension}.
      * @return the {@link Class} instance of the interface or {@code null} if the given dimension is blank.
      * @throws IllegalArgumentException in case no class instance could be parsed from the given dimension.
      */

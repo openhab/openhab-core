@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence;
+package org.openhab.core.persistence;
 
 import java.util.Date;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.items.Item;
+import org.openhab.core.types.State;
 
 /**
  * This interface is used by persistence services to represent an item

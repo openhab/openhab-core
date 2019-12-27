@@ -17,9 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.events.AbstractEventFactory;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFactory;
+import org.openhab.core.events.AbstractEventFactory;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFactory;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.dto.RuleDTO;

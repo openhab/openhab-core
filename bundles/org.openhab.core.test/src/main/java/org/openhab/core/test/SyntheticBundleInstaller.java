@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.test;
+package org.openhab.core.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,9 +34,9 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.service.ReadyMarker;
-import org.eclipse.smarthome.core.service.ReadyMarkerUtils;
-import org.eclipse.smarthome.core.service.ReadyService;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyMarkerUtils;
+import org.openhab.core.service.ReadyService;
 import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -254,15 +254,15 @@ public class SyntheticBundleInstaller {
     }
 
     private static boolean isXmlThingTypeBundleAvailable(BundleContext context) {
-        return isBundleAvailable(context, "org.eclipse.smarthome.core.thing.xml");
+        return isBundleAvailable(context, "org.openhab.core.thing.xml");
     }
 
     private static boolean isXmlBindingInfoBundleAvailable(BundleContext context) {
-        return isBundleAvailable(context, "org.eclipse.smarthome.core.binding.xml");
+        return isBundleAvailable(context, "org.openhab.core.binding.xml");
     }
 
     private static boolean isXmlConfigBundleAvailable(BundleContext context) {
-        return isBundleAvailable(context, "org.eclipse.smarthome.config.xml");
+        return isBundleAvailable(context, "org.openhab.core.config.xml");
     }
 
     /**

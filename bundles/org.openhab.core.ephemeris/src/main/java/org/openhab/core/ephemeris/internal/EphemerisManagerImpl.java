@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.ephemeris.internal;
+package org.openhab.core.ephemeris.internal;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,11 +41,11 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.ephemeris.EphemerisManager;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
+import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.ephemeris.EphemerisManager;
+import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;

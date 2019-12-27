@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.*;
@@ -22,20 +22,20 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.items.events.ItemStateChangedEvent;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.RawType;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.service.CommandDescriptionService;
-import org.eclipse.smarthome.core.service.StateDescriptionService;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.CommandOption;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
-import org.eclipse.smarthome.core.types.StateOption;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.events.ItemStateChangedEvent;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.service.CommandDescriptionService;
+import org.openhab.core.service.StateDescriptionService;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.CommandOption;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.StateOption;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 

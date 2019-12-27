@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.dto;
+package org.openhab.core.config.core.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
  * This is a data transfer object that is used to serialize parameter of a

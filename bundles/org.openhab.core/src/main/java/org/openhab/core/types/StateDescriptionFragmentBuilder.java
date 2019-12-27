@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.types;
+package org.openhab.core.types;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.internal.types.StateDescriptionFragmentImpl;
+import org.openhab.core.internal.types.StateDescriptionFragmentImpl;
 
 /**
  * Builds a {@link StateDescriptionFragment} with the relevant parts only.

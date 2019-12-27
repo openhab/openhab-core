@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.upnp;
+package org.openhab.core.io.transport.upnp;
 
 /**
  * The {@link UpnpIOParticipant} is an interface that needs to

@@ -16,8 +16,8 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.I18nUtil;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
+import org.openhab.core.i18n.I18nUtil;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.osgi.framework.Bundle;
 

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing
+package org.openhab.core.model.thing
 
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
@@ -26,7 +26,7 @@ class ThingStandaloneSetup extends ThingStandaloneSetupGenerated {
     }
     
     def static void unregister() {
-        EPackage.Registry.INSTANCE.remove("http://www.eclipse.org/smarthome/model/Thing");
+        EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Thing");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("things");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("things");
     }

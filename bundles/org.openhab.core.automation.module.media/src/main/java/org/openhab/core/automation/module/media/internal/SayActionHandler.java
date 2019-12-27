@@ -14,7 +14,7 @@ package org.openhab.core.automation.module.media.internal;
 
 import java.util.Map;
 
-import org.eclipse.smarthome.core.voice.VoiceManager;
+import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
 

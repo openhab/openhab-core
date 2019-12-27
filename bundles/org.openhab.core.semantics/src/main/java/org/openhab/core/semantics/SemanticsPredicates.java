@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics;
+package org.openhab.core.semantics;
 
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.semantics.model.Equipment;
-import org.eclipse.smarthome.core.semantics.model.Location;
-import org.eclipse.smarthome.core.semantics.model.Point;
-import org.eclipse.smarthome.core.semantics.model.Property;
-import org.eclipse.smarthome.core.semantics.model.Tag;
+import org.openhab.core.items.Item;
+import org.openhab.core.semantics.model.Equipment;
+import org.openhab.core.semantics.model.Location;
+import org.openhab.core.semantics.model.Point;
+import org.openhab.core.semantics.model.Property;
+import org.openhab.core.semantics.model.Tag;
 
 /**
  * This class provides predicates that allow filtering item streams with regards to their semantics.

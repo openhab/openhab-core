@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.profiles;
+package org.openhab.core.thing.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.UID;
+import org.openhab.core.thing.UID;
 
 /**
  * Identifier of a profile type.

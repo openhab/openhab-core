@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.profiles;
+package org.openhab.core.thing.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * A {@link StateProfile} defined the communication for channels of STATE kind.

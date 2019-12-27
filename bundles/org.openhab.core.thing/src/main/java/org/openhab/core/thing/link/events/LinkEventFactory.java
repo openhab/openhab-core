@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link.events;
+package org.openhab.core.thing.link.events;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.core.events.AbstractEventFactory;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFactory;
-import org.eclipse.smarthome.core.thing.link.AbstractLink;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
-import org.eclipse.smarthome.core.thing.link.dto.ItemChannelLinkDTO;
+import org.openhab.core.events.AbstractEventFactory;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFactory;
+import org.openhab.core.thing.link.AbstractLink;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import org.osgi.service.component.annotations.Component;
 
 /**

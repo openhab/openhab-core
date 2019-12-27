@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.thing;
+package org.openhab.core.io.rest.core.internal.thing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,31 +27,31 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTO;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionDTOMapper;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterDTO;
-import org.eclipse.smarthome.config.core.dto.ConfigDescriptionParameterGroupDTO;
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.dto.ChannelDefinitionDTO;
-import org.eclipse.smarthome.core.thing.dto.ChannelGroupDefinitionDTO;
-import org.eclipse.smarthome.core.thing.dto.StrippedThingTypeDTO;
-import org.eclipse.smarthome.core.thing.dto.StrippedThingTypeDTOMapper;
-import org.eclipse.smarthome.core.thing.dto.ThingTypeDTO;
-import org.eclipse.smarthome.core.thing.type.BridgeType;
-import org.eclipse.smarthome.core.thing.type.ChannelDefinition;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupDefinition;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
-import org.eclipse.smarthome.core.thing.type.ThingType;
-import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
-import org.eclipse.smarthome.io.rest.Stream2JSONInputStream;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
+import org.openhab.core.auth.Role;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.dto.ChannelDefinitionDTO;
+import org.openhab.core.thing.dto.ChannelGroupDefinitionDTO;
+import org.openhab.core.thing.dto.StrippedThingTypeDTO;
+import org.openhab.core.thing.dto.StrippedThingTypeDTOMapper;
+import org.openhab.core.thing.dto.ThingTypeDTO;
+import org.openhab.core.thing.type.BridgeType;
+import org.openhab.core.thing.type.ChannelDefinition;
+import org.openhab.core.thing.type.ChannelGroupDefinition;
+import org.openhab.core.thing.type.ChannelGroupType;
+import org.openhab.core.thing.type.ChannelGroupTypeRegistry;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeRegistry;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

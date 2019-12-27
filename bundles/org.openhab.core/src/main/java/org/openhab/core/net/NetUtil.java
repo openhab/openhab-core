@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.net;
+package org.openhab.core.net;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -38,8 +38,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.SafeCaller;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
+import org.openhab.core.common.SafeCaller;
+import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * @author Gary Tse - Network address change listener
  * @author Tim Roberts - Added primary address change to network address change listener
  */
-@Component(configurationPid = "org.eclipse.smarthome.network", property = { "service.pid=org.eclipse.smarthome.network",
+@Component(configurationPid = "org.openhab.core.network", property = { "service.pid=org.openhab.core.network",
         "service.config.description.uri=system:network", "service.config.label=Network Settings",
         "service.config.category=system" })
 @NonNullByDefault

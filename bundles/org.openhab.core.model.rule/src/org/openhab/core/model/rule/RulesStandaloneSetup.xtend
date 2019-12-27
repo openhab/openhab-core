@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule
+package org.openhab.core.model.rule
 
 import com.google.inject.Guice
 import com.google.inject.Injector
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.smarthome.model.script.ScriptServiceUtil
-import org.eclipse.smarthome.model.script.ScriptStandaloneSetup
-import org.eclipse.smarthome.model.script.ServiceModule
+import org.openhab.core.model.script.ScriptServiceUtil
+import org.openhab.core.model.script.ScriptStandaloneSetup
+import org.openhab.core.model.script.ServiceModule
 import org.eclipse.xtext.resource.IResourceServiceProvider
-import org.eclipse.smarthome.model.script.engine.ScriptEngine
+import org.openhab.core.model.script.engine.ScriptEngine
 
 /** 
  * Initialization support for running Xtext languages
@@ -74,7 +74,7 @@ class RulesStandaloneSetup extends RulesStandaloneSetupGenerated {
     }
     
     def static unregister() {
-        EPackage.Registry.INSTANCE.remove("http://www.eclipse.org/smarthome/model/Rules");
+        EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Rules");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("rules");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("rules");
         

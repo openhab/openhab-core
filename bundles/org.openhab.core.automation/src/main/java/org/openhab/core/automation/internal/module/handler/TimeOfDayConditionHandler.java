@@ -16,7 +16,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.slf4j.Logger;

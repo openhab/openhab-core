@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.extensions;
+package org.openhab.core.io.console.extensions;
 
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.io.console.Console;
+import org.openhab.core.io.console.Console;
 
 /**
  * Client which provide a console command have to implement this interface

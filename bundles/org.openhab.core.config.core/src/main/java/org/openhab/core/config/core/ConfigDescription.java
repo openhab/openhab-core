@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core;
+package org.openhab.core.config.core;
 
 import java.net.URI;
 import java.util.Collections;
@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.common.registry.Identifiable;
+import org.openhab.core.common.registry.Identifiable;
 
 /**
  * The {@link ConfigDescription} class contains a description for a concrete

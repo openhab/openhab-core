@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.auth.oauth2client.internal;
+package org.openhab.core.auth.oauth2client.internal;
 
-import static org.eclipse.smarthome.auth.oauth2client.internal.Keyword.*;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,11 +36,11 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.Fields;
-import org.eclipse.smarthome.core.auth.client.oauth2.AccessTokenResponse;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthException;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthResponseException;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
-import org.eclipse.smarthome.io.net.http.TrustManagerProvider;
+import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.OAuthException;
+import org.openhab.core.auth.client.oauth2.OAuthResponseException;
+import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.io.net.http.TrustManagerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script;
+package org.openhab.core.model.script;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.xbase.typesystem.internal.FeatureScopeTracker;

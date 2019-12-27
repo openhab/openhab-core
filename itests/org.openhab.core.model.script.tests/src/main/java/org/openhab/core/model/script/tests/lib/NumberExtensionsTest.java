@@ -12,14 +12,14 @@
  */
 /**
  */
-package org.eclipse.smarthome.model.script.tests.lib;
+package org.openhab.core.model.script.tests.lib;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.types.Type;
-import org.eclipse.smarthome.model.script.lib.NumberExtensions;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.types.Type;
+import org.openhab.core.model.script.lib.NumberExtensions;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -521,7 +521,7 @@ public class NumberExtensionsTest {
     }
 
     /**
-     * Test method for {@link NumberExtensions#operator_equals(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
+     * Test method for {@link NumberExtensions#operator_equals(org.openhab.core.types.Type, java.lang.Number)}
      */
     @Test
     public void testOperatorEqualsTypeNumber() {
@@ -541,7 +541,7 @@ public class NumberExtensionsTest {
 
     /**
      * Test method for
-     * {@link NumberExtensions#operator_notEquals(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
+     * {@link NumberExtensions#operator_notEquals(org.openhab.core.types.Type, java.lang.Number)}
      */
     @Test
     public void testOperatorNotEqualsTypeNumber() {
@@ -561,7 +561,7 @@ public class NumberExtensionsTest {
 
     /**
      * Test method for
-     * {@link NumberExtensions#operator_greaterThan(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
+     * {@link NumberExtensions#operator_greaterThan(org.openhab.core.types.Type, java.lang.Number)}
      */
     @Test
     public void testOperatorGreaterThanTypeNumber() {
@@ -581,7 +581,7 @@ public class NumberExtensionsTest {
 
     /**
      * Test method for
-     * {@link NumberExtensions#operator_greaterEqualsThan(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
+     * {@link NumberExtensions#operator_greaterEqualsThan(org.openhab.core.types.Type, java.lang.Number)}
      */
     @Test
     public void testOperatorGreaterEqualsThanTypeNumber() {
@@ -607,7 +607,7 @@ public class NumberExtensionsTest {
 
     /**
      * Test method for
-     * {@link NumberExtensions#operator_lessThan(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
+     * {@link NumberExtensions#operator_lessThan(org.openhab.core.types.Type, java.lang.Number)}
      */
     @Test
     public void testOperatorLessThanTypeNumber() {
@@ -627,7 +627,7 @@ public class NumberExtensionsTest {
 
     /**
      * Test method for
-     * {@link NumberExtensions#operator_lessEqualsThan(org.eclipse.smarthome.core.types.Type, java.lang.Number)}
+     * {@link NumberExtensions#operator_lessEqualsThan(org.openhab.core.types.Type, java.lang.Number)}
      */
     @Test
     public void testOperatorLessEqualsThanTypeNumber() {

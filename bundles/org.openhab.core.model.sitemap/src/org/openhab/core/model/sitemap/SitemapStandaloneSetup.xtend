@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.sitemap
+package org.openhab.core.model.sitemap
 
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
@@ -26,7 +26,7 @@ class SitemapStandaloneSetup extends SitemapStandaloneSetupGenerated {
     }
     
     def static void unregister() {
-        EPackage.Registry.INSTANCE.remove("http://www.eclipse.org/smarthome/model/Sitemap");
+        EPackage.Registry.INSTANCE.remove("https://openhab.org/model/Sitemap");
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().remove("sitemap");
         IResourceServiceProvider.Registry.INSTANCE.getExtensionToFactoryMap().remove("sitemap");
     }

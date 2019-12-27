@@ -14,8 +14,8 @@ package org.openhab.core.automation.module.media.internal;
 
 import java.util.Map;
 
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioManager;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.slf4j.Logger;

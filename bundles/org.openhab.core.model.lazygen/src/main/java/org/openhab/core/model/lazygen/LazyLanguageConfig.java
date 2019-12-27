@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.lazygen;
+package org.openhab.core.model.lazygen;
 
 import static org.eclipse.xtext.util.Strings.equal;
 

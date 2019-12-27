@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigUtil;
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigUtil;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.internal.ModuleImpl;

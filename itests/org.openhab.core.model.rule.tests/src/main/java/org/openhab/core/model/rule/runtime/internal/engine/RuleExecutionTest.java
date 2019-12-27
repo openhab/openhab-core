@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.runtime.internal.engine;
+package org.openhab.core.model.rule.runtime.internal.engine;
 
 import static org.junit.Assert.*;
 
@@ -21,22 +21,22 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFilter;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.rule.rules.Rule;
-import org.eclipse.smarthome.model.rule.runtime.RuleEngine;
-import org.eclipse.smarthome.model.rule.runtime.internal.engine.RuleTriggerManager.TriggerTypes;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.rule.rules.Rule;
+import org.openhab.core.model.rule.runtime.RuleEngine;
+import org.openhab.core.model.rule.runtime.internal.engine.RuleTriggerManager.TriggerTypes;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 

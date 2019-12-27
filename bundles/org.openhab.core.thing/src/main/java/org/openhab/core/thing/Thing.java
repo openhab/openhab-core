@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing;
+package org.openhab.core.thing;
 
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.common.registry.Identifiable;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.items.Item;
+import org.openhab.core.thing.binding.ThingHandler;
 
 /**
  * A {@link Thing} is a representation of a connected part (e.g. physical device or cloud service) from the real world.

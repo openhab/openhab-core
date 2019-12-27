@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.serial.internal;
+package org.openhab.core.config.serial.internal;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -18,9 +18,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
+import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.io.transport.serial.SerialPortManager;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

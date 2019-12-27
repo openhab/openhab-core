@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.internal;
+package org.openhab.core.thing.xml.internal;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
-import org.eclipse.smarthome.config.xml.AbstractXmlConfigDescriptionProvider;
-import org.eclipse.smarthome.config.xml.osgi.XmlDocumentBundleTracker;
-import org.eclipse.smarthome.config.xml.osgi.XmlDocumentProvider;
-import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupType;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ThingType;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.xml.AbstractXmlConfigDescriptionProvider;
+import org.openhab.core.config.xml.osgi.XmlDocumentBundleTracker;
+import org.openhab.core.config.xml.osgi.XmlDocumentProvider;
+import org.openhab.core.thing.binding.ThingTypeProvider;
+import org.openhab.core.thing.type.ChannelGroupType;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ThingType;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

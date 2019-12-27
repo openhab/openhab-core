@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.profiles;
+package org.openhab.core.thing.internal.profiles;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID;
-import org.eclipse.smarthome.core.thing.profiles.StateProfileType;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
+import org.openhab.core.thing.profiles.StateProfileType;
 
 /**
  * Default implementation of a {@link StateProfileType}.

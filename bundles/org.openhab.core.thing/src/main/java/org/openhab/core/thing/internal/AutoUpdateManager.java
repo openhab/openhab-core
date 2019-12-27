@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal;
+package org.openhab.core.thing.internal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,25 +18,25 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
-import org.eclipse.smarthome.core.items.MetadataRegistry;
-import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLink;
-import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
-import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.type.AutoUpdatePolicy;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -53,12 +53,12 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true, service = {
-        AutoUpdateManager.class }, configurationPid = "org.eclipse.smarthome.autoupdate", configurationPolicy = ConfigurationPolicy.OPTIONAL)
+        AutoUpdateManager.class }, configurationPid = "org.openhab.core.autoupdate", configurationPolicy = ConfigurationPolicy.OPTIONAL)
 public class AutoUpdateManager {
 
     private static final String AUTOUPDATE_KEY = "autoupdate";
-    protected static final String EVENT_SOURCE = "org.eclipse.smarthome.core.autoupdate";
-    protected static final String EVENT_SOURCE_OPTIMISTIC = "org.eclipse.smarthome.core.autoupdate.optimistic";
+    protected static final String EVENT_SOURCE = "org.openhab.core.autoupdate";
+    protected static final String EVENT_SOURCE_OPTIMISTIC = "org.openhab.core.autoupdate.optimistic";
 
     protected static final String PROPERTY_ENABLED = "enabled";
     protected static final String PROPERTY_SEND_OPTIMISTIC_UPDATES = "sendOptimisticUpdates";

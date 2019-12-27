@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal;
+package org.openhab.core.thing.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.eclipse.smarthome.core.service.ReadyService;
-import org.eclipse.smarthome.core.storage.Storage;
-import org.eclipse.smarthome.core.storage.StorageService;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.core.util.BundleResolver;
+import org.openhab.core.service.ReadyService;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageService;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.util.BundleResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

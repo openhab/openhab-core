@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.javavoicemanager;
+package org.openhab.core.voice.javavoicemanager;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -23,21 +23,21 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
 
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.voice.VoiceManager;
-import org.eclipse.smarthome.core.voice.internal.AudioManagerStub;
-import org.eclipse.smarthome.core.voice.internal.AudioSourceStub;
-import org.eclipse.smarthome.core.voice.internal.ConsoleStub;
-import org.eclipse.smarthome.core.voice.internal.HumanLanguageInterpreterStub;
-import org.eclipse.smarthome.core.voice.internal.KSServiceStub;
-import org.eclipse.smarthome.core.voice.internal.STTServiceStub;
-import org.eclipse.smarthome.core.voice.internal.SinkStub;
-import org.eclipse.smarthome.core.voice.internal.TTSServiceStub;
-import org.eclipse.smarthome.core.voice.internal.VoiceManagerImpl;
-import org.eclipse.smarthome.core.voice.internal.VoiceStub;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.voice.VoiceManager;
+import org.openhab.core.voice.internal.AudioManagerStub;
+import org.openhab.core.voice.internal.AudioSourceStub;
+import org.openhab.core.voice.internal.ConsoleStub;
+import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
+import org.openhab.core.voice.internal.KSServiceStub;
+import org.openhab.core.voice.internal.STTServiceStub;
+import org.openhab.core.voice.internal.SinkStub;
+import org.openhab.core.voice.internal.TTSServiceStub;
+import org.openhab.core.voice.internal.VoiceManagerImpl;
+import org.openhab.core.voice.internal.VoiceStub;
+import org.openhab.core.voice.text.InterpretationException;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,7 +53,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Velin Yordanov - migrated tests from groovy to java
  */
 public class VoiceManagerTest extends JavaOSGiTest {
-    private static final String PID = "org.eclipse.smarthome.voice";
+    private static final String PID = "org.openhab.core.voice";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
     private static final String CONFIG_DEFAULT_KS = "defaultKS";
     private static final String CONFIG_DEFAULT_STT = "defaultSTT";
@@ -164,7 +164,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put("defaultHLI", hliStub.getId());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        String pid = "org.eclipse.smarthome.voice";
+        String pid = "org.openhab.core.voice";
         Configuration configuration = configAdmin.getConfiguration(pid);
         configuration.update(voiceConfig);
 
@@ -249,7 +249,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
 
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        String pid = "org.eclipse.smarthome.voice";
+        String pid = "org.openhab.core.voice";
         Configuration configuration = configAdmin.getConfiguration(pid);
         configuration.update(config);
 

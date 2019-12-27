@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.profiles;
+package org.openhab.core.thing.profiles;
 
-import static org.eclipse.smarthome.core.thing.profiles.ProfileTypeUID.SYSTEM_SCOPE;
+import static org.openhab.core.thing.profiles.ProfileTypeUID.SYSTEM_SCOPE;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.thing.DefaultSystemChannelTypeProvider;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.thing.DefaultSystemChannelTypeProvider;
 
 /**
  * System profile constants.

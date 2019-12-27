@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.actions;
+package org.openhab.core.model.script.actions;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.joda.time.Instant.now;
 import static org.junit.Assert.assertThat;
 
-import org.eclipse.smarthome.model.script.scheduler.test.MockClosure.MockClosure0;
-import org.eclipse.smarthome.model.script.scheduler.test.MockClosure.MockClosure1;
-import org.eclipse.smarthome.model.script.scheduler.test.MockScheduler;
+import org.openhab.core.model.script.scheduler.test.MockClosure.MockClosure0;
+import org.openhab.core.model.script.scheduler.test.MockClosure.MockClosure1;
+import org.openhab.core.model.script.scheduler.test.MockScheduler;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.quartz.SchedulerException;

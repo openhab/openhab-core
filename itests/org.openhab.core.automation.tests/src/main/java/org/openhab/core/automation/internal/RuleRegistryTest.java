@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

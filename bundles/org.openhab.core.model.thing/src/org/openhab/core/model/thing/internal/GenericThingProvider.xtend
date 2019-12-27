@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.internal
+package org.openhab.core.model.thing.internal
 
 import java.util.ArrayList
 import java.util.Collection
@@ -21,39 +21,39 @@ import java.util.Set
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
-import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry
-import org.eclipse.smarthome.config.core.ConfigUtil
-import org.eclipse.smarthome.config.core.Configuration
-import org.eclipse.smarthome.core.common.registry.AbstractProvider
-import org.eclipse.smarthome.core.i18n.LocaleProvider
-import org.eclipse.smarthome.core.service.ReadyMarker
-import org.eclipse.smarthome.core.service.ReadyMarkerFilter
-import org.eclipse.smarthome.core.service.ReadyService
-import org.eclipse.smarthome.core.thing.Channel
-import org.eclipse.smarthome.core.thing.ChannelUID
-import org.eclipse.smarthome.core.thing.Thing
-import org.eclipse.smarthome.core.thing.ThingProvider
-import org.eclipse.smarthome.core.thing.ThingTypeUID
-import org.eclipse.smarthome.core.thing.ThingUID
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder
-import org.eclipse.smarthome.core.thing.type.AutoUpdatePolicy
-import org.eclipse.smarthome.core.thing.type.ChannelDefinition
-import org.eclipse.smarthome.core.thing.type.ChannelKind
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID
-import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry
-import org.eclipse.smarthome.core.thing.util.ThingHelper
-import org.eclipse.smarthome.core.util.BundleResolver
-import org.eclipse.smarthome.model.core.ModelRepository
-import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener
-import org.eclipse.smarthome.model.thing.thing.ModelBridge
-import org.eclipse.smarthome.model.thing.thing.ModelChannel
-import org.eclipse.smarthome.model.thing.thing.ModelPropertyContainer
-import org.eclipse.smarthome.model.thing.thing.ModelThing
-import org.eclipse.smarthome.model.thing.thing.ThingModel
+import org.openhab.core.config.core.ConfigDescriptionRegistry
+import org.openhab.core.config.core.ConfigUtil
+import org.openhab.core.config.core.Configuration
+import org.openhab.core.common.registry.AbstractProvider
+import org.openhab.core.i18n.LocaleProvider
+import org.openhab.core.service.ReadyMarker
+import org.openhab.core.service.ReadyMarkerFilter
+import org.openhab.core.service.ReadyService
+import org.openhab.core.thing.Channel
+import org.openhab.core.thing.ChannelUID
+import org.openhab.core.thing.Thing
+import org.openhab.core.thing.ThingProvider
+import org.openhab.core.thing.ThingTypeUID
+import org.openhab.core.thing.ThingUID
+import org.openhab.core.thing.binding.ThingHandlerFactory
+import org.openhab.core.thing.binding.builder.BridgeBuilder
+import org.openhab.core.thing.binding.builder.ChannelBuilder
+import org.openhab.core.thing.binding.builder.ThingBuilder
+import org.openhab.core.thing.type.AutoUpdatePolicy
+import org.openhab.core.thing.type.ChannelDefinition
+import org.openhab.core.thing.type.ChannelKind
+import org.openhab.core.thing.type.ChannelTypeRegistry
+import org.openhab.core.thing.type.ChannelTypeUID
+import org.openhab.core.thing.type.ThingTypeRegistry
+import org.openhab.core.thing.util.ThingHelper
+import org.openhab.core.util.BundleResolver
+import org.openhab.core.model.core.ModelRepository
+import org.openhab.core.model.core.ModelRepositoryChangeListener
+import org.openhab.core.model.thing.thing.ModelBridge
+import org.openhab.core.model.thing.thing.ModelChannel
+import org.openhab.core.model.thing.thing.ModelPropertyContainer
+import org.openhab.core.model.thing.thing.ModelThing
+import org.openhab.core.model.thing.thing.ThingModel
 import org.eclipse.xtend.lib.annotations.Data
 import org.osgi.service.component.annotations.Component
 import org.osgi.service.component.annotations.Reference
@@ -437,13 +437,13 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
         this.bundleResolver = null;
     }
 
-    override void modelChanged(String modelName, org.eclipse.smarthome.model.core.EventType type) {
+    override void modelChanged(String modelName, org.openhab.core.model.core.EventType type) {
         if (modelName.endsWith("things")) {
             switch type {
-                case org.eclipse.smarthome.model.core.EventType.ADDED: {
+                case org.openhab.core.model.core.EventType.ADDED: {
                     createThingsFromModel(modelName)
                 }
-                case org.eclipse.smarthome.model.core.EventType.MODIFIED: {
+                case org.openhab.core.model.core.EventType.MODIFIED: {
                     val oldThings = thingsMap.get(modelName) ?: newArrayList
                     val model = modelRepository.getModel(modelName) as ThingModel
                     if (model !== null) {
@@ -457,7 +457,7 @@ class GenericThingProvider extends AbstractProvider<Thing> implements ThingProvi
                         thingsMap.get(modelName).removeAll(removedThings)
                     }
                 }
-                case org.eclipse.smarthome.model.core.EventType.REMOVED: {
+                case org.openhab.core.model.core.EventType.REMOVED: {
                     logger.debug("Removing all things from model '{}'.", modelName)
                     val things = thingsMap.remove(modelName) ?: newArrayList
                     things.forEach [

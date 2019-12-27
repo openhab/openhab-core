@@ -31,11 +31,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.storage.Storage;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageService;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;

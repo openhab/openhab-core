@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.FilterCriteria;
-import org.eclipse.smarthome.config.core.ParameterOption;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;

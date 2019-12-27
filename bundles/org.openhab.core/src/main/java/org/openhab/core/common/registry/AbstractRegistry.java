@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.common.registry;
+package org.openhab.core.common.registry;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
@@ -30,8 +30,8 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventPublisher;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventPublisher;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;

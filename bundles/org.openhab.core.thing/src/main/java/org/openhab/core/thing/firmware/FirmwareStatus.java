@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.firmware;
+package org.openhab.core.thing.firmware;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareUpdateHandler;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.firmware.Firmware;
+import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
 
 /**
  * The {@link FirmwareStatus} enumeration defines all possible statuses for the {@link Firmware} of a {@link Thing}

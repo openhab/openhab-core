@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.auth.oauth2client.test.internal.cipher;
+package org.openhab.core.auth.oauth2client.test.internal.cipher;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -22,7 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.eclipse.smarthome.auth.oauth2client.internal.cipher.SymmetricKeyCipher;
+import org.openhab.core.auth.oauth2client.internal.cipher.SymmetricKeyCipher;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.InvalidSyntaxException;

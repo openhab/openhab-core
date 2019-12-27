@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.internal;
+package org.openhab.core.thing.xml.internal;
 
 import static java.util.stream.Collectors.toList;
 
@@ -19,11 +19,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.xml.util.ConverterAttributeMapValidator;
-import org.eclipse.smarthome.config.xml.util.NodeIterator;
-import org.eclipse.smarthome.config.xml.util.NodeList;
-import org.eclipse.smarthome.config.xml.util.NodeValue;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
+import org.openhab.core.config.xml.util.NodeIterator;
+import org.openhab.core.config.xml.util.NodeList;
+import org.openhab.core.config.xml.util.NodeValue;
+import org.openhab.core.thing.ThingTypeUID;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;

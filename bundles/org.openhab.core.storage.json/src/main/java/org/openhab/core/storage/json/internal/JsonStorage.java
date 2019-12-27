@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.storage.json.internal;
+package org.openhab.core.storage.json.internal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,9 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.ConfigurationDeserializer;
-import org.eclipse.smarthome.core.storage.Storage;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.ConfigurationDeserializer;
+import org.openhab.core.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

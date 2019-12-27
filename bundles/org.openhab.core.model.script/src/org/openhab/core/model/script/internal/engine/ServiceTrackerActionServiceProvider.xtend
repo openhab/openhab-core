@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.internal.engine;
+package org.openhab.core.model.script.internal.engine;
 
 import com.google.inject.Singleton
-import org.eclipse.smarthome.model.script.ScriptServiceUtil
-import org.eclipse.smarthome.model.script.engine.IActionServiceProvider
+import org.openhab.core.model.script.ScriptServiceUtil
+import org.openhab.core.model.script.engine.IActionServiceProvider
 
 @Singleton
 class ServiceTrackerActionServiceProvider implements IActionServiceProvider {

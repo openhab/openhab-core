@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
+import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
 import org.openhab.core.automation.parser.ParsingNestedException;

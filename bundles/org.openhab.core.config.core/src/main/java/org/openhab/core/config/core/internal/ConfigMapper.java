@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal;
+package org.openhab.core.config.core.internal;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

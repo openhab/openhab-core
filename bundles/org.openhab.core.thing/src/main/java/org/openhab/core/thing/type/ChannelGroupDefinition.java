@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
-import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.core.thing.Thing;
 
 /**
  * The {@link ChannelGroupDefinition} class defines a {@link ChannelGroupType} of a {@link ThingType}.

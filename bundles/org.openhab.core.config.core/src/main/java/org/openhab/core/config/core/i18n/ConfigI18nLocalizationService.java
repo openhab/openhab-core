@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.i18n;
+package org.openhab.core.config.core.i18n;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -19,14 +19,14 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterGroup;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.config.core.internal.i18n.ConfigDescriptionGroupI18nUtil;
-import org.eclipse.smarthome.config.core.internal.i18n.ConfigDescriptionI18nUtil;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.config.core.internal.i18n.ConfigDescriptionGroupI18nUtil;
+import org.openhab.core.config.core.internal.i18n.ConfigDescriptionI18nUtil;
+import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

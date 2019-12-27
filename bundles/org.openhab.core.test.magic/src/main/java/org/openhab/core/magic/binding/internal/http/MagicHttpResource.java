@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal.http;
+package org.openhab.core.magic.binding.internal.http;
 
 import java.io.IOException;
 import java.net.URL;

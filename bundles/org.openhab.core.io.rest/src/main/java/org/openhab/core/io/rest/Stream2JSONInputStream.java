@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest;
+package org.openhab.core.io.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DateTimeType;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

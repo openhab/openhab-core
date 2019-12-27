@@ -10,19 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.actions;
+package org.openhab.core.model.script.actions;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.script.ScriptServiceUtil;
-import org.eclipse.smarthome.model.script.engine.Script;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
-import org.eclipse.smarthome.model.script.engine.ScriptExecutionException;
-import org.eclipse.smarthome.model.script.internal.actions.TimerExecutionJob;
-import org.eclipse.smarthome.model.script.internal.actions.TimerImpl;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.model.script.engine.Script;
+import org.openhab.core.model.script.engine.ScriptEngine;
+import org.openhab.core.model.script.engine.ScriptExecutionException;
+import org.openhab.core.model.script.internal.actions.TimerExecutionJob;
+import org.openhab.core.model.script.internal.actions.TimerImpl;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;

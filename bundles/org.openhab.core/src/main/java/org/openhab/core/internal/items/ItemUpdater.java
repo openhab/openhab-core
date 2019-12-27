@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.events.AbstractItemEventSubscriber;
-import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
-import org.eclipse.smarthome.core.items.events.ItemStateEvent;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.events.AbstractItemEventSubscriber;
+import org.openhab.core.items.events.ItemCommandEvent;
+import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.types.State;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

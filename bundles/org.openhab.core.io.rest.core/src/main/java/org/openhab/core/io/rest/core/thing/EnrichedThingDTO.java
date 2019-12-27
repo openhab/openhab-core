@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.thing;
+package org.openhab.core.io.rest.core.thing;
 
 import java.util.List;
 
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.dto.ChannelDTO;
-import org.eclipse.smarthome.core.thing.dto.ThingDTO;
-import org.eclipse.smarthome.core.thing.firmware.dto.FirmwareStatusDTO;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.dto.ChannelDTO;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 
 /**
  * This is a data transfer object that is used to serialize things with dynamic data like the status.

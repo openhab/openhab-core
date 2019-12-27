@@ -1,4 +1,4 @@
-grammar org.eclipse.smarthome.model.thing.Thing 
+grammar org.openhab.core.model.thing.Thing 
 
 // disabled due to conflicts between the custom ID rule and the common INT rule
 // with org.eclipse.xtext.common.Terminals
@@ -7,7 +7,7 @@ hidden(WS, ML_COMMENT, SL_COMMENT)
 
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
-generate thing "http://www.eclipse.org/smarthome/model/Thing"
+generate thing "https://openhab.org/model/Thing"
 
 ThingModel:
 	things+=(ModelThing|ModelBridge)*;

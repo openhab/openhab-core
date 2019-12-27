@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding.firmware;
+package org.openhab.core.thing.binding.firmware;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareStatus;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateService;
+import org.openhab.core.thing.firmware.FirmwareStatus;
+import org.openhab.core.thing.firmware.FirmwareUpdateService;
 
 /**
  * The {@link FirmwareUpdateBackgroundTransferHandler} is an extension of the {@link FirmwareUpdateHandler} and is to be

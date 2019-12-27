@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.persistence.extensions;
+package org.openhab.core.model.persistence.extensions;
 
 import static org.junit.Assert.*;
 
@@ -18,14 +18,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceService;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.model.persistence.tests.TestPersistenceService;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.model.persistence.tests.TestPersistenceService;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.junit.After;

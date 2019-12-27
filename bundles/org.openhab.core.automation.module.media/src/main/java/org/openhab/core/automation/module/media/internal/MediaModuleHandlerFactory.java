@@ -17,8 +17,8 @@ import static java.util.Collections.unmodifiableList;
 
 import java.util.Collection;
 
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.voice.VoiceManager;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandlerFactory;

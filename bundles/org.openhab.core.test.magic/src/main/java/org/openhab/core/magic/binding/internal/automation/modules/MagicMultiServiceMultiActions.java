@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal.automation.modules;
+package org.openhab.core.magic.binding.internal.automation.modules;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
-@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, configurationPid = "org.eclipse.smarthome.MagicMultiAction")
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, configurationPid = "org.openhab.core.MagicMultiAction")
 @ActionScope(name = "binding.magic")
 public class MagicMultiServiceMultiActions implements AnnotatedActions {
 

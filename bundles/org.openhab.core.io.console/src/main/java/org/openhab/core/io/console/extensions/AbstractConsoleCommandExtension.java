@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.extensions;
+package org.openhab.core.io.console.extensions;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.io.console.Console;
+import org.openhab.core.io.console.Console;
 
 /**
  * A base class that should be used by console command extension for better inclusion.

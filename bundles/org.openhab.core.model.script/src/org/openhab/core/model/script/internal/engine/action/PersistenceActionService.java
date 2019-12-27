@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.internal.engine.action;
+package org.openhab.core.model.script.internal.engine.action;
 
-import org.eclipse.smarthome.model.persistence.extensions.PersistenceExtensions;
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
+import org.openhab.core.model.persistence.extensions.PersistenceExtensions;
+import org.openhab.core.model.script.engine.action.ActionService;
 import org.osgi.service.component.annotations.Component;
 
 /**

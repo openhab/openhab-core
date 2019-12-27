@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mdns.discovery;
+package org.openhab.core.io.transport.mdns.discovery;
 
 import java.util.Set;
 
 import javax.jmdns.ServiceInfo;
 
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * A {@link MDNSDiscoveryParticipant} that is registered as a service is picked up by the MDNSDiscoveryService
@@ -26,7 +26,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
  * mDNS scans.
  *
  * @author Tobias Bräutigam - Initial contribution
- * @deprecated use org.eclipse.smarthome.config.discovery.mdns.MDNSDiscoveryParticipant instead.
+ * @deprecated use org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant instead.
  */
 @Deprecated
 public interface MDNSDiscoveryParticipant {

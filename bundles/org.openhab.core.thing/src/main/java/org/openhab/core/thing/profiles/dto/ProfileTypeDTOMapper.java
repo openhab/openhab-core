@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.profiles.dto;
+package org.openhab.core.thing.profiles.dto;
 
-import org.eclipse.smarthome.core.thing.profiles.ProfileType;
-import org.eclipse.smarthome.core.thing.profiles.TriggerProfileType;
+import org.openhab.core.thing.profiles.ProfileType;
+import org.openhab.core.thing.profiles.TriggerProfileType;
 
 /**
  * The {@link ProfileTypeDTOMapper} is an utility class to map profile-types into profile-type data transfer

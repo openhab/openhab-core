@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest;
+package org.openhab.core.io.rest;
 
 /**
  * This is a marker interface for REST resource implementations

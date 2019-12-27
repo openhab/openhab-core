@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal;
+package org.openhab.core.io.rest.core.internal;
 
-import org.eclipse.smarthome.io.rest.JSONResponse;
+import org.openhab.core.io.rest.JSONResponse;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;

@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.firmware;
+package org.openhab.core.thing.firmware;
 
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareUpdateHandler;
-import org.eclipse.smarthome.core.thing.binding.firmware.ProgressCallback;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.firmware.Firmware;
+import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
+import org.openhab.core.thing.binding.firmware.ProgressCallback;
 
 /**
  * The firmware update service is registered as an OSGi service and is responsible for tracking all available

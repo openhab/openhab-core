@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.thing;
+package org.openhab.core.io.rest.core.thing;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatusInfo;
-import org.eclipse.smarthome.core.thing.dto.ChannelDTO;
-import org.eclipse.smarthome.core.thing.dto.ThingDTO;
-import org.eclipse.smarthome.core.thing.dto.ThingDTOMapper;
-import org.eclipse.smarthome.core.thing.firmware.dto.FirmwareStatusDTO;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatusInfo;
+import org.openhab.core.thing.dto.ChannelDTO;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.dto.ThingDTOMapper;
+import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 
 /**
  * The {@link EnrichedThingDTOMapper} is an utility class to map things into enriched thing data transfer objects

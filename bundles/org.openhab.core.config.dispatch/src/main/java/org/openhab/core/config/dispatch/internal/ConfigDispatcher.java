@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.dispatch.internal;
+package org.openhab.core.config.dispatch.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -68,11 +68,11 @@ import com.google.gson.JsonSyntaxException;
  *
  * <p>
  * In case the pid does not contain any ".", the default service pid namespace is prefixed, which can be defined by the
- * program argument "smarthome.servicepid" (default is "org.eclipse.smarthome").
+ * program argument "smarthome.servicepid" (default is "org.openhab.core").
  *
  * <p>
  * If no pid is defined in the property line, the default pid namespace will be used together with the filename. E.g. if
- * you have a file "security.cfg", the pid that will be used is "org.eclipse.smarthome.security".
+ * you have a file "security.cfg", the pid that will be used is "org.openhab.core.security".
  *
  * <p>
  * Last but not least, a pid can be defined in the first line of a cfg file by prefixing it with "pid:", e.g.
@@ -113,7 +113,7 @@ public class ConfigDispatcher {
     public static final String SERVICECFG_PROG_ARGUMENT = "smarthome.servicecfg";
 
     /** The default namespace for service pids */
-    public static final String SERVICE_PID_NAMESPACE = "org.eclipse.smarthome";
+    public static final String SERVICE_PID_NAMESPACE = "org.openhab.core";
 
     /** The default services configuration filename */
     public static final String SERVICE_CFG_FILE = "smarthome.cfg";

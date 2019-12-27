@@ -20,13 +20,13 @@
     <!-- These bundles are generated trough XText -->
     <suppress files=".+org.openhab.core.model.+" checks="RequireBundleCheck|ExportInternalPackageCheck|ManifestPackageVersionCheck|ImportExportedPackagesCheck|PackageExportsNameCheck|PomXmlCheck"/>
 
-    <suppress files=".+org.eclipse.smarthome.config.discovery.mdns.internal.MDNSDiscoveryService.java|.+org.eclipse.smarthome.config.discovery.upnp.internal.UpnpDiscoveryService.java|.+org.eclipse.smarthome.io.console.eclipse.internal.ConsoleSupportEclipse.java|.+org.eclipse.smarthome.io.console.rfc147.internal.CommandWrapper.java|.+org.eclipse.smarthome.core.library.unit.MetricPrefix.java" checks="MethodNameCheck"/>
+    <suppress files=".+org.openhab.core.config.discovery.mdns.internal.MDNSDiscoveryService.java|.+org.openhab.core.config.discovery.upnp.internal.UpnpDiscoveryService.java|.+org.openhab.core.io.console.eclipse.internal.ConsoleSupportEclipse.java|.+org.openhab.core.io.console.rfc147.internal.CommandWrapper.java|.+org.openhab.core.library.unit.MetricPrefix.java" checks="MethodNameCheck"/>
 
 	<!-- Add suppression as discussed in https://github.com/openhab/static-code-analysis/issues/265 -->
-	<suppress files=".+org.eclipse.smarthome.core.common.registry.AbstractRegistry.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
-	<suppress files=".+org.eclipse.smarthome.core.thing.binding.BaseThingHandler.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
-	<suppress files=".+org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
-	<suppress files=".+org.eclipse.smarthome.core.transform.AbstractFileTransformationService.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
+	<suppress files=".+org.openhab.core.common.registry.AbstractRegistry.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
+	<suppress files=".+org.openhab.core.thing.binding.BaseThingHandler.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
+	<suppress files=".+org.openhab.core.thing.binding.BaseThingHandlerFactory.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
+	<suppress files=".+org.openhab.core.transform.AbstractFileTransformationService.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
 	<suppress files=".+org.openhab.core.automation.internal.commands.AbstractCommandProvider.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
 	<suppress files=".+org.openhab.core.automation.sample.rest.api.internal.Activator.java" checks="DeclarativeServicesDependencyInjectionCheck"/>
 </suppressions>

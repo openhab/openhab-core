@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.auth.oauth2client.internal;
+package org.openhab.core.auth.oauth2client.internal;
 
-import static org.eclipse.smarthome.auth.oauth2client.internal.StorageRecordType.*;
+import static org.openhab.core.auth.oauth2client.internal.StorageRecordType.*;
 
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
@@ -28,11 +28,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.auth.oauth2client.internal.cipher.SymmetricKeyCipher;
-import org.eclipse.smarthome.core.auth.client.oauth2.AccessTokenResponse;
-import org.eclipse.smarthome.core.auth.client.oauth2.StorageCipher;
-import org.eclipse.smarthome.core.storage.Storage;
-import org.eclipse.smarthome.core.storage.StorageService;
+import org.openhab.core.auth.oauth2client.internal.cipher.SymmetricKeyCipher;
+import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.StorageCipher;
+import org.openhab.core.storage.Storage;
+import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

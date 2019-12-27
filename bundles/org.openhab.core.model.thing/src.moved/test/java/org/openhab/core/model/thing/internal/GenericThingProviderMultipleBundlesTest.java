@@ -10,26 +10,26 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.internal;
+package org.openhab.core.model.thing.internal;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.service.ReadyMarker;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.eclipse.smarthome.core.thing.binding.builder.BridgeBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.util.BundleResolver;
-import org.eclipse.smarthome.model.core.EventType;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.thing.thing.ModelBridge;
-import org.eclipse.smarthome.model.thing.thing.ModelThing;
-import org.eclipse.smarthome.model.thing.thing.ThingModel;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.util.BundleResolver;
+import org.openhab.core.model.core.EventType;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.thing.thing.ModelBridge;
+import org.openhab.core.model.thing.thing.ModelThing;
+import org.openhab.core.model.thing.thing.ThingModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;

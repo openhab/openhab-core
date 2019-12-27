@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.events;
+package org.openhab.core.internal.events;
 
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -18,8 +18,8 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventPublisher;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventPublisher;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.EventAdmin;

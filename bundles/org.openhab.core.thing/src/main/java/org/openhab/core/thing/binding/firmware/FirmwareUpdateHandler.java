@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding.firmware;
+package org.openhab.core.thing.binding.firmware;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateService;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.firmware.FirmwareUpdateService;
 
 /**
  * The {@link FirmwareUpdateHandler} can be implemented and registered as an OSGi service in order to update the
  * firmware for the physical device of a {@link Thing}. The {@link FirmwareUpdateService} tracks each firmware
  * update handler and starts the firmware update process by the operation
- * {@link FirmwareUpdateService#updateFirmware(org.eclipse.smarthome.core.thing.ThingUID, FirmwareUID, java.util.Locale)}
+ * {@link FirmwareUpdateService#updateFirmware(org.openhab.core.thing.ThingUID, FirmwareUID, java.util.Locale)}
  * .
  *
  * @author Thomas Höfer - Initial contribution

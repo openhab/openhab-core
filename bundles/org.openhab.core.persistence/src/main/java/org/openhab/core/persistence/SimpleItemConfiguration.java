@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence;
+package org.openhab.core.persistence;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.smarthome.core.persistence.config.SimpleConfig;
-import org.eclipse.smarthome.core.persistence.strategy.SimpleStrategy;
+import org.openhab.core.persistence.config.SimpleConfig;
+import org.openhab.core.persistence.strategy.SimpleStrategy;
 
 /**
  * This class holds the configuration of a persistence strategy for specific items.

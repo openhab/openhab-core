@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.events;
+package org.openhab.core.events;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 

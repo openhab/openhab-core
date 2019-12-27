@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.net;
+package org.openhab.core.config.core.internal.net;
 
 import java.net.Inet4Address;
 import java.net.URI;
@@ -21,10 +21,10 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.net.CidrAddress;
-import org.eclipse.smarthome.core.net.NetUtil;
+import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.net.CidrAddress;
+import org.openhab.core.net.NetUtil;
 import org.osgi.service.component.annotations.Component;
 
 /**

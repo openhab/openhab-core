@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items.dto;
+package org.openhab.core.items.dto;
 
 /**
  * This is a data transfer object that is used to serialize group functions.

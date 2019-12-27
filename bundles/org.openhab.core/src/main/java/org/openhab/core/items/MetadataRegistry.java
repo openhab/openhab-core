@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.Registry;
+import org.openhab.core.common.registry.Registry;
 
 /**
  * The MetadataRegistry is the central place, where additional information about items is kept.

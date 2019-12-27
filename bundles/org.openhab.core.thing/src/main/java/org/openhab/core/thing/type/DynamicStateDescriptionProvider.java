@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.types.StateDescription;
 
 /**
  * The {@link DynamicStateDescriptionProvider} is responsible for providing {@link StateDescription} for a channel

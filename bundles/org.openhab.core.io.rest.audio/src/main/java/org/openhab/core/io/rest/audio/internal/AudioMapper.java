@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.audio.internal;
+package org.openhab.core.io.rest.audio.internal;
 
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioSource;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
 
 /**
  * Mapper class that maps {@link AudioSink} and {@link AudioSource} instanced to their respective DTOs.

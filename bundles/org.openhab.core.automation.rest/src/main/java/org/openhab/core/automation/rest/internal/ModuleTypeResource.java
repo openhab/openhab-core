@@ -30,8 +30,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.rest.LocaleService;
-import org.eclipse.smarthome.io.rest.RESTResource;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.automation.dto.ActionTypeDTOMapper;
 import org.openhab.core.automation.dto.ConditionTypeDTOMapper;
 import org.openhab.core.automation.dto.ModuleTypeDTO;

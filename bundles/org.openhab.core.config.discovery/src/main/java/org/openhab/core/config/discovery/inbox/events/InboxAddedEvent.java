@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.inbox.events;
+package org.openhab.core.config.discovery.inbox.events;
 
-import org.eclipse.smarthome.config.discovery.dto.DiscoveryResultDTO;
+import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
 
 /**
  * An {@link InboxAddedEvent} notifies subscribers that a discovery result has been added to the inbox.

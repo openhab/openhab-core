@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.runtime;
+package org.openhab.core.model.script.runtime;
 
 /**
  * This is a marker interface for Script Runtimes.

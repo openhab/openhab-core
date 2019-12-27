@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.servlet;
+package org.openhab.core.io.http.servlet;
 
 import java.util.Hashtable;
 

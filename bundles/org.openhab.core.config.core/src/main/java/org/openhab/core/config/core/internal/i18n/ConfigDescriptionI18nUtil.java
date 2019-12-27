@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.i18n;
+package org.openhab.core.config.core.internal.i18n;
 
 import java.net.URI;
 import java.util.Locale;
@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.i18n.I18nUtil;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
+import org.openhab.core.i18n.I18nUtil;
+import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 

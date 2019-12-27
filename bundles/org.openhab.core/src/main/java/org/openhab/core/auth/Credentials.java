@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.auth;
+package org.openhab.core.auth;
 
 /**
  * Marker interface for credentials which can be handled by authentication providers.

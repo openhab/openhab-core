@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.auth;
+package org.openhab.core.io.http.auth;
 
 import java.util.Optional;
 
-import org.eclipse.smarthome.core.auth.Credentials;
+import org.openhab.core.auth.Credentials;
 
 /**
  * Provider of credentials which works in given context and can provide credentials out of it.

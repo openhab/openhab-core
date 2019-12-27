@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sse.internal.util;
+package org.openhab.core.io.rest.sse.internal.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +19,8 @@ import java.util.StringTokenizer;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.io.rest.sse.beans.EventBean;
+import org.openhab.core.events.Event;
+import org.openhab.core.io.rest.sse.beans.EventBean;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 
 /**

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
 import java.util.List;
 
@@ -18,13 +18,13 @@ import javax.measure.Quantity;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.GroupFunction;
-import org.eclipse.smarthome.core.items.dto.GroupFunctionDTO;
-import org.eclipse.smarthome.core.library.types.ArithmeticGroupFunction;
-import org.eclipse.smarthome.core.library.types.DateTimeGroupFunction;
-import org.eclipse.smarthome.core.library.types.QuantityTypeArithmeticGroupFunction;
-import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.dto.GroupFunctionDTO;
+import org.openhab.core.library.types.ArithmeticGroupFunction;
+import org.openhab.core.library.types.DateTimeGroupFunction;
+import org.openhab.core.library.types.QuantityTypeArithmeticGroupFunction;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.State;
 import org.slf4j.LoggerFactory;
 
 /**

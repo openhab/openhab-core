@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sitemap.internal;
+package org.openhab.core.io.rest.sitemap.internal;
 
 /**
  * Event to notify the browser that the sitemap has been changed

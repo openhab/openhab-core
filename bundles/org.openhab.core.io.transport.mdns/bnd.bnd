@@ -1,2 +1,2 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.eclipse.smarthome.io.transport.mdns.internal.MDNSActivator
+Bundle-Activator: org.openhab.core.io.transport.mdns.internal.MDNSActivator

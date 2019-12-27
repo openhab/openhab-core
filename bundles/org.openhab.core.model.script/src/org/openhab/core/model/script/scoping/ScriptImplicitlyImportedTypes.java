@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.scoping;
+package org.openhab.core.model.script.scoping;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -19,26 +19,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.library.unit.BinaryPrefix;
-import org.eclipse.smarthome.core.library.unit.ImperialUnits;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.thing.binding.ThingActions;
-import org.eclipse.smarthome.model.persistence.extensions.PersistenceExtensions;
-import org.eclipse.smarthome.model.script.actions.Audio;
-import org.eclipse.smarthome.model.script.actions.BusEvent;
-import org.eclipse.smarthome.model.script.actions.Exec;
-import org.eclipse.smarthome.model.script.actions.HTTP;
-import org.eclipse.smarthome.model.script.actions.LogAction;
-import org.eclipse.smarthome.model.script.actions.Ping;
-import org.eclipse.smarthome.model.script.actions.ScriptExecution;
-import org.eclipse.smarthome.model.script.actions.Things;
-import org.eclipse.smarthome.model.script.actions.Voice;
-import org.eclipse.smarthome.model.script.engine.IActionServiceProvider;
-import org.eclipse.smarthome.model.script.engine.IThingActionsProvider;
-import org.eclipse.smarthome.model.script.engine.action.ActionService;
-import org.eclipse.smarthome.model.script.lib.NumberExtensions;
+import org.openhab.core.library.unit.BinaryPrefix;
+import org.openhab.core.library.unit.ImperialUnits;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.model.persistence.extensions.PersistenceExtensions;
+import org.openhab.core.model.script.actions.Audio;
+import org.openhab.core.model.script.actions.BusEvent;
+import org.openhab.core.model.script.actions.Exec;
+import org.openhab.core.model.script.actions.HTTP;
+import org.openhab.core.model.script.actions.LogAction;
+import org.openhab.core.model.script.actions.Ping;
+import org.openhab.core.model.script.actions.ScriptExecution;
+import org.openhab.core.model.script.actions.Things;
+import org.openhab.core.model.script.actions.Voice;
+import org.openhab.core.model.script.engine.IActionServiceProvider;
+import org.openhab.core.model.script.engine.IThingActionsProvider;
+import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.model.script.lib.NumberExtensions;
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures;
 import org.joda.time.DateTime;
 

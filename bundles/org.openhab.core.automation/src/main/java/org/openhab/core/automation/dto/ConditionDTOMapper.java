@@ -15,7 +15,7 @@ package org.openhab.core.automation.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.util.ModuleBuilder;
 

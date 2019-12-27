@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.persistence.dto;
+package org.openhab.core.persistence.dto;
 
 /**
  * This is a java bean that is used to serialize services to JSON.

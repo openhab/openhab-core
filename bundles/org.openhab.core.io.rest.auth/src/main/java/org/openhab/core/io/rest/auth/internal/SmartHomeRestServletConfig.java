@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.auth.internal;
+package org.openhab.core.io.rest.auth.internal;
 
 import java.util.Dictionary;
 import java.util.Hashtable;

@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.dto;
+package org.openhab.core.thing.dto;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.type.ChannelKind;
 
 /**
  * This is a data transfer object that is used to serialize channels.

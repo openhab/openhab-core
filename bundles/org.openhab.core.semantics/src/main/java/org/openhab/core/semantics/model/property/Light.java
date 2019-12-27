@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics.model.property;
+package org.openhab.core.semantics.model.property;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.semantics.model.Property;
-import org.eclipse.smarthome.core.semantics.model.TagInfo;
+import org.openhab.core.semantics.model.Property;
+import org.openhab.core.semantics.model.TagInfo;
 
 /**
  * This class defines a Light.

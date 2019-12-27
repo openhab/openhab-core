@@ -35,8 +35,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.service.AbstractWatchService;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.service.AbstractWatchService;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.osgi.service.component.annotations.Component;

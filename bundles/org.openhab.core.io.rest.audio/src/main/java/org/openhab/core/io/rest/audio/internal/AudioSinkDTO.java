@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.audio.internal;
+package org.openhab.core.io.rest.audio.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSink;
 
 /**
  * A DTO that is used on the REST API to provide infos about {@link AudioSink} to UIs.

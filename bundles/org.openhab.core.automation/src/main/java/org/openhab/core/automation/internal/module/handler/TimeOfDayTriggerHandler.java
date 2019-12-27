@@ -14,9 +14,9 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.text.MessageFormat;
 
-import org.eclipse.smarthome.core.scheduler.CronScheduler;
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
-import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
+import org.openhab.core.scheduler.CronScheduler;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.scheduler.SchedulerRunnable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;

@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.metadata;
+package org.openhab.core.config.core.internal.metadata;
 
-import static org.eclipse.smarthome.config.core.internal.metadata.MetadataConfigDescriptionProviderImpl.*;
+import static org.openhab.core.config.core.internal.metadata.MetadataConfigDescriptionProviderImpl.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -23,13 +23,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterBuilder;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.config.core.metadata.MetadataConfigDescriptionProvider;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.config.core.metadata.MetadataConfigDescriptionProvider;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

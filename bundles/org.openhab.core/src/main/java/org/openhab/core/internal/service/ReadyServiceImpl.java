@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.service;
+package org.openhab.core.internal.service;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,9 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
-import org.eclipse.smarthome.core.service.ReadyMarker;
-import org.eclipse.smarthome.core.service.ReadyMarkerFilter;
-import org.eclipse.smarthome.core.service.ReadyService;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyMarkerFilter;
+import org.openhab.core.service.ReadyService;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

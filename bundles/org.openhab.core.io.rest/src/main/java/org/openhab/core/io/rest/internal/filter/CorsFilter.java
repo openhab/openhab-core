@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.internal.filter;
+package org.openhab.core.io.rest.internal.filter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.io.rest.internal.Constants;
+import org.openhab.core.io.rest.internal.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @Component(immediate = true, property = {
-        "service.pid=org.eclipse.smarthome.cors" }, configurationPid = "org.eclipse.smarthome.cors", configurationPolicy = ConfigurationPolicy.REQUIRE)
+        "service.pid=org.openhab.core.cors" }, configurationPid = "org.openhab.core.cors", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class CorsFilter implements ContainerResponseFilter {
 
     static final String HTTP_HEAD_METHOD = "HEAD";

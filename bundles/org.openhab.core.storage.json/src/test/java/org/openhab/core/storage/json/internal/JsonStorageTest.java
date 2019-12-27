@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.storage.json.internal;
+package org.openhab.core.storage.json.internal;
 
 import static org.junit.Assert.*;
 
@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
 

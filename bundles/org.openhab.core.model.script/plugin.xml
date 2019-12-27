@@ -5,8 +5,8 @@
 
   <extension point="org.eclipse.emf.ecore.generated_package">
     <package 
-       uri = "http://www.eclipse.org/smarthome/model/Script" 
-       class = "org.eclipse.smarthome.model.script.script.ScriptPackage"
+       uri = "https://openhab.org/model/Script" 
+       class = "org.openhab.core.model.script.script.ScriptPackage"
        genModel = "model/generated/Script.genmodel" /> 
 	
   </extension>

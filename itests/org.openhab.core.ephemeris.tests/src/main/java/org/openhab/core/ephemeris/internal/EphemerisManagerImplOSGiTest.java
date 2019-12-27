@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.ephemeris.internal;
+package org.openhab.core.ephemeris.internal;
 
-import static org.eclipse.smarthome.core.ephemeris.internal.EphemerisManagerImpl.*;
+import static org.openhab.core.ephemeris.internal.EphemerisManagerImpl.*;
 import static org.junit.Assert.*;
 
 import java.net.URI;
@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.core.ephemeris.EphemerisManager;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.ephemeris.EphemerisManager;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assume;
 import org.junit.Before;

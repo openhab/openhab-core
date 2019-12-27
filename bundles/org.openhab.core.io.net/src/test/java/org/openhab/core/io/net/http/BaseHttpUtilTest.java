@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.net.http;
+package org.openhab.core.io.net.http;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;

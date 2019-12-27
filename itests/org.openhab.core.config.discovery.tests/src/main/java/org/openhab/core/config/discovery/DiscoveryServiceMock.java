@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery;
+package org.openhab.core.config.discovery;
 
 import java.util.Collections;
 import java.util.Random;
 
-import org.eclipse.smarthome.config.discovery.internal.DiscoveryResultImpl;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 
 /**
  * The {@link DiscoveryServiceMock} is a mock for a {@link
- * org.eclipse.smarthome.config.discovery.DiscoveryService} which can simulate a working and faulty
+ * org.openhab.core.config.discovery.DiscoveryService} which can simulate a working and faulty
  * discovery.<br>
  * If this mock is configured to be faulty, an exception is thrown if the discovery is enforced or
  * aborted.

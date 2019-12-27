@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.internal;
+package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
@@ -24,9 +24,9 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.util.HashSet;
 
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
-import org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
-import org.eclipse.smarthome.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
+import org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
+import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
 import org.junit.Before;
 import org.junit.Test;
 

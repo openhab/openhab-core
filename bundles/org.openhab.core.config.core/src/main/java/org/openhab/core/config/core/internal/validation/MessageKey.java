@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.internal.validation;
+package org.openhab.core.config.core.internal.validation;
 
 /**
  * Utility class providing the {@link MessageKey}s for config description validation. The {@link MessageKey}

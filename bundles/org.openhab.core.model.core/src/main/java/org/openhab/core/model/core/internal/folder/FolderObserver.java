@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.core.internal.folder;
+package org.openhab.core.model.core.internal.folder;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -35,10 +35,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.service.AbstractWatchService;
-import org.eclipse.smarthome.model.core.ModelParser;
-import org.eclipse.smarthome.model.core.ModelRepository;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.model.core.ModelParser;
+import org.openhab.core.model.core.ModelRepository;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -56,7 +56,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Fabio Marini - Refactoring to use WatchService
  * @author Ana Dimova - reduce to a single watch thread for all class instances
  */
-@Component(name = "org.eclipse.smarthome.folder", immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(name = "org.openhab.core.folder", immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class FolderObserver extends AbstractWatchService {
 
     public FolderObserver() {

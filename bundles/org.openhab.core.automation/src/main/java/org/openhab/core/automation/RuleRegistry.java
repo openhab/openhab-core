@@ -16,7 +16,7 @@ import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Registry;
+import org.openhab.core.common.registry.Registry;
 
 /**
  * The {@link RuleRegistry} provides basic functionality for managing {@link Rule}s.

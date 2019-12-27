@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.TypeParser;
+import org.openhab.core.types.State;
+import org.openhab.core.types.TypeParser;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.automation.internal.module.exception.UncomparableException;

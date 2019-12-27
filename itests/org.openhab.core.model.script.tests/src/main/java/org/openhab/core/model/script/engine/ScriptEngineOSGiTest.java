@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.engine;
+package org.openhab.core.model.script.engine;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -21,22 +21,22 @@ import java.util.Collection;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemProvider;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.library.items.SwitchItem;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.MetricPrefix;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.library.unit.SmartHomeUnits;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.model.script.ScriptServiceUtil;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemProvider;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.MetricPrefix;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.types.State;
+import org.openhab.core.model.script.ScriptServiceUtil;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -105,18 +105,18 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         OnOffType switch1State = runScript("Switch1.state = ON;Switch1.state = OFF;Switch1.state = ON;Switch1.state");
 
         assertNotNull(switch1State);
-        assertEquals("org.eclipse.smarthome.core.library.types.OnOffType", switch1State.getClass().getName());
+        assertEquals("org.openhab.core.library.types.OnOffType", switch1State.getClass().getName());
         assertEquals("ON", switch1State.toString());
     }
 
     @SuppressWarnings("null")
     @Test
     public void testAssignQuantityType() throws ScriptParsingException, ScriptExecutionException {
-        runScript("NumberA.state = 20.0|°C as org.eclipse.smarthome.core.types.State");
+        runScript("NumberA.state = 20.0|°C as org.openhab.core.types.State");
 
         State numberState = itemRegistry.get(NUMBER_ITEM_TEMPERATURE).getState();
         assertNotNull(numberState);
-        assertEquals("org.eclipse.smarthome.core.library.types.QuantityType", numberState.getClass().getName());
+        assertEquals("org.openhab.core.library.types.QuantityType", numberState.getClass().getName());
         assertEquals("20.0 °C", numberState.toString());
     }
 
@@ -228,7 +228,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
     @Test
     public void testAssignAndCompareQuantityType() throws ScriptParsingException, ScriptExecutionException {
         assertFalse(
-                runScript("NumberA.state = 20.0|°C as org.eclipse.smarthome.core.types.State; NumberA.state < 20|°F"));
+                runScript("NumberA.state = 20.0|°C as org.openhab.core.types.State; NumberA.state < 20|°F"));
     }
 
     @Test

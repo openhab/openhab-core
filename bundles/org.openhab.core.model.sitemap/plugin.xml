@@ -5,8 +5,8 @@
 
   <extension point="org.eclipse.emf.ecore.generated_package">
     <package 
-       uri = "http://www.eclipse.org/smarthome/model/sitemap/Sitemap" 
-       class = "org.eclipse.smarthome.model.sitemap.sitemap.SitemapPackage"
+       uri = "https://openhab.org/model/sitemap/Sitemap" 
+       class = "org.openhab.core.model.sitemap.sitemap.SitemapPackage"
        genModel = "model/generated/Sitemap.genmodel" /> 
 	
   </extension>

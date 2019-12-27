@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
@@ -25,21 +25,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.smarthome.core.common.registry.RegistryChangeListener;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.internal.items.ItemRegistryImpl;
-import org.eclipse.smarthome.core.items.events.ItemAddedEvent;
-import org.eclipse.smarthome.core.items.events.ItemRemovedEvent;
-import org.eclipse.smarthome.core.items.events.ItemUpdatedEvent;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.library.items.StringItem;
-import org.eclipse.smarthome.core.library.items.SwitchItem;
-import org.eclipse.smarthome.core.service.CommandDescriptionService;
-import org.eclipse.smarthome.core.service.StateDescriptionService;
-import org.eclipse.smarthome.test.java.JavaTest;
-import org.eclipse.smarthome.test.storage.VolatileStorageService;
+import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.internal.items.ItemRegistryImpl;
+import org.openhab.core.items.events.ItemAddedEvent;
+import org.openhab.core.items.events.ItemRemovedEvent;
+import org.openhab.core.items.events.ItemUpdatedEvent;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.service.CommandDescriptionService;
+import org.openhab.core.service.StateDescriptionService;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.test.storage.VolatileStorageService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

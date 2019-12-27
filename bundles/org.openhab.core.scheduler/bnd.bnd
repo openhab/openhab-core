@@ -1,5 +1,5 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.eclipse.smarthome.core.scheduler.internal.SchedulerActivator
+Bundle-Activator: org.openhab.core.scheduler.internal.SchedulerActivator
 Import-Package: \
   com.mchange.v2.c3p0;resolution:=optional,\
   commonj.work;resolution:=optional,\

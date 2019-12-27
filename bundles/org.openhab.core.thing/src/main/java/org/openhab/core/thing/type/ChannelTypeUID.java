@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
-import org.eclipse.smarthome.core.thing.UID;
+import org.openhab.core.thing.UID;
 
 /**
  * The {@link ChannelTypeUID} represents a unique identifier for channel types.

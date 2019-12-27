@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.internal;
+package org.openhab.core.config.discovery.internal;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -29,16 +29,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.DiscoveryListener;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryServiceCallback;
-import org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry;
-import org.eclipse.smarthome.config.discovery.ExtendedDiscoveryService;
-import org.eclipse.smarthome.config.discovery.ScanListener;
-import org.eclipse.smarthome.core.common.SafeCaller;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.DiscoveryListener;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryServiceCallback;
+import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
+import org.openhab.core.config.discovery.ExtendedDiscoveryService;
+import org.openhab.core.config.discovery.ScanListener;
+import org.openhab.core.common.SafeCaller;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

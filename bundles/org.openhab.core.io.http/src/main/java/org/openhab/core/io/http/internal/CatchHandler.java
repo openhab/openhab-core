@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.http.internal;
+package org.openhab.core.io.http.internal;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.smarthome.io.http.Handler;
-import org.eclipse.smarthome.io.http.HandlerContext;
+import org.openhab.core.io.http.Handler;
+import org.openhab.core.io.http.HandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

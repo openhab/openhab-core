@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.test.java;
+package org.openhab.core.test.java;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.test.internal.java.MissingServiceAnalyzer;
-import org.eclipse.smarthome.test.storage.VolatileStorageService;
+import org.openhab.core.test.internal.java.MissingServiceAnalyzer;
+import org.openhab.core.test.storage.VolatileStorageService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

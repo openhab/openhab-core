@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.internal.chart;
+package org.openhab.core.ui.internal.chart;
 
 import java.awt.image.BufferedImage;
 import java.io.EOFException;
@@ -36,10 +36,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.BooleanUtils;
-import org.eclipse.smarthome.config.core.ConfigurableService;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.io.http.servlet.SmartHomeServlet;
-import org.eclipse.smarthome.ui.chart.ChartProvider;
+import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.io.http.servlet.SmartHomeServlet;
+import org.openhab.core.ui.chart.ChartProvider;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -69,8 +69,8 @@ import org.osgi.service.http.HttpService;
  * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
-@Component(immediate = true, service = ChartServlet.class, configurationPid = "org.eclipse.smarthome.chart", property = {
-        Constants.SERVICE_PID + "=org.eclipse.smarthome.chart",
+@Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.core.chart", property = {
+        Constants.SERVICE_PID + "=org.openhab.core.chart",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Charts",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + "system:chart" })

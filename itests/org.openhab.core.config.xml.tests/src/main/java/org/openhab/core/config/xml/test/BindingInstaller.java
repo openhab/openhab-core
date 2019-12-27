@@ -10,16 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml.test;
+package org.openhab.core.config.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.util.function.Consumer;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
-import org.eclipse.smarthome.test.BundleCloseable;
-import org.eclipse.smarthome.test.SyntheticBundleInstaller;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.test.BundleCloseable;
+import org.openhab.core.test.SyntheticBundleInstaller;
 import org.osgi.framework.BundleContext;
 
 /**

@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics.model.property;
+package org.openhab.core.semantics.model.property;
 
 import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.semantics.model.Property;
+import org.openhab.core.semantics.model.Property;
 
 /**
  * This class provides a stream of all defined properties.

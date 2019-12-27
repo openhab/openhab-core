@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.auth.oauth2client.internal;
+package org.openhab.core.auth.oauth2client.internal;
 
-import static org.eclipse.smarthome.auth.oauth2client.internal.Keyword.*;
+import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -27,12 +27,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.UrlEncoded;
-import org.eclipse.smarthome.core.auth.client.oauth2.AccessTokenRefreshListener;
-import org.eclipse.smarthome.core.auth.client.oauth2.AccessTokenResponse;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthClientService;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthException;
-import org.eclipse.smarthome.core.auth.client.oauth2.OAuthResponseException;
-import org.eclipse.smarthome.io.net.http.HttpClientFactory;
+import org.openhab.core.auth.client.oauth2.AccessTokenRefreshListener;
+import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.OAuthClientService;
+import org.openhab.core.auth.client.oauth2.OAuthException;
+import org.openhab.core.auth.client.oauth2.OAuthResponseException;
+import org.openhab.core.io.net.http.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * It requires the following services:
  *
- * org.eclipse.smarthome.core.storage.Storage (mandatory; for storing grant tokens, access tokens and refresh tokens)
+ * org.openhab.core.storage.Storage (mandatory; for storing grant tokens, access tokens and refresh tokens)
  *
  * HttpClientFactory for http connections with Jetty
  *
@@ -83,7 +83,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
      *
      * @param bundleContext Bundle Context
      * @param handle The handle produced previously from
-     *            {@link org.eclipse.smarthome.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}
+     *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}
      * @param storeHandler Storage handler
      * @param tokenExpiresInSeconds Positive integer; a small time buffer in seconds. It is used to calculate the expiry
      *            of the access tokens. This allows the access token to expire earlier than the
@@ -113,7 +113,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
      *
      * @param bundleContext Bundle Context*
      * @param handle The handle produced previously from
-     *            {@link org.eclipse.smarthome.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}*
+     *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}*
      * @param storeHandler Storage handler
      * @param httpClientFactory Http client factory
      * @param persistedParams These parameters are static with respect to the oauth provider and thus can be persisted.

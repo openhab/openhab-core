@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.binding.xml.test;
+package org.openhab.core.binding.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -20,10 +20,10 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.binding.BindingInfo;
-import org.eclipse.smarthome.core.binding.BindingInfoRegistry;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.binding.BindingInfo;
+import org.openhab.core.binding.BindingInfoRegistry;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.cm.Configuration;
@@ -91,7 +91,7 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
         ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
 
-        Configuration config = configAdmin.getConfiguration("org.eclipse.smarthome.i18n", null);
+        Configuration config = configAdmin.getConfiguration("org.openhab.core.i18n", null);
         assertThat(config, is(notNullValue()));
 
         Dictionary<String, Object> properties = config.getProperties();

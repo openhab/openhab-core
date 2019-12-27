@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items;
+package org.openhab.core.items;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,20 +27,20 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.service.CommandDescriptionService;
-import org.eclipse.smarthome.core.service.StateDescriptionService;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.CommandDescriptionBuilder;
-import org.eclipse.smarthome.core.types.CommandOption;
-import org.eclipse.smarthome.core.types.RefreshType;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.StateDescription;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.service.CommandDescriptionService;
+import org.openhab.core.service.StateDescriptionService;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.CommandDescriptionBuilder;
+import org.openhab.core.types.CommandOption;
+import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

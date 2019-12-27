@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.core.internal;
+package org.openhab.core.model.core.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,10 +35,10 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
-import org.eclipse.smarthome.model.core.EventType;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
-import org.eclipse.smarthome.model.core.SafeEMF;
+import org.openhab.core.model.core.EventType;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.model.core.SafeEMF;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;

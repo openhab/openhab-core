@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.core;
+package org.openhab.core.model.core;
 
 /**
  * This class holds all important constants relevant for this bundle.
@@ -19,6 +19,6 @@ package org.eclipse.smarthome.model.core;
  */
 public class ModelCoreConstants {
 
-    /** The service pid used for the managed service (without the "org.eclipse.smarthome" prefix */
+    /** The service pid used for the managed service (without the "org.openhab.core" prefix */
     public static final String SERVICE_PID = "folder";
 }

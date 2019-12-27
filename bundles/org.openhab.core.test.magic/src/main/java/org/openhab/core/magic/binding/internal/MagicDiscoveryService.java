@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal;
+package org.openhab.core.magic.binding.internal;
 
-import static org.eclipse.smarthome.magic.binding.MagicBindingConstants.THING_TYPE_CONFIG_THING;
+import static org.openhab.core.magic.binding.MagicBindingConstants.THING_TYPE_CONFIG_THING;
 
 import java.util.Collections;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Component;
 
 /**

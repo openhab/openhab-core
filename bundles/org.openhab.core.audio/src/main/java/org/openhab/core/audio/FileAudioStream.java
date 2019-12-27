@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio;
+package org.openhab.core.audio;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +20,7 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.audio.utils.AudioStreamUtils;
+import org.openhab.core.audio.utils.AudioStreamUtils;
 
 /**
  * This is an AudioStream from an audio file

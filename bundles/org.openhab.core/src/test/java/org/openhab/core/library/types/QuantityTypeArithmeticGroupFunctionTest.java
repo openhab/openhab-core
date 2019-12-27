@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.types;
+package org.openhab.core.library.types;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -25,14 +25,14 @@ import javax.measure.quantity.Power;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.items.GroupFunction;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

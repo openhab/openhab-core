@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,12 +21,12 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.ActiveItem;
-import org.eclipse.smarthome.core.items.GroupFunction;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemBuilder;
-import org.eclipse.smarthome.core.items.ItemFactory;
+import org.openhab.core.items.ActiveItem;
+import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilder;
+import org.openhab.core.items.ItemFactory;
 
 /**
  * The {@link ItemBuilder} implementation.

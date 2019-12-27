@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.status;
+package org.openhab.core.config.core.status;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -23,12 +23,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 
-import org.eclipse.smarthome.config.core.status.ConfigStatusMessage.Type;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.util.BundleResolver;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.util.BundleResolver;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
 

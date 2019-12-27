@@ -23,10 +23,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
-import org.eclipse.smarthome.core.thing.binding.ThingActions;
-import org.eclipse.smarthome.core.thing.binding.ThingActionsScope;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
+import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.thing.binding.ThingActionsScope;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandlerFactory;

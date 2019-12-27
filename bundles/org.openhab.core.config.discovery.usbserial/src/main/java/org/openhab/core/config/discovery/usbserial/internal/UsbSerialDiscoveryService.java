@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.discovery.usbserial.internal;
+package org.openhab.core.config.discovery.usbserial.internal;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -22,16 +22,16 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
-import org.eclipse.smarthome.config.discovery.DiscoveryResult;
-import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
-import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDeviceInformation;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscovery;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscoveryListener;
-import org.eclipse.smarthome.config.discovery.usbserial.UsbSerialDiscoveryParticipant;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.core.config.discovery.AbstractDiscoveryService;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscovery;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryParticipant;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

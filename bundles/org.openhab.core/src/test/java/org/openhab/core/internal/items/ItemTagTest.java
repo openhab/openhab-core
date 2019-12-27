@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 
-import org.eclipse.smarthome.core.library.items.SwitchItem;
+import org.openhab.core.library.items.SwitchItem;
 import org.junit.Test;
 
 /**

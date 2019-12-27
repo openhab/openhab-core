@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal;
+package org.openhab.core.thing.internal;
 
 import java.util.Collection;
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ThingType;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.ThingTypeProvider;
+import org.openhab.core.thing.type.ThingType;
 
 /**
  * @author Markus Rathgeb - Initial contribution

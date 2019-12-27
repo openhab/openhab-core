@@ -1,5 +1,5 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.eclipse.smarthome.ui.internal.UIActivator
+Bundle-Activator: org.openhab.core.ui.internal.UIActivator
 Private-Package: \
   org.knowm.xchart.*
 Import-Package: \

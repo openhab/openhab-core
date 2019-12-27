@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.transform;
+package org.openhab.core.transform;
 
 import java.util.Collection;
 import java.util.IllegalFormatException;

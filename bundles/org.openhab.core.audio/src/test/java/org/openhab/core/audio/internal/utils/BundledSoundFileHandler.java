@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.audio.internal.utils;
+package org.openhab.core.audio.internal.utils;
 
 import java.io.Closeable;
 import java.io.File;
@@ -22,8 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.audio.internal.AudioManagerTest;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.audio.internal.AudioManagerTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

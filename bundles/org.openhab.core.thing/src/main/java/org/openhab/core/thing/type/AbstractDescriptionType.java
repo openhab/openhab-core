@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Identifiable;
-import org.eclipse.smarthome.core.thing.UID;
+import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.thing.UID;
 
 /**
  * The {@link AbstractDescriptionType} class is the base class for a {@link ThingType},

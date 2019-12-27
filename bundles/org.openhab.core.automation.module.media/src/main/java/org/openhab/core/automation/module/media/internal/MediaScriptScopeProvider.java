@@ -17,8 +17,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.smarthome.core.audio.AudioManager;
-import org.eclipse.smarthome.core.voice.VoiceManager;
+import org.openhab.core.audio.AudioManager;
+import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

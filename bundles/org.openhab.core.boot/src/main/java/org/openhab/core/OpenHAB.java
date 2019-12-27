@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.framework.FrameworkUtil;
 
 /**

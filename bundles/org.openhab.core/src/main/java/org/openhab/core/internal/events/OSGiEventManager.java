@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.events;
+package org.openhab.core.internal.events;
 
 import java.util.Collections;
 import java.util.Map;
@@ -18,9 +18,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFactory;
-import org.eclipse.smarthome.core.events.EventSubscriber;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFactory;
+import org.openhab.core.events.EventSubscriber;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

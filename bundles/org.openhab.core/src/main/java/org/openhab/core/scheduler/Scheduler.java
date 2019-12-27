@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.scheduler;
+package org.openhab.core.scheduler;
 
 import java.time.Duration;
 import java.time.Instant;

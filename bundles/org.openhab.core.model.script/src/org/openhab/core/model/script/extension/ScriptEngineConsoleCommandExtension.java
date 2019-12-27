@@ -10,20 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.extension;
+package org.openhab.core.model.script.extension;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.extensions.AbstractConsoleCommandExtension;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
-import org.eclipse.smarthome.model.script.engine.Script;
-import org.eclipse.smarthome.model.script.engine.ScriptEngine;
-import org.eclipse.smarthome.model.script.engine.ScriptExecutionException;
-import org.eclipse.smarthome.model.script.engine.ScriptParsingException;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.model.script.engine.Script;
+import org.openhab.core.model.script.engine.ScriptEngine;
+import org.openhab.core.model.script.engine.ScriptExecutionException;
+import org.openhab.core.model.script.engine.ScriptParsingException;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;

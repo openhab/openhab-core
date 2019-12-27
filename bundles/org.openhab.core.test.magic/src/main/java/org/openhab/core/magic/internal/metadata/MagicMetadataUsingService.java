@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.internal.metadata;
+package org.openhab.core.magic.internal.metadata;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -18,9 +18,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.items.MetadataPredicates;
-import org.eclipse.smarthome.core.items.MetadataRegistry;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.items.MetadataPredicates;
+import org.openhab.core.items.MetadataRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

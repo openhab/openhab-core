@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.service;
+package org.openhab.core.internal.service;
 
 import java.util.List;
 import java.util.Locale;
@@ -18,9 +18,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.service.CommandDescriptionService;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.CommandDescriptionProvider;
+import org.openhab.core.service.CommandDescriptionService;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.CommandDescriptionProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

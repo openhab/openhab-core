@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.i18n;
+package org.openhab.core.i18n;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.library.types.PointType;
+import org.openhab.core.library.types.PointType;
 
 /**
  * This interface describes a provider for a location.

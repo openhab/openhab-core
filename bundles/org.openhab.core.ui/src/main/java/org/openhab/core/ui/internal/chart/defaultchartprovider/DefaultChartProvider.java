@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.internal.chart.defaultchartprovider;
+package org.openhab.core.ui.internal.chart.defaultchartprovider;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -28,23 +28,23 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
-import org.eclipse.smarthome.core.persistence.FilterCriteria;
-import org.eclipse.smarthome.core.persistence.FilterCriteria.Ordering;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceService;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
-import org.eclipse.smarthome.core.persistence.QueryablePersistenceService;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.ui.chart.ChartProvider;
-import org.eclipse.smarthome.ui.internal.chart.ChartServlet;
-import org.eclipse.smarthome.ui.items.ItemUIRegistry;
+import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.OpenClosedType;
+import org.openhab.core.persistence.FilterCriteria;
+import org.openhab.core.persistence.FilterCriteria.Ordering;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.types.State;
+import org.openhab.core.ui.chart.ChartProvider;
+import org.openhab.core.ui.internal.chart.ChartServlet;
+import org.openhab.core.ui.items.ItemUIRegistry;
 import org.knowm.xchart.Chart;
 import org.knowm.xchart.ChartBuilder;
 import org.knowm.xchart.Series;

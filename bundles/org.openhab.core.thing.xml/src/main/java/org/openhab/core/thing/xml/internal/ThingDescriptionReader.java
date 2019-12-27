@@ -10,28 +10,28 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.internal;
+package org.openhab.core.thing.xml.internal;
 
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameterGroup;
-import org.eclipse.smarthome.config.core.FilterCriteria;
-import org.eclipse.smarthome.config.xml.ConfigDescriptionConverter;
-import org.eclipse.smarthome.config.xml.ConfigDescriptionParameterConverter;
-import org.eclipse.smarthome.config.xml.ConfigDescriptionParameterGroupConverter;
-import org.eclipse.smarthome.config.xml.FilterCriteriaConverter;
-import org.eclipse.smarthome.config.xml.util.NodeAttributes;
-import org.eclipse.smarthome.config.xml.util.NodeAttributesConverter;
-import org.eclipse.smarthome.config.xml.util.NodeList;
-import org.eclipse.smarthome.config.xml.util.NodeListConverter;
-import org.eclipse.smarthome.config.xml.util.NodeValue;
-import org.eclipse.smarthome.config.xml.util.NodeValueConverter;
-import org.eclipse.smarthome.config.xml.util.XmlDocumentReader;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.EventDescription;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.xml.ConfigDescriptionConverter;
+import org.openhab.core.config.xml.ConfigDescriptionParameterConverter;
+import org.openhab.core.config.xml.ConfigDescriptionParameterGroupConverter;
+import org.openhab.core.config.xml.FilterCriteriaConverter;
+import org.openhab.core.config.xml.util.NodeAttributes;
+import org.openhab.core.config.xml.util.NodeAttributesConverter;
+import org.openhab.core.config.xml.util.NodeList;
+import org.openhab.core.config.xml.util.NodeListConverter;
+import org.openhab.core.config.xml.util.NodeValue;
+import org.openhab.core.config.xml.util.NodeValueConverter;
+import org.openhab.core.config.xml.util.XmlDocumentReader;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.EventDescription;
+import org.openhab.core.types.StateDescription;
 
 import com.thoughtworks.xstream.XStream;
 

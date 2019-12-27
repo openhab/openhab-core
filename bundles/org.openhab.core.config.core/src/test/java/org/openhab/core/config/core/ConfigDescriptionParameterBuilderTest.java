@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core;
+package org.openhab.core.config.core;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import org.eclipse.smarthome.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.junit.Test;
 
 /**

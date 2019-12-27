@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.item;
+package org.openhab.core.model.item;
 
 /**
  * This exception is used by {@link BindingConfigReader} instances if parsing configurations fails

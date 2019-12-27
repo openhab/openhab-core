@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.types;
+package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.ComplexType;
-import org.eclipse.smarthome.core.types.PrimitiveType;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.ComplexType;
+import org.openhab.core.types.PrimitiveType;
+import org.openhab.core.types.State;
 
 /**
  * This type can be used for items that are dealing with GPS or
@@ -60,7 +60,7 @@ public class PointType implements ComplexType, Command, State {
      * Default constructor creates a point at sea level where the equator
      * (0° latitude) and the prime meridian (0° longitude) intersect.
      * A nullary constructor is needed by
-     * {@link org.eclipse.smarthome.core.internal.items.ItemUpdater#receiveUpdate})
+     * {@link org.openhab.core.internal.items.ItemUpdater#receiveUpdate})
      */
     public PointType() {
     }

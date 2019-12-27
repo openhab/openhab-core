@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
 import static java.util.stream.Collectors.toList;
 
@@ -21,25 +21,25 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.AbstractRegistry;
-import org.eclipse.smarthome.core.common.registry.Provider;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.i18n.UnitProvider;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
-import org.eclipse.smarthome.core.items.ItemNotUniqueException;
-import org.eclipse.smarthome.core.items.ItemProvider;
-import org.eclipse.smarthome.core.items.ItemRegistry;
-import org.eclipse.smarthome.core.items.ItemStateConverter;
-import org.eclipse.smarthome.core.items.ItemUtil;
-import org.eclipse.smarthome.core.items.ManagedItemProvider;
-import org.eclipse.smarthome.core.items.MetadataRegistry;
-import org.eclipse.smarthome.core.items.RegistryHook;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.service.CommandDescriptionService;
-import org.eclipse.smarthome.core.service.StateDescriptionService;
+import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Provider;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemNotUniqueException;
+import org.openhab.core.items.ItemProvider;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.ItemStateConverter;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.items.ManagedItemProvider;
+import org.openhab.core.items.MetadataRegistry;
+import org.openhab.core.items.RegistryHook;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.service.CommandDescriptionService;
+import org.openhab.core.service.StateDescriptionService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

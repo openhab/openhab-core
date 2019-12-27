@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.items;
+package org.openhab.core.internal.items;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -19,10 +19,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.ManagedMetadataProvider;
-import org.eclipse.smarthome.core.items.Metadata;
-import org.eclipse.smarthome.core.items.MetadataKey;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ManagedMetadataProvider;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

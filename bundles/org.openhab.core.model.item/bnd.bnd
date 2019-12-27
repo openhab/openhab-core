@@ -1,33 +1,33 @@
 Bundle-SymbolicName: ${project.artifactId}
-Export-Package: org.eclipse.smarthome.model,\
- org.eclipse.smarthome.model.formatting,\
- org.eclipse.smarthome.model.generator,\
- org.eclipse.smarthome.model.item,\
- org.eclipse.smarthome.model.items,\
- org.eclipse.smarthome.model.items.impl,\
- org.eclipse.smarthome.model.items.util,\
- org.eclipse.smarthome.model.parser.antlr,\
- org.eclipse.smarthome.model.parser.antlr.internal,\
- org.eclipse.smarthome.model.scoping,\
- org.eclipse.smarthome.model.serializer,\
- org.eclipse.smarthome.model.services,\
- org.eclipse.smarthome.model.validation
+Export-Package: org.openhab.core.model,\
+ org.openhab.core.model.formatting,\
+ org.openhab.core.model.generator,\
+ org.openhab.core.model.item,\
+ org.openhab.core.model.items,\
+ org.openhab.core.model.items.impl,\
+ org.openhab.core.model.items.util,\
+ org.openhab.core.model.parser.antlr,\
+ org.openhab.core.model.parser.antlr.internal,\
+ org.openhab.core.model.scoping,\
+ org.openhab.core.model.serializer,\
+ org.openhab.core.model.services,\
+ org.openhab.core.model.validation
 Import-Package: javax.measure,\
  javax.measure.quantity,\
  org.apache.log4j,\
  org.eclipse.jdt.annotation;resolution:=optional,\
- org.eclipse.smarthome.config.core,\
- org.eclipse.smarthome.core.common.registry,\
- org.eclipse.smarthome.core.i18n,\
- org.eclipse.smarthome.core.items,\
- org.eclipse.smarthome.core.items.dto,\
- org.eclipse.smarthome.core.library.items,\
- org.eclipse.smarthome.core.library.types,\
- org.eclipse.smarthome.core.thing.util,\
- org.eclipse.smarthome.core.types,\
- org.eclipse.smarthome.core.types.util,\
- org.eclipse.smarthome.model.core,\
- org.eclipse.smarthome.model.core.valueconverter,\
+ org.openhab.core.config.core,\
+ org.openhab.core.common.registry,\
+ org.openhab.core.i18n,\
+ org.openhab.core.items,\
+ org.openhab.core.items.dto,\
+ org.openhab.core.library.items,\
+ org.openhab.core.library.types,\
+ org.openhab.core.thing.util,\
+ org.openhab.core.types,\
+ org.openhab.core.types.util,\
+ org.openhab.core.model.core,\
+ org.openhab.core.model.core.valueconverter,\
  org.eclipse.xtext.xbase.lib,\
  org.osgi.framework,\
  org.slf4j

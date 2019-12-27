@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.items.events;
+package org.openhab.core.items.events;
 
 import static org.junit.Assert.*;
 
-import org.eclipse.smarthome.core.events.AbstractEventFactory;
+import org.openhab.core.events.AbstractEventFactory;
 import org.junit.Test;
 
 /**

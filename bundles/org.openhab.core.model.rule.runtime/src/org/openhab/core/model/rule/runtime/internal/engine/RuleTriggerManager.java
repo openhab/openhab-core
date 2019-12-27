@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.rule.runtime.internal.engine;
+package org.openhab.core.model.rule.runtime.internal.engine;
 
-import static org.eclipse.smarthome.model.rule.runtime.internal.engine.RuleTriggerManager.TriggerTypes.*;
+import static org.openhab.core.model.rule.runtime.internal.engine.RuleTriggerManager.TriggerTypes.*;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
@@ -28,27 +28,27 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
-import org.eclipse.smarthome.core.types.Type;
-import org.eclipse.smarthome.core.types.TypeParser;
-import org.eclipse.smarthome.model.rule.rules.ChangedEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.CommandEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.EventEmittedTrigger;
-import org.eclipse.smarthome.model.rule.rules.EventTrigger;
-import org.eclipse.smarthome.model.rule.rules.GroupMemberChangedEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.GroupMemberCommandEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.GroupMemberUpdateEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.Rule;
-import org.eclipse.smarthome.model.rule.rules.RuleModel;
-import org.eclipse.smarthome.model.rule.rules.SystemOnShutdownTrigger;
-import org.eclipse.smarthome.model.rule.rules.SystemOnStartupTrigger;
-import org.eclipse.smarthome.model.rule.rules.ThingStateChangedEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.ThingStateUpdateEventTrigger;
-import org.eclipse.smarthome.model.rule.rules.TimerTrigger;
-import org.eclipse.smarthome.model.rule.rules.UpdateEventTrigger;
+import org.openhab.core.items.Item;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
+import org.openhab.core.types.TypeParser;
+import org.openhab.core.model.rule.rules.ChangedEventTrigger;
+import org.openhab.core.model.rule.rules.CommandEventTrigger;
+import org.openhab.core.model.rule.rules.EventEmittedTrigger;
+import org.openhab.core.model.rule.rules.EventTrigger;
+import org.openhab.core.model.rule.rules.GroupMemberChangedEventTrigger;
+import org.openhab.core.model.rule.rules.GroupMemberCommandEventTrigger;
+import org.openhab.core.model.rule.rules.GroupMemberUpdateEventTrigger;
+import org.openhab.core.model.rule.rules.Rule;
+import org.openhab.core.model.rule.rules.RuleModel;
+import org.openhab.core.model.rule.rules.SystemOnShutdownTrigger;
+import org.openhab.core.model.rule.rules.SystemOnStartupTrigger;
+import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
+import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
+import org.openhab.core.model.rule.rules.TimerTrigger;
+import org.openhab.core.model.rule.rules.UpdateEventTrigger;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobDetail;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.net.http.internal;
+package org.openhab.core.io.net.http.internal;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;

@@ -57,7 +57,7 @@
 				},
 				{
 					"name": "event",
-					"type": "org.eclipse.smarthome.core.events.Event",
+					"type": "org.openhab.core.events.Event",
 					"label": "Event",
 					"description": "The event which was sent.",
 					"reference": "event"
@@ -121,7 +121,7 @@
 				},
 				{
 					"name": "event",
-					"type": "org.eclipse.smarthome.core.events.Event",
+					"type": "org.openhab.core.events.Event",
 					"label": "Event",
 					"description": "The event which was sent.",
 					"reference": "event"
@@ -225,7 +225,7 @@
 				},
 				{
 					"name": "event",
-					"type": "org.eclipse.smarthome.core.events.Event",
+					"type": "org.openhab.core.events.Event",
 					"label": "Event",
 					"description": "The event which was sent.",
 					"reference": "event"

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.internal.persistence;
+package org.openhab.core.io.rest.core.internal.persistence;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,14 +21,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.eclipse.smarthome.core.i18n.TimeZoneProvider;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.persistence.HistoricItem;
-import org.eclipse.smarthome.core.persistence.PersistenceServiceRegistry;
-import org.eclipse.smarthome.core.persistence.QueryablePersistenceService;
-import org.eclipse.smarthome.core.persistence.dto.ItemHistoryDTO;
-import org.eclipse.smarthome.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.dto.ItemHistoryDTO;
+import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
+import org.openhab.core.types.State;
 import org.junit.Before;
 import org.junit.Test;
 

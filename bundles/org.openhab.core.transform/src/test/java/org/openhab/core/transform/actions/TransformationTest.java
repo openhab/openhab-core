@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.transform.actions;
+package org.openhab.core.transform.actions;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.smarthome.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationException;
 import org.junit.Test;
 
 /**

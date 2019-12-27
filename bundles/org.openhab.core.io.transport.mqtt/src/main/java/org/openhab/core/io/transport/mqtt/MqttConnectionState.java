@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt;
+package org.openhab.core.io.transport.mqtt;
 
 /**
  * The connection state of a {@link MqttBrokerConnection}.

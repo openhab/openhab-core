@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.engine;
+package org.openhab.core.model.script.engine;
 
 import java.util.List;
 
-import org.eclipse.smarthome.core.thing.binding.ThingActions;
+import org.openhab.core.thing.binding.ThingActions;
 
 public interface IThingActionsProvider {
 

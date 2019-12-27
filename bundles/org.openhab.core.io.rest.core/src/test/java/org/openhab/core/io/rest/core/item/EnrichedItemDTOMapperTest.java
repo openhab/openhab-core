@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.core.item;
+package org.openhab.core.io.rest.core.item;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.net.URI;
 
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.library.CoreItemFactory;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
 

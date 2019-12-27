@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.scheduler;
+package org.openhab.core.internal.scheduler;
 
 import static org.junit.Assert.*;
 
@@ -30,9 +30,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.smarthome.core.scheduler.ScheduledCompletableFuture;
-import org.eclipse.smarthome.core.scheduler.SchedulerRunnable;
-import org.eclipse.smarthome.core.scheduler.SchedulerTemporalAdjuster;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.scheduler.SchedulerRunnable;
+import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 import org.junit.Test;
 
 /**

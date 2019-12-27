@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.net;
+package org.openhab.core.net;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;

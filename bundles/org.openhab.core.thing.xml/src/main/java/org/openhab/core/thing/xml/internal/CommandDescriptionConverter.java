@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.internal;
+package org.openhab.core.thing.xml.internal;
 
-import org.eclipse.smarthome.config.xml.util.GenericUnmarshaller;
-import org.eclipse.smarthome.config.xml.util.NodeIterator;
-import org.eclipse.smarthome.config.xml.util.NodeList;
-import org.eclipse.smarthome.config.xml.util.NodeValue;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.CommandDescriptionBuilder;
-import org.eclipse.smarthome.core.types.CommandOption;
+import org.openhab.core.config.xml.util.GenericUnmarshaller;
+import org.openhab.core.config.xml.util.NodeIterator;
+import org.openhab.core.config.xml.util.NodeList;
+import org.openhab.core.config.xml.util.NodeValue;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.CommandDescriptionBuilder;
+import org.openhab.core.types.CommandOption;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding;
+package org.openhab.core.thing.binding;
 
 /**
  * Marker interface for Automation Actions with access to a ThingHandler

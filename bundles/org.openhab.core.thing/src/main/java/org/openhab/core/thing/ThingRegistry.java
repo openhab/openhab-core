@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing;
+package org.openhab.core.thing;
 
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.validation.ConfigValidationException;
-import org.eclipse.smarthome.core.common.registry.Registry;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
-import org.eclipse.smarthome.core.thing.internal.ThingTracker;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.validation.ConfigValidationException;
+import org.openhab.core.common.registry.Registry;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.internal.ThingTracker;
 
 /**
  * {@link ThingRegistry} tracks all {@link Thing}s from different {@link ThingProvider}s and provides access to them.

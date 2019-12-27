@@ -23,8 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigConstants;
-import org.eclipse.smarthome.core.common.registry.ProviderChangeListener;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.Module;

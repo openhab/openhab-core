@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.console.karaf.internal;
+package org.openhab.core.io.console.karaf.internal;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,9 +24,9 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.api.console.Session;
-import org.eclipse.smarthome.io.console.Console;
-import org.eclipse.smarthome.io.console.ConsoleInterpreter;
-import org.eclipse.smarthome.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.ConsoleInterpreter;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 
 /**
  * This class wraps ESH ConsoleCommandExtensions to commands for Apache Karaf

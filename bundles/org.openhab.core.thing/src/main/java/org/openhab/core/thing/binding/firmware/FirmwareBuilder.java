@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding.firmware;
+package org.openhab.core.thing.binding.firmware;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -20,8 +20,8 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.internal.firmware.FirmwareImpl;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.internal.firmware.FirmwareImpl;
 
 /**
  * The builder to create a {@link Firmware}.

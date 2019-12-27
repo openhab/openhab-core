@@ -19,8 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.storage.StorageService;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.storage.StorageService;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

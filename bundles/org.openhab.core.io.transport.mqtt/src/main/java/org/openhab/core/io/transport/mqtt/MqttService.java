@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mqtt;
+package org.openhab.core.io.transport.mqtt;
 
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mqtt.internal.MqttBrokerConnectionServiceInstance;
+import org.openhab.core.io.transport.mqtt.internal.MqttBrokerConnectionServiceInstance;
 
 /**
  * This service allows you to enumerate system-wide configured Mqtt broker connections. You do not need this service

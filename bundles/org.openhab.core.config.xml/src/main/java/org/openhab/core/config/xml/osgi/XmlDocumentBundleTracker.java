@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.xml.osgi;
+package org.openhab.core.config.xml.osgi;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -32,11 +32,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.eclipse.smarthome.config.xml.util.XmlDocumentReader;
-import org.eclipse.smarthome.core.common.ThreadPoolManager;
-import org.eclipse.smarthome.core.service.ReadyMarker;
-import org.eclipse.smarthome.core.service.ReadyMarkerUtils;
-import org.eclipse.smarthome.core.service.ReadyService;
+import org.openhab.core.config.xml.util.XmlDocumentReader;
+import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyMarkerUtils;
+import org.openhab.core.service.ReadyService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;

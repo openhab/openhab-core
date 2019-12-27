@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding.firmware;
+package org.openhab.core.thing.binding.firmware;
 
 import java.util.function.Function;
 
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.firmware.FirmwareProvider;
 
 /**
  * A function for defining specific installation restrictions for a given {@link Firmware}.

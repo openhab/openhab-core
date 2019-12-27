@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.script.scoping;
+package org.openhab.core.model.script.scoping;
 
 import java.util.List;
 

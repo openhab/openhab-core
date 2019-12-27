@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.extension;
+package org.openhab.core.extension;
 
-import org.eclipse.smarthome.core.events.AbstractEvent;
+import org.openhab.core.events.AbstractEvent;
 
 /**
  * This is an {@link Event} that is sent on extension operations, such as installing and uninstalling.

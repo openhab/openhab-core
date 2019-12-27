@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.thing.test.hue;
+package org.openhab.core.model.thing.test.hue;
 
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.*;
@@ -26,21 +26,21 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFilter;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingRegistry;
-import org.eclipse.smarthome.core.thing.events.AbstractThingRegistryEvent;
-import org.eclipse.smarthome.core.thing.events.ThingAddedEvent;
-import org.eclipse.smarthome.core.thing.events.ThingRemovedEvent;
-import org.eclipse.smarthome.core.thing.events.ThingUpdatedEvent;
-import org.eclipse.smarthome.core.thing.type.ChannelKind;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
-import org.eclipse.smarthome.model.core.ModelRepository;
-import org.eclipse.smarthome.test.java.JavaOSGiTest;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.events.AbstractThingRegistryEvent;
+import org.openhab.core.thing.events.ThingAddedEvent;
+import org.openhab.core.thing.events.ThingRemovedEvent;
+import org.openhab.core.thing.events.ThingUpdatedEvent;
+import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.binding;
+package org.openhab.core.thing.binding;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.config.core.status.ConfigStatusSource;
-import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.core.config.core.status.ConfigStatusSource;
+import org.openhab.core.thing.Thing;
 
 /**
  * An implementation of {@link ConfigStatusSource} for the {@link Thing} entity.

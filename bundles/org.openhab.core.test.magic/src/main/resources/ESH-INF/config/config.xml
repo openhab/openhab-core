@@ -128,7 +128,7 @@
 			<label>Select Decimal - options from backend</label>
 			<description>A decimal parameter with options provided by the backend.</description>
 			<limitToOptions>true</limitToOptions>
-			<!-- options are retrieved from org.eclipse.smarthome.binding.magic.internal.MagicServiceImpl. -->
+			<!-- options are retrieved from org.openhab.core.binding.magic.internal.MagicServiceImpl. -->
 		</parameter>
 	</config-description>
 

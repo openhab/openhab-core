@@ -10,41 +10,41 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.voice.internal;
+package org.openhab.core.voice.internal;
 
 import java.util.HashSet;
 import java.util.Locale;
 
-import org.eclipse.smarthome.core.audio.AudioException;
-import org.eclipse.smarthome.core.audio.AudioFormat;
-import org.eclipse.smarthome.core.audio.AudioSink;
-import org.eclipse.smarthome.core.audio.AudioSource;
-import org.eclipse.smarthome.core.audio.AudioStream;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioFormatException;
-import org.eclipse.smarthome.core.audio.UnsupportedAudioStreamException;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.items.ItemUtil;
-import org.eclipse.smarthome.core.items.events.ItemEventFactory;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.voice.KSErrorEvent;
-import org.eclipse.smarthome.core.voice.KSEvent;
-import org.eclipse.smarthome.core.voice.KSException;
-import org.eclipse.smarthome.core.voice.KSListener;
-import org.eclipse.smarthome.core.voice.KSService;
-import org.eclipse.smarthome.core.voice.KSpottedEvent;
-import org.eclipse.smarthome.core.voice.RecognitionStopEvent;
-import org.eclipse.smarthome.core.voice.STTEvent;
-import org.eclipse.smarthome.core.voice.STTException;
-import org.eclipse.smarthome.core.voice.STTListener;
-import org.eclipse.smarthome.core.voice.STTService;
-import org.eclipse.smarthome.core.voice.STTServiceHandle;
-import org.eclipse.smarthome.core.voice.SpeechRecognitionErrorEvent;
-import org.eclipse.smarthome.core.voice.SpeechRecognitionEvent;
-import org.eclipse.smarthome.core.voice.TTSException;
-import org.eclipse.smarthome.core.voice.TTSService;
-import org.eclipse.smarthome.core.voice.Voice;
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
-import org.eclipse.smarthome.core.voice.text.InterpretationException;
+import org.openhab.core.audio.AudioException;
+import org.openhab.core.audio.AudioFormat;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.UnsupportedAudioFormatException;
+import org.openhab.core.audio.UnsupportedAudioStreamException;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.voice.KSErrorEvent;
+import org.openhab.core.voice.KSEvent;
+import org.openhab.core.voice.KSException;
+import org.openhab.core.voice.KSListener;
+import org.openhab.core.voice.KSService;
+import org.openhab.core.voice.KSpottedEvent;
+import org.openhab.core.voice.RecognitionStopEvent;
+import org.openhab.core.voice.STTEvent;
+import org.openhab.core.voice.STTException;
+import org.openhab.core.voice.STTListener;
+import org.openhab.core.voice.STTService;
+import org.openhab.core.voice.STTServiceHandle;
+import org.openhab.core.voice.SpeechRecognitionErrorEvent;
+import org.openhab.core.voice.SpeechRecognitionEvent;
+import org.openhab.core.voice.TTSException;
+import org.openhab.core.voice.TTSService;
+import org.openhab.core.voice.Voice;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.InterpretationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

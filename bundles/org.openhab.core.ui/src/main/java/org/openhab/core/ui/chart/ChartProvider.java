@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.chart;
+package org.openhab.core.ui.chart;
 
 import java.awt.image.BufferedImage;
 import java.util.Date;
 
-import org.eclipse.smarthome.core.items.ItemNotFoundException;
+import org.openhab.core.items.ItemNotFoundException;
 
 /**
  * Defines the interface for chart providers. A chart provider interfaces with

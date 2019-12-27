@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.icon;
+package org.openhab.core.ui.icon;
 
 import java.util.Collections;
 import java.util.HashSet;

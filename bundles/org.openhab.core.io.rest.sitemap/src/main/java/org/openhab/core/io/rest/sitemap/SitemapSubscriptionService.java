@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sitemap;
+package org.openhab.core.io.rest.sitemap;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,21 +26,21 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFilter;
-import org.eclipse.smarthome.core.events.EventSubscriber;
-import org.eclipse.smarthome.core.items.GroupItem;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.items.events.ItemStatePredictedEvent;
-import org.eclipse.smarthome.io.rest.sitemap.internal.PageChangeListener;
-import org.eclipse.smarthome.io.rest.sitemap.internal.SitemapEvent;
-import org.eclipse.smarthome.model.core.EventType;
-import org.eclipse.smarthome.model.core.ModelRepositoryChangeListener;
-import org.eclipse.smarthome.model.sitemap.SitemapProvider;
-import org.eclipse.smarthome.model.sitemap.sitemap.LinkableWidget;
-import org.eclipse.smarthome.model.sitemap.sitemap.Sitemap;
-import org.eclipse.smarthome.model.sitemap.sitemap.Widget;
-import org.eclipse.smarthome.ui.items.ItemUIRegistry;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFilter;
+import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.items.GroupItem;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.events.ItemStatePredictedEvent;
+import org.openhab.core.io.rest.sitemap.internal.PageChangeListener;
+import org.openhab.core.io.rest.sitemap.internal.SitemapEvent;
+import org.openhab.core.model.core.EventType;
+import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
+import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(service = { SitemapSubscriptionService.class,
-        EventSubscriber.class }, configurationPid = "org.eclipse.smarthome.sitemapsubscription")
+        EventSubscriber.class }, configurationPid = "org.openhab.core.sitemapsubscription")
 public class SitemapSubscriptionService implements ModelRepositoryChangeListener, EventSubscriber {
 
     private static final String SITEMAP_PAGE_SEPARATOR = "#";

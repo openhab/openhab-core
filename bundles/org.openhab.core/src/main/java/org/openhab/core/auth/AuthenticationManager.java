@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.auth;
+package org.openhab.core.auth;
 
 /**
  * Authentication manager is main entry point for all places which are interested in securing requests and verifying

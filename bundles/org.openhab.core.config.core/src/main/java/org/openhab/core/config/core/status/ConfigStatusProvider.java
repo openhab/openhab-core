@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.config.core.status;
+package org.openhab.core.config.core.status;
 
 import java.util.Collection;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.Configuration;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * The {@link ConfigStatusProvider} can be implemented and registered as an <i>OSGi</i> service to provide status

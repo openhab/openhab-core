@@ -10,18 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.test;
+package org.openhab.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.config.core.ConfigDescriptionRegistry;
-import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
-import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelTypeRegistry;
-import org.eclipse.smarthome.test.SyntheticBundleInstaller;
-import org.eclipse.smarthome.test.java.JavaTest;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.thing.binding.ThingTypeProvider;
+import org.openhab.core.thing.type.ChannelGroupTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.test.SyntheticBundleInstaller;
+import org.openhab.core.test.java.JavaTest;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;

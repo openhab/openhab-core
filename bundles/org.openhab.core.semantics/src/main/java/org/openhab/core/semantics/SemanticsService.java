@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.semantics;
+package org.openhab.core.semantics;
 
 import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.items.Item;
-import org.eclipse.smarthome.core.semantics.model.Location;
+import org.openhab.core.items.Item;
+import org.openhab.core.semantics.model.Location;
 
 /**
  * This interface defines a service, which offers functionality regarding semantic tags.

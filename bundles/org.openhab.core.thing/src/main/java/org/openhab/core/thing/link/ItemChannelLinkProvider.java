@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link;
+package org.openhab.core.thing.link;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.common.registry.Provider;
+import org.openhab.core.common.registry.Provider;
 
 /**
  * The {@link ItemChannelLinkProvider} is responsible for providing item channel

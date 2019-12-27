@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.mdns.internal;
+package org.openhab.core.io.transport.mdns.internal;
 
 import java.io.IOException;
 import java.util.Set;
@@ -18,9 +18,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.mdns.MDNSClient;
-import org.eclipse.smarthome.io.transport.mdns.MDNSService;
-import org.eclipse.smarthome.io.transport.mdns.ServiceDescription;
+import org.openhab.core.io.transport.mdns.MDNSClient;
+import org.openhab.core.io.transport.mdns.MDNSService;
+import org.openhab.core.io.transport.mdns.ServiceDescription;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;

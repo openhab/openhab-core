@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.ui.internal.proxy;
+package org.openhab.core.ui.internal.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;

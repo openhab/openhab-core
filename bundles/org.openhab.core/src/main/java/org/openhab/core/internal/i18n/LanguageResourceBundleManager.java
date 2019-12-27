@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.i18n;
+package org.openhab.core.internal.i18n;
 
 import java.io.File;
 import java.net.URL;
@@ -21,8 +21,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
 
-import org.eclipse.smarthome.core.common.osgi.ResourceBundleClassLoader;
-import org.eclipse.smarthome.core.i18n.LocaleProvider;
+import org.openhab.core.common.osgi.ResourceBundleClassLoader;
+import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.Bundle;
 
 /**

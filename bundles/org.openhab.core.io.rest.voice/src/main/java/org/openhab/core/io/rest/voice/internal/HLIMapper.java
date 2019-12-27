@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.voice.internal;
+package org.openhab.core.io.rest.voice.internal;
 
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.smarthome.core.voice.text.HumanLanguageInterpreter;
+import org.openhab.core.voice.text.HumanLanguageInterpreter;
 
 /**
  * Mapper class that maps {@link HumanLanguageInterpreter} instanced to their respective DTOs.

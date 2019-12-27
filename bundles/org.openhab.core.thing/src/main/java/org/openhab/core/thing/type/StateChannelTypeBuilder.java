@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.type;
+package org.openhab.core.thing.type;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.types.CommandDescription;
-import org.eclipse.smarthome.core.types.CommandOption;
-import org.eclipse.smarthome.core.types.StateDescription;
+import org.openhab.core.types.CommandDescription;
+import org.openhab.core.types.CommandOption;
+import org.openhab.core.types.StateDescription;
 
 /**
  * Interface for builders for {@link ChannelType}s of kind STATE

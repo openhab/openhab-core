@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.magic.binding.internal;
+package org.openhab.core.magic.binding.internal;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -19,10 +19,10 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 
-import org.eclipse.smarthome.config.core.ConfigOptionProvider;
-import org.eclipse.smarthome.config.core.Configuration;
-import org.eclipse.smarthome.config.core.ParameterOption;
-import org.eclipse.smarthome.magic.binding.MagicService;
+import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.magic.binding.MagicService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Henning Treu - Initial contribution
  */
-@Component(configurationPid = "org.eclipse.smarthome.magic", service = ConfigOptionProvider.class, immediate = true, property = {
-        "service.pid=org.eclipse.smarthome.magic", "service.config.description.uri=test:magic",
+@Component(configurationPid = "org.openhab.core.magic", service = ConfigOptionProvider.class, immediate = true, property = {
+        "service.pid=org.openhab.core.magic", "service.config.description.uri=test:magic",
         "service.config.label=Magic", "service.config.category=test" })
 public class MagicServiceImpl implements MagicService {
     private final Logger logger = LoggerFactory.getLogger(MagicServiceImpl.class);

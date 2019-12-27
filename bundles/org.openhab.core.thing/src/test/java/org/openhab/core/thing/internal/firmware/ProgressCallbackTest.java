@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.internal.firmware;
+package org.openhab.core.thing.internal.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -22,22 +22,22 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventPublisher;
-import org.eclipse.smarthome.core.i18n.TranslationProvider;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.binding.firmware.Firmware;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareBuilder;
-import org.eclipse.smarthome.core.thing.binding.firmware.FirmwareUpdateHandler;
-import org.eclipse.smarthome.core.thing.binding.firmware.ProgressCallback;
-import org.eclipse.smarthome.core.thing.binding.firmware.ProgressStep;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateProgressInfoEvent;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateResult;
-import org.eclipse.smarthome.core.thing.firmware.FirmwareUpdateResultInfoEvent;
-import org.eclipse.smarthome.core.util.BundleResolver;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.builder.ThingBuilder;
+import org.openhab.core.thing.binding.firmware.Firmware;
+import org.openhab.core.thing.binding.firmware.FirmwareBuilder;
+import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
+import org.openhab.core.thing.binding.firmware.ProgressCallback;
+import org.openhab.core.thing.binding.firmware.ProgressStep;
+import org.openhab.core.thing.firmware.FirmwareUpdateProgressInfoEvent;
+import org.openhab.core.thing.firmware.FirmwareUpdateResult;
+import org.openhab.core.thing.firmware.FirmwareUpdateResultInfoEvent;
+import org.openhab.core.util.BundleResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;

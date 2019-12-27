@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.link;
+package org.openhab.core.thing.link;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.common.registry.Identifiable;
-import org.eclipse.smarthome.core.items.ItemUtil;
-import org.eclipse.smarthome.core.thing.UID;
+import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.thing.UID;
 
 /**
  * {@link AbstractLink} is the abstract base class of all links.

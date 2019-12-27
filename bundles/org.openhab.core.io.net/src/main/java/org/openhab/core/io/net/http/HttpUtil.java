@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.net.http;
+package org.openhab.core.io.net.http;
 
 import static org.eclipse.jetty.http.HttpMethod.*;
 
@@ -44,7 +44,7 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.StringUtil;
-import org.eclipse.smarthome.core.library.types.RawType;
+import org.openhab.core.library.types.RawType;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;

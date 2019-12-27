@@ -10,17 +10,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.transport.serial.rxtx.rfc2217.internal;
+package org.openhab.core.io.transport.serial.rxtx.rfc2217.internal;
 
 import java.net.URI;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.io.transport.serial.ProtocolType;
-import org.eclipse.smarthome.io.transport.serial.ProtocolType.PathType;
-import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
-import org.eclipse.smarthome.io.transport.serial.SerialPortProvider;
+import org.openhab.core.io.transport.serial.ProtocolType;
+import org.openhab.core.io.transport.serial.ProtocolType.PathType;
+import org.openhab.core.io.transport.serial.SerialPortIdentifier;
+import org.openhab.core.io.transport.serial.SerialPortProvider;
 import org.osgi.service.component.annotations.Component;
 
 import gnu.io.rfc2217.TelnetSerialPort;

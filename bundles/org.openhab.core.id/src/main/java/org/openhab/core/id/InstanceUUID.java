@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.id;
+package org.openhab.core.id;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.openhab.core.config.core.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

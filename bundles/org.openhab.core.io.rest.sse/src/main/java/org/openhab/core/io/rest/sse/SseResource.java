@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.sse;
+package org.openhab.core.io.rest.sse;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -30,10 +30,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.smarthome.core.auth.Role;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.io.rest.sse.internal.SseEventOutput;
-import org.eclipse.smarthome.io.rest.sse.internal.util.SseUtil;
+import org.openhab.core.auth.Role;
+import org.openhab.core.events.Event;
+import org.openhab.core.io.rest.sse.internal.SseEventOutput;
+import org.openhab.core.io.rest.sse.internal.util.SseUtil;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.SseBroadcaster;
 import org.glassfish.jersey.media.sse.SseFeature;

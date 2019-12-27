@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.optimize.internal;
+package org.openhab.core.io.rest.optimize.internal;
 
 import static com.eclipsesource.jaxrs.publisher.ServiceProperties.PUBLISH;
 
@@ -36,7 +36,7 @@ import com.eclipsesource.jaxrs.publisher.ResourceFilter;
 /**
  * Provides a filter for all classes/interfaces which are relevant in the context of JAX-RS.
  *
- * By default, this filter will allow every service outside of the org.eclipse.smarthome.**-Namespace to be parsed by
+ * By default, this filter will allow every service outside of the org.openhab.core.**-Namespace to be parsed by
  * the JAXR-RS implementation. To further optimize this, install a fragment which adds a "/res/whitelist.txt" file,
  * containing one service interface or class per line like in the following example:
  *
@@ -65,11 +65,11 @@ public class ResourceFilterImpl implements ResourceFilter {
             // JAX-RS
             "javax.ws.rs.ext.MessageBodyReader", "javax.ws.rs.ext.MessageBodyWriter",
             // openHAB
-            "org.eclipse.smarthome.io.rest.internal.filter.ProxyFilter",
-            "org.eclipse.smarthome.io.rest.internal.resources.RootResource",
-            "org.eclipse.smarthome.io.rest.JSONResponse$ExceptionMapper", "org.eclipse.smarthome.io.rest.RESTResource",
-            "org.eclipse.smarthome.io.rest.sse.internal.async.BlockingAsyncFeature",
-            "org.eclipse.smarthome.io.rest.sse.SseResource",
+            "org.openhab.core.io.rest.internal.filter.ProxyFilter",
+            "org.openhab.core.io.rest.internal.resources.RootResource",
+            "org.openhab.core.io.rest.JSONResponse$ExceptionMapper", "org.openhab.core.io.rest.RESTResource",
+            "org.openhab.core.io.rest.sse.internal.async.BlockingAsyncFeature",
+            "org.openhab.core.io.rest.sse.SseResource",
             // SSE
             "org.glassfish.jersey.media.sse.SseFeature",
             "org.glassfish.jersey.server.monitoring.ApplicationEventListener" };
@@ -97,7 +97,7 @@ public class ResourceFilterImpl implements ResourceFilter {
         List<String> whitelist = loadWhitelistExtension();
         if (whitelist == null) {
             logger.debug("No /res/whitelist.txt file found - scanning all unknown services");
-            builder.append("(!(" + Constants.OBJECTCLASS + "=org.eclipse.smarthome.*))");
+            builder.append("(!(" + Constants.OBJECTCLASS + "=org.openhab.core.*))");
         } else {
             logger.debug("Whitelist /res/whitelist.txt file found - restricting scanning of services");
             whitelist.forEach(entry -> {

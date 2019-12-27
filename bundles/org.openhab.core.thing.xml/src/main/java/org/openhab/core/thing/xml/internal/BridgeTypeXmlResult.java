@@ -10,15 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.xml.internal;
+package org.openhab.core.thing.xml.internal;
 
 import java.util.List;
 
-import org.eclipse.smarthome.config.core.ConfigDescription;
-import org.eclipse.smarthome.config.core.ConfigDescriptionProvider;
-import org.eclipse.smarthome.config.xml.util.NodeValue;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.type.BridgeType;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.xml.util.NodeValue;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.type.BridgeType;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 

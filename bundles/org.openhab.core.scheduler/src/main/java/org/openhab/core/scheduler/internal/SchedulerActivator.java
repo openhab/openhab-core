@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.scheduler.internal;
+package org.openhab.core.scheduler.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

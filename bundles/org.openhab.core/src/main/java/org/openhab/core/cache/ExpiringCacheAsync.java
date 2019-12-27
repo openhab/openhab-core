@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.cache;
+package org.openhab.core.cache;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Complementary class to {@link org.eclipse.smarthome.core.cache.ExpiringCache}, implementing an asynchronous variant
+ * Complementary class to {@link org.openhab.core.cache.ExpiringCache}, implementing an asynchronous variant
  * of an expiring cache. An instance returns the cached value immediately to the callback if not expired yet, otherwise
  * issue a fetch in another thread and notify callback implementors asynchronously.
  *

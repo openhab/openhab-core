@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.extension;
+package org.openhab.core.extension;
 
 import java.util.Collections;
 
-import org.eclipse.smarthome.core.events.AbstractEventFactory;
-import org.eclipse.smarthome.core.events.Event;
-import org.eclipse.smarthome.core.events.EventFactory;
+import org.openhab.core.events.AbstractEventFactory;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventFactory;
 import org.osgi.service.component.annotations.Component;
 
 /**

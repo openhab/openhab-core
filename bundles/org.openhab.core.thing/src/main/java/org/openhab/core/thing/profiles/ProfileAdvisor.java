@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.thing.profiles;
+package org.openhab.core.thing.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.Channel;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.type.ChannelType;
 
 /**
  * Implementors can give advice which {@link Profile}s can/should be used for a given link.

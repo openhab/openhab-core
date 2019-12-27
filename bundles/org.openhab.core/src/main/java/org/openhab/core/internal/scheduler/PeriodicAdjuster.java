@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.internal.scheduler;
+package org.openhab.core.internal.scheduler;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
@@ -19,7 +19,7 @@ import java.util.Iterator;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.scheduler.SchedulerTemporalAdjuster;
+import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 
 /**
  * This is a Temporal Adjuster that takes a list of delays.

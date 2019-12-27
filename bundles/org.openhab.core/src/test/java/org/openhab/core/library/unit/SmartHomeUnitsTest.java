@@ -10,9 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library.unit;
+package org.openhab.core.library.unit;
 
-import static org.eclipse.smarthome.core.library.unit.MetricPrefix.HECTO;
+import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
@@ -26,10 +26,10 @@ import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 
-import org.eclipse.smarthome.core.library.dimension.ArealDensity;
-import org.eclipse.smarthome.core.library.dimension.Density;
-import org.eclipse.smarthome.core.library.dimension.Intensity;
-import org.eclipse.smarthome.core.library.types.QuantityType;
+import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.Density;
+import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.types.QuantityType;
 import org.junit.Test;
 
 import tec.uom.se.quantity.Quantities;

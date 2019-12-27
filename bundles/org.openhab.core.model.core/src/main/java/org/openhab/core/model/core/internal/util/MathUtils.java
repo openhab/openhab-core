@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.model.core.internal.util;
+package org.openhab.core.model.core.internal.util;
 
 /**
  * This class provides a few mathematical helper functions that are required by

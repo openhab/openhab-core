@@ -10,25 +10,25 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.core.library;
+package org.openhab.core.library;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.items.GenericItem;
-import org.eclipse.smarthome.core.items.ItemFactory;
-import org.eclipse.smarthome.core.items.ItemUtil;
-import org.eclipse.smarthome.core.library.items.CallItem;
-import org.eclipse.smarthome.core.library.items.ColorItem;
-import org.eclipse.smarthome.core.library.items.ContactItem;
-import org.eclipse.smarthome.core.library.items.DateTimeItem;
-import org.eclipse.smarthome.core.library.items.DimmerItem;
-import org.eclipse.smarthome.core.library.items.ImageItem;
-import org.eclipse.smarthome.core.library.items.LocationItem;
-import org.eclipse.smarthome.core.library.items.NumberItem;
-import org.eclipse.smarthome.core.library.items.PlayerItem;
-import org.eclipse.smarthome.core.library.items.RollershutterItem;
-import org.eclipse.smarthome.core.library.items.StringItem;
-import org.eclipse.smarthome.core.library.items.SwitchItem;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.items.ItemFactory;
+import org.openhab.core.items.ItemUtil;
+import org.openhab.core.library.items.CallItem;
+import org.openhab.core.library.items.ColorItem;
+import org.openhab.core.library.items.ContactItem;
+import org.openhab.core.library.items.DateTimeItem;
+import org.openhab.core.library.items.DimmerItem;
+import org.openhab.core.library.items.ImageItem;
+import org.openhab.core.library.items.LocationItem;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.PlayerItem;
+import org.openhab.core.library.items.RollershutterItem;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.items.SwitchItem;
 import org.osgi.service.component.annotations.Component;
 
 /**
