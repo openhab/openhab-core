@@ -18,7 +18,8 @@ import java.util.Set;
 
 import javax.measure.Quantity;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -31,6 +32,7 @@ import org.openhab.core.types.UnDefType;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
     abstract class DimensionalGroupFunction implements GroupFunction {
@@ -42,7 +44,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);
@@ -56,7 +58,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             return new State[0];
         }
 
-        protected boolean isSameDimension(Item item) {
+        protected boolean isSameDimension(@Nullable Item item) {
             if (item instanceof GroupItem) {
                 return isSameDimension(((GroupItem) item).getBaseItem());
             }
@@ -70,13 +72,13 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     static class Avg extends DimensionalGroupFunction {
 
-        public Avg(@NonNull Class<? extends Quantity<?>> dimension) {
+        public Avg(Class<? extends Quantity<?>> dimension) {
             super(dimension);
         }
 
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items == null || items.isEmpty()) {
                 return UnDefType.UNDEF;
             }
@@ -113,13 +115,13 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     static class Sum extends DimensionalGroupFunction {
 
-        public Sum(@NonNull Class<? extends @NonNull Quantity<?>> dimension) {
+        public Sum(Class<? extends Quantity<?>> dimension) {
             super(dimension);
         }
 
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items == null || items.isEmpty()) {
                 return UnDefType.UNDEF;
             }
@@ -148,13 +150,13 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     static class Min extends DimensionalGroupFunction {
 
-        public Min(@NonNull Class<? extends @NonNull Quantity<?>> dimension) {
+        public Min(Class<? extends Quantity<?>> dimension) {
             super(dimension);
         }
 
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items == null || items.isEmpty()) {
                 return UnDefType.UNDEF;
             }
@@ -171,6 +173,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                     }
                 }
             }
+
             return min != null ? min : UnDefType.UNDEF;
         }
 
@@ -181,13 +184,13 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     static class Max extends DimensionalGroupFunction {
 
-        public Max(@NonNull Class<? extends @NonNull Quantity<?>> dimension) {
+        public Max(Class<? extends Quantity<?>> dimension) {
             super(dimension);
         }
 
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items == null || items.isEmpty()) {
                 return UnDefType.UNDEF;
             }

@@ -15,6 +15,8 @@ package org.openhab.core.items;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
@@ -24,6 +26,7 @@ import org.openhab.core.types.UnDefType;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface GroupFunction {
 
     /**
@@ -32,7 +35,7 @@ public interface GroupFunction {
      * @param items the items to calculate a group state for
      * @return the calculated group state
      */
-    State calculate(Set<Item> items);
+    State calculate(@Nullable Set<Item> items);
 
     /**
      * Calculates the group state and returns it as a state of the requested type.
@@ -41,7 +44,8 @@ public interface GroupFunction {
      * @param stateClass the type in which the state should be returned
      * @return the calculated group state of the requested type or null, if type is not supported
      */
-    <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass);
+    @Nullable
+    <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass);
 
     /**
      * Returns the parameters of the function as an array.
@@ -55,13 +59,14 @@ public interface GroupFunction {
      * have the same state. If this is the case, this state is returned, otherwise UNDEF is returned.
      *
      * @author Kai Kreuzer - Initial contribution
-     *
      */
     static class Equality implements GroupFunction {
 
         @Override
-        public State calculate(Set<Item> items) {
-            if (!items.isEmpty()) {
+        public State calculate(@Nullable Set<Item> items) {
+            if (items == null || items.isEmpty()) {
+                return UnDefType.UNDEF;
+            } else {
                 Iterator<Item> it = items.iterator();
                 State state = it.next().getState();
                 while (it.hasNext()) {
@@ -70,13 +75,11 @@ public interface GroupFunction {
                     }
                 }
                 return state;
-            } else {
-                return UnDefType.UNDEF;
             }
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);

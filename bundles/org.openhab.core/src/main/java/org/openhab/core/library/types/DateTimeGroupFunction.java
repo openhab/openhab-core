@@ -15,6 +15,8 @@ package org.openhab.core.library.types;
 import java.time.ZonedDateTime;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
@@ -25,6 +27,7 @@ import org.openhab.core.types.UnDefType;
  *
  * @author Robert Michalak - Initial contribution
  */
+@NonNullByDefault
 public interface DateTimeGroupFunction extends GroupFunction {
 
     /**
@@ -36,7 +39,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items != null && !items.isEmpty()) {
                 ZonedDateTime max = null;
                 for (Item item : items) {
@@ -55,7 +58,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);
@@ -79,7 +82,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items != null && !items.isEmpty()) {
                 ZonedDateTime max = null;
                 for (Item item : items) {
@@ -98,7 +101,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);

@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
@@ -31,6 +33,7 @@ import org.openhab.core.types.UnDefType;
  * @author Thomas Eichstädt-Engelen - Added "N" functions
  * @author Gaël L'hopital - Added count function
  */
+@NonNullByDefault
 public interface ArithmeticGroupFunction extends GroupFunction {
 
     /**
@@ -45,7 +48,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         protected final State activeState;
         protected final State passiveState;
 
-        public And(State activeValue, State passiveValue) {
+        public And(@Nullable State activeValue, @Nullable State passiveValue) {
             if (activeValue == null || passiveValue == null) {
                 throw new IllegalArgumentException("Parameters must not be null!");
             }
@@ -54,22 +57,22 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
-            if (items != null && !items.isEmpty()) {
+        public State calculate(@Nullable Set<Item> items) {
+            if (items == null || items.isEmpty()) {
+                // if we do not have any items, we return the passive state
+                return passiveState;
+            } else {
                 for (Item item : items) {
                     if (!activeState.equals(item.getStateAs(activeState.getClass()))) {
                         return passiveState;
                     }
                 }
                 return activeState;
-            } else {
-                // if we do not have any items, we return the passive state
-                return passiveState;
             }
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);
@@ -88,15 +91,12 @@ public interface ArithmeticGroupFunction extends GroupFunction {
 
         private int count(Set<Item> items, State state) {
             int count = 0;
-            if (items != null && state != null) {
-                for (Item item : items) {
-                    if (state.equals(item.getStateAs(state.getClass()))) {
-                        count++;
-                    }
+            for (Item item : items) {
+                if (state.equals(item.getStateAs(state.getClass()))) {
+                    count++;
                 }
             }
             return count;
-
         }
 
         @Override
@@ -117,7 +117,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         protected final State activeState;
         protected final State passiveState;
 
-        public Or(State activeValue, State passiveValue) {
+        public Or(@Nullable State activeValue, @Nullable State passiveValue) {
             if (activeValue == null || passiveValue == null) {
                 throw new IllegalArgumentException("Parameters must not be null!");
             }
@@ -126,7 +126,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
                 for (Item item : items) {
                     if (activeState.equals(item.getStateAs(activeState.getClass()))) {
@@ -138,13 +138,17 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);
             } else {
                 if (stateClass == DecimalType.class) {
-                    return stateClass.cast(new DecimalType(count(items, activeState)));
+                    if (items != null) {
+                        return stateClass.cast(new DecimalType(count(items, activeState)));
+                    } else {
+                        return stateClass.cast(DecimalType.ZERO);
+                    }
                 } else {
                     return null;
                 }
@@ -153,11 +157,9 @@ public interface ArithmeticGroupFunction extends GroupFunction {
 
         private int count(Set<Item> items, State state) {
             int count = 0;
-            if (items != null && state != null) {
-                for (Item item : items) {
-                    if (state.equals(item.getStateAs(state.getClass()))) {
-                        count++;
-                    }
+            for (Item item : items) {
+                if (state.equals(item.getStateAs(state.getClass()))) {
+                    count++;
                 }
             }
             return count;
@@ -177,15 +179,14 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      */
     static class NAnd extends And {
 
-        public NAnd(State activeValue, State passiveValue) {
+        public NAnd(@Nullable State activeValue, @Nullable State passiveValue) {
             super(activeValue, passiveValue);
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             State result = super.calculate(items);
-            State notResult = result.equals(activeState) ? passiveState : activeState;
-            return notResult;
+            return activeState.equals(result) ? passiveState : activeState;
         }
 
     }
@@ -198,15 +199,14 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      */
     static class NOr extends Or {
 
-        public NOr(State activeValue, State passiveValue) {
+        public NOr(@Nullable State activeValue, @Nullable State passiveValue) {
             super(activeValue, passiveValue);
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             State result = super.calculate(items);
-            State notResult = result.equals(activeState) ? passiveState : activeState;
-            return notResult;
+            return activeState.equals(result) ? passiveState : activeState;
         }
 
     }
@@ -220,7 +220,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             BigDecimal sum = BigDecimal.ZERO;
             int count = 0;
             if (items != null) {
@@ -240,7 +240,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);
@@ -264,7 +264,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             BigDecimal sum = BigDecimal.ZERO;
             if (items != null) {
                 for (Item item : items) {
@@ -278,7 +278,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);
@@ -302,7 +302,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items != null && !items.isEmpty()) {
                 BigDecimal min = null;
                 for (Item item : items) {
@@ -321,7 +321,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);
@@ -345,7 +345,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             if (items != null && !items.isEmpty()) {
                 BigDecimal max = null;
                 for (Item item : items) {
@@ -364,7 +364,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);
@@ -390,7 +390,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
 
         protected final Pattern pattern;
 
-        public Count(State regExpr) {
+        public Count(@Nullable State regExpr) {
             if (regExpr == null) {
                 throw new IllegalArgumentException("Parameter must not be null!");
             }
@@ -398,7 +398,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        public State calculate(Set<Item> items) {
+        public State calculate(@Nullable Set<Item> items) {
             int count = 0;
             if (items != null) {
                 for (Item item : items) {
@@ -408,12 +408,11 @@ public interface ArithmeticGroupFunction extends GroupFunction {
                     }
                 }
             }
-
             return new DecimalType(count);
         }
 
         @Override
-        public <T extends State> T getStateAs(Set<Item> items, Class<T> stateClass) {
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 return stateClass.cast(state);

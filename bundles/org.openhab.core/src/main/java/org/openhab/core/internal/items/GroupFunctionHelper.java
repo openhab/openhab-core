@@ -16,7 +16,7 @@ import java.util.List;
 
 import javax.measure.Quantity;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.dto.GroupFunctionDTO;
@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Henning Treu - Initial contribution
  * @author Robert Michalak - LATEST and EARLIEST group functions
  */
+@NonNullByDefault
 public class GroupFunctionHelper {
 
     /**
@@ -54,7 +55,7 @@ public class GroupFunctionHelper {
     }
 
     private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, List<State> args,
-            @NonNull Class<? extends Quantity<?>> dimension) {
+            Class<? extends Quantity<?>> dimension) {
         String functionName = function.name;
         switch (functionName.toUpperCase()) {
             case "AVG":

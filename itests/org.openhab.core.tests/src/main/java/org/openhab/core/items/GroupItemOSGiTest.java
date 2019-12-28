@@ -39,6 +39,7 @@ import org.openhab.core.internal.items.GroupFunctionHelper;
 import org.openhab.core.internal.items.ItemStateConverterImpl;
 import org.openhab.core.items.dto.GroupFunctionDTO;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
+import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemUpdatedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.ColorItem;
@@ -415,7 +416,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatGroupItemChangesRespectGroupFunctionOR() {
+    public void assertThatGroupItemChangesRespectGroupFunctionOR() throws InterruptedException {
         events.clear();
         GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"),
                 new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
@@ -431,23 +432,64 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         // State changes -> one change event is fired
         sw1.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events.size(), is(1)));
+        waitForAssert(() -> assertThat(events, hasSize(1)));
 
-        List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
+        List<Event> groupItemStateChangedEvents = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
-        assertThat(changes.size(), is(1));
+        assertThat(groupItemStateChangedEvents, hasSize(1));
 
-        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
-        assertTrue(change.getItemName().equals(groupItem.getName()));
+        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) groupItemStateChangedEvents.get(0);
+        assertThat(change.getItemName(), is(groupItem.getName()));
 
-        assertTrue(change.getOldItemState().equals(UnDefType.NULL));
-        assertTrue(change.getItemState().equals(OnOffType.ON));
+        // we expect that the group should now have status "ON"
+        assertThat(change.getOldItemState(), is(UnDefType.NULL));
+        assertThat(change.getItemState(), is(OnOffType.ON));
 
-        assertTrue(groupItem.getState().equals(OnOffType.ON));
+        assertThat(groupItem.getState(), is(OnOffType.ON));
+
+        events.clear();
+
+        // State does not change -> no change event is fired
+        sw2.setState(OnOffType.ON);
+
+        // wait to see that the event doesn't fire
+        Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
+
+        waitForAssert(() -> assertThat(events, hasSize(0)));
     }
 
     @Test
-    public void assertThatGroupItemChangesRespectGroupFunctionORwithUNDEF() throws InterruptedException {
+    public void assertThatItemCommandEventsAreEmittedFromCommand() {
+        events.clear();
+        GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"),
+                new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
+        groupItem.setItemStateConverter(itemStateConverter);
+
+        SwitchItem sw1 = new SwitchItem("switch1");
+        SwitchItem sw2 = new SwitchItem("switch2");
+        groupItem.addMember(sw1);
+        groupItem.addMember(sw2);
+
+        groupItem.setEventPublisher(publisher);
+
+        // Command is sent to item -> no change event is fired
+        groupItem.send(OnOffType.ON);
+
+        waitForAssert(() -> assertThat(events, hasSize(2)));
+
+        List<Event> itemCommandEvents = events.stream().filter(it -> it instanceof ItemCommandEvent)
+                .collect(Collectors.toList());
+        assertThat(itemCommandEvents, hasSize(2));
+
+        List<Event> groupItemStateChangedEvents = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
+                .collect(Collectors.toList());
+        assertThat(groupItemStateChangedEvents, hasSize(0));
+
+        assertThat(groupItem.getState(), is(UnDefType.NULL));
+    }
+
+    @Test
+    public void assertThatGroupItemChangesRespectGroupFunctionORWithUNDEF() throws InterruptedException {
         events.clear();
         GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"),
                 new ArithmeticGroupFunction.Or(OnOffType.ON, OnOffType.OFF));
@@ -463,20 +505,24 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         // State changes -> one change event is fired
         sw1.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events.size(), is(1)));
+        waitForAssert(() -> assertThat(events, hasSize(1)));
 
         List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
-        assertThat(changes.size(), is(1));
+        assertThat(changes, hasSize(1));
 
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
         assertTrue(change.getItemName().equals(groupItem.getName()));
 
+        // we expect that the group should now have status "ON"
         assertTrue(change.getOldItemState().equals(UnDefType.NULL));
         assertTrue(change.getItemState().equals(OnOffType.ON));
 
+        assertThat(groupItem.getState(), is(OnOffType.ON));
+
         events.clear();
 
+        // State does not change -> no change event is fired
         sw2.setState(OnOffType.ON);
 
         sw2.setState(UnDefType.UNDEF);
@@ -484,7 +530,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         // wait to see that the event doesn't fire
         Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);
 
-        assertThat(events.size(), is(0));
+        assertThat(events, hasSize(0));
 
         assertTrue(groupItem.getState().equals(OnOffType.ON));
     }
@@ -506,11 +552,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         // State changes -> one change event is fired
         sw1.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events.size(), is(1)));
+        waitForAssert(() -> assertThat(events, hasSize(1)));
 
         List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
-        assertThat(changes.size(), is(1));
+        assertThat(changes, hasSize(1));
 
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
         assertTrue(change.getItemName().equals(groupItem.getName()));
@@ -519,15 +565,17 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertTrue(change.getOldItemState().equals(UnDefType.NULL));
         assertTrue(change.getItemState().equals(OnOffType.OFF));
 
+        assertThat(groupItem.getState(), is(OnOffType.OFF));
+
         events.clear();
 
         // State changes -> one change event is fired
         sw2.setState(OnOffType.ON);
 
-        waitForAssert(() -> assertThat(events.size(), is(1)));
+        waitForAssert(() -> assertThat(events, hasSize(1)));
 
         changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent).collect(Collectors.toList());
-        assertThat(changes.size(), is(1));
+        assertThat(changes, hasSize(1));
 
         change = (GroupItemStateChangedEvent) changes.get(0);
         assertTrue(change.getItemName().equals(groupItem.getName()));
@@ -545,6 +593,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
             throws InterruptedException {
         events.clear();
         GroupItem groupItem = new GroupItem("root");
+
         TestItem member = new TestItem("member1");
         groupItem.addMember(member);
         groupItem.setEventPublisher(publisher);

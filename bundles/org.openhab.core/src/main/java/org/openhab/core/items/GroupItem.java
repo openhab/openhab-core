@@ -175,7 +175,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         // in case membership is constructed programmatically this sanitizes
         // the group names on the item:
         if (added && item instanceof GenericItem) {
-            ((GenericItem) item).addGroupName(this.getName());
+            ((GenericItem) item).addGroupName(getName());
         }
         registerStateListener(item);
     }
@@ -286,8 +286,7 @@ public class GroupItem extends GenericItem implements StateChangeListener {
         if (getAcceptedCommandTypes().contains(command.getClass())) {
             internalSend(command);
         } else {
-            logger.warn("Command '{}' has been ignored for group '{}' as it is not accepted.", command.toString(),
-                    getName());
+            logger.warn("Command '{}' has been ignored for group '{}' as it is not accepted.", command, getName());
         }
     }
 
@@ -368,13 +367,14 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     @Override
     public void stateUpdated(Item item, State state) {
         State oldState = this.state;
-        if (function != null && baseItem != null) {
+        State newState = oldState;
+        if (function != null && baseItem != null && itemStateConverter != null) {
             State calculatedState = function.calculate(getStateMembers(getMembers()));
-            calculatedState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
-            setState(calculatedState);
+            newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
+            setState(newState);
         }
-        if (!oldState.equals(this.state)) {
-            sendGroupStateChangedEvent(item.getName(), this.state, oldState);
+        if (!oldState.equals(newState)) {
+            sendGroupStateChangedEvent(item.getName(), newState, oldState);
         }
     }
 
@@ -392,8 +392,8 @@ public class GroupItem extends GenericItem implements StateChangeListener {
 
     private void sendGroupStateChangedEvent(String memberName, State newState, State oldState) {
         if (eventPublisher != null) {
-            eventPublisher.post(
-                    ItemEventFactory.createGroupStateChangedEvent(this.getName(), memberName, newState, oldState));
+            eventPublisher
+                    .post(ItemEventFactory.createGroupStateChangedEvent(getName(), memberName, newState, oldState));
         }
     }
 
