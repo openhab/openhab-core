@@ -12,9 +12,14 @@
  */
 package org.openhab.core.thing;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.registry.DefaultAbstractManagedProvider;
+import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.dto.ThingDTOMapper;
+import org.openhab.core.thing.type.BridgeType;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -31,11 +36,15 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(immediate = true, service = { ThingProvider.class, ManagedThingProvider.class })
-public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, ThingUID> implements ThingProvider {
+public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUID, ThingDTO> implements ThingProvider {
+
+    private ThingTypeRegistry thingTypeRegistry;
 
     @Activate
-    public ManagedThingProvider(final @Reference StorageService storageService) {
+    public ManagedThingProvider(final @Reference StorageService storageService,
+            final @Reference ThingTypeRegistry thingTypeRegistry) {
         super(storageService);
+        this.thingTypeRegistry = thingTypeRegistry;
     }
 
     @Override
@@ -46,5 +55,18 @@ public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, 
     @Override
     protected String keyToString(ThingUID key) {
         return key.toString();
+    }
+
+    @Override
+    protected Thing toElement(@NonNull String key, @NonNull ThingDTO persistableElement) {
+        ThingTypeUID thingTypeUID = new ThingTypeUID(persistableElement.thingTypeUID);
+        boolean isBridge = thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType;
+
+        return ThingDTOMapper.map(persistableElement, isBridge);
+    }
+
+    @Override
+    protected ThingDTO toPersistableElement(Thing element) {
+        return ThingDTOMapper.map(element);
     }
 }
