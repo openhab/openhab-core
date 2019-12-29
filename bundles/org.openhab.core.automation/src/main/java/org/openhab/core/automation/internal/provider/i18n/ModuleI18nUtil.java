@@ -18,13 +18,13 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.i18n.I18nUtil;
-import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.i18n.I18nUtil;
+import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 
 /**

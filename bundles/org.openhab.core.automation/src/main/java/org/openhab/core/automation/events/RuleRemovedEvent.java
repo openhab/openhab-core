@@ -26,10 +26,10 @@ public class RuleRemovedEvent extends AbstractRuleRegistryEvent {
     /**
      * Constructs a new rule removed event
      *
-     * @param topic   the topic of the event
+     * @param topic the topic of the event
      * @param payload the payload of the event
-     * @param source  the source of the event
-     * @param rule    the rule for which this event is
+     * @param source the source of the event
+     * @param rule the rule for which this event is
      */
     public RuleRemovedEvent(String topic, String payload, String source, RuleDTO rule) {
         super(topic, payload, source, rule);

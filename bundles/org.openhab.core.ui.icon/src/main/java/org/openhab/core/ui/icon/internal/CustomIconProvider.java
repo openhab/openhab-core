@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(immediate = true, service = {IconProvider.class} )
+@Component(immediate = true, service = { IconProvider.class })
 public class CustomIconProvider extends AbstractResourceIconProvider {
 
     private File getIconFile(String filename, String iconSetId) {

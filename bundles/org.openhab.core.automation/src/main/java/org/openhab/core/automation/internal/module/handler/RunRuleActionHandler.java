@@ -15,9 +15,9 @@ package org.openhab.core.automation.internal.module.handler;
 import java.util.List;
 import java.util.Map;
 
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
+import org.openhab.core.config.core.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

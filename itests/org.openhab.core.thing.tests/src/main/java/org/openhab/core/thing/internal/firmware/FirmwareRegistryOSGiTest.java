@@ -12,9 +12,9 @@
  */
 package org.openhab.core.thing.internal.firmware;
 
-import static org.openhab.core.thing.firmware.Constants.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.openhab.core.thing.firmware.Constants.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,11 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.firmware.Firmware;
@@ -36,10 +40,6 @@ import org.openhab.core.thing.firmware.Constants;
 import org.openhab.core.thing.firmware.FirmwareProvider;
 import org.openhab.core.thing.firmware.FirmwareRegistry;
 import org.openhab.core.thing.testutil.i18n.DefaultLocaleSetter;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**

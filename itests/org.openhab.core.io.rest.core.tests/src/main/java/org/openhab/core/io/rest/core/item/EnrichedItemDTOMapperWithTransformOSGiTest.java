@@ -20,15 +20,15 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.math.BigDecimal;
 import java.util.Collections;
 
-import org.openhab.core.library.items.NumberItem;
-import org.openhab.core.library.types.DecimalType;
-import org.openhab.core.service.StateDescriptionService;
-import org.openhab.core.types.StateDescription;
-import org.openhab.core.types.StateOption;
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.service.StateDescriptionService;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateOption;
 
 /**
  * @author Henning Treu - Initial contribution

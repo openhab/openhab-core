@@ -16,11 +16,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.openhab.core.library.types.OnOffType;
-import org.openhab.core.thing.profiles.ProfileCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.thing.profiles.ProfileCallback;
 
 /**
  *

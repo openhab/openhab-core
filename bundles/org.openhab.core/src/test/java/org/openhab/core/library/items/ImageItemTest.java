@@ -14,9 +14,9 @@ package org.openhab.core.library.items;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.types.State;
-import org.junit.Test;
 
 /**
  *

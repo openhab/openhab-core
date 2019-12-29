@@ -50,7 +50,7 @@ public interface ModuleHandlerFactory {
      * Creates a {@link ModuleHandler} instance needed for the operation of the {@link Module}s
      * included in {@link Rule}s.
      *
-     * @param module  the {@link Module} for which a {@link ModuleHandler} instance must be created.
+     * @param module the {@link Module} for which a {@link ModuleHandler} instance must be created.
      * @param ruleUID the identifier of the {@link Rule} that the given module belongs to.
      * @return a new {@link ModuleHandler} instance, or {@code null} if the type of the
      *         {@code module} parameter is not supported by this factory.
@@ -62,7 +62,7 @@ public interface ModuleHandlerFactory {
      * for handling the specified {@code module} in the {@link Rule} with the specified {@code ruleUID}.
      * If no other {@link Rule}s and {@link Module}s use this {@code handler} instance, it should be disposed.
      *
-     * @param module  the {@link Module} for which the {@code handler} was created.
+     * @param module the {@link Module} for which the {@code handler} was created.
      * @param ruleUID the identifier of the {@link Rule} that the given module belongs to.
      * @param handler the {@link ModuleHandler} instance that is no longer needed.
      */

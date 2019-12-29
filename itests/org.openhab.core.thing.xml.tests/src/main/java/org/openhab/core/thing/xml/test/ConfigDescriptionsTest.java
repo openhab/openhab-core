@@ -18,15 +18,15 @@ import static org.junit.Assert.assertThat;
 import java.net.URI;
 import java.util.Collection;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
-import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
 
 /**
  * @author Henning Treu - Initial contribution

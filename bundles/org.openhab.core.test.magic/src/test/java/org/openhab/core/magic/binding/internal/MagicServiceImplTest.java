@@ -18,10 +18,10 @@ import static org.junit.Assert.*;
 import java.net.URI;
 import java.util.Collection;
 
-import org.openhab.core.config.core.ParameterOption;
-import org.openhab.core.magic.binding.MagicService;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.magic.binding.MagicService;
 
 /**
  * Tests cases for {@link MagicService}.

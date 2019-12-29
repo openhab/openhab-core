@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
-import org.junit.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution

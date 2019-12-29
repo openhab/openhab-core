@@ -28,11 +28,11 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.Test;
 import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
 import org.openhab.core.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
 import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
 import org.openhab.core.test.java.JavaTest;
-import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 
 import com.hivemq.client.mqtt.lifecycle.MqttClientDisconnectedContext;

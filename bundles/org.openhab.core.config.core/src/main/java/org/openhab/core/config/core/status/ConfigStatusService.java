@@ -18,8 +18,8 @@ import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
-import org.openhab.core.config.core.status.events.ConfigStatusInfoEvent;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.status.events.ConfigStatusInfoEvent;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;

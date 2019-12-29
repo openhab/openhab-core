@@ -19,15 +19,15 @@ import static org.mockito.Mockito.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.discovery.inbox.Inbox;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Christoph Knauf - Initial contribution

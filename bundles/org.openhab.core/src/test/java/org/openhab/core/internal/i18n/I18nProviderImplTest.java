@@ -12,11 +12,11 @@
  */
 package org.openhab.core.internal.i18n;
 
-import static org.openhab.core.internal.i18n.I18nProviderImpl.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.openhab.core.internal.i18n.I18nProviderImpl.*;
 
 import java.time.ZoneId;
 import java.util.Dictionary;
@@ -25,10 +25,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.openhab.core.library.types.PointType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.library.types.PointType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;

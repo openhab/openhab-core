@@ -22,7 +22,7 @@ import java.util.StringTokenizer;
  * @author Ana Dimova - Initial contribution
  */
 public class Vendor {
-    
+
     private static final String DELIMITER = ";";
 
     /**
@@ -45,7 +45,7 @@ public class Vendor {
      * This field keeps the count of the rules provided from this vendor.
      */
     private int rulesCount = 0;
-    
+
     public Vendor(String nameversion) {
         int index = nameversion.indexOf(DELIMITER);
         vendorSymbolicName = nameversion.substring(0, index);
@@ -130,7 +130,7 @@ public class Vendor {
     public int hashCode() {
         return vendorSymbolicName.hashCode() + vendorVersion.hashCode();
     }
-    
+
     /**
      * @see java.lang.Object#toString()
      */

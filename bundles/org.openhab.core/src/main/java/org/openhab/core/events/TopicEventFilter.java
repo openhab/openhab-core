@@ -21,7 +21,7 @@ package org.openhab.core.events;
 public class TopicEventFilter implements EventFilter {
 
     private final String topicRegex;
-    
+
     /**
      * Constructs a new topic event filter.
      * 
@@ -31,7 +31,7 @@ public class TopicEventFilter implements EventFilter {
     public TopicEventFilter(String topicRegex) {
         this.topicRegex = topicRegex;
     }
- 
+
     @Override
     public boolean apply(Event event) {
         return event.getTopic().matches(topicRegex);

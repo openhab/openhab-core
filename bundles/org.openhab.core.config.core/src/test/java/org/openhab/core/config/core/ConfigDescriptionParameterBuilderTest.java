@@ -18,8 +18,8 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.junit.Test;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
  * Tests for {@link ConfigDescriptionParameterBuilder) class.

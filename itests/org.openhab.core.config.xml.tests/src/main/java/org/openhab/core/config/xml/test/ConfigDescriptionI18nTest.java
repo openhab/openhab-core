@@ -20,13 +20,13 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * The ConfigDescriptionI18nTest is a test for loading of configuration description from XML documents.

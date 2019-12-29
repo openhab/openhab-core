@@ -23,12 +23,12 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.registry.AbstractRegistry;
-import org.openhab.core.common.registry.Provider;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.automation.template.TemplateProvider;
 import org.openhab.core.automation.template.TemplateRegistry;
+import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Provider;
 import org.osgi.service.component.annotations.Component;
 
 /**

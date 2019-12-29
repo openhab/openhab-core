@@ -14,11 +14,11 @@ package org.openhab.core.library.items;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.State;
-import org.junit.Test;
 
 /**
  *

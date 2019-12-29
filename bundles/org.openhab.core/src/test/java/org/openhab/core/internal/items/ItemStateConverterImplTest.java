@@ -19,6 +19,8 @@ import static org.mockito.Mockito.*;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.items.NumberItem;
@@ -29,8 +31,6 @@ import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.UnDefType;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Test the {@link ItemStateConverterImpl}.

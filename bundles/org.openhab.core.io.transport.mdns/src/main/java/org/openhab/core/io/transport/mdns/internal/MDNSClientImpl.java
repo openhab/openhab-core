@@ -30,11 +30,11 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
+import org.openhab.core.io.transport.mdns.MDNSClient;
+import org.openhab.core.io.transport.mdns.ServiceDescription;
 import org.openhab.core.net.CidrAddress;
 import org.openhab.core.net.NetworkAddressChangeListener;
 import org.openhab.core.net.NetworkAddressService;
-import org.openhab.core.io.transport.mdns.MDNSClient;
-import org.openhab.core.io.transport.mdns.ServiceDescription;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

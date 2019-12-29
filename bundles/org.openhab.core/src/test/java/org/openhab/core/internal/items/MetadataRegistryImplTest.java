@@ -19,14 +19,14 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 
-import org.openhab.core.items.Item;
-import org.openhab.core.items.ManagedMetadataProvider;
-import org.openhab.core.items.Metadata;
-import org.openhab.core.items.MetadataKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ManagedMetadataProvider;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;

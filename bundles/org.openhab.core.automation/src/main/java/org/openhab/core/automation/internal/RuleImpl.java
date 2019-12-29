@@ -21,8 +21,6 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -31,6 +29,8 @@ import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.template.RuleTemplate;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * This is the internal implementation of a {@link Rule}, which comes with full getters and setters.

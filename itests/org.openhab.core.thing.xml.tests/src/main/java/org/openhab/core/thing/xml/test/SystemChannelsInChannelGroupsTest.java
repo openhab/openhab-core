@@ -18,6 +18,9 @@ import static org.junit.Assert.assertThat;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.ChannelDefinition;
 import org.openhab.core.thing.type.ChannelGroupType;
@@ -26,9 +29,6 @@ import org.openhab.core.thing.type.ChannelGroupTypeUID;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution and API

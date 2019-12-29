@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ConditionType;
 import org.openhab.core.automation.type.Input;
@@ -34,6 +33,7 @@ import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.type.TriggerType;
+import org.openhab.core.common.registry.ProviderChangeListener;
 
 /**
  * ModuleTypeManagerMockup is a ModuleTypeManager which returns mockup module types for the following predefined module

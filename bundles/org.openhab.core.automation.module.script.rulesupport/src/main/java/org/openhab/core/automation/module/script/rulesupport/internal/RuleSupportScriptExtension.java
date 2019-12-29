@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -47,6 +45,8 @@ import org.openhab.core.automation.util.ActionBuilder;
 import org.openhab.core.automation.util.ConditionBuilder;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.TriggerBuilder;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.Configuration;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

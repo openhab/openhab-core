@@ -18,11 +18,11 @@ package org.openhab.core.items.dto;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Test;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.ArithmeticGroupFunction;
 import org.openhab.core.library.types.StringType;
-import org.junit.Test;
 
 /**
  * @author Stefan Triller - Initial contribution

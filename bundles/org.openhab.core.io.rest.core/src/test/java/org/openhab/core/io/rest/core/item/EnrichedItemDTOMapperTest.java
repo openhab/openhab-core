@@ -17,12 +17,12 @@ import static org.junit.Assert.assertThat;
 
 import java.net.URI;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Kai Kreuzer - Initial contribution

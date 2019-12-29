@@ -69,7 +69,8 @@ public abstract class BaseDynamicCommandDescriptionProvider implements DynamicCo
             return null;
         }
 
-        return CommandDescriptionBuilder.create().withCommandOptions(localizedCommandOptions(options, channel, locale)).build();
+        return CommandDescriptionBuilder.create().withCommandOptions(localizedCommandOptions(options, channel, locale))
+                .build();
     }
 
     /**

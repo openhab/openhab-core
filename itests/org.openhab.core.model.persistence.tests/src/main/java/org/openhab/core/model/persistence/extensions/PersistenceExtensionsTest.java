@@ -18,19 +18,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.openhab.core.items.GenericItem;
-import org.openhab.core.library.types.DecimalType;
-import org.openhab.core.persistence.HistoricItem;
-import org.openhab.core.persistence.PersistenceService;
-import org.openhab.core.persistence.PersistenceServiceRegistry;
-import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
-import org.openhab.core.model.persistence.tests.TestPersistenceService;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.model.persistence.tests.TestPersistenceService;
+import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * @author Kai Kreuzer - Initial contribution

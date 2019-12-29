@@ -15,12 +15,12 @@ package org.openhab.core.magic.binding.internal.automation.modules;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
 import org.openhab.core.automation.annotation.ActionScope;
 import org.openhab.core.automation.annotation.RuleAction;
+import org.openhab.core.config.core.ConfigurableService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

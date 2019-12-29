@@ -22,9 +22,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
  * Test the ConfigOptionRegistry

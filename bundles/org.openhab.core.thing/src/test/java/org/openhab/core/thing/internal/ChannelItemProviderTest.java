@@ -24,6 +24,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.items.Item;
@@ -41,9 +44,6 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  * @author Simon Kaufmann - Initial contribution

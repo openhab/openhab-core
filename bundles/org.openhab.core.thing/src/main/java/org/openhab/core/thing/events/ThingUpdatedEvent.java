@@ -16,7 +16,7 @@ import org.openhab.core.thing.dto.ThingDTO;
 
 /**
  * A {@link ThingUpdatedEvent} notifies subscribers that a thing has been updated.
- * Thing updated events must be created with the {@link ThingEventFactory}. 
+ * Thing updated events must be created with the {@link ThingEventFactory}.
  * 
  * @author Stefan Bußweiler - Initial contribution
  */

@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.openhab.core.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.test.java.JavaTest;
 
 /**
  * Tests {@link ConfigDescriptionRegistry}.

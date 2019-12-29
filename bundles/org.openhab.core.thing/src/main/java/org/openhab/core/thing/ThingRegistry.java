@@ -16,9 +16,9 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.Registry;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigValidationException;
-import org.openhab.core.common.registry.Registry;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.internal.ThingTracker;
 

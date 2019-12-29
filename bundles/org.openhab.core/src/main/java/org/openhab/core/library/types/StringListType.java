@@ -78,7 +78,7 @@ public class StringListType implements Command, State {
      * (alphabetical) order of their keys.
      *
      * @param pattern the pattern to use containing indexes to reference the
-     *                    single elements of this type.
+     *            single elements of this type.
      */
     @Override
     public String format(String pattern) {

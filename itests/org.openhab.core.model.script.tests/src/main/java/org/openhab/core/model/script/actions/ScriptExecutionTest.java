@@ -16,11 +16,11 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.joda.time.Instant.now;
 import static org.junit.Assert.assertThat;
 
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openhab.core.model.script.scheduler.test.MockClosure.MockClosure0;
 import org.openhab.core.model.script.scheduler.test.MockClosure.MockClosure1;
 import org.openhab.core.model.script.scheduler.test.MockScheduler;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.quartz.SchedulerException;
 import org.quartz.impl.SchedulerRepository;
 import org.quartz.impl.StdSchedulerFactory;

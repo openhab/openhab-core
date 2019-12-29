@@ -18,25 +18,25 @@ package org.openhab.core.voice;
  * @author Kelly Davis - Initial contribution
  */
 public class SpeechRecognitionErrorEvent implements STTEvent {
-   /**
-    * The message describing the error
-    */
+    /**
+     * The message describing the error
+     */
     private final String message;
 
-   /**
-    * Constructs an instance with the passed {@code message}.
-    *
-    * @param message The message describing the error
-    */
+    /**
+     * Constructs an instance with the passed {@code message}.
+     *
+     * @param message The message describing the error
+     */
     public SpeechRecognitionErrorEvent(String message) {
         this.message = message;
     }
 
-   /**
-    * Gets the message describing this error
-    *
-    * @return The message describing this error
-    */
+    /**
+     * Gets the message describing this error
+     *
+     * @return The message describing this error
+     */
     public String getMessage() {
         return this.message;
     }

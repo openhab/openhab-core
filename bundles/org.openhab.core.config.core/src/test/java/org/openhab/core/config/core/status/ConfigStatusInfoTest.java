@@ -20,8 +20,8 @@ import static org.junit.Assert.assertThat;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 import org.junit.Test;
+import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 
 /**
  * Testing the {@link ConfigStatusInfo}.

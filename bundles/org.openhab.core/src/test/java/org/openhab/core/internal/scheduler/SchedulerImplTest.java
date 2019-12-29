@@ -30,10 +30,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Test;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.SchedulerRunnable;
 import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
-import org.junit.Test;
 
 /**
  * Test class for {@link SchedulerImpl}.

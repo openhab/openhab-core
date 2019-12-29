@@ -16,7 +16,7 @@ import org.openhab.core.thing.dto.ThingDTO;
 
 /**
  * A {@link ThingRemovedEvent} notifies subscribers that a thing has been removed.
- * Thing removed events must be created with the {@link ThingEventFactory}. 
+ * Thing removed events must be created with the {@link ThingEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
  */

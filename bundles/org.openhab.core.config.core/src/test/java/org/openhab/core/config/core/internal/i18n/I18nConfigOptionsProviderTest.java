@@ -18,10 +18,10 @@ import static org.junit.Assert.assertThat;
 import java.net.URI;
 import java.util.Locale;
 
-import org.openhab.core.config.core.ParameterOption;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.config.core.ParameterOption;
 
 /**
  * Tests for {@link I18nConfigOptionsProvider}

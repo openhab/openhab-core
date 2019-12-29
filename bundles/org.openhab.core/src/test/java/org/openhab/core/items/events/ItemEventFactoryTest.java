@@ -15,6 +15,7 @@ package org.openhab.core.items.events;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.dto.ItemDTOMapper;
@@ -26,7 +27,6 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
-import org.junit.Test;
 
 import com.google.gson.Gson;
 

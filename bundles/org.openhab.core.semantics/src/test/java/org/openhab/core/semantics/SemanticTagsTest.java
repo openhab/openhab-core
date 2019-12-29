@@ -16,6 +16,8 @@ import static org.junit.Assert.*;
 
 import java.util.Locale;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
@@ -26,8 +28,6 @@ import org.openhab.core.semantics.model.location.Kitchen;
 import org.openhab.core.semantics.model.location.Room;
 import org.openhab.core.semantics.model.point.Measurement;
 import org.openhab.core.semantics.model.property.Temperature;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Kai Kreuzer - Initial contribution

@@ -4,7 +4,8 @@
 	xsi:schemaLocation="https://openhab.org/schemas/binding/v1.0.0 https://openhab.org/schemas/binding-1.0.0.xsd">
 
 	<name>YahooWeather Binding</name>
-	<description>The Yahoo Weather Binding requests the Yahoo Weather Service to show the current temperature, humidity and pressure.</description>
+	<description>The Yahoo Weather Binding requests the Yahoo Weather Service to show the current temperature, humidity and
+		pressure.</description>
 	<author>Kai Kreuzer</author>
 
 </binding:binding>

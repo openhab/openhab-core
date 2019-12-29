@@ -32,8 +32,8 @@ final class PatternValidator implements ConfigDescriptionParameterValidator {
 
         if (!((String) value).matches(parameter.getPattern())) {
             MessageKey messageKey = MessageKey.PATTERN_VIOLATED;
-            return new ConfigValidationMessage(parameter.getName(), messageKey.defaultMessage, messageKey.key, String.valueOf(value),
-                    parameter.getPattern());
+            return new ConfigValidationMessage(parameter.getName(), messageKey.defaultMessage, messageKey.key,
+                    String.valueOf(value), parameter.getPattern());
         }
 
         return null;

@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.i18n.I18nUtil;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;

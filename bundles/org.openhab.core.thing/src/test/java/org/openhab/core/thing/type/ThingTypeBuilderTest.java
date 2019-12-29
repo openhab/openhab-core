@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.openhab.core.thing.ThingTypeUID;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * Tests the {@link ThingTypeBuilder}.

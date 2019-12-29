@@ -14,6 +14,7 @@ package org.openhab.core.thing.internal;
 
 import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -21,7 +22,6 @@ import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.junit.Test;
 
 /**
  *

@@ -26,6 +26,11 @@ import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
+import org.hamcrest.core.IsCollectionContaining;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.openhab.core.io.rest.LocaleServiceImpl;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.TriggerProfileType;
@@ -33,11 +38,6 @@ import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
-import org.openhab.core.io.rest.LocaleServiceImpl;
-import org.hamcrest.core.IsCollectionContaining;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  * @author Henning Treu - Initial contribution

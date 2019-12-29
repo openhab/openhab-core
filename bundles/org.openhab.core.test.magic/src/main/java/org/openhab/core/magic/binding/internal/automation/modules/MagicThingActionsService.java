@@ -15,13 +15,13 @@ package org.openhab.core.magic.binding.internal.automation.modules;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openhab.core.thing.binding.ThingActions;
-import org.openhab.core.thing.binding.ThingHandler;
-import org.openhab.core.magic.binding.handler.MagicActionModuleThingHandler;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
 import org.openhab.core.automation.annotation.ActionScope;
 import org.openhab.core.automation.annotation.RuleAction;
+import org.openhab.core.magic.binding.handler.MagicActionModuleThingHandler;
+import org.openhab.core.thing.binding.ThingActions;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

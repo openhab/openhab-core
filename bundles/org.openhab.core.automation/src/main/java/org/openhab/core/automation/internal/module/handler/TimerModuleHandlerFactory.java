@@ -15,13 +15,13 @@ package org.openhab.core.automation.internal.module.handler;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.openhab.core.scheduler.CronScheduler;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseModuleHandlerFactory;
 import org.openhab.core.automation.handler.ModuleHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
+import org.openhab.core.scheduler.CronScheduler;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;

@@ -23,14 +23,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
-import org.openhab.core.util.BundleResolver;
 import org.openhab.core.test.java.JavaTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.openhab.core.util.BundleResolver;
 
 /**
  * Testing the {@link ConfigStatusService} OSGi service.

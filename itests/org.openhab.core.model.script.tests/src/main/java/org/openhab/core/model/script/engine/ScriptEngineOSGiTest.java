@@ -21,6 +21,9 @@ import java.util.Collection;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
@@ -34,12 +37,9 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.SmartHomeUnits;
-import org.openhab.core.types.State;
 import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.openhab.core.types.State;
 
 /**
  *
@@ -227,8 +227,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testAssignAndCompareQuantityType() throws ScriptParsingException, ScriptExecutionException {
-        assertFalse(
-                runScript("NumberA.state = 20.0|°C as org.openhab.core.types.State; NumberA.state < 20|°F"));
+        assertFalse(runScript("NumberA.state = 20.0|°C as org.openhab.core.types.State; NumberA.state < 20|°F"));
     }
 
     @Test

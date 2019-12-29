@@ -16,10 +16,10 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 
+import org.junit.Test;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService.ReadyTracker;
-import org.junit.Test;
 
 /**
  *

@@ -24,9 +24,9 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.openhab.core.ui.icon.IconSet.Format;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.ui.icon.IconSet.Format;
 
 /**
  * Tests for {@link AbstractResourceIconProvider}.

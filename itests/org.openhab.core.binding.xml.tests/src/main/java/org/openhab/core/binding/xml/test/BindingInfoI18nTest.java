@@ -20,12 +20,12 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.binding.BindingInfoRegistry;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 

@@ -12,19 +12,19 @@
  */
 package org.openhab.core.thing.profiles.i18n;
 
-import static org.openhab.core.thing.profiles.SystemProfiles.*;
 import static org.junit.Assert.*;
+import static org.openhab.core.thing.profiles.SystemProfiles.*;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.internal.profiles.SystemProfileFactory;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeProvider;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Test cases for i18n of the {@link SystemProfileFactory} class.

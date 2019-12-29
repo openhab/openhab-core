@@ -16,12 +16,12 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnectionEx;
 import org.openhab.core.io.transport.mqtt.MqttService;
 import org.openhab.core.io.transport.mqtt.MqttServiceObserver;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.osgi.service.cm.ConfigurationException;
 
 /**

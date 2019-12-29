@@ -17,11 +17,11 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Locale;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.voice.internal.SinkStub;
 import org.openhab.core.voice.internal.TTSServiceStub;
 import org.openhab.core.voice.internal.VoiceStub;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
 /**

@@ -47,7 +47,7 @@ public class IconSetResource implements RESTResource {
 
     private LocaleService localeService;
 
-    @Reference(cardinality=ReferenceCardinality.MULTIPLE, policy=ReferencePolicy.DYNAMIC)
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addIconProvider(IconProvider iconProvider) {
         this.iconProviders.add(iconProvider);
     }
@@ -60,7 +60,7 @@ public class IconSetResource implements RESTResource {
     protected void setLocaleService(LocaleService localeService) {
         this.localeService = localeService;
     }
-    
+
     protected void unsetLocaleService(LocaleService localeService) {
         this.localeService = null;
     }

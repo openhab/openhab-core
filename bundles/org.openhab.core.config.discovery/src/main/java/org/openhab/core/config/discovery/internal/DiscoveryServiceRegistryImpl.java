@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.discovery.DiscoveryListener;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
@@ -36,7 +37,6 @@ import org.openhab.core.config.discovery.DiscoveryServiceCallback;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.config.discovery.ExtendedDiscoveryService;
 import org.openhab.core.config.discovery.ScanListener;
-import org.openhab.core.common.SafeCaller;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.osgi.service.component.annotations.Activate;

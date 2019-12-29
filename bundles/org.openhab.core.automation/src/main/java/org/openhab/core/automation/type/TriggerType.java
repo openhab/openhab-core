@@ -18,9 +18,9 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
  * This class provides common functionality for creating {@link Trigger} instances by supplying their meta-information.
@@ -39,11 +39,11 @@ public class TriggerType extends ModuleType {
      * Creates an instance of {@link TriggerType} with base properties - UID, a {@link List} of configuration
      * descriptions and a {@link List} of {@link Output} descriptions.
      *
-     * @param UID                the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
-     *                           generated.
+     * @param UID the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
+     *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Trigger} instances.
-     * @param outputs            a {@link List} with {@link Output} meta-information descriptions of the future
-     *                           {@link Trigger} instances.
+     * @param outputs a {@link List} with {@link Output} meta-information descriptions of the future
+     *            {@link Trigger} instances.
      */
     public TriggerType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Output> outputs) {
@@ -55,20 +55,20 @@ public class TriggerType extends ModuleType {
      * Creates an instance of {@link TriggerType} with UID, label, description, a {@link Set} of tags, visibility,
      * a {@link List} of configuration descriptions and a {@link List} of {@link Output} descriptions.
      *
-     * @param UID                the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
-     *                           generated.
+     * @param UID the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
+     *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Trigger} instances.
-     * @param label              a short and accurate, human-readable label of the {@link TriggerType}.
-     * @param description        a detailed, human-readable description of usage of {@link TriggerType} and its
-     *                           benefits.
-     * @param tags               defines categories that fit the {@link TriggerType} and which can serve as criteria for
-     *                           searching or filtering it.
-     * @param visibility         determines whether the {@link TriggerType} can be used by anyone if it is
-     *                           {@link Visibility#VISIBLE} or only by its creator if it is {@link Visibility#HIDDEN}.
-     *                           If {@code null} is provided the default visibility {@link Visibility#VISIBLE} will be
-     *                           used.
-     * @param outputs            a {@link List} with {@link Output} meta-information descriptions of the future
-     *                           {@link Trigger} instances.
+     * @param label a short and accurate, human-readable label of the {@link TriggerType}.
+     * @param description a detailed, human-readable description of usage of {@link TriggerType} and its
+     *            benefits.
+     * @param tags defines categories that fit the {@link TriggerType} and which can serve as criteria for
+     *            searching or filtering it.
+     * @param visibility determines whether the {@link TriggerType} can be used by anyone if it is
+     *            {@link Visibility#VISIBLE} or only by its creator if it is {@link Visibility#HIDDEN}.
+     *            If {@code null} is provided the default visibility {@link Visibility#VISIBLE} will be
+     *            used.
+     * @param outputs a {@link List} with {@link Output} meta-information descriptions of the future
+     *            {@link Trigger} instances.
      */
     public TriggerType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,

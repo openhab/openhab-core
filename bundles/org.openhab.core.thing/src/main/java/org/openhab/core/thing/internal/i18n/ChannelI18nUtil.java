@@ -19,9 +19,7 @@ import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.thing.i18n.ChannelGroupTypeI18nLocalizationService;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
-import org.openhab.core.thing.i18n.ThingTypeI18nLocalizationService;
 import org.openhab.core.thing.type.ChannelDefinition;
 import org.openhab.core.thing.type.ChannelDefinitionBuilder;
 import org.openhab.core.thing.type.ChannelType;

@@ -18,13 +18,13 @@ import static org.mockito.Mockito.*;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
-import org.openhab.core.library.types.DateTimeType;
-import org.openhab.core.library.types.DecimalType;
-import org.openhab.core.thing.profiles.ProfileCallback;
-import org.openhab.core.types.State;
-import org.openhab.core.test.java.JavaTest;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.thing.profiles.ProfileCallback;
+import org.openhab.core.types.State;
 
 /**
  * Tests for the system:timestamp-update profile

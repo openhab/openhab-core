@@ -14,11 +14,11 @@ package org.openhab.core.binding.xml.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.binding.BindingInfo;
+import org.openhab.core.binding.BindingInfoProvider;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.xml.AbstractXmlConfigDescriptionProvider;
 import org.openhab.core.config.xml.osgi.XmlDocumentProvider;
-import org.openhab.core.binding.BindingInfo;
-import org.openhab.core.binding.BindingInfoProvider;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

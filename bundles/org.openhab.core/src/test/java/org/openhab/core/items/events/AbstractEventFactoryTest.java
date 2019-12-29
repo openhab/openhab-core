@@ -14,8 +14,8 @@ package org.openhab.core.items.events;
 
 import static org.junit.Assert.*;
 
-import org.openhab.core.events.AbstractEventFactory;
 import org.junit.Test;
+import org.openhab.core.events.AbstractEventFactory;
 
 /**
  * {@link AbstractEventFactoryTests} tests the {@link AbstractEventFactory}.

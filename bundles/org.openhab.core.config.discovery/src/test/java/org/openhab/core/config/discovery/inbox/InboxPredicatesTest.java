@@ -12,9 +12,9 @@
  */
 package org.openhab.core.config.discovery.inbox;
 
-import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -25,13 +25,13 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link InboxPredicates}.

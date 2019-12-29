@@ -13,13 +13,13 @@
 package org.openhab.core.automation.internal;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * Modules are building components of the {@link Rule}s. Each ModuleImpl is

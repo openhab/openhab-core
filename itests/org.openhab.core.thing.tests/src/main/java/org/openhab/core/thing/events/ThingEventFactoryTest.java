@@ -15,7 +15,9 @@ package org.openhab.core.thing.events;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import org.junit.Test;
 import org.openhab.core.events.Event;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.thing.Thing;
@@ -28,8 +30,6 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.events.ThingEventFactory.TriggerEventPayloadBean;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Test;
 
 import com.google.gson.Gson;
 

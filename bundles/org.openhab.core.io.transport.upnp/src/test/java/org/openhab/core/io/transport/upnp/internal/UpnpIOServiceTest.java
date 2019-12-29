@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
 import org.junit.Before;
 import org.junit.Test;
 import org.jupnp.UpnpService;
@@ -33,6 +32,7 @@ import org.jupnp.model.types.UDAServiceId;
 import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.mockito.Mock;
+import org.openhab.core.io.transport.upnp.UpnpIOParticipant;
 
 /**
  * Tests {@link UpnpIOServiceImpl}.

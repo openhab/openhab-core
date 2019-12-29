@@ -18,11 +18,11 @@ import static org.junit.Assert.assertThat;
 import java.math.BigDecimal;
 import java.util.Collections;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateOption;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Test the {@link StateDescriptionFragmentImpl}.

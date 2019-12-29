@@ -22,10 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.openhab.core.config.core.ConfigConstants;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.ParameterOption;
-import org.openhab.core.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.automation.AnnotatedActions;
@@ -40,6 +36,10 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.test.java.JavaTest;
 
 /**
  * Tests for the {@link AnnotatedActionModuleTypeProvider}

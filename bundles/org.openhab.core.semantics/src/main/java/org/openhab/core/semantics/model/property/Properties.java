@@ -12,8 +12,8 @@
  */
 package org.openhab.core.semantics.model.property;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;

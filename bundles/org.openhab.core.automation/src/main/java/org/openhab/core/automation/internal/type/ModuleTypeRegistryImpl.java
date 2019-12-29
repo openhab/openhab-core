@@ -22,8 +22,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.registry.AbstractRegistry;
-import org.openhab.core.common.registry.Provider;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.CompositeActionType;
 import org.openhab.core.automation.type.CompositeConditionType;
@@ -33,6 +31,8 @@ import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.TriggerType;
+import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Provider;
 import org.osgi.service.component.annotations.Component;
 
 /**

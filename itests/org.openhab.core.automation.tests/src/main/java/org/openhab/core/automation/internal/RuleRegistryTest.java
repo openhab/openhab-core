@@ -20,12 +20,12 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleRegistry;
+import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
  * Testing the {@link Predicate}s for {@link RuleImpl}s.

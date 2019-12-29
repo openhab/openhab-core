@@ -17,8 +17,8 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 
-import org.openhab.core.library.items.SwitchItem;
 import org.junit.Test;
+import org.openhab.core.library.items.SwitchItem;
 
 /**
  * Test Item Tag handling.

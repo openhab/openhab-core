@@ -17,6 +17,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -24,9 +27,6 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.util.BundleResolver;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 

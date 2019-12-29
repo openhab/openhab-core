@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeBuilder;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
@@ -31,9 +34,6 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
-import org.openhab.core.test.java.JavaTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for the ProfileTypeResource

@@ -29,13 +29,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.io.rest.LocaleService;
-import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.automation.dto.RuleTemplateDTO;
 import org.openhab.core.automation.dto.RuleTemplateDTOMapper;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.template.TemplateRegistry;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

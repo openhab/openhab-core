@@ -21,6 +21,9 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -29,9 +32,6 @@ import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.semantics.model.location.Bathroom;
 import org.openhab.core.semantics.model.location.LivingRoom;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  * @author Kai Kreuzer - Initial contribution

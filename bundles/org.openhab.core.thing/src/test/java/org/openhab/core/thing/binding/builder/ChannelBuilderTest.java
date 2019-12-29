@@ -12,14 +12,16 @@
  */
 package org.openhab.core.thing.binding.builder;
 
-import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_OUTDOOR_TEMPERATURE;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_OUTDOOR_TEMPERATURE;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ThingTypeUID;
@@ -27,8 +29,6 @@ import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests the {@link ChannelBuilder}.

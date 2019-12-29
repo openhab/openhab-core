@@ -24,6 +24,10 @@ import java.util.stream.Stream;
 
 import javax.measure.quantity.Temperature;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -43,6 +47,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.service.StateDescriptionService;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -72,11 +77,6 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 
 /**
  *

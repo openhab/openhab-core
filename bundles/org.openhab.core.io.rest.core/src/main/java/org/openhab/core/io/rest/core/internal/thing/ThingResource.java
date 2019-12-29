@@ -47,6 +47,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
@@ -54,7 +55,12 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.status.ConfigStatusInfo;
 import org.openhab.core.config.core.status.ConfigStatusService;
 import org.openhab.core.config.core.validation.ConfigValidationException;
-import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.openhab.core.io.rest.core.thing.EnrichedThingDTO;
+import org.openhab.core.io.rest.core.thing.EnrichedThingDTOMapper;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ManagedItemProvider;
@@ -88,12 +94,6 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.thing.util.ThingHelper;
-import org.openhab.core.io.rest.JSONResponse;
-import org.openhab.core.io.rest.LocaleService;
-import org.openhab.core.io.rest.RESTResource;
-import org.openhab.core.io.rest.Stream2JSONInputStream;
-import org.openhab.core.io.rest.core.thing.EnrichedThingDTO;
-import org.openhab.core.io.rest.core.thing.EnrichedThingDTOMapper;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -919,7 +919,8 @@ public class ThingResource implements RESTResource {
                 && managedItemChannelLinkProvider != null && managedItemProvider != null && managedThingProvider != null
                 && thingRegistry != null && configStatusService != null && configDescRegistry != null
                 && thingTypeRegistry != null && channelTypeRegistry != null && firmwareUpdateService != null
-                && thingStatusInfoI18nLocalizationService != null && firmwareRegistry != null && localeService != null && thingManager != null;
+                && thingStatusInfoI18nLocalizationService != null && firmwareRegistry != null && localeService != null
+                && thingManager != null;
     }
 
 }

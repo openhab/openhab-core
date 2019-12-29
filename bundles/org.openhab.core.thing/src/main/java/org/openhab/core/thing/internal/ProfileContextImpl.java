@@ -15,8 +15,8 @@ package org.openhab.core.thing.internal;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.profiles.ProfileContext;
 
 /**

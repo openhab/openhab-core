@@ -17,11 +17,11 @@ import static org.junit.Assert.assertThat;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.test.SyntheticBundleInstaller;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.ChannelGroupTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
-import org.openhab.core.test.SyntheticBundleInstaller;
-import org.openhab.core.test.java.JavaTest;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;

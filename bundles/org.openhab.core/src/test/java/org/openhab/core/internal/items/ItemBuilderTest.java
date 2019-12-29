@@ -20,14 +20,14 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.items.ActiveItem;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  *

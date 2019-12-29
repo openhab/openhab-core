@@ -16,12 +16,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
 
+import org.junit.Test;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.types.State;
-import org.junit.Test;
 
 /**
  * @author Chris Jackson - Initial contribution

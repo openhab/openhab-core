@@ -34,24 +34,24 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
-import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
-import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.test.java.JavaTest;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  * Test aspects of the {@link SitemapResource}.

@@ -30,10 +30,10 @@ import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.lang.reflect.FieldUtils;
-import org.openhab.core.io.net.http.TlsTrustManagerProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.io.net.http.TlsTrustManagerProvider;
 
 /**
  * Tests which validate the behavior of the ExtensibleTrustManager

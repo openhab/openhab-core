@@ -25,11 +25,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.Test;
+import org.mockito.Mockito;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
 import org.openhab.core.i18n.TranslationProvider;
-import org.junit.Test;
-import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 
 /**

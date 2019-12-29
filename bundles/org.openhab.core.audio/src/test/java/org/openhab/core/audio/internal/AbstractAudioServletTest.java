@@ -21,6 +21,8 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.After;
+import org.junit.Before;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
@@ -28,8 +30,6 @@ import org.openhab.core.audio.FixedLengthAudioStream;
 import org.openhab.core.test.TestPortUtil;
 import org.openhab.core.test.TestServer;
 import org.openhab.core.test.java.JavaTest;
-import org.junit.After;
-import org.junit.Before;
 
 /**
  * Base class for tests using the {@link AudioServlet}.

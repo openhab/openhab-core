@@ -17,17 +17,17 @@ import static org.junit.Assert.*;
 
 import java.util.Collection;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.test.AsyncResultWrapper;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.openhab.core.test.AsyncResultWrapper;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link ManagedThingProvider}.

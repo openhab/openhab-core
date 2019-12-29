@@ -12,11 +12,10 @@
  */
 package org.openhab.core.automation.dto;
 
+import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
-import org.openhab.core.automation.Rule;
-import org.openhab.core.automation.dto.RuleDTO;
-import org.openhab.core.automation.util.RuleBuilder;
 
 /**
  * This is a utility class to convert between the respective object and its DTO.

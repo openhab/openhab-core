@@ -14,8 +14,8 @@ package org.openhab.core.automation.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * This class is implementation of {@link Trigger} modules used in the {@link RuleEngine}s.

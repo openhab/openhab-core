@@ -18,6 +18,12 @@ import static org.junit.Assert.*;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.test.BundleCloseable;
+import org.openhab.core.test.SyntheticBundleInstaller;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.ChannelDefinition;
 import org.openhab.core.thing.type.ChannelGroupType;
@@ -25,12 +31,6 @@ import org.openhab.core.thing.type.ChannelGroupTypeProvider;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeProvider;
 import org.openhab.core.thing.type.ThingType;
-import org.openhab.core.test.BundleCloseable;
-import org.openhab.core.test.SyntheticBundleInstaller;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 /***
  *

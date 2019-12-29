@@ -14,9 +14,9 @@ package org.openhab.core.library.items;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.RewindFastforwardType;
-import org.junit.Test;
 
 /**
  *

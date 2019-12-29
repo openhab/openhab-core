@@ -29,7 +29,8 @@ public class ConfigDescriptionParameterGroupDTO {
     public ConfigDescriptionParameterGroupDTO() {
     }
 
-    public ConfigDescriptionParameterGroupDTO(String name, String context, Boolean advanced, String label, String description) {
+    public ConfigDescriptionParameterGroupDTO(String name, String context, Boolean advanced, String label,
+            String description) {
         this.name = name;
         this.context = context;
         this.advanced = advanced;

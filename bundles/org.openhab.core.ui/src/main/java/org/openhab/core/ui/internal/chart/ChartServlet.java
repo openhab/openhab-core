@@ -37,8 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.openhab.core.config.core.ConfigurableService;
-import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.io.http.servlet.SmartHomeServlet;
+import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.ui.chart.ChartProvider;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -70,8 +70,7 @@ import org.osgi.service.http.HttpService;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
 @Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.core.chart", property = {
-        Constants.SERVICE_PID + "=org.openhab.core.chart",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
+        Constants.SERVICE_PID + "=org.openhab.core.chart", ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Charts",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + "system:chart" })
 public class ChartServlet extends SmartHomeServlet {

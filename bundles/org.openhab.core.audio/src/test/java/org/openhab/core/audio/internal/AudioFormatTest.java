@@ -18,8 +18,8 @@ import static org.junit.Assert.assertThat;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.openhab.core.audio.AudioFormat;
 import org.junit.Test;
+import org.openhab.core.audio.AudioFormat;
 
 /**
  * OSGi test for {@link AudioFormat}

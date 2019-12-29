@@ -23,8 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigConstants;
-import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.Module;
@@ -38,6 +36,8 @@ import org.openhab.core.automation.module.provider.i18n.ModuleTypeI18nService;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
+import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;

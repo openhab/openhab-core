@@ -14,8 +14,8 @@ package org.openhab.core.library.types;
 
 import static org.junit.Assert.*;
 
-import org.openhab.core.library.unit.SmartHomeUnits;
 import org.junit.Test;
+import org.openhab.core.library.unit.SmartHomeUnits;
 
 /**
  * @author Kai Kreuzer - Initial contribution

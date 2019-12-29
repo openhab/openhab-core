@@ -313,8 +313,8 @@ public class QuantityType<T extends Quantity<T>> extends Number
                 return null;
             }
         } else if (target == HSBType.class) {
-            return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO,
-                    new PercentType(toBigDecimal().multiply(HUNDRED))));
+            return target.cast(
+                    new HSBType(DecimalType.ZERO, PercentType.ZERO, new PercentType(toBigDecimal().multiply(HUNDRED))));
         } else if (target == PercentType.class) {
             if (SmartHomeUnits.PERCENT.equals(getUnit())) {
                 return target.cast(new PercentType(toBigDecimal()));

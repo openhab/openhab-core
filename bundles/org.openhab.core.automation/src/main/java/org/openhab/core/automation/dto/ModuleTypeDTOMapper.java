@@ -12,9 +12,8 @@
  */
 package org.openhab.core.automation.dto;
 
-import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
-import org.openhab.core.automation.dto.ModuleTypeDTO;
 import org.openhab.core.automation.type.ModuleType;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
 
 /**
  * This is a utility class to convert between the respective object and its DTO.

@@ -16,8 +16,8 @@ import java.math.BigDecimal;
 
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
-import org.openhab.core.config.core.internal.validation.TypeIntrospections.TypeIntrospection;
 import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.config.core.internal.validation.TypeIntrospections.TypeIntrospection;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
 
 /**
@@ -67,6 +67,7 @@ final class MinMaxValidator implements ConfigDescriptionParameterValidator {
 
     private static ConfigValidationMessage createMinMaxViolationMessage(String parameterName, MessageKey messageKey,
             BigDecimal minMax) {
-        return new ConfigValidationMessage(parameterName, messageKey.defaultMessage, messageKey.key, String.valueOf(minMax));
+        return new ConfigValidationMessage(parameterName, messageKey.defaultMessage, messageKey.key,
+                String.valueOf(minMax));
     }
 }

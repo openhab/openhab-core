@@ -34,10 +34,10 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerUtils;
 import org.openhab.core.service.ReadyService;
-import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;

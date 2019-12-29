@@ -35,10 +35,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.openhab.core.config.core.ConfigConstants;
-import org.openhab.core.service.AbstractWatchService;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.service.AbstractWatchService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

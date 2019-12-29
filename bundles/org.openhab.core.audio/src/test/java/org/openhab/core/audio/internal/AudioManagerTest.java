@@ -25,7 +25,9 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.function.BiFunction;
 
-import org.openhab.core.config.core.ParameterOption;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSource;
@@ -35,10 +37,8 @@ import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.internal.fake.AudioSinkFake;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.library.types.PercentType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * OSGi test for {@link AudioManagerImpl}

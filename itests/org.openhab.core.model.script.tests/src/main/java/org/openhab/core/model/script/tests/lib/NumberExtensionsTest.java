@@ -17,11 +17,11 @@ package org.openhab.core.model.script.tests.lib;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.openhab.core.library.types.DecimalType;
-import org.openhab.core.types.Type;
-import org.openhab.core.model.script.lib.NumberExtensions;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.model.script.lib.NumberExtensions;
+import org.openhab.core.types.Type;
 
 /**
  * Test case for {@link NumberExtensions} library class

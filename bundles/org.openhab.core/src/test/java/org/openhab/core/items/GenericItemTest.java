@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.events.ItemStateChangedEvent;
@@ -36,8 +38,6 @@ import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 /**
  * The GenericItemTest tests functionality of the GenericItem.

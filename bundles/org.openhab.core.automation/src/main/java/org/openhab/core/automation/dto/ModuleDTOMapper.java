@@ -13,7 +13,6 @@
 package org.openhab.core.automation.dto;
 
 import org.openhab.core.automation.Module;
-import org.openhab.core.automation.dto.ModuleDTO;
 
 /**
  * This is a utility class to convert between the respective object and its DTO.

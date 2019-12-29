@@ -36,14 +36,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.openhab.core.common.QueueingThreadPoolExecutor;
-import org.openhab.core.test.java.JavaTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.mockito.Mock;
+import org.openhab.core.common.QueueingThreadPoolExecutor;
+import org.openhab.core.test.java.JavaTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

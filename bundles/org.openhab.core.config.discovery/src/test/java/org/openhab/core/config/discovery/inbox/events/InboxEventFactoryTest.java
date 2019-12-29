@@ -15,13 +15,13 @@ package org.openhab.core.config.discovery.inbox.events;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTOMapper;
 import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.events.Event;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
-import org.junit.Test;
 
 import com.google.gson.Gson;
 

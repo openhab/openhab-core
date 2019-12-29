@@ -14,9 +14,9 @@ package org.openhab.core.io.rest.internal.filter;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
-import static org.openhab.core.io.rest.internal.filter.CorsFilter.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
+import static org.openhab.core.io.rest.internal.filter.CorsFilter.*;
 
 import java.io.IOException;
 import java.util.stream.Stream;

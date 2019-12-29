@@ -15,10 +15,10 @@ package org.openhab.core.io.rest.sse.internal;
 import java.io.IOException;
 import java.util.List;
 
-import org.openhab.core.io.rest.sse.beans.EventBean;
-import org.openhab.core.io.rest.sse.internal.util.SseUtil;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
+import org.openhab.core.io.rest.sse.beans.EventBean;
+import org.openhab.core.io.rest.sse.internal.util.SseUtil;
 
 /**
  * {@link EventOutput} implementation that takes a filter parameter and only writes out events that match this filter.

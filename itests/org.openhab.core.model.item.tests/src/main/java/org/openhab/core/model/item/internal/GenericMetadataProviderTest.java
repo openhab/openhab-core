@@ -16,8 +16,8 @@ import static org.junit.Assert.*;
 
 import java.util.Collection;
 
-import org.openhab.core.items.Metadata;
 import org.junit.Test;
+import org.openhab.core.items.Metadata;
 
 /**
  * @author Simon Kaufmann - Initial contribution

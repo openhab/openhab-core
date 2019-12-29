@@ -12,9 +12,9 @@
  */
 package org.openhab.core.io.rest.internal.filter;
 
-import static org.openhab.core.io.rest.internal.filter.ProxyFilter.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.openhab.core.io.rest.internal.filter.ProxyFilter.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;

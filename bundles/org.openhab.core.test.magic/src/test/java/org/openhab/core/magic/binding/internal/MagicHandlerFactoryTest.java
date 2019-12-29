@@ -16,14 +16,14 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingTypeUID;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.magic.binding.MagicBindingConstants;
 import org.openhab.core.magic.binding.handler.MagicColorLightHandler;
 import org.openhab.core.magic.binding.handler.MagicDimmableLightHandler;
 import org.openhab.core.magic.binding.handler.MagicOnOffLightHandler;
-import org.junit.Before;
-import org.junit.Test;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * Tests cases for {@link MagicHandlerFactory}.

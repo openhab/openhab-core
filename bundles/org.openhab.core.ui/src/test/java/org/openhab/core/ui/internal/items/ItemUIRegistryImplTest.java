@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.eclipse.emf.common.util.BasicEList;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -35,11 +38,6 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.types.State;
-import org.openhab.core.types.StateDescription;
-import org.openhab.core.types.StateOption;
-import org.openhab.core.types.UnDefType;
-import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -47,10 +45,12 @@ import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.Slider;
 import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.types.State;
+import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateOption;
+import org.openhab.core.types.UnDefType;
+import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.ui.items.ItemUIProvider;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  * @author Kai Kreuzer - Initial contribution

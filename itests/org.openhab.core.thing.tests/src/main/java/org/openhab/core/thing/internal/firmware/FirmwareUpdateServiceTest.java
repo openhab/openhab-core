@@ -12,14 +12,14 @@
  */
 package org.openhab.core.thing.internal.firmware;
 
-import static org.openhab.core.thing.firmware.Constants.*;
-import static org.openhab.core.thing.firmware.FirmwareStatusInfo.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.openhab.core.thing.firmware.Constants.*;
+import static org.openhab.core.thing.firmware.FirmwareStatusInfo.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,12 +38,21 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
 import org.openhab.core.common.SafeCaller;
+import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
@@ -60,15 +69,6 @@ import org.openhab.core.thing.firmware.FirmwareUpdateResult;
 import org.openhab.core.thing.firmware.FirmwareUpdateResultInfoEvent;
 import org.openhab.core.thing.firmware.FirmwareUpdateService;
 import org.openhab.core.util.BundleResolver;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 
 /**

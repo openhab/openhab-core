@@ -16,8 +16,8 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.automation.Visibility;
+import org.openhab.core.common.registry.Identifiable;
 
 /**
  * The templates define types of shared, ready to use definitions of automation objects, which

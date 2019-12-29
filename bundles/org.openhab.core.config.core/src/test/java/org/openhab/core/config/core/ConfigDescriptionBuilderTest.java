@@ -20,9 +20,9 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
  * Tests for {@link ConfigDescriptionBuilder) class.

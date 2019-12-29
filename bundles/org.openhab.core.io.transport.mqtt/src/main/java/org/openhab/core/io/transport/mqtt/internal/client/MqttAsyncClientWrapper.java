@@ -20,11 +20,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
 import org.openhab.core.io.transport.mqtt.internal.ClientCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hivemq.client.mqtt.MqttClientState;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link MqttAsyncClientWrapper} is the base class for async client wrappers

@@ -16,9 +16,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.joda.time.Instant.now;
 import static org.junit.Assert.assertThat;
 
-import org.openhab.core.model.script.actions.Timer;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import org.openhab.core.model.script.actions.Timer;
 
 /**
  * Mock implementations of Procedure0 and Procedure1

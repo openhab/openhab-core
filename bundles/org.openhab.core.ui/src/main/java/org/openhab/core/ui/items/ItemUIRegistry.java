@@ -21,10 +21,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.types.State;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.types.State;
 
 /**
  * This interface is used by a service which combines the core item registry

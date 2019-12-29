@@ -22,22 +22,22 @@ import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.openhab.core.config.core.Configuration;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.thing.internal.GenericItemChannelLinkProvider;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkProvider;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
-import org.openhab.core.model.core.ModelRepository;
-import org.openhab.core.model.thing.internal.GenericItemChannelLinkProvider;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  *

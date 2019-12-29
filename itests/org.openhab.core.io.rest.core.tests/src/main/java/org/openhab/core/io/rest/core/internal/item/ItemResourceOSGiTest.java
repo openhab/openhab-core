@@ -31,6 +31,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.ManagedItemProvider;
@@ -42,11 +46,7 @@ import org.openhab.core.items.dto.MetadataDTO;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
-import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;

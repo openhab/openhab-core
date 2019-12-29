@@ -19,9 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.FilterCriteria;
-import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -38,6 +35,9 @@ import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.type.TriggerType;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.core.ParameterOption;
 
 /**
  * This class provides the functionality responsible for printing the automation objects as a result of commands.

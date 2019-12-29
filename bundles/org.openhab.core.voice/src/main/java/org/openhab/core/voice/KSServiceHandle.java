@@ -18,8 +18,8 @@ package org.openhab.core.voice;
  * @author Kelly Davis - Initial contribution
  */
 public interface KSServiceHandle {
-   /**
-    * Aborts keyword spotting in the associated {@link KSService}
-    */
+    /**
+     * Aborts keyword spotting in the associated {@link KSService}
+     */
     public void abort();
 }

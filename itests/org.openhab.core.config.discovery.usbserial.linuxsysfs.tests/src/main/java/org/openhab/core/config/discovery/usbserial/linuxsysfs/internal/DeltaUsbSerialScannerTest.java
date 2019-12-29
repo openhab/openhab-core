@@ -24,11 +24,11 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.util.HashSet;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link DeltaUsbSerialScanner}.

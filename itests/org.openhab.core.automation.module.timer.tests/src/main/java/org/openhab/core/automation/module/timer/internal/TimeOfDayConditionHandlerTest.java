@@ -22,13 +22,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openhab.core.config.core.Configuration;
 import org.junit.Test;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
 import org.openhab.core.automation.internal.module.handler.TimeOfDayConditionHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * This tests the TimeOfDay Condition.
