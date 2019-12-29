@@ -49,7 +49,9 @@ public class ChannelDTOMapper {
      */
     public static Channel map(ChannelDTO channelDTO) {
         ChannelUID channelUID = new ChannelUID(channelDTO.uid);
-        ChannelTypeUID channelTypeUID = new ChannelTypeUID(channelDTO.channelTypeUID);
+        ChannelTypeUID channelTypeUID = channelDTO.channelTypeUID != null
+                ? new ChannelTypeUID(channelDTO.channelTypeUID)
+                : null;
         return ChannelBuilder.create(channelUID, channelDTO.itemType)
                 .withConfiguration(new Configuration(channelDTO.configuration)).withLabel(channelDTO.label)
                 .withDescription(channelDTO.description).withProperties(channelDTO.properties).withType(channelTypeUID)
