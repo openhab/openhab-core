@@ -12,10 +12,10 @@
  */
 package org.openhab.core.library.unit;
 
-import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
+import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 
 import java.math.BigDecimal;
 
@@ -26,11 +26,11 @@ import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 
+import org.junit.Test;
 import org.openhab.core.library.dimension.ArealDensity;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.types.QuantityType;
-import org.junit.Test;
 
 import tec.uom.se.quantity.Quantities;
 import tec.uom.se.unit.Units;
@@ -292,6 +292,22 @@ public class SmartHomeUnitsTest {
     @Test
     public void testMicrowattPerSquareCentimetreFromString() {
         assertThat(QuantityType.valueOf("2.60 µW/cm²").getUnit().toString(), is("µW/cm²"));
+    }
+
+    @Test
+    public void testElectricCharge() {
+        QuantityType<?> oneAh = QuantityType.valueOf("3600 C");
+        QuantityType<?> converted = oneAh.toUnit(SmartHomeUnits.AMPERE_HOUR);
+        QuantityType<?> converted2 = oneAh.toUnit(SmartHomeUnits.MILLIAMPERE_HOUR);
+        assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
+        assertEquals("1000 mA h", converted2.toString());
+    }
+
+    @Test
+    public void testConductivity() {
+        QuantityType<?> oneSM = QuantityType.valueOf("1 S/m");
+        QuantityType<?> converted = oneSM.toUnit("µS/cm");
+        assertEquals("10000 µS/cm", converted.toString());
     }
 
 }
