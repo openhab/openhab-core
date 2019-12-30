@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * This is a utility class to convert between the respective object and its DTO.

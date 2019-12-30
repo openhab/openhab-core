@@ -19,13 +19,13 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.events.Event;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.firmware.ProgressStep;
-import org.openhab.core.test.java.JavaTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  *

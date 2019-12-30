@@ -55,5 +55,6 @@ public interface SerialPortIdentifier {
      *
      * @return the port owner or null if the port is not currently owned
      */
-    @Nullable String getCurrentOwner();
+    @Nullable
+    String getCurrentOwner();
 }

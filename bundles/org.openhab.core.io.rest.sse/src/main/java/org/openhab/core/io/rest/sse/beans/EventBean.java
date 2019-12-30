@@ -23,7 +23,7 @@ public class EventBean {
     public String topic;
 
     public String payload;
-    
+
     public String type;
 
 }

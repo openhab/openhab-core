@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TranslationProvider;
@@ -38,8 +40,6 @@ import org.openhab.core.thing.firmware.FirmwareUpdateProgressInfoEvent;
 import org.openhab.core.thing.firmware.FirmwareUpdateResult;
 import org.openhab.core.thing.firmware.FirmwareUpdateResultInfoEvent;
 import org.openhab.core.util.BundleResolver;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 /**

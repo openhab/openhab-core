@@ -21,37 +21,37 @@ public class STTException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-   /**
-    * Constructs a new exception with null as its detail message.
-    */
+    /**
+     * Constructs a new exception with null as its detail message.
+     */
     public STTException() {
         super();
     }
 
-   /**
-    * Constructs a new exception with the specified detail message and cause.
-    *
-    * @param message Detail message
-    * @param cause The cause
-    */
+    /**
+     * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message Detail message
+     * @param cause The cause
+     */
     public STTException(String message, Throwable cause) {
         super(message, cause);
     }
 
-   /**
-    * Constructs a new exception with the specified detail message.
-    *
-    * @param message Detail message
-    */
+    /**
+     * Constructs a new exception with the specified detail message.
+     *
+     * @param message Detail message
+     */
     public STTException(String message) {
         super(message);
     }
 
-   /**
-    * Constructs a new exception with the specified cause.
-    *
-    * @param cause The cause
-    */
+    /**
+     * Constructs a new exception with the specified cause.
+     *
+     * @param cause The cause
+     */
     public STTException(Throwable cause) {
         super(cause);
     }

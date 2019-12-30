@@ -17,11 +17,11 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * This class is implementation of {@link Condition} modules used in the {@link RuleEngineImpl}s.

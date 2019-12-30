@@ -18,6 +18,8 @@ import java.io.ByteArrayInputStream;
 import java.util.Iterator;
 import java.util.function.Function;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.rule.rules.ChangedEventTrigger;
 import org.openhab.core.model.rule.rules.CommandEventTrigger;
@@ -27,8 +29,6 @@ import org.openhab.core.model.rule.rules.Rule;
 import org.openhab.core.model.rule.runtime.RuleEngine;
 import org.openhab.core.model.rule.runtime.internal.engine.RuleTriggerManager.TriggerTypes;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution

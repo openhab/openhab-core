@@ -25,17 +25,17 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.StringUtil;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.types.UnDefType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.Video;
+import org.openhab.core.types.UnDefType;
 import org.openhab.core.ui.items.ItemUIRegistry;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link ProxyServletService} class.

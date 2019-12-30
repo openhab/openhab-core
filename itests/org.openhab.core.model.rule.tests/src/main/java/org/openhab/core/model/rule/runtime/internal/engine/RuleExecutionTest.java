@@ -21,6 +21,8 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
@@ -37,8 +39,6 @@ import org.openhab.core.model.rule.rules.Rule;
 import org.openhab.core.model.rule.runtime.RuleEngine;
 import org.openhab.core.model.rule.runtime.internal.engine.RuleTriggerManager.TriggerTypes;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Kai Kreuzer - Initial contribution

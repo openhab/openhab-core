@@ -17,11 +17,11 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.xml.util.NodeIterator;
-import org.openhab.core.binding.BindingInfo;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;

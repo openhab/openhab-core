@@ -35,13 +35,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.Configuration;
-import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.openhab.core.io.rest.core.internal.RESTCoreActivator;

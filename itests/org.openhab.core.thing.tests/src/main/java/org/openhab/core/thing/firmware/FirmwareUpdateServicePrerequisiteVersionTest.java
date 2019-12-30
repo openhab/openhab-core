@@ -24,15 +24,15 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.firmware.Firmware;
 import org.openhab.core.thing.binding.firmware.FirmwareBuilder;
 import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests that the {@link FirmwareUpdateService} honors the prerequisite version of {@link Firmware}s.

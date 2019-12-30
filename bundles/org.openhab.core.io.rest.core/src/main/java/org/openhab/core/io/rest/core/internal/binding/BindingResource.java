@@ -34,14 +34,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
-import org.openhab.core.config.core.ConfigUtil;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.auth.Role;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.binding.BindingInfoRegistry;
 import org.openhab.core.binding.dto.BindingInfoDTO;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;

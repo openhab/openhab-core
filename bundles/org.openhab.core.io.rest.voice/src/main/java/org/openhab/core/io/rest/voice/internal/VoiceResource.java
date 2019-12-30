@@ -34,13 +34,13 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
-import org.openhab.core.io.rest.JSONResponse;
-import org.openhab.core.io.rest.LocaleService;
-import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

@@ -20,6 +20,9 @@ import static org.mockito.Mockito.*;
 import javax.measure.Unit;
 import javax.measure.quantity.Temperature;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -29,9 +32,6 @@ import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 /**
  * Tests for the system:offset profile

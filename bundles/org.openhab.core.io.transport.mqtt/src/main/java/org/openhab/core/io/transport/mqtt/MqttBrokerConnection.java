@@ -14,7 +14,6 @@ package org.openhab.core.io.transport.mqtt;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -67,14 +66,16 @@ public class MqttBrokerConnection {
      * MQTT transport protocols
      */
     public enum Protocol {
-        TCP, WEBSOCKETS
+        TCP,
+        WEBSOCKETS
     }
 
     /**
      * MQTT version (currently v3 and v5)
      */
     public enum MqttVersion {
-        V3, V5
+        V3,
+        V5
     }
 
     // Connection parameters
@@ -189,9 +190,9 @@ public class MqttBrokerConnection {
      * @param port A port or null to select the default port for a secure or insecure connection
      * @param secure A secure connection
      * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
-     * used for access restriction implementations.
-     * If none is specified, a default is generated. The client id cannot be longer than 65535
-     * characters.
+     *            used for access restriction implementations.
+     *            If none is specified, a default is generated. The client id cannot be longer than 65535
+     *            characters.
      * @throws IllegalArgumentException If the client id or port is not valid.
      */
     public MqttBrokerConnection(String host, @Nullable Integer port, boolean secure, @Nullable String clientId) {
@@ -206,9 +207,9 @@ public class MqttBrokerConnection {
      * @param port A port or null to select the default port for a secure or insecure connection
      * @param secure A secure connection
      * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
-     * used for access restriction implementations.
-     * If none is specified, a default is generated. The client id cannot be longer than 65535
-     * characters.
+     *            used for access restriction implementations.
+     *            If none is specified, a default is generated. The client id cannot be longer than 65535
+     *            characters.
      * @throws IllegalArgumentException If the client id or port is not valid.
      */
     @Deprecated
@@ -226,9 +227,9 @@ public class MqttBrokerConnection {
      * @param port A port or null to select the default port for a secure or insecure connection
      * @param secure A secure connection
      * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
-     * used for access restriction implementations.
-     * If none is specified, a default is generated. The client id cannot be longer than 65535
-     * characters.
+     *            used for access restriction implementations.
+     *            If none is specified, a default is generated. The client id cannot be longer than 65535
+     *            characters.
      * @throws IllegalArgumentException If the client id or port is not valid.
      */
     public MqttBrokerConnection(Protocol protocol, MqttVersion mqttVersion, String host, @Nullable Integer port,
@@ -419,7 +420,7 @@ public class MqttBrokerConnection {
      *
      * @param lastWill The last will object or null.
      * @param applyImmediately If true, the connection will stopped and started for the new last-will to take effect
-     * immediately.
+     *            immediately.
      * @throws MqttException
      * @throws ConfigurationException
      */
@@ -475,9 +476,8 @@ public class MqttBrokerConnection {
         if (isConnecting) {
             return MqttConnectionState.CONNECTING;
         }
-        return (client != null && client.getState().isConnected()) ?
-                MqttConnectionState.CONNECTED :
-                MqttConnectionState.DISCONNECTED;
+        return (client != null && client.getState().isConnected()) ? MqttConnectionState.CONNECTED
+                : MqttConnectionState.DISCONNECTED;
     }
 
     /**
@@ -513,7 +513,7 @@ public class MqttBrokerConnection {
      * Set the ssl context provider. The default provider is {@see AcceptAllCertifcatesSSLContext}.
      *
      * @return The ssl context provider. Should not be null, but the ssl context will in fact
-     * only be used if a ssl:// url is given.
+     *         only be used if a ssl:// url is given.
      */
     @Deprecated
     public void setSSLContextProvider(SSLContextProvider sslContextProvider) {
@@ -636,7 +636,7 @@ public class MqttBrokerConnection {
      * @param client The client connection
      * @param topic The topic to unsubscribe from
      * @return Completes with true if successful. Completes with false if no broker connection is established.
-     * Exceptionally otherwise.
+     *         Exceptionally otherwise.
      */
     protected CompletableFuture<Boolean> unsubscribeRaw(MqttAsyncClientWrapper client, String topic) {
         logger.trace("Unsubscribing message consumer for topic '{}' from broker '{}'", topic, host);
@@ -686,7 +686,7 @@ public class MqttBrokerConnection {
      * do nothing if there is already an active connection.
      *
      * @return Returns a future that completes with true if already connected or connecting,
-     * completes with false if a connection timeout has happened and completes exceptionally otherwise.
+     *         completes with false if a connection timeout has happened and completes exceptionally otherwise.
      */
     public CompletableFuture<Boolean> start() {
         // We don't want multiple concurrent threads to start a connection
@@ -872,7 +872,7 @@ public class MqttBrokerConnection {
      * @param topic The topic
      * @param payload The message payload
      * @return Returns a future that completes with a result of true if the publishing succeeded and completes
-     * exceptionally on an error or with a result of false if no broker connection is established.
+     *         exceptionally on an error or with a result of false if no broker connection is established.
      */
     public CompletableFuture<Boolean> publish(String topic, byte[] payload) {
         return publish(topic, payload, getQos(), isRetain());
@@ -886,7 +886,7 @@ public class MqttBrokerConnection {
      * @param qos The quality of service for this message
      * @param retain Set to true to retain the message on the broker
      * @return Returns a future that completes with a result of true if the publishing succeeded and completes
-     * exceptionally on an error or with a result of false if no broker connection is established.
+     *         exceptionally on an error or with a result of false if no broker connection is established.
      */
     public CompletableFuture<Boolean> publish(String topic, byte[] payload, int qos, boolean retain) {
         final MqttAsyncClientWrapper client = this.client;

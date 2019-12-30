@@ -17,8 +17,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.Item;
 import org.openhab.core.thing.binding.ThingHandler;
 

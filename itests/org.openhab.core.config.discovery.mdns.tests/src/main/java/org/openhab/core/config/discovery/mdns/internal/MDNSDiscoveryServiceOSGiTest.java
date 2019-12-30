@@ -12,17 +12,17 @@
  */
 package org.openhab.core.config.discovery.mdns.internal;
 
-import static org.openhab.core.config.discovery.DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.openhab.core.config.discovery.DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY;
 
 import java.io.IOException;
 import java.util.Hashtable;
 
-import org.openhab.core.config.discovery.DiscoveryService;
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.config.discovery.DiscoveryService;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 

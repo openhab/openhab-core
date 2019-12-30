@@ -14,9 +14,9 @@ package org.openhab.core.automation.module.media.internal;
 
 import java.util.Map;
 
-import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
+import org.openhab.core.voice.VoiceManager;
 
 /**
  * This is an ModuleHandler implementation for Actions that trigger a TTS output through "say".

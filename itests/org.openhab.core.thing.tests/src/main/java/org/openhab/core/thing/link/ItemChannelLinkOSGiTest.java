@@ -18,6 +18,10 @@ import static org.mockito.Mockito.*;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
@@ -25,10 +29,6 @@ import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
 /**

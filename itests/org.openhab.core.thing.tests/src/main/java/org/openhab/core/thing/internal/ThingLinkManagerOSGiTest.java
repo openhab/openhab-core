@@ -27,8 +27,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
@@ -53,12 +59,6 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.osgi.service.component.ComponentContext;
 
 /**

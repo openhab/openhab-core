@@ -12,13 +12,13 @@
  */
 package org.openhab.core.config.discovery.internal;
 
-import static org.openhab.core.config.discovery.inbox.InboxPredicates.withFlag;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.openhab.core.config.discovery.inbox.InboxPredicates.withFlag;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,12 +27,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
+import org.openhab.core.test.storage.VolatileStorageService;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
@@ -47,12 +53,6 @@ import org.openhab.core.thing.events.ThingStatusInfoChangedEvent;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.thing.type.ThingTypeRegistry;
-import org.openhab.core.test.storage.VolatileStorageService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  * @author Andre Fuechsel - Initial contribution

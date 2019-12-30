@@ -18,6 +18,7 @@ import static org.junit.Assert.*;
 
 import java.util.stream.Stream;
 
+import org.junit.Test;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -26,7 +27,6 @@ import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.internal.ThingImpl;
-import org.junit.Test;
 
 /**
  * @author Alex Tugarev - Initial contribution

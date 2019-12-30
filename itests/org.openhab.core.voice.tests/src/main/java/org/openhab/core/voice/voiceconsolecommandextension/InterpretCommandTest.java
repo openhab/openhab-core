@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.internal.TTSServiceStub;
 import org.openhab.core.voice.internal.VoiceStub;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 

@@ -24,10 +24,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
-import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
 
 /**
  * Test class for {@link DelegatedSchedulerImpl}.

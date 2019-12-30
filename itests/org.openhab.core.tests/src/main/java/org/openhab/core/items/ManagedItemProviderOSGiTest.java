@@ -19,6 +19,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.items.ManagedItemProvider.PersistedItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.NumberItem;
@@ -30,12 +33,9 @@ import org.openhab.core.library.types.ArithmeticGroupFunction.Sum;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * The {@link ManagedItemProviderOSGiTest} runs inside an

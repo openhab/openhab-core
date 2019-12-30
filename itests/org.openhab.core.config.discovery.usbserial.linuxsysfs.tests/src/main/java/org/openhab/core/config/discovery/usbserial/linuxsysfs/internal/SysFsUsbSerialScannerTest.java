@@ -16,12 +16,12 @@ import static java.lang.Integer.toHexString;
 import static java.nio.file.Files.*;
 import static java.nio.file.attribute.PosixFilePermission.*;
 import static java.util.Arrays.asList;
-import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.SysfsUsbSerialScanner.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeTrue;
+import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.SysfsUsbSerialScanner.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,12 +30,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 
 /**
  * Unit tests for the {@link SysfsUsbSerialScanner}.

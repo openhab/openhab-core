@@ -18,8 +18,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;

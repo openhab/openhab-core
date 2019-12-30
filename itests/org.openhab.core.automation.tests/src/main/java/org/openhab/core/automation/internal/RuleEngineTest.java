@@ -20,13 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
-import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
-import org.openhab.core.config.core.Configuration;
-import org.openhab.core.config.core.FilterCriteria;
-import org.openhab.core.config.core.ParameterOption;
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -40,6 +33,13 @@ import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
  * Test adding, retrieving and updating rules from the RuleEngineImpl

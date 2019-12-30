@@ -22,12 +22,12 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.EventOption;
 import org.openhab.core.types.StateDescription;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests the {@link ChannelTypeBuilder}.

@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.CompositeActionType;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
 
 /**
  * This is a utility class to convert between the respective object and its DTO.

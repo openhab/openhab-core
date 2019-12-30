@@ -21,8 +21,8 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.junit.Test;
+import org.openhab.core.scheduler.ScheduledCompletableFuture;
 
 /**
  * Test class for {@link PeriodicSchedulerImpl}.

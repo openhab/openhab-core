@@ -12,6 +12,7 @@
  */
 package org.openhab.core.magic.binding.handler;
 
+import org.openhab.core.io.net.http.HttpUtil;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -20,7 +21,6 @@ import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
-import org.openhab.core.io.net.http.HttpUtil;
 
 /**
  * The {@link MagicImageHandler} is responsible for handling commands, which are

@@ -18,6 +18,9 @@ import static org.junit.Assert.*;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.ChannelDefinition;
 import org.openhab.core.thing.type.ChannelGroupDefinition;
@@ -27,9 +30,6 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.xml.test.LoadedTestBundle.StuffAddition;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Henning Treu - Initial contribution

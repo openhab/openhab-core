@@ -12,17 +12,20 @@
  */
 package org.openhab.core.config.core.internal.metadata;
 
-import static org.openhab.core.config.core.internal.metadata.MetadataConfigDescriptionProviderImpl.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.openhab.core.config.core.internal.metadata.MetadataConfigDescriptionProviderImpl.*;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -30,9 +33,6 @@ import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.config.core.metadata.MetadataConfigDescriptionProvider;
 import org.openhab.core.test.java.JavaTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  *

@@ -14,7 +14,10 @@ package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.junit.Assert.assertNotNull;
 
+import org.junit.Before;
 import org.openhab.core.audio.AudioManager;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.internal.AudioManagerStub;
 import org.openhab.core.voice.internal.AudioSourceStub;
@@ -22,9 +25,6 @@ import org.openhab.core.voice.internal.ConsoleStub;
 import org.openhab.core.voice.internal.SinkStub;
 import org.openhab.core.voice.internal.VoiceConsoleCommandExtension;
 import org.openhab.core.voice.internal.VoiceManagerImpl;
-import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
 
 /**
  * A base class for the classes testing the different commands of the {@link VoiceConsoleCommandExtension}.

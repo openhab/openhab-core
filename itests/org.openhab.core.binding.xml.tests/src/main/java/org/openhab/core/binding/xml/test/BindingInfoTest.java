@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.binding.BindingInfo;
+import org.openhab.core.binding.BindingInfoRegistry;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
-import org.openhab.core.binding.BindingInfo;
-import org.openhab.core.binding.BindingInfoRegistry;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Alex Tugarev - Initial contribution

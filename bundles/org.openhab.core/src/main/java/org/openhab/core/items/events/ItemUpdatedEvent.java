@@ -23,7 +23,7 @@ import org.openhab.core.items.dto.ItemDTO;
 public class ItemUpdatedEvent extends AbstractItemRegistryEvent {
 
     private final ItemDTO oldItem;
-    
+
     /**
      * The item updated event type.
      */

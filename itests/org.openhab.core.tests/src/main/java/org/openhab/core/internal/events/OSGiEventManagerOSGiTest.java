@@ -23,17 +23,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.osgi.framework.ServiceRegistration;
 
 /**

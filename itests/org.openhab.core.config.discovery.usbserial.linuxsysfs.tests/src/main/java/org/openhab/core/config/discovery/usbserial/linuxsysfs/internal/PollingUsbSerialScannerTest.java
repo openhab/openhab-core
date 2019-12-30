@@ -13,20 +13,20 @@
 package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
 import static java.util.Arrays.asList;
-import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.PollingUsbSerialScanner.PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.PollingUsbSerialScanner.PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Unit tests for the {@link PollingUsbSerialScanner}.

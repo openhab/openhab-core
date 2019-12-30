@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config-description:config-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
 	https://openhab.org/schemas/config-description-1.0.0.xsd">
@@ -7,7 +8,9 @@
 	<config-description uri="system:network">
 		<parameter name="primaryAddress" type="text">
 			<label>Primary Address</label>
-			<description>A subnet (e.g. 192.168.1.0/24) <!-- or an IP address (e.g. 192.168.1.5) --></description>
+			<description>
+				A subnet (e.g. 192.168.1.0/24) <!-- or an IP address (e.g. 192.168.1.5) -->
+			</description>
 			<limitToOptions>true</limitToOptions>
 		</parameter>
 		<parameter name="broadcastAddress" type="text">

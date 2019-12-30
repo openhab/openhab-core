@@ -12,9 +12,8 @@
  */
 package org.openhab.core.automation.dto;
 
-import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
-import org.openhab.core.automation.dto.RuleTemplateDTO;
 import org.openhab.core.automation.template.RuleTemplate;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
 
 /**
  * This is a utility class to convert between the Rule Templates and RuleTemplateDTO objects.

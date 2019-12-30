@@ -17,10 +17,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.openhab.core.io.http.WrappingHttpContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.io.http.WrappingHttpContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 

@@ -14,9 +14,9 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.util.Map;
 
-import org.openhab.core.events.Event;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
+import org.openhab.core.events.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

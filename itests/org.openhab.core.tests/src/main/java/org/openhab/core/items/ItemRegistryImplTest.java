@@ -25,6 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
@@ -40,11 +45,6 @@ import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.StateDescriptionService;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.test.storage.VolatileStorageService;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.Mock;
 
 /**
  * The {@link ItemRegistryImplTest} runs inside an OSGi container and tests the {@link ItemRegistry}.

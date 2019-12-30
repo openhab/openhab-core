@@ -38,8 +38,8 @@ public class ThingDescriptionConverter extends GenericUnmarshaller<ThingDescript
     public ThingDescriptionConverter() {
         super(ThingDescriptionList.class);
 
-        this.attributeMapValidator = new ConverterAttributeMapValidator(new String[][] { { "bindingId", "true" },
-                { "schemaLocation", "false" } });
+        this.attributeMapValidator = new ConverterAttributeMapValidator(
+                new String[][] { { "bindingId", "true" }, { "schemaLocation", "false" } });
     }
 
     @Override

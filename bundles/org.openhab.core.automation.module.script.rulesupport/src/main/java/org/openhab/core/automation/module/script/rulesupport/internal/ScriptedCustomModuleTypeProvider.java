@@ -21,9 +21,9 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
+import org.openhab.core.common.registry.ProviderChangeListener;
 import org.osgi.service.component.annotations.Component;
 
 /**

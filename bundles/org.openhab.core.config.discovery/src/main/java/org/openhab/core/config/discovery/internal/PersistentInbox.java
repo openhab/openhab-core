@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -49,7 +50,6 @@ import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.config.discovery.inbox.InboxFilterCriteria;
 import org.openhab.core.config.discovery.inbox.InboxListener;
 import org.openhab.core.config.discovery.inbox.events.InboxEventFactory;
-import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;

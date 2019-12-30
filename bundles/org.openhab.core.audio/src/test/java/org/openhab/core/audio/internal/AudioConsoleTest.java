@@ -20,6 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSource;
@@ -30,9 +33,6 @@ import org.openhab.core.audio.internal.fake.AudioSinkFake;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.console.Console;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * OSGi test for {@link AudioConsoleCommandExtension}

@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <xml_api_reply version="1">
-	<weather module_id="0" tab_id="0" mobile_row="0" mobile_zipped="1"
-		row="0" section="0">
+	<weather module_id="0" tab_id="0" mobile_row="0" mobile_zipped="1" row="0" section="0">
 		<forecast_information>
 			<city data="Krefeld, North Rhine-Westphalia" />
 			<postal_code data="Krefeld Germany" />

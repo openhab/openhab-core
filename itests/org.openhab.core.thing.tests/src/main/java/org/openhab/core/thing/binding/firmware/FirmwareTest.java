@@ -23,11 +23,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Test;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Test;
 
 /**
  * Testing the {@link Firmware} domain object.

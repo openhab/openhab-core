@@ -16,7 +16,7 @@ import org.openhab.core.thing.dto.ThingDTO;
 
 /**
  * A {@link ThingAddedEvent} notifies subscribers that a thing has been added.
- * Thing added events must be created with the {@link ThingEventFactory}. 
+ * Thing added events must be created with the {@link ThingEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
  */

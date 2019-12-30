@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -31,7 +32,6 @@ import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.config.discovery.inbox.InboxAutoApprovePredicate;
 import org.openhab.core.config.discovery.inbox.InboxListener;
-import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.AbstractTypedEventSubscriber;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.thing.Thing;
@@ -87,8 +87,7 @@ import org.slf4j.LoggerFactory;
  * @author Henning Sudbrock - added hook for selectively auto-approving inbox entries
  */
 @Component(immediate = true, configurationPid = "org.openhab.core.inbox", service = EventSubscriber.class, property = {
-        Constants.SERVICE_PID + "=org.openhab.core.inbox",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
+        Constants.SERVICE_PID + "=org.openhab.core.inbox", ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Inbox",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=system:inbox" })
 @NonNullByDefault

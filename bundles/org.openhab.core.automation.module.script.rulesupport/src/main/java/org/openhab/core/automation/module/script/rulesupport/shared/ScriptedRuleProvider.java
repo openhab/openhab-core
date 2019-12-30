@@ -17,9 +17,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
+import org.openhab.core.common.registry.ProviderChangeListener;
 import org.osgi.service.component.annotations.Component;
 
 /**

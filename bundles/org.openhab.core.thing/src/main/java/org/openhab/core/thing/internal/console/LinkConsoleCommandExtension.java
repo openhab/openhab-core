@@ -16,12 +16,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.openhab.core.thing.ChannelUID;
-import org.openhab.core.thing.link.ItemChannelLink;
-import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

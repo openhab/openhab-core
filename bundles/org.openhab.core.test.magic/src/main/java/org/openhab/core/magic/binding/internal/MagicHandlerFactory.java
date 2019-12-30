@@ -19,12 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.openhab.core.thing.Bridge;
-import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingTypeUID;
-import org.openhab.core.thing.binding.BaseThingHandlerFactory;
-import org.openhab.core.thing.binding.ThingHandler;
-import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.magic.binding.handler.MagicActionModuleThingHandler;
 import org.openhab.core.magic.binding.handler.MagicBridgeHandler;
 import org.openhab.core.magic.binding.handler.MagicBridgedThingHandler;
@@ -44,6 +38,12 @@ import org.openhab.core.magic.binding.handler.MagicOnlineOfflineHandler;
 import org.openhab.core.magic.binding.handler.MagicPlayerHandler;
 import org.openhab.core.magic.binding.handler.MagicRolllershutterHandler;
 import org.openhab.core.magic.binding.handler.MagicThermostatThingHandler;
+import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingTypeUID;
+import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingHandler;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

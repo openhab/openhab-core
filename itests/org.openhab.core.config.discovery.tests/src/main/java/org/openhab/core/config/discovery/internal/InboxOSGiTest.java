@@ -36,6 +36,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -55,6 +58,8 @@ import org.openhab.core.config.discovery.inbox.events.InboxUpdatedEvent;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.test.AsyncResultWrapper;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
@@ -68,11 +73,6 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.thing.type.ThingTypeRegistry;
-import org.openhab.core.test.AsyncResultWrapper;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
 /**

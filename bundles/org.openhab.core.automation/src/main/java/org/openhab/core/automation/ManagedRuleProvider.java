@@ -12,10 +12,10 @@
  */
 package org.openhab.core.automation;
 
-import org.openhab.core.common.registry.AbstractManagedProvider;
-import org.openhab.core.storage.StorageService;
 import org.openhab.core.automation.dto.RuleDTO;
 import org.openhab.core.automation.dto.RuleDTOMapper;
+import org.openhab.core.common.registry.AbstractManagedProvider;
+import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

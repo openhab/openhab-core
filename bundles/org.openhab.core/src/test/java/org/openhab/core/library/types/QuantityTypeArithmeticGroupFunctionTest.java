@@ -25,6 +25,9 @@ import javax.measure.quantity.Power;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
@@ -33,9 +36,6 @@ import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 import tec.uom.se.unit.Units;
 

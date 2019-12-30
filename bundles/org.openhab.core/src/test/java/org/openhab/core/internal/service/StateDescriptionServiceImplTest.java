@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
@@ -28,8 +30,6 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateDescriptionFragmentProvider;
 import org.openhab.core.types.StateDescriptionProvider;
 import org.openhab.core.types.StateOption;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for the StateDescriptionService implementation

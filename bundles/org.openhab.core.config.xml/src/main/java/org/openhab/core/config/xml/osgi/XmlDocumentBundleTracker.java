@@ -32,8 +32,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.openhab.core.config.xml.util.XmlDocumentReader;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.xml.util.XmlDocumentReader;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerUtils;
 import org.openhab.core.service.ReadyService;

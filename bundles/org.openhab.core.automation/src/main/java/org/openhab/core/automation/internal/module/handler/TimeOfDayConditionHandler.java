@@ -16,9 +16,9 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
+import org.openhab.core.config.core.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

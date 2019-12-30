@@ -21,11 +21,11 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpStatus;
+import org.junit.Test;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
-import org.junit.Test;
 
 /**
  * Test cases for {@link AudioServlet}

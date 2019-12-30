@@ -35,14 +35,14 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
      * the liked {@link Trigger} instance was fired.
      *
      * @param trigger instance of trigger which was fired. When one TriggerHandler
-     *                serve more then one {@link Trigger} instances, this parameter
-     *                defines which trigger was fired.
+     *            serve more then one {@link Trigger} instances, this parameter
+     *            defines which trigger was fired.
      * @param context is a {@link Map} of output values of the triggered {@link Trigger}. Each entry of the map
-     *                contains:
-     *                <ul>
-     *                <li><code>key</code> - the id of the {@link Output} ,
-     *                <li><code>value</code> - represents output value of the {@link Trigger}'s {@link Output}
-     *                </ul>
+     *            contains:
+     *            <ul>
+     *            <li><code>key</code> - the id of the {@link Output} ,
+     *            <li><code>value</code> - represents output value of the {@link Trigger}'s {@link Output}
+     *            </ul>
      */
     public void triggered(Trigger trigger, Map<String, ?> context);
 

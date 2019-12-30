@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.xml.AbstractXmlBasedProvider;
 import org.openhab.core.config.xml.AbstractXmlConfigDescriptionProvider;
@@ -26,7 +27,6 @@ import org.openhab.core.config.xml.osgi.XmlDocumentBundleTracker;
 import org.openhab.core.config.xml.osgi.XmlDocumentProvider;
 import org.openhab.core.config.xml.osgi.XmlDocumentProviderFactory;
 import org.openhab.core.config.xml.util.XmlDocumentReader;
-import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.UID;

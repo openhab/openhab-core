@@ -28,11 +28,11 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.openhab.core.test.java.JavaTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openhab.core.test.java.JavaTest;
 
 /**
  * Test for {@link AbstractWatchService}.

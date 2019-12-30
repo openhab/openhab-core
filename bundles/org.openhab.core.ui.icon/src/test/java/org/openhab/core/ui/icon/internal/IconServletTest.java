@@ -12,10 +12,10 @@
  */
 package org.openhab.core.ui.icon.internal;
 
-import static org.openhab.core.ui.icon.internal.IconServlet.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.openhab.core.ui.icon.internal.IconServlet.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,14 +27,14 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openhab.core.ui.icon.IconProvider;
-import org.openhab.core.ui.icon.IconSet.Format;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.openhab.core.ui.icon.IconProvider;
+import org.openhab.core.ui.icon.IconSet.Format;
 
 /**
  * Tests for {@link IconServlet}.

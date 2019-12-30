@@ -15,10 +15,10 @@ package org.openhab.core.automation;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.automation.type.ConditionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
  * This interface represents automation {@code Condition} modules which are working as a filter for {@link Rule}'s

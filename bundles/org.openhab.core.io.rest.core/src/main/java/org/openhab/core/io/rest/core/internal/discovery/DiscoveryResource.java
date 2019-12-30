@@ -26,9 +26,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.openhab.core.auth.Role;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.config.discovery.ScanListener;
-import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

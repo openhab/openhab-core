@@ -17,11 +17,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.openhab.core.magic.binding.MagicBindingConstants;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.firmware.Firmware;
 import org.openhab.core.thing.binding.firmware.FirmwareBuilder;
 import org.openhab.core.thing.firmware.FirmwareProvider;
-import org.openhab.core.magic.binding.MagicBindingConstants;
 import org.osgi.service.component.annotations.Component;
 
 /**

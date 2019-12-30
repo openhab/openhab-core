@@ -21,10 +21,10 @@ import java.util.List;
 
 import javax.measure.quantity.Temperature;
 
-import org.openhab.core.items.GenericItem;
-import org.openhab.core.library.items.NumberItem;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.items.GenericItem;
+import org.openhab.core.library.items.NumberItem;
 
 /**
  * @author Henning Treu - Initial contribution

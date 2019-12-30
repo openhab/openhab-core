@@ -19,6 +19,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.util.Collections;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
 import org.openhab.core.events.EventPublisher;
@@ -30,9 +33,6 @@ import org.openhab.core.items.MetadataProvider;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  * The {@link AbstractItemEventSubscriberOSGiTest} runs inside an OSGi container and tests the

@@ -20,10 +20,10 @@ import java.util.List;
 
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
-import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.thing.ThingTypeUID;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;

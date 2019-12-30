@@ -26,9 +26,9 @@ public class RuleAddedEvent extends AbstractRuleRegistryEvent {
     /**
      * constructs a new rule added event
      *
-     * @param topic   the topic of the event
+     * @param topic the topic of the event
      * @param payload the payload of the event
-     * @param source  the source of the event
+     * @param source the source of the event
      * @param ruleDTO the rule for which this event is created
      */
     public RuleAddedEvent(String topic, String payload, String source, RuleDTO rule) {

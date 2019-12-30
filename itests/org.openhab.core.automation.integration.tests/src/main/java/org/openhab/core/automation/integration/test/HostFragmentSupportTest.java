@@ -19,12 +19,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import org.openhab.core.storage.StorageService;
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
+import org.openhab.core.storage.StorageService;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;

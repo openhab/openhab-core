@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.persistence.HistoricItem;
@@ -29,8 +31,6 @@ import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
 import org.openhab.core.types.State;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for PersistenceItem Restresource

@@ -43,8 +43,8 @@ public class CommandWrapper {
             if (cmd.equals(command.getCommand())) {
                 ConsoleInterpreter.execute(ConsoleSupportRfc147.CONSOLE, command, cmdArgs);
             } else {
-                System.out.println(String.format("The command (%s) differs from expected one (%s).", cmd,
-                        command.getCommand()));
+                System.out.println(
+                        String.format("The command (%s) differs from expected one (%s).", cmd, command.getCommand()));
             }
         }
     }

@@ -15,10 +15,10 @@ package org.openhab.core.io.rest.mdns.internal;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.openhab.core.net.HttpServiceUtil;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.transport.mdns.MDNSService;
 import org.openhab.core.io.transport.mdns.ServiceDescription;
+import org.openhab.core.net.HttpServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;

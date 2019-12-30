@@ -14,9 +14,9 @@ package org.openhab.core.binding.xml.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
-import org.openhab.core.binding.BindingInfo;
 
 /**
  * The {@link BindingInfoXmlResult} is an intermediate XML conversion result object which

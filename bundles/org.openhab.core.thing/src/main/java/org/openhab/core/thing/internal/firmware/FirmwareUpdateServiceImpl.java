@@ -33,10 +33,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
-import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
+import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;

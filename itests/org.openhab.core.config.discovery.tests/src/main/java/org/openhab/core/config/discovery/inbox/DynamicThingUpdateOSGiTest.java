@@ -20,9 +20,13 @@ import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -37,10 +41,6 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 /**
  * The {@link DynamicThingUpdateOSGiTest} checks if a {@link Thing} configuration is updated

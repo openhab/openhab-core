@@ -27,11 +27,11 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.test.internal.java.MissingServiceAnalyzer;
-import org.openhab.core.test.storage.VolatileStorageService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.openhab.core.test.internal.java.MissingServiceAnalyzer;
+import org.openhab.core.test.storage.VolatileStorageService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;

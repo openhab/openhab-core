@@ -30,8 +30,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.io.rest.LocaleService;
-import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.automation.dto.ActionTypeDTOMapper;
 import org.openhab.core.automation.dto.ConditionTypeDTOMapper;
 import org.openhab.core.automation.dto.ModuleTypeDTO;
@@ -44,6 +42,8 @@ import org.openhab.core.automation.type.ConditionType;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.TriggerType;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

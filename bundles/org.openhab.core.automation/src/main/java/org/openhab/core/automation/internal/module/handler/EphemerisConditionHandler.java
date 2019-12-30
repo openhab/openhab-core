@@ -17,11 +17,11 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.Configuration;
-import org.openhab.core.ephemeris.EphemerisManager;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.handler.ConditionHandler;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.ephemeris.EphemerisManager;
 
 /**
  * ConditionHandler implementation for Ephemeris based conditions.

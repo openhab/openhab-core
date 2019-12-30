@@ -26,11 +26,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadFactoryBuilder;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscovery;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
-import org.openhab.core.common.ThreadFactoryBuilder;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

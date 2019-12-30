@@ -14,9 +14,9 @@ package org.openhab.core.io.rest.sitemap.internal;
 
 import java.io.IOException;
 
-import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
+import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

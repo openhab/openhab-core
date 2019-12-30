@@ -20,11 +20,11 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.mapdb.DB;
 import org.openhab.core.items.ManagedItemProvider.PersistedItem;
 import org.openhab.core.items.ManagedItemProvider.PersistedItemInstanceCreator;
 import org.openhab.core.storage.DeletableStorage;
 import org.openhab.core.storage.Storage;
-import org.mapdb.DB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

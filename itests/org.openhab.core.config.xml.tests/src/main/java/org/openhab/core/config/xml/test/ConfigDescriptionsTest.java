@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -32,8 +34,6 @@ import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.test.BundleCloseable;
 import org.openhab.core.test.SyntheticBundleInstaller;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * The ConfigDescriptionsTest is a test for loading of configuration description from XML documents.

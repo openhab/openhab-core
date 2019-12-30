@@ -19,9 +19,9 @@ import java.util.StringTokenizer;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
+import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.openhab.core.events.Event;
 import org.openhab.core.io.rest.sse.beans.EventBean;
-import org.glassfish.jersey.media.sse.OutboundEvent;
 
 /**
  * Utility class containing helper methods for the SSE implementation.

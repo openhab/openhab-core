@@ -15,11 +15,11 @@ package org.openhab.core.thing.binding.builder;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.ThingStatusInfo;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests the {@link ThingStatusInfoBuilder}.

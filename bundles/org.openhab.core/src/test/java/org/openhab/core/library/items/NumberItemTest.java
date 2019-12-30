@@ -19,6 +19,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import javax.measure.quantity.Temperature;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
@@ -31,9 +34,6 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  *

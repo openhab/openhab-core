@@ -19,9 +19,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleRegistry;
+import org.openhab.core.common.registry.RegistryChangeListener;
 
 /**
  * The {@link RuleSupportRuleRegistryDelegate} is wrapping a {@link RuleRegistry} to provide a comfortable way to add

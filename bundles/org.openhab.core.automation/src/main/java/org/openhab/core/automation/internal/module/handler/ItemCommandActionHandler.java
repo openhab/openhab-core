@@ -14,6 +14,8 @@ package org.openhab.core.automation.internal.module.handler;
 
 import java.util.Map;
 
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -22,8 +24,6 @@ import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.TypeParser;
-import org.openhab.core.automation.Action;
-import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -38,6 +37,7 @@ import org.openhab.core.automation.type.CompositeTriggerType;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ReferenceResolver;
+import org.openhab.core.config.core.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

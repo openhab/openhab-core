@@ -14,11 +14,11 @@ package org.openhab.core.automation.util;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * This class allows the easy construction of a {@link Module} instance using the builder pattern.

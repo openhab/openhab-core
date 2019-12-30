@@ -12,10 +12,10 @@
  */
 package org.openhab.core.types.util;
 
-import static org.openhab.core.library.unit.MetricPrefix.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
+import static org.openhab.core.library.unit.MetricPrefix.*;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -24,12 +24,12 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Power;
 import javax.measure.quantity.Temperature;
 
+import org.junit.Test;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.SmartHomeUnits;
-import org.junit.Test;
 
 /**
  * @author Henning Treu - Initial contribution

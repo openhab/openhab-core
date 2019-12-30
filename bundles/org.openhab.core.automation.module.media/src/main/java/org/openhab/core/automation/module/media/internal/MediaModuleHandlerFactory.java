@@ -18,12 +18,12 @@ import static java.util.Collections.unmodifiableList;
 import java.util.Collection;
 
 import org.openhab.core.audio.AudioManager;
-import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandlerFactory;
 import org.openhab.core.automation.handler.ModuleHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
+import org.openhab.core.voice.VoiceManager;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;

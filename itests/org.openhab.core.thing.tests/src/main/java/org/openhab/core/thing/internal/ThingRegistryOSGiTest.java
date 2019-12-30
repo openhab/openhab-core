@@ -25,11 +25,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.Configuration;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
@@ -46,10 +50,6 @@ import org.openhab.core.thing.events.ThingAddedEvent;
 import org.openhab.core.thing.events.ThingRemovedEvent;
 import org.openhab.core.thing.events.ThingUpdatedEvent;
 import org.openhab.core.types.Command;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.framework.ServiceRegistration;
 
 /**

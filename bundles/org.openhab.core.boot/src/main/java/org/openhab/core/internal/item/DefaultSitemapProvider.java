@@ -15,10 +15,6 @@ package org.openhab.core.internal.item;
 import java.util.Collections;
 import java.util.Set;
 
-import org.openhab.core.thing.Channel;
-import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingRegistry;
-import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -27,6 +23,10 @@ import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.SitemapImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.TextImpl;
+import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

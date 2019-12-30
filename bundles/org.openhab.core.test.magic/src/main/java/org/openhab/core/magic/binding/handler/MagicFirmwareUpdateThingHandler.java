@@ -13,6 +13,7 @@
 package org.openhab.core.magic.binding.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.magic.binding.MagicBindingConstants;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -23,7 +24,6 @@ import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
 import org.openhab.core.thing.binding.firmware.ProgressCallback;
 import org.openhab.core.thing.binding.firmware.ProgressStep;
 import org.openhab.core.types.Command;
-import org.openhab.core.magic.binding.MagicBindingConstants;
 
 /**
  * Handler for firmware updatable magic things. Defines full progress sequence and simulates firmware update with small

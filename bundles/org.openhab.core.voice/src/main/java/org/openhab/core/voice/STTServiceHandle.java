@@ -18,8 +18,8 @@ package org.openhab.core.voice;
  * @author Kelly Davis - Initial contribution
  */
 public interface STTServiceHandle {
-   /**
-    * Aborts recognition in the associated {@link STTService}
-    */
+    /**
+     * Aborts recognition in the associated {@link STTService}
+     */
     public void abort();
 }

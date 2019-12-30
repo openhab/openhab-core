@@ -20,6 +20,8 @@ import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.rest.core.internal.RESTCoreActivator;
+import org.openhab.core.io.rest.core.internal.item.ItemResource;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.dto.ItemDTO;
@@ -28,8 +30,6 @@ import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
-import org.openhab.core.io.rest.core.internal.RESTCoreActivator;
-import org.openhab.core.io.rest.core.internal.item.ItemResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

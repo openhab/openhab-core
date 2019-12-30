@@ -12,10 +12,10 @@
  */
 package org.openhab.core.thing.firmware;
 
-import static org.openhab.core.thing.Thing.*;
-import static org.openhab.core.thing.firmware.FirmwareStatus.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.openhab.core.thing.Thing.*;
+import static org.openhab.core.thing.firmware.FirmwareStatus.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,6 +23,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
@@ -35,9 +38,6 @@ import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
 import org.openhab.core.thing.binding.firmware.ProgressCallback;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * OSGi integration tests for the {@link FirmwareUpdateService}, focusing on firmware updates with firmwares that are

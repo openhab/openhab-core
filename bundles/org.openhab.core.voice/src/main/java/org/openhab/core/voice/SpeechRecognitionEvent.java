@@ -17,27 +17,27 @@ package org.openhab.core.voice;
  *
  * @author Kelly Davis - Initial contribution
  */
-public class SpeechRecognitionEvent  implements STTEvent {
-   /**
-    * Confidence of recognized speech
-    */
+public class SpeechRecognitionEvent implements STTEvent {
+    /**
+     * Confidence of recognized speech
+     */
     private final float confidence;
 
-   /**
-    * Transcript of recognized speech
-    */
+    /**
+     * Transcript of recognized speech
+     */
     private final String transcript;
 
-   /**
-    * Constructs an instance with the passed {@code transcript} and {@code confidence}.
-    *
-    * The confidence represents a numeric estimate between 0 and 1, inclusively, of how
-    * confident the recognition engine is of the transcript. A higher number means the
-    * system is more confident.
-    *
-    * @param transcript The transcript of the recognized speech
-    * @param confidence The confidence of the transcript
-    */
+    /**
+     * Constructs an instance with the passed {@code transcript} and {@code confidence}.
+     *
+     * The confidence represents a numeric estimate between 0 and 1, inclusively, of how
+     * confident the recognition engine is of the transcript. A higher number means the
+     * system is more confident.
+     *
+     * @param transcript The transcript of the recognized speech
+     * @param confidence The confidence of the transcript
+     */
     public SpeechRecognitionEvent(String transcript, float confidence) {
         if ((null == transcript) || (transcript.isEmpty())) {
             throw new IllegalArgumentException("The passed transcript is null or empty");
@@ -50,24 +50,24 @@ public class SpeechRecognitionEvent  implements STTEvent {
         this.confidence = confidence;
     }
 
-   /**
-    * Returns the transcript of the recognized speech.
-    *
-    * @return The transcript of the recognized speech.
-    */
+    /**
+     * Returns the transcript of the recognized speech.
+     *
+     * @return The transcript of the recognized speech.
+     */
     public String getTranscript() {
         return this.transcript;
     }
 
-   /**
-    * Returns the confidence of the transcript.
-    *
-    * The confidence represents a numeric estimate between 0 and 1, inclusively, of how
-    * confident the recognition engine is of the transcript. A higher number means the
-    * system is more confident.
-    *
-    * @return The transcript of the recognized speech.
-    */
+    /**
+     * Returns the confidence of the transcript.
+     *
+     * The confidence represents a numeric estimate between 0 and 1, inclusively, of how
+     * confident the recognition engine is of the transcript. A higher number means the
+     * system is more confident.
+     *
+     * @return The transcript of the recognized speech.
+     */
     public float getConfidence() {
         return this.confidence;
     }

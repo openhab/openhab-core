@@ -16,14 +16,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.openhab.core.auth.oauth2client.test.internal.AbstractTestAgent;
-import org.openhab.core.auth.oauth2client.test.internal.AuthorizationCodeTestAgent;
-import org.openhab.core.auth.oauth2client.test.internal.ResourceOwnerTestAgent;
-import org.openhab.core.auth.oauth2client.test.internal.TestAgent;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
+import org.openhab.core.auth.oauth2client.test.internal.AbstractTestAgent;
+import org.openhab.core.auth.oauth2client.test.internal.AuthorizationCodeTestAgent;
+import org.openhab.core.auth.oauth2client.test.internal.ResourceOwnerTestAgent;
+import org.openhab.core.auth.oauth2client.test.internal.TestAgent;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;

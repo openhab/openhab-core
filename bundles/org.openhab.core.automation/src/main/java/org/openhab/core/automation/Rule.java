@@ -17,10 +17,10 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.template.RuleTemplate;
+import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
-import org.openhab.core.common.registry.Identifiable;
-import org.openhab.core.automation.template.RuleTemplate;
 
 /**
  * An automation Rule is built from {@link Module}s and consists of three parts:

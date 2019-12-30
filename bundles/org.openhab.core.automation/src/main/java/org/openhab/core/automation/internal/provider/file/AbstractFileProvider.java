@@ -27,15 +27,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.config.core.ConfigConstants;
-import org.openhab.core.common.registry.Provider;
-import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
 import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.template.TemplateProvider;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
+import org.openhab.core.common.registry.Provider;
+import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.config.core.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -19,15 +19,15 @@ import static org.mockito.Mockito.*;
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
 
-import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingRegistry;
-import org.openhab.core.thing.binding.ThingHandlerFactory;
-import org.openhab.core.model.core.ModelRepository;
-import org.openhab.core.model.thing.testsupport.hue.TestHueThingHandlerFactoryX;
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.thing.testsupport.hue.TestHueThingHandlerFactoryX;
+import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.ComponentContext;
 
 /**

@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.Test;
 import org.openhab.core.scheduler.CronJob;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
-import org.junit.Test;
 
 /**
  * Test class for {@link CronSchedulerImpl}.

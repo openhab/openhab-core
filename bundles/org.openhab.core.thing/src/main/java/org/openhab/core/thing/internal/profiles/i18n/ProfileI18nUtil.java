@@ -21,7 +21,6 @@ import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.thing.profiles.Profile;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
-import org.openhab.core.thing.profiles.i18n.ProfileTypeI18nLocalizationService;
 import org.osgi.framework.Bundle;
 
 /**

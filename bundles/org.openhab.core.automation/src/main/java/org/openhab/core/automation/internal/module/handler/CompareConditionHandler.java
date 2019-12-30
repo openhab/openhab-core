@@ -18,11 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.openhab.core.types.State;
-import org.openhab.core.types.TypeParser;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseConditionModuleHandler;
 import org.openhab.core.automation.internal.module.exception.UncomparableException;
+import org.openhab.core.types.State;
+import org.openhab.core.types.TypeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

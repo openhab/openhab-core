@@ -19,13 +19,13 @@ import static org.junit.Assert.assertThat;
 import java.net.URI;
 import java.util.Arrays;
 
+import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
-import org.junit.Test;
 
 /**
  * @author Christoph Weitkamp - Initial contribution

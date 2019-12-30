@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.Item;
@@ -27,8 +29,6 @@ import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution

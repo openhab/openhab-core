@@ -21,8 +21,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
@@ -33,10 +37,6 @@ import org.openhab.core.thing.profiles.ProfileTypeProvider;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.SystemProfiles;
 import org.openhab.core.thing.type.ChannelType;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 /**
  * Test cases for the {@link SystemProfileFactory} class.

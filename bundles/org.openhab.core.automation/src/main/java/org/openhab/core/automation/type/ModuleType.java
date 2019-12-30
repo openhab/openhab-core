@@ -19,11 +19,11 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.Visibility;
+import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
  * This class provides common functionality for creating {@link ModuleType} instances. Each {@link ModuleType} instance

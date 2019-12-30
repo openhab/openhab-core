@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.io.console.Console;
+import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
+import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -33,9 +36,6 @@ import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.events.ThingEventFactory;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
-import org.openhab.core.io.console.Console;
-import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
-import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

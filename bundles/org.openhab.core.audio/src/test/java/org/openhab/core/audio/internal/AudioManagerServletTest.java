@@ -15,13 +15,13 @@ package org.openhab.core.audio.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.internal.fake.AudioSinkFake;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * OSGi test for {@link AudioManagerImpl}

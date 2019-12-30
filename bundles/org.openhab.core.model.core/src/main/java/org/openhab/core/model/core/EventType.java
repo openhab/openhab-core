@@ -13,10 +13,12 @@
 package org.openhab.core.model.core;
 
 /**
- * These are the event types that can occur as model repository changes 
+ * These are the event types that can occur as model repository changes
  * 
  * @author Kai Kreuzer - Initial contribution
  */
 public enum EventType {
-    ADDED, REMOVED, MODIFIED
+    ADDED,
+    REMOVED,
+    MODIFIED
 }

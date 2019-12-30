@@ -22,11 +22,11 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
+import org.openhab.core.config.core.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

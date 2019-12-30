@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.openhab.core.common.registry.Provider;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.type.ModuleType;
+import org.openhab.core.common.registry.Provider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;

@@ -26,11 +26,11 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.io.rest.core.service.ConfigurableServiceDTO;
 import org.openhab.core.test.AsyncResultWrapper;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 

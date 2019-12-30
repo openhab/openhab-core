@@ -16,12 +16,12 @@ import java.io.File;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.storage.DeletableStorage;
 import org.openhab.core.storage.DeletableStorageService;
 import org.openhab.core.storage.StorageService;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

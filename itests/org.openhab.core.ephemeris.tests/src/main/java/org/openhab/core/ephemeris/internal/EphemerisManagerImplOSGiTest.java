@@ -12,8 +12,8 @@
  */
 package org.openhab.core.ephemeris.internal;
 
-import static org.openhab.core.ephemeris.internal.EphemerisManagerImpl.*;
 import static org.junit.Assert.*;
+import static org.openhab.core.ephemeris.internal.EphemerisManagerImpl.*;
 
 import java.net.URI;
 import java.net.URL;
@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.config.core.ParameterOption;
-import org.openhab.core.ephemeris.EphemerisManager;
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.ephemeris.EphemerisManager;
+import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
  * Test class for {@link EphemerisManagerImpl}.

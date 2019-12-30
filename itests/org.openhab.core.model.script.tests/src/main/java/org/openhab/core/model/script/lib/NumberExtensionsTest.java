@@ -21,11 +21,11 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
+import org.junit.Test;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.SmartHomeUnits;
 import org.openhab.core.types.Type;
-import org.junit.Test;
 
 /**
  *

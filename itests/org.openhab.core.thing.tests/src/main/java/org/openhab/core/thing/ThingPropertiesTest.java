@@ -17,13 +17,13 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.ThingFactory;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Testing thing properties.

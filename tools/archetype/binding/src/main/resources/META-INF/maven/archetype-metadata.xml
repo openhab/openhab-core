@@ -1,4 +1,5 @@
-<archetype-descriptor xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+<archetype-descriptor
+	xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd"
 	name="openHAB Binding Archetype" partial="false">
@@ -12,8 +13,8 @@
 		</requiredProperty>
 		<requiredProperty key="author">
 		</requiredProperty>
-        <requiredProperty key="githubUser">
-        </requiredProperty>
+		<requiredProperty key="githubUser">
+		</requiredProperty>
 		<requiredProperty key="bindingId">
 		</requiredProperty>
 		<requiredProperty key="bindingIdCamelCase">

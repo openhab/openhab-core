@@ -26,11 +26,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
-import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
-import org.openhab.core.config.core.Configuration;
-import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
@@ -40,6 +35,11 @@ import org.openhab.core.automation.annotation.RuleAction;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.ParameterOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

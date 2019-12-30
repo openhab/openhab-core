@@ -23,20 +23,20 @@ import java.util.function.Predicate;
 
 import org.eclipse.emf.common.util.EList;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.io.rest.core.item.EnrichedItemDTOMapper;
+import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.StateChangeListener;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.types.State;
-import org.openhab.core.io.rest.core.item.EnrichedItemDTOMapper;
-import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Frame;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 
 /**

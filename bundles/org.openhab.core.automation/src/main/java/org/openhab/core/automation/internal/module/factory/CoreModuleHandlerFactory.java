@@ -15,8 +15,6 @@ package org.openhab.core.automation.internal.module.factory;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.openhab.core.events.EventPublisher;
-import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -35,6 +33,8 @@ import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandl
 import org.openhab.core.automation.internal.module.handler.RuleEnablementActionHandler;
 import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
+import org.openhab.core.events.EventPublisher;
+import org.openhab.core.items.ItemRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

@@ -22,10 +22,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.openhab.core.config.core.Configuration;
-import org.openhab.core.test.java.JavaTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.test.java.JavaTest;
 
 /**
  * This test makes sure that the JsonStorage loads all stored numbers as BigDecimal

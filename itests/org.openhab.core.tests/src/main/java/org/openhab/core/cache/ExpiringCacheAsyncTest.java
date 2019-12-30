@@ -19,8 +19,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-import org.openhab.core.test.java.JavaTest;
 import org.junit.Test;
+import org.openhab.core.test.java.JavaTest;
 
 /**
  * Tests cases for {@link ExpiringAsyncCache}.

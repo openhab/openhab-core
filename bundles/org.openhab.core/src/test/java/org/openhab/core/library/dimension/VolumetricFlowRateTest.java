@@ -17,12 +17,12 @@ import static org.junit.Assert.assertThat;
 
 import javax.measure.Unit;
 
-import org.openhab.core.library.unit.SmartHomeUnits;
-import org.openhab.core.types.util.UnitUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.types.util.UnitUtils;
 
 import tec.uom.se.ComparableQuantity;
 import tec.uom.se.quantity.Quantities;

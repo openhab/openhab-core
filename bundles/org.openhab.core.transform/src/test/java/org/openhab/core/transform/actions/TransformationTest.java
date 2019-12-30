@@ -14,8 +14,8 @@ package org.openhab.core.transform.actions;
 
 import static org.junit.Assert.assertEquals;
 
-import org.openhab.core.transform.TransformationException;
 import org.junit.Test;
+import org.openhab.core.transform.TransformationException;
 
 /**
  * @author Stefan Triller - Initial contribution

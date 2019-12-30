@@ -32,16 +32,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.eclipse.emf.ecore.EObject;
-import org.openhab.core.config.core.ConfigConstants;
-import org.openhab.core.service.AbstractWatchService;
-import org.openhab.core.model.core.ModelParser;
-import org.openhab.core.model.core.ModelRepository;
-import org.openhab.core.model.core.ModelRepositoryChangeListener;
-import org.openhab.core.test.java.JavaOSGiTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.model.core.ModelParser;
+import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.service.component.ComponentContext;
 
 /**

@@ -13,12 +13,14 @@
 		</parameter>
 		<parameter name="write_delay" type="integer" min="0" max="60000">
 			<label>Write delay</label>
-			<description>Sets the time to wait before writing changes to disk. This can reduce the number of writes when many changes are being introduced within a short period. Time is defined in milliseconds.</description>
+			<description>Sets the time to wait before writing changes to disk. This can reduce the number of writes when many
+				changes are being introduced within a short period. Time is defined in milliseconds.</description>
 			<default>500</default>
 		</parameter>
 		<parameter name="max_defer_delay" type="integer" min="1000" max="60000">
 			<label>Maximum write delay</label>
-			<description>Sets the maximum period the service will wait to write data to disk in the event that many changes are happening continually.</description>
+			<description>Sets the maximum period the service will wait to write data to disk in the event that many changes are
+				happening continually.</description>
 			<default>30000</default>
 		</parameter>
 	</config-description>

@@ -25,15 +25,15 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigConstants;
-import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.storage.DeletableStorage;
-import org.openhab.core.storage.Storage;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.storage.DeletableStorage;
+import org.openhab.core.storage.Storage;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution
