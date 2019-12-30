@@ -15,18 +15,21 @@ package org.openhab.core.config.xml.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.test.BundleCloseable;
+import org.openhab.core.test.SyntheticBundleInstaller;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * The ConfigDescriptionI18nTest is a test for loading of configuration description from XML documents.
@@ -38,38 +41,40 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "yahooweather.bundle";
 
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private BindingInstaller bindingInstaller;
+    private ConfigDescriptionProvider configDescriptionProvider;
 
     @Before
     public void setUp() {
-        configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
-        assertThat(configDescriptionRegistry, is(notNullValue()));
-        bindingInstaller = new BindingInstaller(this::waitForAssert, configDescriptionRegistry, bundleContext);
+        configDescriptionProvider = getService(ConfigDescriptionProvider.class,
+                serviceReference -> "core.xml.config".equals(serviceReference.getProperty("esh.scope")));
+        assertThat(configDescriptionProvider, is(notNullValue()));
     }
 
     @Test
     public void assertConfigDescriptionsAreLocalized() throws Exception {
-        bindingInstaller.exec(TEST_BUNDLE_NAME, () -> {
-            Collection<ConfigDescription> configDescriptions = configDescriptionRegistry
+        try (BundleCloseable bundle = new BundleCloseable(
+                SyntheticBundleInstaller.install(bundleContext, TEST_BUNDLE_NAME))) {
+            assertThat(bundle, is(notNullValue()));
+
+            Collection<ConfigDescription> configDescriptions = configDescriptionProvider
                     .getConfigDescriptions(Locale.GERMAN);
 
-            ConfigDescription config = new LinkedList<>(configDescriptions).getFirst();
+            ConfigDescription config = findDescription(configDescriptions, "config:Dummy");
             assertThat(config, is(notNullValue()));
 
             String expected = "location.label = Ort\n" + //
-            "location.description = Ort der Wetterinformation.\n" + //
-            "unit.label = Einheit\n" + //
-            "unit.description = Spezifiziert die Einheit der Daten. Valide Werte sind 'us' und 'metric'\n" + //
-            "refresh.label = Aktualisierungsintervall\n" + //
-            "refresh.description = Spezifiziert das Aktualisierungsintervall in Sekunden\n" + //
-            "question.pattern = Wie ist das Wetter in [\\w]*?\n" + //
-            "question.options = München, Köln\n" + //
-            "group.label = Group 1 German Label\n" + //
-            "group.description = Group 1 German Description";
+                    "location.description = Ort der Wetterinformation.\n" + //
+                    "unit.label = Einheit\n" + //
+                    "unit.description = Spezifiziert die Einheit der Daten. Valide Werte sind 'us' und 'metric'\n" + //
+                    "refresh.label = Aktualisierungsintervall\n" + //
+                    "refresh.description = Spezifiziert das Aktualisierungsintervall in Sekunden\n" + //
+                    "question.pattern = Wie ist das Wetter in [\\w]*?\n" + //
+                    "question.options = München, Köln\n" + //
+                    "group.label = Group 1 German Label\n" + //
+                    "group.description = Group 1 German Description";
 
             assertEquals(expected, asString(config));
-        });
+        }
     }
 
     private static String asString(ConfigDescription description) {
@@ -95,6 +100,18 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
         return sb.toString();
     }
 
+    private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, String uri) {
+        try {
+            return findDescription(descriptions, new URI(uri));
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, URI uri) {
+        return descriptions.stream().filter(d -> uri.equals(d.getUID())).findFirst().get();
+    }
+
     private static ConfigDescriptionParameter findParameter(ConfigDescription description, String parameterName) {
         return description.getParameters().stream().filter(p -> parameterName.equals(p.getName())).findFirst().get();
     }
@@ -104,5 +121,4 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
         return description.getParameterGroups().stream().filter(g -> parameterGroupName.equals(g.getName())).findFirst()
                 .get();
     }
-
 }
