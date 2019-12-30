@@ -15,8 +15,9 @@ package org.openhab.core.config.xml.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -58,7 +59,7 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
             Collection<ConfigDescription> configDescriptions = configDescriptionProvider
                     .getConfigDescriptions(Locale.GERMAN);
 
-            ConfigDescription config = new LinkedList<>(configDescriptions).getFirst();
+            ConfigDescription config = findDescription(configDescriptions, "config:Dummy");
             assertThat(config, is(notNullValue()));
 
             String expected = "location.label = Ort\n" + //
@@ -99,6 +100,18 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
         return sb.toString();
     }
 
+    private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, String uri) {
+        try {
+            return findDescription(descriptions, new URI(uri));
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    private static ConfigDescription findDescription(Collection<ConfigDescription> descriptions, URI uri) {
+        return descriptions.stream().filter(d -> uri.equals(d.getUID())).findFirst().get();
+    }
+
     private static ConfigDescriptionParameter findParameter(ConfigDescription description, String parameterName) {
         return description.getParameters().stream().filter(p -> parameterName.equals(p.getName())).findFirst().get();
     }
@@ -108,5 +121,4 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
         return description.getParameterGroups().stream().filter(g -> parameterGroupName.equals(g.getName())).findFirst()
                 .get();
     }
-
 }
