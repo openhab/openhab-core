@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,9 +21,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.validation.ConfigValidationException;
-import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -509,19 +510,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param value the value of the property
      */
     protected void updateProperty(String name, String value) {
-        String existingPropertyValue = thing.getProperties().get(name);
-        if (existingPropertyValue == null || !existingPropertyValue.equals(value)) {
-            thing.setProperty(name, value);
-            synchronized (this) {
-                if (this.callback != null) {
-                    this.callback.thingUpdated(thing);
-                } else {
-                    logger.warn(
-                            "Handler {} tried updating its thing's properties although the handler was already disposed.",
-                            this.getClass().getSimpleName());
-                }
-            }
-        }
+        updateProperties(Collections.singletonMap(name, value));
     }
 
     /**
