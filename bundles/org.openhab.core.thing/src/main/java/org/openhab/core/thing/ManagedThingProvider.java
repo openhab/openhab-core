@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.type.BridgeType;
@@ -39,12 +40,14 @@ import org.osgi.service.component.annotations.Reference;
 public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUID, ThingDTO> implements ThingProvider {
 
     private ThingTypeRegistry thingTypeRegistry;
+    private ThingManager thingManager;
 
     @Activate
     public ManagedThingProvider(final @Reference StorageService storageService,
-            final @Reference ThingTypeRegistry thingTypeRegistry) {
+            final @Reference ThingTypeRegistry thingTypeRegistry, final @Reference ThingManager thingManager) {
         super(storageService);
         this.thingTypeRegistry = thingTypeRegistry;
+        this.thingManager = thingManager;
     }
 
     @Override
@@ -62,7 +65,18 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
         ThingTypeUID thingTypeUID = new ThingTypeUID(persistableElement.thingTypeUID);
         boolean isBridge = thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType;
 
-        return ThingDTOMapper.map(persistableElement, isBridge);
+        Thing thing = ThingDTOMapper.map(persistableElement, isBridge);
+
+        // Add the thing handler and thing status
+        ThingHandler thingHandler = thingManager.getHandler(thing.getUID());
+        ThingStatusInfo thingStatusInfo = thingManager.getStatusInfo(thing.getUID());
+
+        thing.setHandler(thingHandler);
+        if (thingStatusInfo != null) {
+            thing.setStatusInfo(thingStatusInfo);
+        }
+
+        return thing;
     }
 
     @Override

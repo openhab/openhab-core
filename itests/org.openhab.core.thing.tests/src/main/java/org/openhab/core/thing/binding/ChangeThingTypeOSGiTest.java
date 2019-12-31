@@ -47,6 +47,8 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.type.ChannelDefinition;
@@ -320,9 +322,10 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         StorageService storage = getService(StorageService.class);
         Map<String, Object> properties = new HashMap<>(1);
         properties.put("providedspecific", "there");
-        Thing persistedThing = ThingFactory.createThing(thingTypeSpecific,
+        Thing thingToPersist = ThingFactory.createThing(thingTypeSpecific,
                 new ThingUID("testBinding", "persistedThing"), new Configuration(properties), null, null);
-        persistedThing.setProperty("universal", "survives");
+        thingToPersist.setProperty("universal", "survives");
+        ThingDTO persistedThing = ThingDTOMapper.map(thingToPersist);
         storage.getStorage(Thing.class.getName()).put("testBinding::persistedThing", persistedThing);
         selfChanging = true;
 
@@ -399,9 +402,9 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         assertThat(thing.getStatus(), is(ThingStatus.ONLINE));
 
         // Ensure the new thing type has been persisted into the database
-        Storage<Thing> storage = getService(StorageService.class).getStorage(Thing.class.getName());
-        Thing persistedThing = storage.get("testBinding::testThing");
-        assertThat(persistedThing.getThingTypeUID().getAsString(), is("testBinding:specific"));
+        Storage<ThingDTO> storage = getService(StorageService.class).getStorage(Thing.class.getName());
+        ThingDTO persistedThing = storage.get("testBinding::testThing");
+        assertThat(persistedThing.thingTypeUID, is("testBinding:specific"));
     }
 
     private ThingType registerThingTypeAndConfigDescription(ThingTypeUID thingTypeUID,

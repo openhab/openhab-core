@@ -13,6 +13,7 @@
 package org.openhab.core.thing;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.thing.binding.ThingHandler;
 
 /**
  * {@link ThingManager} interface defines methods for managing a {@link Thing}.
@@ -42,4 +43,20 @@ public interface ThingManager {
      * @param isEnabled a new <b>enabled / disabled</b> state of the {@link Thing}.
      */
     public void setEnabled(ThingUID thingUID, boolean isEnabled);
+
+    /**
+     * This method returns the {@link ThingStatusInfo}.
+     *
+     * @param thingUID UID of the {@link Thing}.
+     * @return the {@link ThingStatusInfo} of the thing
+     */
+    public ThingStatusInfo getStatusInfo(ThingUID thingUID);
+
+    /**
+     * This method returns the {@link ThingHandler}.
+     *
+     * @param thingUID UID of the {@link Thing}.
+     * @return the {@link ThingHandler} of the thing
+     */
+    public ThingHandler getHandler(ThingUID thingUID);
 }
