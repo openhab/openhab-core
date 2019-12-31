@@ -50,6 +50,7 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
@@ -108,7 +109,11 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<ElectricCurrent> AMPERE = addUnit(Units.AMPERE);
     public static final Unit<ElectricCapacitance> FARAD = addUnit(Units.FARAD);
     public static final Unit<ElectricCharge> COULOMB = addUnit(Units.COULOMB);
+    public static final Unit<ElectricCharge> AMPERE_HOUR = addUnit(Units.COULOMB.multiply(3600));
+    public static final Unit<ElectricCharge> MILLIAMPERE_HOUR = addUnit(MetricPrefix.MILLI(AMPERE_HOUR));
     public static final Unit<ElectricConductance> SIEMENS = addUnit(Units.SIEMENS);
+    public static final Unit<ElectricConductivity> SIEMENS_PER_METRE = addUnit(
+            new ProductUnit<ElectricConductivity>(Units.SIEMENS.divide(Units.METRE)));
     public static final Unit<ElectricInductance> HENRY = addUnit(Units.HENRY);
     public static final Unit<ElectricPotential> VOLT = addUnit(Units.VOLT);
     public static final Unit<ElectricResistance> OHM = addUnit(Units.OHM);
@@ -192,6 +197,7 @@ public final class SmartHomeUnits extends CustomUnits {
      */
     static {
         // Ordered alphabetical by name
+        SimpleUnitFormat.getInstance().label(AMPERE_HOUR, "A h");
         SimpleUnitFormat.getInstance().label(BAR, BAR.getSymbol());
         SimpleUnitFormat.getInstance().label(BIT, BIT.getSymbol());
         SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, "bit/s");
@@ -223,11 +229,13 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MEGAWATT_HOUR, "MWh");
         SimpleUnitFormat.getInstance().label(MICROGRAM_PER_CUBICMETRE, "µg/m³");
         SimpleUnitFormat.getInstance().label(MICROWATT_PER_SQUARE_CENTIMETRE, "µW/cm²");
+        SimpleUnitFormat.getInstance().label(MILLIAMPERE_HOUR, "mA h");
         SimpleUnitFormat.getInstance().label(MILLIBAR, "mbar");
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
         SimpleUnitFormat.getInstance().label(OCTET, "o");
         SimpleUnitFormat.getInstance().label(PARTS_PER_MILLION, "ppm");
         SimpleUnitFormat.getInstance().label(STANDARD_GRAVITY, "gₙ");
+        SimpleUnitFormat.getInstance().label(SIEMENS_PER_METRE, "S/m");
         SimpleUnitFormat.getInstance().label(TERABIT, "Tbit");
         SimpleUnitFormat.getInstance().label(TERABIT_PER_SECOND, "Tbit/s");
         SimpleUnitFormat.getInstance().label(WATT_HOUR, "Wh");

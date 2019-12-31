@@ -294,4 +294,20 @@ public class SmartHomeUnitsTest {
         assertThat(QuantityType.valueOf("2.60 µW/cm²").getUnit().toString(), is("µW/cm²"));
     }
 
+    @Test
+    public void testElectricCharge() {
+        QuantityType<?> oneAh = QuantityType.valueOf("3600 C");
+        QuantityType<?> converted = oneAh.toUnit(SmartHomeUnits.AMPERE_HOUR);
+        QuantityType<?> converted2 = oneAh.toUnit(SmartHomeUnits.MILLIAMPERE_HOUR);
+        assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
+        assertEquals("1000 mA h", converted2.toString());
+    }
+
+    @Test
+    public void testConductivity() {
+        QuantityType<?> oneSM = QuantityType.valueOf("1 S/m");
+        QuantityType<?> converted = oneSM.toUnit("µS/cm");
+        assertEquals("10000 µS/cm", converted.toString());
+    }
+
 }
