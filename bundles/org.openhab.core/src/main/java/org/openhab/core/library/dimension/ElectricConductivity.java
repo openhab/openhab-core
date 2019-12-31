@@ -22,5 +22,5 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Gaël L'hopital - Initial contribution
  */
 @NonNullByDefault
-public interface Conductivity extends Quantity<Conductivity> {
+public interface ElectricConductivity extends Quantity<ElectricConductivity> {
 }

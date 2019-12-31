@@ -50,7 +50,7 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.dimension.ArealDensity;
-import org.openhab.core.library.dimension.Conductivity;
+import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
@@ -112,8 +112,8 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<ElectricCharge> AMPERE_HOUR = addUnit(Units.COULOMB.multiply(3600));
     public static final Unit<ElectricCharge> MILLIAMPERE_HOUR = addUnit(MetricPrefix.MILLI(AMPERE_HOUR));
     public static final Unit<ElectricConductance> SIEMENS = addUnit(Units.SIEMENS);
-    public static final Unit<Conductivity> SIEMENS_PER_METRE = addUnit(
-            new ProductUnit<Conductivity>(Units.SIEMENS.divide(Units.METRE)));
+    public static final Unit<ElectricConductivity> SIEMENS_PER_METRE = addUnit(
+            new ProductUnit<ElectricConductivity>(Units.SIEMENS.divide(Units.METRE)));
     public static final Unit<ElectricInductance> HENRY = addUnit(Units.HENRY);
     public static final Unit<ElectricPotential> VOLT = addUnit(Units.VOLT);
     public static final Unit<ElectricResistance> OHM = addUnit(Units.OHM);
