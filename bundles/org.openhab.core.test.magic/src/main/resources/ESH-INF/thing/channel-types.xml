@@ -93,6 +93,7 @@
 	</channel-type>
 
 	<channel-type id="systemcommand">
+		<item-type>String</item-type>
 		<label>Send system command</label>
 		<description>Sends a system command to Kodi. This allows to shutdown/suspend/hibernate/reboot/quit Kodi.</description>
 	</channel-type>
