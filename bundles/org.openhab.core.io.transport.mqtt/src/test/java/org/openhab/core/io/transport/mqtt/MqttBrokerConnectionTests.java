@@ -26,7 +26,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
 import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
@@ -44,6 +44,7 @@ import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
  * @author David Graeff - Initial contribution
  * @author Jan N. Klug - adjusted to HiveMQ client
  */
+@NonNullByDefault
 public class MqttBrokerConnectionTests extends JavaTest {
     @Test
     public void subscribeBeforeOnlineThenConnect()
@@ -62,7 +63,7 @@ public class MqttBrokerConnectionTests extends JavaTest {
         Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload("hello".getBytes())
                 .build();
         // Test if subscription is active
-        connection.clientCallback.messageArrived(publishMessage);
+        connection.getSubscribers().get("homie/device123/$name").messageArrived(publishMessage);
         verify(subscriber).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
     }
 
@@ -88,7 +89,9 @@ public class MqttBrokerConnectionTests extends JavaTest {
 
         Mqtt3Publish publishMessage = Mqtt3Publish.builder().topic("homie/device123/$name").payload("hello".getBytes())
                 .build();
-        connection.clientCallback.messageArrived(publishMessage);
+        connection.getSubscribers().get("homie/device123/+").messageArrived(publishMessage);
+        connection.getSubscribers().get("#").messageArrived(publishMessage);
+        connection.getSubscribers().get("homie/#").messageArrived(publishMessage);
 
         verify(subscriber).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
         verify(subscriber2).processMessage(eq("homie/device123/$name"), eq("hello".getBytes()));
@@ -194,7 +197,7 @@ public class MqttBrokerConnectionTests extends JavaTest {
 
         MqttConnectionObserver o = new MqttConnectionObserver() {
             @Override
-            public void connectionStateChanged(@NonNull MqttConnectionState state, @Nullable Throwable error) {
+            public void connectionStateChanged(MqttConnectionState state, @Nullable Throwable error) {
                 if (state == MqttConnectionState.DISCONNECTED) {
                     latch.countDown();
                 }

@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.ConnectionCallback;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.Protocol;
 import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
-import org.openhab.core.io.transport.mqtt.internal.ClientCallback;
+import org.openhab.core.io.transport.mqtt.internal.Subscription;
 
 import com.hivemq.client.mqtt.MqttClientState;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
@@ -64,14 +64,14 @@ public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
     }
 
     @Override
-    public CompletableFuture<?> internalSubscribe(String topic, int qos, ClientCallback clientCallback) {
+    public CompletableFuture<?> subscribe(String topic, int qos, Subscription subscription) {
         Mqtt3Subscribe subscribeMessage = Mqtt3Subscribe.builder().topicFilter(topic).qos(getMqttQosFromInt(qos))
                 .build();
-        return client.subscribe(subscribeMessage, clientCallback::messageArrived);
+        return client.subscribe(subscribeMessage, subscription::messageArrived);
     }
 
     @Override
-    public CompletableFuture<?> internalUnsubscribe(String topic) {
+    public CompletableFuture<?> unsubscribe(String topic) {
         Mqtt3Unsubscribe unsubscribeMessage = Mqtt3Unsubscribe.builder().topicFilter(topic).build();
         return client.unsubscribe(unsubscribeMessage);
     }

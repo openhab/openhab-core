@@ -17,7 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.TrustManager;
@@ -25,8 +31,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.io.transport.mqtt.internal.ClientCallback;
-import org.openhab.core.io.transport.mqtt.internal.TopicSubscribers;
+import org.openhab.core.io.transport.mqtt.internal.Subscription;
 import org.openhab.core.io.transport.mqtt.internal.client.Mqtt3AsyncClientWrapper;
 import org.openhab.core.io.transport.mqtt.internal.client.Mqtt5AsyncClientWrapper;
 import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
@@ -103,7 +108,7 @@ public class MqttBrokerConnection {
     protected @Nullable MqttAsyncClientWrapper client;
     protected boolean isConnecting = false;
     protected final List<MqttConnectionObserver> connectionObservers = new CopyOnWriteArrayList<>();
-    protected final Map<String, TopicSubscribers> subscribers = new ConcurrentHashMap<>();
+    protected final Map<String, Subscription> subscribers = new ConcurrentHashMap<>();
 
     // Connection timeout handling
     protected final AtomicReference<@Nullable ScheduledFuture<?>> timeoutFuture = new AtomicReference<>(null);
@@ -126,6 +131,7 @@ public class MqttBrokerConnection {
             this.cancelTimeoutFuture = mqttBrokerConnectionImpl::cancelTimeoutFuture;
         }
 
+        @Override
         public void onConnected(@Nullable MqttClientConnectedContext context) {
             cancelTimeoutFuture.run();
 
@@ -134,8 +140,8 @@ public class MqttBrokerConnection {
                 connection.reconnectStrategy.connectionEstablished();
             }
             List<CompletableFuture<Boolean>> futures = new ArrayList<>();
-            connection.subscribers.forEach((topic, subscriberList) -> {
-                futures.add(connection.subscribeRaw(topic));
+            connection.subscribers.forEach((topic, subscription) -> {
+                futures.add(connection.subscribeRaw(topic, subscription));
             });
 
             // As soon as all subscriptions are performed, turn the connection future complete.
@@ -146,6 +152,7 @@ public class MqttBrokerConnection {
             });
         }
 
+        @Override
         public void onDisconnected(@Nullable MqttClientDisconnectedContext context) {
             if (context != null) {
                 final Throwable throwable = context.getCause();
@@ -178,8 +185,6 @@ public class MqttBrokerConnection {
         }
     }
 
-    // Client callback object
-    protected ClientCallback clientCallback = new ClientCallback(this, connectionObservers, subscribers);
     // Connection callback object
     protected ConnectionCallback connectionCallback;
 
@@ -542,31 +547,20 @@ public class MqttBrokerConnection {
      * @return Completes with true if successful. Completes with false if not connected yet. Exceptionally otherwise.
      */
     public CompletableFuture<Boolean> subscribe(String topic, MqttMessageSubscriber subscriber) {
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        final Subscription subscription;
+        final boolean needsSubscribe;
         synchronized (subscribers) {
-            TopicSubscribers subscriberList = subscribers.getOrDefault(topic, new TopicSubscribers(topic));
-            subscribers.put(topic, subscriberList);
-            subscriberList.add(subscriber);
+            subscription = subscribers.computeIfAbsent(topic, t -> new Subscription());
+
+            needsSubscribe = subscription.isEmpty();
+
+            subscription.add(subscriber);
         }
-        final MqttAsyncClientWrapper client = this.client;
-        if (client == null) {
-            future.completeExceptionally(new Exception("No MQTT client"));
-            return future;
+
+        if (needsSubscribe) {
+            return subscribeRaw(topic, subscription);
         }
-        if (client.getState().isConnected()) {
-            client.subscribe(topic, qos, clientCallback).whenComplete((s, t) -> {
-                if (t == null) {
-                    future.complete(true);
-                } else {
-                    logger.warn("Failed subscribing to topic {}", topic, t);
-                    future.completeExceptionally(new MqttException(t));
-                }
-            });
-        } else {
-            // The subscription will be performed on connecting.
-            future.complete(false);
-        }
-        return future;
+        return CompletableFuture.completedFuture(true);
     }
 
     /**
@@ -575,13 +569,14 @@ public class MqttBrokerConnection {
      * @param topic The topic to subscribe to.
      * @return Completes with true if successful. Exceptionally otherwise.
      */
-    protected CompletableFuture<Boolean> subscribeRaw(String topic) {
+    protected CompletableFuture<Boolean> subscribeRaw(String topic, Subscription subscription) {
         logger.trace("subscribeRaw message consumer for topic '{}' from broker '{}'", topic, host);
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         final MqttAsyncClientWrapper mqttClient = this.client;
         if (mqttClient != null && mqttClient.getState().isConnected()) {
-            mqttClient.subscribe(topic, qos, clientCallback).whenComplete((s, t) -> {
+            mqttClient.subscribe(topic, qos, subscription).whenComplete((s, t) -> {
                 if (t == null) {
+                    logger.trace("Successfully subscribed to topic {}", topic);
                     future.complete(true);
                 } else {
                     logger.warn("Failed subscribing to topic {}", topic, t);
@@ -604,30 +599,32 @@ public class MqttBrokerConnection {
      */
     @SuppressWarnings({ "null", "unused" })
     public CompletableFuture<Boolean> unsubscribe(String topic, MqttMessageSubscriber subscriber) {
+        final boolean needsUnsubscribe;
+
         synchronized (subscribers) {
-            final @Nullable List<MqttMessageSubscriber> list = subscribers.get(topic);
-            if (list == null) {
+            final @Nullable Subscription subscription = subscribers.get(topic);
+            if (subscription == null) {
                 logger.trace("Tried to unsubscribe {} from topic {}, but subscriber list is empty", subscriber, topic);
                 return CompletableFuture.completedFuture(true);
             }
-            list.remove(subscriber);
-            if (!list.isEmpty()) {
-                logger.trace("Removed {} from topic subscribers for topic {}, but other subscribers present",
-                        subscriber, topic);
-                return CompletableFuture.completedFuture(true);
+            subscription.remove(subscriber);
+
+            if (subscription.isEmpty()) {
+                needsUnsubscribe = true;
+                subscribers.remove(topic);
+            } else {
+                needsUnsubscribe = false;
             }
-            // Remove from subscriber list
-            subscribers.remove(topic);
-            // No more subscribers to this topic. Unsubscribe topic on the broker
+        }
+        if (needsUnsubscribe) {
             MqttAsyncClientWrapper mqttClient = this.client;
             if (mqttClient != null) {
                 logger.trace("Subscriber list is empty after removing {}, unsubscribing topic {} from client",
                         subscriber, topic);
                 return unsubscribeRaw(mqttClient, topic);
-            } else {
-                return CompletableFuture.completedFuture(false);
             }
         }
+        return CompletableFuture.completedFuture(true);
     }
 
     /**
@@ -772,7 +769,7 @@ public class MqttBrokerConnection {
         MqttAsyncClientWrapper client = this.client;
         List<CompletableFuture<Boolean>> futures = new ArrayList<>();
         if (client != null) {
-            subscribers.forEach((topic, subList) -> {
+            subscribers.forEach((topic, subscription) -> {
                 futures.add(unsubscribeRaw(client, topic));
             });
             subscribers.clear();

@@ -18,6 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +31,12 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  */
 @Deprecated
+@NonNullByDefault
 public class CustomSSLContextProvider implements SSLContextProvider {
     private final Logger logger = LoggerFactory.getLogger(CustomSSLContextProvider.class);
-    private final TrustManagerFactory factory;
+    private final @Nullable TrustManagerFactory factory;
 
-    public CustomSSLContextProvider(TrustManagerFactory factory) {
+    public CustomSSLContextProvider(@Nullable TrustManagerFactory factory) {
         this.factory = factory;
     }
 

@@ -12,16 +12,12 @@
  */
 package org.openhab.core.io.transport.mqtt.internal.client;
 
-import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.mqtt.MqttWillAndTestament;
-import org.openhab.core.io.transport.mqtt.internal.ClientCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openhab.core.io.transport.mqtt.internal.Subscription;
 
 import com.hivemq.client.mqtt.MqttClientState;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
@@ -34,9 +30,6 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 
 @NonNullByDefault
 public abstract class MqttAsyncClientWrapper {
-    private final Logger logger = LoggerFactory.getLogger(MqttAsyncClientWrapper.class);
-    private final Set<String> subscriptions = ConcurrentHashMap.newKeySet();
-
     /**
      * connect this client
      *
@@ -64,42 +57,6 @@ public abstract class MqttAsyncClientWrapper {
     public abstract MqttClientState getState();
 
     /**
-     * subscribe a client callback to a topic (keeps track of subscriptions)
-     *
-     * @param topic the topic
-     * @param qos QoS for this subscription
-     * @param clientCallback the client callback that need
-     * @return a CompletableFuture (exceptionally on fail)
-     */
-    public CompletableFuture<Boolean> subscribe(String topic, int qos, ClientCallback clientCallback) {
-        boolean needsSubscription = subscriptions.add(topic);
-        if (needsSubscription) {
-            logger.trace("Trying to subscribe {} to topic {}", this, topic);
-            return internalSubscribe(topic, qos, clientCallback).thenApply(s -> {
-                logger.trace("Successfully subscribed {} to topic {}", this, topic);
-                return true;
-            });
-        } else {
-            logger.trace("{} already subscribed to topic {}", this, topic);
-            return CompletableFuture.completedFuture(true);
-        }
-    }
-
-    /**
-     * unsubscribes from a topic (keeps track of subscriptions)
-     *
-     * @param topic the topic
-     * @return a CompletableFuture (exceptionally on fail)
-     */
-    public CompletableFuture<Boolean> unsubscribe(String topic) {
-        subscriptions.remove(topic);
-        return internalUnsubscribe(topic).thenApply(s -> {
-            logger.trace("Successfully unsubscribed {} from topic {}", this, topic);
-            return true;
-        });
-    }
-
-    /**
      * publish a message
      *
      * @param topic the topic
@@ -110,9 +67,23 @@ public abstract class MqttAsyncClientWrapper {
      */
     public abstract CompletableFuture<?> publish(String topic, byte[] payload, boolean retain, int qos);
 
-    protected abstract CompletableFuture<?> internalSubscribe(String topic, int qos, ClientCallback clientCallback);
+    /**
+     * subscribe a client callback to a topic
+     *
+     * @param topic the topic
+     * @param qos QoS for this subscription
+     * @param subscription the subscription which keeps track of subscribers and retained messages
+     * @return a CompletableFuture (exceptionally on fail)
+     */
+    public abstract CompletableFuture<?> subscribe(String topic, int qos, Subscription subscription);
 
-    protected abstract CompletableFuture<?> internalUnsubscribe(String topic);
+    /**
+     * unsubscribes from a topic
+     *
+     * @param topic the topic
+     * @return a CompletableFuture (exceptionally on fail)
+     */
+    public abstract CompletableFuture<?> unsubscribe(String topic);
 
     protected MqttQos getMqttQosFromInt(int qos) {
         switch (qos) {

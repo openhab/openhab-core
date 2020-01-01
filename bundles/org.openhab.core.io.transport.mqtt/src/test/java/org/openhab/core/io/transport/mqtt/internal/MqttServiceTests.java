@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
@@ -29,6 +30,7 @@ import org.osgi.service.cm.ConfigurationException;
  *
  * @author David Graeff - Initial contribution
  */
+@NonNullByDefault
 public class MqttServiceTests {
     // Tests addBrokersListener/removeBrokersListener
     @Test
