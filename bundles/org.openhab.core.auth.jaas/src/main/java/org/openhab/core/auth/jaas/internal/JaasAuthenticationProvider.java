@@ -45,7 +45,7 @@ import org.osgi.service.component.annotations.Modified;
  * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Removed ManagedService and used DS configuration instead
  */
-@Component(configurationPid = "org.openhab.core.jaas")
+@Component(configurationPid = "org.openhab.jaas")
 public class JaasAuthenticationProvider implements AuthenticationProvider {
 
     private String realmName;

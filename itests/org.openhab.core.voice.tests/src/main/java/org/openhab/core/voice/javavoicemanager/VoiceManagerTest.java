@@ -53,7 +53,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * @author Velin Yordanov - migrated tests from groovy to java
  */
 public class VoiceManagerTest extends JavaOSGiTest {
-    private static final String PID = "org.openhab.core.voice";
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
     private static final String CONFIG_DEFAULT_KS = "defaultKS";
     private static final String CONFIG_DEFAULT_STT = "defaultSTT";
@@ -92,7 +91,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put(CONFIG_DEFAULT_TTS, ttsService.getId());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        Configuration configuration = configAdmin.getConfiguration(PID);
+        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
         configuration.update(voiceConfig);
 
         audioManager = new AudioManagerStub();
@@ -164,8 +163,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         Dictionary<String, Object> voiceConfig = new Hashtable<>();
         voiceConfig.put("defaultHLI", hliStub.getId());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        String pid = "org.openhab.core.voice";
-        Configuration configuration = configAdmin.getConfiguration(pid);
+        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
         configuration.update(voiceConfig);
 
         String result = voiceManager.interpret("something", hliStub.getId());
@@ -249,8 +247,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
 
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        String pid = "org.openhab.core.voice";
-        Configuration configuration = configAdmin.getConfiguration(pid);
+        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
         configuration.update(config);
 
         waitForAssert(() -> {

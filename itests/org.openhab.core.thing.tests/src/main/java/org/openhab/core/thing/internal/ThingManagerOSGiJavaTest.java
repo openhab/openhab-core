@@ -75,6 +75,7 @@ import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
+import org.openhab.core.thing.link.ThingLinkManager;
 import org.openhab.core.thing.type.ChannelDefinitionBuilder;
 import org.openhab.core.thing.type.ChannelGroupType;
 import org.openhab.core.thing.type.ChannelGroupTypeBuilder;
@@ -1055,12 +1056,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     private void configureAutoLinking(Boolean on) throws IOException {
         ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
-        org.osgi.service.cm.Configuration config = configAdmin.getConfiguration("org.openhab.core.links", null);
+        org.osgi.service.cm.Configuration config = configAdmin.getConfiguration(ThingLinkManager.CONFIGURATION_PID);
         Dictionary<String, Object> properties = config.getProperties();
         if (properties == null) {
             properties = new Hashtable<>();
         }
-        properties.put("autoLinks", on.toString());
+        properties.put(ThingLinkManager.AUTO_LINKS, on.toString());
         config.update(properties);
     }
 

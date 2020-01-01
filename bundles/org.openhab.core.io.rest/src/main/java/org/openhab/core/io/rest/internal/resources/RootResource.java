@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @Path("/")
-@Component(service = RootResource.class, configurationPid = "org.openhab.core.io.rest.root")
+@Component(service = RootResource.class, configurationPid = "org.openhab.io.rest.root")
 public class RootResource {
 
     private final transient Logger logger = LoggerFactory.getLogger(RootResource.class);

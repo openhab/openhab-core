@@ -86,7 +86,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - added auto-approve functionality
  * @author Henning Sudbrock - added hook for selectively auto-approving inbox entries
  */
-@Component(immediate = true, configurationPid = "org.openhab.core.inbox", service = EventSubscriber.class, property = {
+@Component(immediate = true, configurationPid = "org.openhab.inbox", service = EventSubscriber.class, property = {
         Constants.SERVICE_PID + "=org.openhab.core.inbox", ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Inbox",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=system:inbox" })

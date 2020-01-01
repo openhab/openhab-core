@@ -44,14 +44,14 @@ import com.google.inject.Injector;
  *
  * @author Simon Kaufmann - Initial contribution
  */
-@Component(immediate = true, service = ModelServer.class, configurationPid = ModelServer.CONFIG_PID, property = {
-        Constants.SERVICE_PID + "=" + ModelServer.CONFIG_PID,
+@Component(immediate = true, service = ModelServer.class, configurationPid = ModelServer.CONFIGURATION_PID, property = {
+        Constants.SERVICE_PID + "=org.openhab.core.lsp",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=misc:lsp",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Language Server (LSP)",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=misc" })
 public class ModelServer {
 
-    static final String CONFIG_PID = "org.openhab.core.lsp";
+    public static final String CONFIGURATION_PID = "org.openhab.lsp";
     private static final String KEY_PORT = "port";
     private static final int DEFAULT_PORT = 5007;
     private final ExecutorService pool = ThreadPoolManager.getPool("lsp");

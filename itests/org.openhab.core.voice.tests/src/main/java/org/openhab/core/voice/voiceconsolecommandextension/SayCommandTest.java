@@ -35,6 +35,7 @@ import org.openhab.core.thing.ThingProvider;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.internal.SinkStub;
 import org.openhab.core.voice.internal.TTSServiceStub;
+import org.openhab.core.voice.internal.VoiceManagerImpl;
 import org.openhab.core.voice.internal.VoiceStub;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
@@ -112,8 +113,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
             Dictionary<String, Object> config = new Hashtable<>();
             config.put(CONFIG_DEFAULT_TTS, defaultTTSService);
             ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-            String pid = "org.openhab.core.voice";
-            Configuration configuration = configAdmin.getConfiguration(pid);
+            Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
             configuration.update(config);
         }
 

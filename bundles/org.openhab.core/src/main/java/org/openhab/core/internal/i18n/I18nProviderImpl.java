@@ -76,7 +76,7 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone
  */
-@Component(immediate = true, configurationPid = "org.openhab.core.i18n", property = {
+@Component(immediate = true, configurationPid = I18nProviderImpl.CONFIGURATION_PID, property = {
         Constants.SERVICE_PID + "=org.openhab.core.i18n", //
         "service.config.label=Regional Settings", //
         "service.config.category=system", //
@@ -87,11 +87,13 @@ public class I18nProviderImpl
 
     private final Logger logger = LoggerFactory.getLogger(I18nProviderImpl.class);
 
+    public static final String CONFIGURATION_PID = "org.openhab.i18n";
+
     // LocaleProvider
-    static final String LANGUAGE = "language";
-    static final String SCRIPT = "script";
-    static final String REGION = "region";
-    static final String VARIANT = "variant";
+    public static final String LANGUAGE = "language";
+    public static final String SCRIPT = "script";
+    public static final String REGION = "region";
+    public static final String VARIANT = "variant";
     private @Nullable Locale locale;
 
     // TranslationProvider

@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Łukasz Dywicki - Initial contribution.
  */
-@Component(configurationPid = "org.openhab.core.auth")
+@Component(configurationPid = "org.openhab.auth")
 public class AuthenticationHandler implements Handler {
 
     private static final String AUTHENTICATION_ENABLED = "enabled";

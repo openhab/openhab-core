@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - added web socket support
  * @author Martin van Wingerden - Add support for ESHTrustManager
  */
-@Component(immediate = true, configurationPid = "org.openhab.core.webclient")
+@Component(immediate = true, configurationPid = "org.openhab.webclient")
 @NonNullByDefault
 public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory {
 

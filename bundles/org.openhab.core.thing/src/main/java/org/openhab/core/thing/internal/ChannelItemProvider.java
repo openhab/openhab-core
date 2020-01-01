@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Add locale provider support
  * @author Thomas Höfer - Added modified operation
  */
-@Component(configurationPid = "org.openhab.core.channelitemprovider", immediate = true)
+@Component(configurationPid = "org.openhab.channelitemprovider", immediate = true)
 @NonNullByDefault
 public class ChannelItemProvider implements ItemProvider {
 

@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.internal.TTSServiceStub;
+import org.openhab.core.voice.internal.VoiceManagerImpl;
 import org.openhab.core.voice.internal.VoiceStub;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -61,8 +62,7 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
         config.put(CONFIG_DEFAULT_HLI, hliStub.getId());
         config.put(CONFIG_DEFAULT_VOICE, voice.getUID());
         ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-        String pid = "org.openhab.core.voice";
-        Configuration configuration = configAdmin.getConfiguration(pid);
+        Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
         configuration.update(config);
     }
 

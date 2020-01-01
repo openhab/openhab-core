@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.binding.BindingInfoRegistry;
 import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.internal.i18n.I18nProviderImpl;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -91,7 +92,7 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
         ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
 
-        Configuration config = configAdmin.getConfiguration("org.openhab.core.i18n", null);
+        Configuration config = configAdmin.getConfiguration(I18nProviderImpl.CONFIGURATION_PID, null);
         assertThat(config, is(notNullValue()));
 
         Dictionary<String, Object> properties = config.getProperties();

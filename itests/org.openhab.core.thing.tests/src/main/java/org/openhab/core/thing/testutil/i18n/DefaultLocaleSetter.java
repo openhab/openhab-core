@@ -21,6 +21,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import org.openhab.core.internal.i18n.I18nProviderImpl;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -48,7 +49,7 @@ public class DefaultLocaleSetter {
     public void setDefaultLocale(Locale locale) throws IOException {
         assertThat(locale, is(notNullValue()));
 
-        Configuration config = configAdmin.getConfiguration("org.openhab.core.i18n", null);
+        Configuration config = configAdmin.getConfiguration(I18nProviderImpl.CONFIGURATION_PID, null);
         assertThat(config, is(notNullValue()));
 
         Dictionary<String, Object> properties = config.getProperties();
@@ -56,10 +57,10 @@ public class DefaultLocaleSetter {
             properties = new Hashtable<>();
         }
 
-        properties.put("language", locale.getLanguage());
-        properties.put("script", locale.getScript());
-        properties.put("region", locale.getCountry());
-        properties.put("variant", locale.getVariant());
+        properties.put(I18nProviderImpl.LANGUAGE, locale.getLanguage());
+        properties.put(I18nProviderImpl.SCRIPT, locale.getScript());
+        properties.put(I18nProviderImpl.REGION, locale.getCountry());
+        properties.put(I18nProviderImpl.VARIANT, locale.getVariant());
 
         config.update(properties);
     }
