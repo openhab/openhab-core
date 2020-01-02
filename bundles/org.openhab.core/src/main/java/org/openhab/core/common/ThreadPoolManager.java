@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 @Component(configurationPid = ThreadPoolManager.CONFIGURATION_PID)
 public class ThreadPoolManager {
 
-    public static final String CONFIGURATION_PID = "org.openhab.core.threadpool";
+    public static final String CONFIGURATION_PID = "org.openhab.threadpool";
 
     /**
      * The common thread pool is reserved for occasional, light weight tasks that run quickly, and

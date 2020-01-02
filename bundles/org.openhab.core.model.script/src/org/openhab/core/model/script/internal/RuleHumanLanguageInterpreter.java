@@ -42,9 +42,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(immediate = true, service = HumanLanguageInterpreter.class, configurationPid = "org.openhab.core.rulehli", property = {
-        Constants.SERVICE_PID + "=org.openhab.core.rulehli",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=voice",
+@Component(immediate = true, service = HumanLanguageInterpreter.class, configurationPid = "org.openhab.rulehli", property = {
+        Constants.SERVICE_PID + "=org.openhab.core.rulehli", ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=voice",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Rule Voice Interpreter",
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + RuleHumanLanguageInterpreter.CONFIG_URI })
 public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {

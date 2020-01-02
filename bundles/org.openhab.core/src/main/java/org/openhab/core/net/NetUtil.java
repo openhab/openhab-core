@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * @author Gary Tse - Network address change listener
  * @author Tim Roberts - Added primary address change to network address change listener
  */
-@Component(configurationPid = "org.openhab.core.network", property = { "service.pid=org.openhab.core.network",
+@Component(configurationPid = "org.openhab.network", property = { "service.pid=org.openhab.core.network",
         "service.config.description.uri=system:network", "service.config.label=Network Settings",
         "service.config.category=system" })
 @NonNullByDefault

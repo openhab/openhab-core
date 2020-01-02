@@ -41,7 +41,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(immediate = true, configurationPid = "org.openhab.core.persistence", property = {
+@Component(immediate = true, configurationPid = "org.openhab.persistence", property = {
         Constants.SERVICE_PID + "=org.openhab.core.persistence",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Persistence",

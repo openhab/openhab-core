@@ -57,12 +57,16 @@ import org.slf4j.LoggerFactory;
  *         ThingSetupManager)
  * @author Markus Rathgeb - Send link notification if item and link exists and unlink on the first removal
  */
-@Component(immediate = true, configurationPid = "org.openhab.core.links", service = { ThingLinkManager.class,
+@Component(immediate = true, configurationPid = ThingLinkManager.CONFIGURATION_PID, service = { ThingLinkManager.class,
         EventSubscriber.class }, property = { "service.config.description.uri:String=system:links",
                 "service.config.label:String=Item Linking", "service.config.category:String=system",
                 "service.pid:String=org.openhab.core.links" })
 @NonNullByDefault
 public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusInfoChangedEvent> {
+
+    public static final String CONFIGURATION_PID = "org.openhab.links";
+
+    public static final String AUTO_LINKS = "autoLinks";
 
     private static final String THREADPOOL_NAME = "thingLinkManager";
 
@@ -103,7 +107,7 @@ public class ThingLinkManager extends AbstractTypedEventSubscriber<ThingStatusIn
     protected void modified(ComponentContext context) {
         // check whether we want to enable the automatic link creation or not
         if (context != null) {
-            Object value = context.getProperties().get("autoLinks");
+            Object value = context.getProperties().get(AUTO_LINKS);
             autoLinks = value == null || !value.toString().equals("false");
         }
     }

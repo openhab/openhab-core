@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Modified;
  * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
-@Component(configurationPid = "org.openhab.core.safecaller", immediate = true)
+@Component(configurationPid = "org.openhab.safecaller", immediate = true)
 public class SafeCallerImpl implements SafeCaller {
 
     private static final String SAFE_CALL_POOL_NAME = "safeCall";

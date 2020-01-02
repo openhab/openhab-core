@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(service = { SitemapSubscriptionService.class,
-        EventSubscriber.class }, configurationPid = "org.openhab.core.sitemapsubscription")
+        EventSubscriber.class }, configurationPid = "org.openhab.sitemapsubscription")
 public class SitemapSubscriptionService implements ModelRepositoryChangeListener, EventSubscriber {
 
     private static final String SITEMAP_PAGE_SEPARATOR = "#";

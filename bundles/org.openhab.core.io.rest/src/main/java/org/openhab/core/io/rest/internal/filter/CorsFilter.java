@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @Component(immediate = true, property = {
-        "service.pid=org.openhab.core.cors" }, configurationPid = "org.openhab.core.cors", configurationPolicy = ConfigurationPolicy.REQUIRE)
+        "service.pid=org.openhab.core.cors" }, configurationPid = "org.openhab.cors", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class CorsFilter implements ContainerResponseFilter {
 
     static final String HTTP_HEAD_METHOD = "HEAD";

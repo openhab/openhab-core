@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
-@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, configurationPid = "org.openhab.core.MagicMultiAction")
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, configurationPid = "org.openhab.magicmultiaction")
 @ActionScope(name = "binding.magic")
 public class MagicMultiServiceMultiActions implements AnnotatedActions {
 

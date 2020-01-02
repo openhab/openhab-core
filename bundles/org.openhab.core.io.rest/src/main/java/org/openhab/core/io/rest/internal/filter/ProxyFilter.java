@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @PreMatching
-@Component(configurationPid = "org.openhab.core.io.rest.proxyfilter", immediate = true, service = ProxyFilter.class)
+@Component(configurationPid = "org.openhab.proxyfilter", immediate = true, service = ProxyFilter.class)
 public class ProxyFilter implements ContainerRequestFilter {
 
     static final String PROTO_PROXY_HEADER = "x-forwarded-proto";

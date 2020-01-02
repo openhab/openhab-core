@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author David Graeff - Initial contribution
  */
-@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MqttBrokerConnectionServiceInstance.class, configurationPid = "org.openhab.core.mqttbroker")
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MqttBrokerConnectionServiceInstance.class, configurationPid = "org.openhab.mqttbroker")
 @NonNullByDefault
 public class MqttBrokerConnectionServiceInstance {
     private final Logger logger = LoggerFactory.getLogger(MqttBrokerConnectionServiceInstance.class);

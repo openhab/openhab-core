@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
-@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MagicMultiInstanceService.class, configurationPid = "org.openhab.core.magicMultiInstance")
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = MagicMultiInstanceService.class, configurationPid = "org.openhab.magicmultiinstance")
 public class MagicMultiInstanceService {
 
     private final Logger logger = LoggerFactory.getLogger(MagicMultiInstanceService.class);
