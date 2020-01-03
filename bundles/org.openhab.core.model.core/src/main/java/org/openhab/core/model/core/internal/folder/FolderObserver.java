@@ -56,7 +56,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Fabio Marini - Refactoring to use WatchService
  * @author Ana Dimova - reduce to a single watch thread for all class instances
  */
-@Component(name = "org.openhab.core.folder", immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(name = "org.openhab.core.folder", immediate = true, configurationPid = "org.openhab.folder", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class FolderObserver extends AbstractWatchService {
 
     public FolderObserver() {
