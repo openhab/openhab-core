@@ -300,7 +300,7 @@ public class SmartHomeUnitsTest {
         QuantityType<?> converted = oneAh.toUnit(SmartHomeUnits.AMPERE_HOUR);
         QuantityType<?> converted2 = oneAh.toUnit(SmartHomeUnits.MILLIAMPERE_HOUR);
         assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
-        assertEquals("1000 mA h", converted2.toString());
+        assertEquals("1000 mAh", converted2.toString());
     }
 
     @Test
