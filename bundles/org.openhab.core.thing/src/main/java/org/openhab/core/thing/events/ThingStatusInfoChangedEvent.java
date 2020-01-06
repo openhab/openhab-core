@@ -86,7 +86,7 @@ public class ThingStatusInfoChangedEvent extends AbstractEvent {
 
     @Override
     public String toString() {
-        return "'" + thingUID + "' changed from " + oldStatusInfo.toString() + " to " + thingStatusInfo.toString();
+        return String.format("Thing '%s' changed from %s to %s", thingUID, oldStatusInfo, thingStatusInfo);
     }
 
 }

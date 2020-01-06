@@ -29,7 +29,7 @@ import org.openhab.core.types.State;
 public class ItemStatePredictedEvent extends AbstractEvent {
 
     /**
-     * The item state changed event type.
+     * The item state predicted event type.
      */
     public static final String TYPE = ItemStatePredictedEvent.class.getSimpleName();
 
@@ -37,6 +37,15 @@ public class ItemStatePredictedEvent extends AbstractEvent {
     protected final State predictedState;
     protected final boolean isConfirmation;
 
+    /**
+     * Constructs a new item state predicted event.
+     *
+     * @param topic the topic
+     * @param payload the payload
+     * @param itemName the item name
+     * @param predictedState the predicted item state
+     * @param isConfirmation the confirmation of previous item state
+     */
     public ItemStatePredictedEvent(String topic, String payload, String itemName, State predictedState,
             boolean isConfirmation) {
         super(topic, payload, null);
@@ -50,21 +59,36 @@ public class ItemStatePredictedEvent extends AbstractEvent {
         return TYPE;
     }
 
+    /**
+     * Gets the item name.
+     *
+     * @return the item name
+     */
     public String getItemName() {
         return itemName;
     }
 
+    /**
+     * Gets the predicted item state.
+     *
+     * @return the predicted item state
+     */
     public State getPredictedState() {
         return predictedState;
     }
 
+    /**
+     * Gets the confirmation of previous item state.
+     *
+     * @return true, if previous item state is confirmed
+     */
     public boolean isConfirmation() {
         return isConfirmation;
     }
 
     @Override
     public String toString() {
-        return String.format("%s predicted to become %s", itemName, predictedState);
+        return String.format("Item '%s' predicted to become %s", itemName, predictedState);
     }
 
 }
