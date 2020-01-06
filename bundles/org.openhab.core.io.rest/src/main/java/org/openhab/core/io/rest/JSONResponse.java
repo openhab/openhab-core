@@ -173,7 +173,7 @@ public class JSONResponse {
                 gson.toJson(entity, entity.getClass(), jsonWriter);
                 jsonWriter.flush();
             } catch (IOException | JsonIOException e) {
-                logger.debug("Error streaming JSON through PipedInputStream / PipedOutputStream: ", e);
+                logger.debug("Error streaming JSON through PipedInputStream / PipedOutputStream.", e);
             }
         });
 
@@ -195,7 +195,7 @@ public class JSONResponse {
 
         @Override
         public Response toResponse(Exception e) {
-            logger.debug("Exception during REST handling: ", e);
+            logger.debug("Exception during REST handling.", e);
 
             Response.StatusType status = Response.Status.INTERNAL_SERVER_ERROR;
 
