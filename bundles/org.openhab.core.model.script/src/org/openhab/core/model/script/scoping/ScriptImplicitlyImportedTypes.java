@@ -19,12 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures;
+import org.joda.time.DateTime;
 import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.SmartHomeUnits;
-import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.model.persistence.extensions.PersistenceExtensions;
 import org.openhab.core.model.script.actions.Audio;
 import org.openhab.core.model.script.actions.BusEvent;
@@ -39,8 +40,7 @@ import org.openhab.core.model.script.engine.IActionServiceProvider;
 import org.openhab.core.model.script.engine.IThingActionsProvider;
 import org.openhab.core.model.script.engine.action.ActionService;
 import org.openhab.core.model.script.lib.NumberExtensions;
-import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures;
-import org.joda.time.DateTime;
+import org.openhab.core.thing.binding.ThingActions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -53,7 +53,6 @@ import com.google.inject.Singleton;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Xtext 2.5.0 migration
  */
-@SuppressWarnings("restriction")
 @Singleton
 public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
 

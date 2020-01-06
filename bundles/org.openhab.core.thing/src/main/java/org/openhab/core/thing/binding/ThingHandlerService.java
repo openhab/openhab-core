@@ -12,12 +12,16 @@
  */
 package org.openhab.core.thing.binding;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  *
- * Interface for a service that provides access to a {@link ThingHandler}
+ * Interface for a service that provides access to a {@link ThingHandler}.
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public interface ThingHandlerService {
 
     /**
@@ -32,6 +36,7 @@ public interface ThingHandlerService {
      *
      * @return the {@link ThingHandler}
      */
+    @Nullable
     ThingHandler getThingHandler();
 
     /**
