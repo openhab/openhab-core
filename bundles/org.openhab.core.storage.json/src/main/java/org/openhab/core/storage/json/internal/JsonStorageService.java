@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Chris Jackson - Initial contribution
  */
-@Component(name = "org.openhab.core.storage.json", property = { //
+@Component(name = "org.openhab.core.storage.json", configurationPid = "org.openhab.storage.json", property = { //
         Constants.SERVICE_PID + "=org.openhab.core.storage.json", //
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Json Storage", //
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //

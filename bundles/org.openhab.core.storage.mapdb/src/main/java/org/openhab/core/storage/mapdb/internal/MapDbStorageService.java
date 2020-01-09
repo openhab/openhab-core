@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
  * @author Alex Tugarev - Added getStorage for name only
  * @author Markus Rathgeb - Use {@link DeletableStorageService}
  */
-@Component(name = "org.openhab.core.storage.mapdb", immediate = true, service = { StorageService.class,
-        DeletableStorageService.class }, property = "storage.format=mapdb")
+@Component(name = "org.openhab.core.storage.mapdb", configurationPid = "org.openhab.storage.mapdb", immediate = true, service = {
+        StorageService.class, DeletableStorageService.class }, property = "storage.format=mapdb")
 @NonNullByDefault
 public class MapDbStorageService implements DeletableStorageService {
 
