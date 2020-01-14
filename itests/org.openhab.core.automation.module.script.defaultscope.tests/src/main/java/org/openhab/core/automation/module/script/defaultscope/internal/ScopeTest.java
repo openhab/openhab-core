@@ -34,7 +34,7 @@ public class ScopeTest extends JavaOSGiTest {
 
     private ScriptEngine engine;
 
-    private final String path = "ESH-INF/automation/jsr223/";
+    private final String path = "OH-INF/automation/jsr223/";
     private final String workingFile = "scopeWorking.js";
     private final String failureFile = "scopeFailure.js";
 

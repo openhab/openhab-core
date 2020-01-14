@@ -52,7 +52,7 @@ import org.osgi.service.component.annotations.Reference;
 public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, BindingInfo>
         implements BindingInfoProvider, XmlDocumentProviderFactory<BindingInfoXmlResult> {
 
-    private static final String XML_DIRECTORY = "/ESH-INF/binding/";
+    private static final String XML_DIRECTORY = "/OH-INF/binding/";
     public static final String READY_MARKER = "esh.xmlBindingInfo";
 
     private final BindingI18nLocalizationService bindingI18nService;

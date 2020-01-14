@@ -58,7 +58,7 @@ import org.osgi.service.component.annotations.Reference;
 public class XmlThingTypeProvider extends AbstractXmlBasedProvider<UID, ThingType>
         implements ThingTypeProvider, XmlDocumentProviderFactory<List<?>> {
 
-    private static final String XML_DIRECTORY = "/ESH-INF/thing/";
+    private static final String XML_DIRECTORY = "/OH-INF/thing/";
     public static final String READY_MARKER = "esh.xmlThingTypes";
 
     private final ThingTypeI18nLocalizationService thingTypeI18nLocalizationService;

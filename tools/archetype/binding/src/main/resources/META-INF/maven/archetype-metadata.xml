@@ -42,7 +42,7 @@
 			</includes>
 		</fileSet>
 		<fileSet filtered="true" packaged="false" encoding="UTF-8">
-			<directory>src/main/resources/ESH-INF</directory>
+			<directory>src/main/resources/OH-INF</directory>
 			<includes>
 				<include>**/*.*</include>
 			</includes>
