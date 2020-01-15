@@ -14,6 +14,7 @@ package org.openhab.core.io.transport.mqtt.sslcontext;
 
 import javax.net.ssl.SSLContext;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
 import org.osgi.service.cm.ConfigurationException;
 
@@ -25,6 +26,7 @@ import org.osgi.service.cm.ConfigurationException;
  * @author David Graeff - Initial contribution
  */
 @Deprecated
+@NonNullByDefault
 public interface SSLContextProvider {
     /**
      * Return an {@link SSLContext} to be used by secure Mqtt broker connections. Never return null here. If you are not

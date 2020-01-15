@@ -20,6 +20,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author David Graeff - Initial contribution
  */
 @Deprecated
+@NonNullByDefault
 public class AcceptAllCertificatesSSLContext implements SSLContextProvider {
     private final Logger logger = LoggerFactory.getLogger(AcceptAllCertificatesSSLContext.class);
 
@@ -41,11 +44,11 @@ public class AcceptAllCertificatesSSLContext implements SSLContextProvider {
         }
 
         @Override
-        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+        public void checkClientTrusted(X509Certificate @Nullable [] certs, @Nullable String authType) {
         }
 
         @Override
-        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+        public void checkServerTrusted(X509Certificate @Nullable [] certs, @Nullable String authType) {
         }
     };
 
