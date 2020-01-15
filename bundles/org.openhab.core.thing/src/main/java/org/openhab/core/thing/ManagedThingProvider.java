@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
@@ -39,8 +38,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true, service = { ThingProvider.class, ManagedThingProvider.class })
 public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUID, ThingDTO> implements ThingProvider {
 
-    private ThingTypeRegistry thingTypeRegistry;
-    private ThingManager thingManager;
+    private final ThingTypeRegistry thingTypeRegistry;
+    private final ThingManager thingManager;
 
     @Activate
     public ManagedThingProvider(final @Reference StorageService storageService,
@@ -61,7 +60,7 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
     }
 
     @Override
-    protected Thing toElement(@NonNull String key, @NonNull ThingDTO persistableElement) {
+    protected Thing toElement(String key, ThingDTO persistableElement) {
         ThingTypeUID thingTypeUID = new ThingTypeUID(persistableElement.thingTypeUID);
         boolean isBridge = thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType;
 
