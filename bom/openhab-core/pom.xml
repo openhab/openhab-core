@@ -258,6 +258,12 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.rest.ui</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.io.rest.voice</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
