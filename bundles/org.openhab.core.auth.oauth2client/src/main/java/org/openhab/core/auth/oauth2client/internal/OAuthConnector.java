@@ -307,7 +307,7 @@ public class OAuthConnector {
             if (statusCode == HttpStatus.OK_200) {
                 AccessTokenResponse jsonResponse = gson.fromJson(content, AccessTokenResponse.class);
                 jsonResponse.setCreatedOn(LocalDateTime.now()); // this is not supplied by the response
-                logger.info("grant type {} to URL {} success", grantType, request.getURI());
+                logger.debug("grant type {} to URL {} success", grantType, request.getURI());
                 return jsonResponse;
             } else if (statusCode == HttpStatus.BAD_REQUEST_400) {
                 OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
