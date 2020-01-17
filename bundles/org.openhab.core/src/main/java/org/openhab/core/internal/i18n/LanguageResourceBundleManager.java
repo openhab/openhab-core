@@ -40,7 +40,7 @@ import org.osgi.framework.Bundle;
 public class LanguageResourceBundleManager {
 
     /** The directory within the bundle where the resource files are searched. */
-    protected static final String RESOURCE_DIRECTORY = "/ESH-INF/i18n";
+    protected static final String RESOURCE_DIRECTORY = "/OH-INF/i18n";
 
     /** The file pattern to filter out resource files. */
     private static final String RESOURCE_FILE_PATTERN = "*.properties";

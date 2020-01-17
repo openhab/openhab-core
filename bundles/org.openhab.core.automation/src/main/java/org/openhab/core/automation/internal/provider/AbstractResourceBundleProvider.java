@@ -79,7 +79,7 @@ public abstract class AbstractResourceBundleProvider<E> {
      * This static field provides a root directory for automation object resources in the bundle resources.
      * It is common for all resources - {@link ModuleType}s, {@link RuleTemplate}s and {@link Rule}s.
      */
-    protected static final String ROOT_DIRECTORY = "ESH-INF/automation";
+    protected static final String ROOT_DIRECTORY = "OH-INF/automation";
 
     protected @Nullable ConfigI18nLocalizationService configI18nService;
 
@@ -97,10 +97,10 @@ public abstract class AbstractResourceBundleProvider<E> {
      * This field is initialized in constructors of any particular provider with specific path for the particular
      * resources from specific type as {@link ModuleType}s, {@link RuleTemplate}s and {@link Rule}s:
      * <li>for
-     * {@link ModuleType}s it is a "ESH-INF/automation/moduletypes/"
+     * {@link ModuleType}s it is a "OH-INF/automation/moduletypes/"
      * <li>for {@link RuleTemplate}s it is a
-     * "ESH-INF/automation/templates/"
-     * <li>for {@link Rule}s it is a "ESH-INF/automation/rules/"
+     * "OH-INF/automation/templates/"
+     * <li>for {@link Rule}s it is a "OH-INF/automation/rules/"
      */
     protected final String path;
 

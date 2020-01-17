@@ -47,18 +47,18 @@ public class ResourceBundleClassLoaderTest {
     @Test
     public void testName() throws Exception {
         Path tmp = Files.createTempDirectory("tmp");
-        URL hostPropertiesURL = createTmpTestPropetiesFile(tmp, "host/ESH-INF/i18n/test.properties");
-        URL fragmentPropertiesURL = createTmpTestPropetiesFile(tmp, "fragment/ESH-INF/i18n/test.properties");
+        URL hostPropertiesURL = createTmpTestPropetiesFile(tmp, "host/OH-INF/i18n/test.properties");
+        URL fragmentPropertiesURL = createTmpTestPropetiesFile(tmp, "fragment/OH-INF/i18n/test.properties");
 
         Bundle bundleMock = mock(Bundle.class);
         when(bundleMock.findEntries(any(), any(), anyBoolean()))
                 .thenAnswer(answer -> Collections.enumeration(Arrays.asList(hostPropertiesURL, fragmentPropertiesURL)));
         when(bundleMock.getEntry(any())).thenReturn(hostPropertiesURL);
 
-        ResourceBundleClassLoader classloader = new ResourceBundleClassLoader(bundleMock, "/ESH-INF/i18n",
+        ResourceBundleClassLoader classloader = new ResourceBundleClassLoader(bundleMock, "/OH-INF/i18n",
                 "*.properties");
 
-        List<URL> propertiesURLs = Collections.list(bundleMock.findEntries("/ESH-INF/i18n", "*.properties", true));
+        List<URL> propertiesURLs = Collections.list(bundleMock.findEntries("/OH-INF/i18n", "*.properties", true));
 
         assertEquals(2, propertiesURLs.size());
         assertTrue(propertiesURLs.contains(hostPropertiesURL));

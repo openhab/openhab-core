@@ -62,7 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This tests the RuleEngineImpl and the import from JSON resources contained in the ESH-INF folder.
+ * This tests the RuleEngineImpl and the import from JSON resources contained in the OH-INF folder.
  * This test must be run first otherwise imported rules will be cleared.
  *
  * @author Benedikt Niehues - Initial contribution
