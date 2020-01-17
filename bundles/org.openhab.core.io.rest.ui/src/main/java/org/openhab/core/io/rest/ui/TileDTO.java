@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.core.ui;
+package org.openhab.core.io.rest.ui;
 
 /**
  * This is an data transfer object for a UI tile.

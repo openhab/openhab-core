@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.core.internal.ui;
+package org.openhab.core.io.rest.ui.internal;
 
 import java.util.stream.Stream;
 
@@ -24,7 +24,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
-import org.openhab.core.io.rest.core.ui.TileDTO;
+import org.openhab.core.io.rest.ui.TileDTO;
 import org.openhab.core.ui.tiles.Tile;
 import org.openhab.core.ui.tiles.TileProvider;
 import org.osgi.service.component.annotations.Component;
