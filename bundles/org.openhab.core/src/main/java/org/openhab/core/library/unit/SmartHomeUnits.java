@@ -50,10 +50,10 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.dimension.ArealDensity;
-import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
+import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
