@@ -23,12 +23,14 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.rest.JSONResponse;
@@ -58,6 +60,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Yordan Zhelev - Added Swagger annotations
  * @author Kai Kreuzer - Removed Thing links and added auto link url
  * @author Franck Dechavanne - Added DTOs to ApiResponses
+ * @author Yannick Schaus - Added filters to getAll
  */
 @Path(ItemChannelLinkResource.PATH_LINKS)
 @RolesAllowed({ Role.ADMIN })
@@ -79,8 +82,18 @@ public class ItemChannelLinkResource implements RESTResource {
     @ApiOperation(value = "Gets all available links.", response = ItemChannelLinkDTO.class, responseContainer = "Collection")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ItemChannelLinkDTO.class, responseContainer = "Collection") })
-    public Response getAll() {
+    public Response getAll(
+            @QueryParam("channelUID") @ApiParam(value = "filter by channel UID", required = false) @Nullable String channelUID,
+            @QueryParam("itemName") @ApiParam(value = "filter by item name", required = false) @Nullable String itemName) {
         Stream<ItemChannelLinkDTO> linkStream = itemChannelLinkRegistry.getAll().stream().map(this::toBeans);
+
+        if (channelUID != null) {
+            linkStream = linkStream.filter(link -> channelUID.equals(link.channelUID));
+        }
+        if (itemName != null) {
+            linkStream = linkStream.filter(link -> itemName.equals(link.itemName));
+        }
+
         return Response.ok(new Stream2JSONInputStream(linkStream)).build();
     }
 
@@ -95,7 +108,7 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Path("/{itemName}/{channelUID}")
-    @ApiOperation(value = "Retrieves links.")
+    @ApiOperation(value = "Retrieves an individual link.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Content does not match the path") })
     public Response getLink(@PathParam("itemName") @ApiParam(value = "itemName") String itemName,
