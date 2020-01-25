@@ -15,6 +15,8 @@ package org.openhab.core.model.script.internal.engine.action;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openhab.core.model.script.actions.Things;
+import org.openhab.core.model.script.engine.action.ActionService;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingStatusInfo;
@@ -22,8 +24,7 @@ import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.thing.binding.ThingActionsScope;
 import org.openhab.core.thing.binding.ThingHandler;
-import org.openhab.core.model.script.actions.Things;
-import org.openhab.core.model.script.engine.action.ActionService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -38,21 +39,17 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(immediate = true)
 public class ThingActionService implements ActionService {
 
+    private static final Map<String, ThingActions> THING_ACTIONS_MAP = new HashMap<>();
     private static ThingRegistry thingRegistry;
-    private static final Map<String, ThingActions> thingActionsMap = new HashMap<>();
+
+    @Activate
+    public ThingActionService(final @Reference ThingRegistry thingRegistry) {
+        ThingActionService.thingRegistry = thingRegistry;
+    }
 
     @Override
     public Class<?> getActionClass() {
         return Things.class;
-    }
-
-    @Reference
-    public void setThingRegistry(ThingRegistry thingRegistry) {
-        ThingActionService.thingRegistry = thingRegistry;
-    }
-
-    public void unsetThingRegistry(ThingRegistry thingRegistry) {
-        ThingActionService.thingRegistry = null;
     }
 
     public static ThingStatusInfo getThingStatusInfo(String thingUid) {
@@ -66,13 +63,21 @@ public class ThingActionService implements ActionService {
         }
     }
 
+    /**
+     * Gets an actions instance of a certain scope for a given thing UID
+     *
+     * @param scope the action scope
+     * @param thingUid the UID of the thing
+     *
+     * @return actions the actions instance or null, if not available
+     */
     public static ThingActions getActions(String scope, String thingUid) {
         ThingUID uid = new ThingUID(thingUid);
         Thing thing = thingRegistry.get(uid);
         if (thing != null) {
             ThingHandler handler = thing.getHandler();
             if (handler != null) {
-                ThingActions thingActions = thingActionsMap.get(getKey(scope, thingUid));
+                ThingActions thingActions = THING_ACTIONS_MAP.get(getKey(scope, thingUid));
                 return thingActions;
             }
         }
@@ -82,12 +87,12 @@ public class ThingActionService implements ActionService {
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     public void addThingActions(ThingActions thingActions) {
         String key = getKey(thingActions);
-        thingActionsMap.put(key, thingActions);
+        THING_ACTIONS_MAP.put(key, thingActions);
     }
 
     public void removeThingActions(ThingActions thingActions) {
         String key = getKey(thingActions);
-        thingActionsMap.remove(key);
+        THING_ACTIONS_MAP.remove(key);
     }
 
     private static String getKey(ThingActions thingActions) {
@@ -108,4 +113,5 @@ public class ThingActionService implements ActionService {
         ThingActionsScope scopeAnnotation = actions.getClass().getAnnotation(ThingActionsScope.class);
         return scopeAnnotation.name();
     }
+
 }

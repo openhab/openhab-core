@@ -12,9 +12,9 @@
  */
 package org.openhab.core.model.script.scoping;
 
-import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.thing.binding.ThingActions;
 
 /**
  * This is a special class loader that tries to resolve classes from available {@link ActionService}s,

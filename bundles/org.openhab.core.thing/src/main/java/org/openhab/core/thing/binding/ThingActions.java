@@ -12,11 +12,14 @@
  */
 package org.openhab.core.thing.binding;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- * Marker interface for Automation Actions with access to a ThingHandler
+ * Marker interface for Automation Actions with access to a {@link ThingHandler}.
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public interface ThingActions extends ThingHandlerService {
 
 }

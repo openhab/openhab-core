@@ -18,11 +18,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.thing.ThingRegistry;
-import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.script.engine.ScriptEngine;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.binding.ThingActions;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

@@ -21,9 +21,6 @@ import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.thing.binding.ThingActionsScope;
 import org.openhab.core.thing.binding.ThingHandler;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * The methods of this class are made available as functions in the scripts.
@@ -35,12 +32,11 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class ScriptThingActions {
 
     private static final Map<String, ThingActions> THING_ACTIONS_MAP = new HashMap<>();
+    private ThingRegistry thingRegistry;
 
     ScriptThingActions(ThingRegistry thingRegistry) {
         this.thingRegistry = thingRegistry;
     }
-
-    private ThingRegistry thingRegistry;
 
     public void dispose() {
         this.thingRegistry = null;
@@ -67,7 +63,6 @@ public class ScriptThingActions {
         return null;
     }
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     void addThingActions(ThingActions thingActions) {
         String key = getKey(thingActions);
         THING_ACTIONS_MAP.put(key, thingActions);
