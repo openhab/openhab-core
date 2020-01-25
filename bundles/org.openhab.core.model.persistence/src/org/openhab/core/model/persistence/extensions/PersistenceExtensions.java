@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 
+import org.joda.time.DateTime;
+import org.joda.time.base.AbstractInstant;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
@@ -30,8 +32,6 @@ import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.types.State;
-import org.joda.time.DateTime;
-import org.joda.time.base.AbstractInstant;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.LoggerFactory;
@@ -182,9 +182,8 @@ public class PersistenceExtensions {
      *
      * @param item the item to check for state changes
      * @param timestamp the point in time to start the check
-     * @return <code>true</code> if item state has changed, <code>false</code> if it did not change or if the default
-     *         persistence service does not refer to a {@link QueryablePersistenceService}, or if the default
-     *         persistence service is not available
+     * @return <code>true</code> if item state has changed, <code>false</code> if it has not changed or if the default
+     *         persistence service is not available or does not refer to a {@link QueryablePersistenceService}
      */
     public static Boolean changedSince(Item item, AbstractInstant timestamp) {
         return changedSince(item, timestamp, getDefaultServiceId());
@@ -197,8 +196,8 @@ public class PersistenceExtensions {
      * @param item the item to check for state changes
      * @param timestamp the point in time to start the check
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return <code>true</code> if item state has changed, or <code>false</code> if it did not change or if the given
-     *         <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
+     * @return <code>true</code> if item state has changed, or <code>false</code> if it has not changed or if the
+     *         provided <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
      */
     public static Boolean changedSince(Item item, AbstractInstant timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
