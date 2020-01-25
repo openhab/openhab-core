@@ -182,9 +182,8 @@ public class PersistenceExtensions {
      *
      * @param item the item to check for state changes
      * @param timestamp the point in time to start the check
-     * @return <code>true</code> if item state had changed, <code>false</code> if it hasn't or if the default
-     *         persistence service does not refer to a {@link QueryablePersistenceService}, or <code>null</code> if the
-     *         default persistence service is not available
+     * @return <code>true</code> if item state has changed, <code>false</code> if it has not changed or if the default
+     *         persistence service is not available or does not refer to a {@link QueryablePersistenceService}
      */
     public static Boolean changedSince(Item item, AbstractInstant timestamp) {
         return changedSince(item, timestamp, getDefaultServiceId());
@@ -197,8 +196,8 @@ public class PersistenceExtensions {
      * @param item the item to check for state changes
      * @param timestamp the point in time to start the check
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return <code>true</code> if item state has changed, or <code>false</code> if it hasn't or if the given
-     *         <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
+     * @return <code>true</code> if item state has changed, or <code>false</code> if it has not changed or if the
+     *         provided <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
      */
     public static Boolean changedSince(Item item, AbstractInstant timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
@@ -262,9 +261,8 @@ public class PersistenceExtensions {
      *
      * @param item the item to get the maximum state value for
      * @param timestamp the point in time to start the check
-     * @return a historic item with the maximum state value since the given point in time, or <code>null</code> if the
-     *         default persistence service is not available, or a {@link HistoricItem} constructed from the
-     *         <code>item</code> if the default persistence service does not refer to a
+     * @return a historic item with the maximum state value since the given point in time, or a {@link HistoricItem}
+     *         constructed from the <code>item</code> if the default persistence service does not refer to a
      *         {@link QueryablePersistenceService}
      */
     public static HistoricItem maximumSince(Item item, AbstractInstant timestamp) {
@@ -330,10 +328,9 @@ public class PersistenceExtensions {
      *
      * @param item the item to get the minimum state value for
      * @param timestamp the point in time from which to search for the minimum state value
-     * @return the historic item with the minimum state value since the given point in time, <code>null</code> if the
-     *         default persistence service is not available, or a {@link HistoricItem} constructed from the
-     *         <code>item</code>'s state if <code>item</code>'s state is the minimum value or if the default persistence
-     *         service does not refer to an available {@link QueryablePersistenceService}
+     * @return the historic item with the minimum state value since the given point in time or a {@link HistoricItem}
+     *         constructed from the <code>item</code>'s state if <code>item</code>'s state is the minimum value or if
+     *         the default persistence service does not refer to an available {@link QueryablePersistenceService}
      */
     public static HistoricItem minimumSince(Item item, AbstractInstant timestamp) {
         return minimumSince(item, timestamp, getDefaultServiceId());
@@ -397,9 +394,8 @@ public class PersistenceExtensions {
      *
      * @param item the item to get the average state value for
      * @param timestamp the point in time from which to search for the average state value
-     * @return the average state values since <code>timestamp</code>, <code>null</code> if the default persistence
-     *         service is not available, or the state of the given <code>item</code> if no previous states could be
-     *         found or if the default persistence service does not refer to an available
+     * @return the average state values since <code>timestamp</code> or the state of the given <code>item</code> if no
+     *         previous states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}
      */
     public static DecimalType averageSince(Item item, AbstractInstant timestamp) {
@@ -475,9 +471,9 @@ public class PersistenceExtensions {
      *
      * @param item the item for which we will sum its persisted state values since <code>timestamp</code>
      * @param timestamp the point in time from which to start the summation
-     * @return the sum of the state values since <code>timestamp</code>, <code>null</code> if the default persistence
-     *         service is not available, or {@link DecimalType.ZERO} if no historic states could be found or if the
-     *         default persistence service does not refer to a {@link QueryablePersistenceService}
+     * @return the sum of the state values since <code>timestamp</code>, or {@link DecimalType.ZERO} if no historic
+     *         states could be found or if the default persistence service does not refer to a
+     *         {@link QueryablePersistenceService}
      */
     public static DecimalType sumSince(Item item, AbstractInstant timestamp) {
         return sumSince(item, timestamp, getDefaultServiceId());
