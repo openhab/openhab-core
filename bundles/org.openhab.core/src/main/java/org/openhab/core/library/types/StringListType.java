@@ -33,7 +33,7 @@ import org.openhab.core.types.State;
 @NonNullByDefault
 public class StringListType implements Command, State {
 
-    protected List<String> typeDetails;
+    final protected List<String> typeDetails;
 
     // constants
     public static final String DELIMITER = ",";
@@ -105,7 +105,7 @@ public class StringListType implements Command, State {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((typeDetails == null) ? 0 : typeDetails.hashCode());
+        result = prime * result + typeDetails.hashCode();
         return result;
     }
 
@@ -121,10 +121,7 @@ public class StringListType implements Command, State {
             return false;
         }
         StringListType other = (StringListType) obj;
-        if (!typeDetails.equals(other.typeDetails)) {
-            return false;
-        }
-        return true;
+        return typeDetails.equals(other.typeDetails);
     }
 
 }
