@@ -15,12 +15,13 @@ package org.openhab.core.model.script.scoping;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures;
-import org.joda.time.DateTime;
 import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
@@ -108,8 +109,9 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(SmartHomeUnits.class);
         result.add(BinaryPrefix.class);
 
-        // jodatime static functions
-        result.add(DateTime.class);
+        // date time static functions
+        result.add(Instant.class);
+        result.add(ZonedDateTime.class);
 
         result.addAll(getActionClasses());
         return result;
