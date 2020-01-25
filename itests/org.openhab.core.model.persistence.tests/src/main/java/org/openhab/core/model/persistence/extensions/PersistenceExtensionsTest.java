@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -42,7 +43,6 @@ import org.openhab.core.types.State;
  * @author Chris Jackson - Initial contribution
  * @author Jan N. Klug - Fix averageSince calculation
  */
-@SuppressWarnings("deprecation")
 public class PersistenceExtensionsTest {
 
     private final PersistenceServiceRegistry registry = new PersistenceServiceRegistry() {
@@ -72,6 +72,13 @@ public class PersistenceExtensionsTest {
         }
     };
 
+    private final TimeZoneProvider timeZoneProvider = new TimeZoneProvider() {
+        @Override
+        public ZoneId getTimeZone() {
+            return ZoneId.systemDefault();
+        }
+    };
+
     private PersistenceExtensions ext;
     private GenericItem item;
 
@@ -79,6 +86,7 @@ public class PersistenceExtensionsTest {
     public void setUp() {
         ext = new PersistenceExtensions();
         ext.setPersistenceServiceRegistry(registry);
+        ext.setTimeZoneProvider(timeZoneProvider);
         item = new GenericItem("Test", "Test") {
             @Override
             public List<Class<? extends State>> getAcceptedDataTypes() {
@@ -181,7 +189,7 @@ public class PersistenceExtensionsTest {
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("2012", historicItem.getState().toString());
-        assertEquals(Date.from(ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant()),
+        assertEquals(Date.from(ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant()),
                 historicItem.getTimestamp());
 
         // default persistence service
@@ -194,17 +202,13 @@ public class PersistenceExtensionsTest {
     @Test
     public void testAverageSince() {
         item.setState(new DecimalType(3025));
-        DecimalType average = PersistenceExtensions.averageSince(item,
-                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
-                TestPersistenceService.ID);
-        assertNull(average);
 
         Instant startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant();
         Instant endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant();
         long storedInterval = endStored.toEpochMilli() - startStored.toEpochMilli();
         long recentInterval = Instant.now().toEpochMilli() - endStored.toEpochMilli();
         double expected = (2007.4994 * storedInterval + 2518.5 * recentInterval) / (storedInterval + recentInterval);
-        average = PersistenceExtensions.averageSince(item, startStored, TestPersistenceService.ID);
+        DecimalType average = PersistenceExtensions.averageSince(item, startStored, TestPersistenceService.ID);
         assertNotNull(average);
         assertEquals(expected, average.doubleValue(), 0.01);
 
