@@ -50,7 +50,6 @@ Fragment-Host: org.openhab.core.model.core
 	org.eclipse.xtext.util;version='[2.19.0,2.19.1)',\
 	org.eclipse.xtext.xbase.lib;version='[2.19.0,2.19.1)',\
 	io.github.classgraph;version='[4.8.35,4.8.36)',\
-	joda-time;version='[2.9.2,2.9.3)',\
 	org.eclipse.xtext.common.types;version='[2.19.0,2.19.1)',\
 	org.objectweb.asm;version='[7.1.0,7.1.1)',\
 	jollyday;version='[0.5.8,0.5.9)',\

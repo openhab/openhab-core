@@ -528,7 +528,7 @@ public class PersistenceExtensions {
      *         persisted updates or the default persistence service is not available or a
      *         {@link QueryablePersistenceService}
      */
-    public static ZonedDateTime lastUpdate(Item item) {
+    public static Instant lastUpdate(Item item) {
         return lastUpdate(item, getDefaultServiceId());
     }
 
@@ -541,7 +541,7 @@ public class PersistenceExtensions {
      *         persisted updates or if persistence service given by <code>serviceId</code> does not refer to an
      *         available {@link QueryablePersistenceService}
      */
-    public static ZonedDateTime lastUpdate(Item item, String serviceId) {
+    public static Instant lastUpdate(Item item, String serviceId) {
         PersistenceService service = getService(serviceId);
         if (service instanceof QueryablePersistenceService) {
             QueryablePersistenceService qService = (QueryablePersistenceService) service;
@@ -551,8 +551,7 @@ public class PersistenceExtensions {
             filter.setPageSize(1);
             Iterable<HistoricItem> result = qService.query(filter);
             if (result.iterator().hasNext()) {
-                return ZonedDateTime.ofInstant(result.iterator().next().getTimestamp().toInstant(),
-                        timeZoneProvider.getTimeZone());
+                return result.iterator().next().getTimestamp().toInstant();
             } else {
                 return null;
             }

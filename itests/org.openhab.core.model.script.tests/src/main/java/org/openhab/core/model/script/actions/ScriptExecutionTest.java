@@ -13,8 +13,9 @@
 package org.openhab.core.model.script.actions;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.joda.time.Instant.now;
 import static org.junit.Assert.assertThat;
+
+import java.time.Instant;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,14 +49,14 @@ public class ScriptExecutionTest {
     }
 
     private Timer createTimer(MockClosure0 closure) {
-        Timer timer = ScriptExecution.createTimer(now(), closure);
+        Timer timer = ScriptExecution.createTimer(Instant.now(), closure);
         // The code in our mock closure needs access to the timer object
         closure.setTimer(timer);
         return timer;
     }
 
     private Timer createTimer(Object arg, MockClosure1 closure) {
-        Timer timer = ScriptExecution.createTimerWithArgument(now(), arg, closure);
+        Timer timer = ScriptExecution.createTimerWithArgument(Instant.now(), arg, closure);
         // The code in our mock closure needs access to the timer object
         closure.setTimer(timer);
         return timer;
@@ -113,7 +114,7 @@ public class ScriptExecutionTest {
         assertThat(t.hasTerminated(), is(equalTo(true)));
 
         // Now try to reschedule the Timer to run again after 10ms
-        boolean rescheduled = t.reschedule(now());
+        boolean rescheduled = t.reschedule(Instant.now());
         assertThat(rescheduled, is(equalTo(true)));
         assertThat(t.hasTerminated(), is(equalTo(false)));
         assertThat(scheduler.getPendingJobCount(), is(equalTo(1)));
