@@ -101,4 +101,14 @@ public class StringListTypeTest {
         assertEquals("a,b", abC.getValue(0));
         assertEquals("c", abC.getValue(1));
     }
+
+    @Test
+    public void testEquals() {
+        StringListType a = new StringListType("1", "2", "3");
+        StringListType b = new StringListType("1", "2", "3");
+        StringListType c = new StringListType("4", "5", "6");
+        assertEquals(a, b);
+        assertNotEquals(a, c);
+        assertNotEquals(b, c);
+    }
 }
