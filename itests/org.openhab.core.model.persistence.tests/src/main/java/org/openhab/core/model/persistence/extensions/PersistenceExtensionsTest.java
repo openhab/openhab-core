@@ -14,17 +14,19 @@ package org.openhab.core.model.persistence.extensions;
 
 import static org.junit.Assert.*;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import org.joda.time.DateMidnight;
-import org.joda.time.DateTime;
-import org.joda.time.base.AbstractInstant;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -41,7 +43,6 @@ import org.openhab.core.types.State;
  * @author Chris Jackson - Initial contribution
  * @author Jan N. Klug - Fix averageSince calculation
  */
-@SuppressWarnings("deprecation")
 public class PersistenceExtensionsTest {
 
     private final PersistenceServiceRegistry registry = new PersistenceServiceRegistry() {
@@ -71,6 +72,13 @@ public class PersistenceExtensionsTest {
         }
     };
 
+    private final TimeZoneProvider timeZoneProvider = new TimeZoneProvider() {
+        @Override
+        public ZoneId getTimeZone() {
+            return ZoneId.systemDefault();
+        }
+    };
+
     private PersistenceExtensions ext;
     private GenericItem item;
 
@@ -78,6 +86,7 @@ public class PersistenceExtensionsTest {
     public void setUp() {
         ext = new PersistenceExtensions();
         ext.setPersistenceServiceRegistry(registry);
+        ext.setTimeZoneProvider(timeZoneProvider);
         item = new GenericItem("Test", "Test") {
             @Override
             public List<Class<? extends State>> getAcceptedDataTypes() {
@@ -98,53 +107,63 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testHistoricState() {
-        HistoricItem historicItem = PersistenceExtensions.historicState(item, new DateMidnight(2012, 1, 1),
+        HistoricItem historicItem = PersistenceExtensions.historicState(item,
+                ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("2012", historicItem.getState().toString());
 
-        historicItem = PersistenceExtensions.historicState(item, new DateMidnight(2011, 12, 31),
+        historicItem = PersistenceExtensions.historicState(item,
+                ZonedDateTime.of(2011, 12, 31, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("2011", historicItem.getState().toString());
 
-        historicItem = PersistenceExtensions.historicState(item, new DateMidnight(2011, 1, 1),
+        historicItem = PersistenceExtensions.historicState(item,
+                ZonedDateTime.of(2011, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("2011", historicItem.getState().toString());
 
-        historicItem = PersistenceExtensions.historicState(item, new DateMidnight(2000, 1, 1),
+        historicItem = PersistenceExtensions.historicState(item,
+                ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("2000", historicItem.getState().toString());
 
         // default persistence service
-        historicItem = PersistenceExtensions.historicState(item, new DateMidnight(2000, 1, 1));
+        historicItem = PersistenceExtensions.historicState(item,
+                ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
         assertNull(historicItem);
     }
 
     @Test
     public void testMinimumSince() {
         item.setState(new QuantityType<>(5000, SIUnits.CELSIUS));
-        HistoricItem historicItem = PersistenceExtensions.minimumSince(item, new DateMidnight(1940, 1, 1),
+        HistoricItem historicItem = PersistenceExtensions.minimumSince(item,
+                ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("5000", historicItem.getState().toString());
 
         item.setState(new DecimalType(5000));
-        historicItem = PersistenceExtensions.minimumSince(item, new DateMidnight(1940, 1, 1),
+        historicItem = PersistenceExtensions.minimumSince(item,
+                ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("5000", historicItem.getState().toString());
 
-        historicItem = PersistenceExtensions.minimumSince(item, new DateMidnight(2005, 1, 1),
+        historicItem = PersistenceExtensions.minimumSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("2005", historicItem.getState().toString());
-        assertEquals(new DateMidnight(2005, 1, 1).toDate(), historicItem.getTimestamp());
+        assertEquals(Date.from(ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant()),
+                historicItem.getTimestamp());
 
         // default persistence service
-        historicItem = PersistenceExtensions.minimumSince(item, new DateMidnight(2005, 1, 1));
+        historicItem = PersistenceExtensions.minimumSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
         assertNotNull(historicItem);
         assertEquals("5000", historicItem.getState().toString());
     }
@@ -152,25 +171,30 @@ public class PersistenceExtensionsTest {
     @Test
     public void testMaximumSince() {
         item.setState(new QuantityType<>(1, SIUnits.CELSIUS));
-        HistoricItem historicItem = PersistenceExtensions.maximumSince(item, new DateMidnight(2012, 1, 1),
+        HistoricItem historicItem = PersistenceExtensions.maximumSince(item,
+                ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("1", historicItem.getState().toString());
 
         item.setState(new DecimalType(1));
-        historicItem = PersistenceExtensions.maximumSince(item, new DateMidnight(2012, 1, 1),
+        historicItem = PersistenceExtensions.maximumSince(item,
+                ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("1", historicItem.getState().toString());
 
-        historicItem = PersistenceExtensions.maximumSince(item, new DateMidnight(2005, 1, 1),
+        historicItem = PersistenceExtensions.maximumSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNotNull(historicItem);
         assertEquals("2012", historicItem.getState().toString());
-        assertEquals(new DateMidnight(2012, 1, 1).toDate(), historicItem.getTimestamp());
+        assertEquals(Date.from(ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant()),
+                historicItem.getTimestamp());
 
         // default persistence service
-        historicItem = PersistenceExtensions.maximumSince(item, new DateMidnight(2005, 1, 1));
+        historicItem = PersistenceExtensions.maximumSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
         assertNotNull(historicItem);
         assertEquals("1", historicItem.getState().toString());
     }
@@ -178,16 +202,13 @@ public class PersistenceExtensionsTest {
     @Test
     public void testAverageSince() {
         item.setState(new DecimalType(3025));
-        DecimalType average = PersistenceExtensions.averageSince(item, new DateMidnight(1940, 1, 1),
-                TestPersistenceService.ID);
-        assertNull(average);
 
-        DateMidnight startStored = new DateMidnight(2003, 1, 1);
-        DateMidnight endStored = new DateMidnight(2012, 1, 1);
-        long storedInterval = endStored.getMillis() - startStored.getMillis();
-        long recentInterval = DateTime.now().getMillis() - endStored.getMillis();
+        Instant startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant();
+        Instant endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant();
+        long storedInterval = endStored.toEpochMilli() - startStored.toEpochMilli();
+        long recentInterval = Instant.now().toEpochMilli() - endStored.toEpochMilli();
         double expected = (2007.4994 * storedInterval + 2518.5 * recentInterval) / (storedInterval + recentInterval);
-        average = PersistenceExtensions.averageSince(item, startStored, TestPersistenceService.ID);
+        DecimalType average = PersistenceExtensions.averageSince(item, startStored, TestPersistenceService.ID);
         assertNotNull(average);
         assertEquals(expected, average.doubleValue(), 0.01);
 
@@ -203,16 +224,21 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testSumSince() {
-        DecimalType sum = PersistenceExtensions.sumSince(item, new DateMidnight(1940, 1, 1), TestPersistenceService.ID);
+        DecimalType sum = PersistenceExtensions.sumSince(item,
+                ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
+                TestPersistenceService.ID);
         assertNotNull(sum);
         assertEquals(0.0, sum.doubleValue(), 0.001);
 
-        sum = PersistenceExtensions.sumSince(item, new DateMidnight(2005, 1, 1), TestPersistenceService.ID);
+        sum = PersistenceExtensions.sumSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
+                TestPersistenceService.ID);
         assertNotNull(sum);
         assertEquals(IntStream.of(2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012).sum(), sum.doubleValue(), 0.001);
 
         // default persistence service
-        sum = PersistenceExtensions.sumSince(item, new DateMidnight(2005, 1, 1));
+        sum = PersistenceExtensions.sumSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
         assertNotNull(sum);
         assertEquals(0.0, sum.doubleValue(), 0.001);
     }
@@ -220,9 +246,9 @@ public class PersistenceExtensionsTest {
     @Test
     public void testLastUpdate() {
         item.setState(new DecimalType(2005));
-        AbstractInstant lastUpdate = PersistenceExtensions.lastUpdate(item, TestPersistenceService.ID);
+        Instant lastUpdate = PersistenceExtensions.lastUpdate(item, TestPersistenceService.ID);
         assertNotNull(lastUpdate);
-        assertEquals(new DateMidnight(2012, 1, 1).toDate(), lastUpdate.toDate());
+        assertEquals(ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(), lastUpdate);
 
         // default persistence service
         lastUpdate = PersistenceExtensions.lastUpdate(item);
@@ -232,44 +258,56 @@ public class PersistenceExtensionsTest {
     @Test
     public void testDeltaSince() {
         item.setState(new DecimalType(2012));
-        DecimalType delta = PersistenceExtensions.deltaSince(item, new DateMidnight(1940, 1, 1),
+        DecimalType delta = PersistenceExtensions.deltaSince(item,
+                ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNull(delta);
 
-        delta = PersistenceExtensions.deltaSince(item, new DateMidnight(2005, 1, 1), TestPersistenceService.ID);
+        delta = PersistenceExtensions.deltaSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
+                TestPersistenceService.ID);
         assertNotNull(delta);
         assertEquals(7, delta.doubleValue(), 0.001);
 
         item.setState(new QuantityType<>(2012, SIUnits.CELSIUS));
-        delta = PersistenceExtensions.deltaSince(item, new DateMidnight(2005, 1, 1), TestPersistenceService.ID);
+        delta = PersistenceExtensions.deltaSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
+                TestPersistenceService.ID);
         assertNotNull(delta);
         assertEquals(7, delta.doubleValue(), 0.001);
 
         // default persistence service
-        delta = PersistenceExtensions.deltaSince(item, new DateMidnight(2005, 1, 1));
+        delta = PersistenceExtensions.deltaSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
         assertNull(delta);
     }
 
     @Test
     public void testEvolutionRate() {
         item.setState(new DecimalType(2012));
-        DecimalType rate = PersistenceExtensions.evolutionRate(item, new DateMidnight(1940, 1, 1),
+        DecimalType rate = PersistenceExtensions.evolutionRate(item,
+                ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertNull(rate);
 
-        rate = PersistenceExtensions.evolutionRate(item, new DateMidnight(2005, 1, 1), TestPersistenceService.ID);
+        rate = PersistenceExtensions.evolutionRate(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
+                TestPersistenceService.ID);
         assertNotNull(rate);
         // ((now - then) / then) * 100
         assertEquals(0.349127182, rate.doubleValue(), 0.001);
 
         item.setState(new QuantityType<>(2012, SIUnits.CELSIUS));
-        rate = PersistenceExtensions.evolutionRate(item, new DateMidnight(2005, 1, 1), TestPersistenceService.ID);
+        rate = PersistenceExtensions.evolutionRate(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
+                TestPersistenceService.ID);
         assertNotNull(rate);
         // ((now - then) / then) * 100
         assertEquals(0.349127182, rate.doubleValue(), 0.001);
 
         // default persistence service
-        rate = PersistenceExtensions.evolutionRate(item, new DateMidnight(2005, 1, 1));
+        rate = PersistenceExtensions.evolutionRate(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
         assertNull(rate);
     }
 
@@ -304,29 +342,37 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testChangedSince() {
-        boolean changed = PersistenceExtensions.changedSince(item, new DateMidnight(1940, 1, 1),
+        boolean changed = PersistenceExtensions.changedSince(item,
+                ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertFalse(changed);
 
-        changed = PersistenceExtensions.changedSince(item, new DateMidnight(2005, 1, 1), TestPersistenceService.ID);
+        changed = PersistenceExtensions.changedSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
+                TestPersistenceService.ID);
         assertTrue(changed);
 
         // default persistence service
-        changed = PersistenceExtensions.changedSince(item, new DateMidnight(2005, 1, 1));
+        changed = PersistenceExtensions.changedSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
         assertFalse(changed);
     }
 
     @Test
     public void testUpdatedSince() {
-        boolean updated = PersistenceExtensions.updatedSince(item, new DateMidnight(1940, 1, 1),
+        boolean updated = PersistenceExtensions.updatedSince(item,
+                ZonedDateTime.of(1940, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
                 TestPersistenceService.ID);
         assertFalse(updated);
 
-        updated = PersistenceExtensions.updatedSince(item, new DateMidnight(2005, 1, 1), TestPersistenceService.ID);
+        updated = PersistenceExtensions.updatedSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant(),
+                TestPersistenceService.ID);
         assertTrue(updated);
 
         // default persistence service
-        updated = PersistenceExtensions.updatedSince(item, new DateMidnight(2005, 1, 1));
+        updated = PersistenceExtensions.updatedSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant());
         assertFalse(updated);
     }
 }

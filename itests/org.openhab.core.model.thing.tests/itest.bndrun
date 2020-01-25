@@ -15,7 +15,6 @@ Fragment-Host: org.openhab.core.model.thing
 -runbundles: \
 	com.google.inject;version='[3.0.0,3.0.1)',\
 	javax.measure.unit-api;version='[1.0.0,1.0.1)',\
-	joda-time;version='[2.9.2,2.9.3)',\
 	log4j;version='[1.2.17,1.2.18)',\
 	org.antlr.runtime;version='[3.2.0,3.2.1)',\
 	org.apache.commons.exec;version='[1.1.0,1.1.1)',\

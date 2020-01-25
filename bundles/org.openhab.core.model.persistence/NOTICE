@@ -13,13 +13,6 @@ https://www.eclipse.org/legal/epl-2.0/.
 https://github.com/openhab/openhab-core
 
 
-== Third-party Content
-
-org.joda.time Version: 2.9.2
-* License: Apache License, 2.0
-* Project: www.joda.org/joda-time/
-* Source: https://github.com/JodaOrg/joda-time/tree/v2.9.2
-
 == Third-party license(s)
 
 === Apache License, 2.0

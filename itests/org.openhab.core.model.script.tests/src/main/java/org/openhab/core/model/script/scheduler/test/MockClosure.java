@@ -13,8 +13,9 @@
 package org.openhab.core.model.script.scheduler.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.joda.time.Instant.now;
 import static org.junit.Assert.assertThat;
+
+import java.time.Instant;
 
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -48,7 +49,7 @@ public class MockClosure {
 
             if (this.rescheduleCount > 0) {
                 this.rescheduleCount--;
-                boolean rescheduled = timer.reschedule(now());
+                boolean rescheduled = timer.reschedule(Instant.now());
                 assertThat(rescheduled, is(equalTo(true)));
             }
         }

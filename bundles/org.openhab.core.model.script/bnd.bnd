@@ -47,7 +47,6 @@ Import-Package: \
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.eclipse.jetty.http.*,\
  org.eclipse.xtext.xbase.lib,\
- org.joda.*,\
  org.osgi.*,\
  org.quartz.*,\
  org.slf4j.*

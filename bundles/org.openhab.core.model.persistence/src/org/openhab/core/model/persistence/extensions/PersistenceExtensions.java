@@ -14,14 +14,13 @@ package org.openhab.core.model.persistence.extensions;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.joda.time.DateTime;
-import org.joda.time.base.AbstractInstant;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
@@ -139,7 +138,7 @@ public class PersistenceExtensions {
      *         the default persistence service is not available or does not refer to a
      *         {@link QueryablePersistenceService}
      */
-    public static HistoricItem historicState(Item item, AbstractInstant timestamp) {
+    public static HistoricItem historicState(Item item, Instant timestamp) {
         return historicState(item, timestamp, getDefaultServiceId());
     }
 
@@ -154,12 +153,12 @@ public class PersistenceExtensions {
      *         if the provided <code>serviceId</code> does not refer to an available
      *         {@link QueryablePersistenceService}
      */
-    public static HistoricItem historicState(Item item, AbstractInstant timestamp, String serviceId) {
+    public static HistoricItem historicState(Item item, Instant timestamp, String serviceId) {
         PersistenceService service = getService(serviceId);
         if (service instanceof QueryablePersistenceService) {
             QueryablePersistenceService qService = (QueryablePersistenceService) service;
             FilterCriteria filter = new FilterCriteria();
-            filter.setEndDate(ZonedDateTime.ofInstant(timestamp.toDate().toInstant(), timeZoneProvider.getTimeZone()));
+            filter.setEndDate(ZonedDateTime.ofInstant(timestamp, timeZoneProvider.getTimeZone()));
             filter.setItemName(item.getName());
             filter.setPageSize(1);
             filter.setOrdering(Ordering.DESCENDING);
@@ -185,7 +184,7 @@ public class PersistenceExtensions {
      * @return <code>true</code> if item state has changed, <code>false</code> if it has not changed or if the default
      *         persistence service is not available or does not refer to a {@link QueryablePersistenceService}
      */
-    public static Boolean changedSince(Item item, AbstractInstant timestamp) {
+    public static Boolean changedSince(Item item, Instant timestamp) {
         return changedSince(item, timestamp, getDefaultServiceId());
     }
 
@@ -199,7 +198,7 @@ public class PersistenceExtensions {
      * @return <code>true</code> if item state has changed, or <code>false</code> if it has not changed or if the
      *         provided <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
      */
-    public static Boolean changedSince(Item item, AbstractInstant timestamp, String serviceId) {
+    public static Boolean changedSince(Item item, Instant timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem itemThen = historicState(item, timestamp);
@@ -212,7 +211,7 @@ public class PersistenceExtensions {
         State state = itemThen.getState();
         while (it.hasNext()) {
             HistoricItem hItem = it.next();
-            if (state != null && !hItem.getState().equals(state)) {
+            if (!hItem.getState().equals(state)) {
                 return true;
             }
             state = hItem.getState();
@@ -231,7 +230,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}, or <code>null</code> if the default persistence service is not
      *         available
      */
-    public static Boolean updatedSince(Item item, AbstractInstant timestamp) {
+    public static Boolean updatedSince(Item item, Instant timestamp) {
         return updatedSince(item, timestamp, getDefaultServiceId());
     }
 
@@ -246,7 +245,7 @@ public class PersistenceExtensions {
      *         since <code>timestamp</code> or if the given <code>serviceId</code> does not refer to a
      *         {@link QueryablePersistenceService}
      */
-    public static Boolean updatedSince(Item item, AbstractInstant timestamp, String serviceId) {
+    public static Boolean updatedSince(Item item, Instant timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
         if (result.iterator().hasNext()) {
             return true;
@@ -265,7 +264,7 @@ public class PersistenceExtensions {
      *         constructed from the <code>item</code> if the default persistence service does not refer to a
      *         {@link QueryablePersistenceService}
      */
-    public static HistoricItem maximumSince(Item item, AbstractInstant timestamp) {
+    public static HistoricItem maximumSince(Item item, Instant timestamp) {
         return maximumSince(item, timestamp, getDefaultServiceId());
     }
 
@@ -281,7 +280,7 @@ public class PersistenceExtensions {
      *         maximum value or if the given <code>serviceId</code> does not refer to an available
      *         {@link QueryablePersistenceService}
      */
-    public static HistoricItem maximumSince(final Item item, AbstractInstant timestamp, String serviceId) {
+    public static HistoricItem maximumSince(final Item item, Instant timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem maximumHistoricItem = null;
@@ -332,7 +331,7 @@ public class PersistenceExtensions {
      *         constructed from the <code>item</code>'s state if <code>item</code>'s state is the minimum value or if
      *         the default persistence service does not refer to an available {@link QueryablePersistenceService}
      */
-    public static HistoricItem minimumSince(Item item, AbstractInstant timestamp) {
+    public static HistoricItem minimumSince(Item item, Instant timestamp) {
         return minimumSince(item, timestamp, getDefaultServiceId());
     }
 
@@ -347,7 +346,7 @@ public class PersistenceExtensions {
      *         constructed from the <code>item</code>'s state if <code>item</code>'s state is the minimum value or if
      *         the given <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
      */
-    public static HistoricItem minimumSince(final Item item, AbstractInstant timestamp, String serviceId) {
+    public static HistoricItem minimumSince(final Item item, Instant timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem minimumHistoricItem = null;
@@ -398,7 +397,7 @@ public class PersistenceExtensions {
      *         previous states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}
      */
-    public static DecimalType averageSince(Item item, AbstractInstant timestamp) {
+    public static DecimalType averageSince(Item item, Instant timestamp) {
         return averageSince(item, timestamp, getDefaultServiceId());
     }
 
@@ -413,7 +412,7 @@ public class PersistenceExtensions {
      *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
      *         refer to an available {@link QueryablePersistenceService}
      */
-    public static DecimalType averageSince(Item item, AbstractInstant timestamp, String serviceId) {
+    public static DecimalType averageSince(Item item, Instant timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
         Iterator<HistoricItem> it = result.iterator();
 
@@ -431,7 +430,7 @@ public class PersistenceExtensions {
             if (state instanceof DecimalType) {
                 thisState = (DecimalType) state;
                 thisTimestamp = BigDecimal.valueOf(thisItem.getTimestamp().getTime());
-                if (firstTimestamp == null) {
+                if (firstTimestamp == null || lastState == null) {
                     firstTimestamp = thisTimestamp;
                 } else {
                     avgValue = (thisState.toBigDecimal().add(lastState.toBigDecimal())).divide(BigDecimal.valueOf(2),
@@ -447,7 +446,7 @@ public class PersistenceExtensions {
         if (lastState != null) {
             thisState = item.getStateAs(DecimalType.class);
             if (thisState != null) {
-                thisTimestamp = BigDecimal.valueOf((new DateTime()).getMillis());
+                thisTimestamp = BigDecimal.valueOf(Instant.now().toEpochMilli());
                 avgValue = (thisState.toBigDecimal().add(lastState.toBigDecimal())).divide(BigDecimal.valueOf(2),
                         MathContext.DECIMAL64);
                 timeSpan = thisTimestamp.subtract(lastTimestamp);
@@ -475,7 +474,7 @@ public class PersistenceExtensions {
      *         states could be found or if the default persistence service does not refer to a
      *         {@link QueryablePersistenceService}
      */
-    public static DecimalType sumSince(Item item, AbstractInstant timestamp) {
+    public static DecimalType sumSince(Item item, Instant timestamp) {
         return sumSince(item, timestamp, getDefaultServiceId());
     }
 
@@ -490,7 +489,7 @@ public class PersistenceExtensions {
      *         states could be found for the <code>item</code> or if <code>serviceId</code> does no refer to a
      *         {@link QueryablePersistenceService}
      */
-    public static DecimalType sumSince(Item item, AbstractInstant timestamp, String serviceId) {
+    public static DecimalType sumSince(Item item, Instant timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
         Iterator<HistoricItem> it = result.iterator();
 
@@ -505,13 +504,12 @@ public class PersistenceExtensions {
         return new DecimalType(sum);
     }
 
-    private static Iterable<HistoricItem> getAllStatesSince(Item item, AbstractInstant timestamp, String serviceId) {
+    private static Iterable<HistoricItem> getAllStatesSince(Item item, Instant timestamp, String serviceId) {
         PersistenceService service = getService(serviceId);
         if (service instanceof QueryablePersistenceService) {
             QueryablePersistenceService qService = (QueryablePersistenceService) service;
             FilterCriteria filter = new FilterCriteria();
-            filter.setBeginDate(
-                    ZonedDateTime.ofInstant(timestamp.toDate().toInstant(), timeZoneProvider.getTimeZone()));
+            filter.setBeginDate(ZonedDateTime.ofInstant(timestamp, timeZoneProvider.getTimeZone()));
             filter.setItemName(item.getName());
             filter.setOrdering(Ordering.ASCENDING);
             return qService.query(filter);
@@ -530,7 +528,7 @@ public class PersistenceExtensions {
      *         persisted updates or the default persistence service is not available or a
      *         {@link QueryablePersistenceService}
      */
-    public static AbstractInstant lastUpdate(Item item) {
+    public static Instant lastUpdate(Item item) {
         return lastUpdate(item, getDefaultServiceId());
     }
 
@@ -543,7 +541,7 @@ public class PersistenceExtensions {
      *         persisted updates or if persistence service given by <code>serviceId</code> does not refer to an
      *         available {@link QueryablePersistenceService}
      */
-    public static AbstractInstant lastUpdate(Item item, String serviceId) {
+    public static Instant lastUpdate(Item item, String serviceId) {
         PersistenceService service = getService(serviceId);
         if (service instanceof QueryablePersistenceService) {
             QueryablePersistenceService qService = (QueryablePersistenceService) service;
@@ -553,7 +551,7 @@ public class PersistenceExtensions {
             filter.setPageSize(1);
             Iterable<HistoricItem> result = qService.query(filter);
             if (result.iterator().hasNext()) {
-                return new DateTime(result.iterator().next().getTimestamp());
+                return result.iterator().next().getTimestamp().toInstant();
             } else {
                 return null;
             }
@@ -575,7 +573,7 @@ public class PersistenceExtensions {
      *         there is no persisted state for the given <code>item</code> at the given <code>timestamp</code> available
      *         in the default persistence service
      */
-    public static DecimalType deltaSince(Item item, AbstractInstant timestamp) {
+    public static DecimalType deltaSince(Item item, Instant timestamp) {
         return deltaSince(item, timestamp, getDefaultServiceId());
     }
 
@@ -591,13 +589,13 @@ public class PersistenceExtensions {
      *         <code>item</code> at the given <code>timestamp</code> using the persistence service named
      *         <code>serviceId</code>
      */
-    public static DecimalType deltaSince(Item item, AbstractInstant timestamp, String serviceId) {
+    public static DecimalType deltaSince(Item item, Instant timestamp, String serviceId) {
         HistoricItem itemThen = historicState(item, timestamp, serviceId);
         if (itemThen != null) {
             DecimalType valueThen = (DecimalType) itemThen.getState();
             DecimalType valueNow = item.getStateAs(DecimalType.class);
 
-            if ((valueThen != null) && (valueNow != null)) {
+            if (valueNow != null) {
                 return new DecimalType(valueNow.toBigDecimal().subtract(valueThen.toBigDecimal()));
             }
         }
@@ -617,7 +615,7 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>, or if there is a state but it is zero (which would cause a
      *         divide-by-zero error)
      */
-    public static DecimalType evolutionRate(Item item, AbstractInstant timestamp) {
+    public static DecimalType evolutionRate(Item item, Instant timestamp) {
         return evolutionRate(item, timestamp, getDefaultServiceId());
     }
 
@@ -635,14 +633,13 @@ public class PersistenceExtensions {
      *         <code>serviceId</code>, or if there is a state but it is zero (which would cause a divide-by-zero
      *         error)
      */
-    public static DecimalType evolutionRate(Item item, AbstractInstant timestamp, String serviceId) {
+    public static DecimalType evolutionRate(Item item, Instant timestamp, String serviceId) {
         HistoricItem itemThen = historicState(item, timestamp, serviceId);
         if (itemThen != null) {
             DecimalType valueThen = (DecimalType) itemThen.getState();
             DecimalType valueNow = item.getStateAs(DecimalType.class);
 
-            if ((valueThen != null) && (valueThen.toBigDecimal().compareTo(BigDecimal.ZERO) != 0)
-                    && (valueNow != null)) {
+            if ((valueThen.toBigDecimal().compareTo(BigDecimal.ZERO) != 0) && (valueNow != null)) {
                 // ((now - then) / then) * 100
                 return new DecimalType(valueNow.toBigDecimal().subtract(valueThen.toBigDecimal())
                         .divide(valueThen.toBigDecimal(), MathContext.DECIMAL64).movePointRight(2));

@@ -15,7 +15,13 @@ package org.openhab.core.model.script.actions;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import java.time.Instant;
+import java.util.Date;
+
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.script.ScriptServiceUtil;
 import org.openhab.core.model.script.engine.Script;
@@ -23,10 +29,6 @@ import org.openhab.core.model.script.engine.ScriptEngine;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
 import org.openhab.core.model.script.internal.actions.TimerExecutionJob;
 import org.openhab.core.model.script.internal.actions.TimerImpl;
-import org.eclipse.xtext.xbase.XExpression;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.joda.time.base.AbstractInstant;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -87,7 +89,7 @@ public class ScriptExecution {
      * @return a handle to the created timer, so that it can be canceled or rescheduled
      * @throws ScriptExecutionException if an error occurs during the execution
      */
-    public static Timer createTimer(AbstractInstant instant, Procedure0 closure) {
+    public static Timer createTimer(Instant instant, Procedure0 closure) {
         JobDataMap dataMap = new JobDataMap();
         dataMap.put("procedure", closure);
         return makeTimer(instant, closure.toString(), dataMap);
@@ -103,7 +105,7 @@ public class ScriptExecution {
      * @return a handle to the created timer, so that it can be canceled or rescheduled
      * @throws ScriptExecutionException if an error occurs during the execution
      */
-    public static Timer createTimerWithArgument(AbstractInstant instant, Object arg1, Procedure1<Object> closure) {
+    public static Timer createTimerWithArgument(Instant instant, Object arg1, Procedure1<Object> closure) {
         JobDataMap dataMap = new JobDataMap();
         dataMap.put("procedure1", closure);
         dataMap.put("argument1", arg1);
@@ -118,11 +120,11 @@ public class ScriptExecution {
      * @param dataMap job data map, preconfigured with arguments
      * @return
      */
-    private static Timer makeTimer(AbstractInstant instant, String closure, JobDataMap dataMap) {
+    private static Timer makeTimer(Instant instant, String closure, JobDataMap dataMap) {
 
         Logger logger = LoggerFactory.getLogger(ScriptExecution.class);
         JobKey jobKey = new JobKey(getTimerId() + " " + instant.toString() + ": " + closure.toString());
-        Trigger trigger = newTrigger().startAt(instant.toDate()).build();
+        Trigger trigger = newTrigger().startAt(Date.from(instant)).build();
         Timer timer = new TimerImpl(jobKey, trigger.getKey(), dataMap, instant);
         try {
             JobDetail job = newJob(TimerExecutionJob.class).withIdentity(jobKey).usingJobData(dataMap).build();

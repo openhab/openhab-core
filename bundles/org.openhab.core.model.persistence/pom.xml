@@ -9,7 +9,7 @@
     <artifactId>org.openhab.core.reactor.bundles</artifactId>
     <version>3.0.0-SNAPSHOT</version>
   </parent>
-
+ 
   <artifactId>org.openhab.core.model.persistence</artifactId>
 
   <name>openHAB Core :: Bundles :: Model Persistence</name>

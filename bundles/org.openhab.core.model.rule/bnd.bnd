@@ -35,8 +35,6 @@ Import-Package: \
  org.apache.commons.lang,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.eclipse.xtext.xbase.lib,\
- org.joda.time,\
- org.joda.time.base,\
  org.osgi.*,\
  org.quartz,\
  org.quartz.impl,\

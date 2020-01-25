@@ -15,11 +15,10 @@ package org.openhab.core.model.script.internal.actions;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import java.time.Instant;
 import java.util.Date;
 
 import org.openhab.core.model.script.actions.Timer;
-import org.joda.time.DateTime;
-import org.joda.time.base.AbstractInstant;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -56,12 +55,12 @@ public class TimerImpl implements Timer {
     private final JobKey jobKey;
     private TriggerKey triggerKey;
     private final JobDataMap dataMap;
-    private final AbstractInstant startTime;
+    private final Instant startTime;
 
     private boolean cancelled = false;
     private boolean terminated = false;
 
-    public TimerImpl(JobKey jobKey, TriggerKey triggerKey, JobDataMap dataMap, AbstractInstant startTime) {
+    public TimerImpl(JobKey jobKey, TriggerKey triggerKey, JobDataMap dataMap, Instant startTime) {
         this.jobKey = jobKey;
         this.triggerKey = triggerKey;
         this.dataMap = dataMap;
@@ -83,9 +82,9 @@ public class TimerImpl implements Timer {
     }
 
     @Override
-    public boolean reschedule(AbstractInstant newTime) {
+    public boolean reschedule(Instant newTime) {
         try {
-            Trigger trigger = newTrigger().startAt(newTime.toDate()).build();
+            Trigger trigger = newTrigger().startAt(Date.from(newTime)).build();
             Date nextTriggerTime = scheduler.rescheduleJob(triggerKey, trigger);
             if (nextTriggerTime == null) {
                 logger.debug("Scheduling a new job job '{}' because the original has already run", jobKey.toString());
@@ -114,7 +113,7 @@ public class TimerImpl implements Timer {
         } catch (SchedulerException e) {
             // fallback implementation
             logger.debug("An error occurred getting currently running jobs: {}", e.getMessage());
-            return DateTime.now().isAfter(startTime) && !terminated;
+            return Instant.now().isAfter(startTime) && !terminated;
         }
     }
 
