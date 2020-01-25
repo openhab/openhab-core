@@ -34,7 +34,6 @@
 
 		<!-- TODO: Unbundled libraries -->
 		<bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xstream/1.4.7_1</bundle>
-		<bundle dependency="true">mvn:joda-time/joda-time/2.9.2</bundle>
 	</feature>
 
 	<feature name="openhab.tp-coap" description="Californium CoAP library" version="${project.version}">
