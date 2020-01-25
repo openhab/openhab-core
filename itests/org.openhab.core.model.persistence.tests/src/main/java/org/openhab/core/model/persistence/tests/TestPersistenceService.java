@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.persistence.FilterCriteria;
@@ -31,13 +33,16 @@ import org.openhab.core.types.State;
 /**
  * A simple persistence service used for unit tests
  *
- * @author Kai Kreuzer - Initial contribution and API
+ * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class TestPersistenceService implements QueryablePersistenceService {
+
+    public static final String ID = "test";
 
     @Override
     public String getId() {
-        return "test";
+        return ID;
     }
 
     @Override
@@ -97,7 +102,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
     }
 
     @Override
-    public String getLabel(Locale locale) {
+    public String getLabel(@Nullable Locale locale) {
         return "Test Label";
     }
 

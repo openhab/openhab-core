@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 
+import org.joda.time.DateTime;
+import org.joda.time.base.AbstractInstant;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
@@ -30,8 +32,6 @@ import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.types.State;
-import org.joda.time.DateTime;
-import org.joda.time.base.AbstractInstant;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.LoggerFactory;
@@ -720,7 +720,6 @@ public class PersistenceExtensions {
                 }
             }
             return null;
-
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
                     .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
