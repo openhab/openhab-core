@@ -14,6 +14,7 @@ package org.openhab.core.thing.dto;
 
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.type.BridgeType;
 import org.openhab.core.thing.type.ThingType;
 
@@ -23,6 +24,7 @@ import org.openhab.core.thing.type.ThingType;
  *
  * @author Miki Jankov - Initial contribution
  */
+@NonNullByDefault
 public class StrippedThingTypeDTOMapper {
 
     /**
