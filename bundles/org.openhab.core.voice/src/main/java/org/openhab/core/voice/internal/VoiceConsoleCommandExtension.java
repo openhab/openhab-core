@@ -30,6 +30,7 @@ import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.InterpretationException;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -46,12 +47,17 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_INTERPRET = "interpret";
     private static final String SUBCMD_VOICES = "voices";
 
-    private ItemRegistry itemRegistry;
-    private LocaleProvider localeProvider;
-    private VoiceManager voiceManager;
+    private final ItemRegistry itemRegistry;
+    private final VoiceManager voiceManager;
+    private final LocaleProvider localeProvider;
 
-    public VoiceConsoleCommandExtension() {
+    @Activate
+    public VoiceConsoleCommandExtension(final @Reference VoiceManager voiceManager,
+            final @Reference LocaleProvider localeProvider, final @Reference ItemRegistry itemRegistry) {
         super("voice", "Commands around voice enablement features.");
+        this.voiceManager = voiceManager;
+        this.localeProvider = localeProvider;
+        this.itemRegistry = itemRegistry;
     }
 
     @Override
@@ -150,33 +156,6 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             msg.append(" ");
         }
         voiceManager.say(msg.toString());
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = null;
-    }
-
-    @Reference
-    protected void setVoiceManager(VoiceManager voiceManager) {
-        this.voiceManager = voiceManager;
-    }
-
-    protected void unsetVoiceManager(VoiceManager voiceManager) {
-        this.voiceManager = null;
     }
 
 }

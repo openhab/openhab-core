@@ -62,6 +62,11 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
     private final Map<String, Long> streamTimeouts = new ConcurrentHashMap<>();
 
     @Activate
+    public AudioServlet(final @Reference HttpService httpService) {
+        this.httpService = httpService;
+    }
+
+    @Activate
     protected void activate() {
         super.activate(SERVLET_NAME);
     }
@@ -69,17 +74,6 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
     @Deactivate
     protected void deactivate() {
         super.deactivate(SERVLET_NAME);
-    }
-
-    @Override
-    @Reference
-    protected void setHttpService(HttpService httpService) {
-        super.setHttpService(httpService);
-    }
-
-    @Override
-    public void unsetHttpService(HttpService httpService) {
-        super.unsetHttpService(httpService);
     }
 
     private @Nullable InputStream prepareInputStream(final String streamId, final HttpServletResponse resp)
