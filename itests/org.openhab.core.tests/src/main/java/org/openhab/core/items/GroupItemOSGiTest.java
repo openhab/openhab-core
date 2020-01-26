@@ -180,7 +180,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveMemberUnregistersAsListenerFromMembers() {
+    public void testRemoveMemberUnregistersListenerFromMember() {
         GroupItem group = new GroupItem("group");
         TestItem member1 = new TestItem("member1");
         TestItem member2 = new TestItem("member2");
@@ -199,7 +199,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testRemoveAllMembersUnregistersAsListenerFromMembers() {
+    public void testRemoveAllMembersUnregistersListenerFromAllMembers() {
         GroupItem group = new GroupItem("group");
         TestItem member1 = new TestItem("member1");
         TestItem member2 = new TestItem("member2");
@@ -218,7 +218,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testDisposeUnregistersAsListenerFromMembers() {
+    public void testDisposeUnregistersListenerFromAllMembers() {
         GroupItem group = new GroupItem("group");
         TestItem member1 = new TestItem("member1");
         TestItem member2 = new TestItem("member2");
