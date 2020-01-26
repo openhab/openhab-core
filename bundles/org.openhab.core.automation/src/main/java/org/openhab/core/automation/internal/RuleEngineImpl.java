@@ -1155,8 +1155,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             ConditionHandler tHandler = managedCondition.getModuleHandler();
             Map<String, Object> context = getContext(ruleUID, managedCondition.getConnections());
             if (tHandler != null && !tHandler.isSatisfied(Collections.unmodifiableMap(context))) {
-                logger.debug("The condition '{}' of rule '{}' is unsatisfied.",
-                        new Object[] { condition.getId(), ruleUID });
+                logger.debug("The condition '{}' of rule '{}' is unsatisfied.", condition.getId(), ruleUID);
                 return false;
             }
         }

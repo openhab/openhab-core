@@ -248,8 +248,8 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
             addCallbackToListener(sitemapName, pageId, callback);
             pageOfSubscription.put(subscriptionId, getValue(sitemapName, pageId));
 
-            logger.debug("Subscription {} changed to page {} of sitemap {} ({} active subscriptions}",
-                    new Object[] { subscriptionId, pageId, sitemapName, callbacks.size() });
+            logger.debug("Subscription {} changed to page {} of sitemap {} ({} active subscriptions}", subscriptionId,
+                    pageId, sitemapName, callbacks.size());
         } else {
             throw new IllegalArgumentException("Subscription " + subscriptionId + " does not exist!");
         }
