@@ -180,7 +180,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testDisposeUnregistersAsListenerFromMembers() {
+    public void testRemoveMemberUnregistersListenerFromMember() {
         GroupItem group = new GroupItem("group");
         TestItem member1 = new TestItem("member1");
         TestItem member2 = new TestItem("member2");
@@ -189,12 +189,50 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         group.addMember(member2);
 
         assertThat(member1.getListeners(), hasSize(1));
+        assertThat(member2.getListeners(), hasSize(1));
+        assertThat(group.getMembers(), hasSize(2));
+
+        group.removeMember(member1);
+        assertThat(member1.getListeners(), hasSize(0));
+        assertThat(member2.getListeners(), hasSize(1));
+        assertThat(group.getMembers(), hasSize(1));
+    }
+
+    @Test
+    public void testRemoveAllMembersUnregistersListenerFromAllMembers() {
+        GroupItem group = new GroupItem("group");
+        TestItem member1 = new TestItem("member1");
+        TestItem member2 = new TestItem("member2");
+
+        group.addMember(member1);
+        group.addMember(member2);
+
         assertThat(member1.getListeners(), hasSize(1));
+        assertThat(member2.getListeners(), hasSize(1));
+        assertThat(group.getMembers(), hasSize(2));
+
+        group.removeAllMembers();
+        assertThat(member1.getListeners(), hasSize(0));
+        assertThat(member2.getListeners(), hasSize(0));
+        assertThat(group.getMembers(), hasSize(0));
+    }
+
+    @Test
+    public void testDisposeUnregistersListenerFromAllMembers() {
+        GroupItem group = new GroupItem("group");
+        TestItem member1 = new TestItem("member1");
+        TestItem member2 = new TestItem("member2");
+
+        group.addMember(member1);
+        group.addMember(member2);
+
+        assertThat(member1.getListeners(), hasSize(1));
+        assertThat(member2.getListeners(), hasSize(1));
         assertThat(group.getMembers(), hasSize(2));
 
         group.dispose();
         assertThat(member1.getListeners(), hasSize(0));
-        assertThat(member1.getListeners(), hasSize(0));
+        assertThat(member2.getListeners(), hasSize(0));
         assertThat(group.getMembers(), hasSize(0));
     }
 
