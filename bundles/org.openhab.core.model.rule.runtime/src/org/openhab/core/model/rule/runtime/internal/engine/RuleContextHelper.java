@@ -14,13 +14,13 @@ package org.openhab.core.model.rule.runtime.internal.engine;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.util.EContentAdapter;
+import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.openhab.core.model.rule.rules.Rule;
 import org.openhab.core.model.rule.rules.RuleModel;
 import org.openhab.core.model.rule.rules.VariableDeclaration;
 import org.openhab.core.model.script.engine.ScriptEngine;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
-import org.eclipse.xtext.naming.QualifiedName;
-import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +64,7 @@ public class RuleContextHelper {
                     evaluationContext.newValue(QualifiedName.create(var.getName()), initialValue);
                 } catch (ScriptExecutionException e) {
                     logger.warn("Variable '{}' on rule file '{}' cannot be initialized with value '{}': {}",
-                            new Object[] { var.getName(), ruleModel.eResource().getURI().path(),
-                                    var.getRight().toString(), e.getMessage() });
+                            var.getName(), ruleModel.eResource().getURI().path(), var.getRight(), e.getMessage());
                 }
             }
             ruleModel.eAdapters().add(new RuleContextAdapter(evaluationContext));

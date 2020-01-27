@@ -89,16 +89,14 @@ public class ThreadPoolManager {
                     ThreadPoolExecutor pool = (ThreadPoolExecutor) pools.get(poolName);
                     if (pool instanceof ScheduledThreadPoolExecutor) {
                         pool.setCorePoolSize(poolSize);
-                        LOGGER.debug("Updated scheduled thread pool '{}' to size {}",
-                                new Object[] { poolName, poolSize });
+                        LOGGER.debug("Updated scheduled thread pool '{}' to size {}", poolName, poolSize);
                     } else if (pool instanceof QueueingThreadPoolExecutor) {
                         pool.setMaximumPoolSize(poolSize);
-                        LOGGER.debug("Updated queuing thread pool '{}' to size {}",
-                                new Object[] { poolName, poolSize });
+                        LOGGER.debug("Updated queuing thread pool '{}' to size {}", poolName, poolSize);
                     }
                 } catch (NumberFormatException e) {
-                    LOGGER.warn("Ignoring invalid configuration for pool '{}': {} - value must be an integer",
-                            new Object[] { poolName, config });
+                    LOGGER.warn("Ignoring invalid configuration for pool '{}': {} - value must be an integer", poolName,
+                            config);
                     continue;
                 }
             }
@@ -126,7 +124,7 @@ public class ThreadPoolManager {
                     ((ThreadPoolExecutor) pool).allowCoreThreadTimeOut(true);
                     ((ScheduledThreadPoolExecutor) pool).setRemoveOnCancelPolicy(true);
                     pools.put(poolName, pool);
-                    LOGGER.debug("Created scheduled thread pool '{}' of size {}", new Object[] { poolName, cfg });
+                    LOGGER.debug("Created scheduled thread pool '{}' of size {}", poolName, cfg);
                 }
             }
         }
@@ -156,7 +154,7 @@ public class ThreadPoolManager {
                     ((ThreadPoolExecutor) pool).setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
                     ((ThreadPoolExecutor) pool).allowCoreThreadTimeOut(true);
                     pools.put(poolName, pool);
-                    LOGGER.debug("Created thread pool '{}' with size {}", new Object[] { poolName, cfg });
+                    LOGGER.debug("Created thread pool '{}' with size {}", poolName, cfg);
                 }
             }
         }

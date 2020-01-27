@@ -114,8 +114,7 @@ public class ItemDTOMapper {
             State state = TypeParser.parseState(baseItem.getAcceptedDataTypes(), param);
             if (state == null) {
                 LoggerFactory.getLogger(ItemDTOMapper.class).warn(
-                        "State '{}' is not valid for a group item with base type '{}'",
-                        new Object[] { param, baseItem.getType() });
+                        "State '{}' is not valid for a group item with base type '{}'", param, baseItem.getType());
                 states.clear();
                 break;
             } else {
