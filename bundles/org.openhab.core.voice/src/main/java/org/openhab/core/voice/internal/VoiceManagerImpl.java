@@ -54,7 +54,6 @@ import org.openhab.core.voice.text.InterpretationException;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -103,29 +102,33 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     private final Map<String, TTSService> ttsServices = new HashMap<>();
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
 
-    private LocaleProvider localeProvider = null;
+    private final LocaleProvider localeProvider;
+    private final AudioManager audioManager;
+    private final EventPublisher eventPublisher;
 
     /**
      * default settings filled through the service configuration
      */
     private String keyword = DEFAULT_KEYWORD;
-    private String listeningItem = null;
-    private String defaultTTS = null;
-    private String defaultSTT = null;
-    private String defaultKS = null;
-    private String defaultHLI = null;
-    private String defaultVoice = null;
+    private String listeningItem;
+    private String defaultTTS;
+    private String defaultSTT;
+    private String defaultKS;
+    private String defaultHLI;
+    private String defaultVoice;
     private final Map<String, String> defaultVoices = new HashMap<>();
-    private AudioManager audioManager;
-    private EventPublisher eventPublisher;
+
+    @Activate
+    public VoiceManagerImpl(final @Reference LocaleProvider localeProvider, final @Reference AudioManager audioManager,
+            final @Reference EventPublisher eventPublisher) {
+        this.localeProvider = localeProvider;
+        this.audioManager = audioManager;
+        this.eventPublisher = eventPublisher;
+    }
 
     @Activate
     protected void activate(Map<String, Object> config) {
         modified(config);
-    }
-
-    @Deactivate
-    protected void deactivate() {
     }
 
     @Modified
@@ -360,8 +363,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
             // If required set BigEndian, BitDepth, BitRate, and Frequency to default values
             if (null == format.isBigEndian()) {
-                format = new AudioFormat(format.getContainer(), format.getCodec(), new Boolean(true),
-                        format.getBitDepth(), format.getBitRate(), format.getFrequency());
+                format = new AudioFormat(format.getContainer(), format.getCodec(), Boolean.TRUE, format.getBitDepth(),
+                        format.getBitRate(), format.getFrequency());
             }
             if (null == format.getBitDepth() || null == format.getBitRate() || null == format.getFrequency()) {
                 // Define default values
@@ -376,19 +379,19 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
                 // These values must be interdependent (bitRate = bitDepth * frequency)
                 if (null == bitRate) {
                     if (null == bitDepth) {
-                        bitDepth = new Integer(defaultBitDepth);
+                        bitDepth = Integer.valueOf(defaultBitDepth);
                     }
                     if (null == frequency) {
-                        frequency = new Long(defaultFrequency);
+                        frequency = Long.valueOf(defaultFrequency);
                     }
-                    bitRate = new Integer(bitDepth.intValue() * frequency.intValue());
+                    bitRate = Integer.valueOf(bitDepth.intValue() * frequency.intValue());
                 } else if (null == bitDepth) {
                     if (null == frequency) {
-                        frequency = new Long(defaultFrequency);
+                        frequency = Long.valueOf(defaultFrequency);
                     }
-                    bitDepth = new Integer(bitRate.intValue() / frequency.intValue());
+                    bitDepth = Integer.valueOf(bitRate.intValue() / frequency.intValue());
                 } else if (null == frequency) {
-                    frequency = new Long(bitRate.longValue() / bitDepth.longValue());
+                    frequency = Long.valueOf(bitRate.longValue() / bitDepth.longValue());
                 }
 
                 format = new AudioFormat(format.getContainer(), format.getCodec(), format.isBigEndian(), bitDepth,
@@ -485,15 +488,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         }
     }
 
-    @Reference
-    protected void setLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(LocaleProvider localeProvider) {
-        this.localeProvider = null;
-    }
-
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addKSService(KSService ksService) {
         this.ksServices.put(ksService.getId(), ksService);
@@ -528,24 +522,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     protected void removeHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
         this.humanLanguageInterpreters.remove(humanLanguageInterpreter.getId());
-    }
-
-    @Reference
-    protected void setAudioManager(AudioManager audioManager) {
-        this.audioManager = audioManager;
-    }
-
-    protected void unsetAudioManager(AudioManager audioManager) {
-        this.audioManager = null;
-    }
-
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
     }
 
     @Override

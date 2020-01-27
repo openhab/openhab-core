@@ -33,7 +33,6 @@ import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.internal.AudioManagerStub;
 import org.openhab.core.voice.internal.AudioSourceStub;
-import org.openhab.core.voice.internal.ConsoleStub;
 import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.internal.KSServiceStub;
 import org.openhab.core.voice.internal.STTServiceStub;
@@ -59,8 +58,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
     private static final String CONFIG_DEFAULT_VOICE = "defaultVoice";
     private static final String CONFIG_DEFAULT_TTS = "defaultTTS";
     private static final String CONFIG_KEYWORD = "keyword";
-    private VoiceManagerImpl voiceManager = new VoiceManagerImpl();
-    private ConsoleStub stubConsole;
+    private VoiceManagerImpl voiceManager;
     private SinkStub sink;
     private TTSServiceStub ttsService;
     private VoiceStub voice;
@@ -134,7 +132,6 @@ public class VoiceManagerTest extends JavaOSGiTest {
 
     @Test
     public void interpretSomethingWithGivenHliIdWhenTheHliIsARegisteredService() throws InterpretationException {
-        stubConsole = new ConsoleStub();
         hliStub = new HumanLanguageInterpreterStub();
         registerService(hliStub);
 
@@ -144,7 +141,6 @@ public class VoiceManagerTest extends JavaOSGiTest {
 
     @Test
     public void interpretSomethingWithGivenHliIdEhenTheHliIsNotARegisteredService() throws InterpretationException {
-        stubConsole = new ConsoleStub();
         hliStub = new HumanLanguageInterpreterStub();
         String result;
         exception.expect(InterpretationException.class);
@@ -156,7 +152,6 @@ public class VoiceManagerTest extends JavaOSGiTest {
     @Test
     public void interpretSomethingWhenTheDefaultHliIsSetAndItIsARegisteredService()
             throws IOException, InterpretationException {
-        stubConsole = new ConsoleStub();
         hliStub = new HumanLanguageInterpreterStub();
         registerService(hliStub);
 
