@@ -17,7 +17,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -46,7 +48,8 @@ public class HttpServiceUtilTest {
         ServiceReference<?>[] secureHttpServiceReferences = getSecureHttpServiceReferences();
 
         when(bundleContext.getAllServiceReferences(ORG_OSGI_SERVICE_HTTP_SERVICE, null)).thenReturn(
-                (ServiceReference<?>[]) ArrayUtils.addAll(httpServiceReferences, secureHttpServiceReferences));
+                Stream.concat(Arrays.stream(httpServiceReferences), Arrays.stream(secureHttpServiceReferences))
+                        .toArray(ServiceReference<?>[]::new));
     }
 
     @Test

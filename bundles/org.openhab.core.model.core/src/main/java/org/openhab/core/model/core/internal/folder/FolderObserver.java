@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -33,8 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
@@ -109,7 +108,7 @@ public class FolderObserver extends AbstractWatchService {
         Enumeration<String> keys = config.keys();
         while (keys.hasMoreElements()) {
             String foldername = keys.nextElement();
-            if (!StringUtils.isAlphanumeric(foldername)) {
+            if (!foldername.matches("[A-Za-z0-9_]*")) {
                 // we allow only simple alphanumeric names for model folders - everything else might be other service
                 // properties
                 continue;
@@ -263,15 +262,15 @@ public class FolderObserver extends AbstractWatchService {
     }
 
     private File getFileByFileExtMap(Map<String, String[]> folderFileExtMap, String filename) {
-        if (StringUtils.isNotBlank(filename) && isNotEmpty(folderFileExtMap)) {
+        if (filename != null && !filename.trim().isEmpty() && isNotEmpty(folderFileExtMap)) {
             String extension = getExtension(filename);
-            if (StringUtils.isNotBlank(extension)) {
+            if (extension != null && !extension.trim().isEmpty()) {
                 Set<Entry<String, String[]>> entries = folderFileExtMap.entrySet();
                 Iterator<Entry<String, String[]>> iterator = entries.iterator();
                 while (iterator.hasNext()) {
                     Entry<String, String[]> entry = iterator.next();
 
-                    if (ArrayUtils.contains(entry.getValue(), extension)) {
+                    if (Arrays.stream(entry.getValue()).anyMatch(extension::equals)) {
                         return new File(getFile(entry.getKey()) + File.separator + filename);
                     }
                 }
