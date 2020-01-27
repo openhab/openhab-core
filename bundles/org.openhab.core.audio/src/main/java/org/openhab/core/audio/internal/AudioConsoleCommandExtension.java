@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
@@ -83,7 +82,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
             switch (subCommand) {
                 case SUBCMD_PLAY:
                     if (args.length > 1) {
-                        play((String[]) ArrayUtils.subarray(args, 1, args.length), console);
+                        play(Arrays.copyOfRange(args, 1, args.length), console);
                     } else {
                         console.println(
                                 "Specify file to play, and optionally the sink(s) to use (e.g. 'play javasound hello.mp3')");
@@ -91,7 +90,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     return;
                 case SUBCMD_STREAM:
                     if (args.length > 1) {
-                        stream((String[]) ArrayUtils.subarray(args, 1, args.length), console);
+                        stream(Arrays.copyOfRange(args, 1, args.length), console);
                     } else {
                         console.println("Specify url to stream from, and optionally the sink(s) to use");
                     }

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.console.Console;
@@ -74,14 +73,14 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             switch (subCommand) {
                 case SUBCMD_SAY:
                     if (args.length > 1) {
-                        say((String[]) ArrayUtils.subarray(args, 1, args.length), console);
+                        say(Arrays.copyOfRange(args, 1, args.length), console);
                     } else {
                         console.println("Specify text to say (e.g. 'say hello')");
                     }
                     return;
                 case SUBCMD_INTERPRET:
                     if (args.length > 1) {
-                        interpret((String[]) ArrayUtils.subarray(args, 1, args.length), console);
+                        interpret(Arrays.copyOfRange(args, 1, args.length), console);
                     } else {
                         console.println("Specify text to interpret (e.g. 'interpret turn all lights off')");
                     }
