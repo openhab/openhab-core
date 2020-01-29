@@ -17,6 +17,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.type.AutoUpdatePolicy;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
@@ -58,6 +59,6 @@ public class ChannelDTOMapper {
                 .withConfiguration(new Configuration(channelDTO.configuration)).withLabel(channelDTO.label)
                 .withDescription(channelDTO.description).withProperties(channelDTO.properties).withType(channelTypeUID)
                 .withDefaultTags(channelDTO.defaultTags).withKind(ChannelKind.parse(channelDTO.kind))
-                .withAutoUpdatePolicy(channelDTO.autoUpdatePolicy).build();
+                .withAutoUpdatePolicy(AutoUpdatePolicy.parse(channelDTO.autoUpdatePolicy)).build();
     }
 }

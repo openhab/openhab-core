@@ -41,7 +41,7 @@ public class ChannelDTO {
     public Set<String> defaultTags;
     public Map<String, String> properties;
     public Map<String, Object> configuration;
-    public AutoUpdatePolicy autoUpdatePolicy;
+    public String autoUpdatePolicy;
 
     public ChannelDTO() {
     }
@@ -59,7 +59,7 @@ public class ChannelDTO {
         this.configuration = toMap(configuration);
         this.defaultTags = new HashSet<>(defaultTags);
         this.kind = kind.toString();
-        this.autoUpdatePolicy = autoUpdatePolicy;
+        this.autoUpdatePolicy = autoUpdatePolicy.toString();
     }
 
     private Map<String, Object> toMap(Configuration configuration) {
