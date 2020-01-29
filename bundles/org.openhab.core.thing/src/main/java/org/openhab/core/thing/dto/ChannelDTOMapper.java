@@ -40,7 +40,7 @@ public class ChannelDTOMapper {
         String channelTypeUIDValue = channelTypeUID != null ? channelTypeUID.getAsString() : null;
         return new ChannelDTO(channel.getUID(), channelTypeUIDValue, channel.getAcceptedItemType(), channel.getKind(),
                 channel.getLabel(), channel.getDescription(), channel.getProperties(), channel.getConfiguration(),
-                channel.getDefaultTags());
+                channel.getDefaultTags(), channel.getAutoUpdatePolicy());
     }
 
     /**
@@ -57,6 +57,7 @@ public class ChannelDTOMapper {
         return ChannelBuilder.create(channelUID, channelDTO.itemType)
                 .withConfiguration(new Configuration(channelDTO.configuration)).withLabel(channelDTO.label)
                 .withDescription(channelDTO.description).withProperties(channelDTO.properties).withType(channelTypeUID)
-                .withDefaultTags(channelDTO.defaultTags).withKind(ChannelKind.parse(channelDTO.kind)).build();
+                .withDefaultTags(channelDTO.defaultTags).withKind(ChannelKind.parse(channelDTO.kind))
+                .withAutoUpdatePolicy(channelDTO.autoUpdatePolicy).build();
     }
 }

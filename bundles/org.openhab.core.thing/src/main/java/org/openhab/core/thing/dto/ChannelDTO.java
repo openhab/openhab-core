@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.type.AutoUpdatePolicy;
 import org.openhab.core.thing.type.ChannelKind;
 
 /**
@@ -40,12 +41,14 @@ public class ChannelDTO {
     public Set<String> defaultTags;
     public Map<String, String> properties;
     public Map<String, Object> configuration;
+    public AutoUpdatePolicy autoUpdatePolicy;
 
     public ChannelDTO() {
     }
 
     public ChannelDTO(ChannelUID uid, String channelTypeUID, String itemType, ChannelKind kind, String label,
-            String description, Map<String, String> properties, Configuration configuration, Set<String> defaultTags) {
+            String description, Map<String, String> properties, Configuration configuration, Set<String> defaultTags,
+            AutoUpdatePolicy autoUpdatePolicy) {
         this.uid = uid.toString();
         this.id = uid.getId();
         this.channelTypeUID = channelTypeUID;
@@ -56,6 +59,7 @@ public class ChannelDTO {
         this.configuration = toMap(configuration);
         this.defaultTags = new HashSet<>(defaultTags);
         this.kind = kind.toString();
+        this.autoUpdatePolicy = autoUpdatePolicy;
     }
 
     private Map<String, Object> toMap(Configuration configuration) {

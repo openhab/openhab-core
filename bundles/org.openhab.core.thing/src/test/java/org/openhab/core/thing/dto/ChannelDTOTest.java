@@ -64,7 +64,7 @@ public class ChannelDTOTest {
         assertThat(result.getProperties(), is(subject.getProperties()));
         assertThat(result.getDefaultTags(), hasSize(1));
         assertThat(result.getDefaultTags(), is(subject.getDefaultTags()));
-        // assertThat(result.getAutoUpdatePolicy(), is(subject.getAutoUpdatePolicy()));
+        assertThat(result.getAutoUpdatePolicy(), is(subject.getAutoUpdatePolicy()));
     }
 
 }
