@@ -52,6 +52,7 @@ public class ChannelBuilder {
         this.acceptedItemType = acceptedItemType;
         this.defaultTags = defaultTags;
         this.kind = ChannelKind.STATE;
+        this.autoUpdatePolicy = AutoUpdatePolicy.DEFAULT;
     }
 
     /**
