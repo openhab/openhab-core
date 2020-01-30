@@ -168,6 +168,23 @@ public class SmartHomeUnitsTest {
         assertThat(SmartHomeUnits.KNOT.getSymbol(), is("kn"));
         assertThat(SmartHomeUnits.KNOT.toString(), is("kn"));
     }
+    
+    @Test
+    public void testVarUnitSymbol() {
+        assertThat(SmartHomeUnits.VAR.getSymbol(), is("var"));
+        assertThat(SmartHomeUnits.VAR_HOUR.toString(), is("varh"));
+    }
+    
+    @Test
+    public void testKVarUnitSymbol() {
+        assertThat(SmartHomeUnits.KILOVAR.toString(), is("kvar"));
+        assertThat(SmartHomeUnits.KILOVAR_HOUR.toString(), is("kvarh"));
+    }
+    
+    @Test
+    public void testKVarHFromString() {
+        assertThat(QuantityType.valueOf("2.60 kvarh").getUnit().toString(), is("kvarh"));
+    }
 
     @Test
     public void testCm2In() {
