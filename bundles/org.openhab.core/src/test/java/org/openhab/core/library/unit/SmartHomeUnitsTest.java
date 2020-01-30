@@ -172,6 +172,7 @@ public class SmartHomeUnitsTest {
     @Test
     public void testVarUnitSymbol() {
         assertThat(SmartHomeUnits.VAR.getSymbol(), is("var"));
+        assertThat(SmartHomeUnits.VAR.toString(), is("var"));
         assertThat(SmartHomeUnits.VAR_HOUR.toString(), is("varh"));
     }
     
@@ -184,6 +185,18 @@ public class SmartHomeUnitsTest {
     @Test
     public void testKVarHFromString() {
         assertThat(QuantityType.valueOf("2.60 kvarh").getUnit().toString(), is("kvarh"));
+    }
+    
+    @Test
+    public void testVoltAmpereUnitSymbol() {
+        assertThat(SmartHomeUnits.VOLT_AMPERE.toString(), is("VA"));
+        assertThat(SmartHomeUnits.VOLT_AMPERE.getSymbol(), is("VA"));
+        assertThat(SmartHomeUnits.VOLT_AMPERE_HOUR.toString(), is("VAh"));
+    }
+
+    @Test
+    public void testVoltAmpereHFromString() {
+        assertThat(QuantityType.valueOf("2.60 VAh").getUnit().toString(), is("VAh"));
     }
 
     @Test
