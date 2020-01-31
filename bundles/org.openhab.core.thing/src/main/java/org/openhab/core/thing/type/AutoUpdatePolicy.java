@@ -42,7 +42,7 @@ public enum AutoUpdatePolicy {
      * Parses the input string into a {@link AutoUpdatePolicy}.
      *
      * @param input the input string
-     * @return the parsed AutoUpdatePolicy.
+     * @return the parsed AutoUpdatePolicy
      * @throws IllegalArgumentException if the input couldn't be parsed.
      */
     public static AutoUpdatePolicy parse(String input) {
@@ -56,6 +56,6 @@ public enum AutoUpdatePolicy {
             }
         }
 
-        throw new IllegalArgumentException("Unknown auto update policy: '" + input + "'");
+        throw new IllegalArgumentException(String.format("Unknown auto update policy: '%s'", input));
     }
 }
