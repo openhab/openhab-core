@@ -59,7 +59,9 @@ public class ChannelDTO {
         this.configuration = toMap(configuration);
         this.defaultTags = new HashSet<>(defaultTags);
         this.kind = kind.toString();
-        this.autoUpdatePolicy = autoUpdatePolicy.toString();
+        if (autoUpdatePolicy != null) {
+            this.autoUpdatePolicy = autoUpdatePolicy.toString();
+        }
     }
 
     private Map<String, Object> toMap(Configuration configuration) {
