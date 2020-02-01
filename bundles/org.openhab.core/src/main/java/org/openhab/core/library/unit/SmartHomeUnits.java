@@ -122,8 +122,13 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<Energy> WATT_HOUR = addUnit(new ProductUnit<>(Units.WATT.multiply(Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
-    public static final Unit<Power> KILOVAR = addUnit(MetricPrefix.KILO(new BaseUnit<Power>("var")));
-    public static final Unit<Energy> KILOVAR_HOUR = addUnit(new ProductUnit<>(KILOVAR.divide(Units.HOUR)),
+    public static final Unit<Power> VAR = addUnit(new AlternateUnit<Power>(Units.WATT, "var"));
+    public static final Unit<Power> KILOVAR = addUnit(MetricPrefix.KILO(VAR));
+    public static final Unit<Energy> VAR_HOUR = addUnit(new ProductUnit<>(VAR.multiply(Units.HOUR)),
+            Energy.class);
+    public static final Unit<Energy> KILOVAR_HOUR = addUnit(MetricPrefix.KILO(VAR_HOUR));
+    public static final Unit<Power> VOLT_AMPERE = addUnit(new AlternateUnit<Power>(Units.WATT, "VA"));
+    public static final Unit<Energy> VOLT_AMPERE_HOUR = addUnit(new ProductUnit<>(VOLT_AMPERE.multiply(Units.HOUR)),
             Energy.class);
     public static final Unit<Force> NEWTON = addUnit(Units.NEWTON);
     public static final Unit<Frequency> HERTZ = addUnit(Units.HERTZ);
@@ -238,6 +243,10 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(SIEMENS_PER_METRE, "S/m");
         SimpleUnitFormat.getInstance().label(TERABIT, "Tbit");
         SimpleUnitFormat.getInstance().label(TERABIT_PER_SECOND, "Tbit/s");
+        SimpleUnitFormat.getInstance().label(VAR, "var");
+        SimpleUnitFormat.getInstance().label(VAR_HOUR, "varh");
+        SimpleUnitFormat.getInstance().label(VOLT_AMPERE, "VA");
+        SimpleUnitFormat.getInstance().label(VOLT_AMPERE_HOUR, "VAh");
         SimpleUnitFormat.getInstance().label(WATT_HOUR, "Wh");
         SimpleUnitFormat.getInstance().label(WATT_SECOND, "Ws");
     }
