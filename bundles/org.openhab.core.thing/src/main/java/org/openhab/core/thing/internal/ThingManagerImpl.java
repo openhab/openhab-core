@@ -1201,8 +1201,8 @@ public class ThingManagerImpl
 
         if (enabled) {
             // Enable a thing
-            if (thing.getStatus().equals(ThingStatus.ONLINE)) {
-                logger.debug("Thing {} is already in the required state.", thingUID);
+            if (thing.isEnabled()) {
+                logger.debug("Thing {} is already enabled.", thingUID);
                 return;
             }
 
@@ -1222,7 +1222,7 @@ public class ThingManagerImpl
             }
         } else {
             if (!thing.isEnabled()) {
-                logger.debug("Thing {} is already in the required state.", thingUID);
+                logger.debug("Thing {} is already disabled.", thingUID);
                 return;
             }
 
