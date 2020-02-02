@@ -13,6 +13,7 @@
 package org.openhab.core.thing.binding.builder;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
@@ -94,7 +95,7 @@ public class ThingBuilderTest {
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build());
         thingBuilder.withoutChannel(new ChannelUID(THING_UID, "channel1"));
         Thing thing = thingBuilder.build();
-        assertThat(thing.getChannels().size(), is(equalTo(1)));
+        assertThat(thing.getChannels(), hasSize(1));
         assertThat(thing.getChannels().get(0).getUID().getId(), is(equalTo("channel2")));
     }
 
@@ -104,7 +105,7 @@ public class ThingBuilderTest {
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build());
         thingBuilder.withoutChannel(new ChannelUID(THING_UID, "channel3"));
-        assertThat(thingBuilder.build().getChannels().size(), is(equalTo(2)));
+        assertThat(thingBuilder.build().getChannels(), hasSize(2));
     }
 
     @Test(expected = IllegalArgumentException.class)

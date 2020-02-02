@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
@@ -32,6 +33,7 @@ import org.openhab.core.thing.util.ThingHelper;
  * @author Stefan Bußweiler - Initial contribution
  * @author Kai Kreuzer - Added DTO to Thing mapping
  */
+@NonNullByDefault
 public class ThingDTOMapper {
 
     /**
@@ -76,10 +78,6 @@ public class ThingDTOMapper {
     }
 
     private static Map<String, Object> toMap(Configuration configuration) {
-        if (configuration == null) {
-            return null;
-        }
-
         Map<String, Object> configurationMap = new HashMap<>(configuration.keySet().size());
         for (String key : configuration.keySet()) {
             configurationMap.put(key, configuration.get(key));

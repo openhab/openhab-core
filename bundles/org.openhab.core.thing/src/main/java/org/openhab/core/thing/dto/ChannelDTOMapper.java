@@ -12,10 +12,12 @@
  */
 package org.openhab.core.thing.dto;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
+import org.openhab.core.thing.type.AutoUpdatePolicy;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
@@ -25,6 +27,7 @@ import org.openhab.core.thing.type.ChannelTypeUID;
  * @author Stefan Bußweiler - Initial contribution
  * @author Kai Kreuzer - added DTO to channel mapping
  */
+@NonNullByDefault
 public class ChannelDTOMapper {
 
     /**
@@ -35,10 +38,10 @@ public class ChannelDTOMapper {
      */
     public static ChannelDTO map(Channel channel) {
         ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
-        String channelTypeUIDValue = channelTypeUID != null ? channelTypeUID.toString() : null;
+        String channelTypeUIDValue = channelTypeUID != null ? channelTypeUID.getAsString() : null;
         return new ChannelDTO(channel.getUID(), channelTypeUIDValue, channel.getAcceptedItemType(), channel.getKind(),
                 channel.getLabel(), channel.getDescription(), channel.getProperties(), channel.getConfiguration(),
-                channel.getDefaultTags());
+                channel.getDefaultTags(), channel.getAutoUpdatePolicy());
     }
 
     /**
@@ -49,10 +52,13 @@ public class ChannelDTOMapper {
      */
     public static Channel map(ChannelDTO channelDTO) {
         ChannelUID channelUID = new ChannelUID(channelDTO.uid);
-        ChannelTypeUID channelTypeUID = new ChannelTypeUID(channelDTO.channelTypeUID);
+        ChannelTypeUID channelTypeUID = channelDTO.channelTypeUID != null
+                ? new ChannelTypeUID(channelDTO.channelTypeUID)
+                : null;
         return ChannelBuilder.create(channelUID, channelDTO.itemType)
                 .withConfiguration(new Configuration(channelDTO.configuration)).withLabel(channelDTO.label)
                 .withDescription(channelDTO.description).withProperties(channelDTO.properties).withType(channelTypeUID)
-                .withDefaultTags(channelDTO.defaultTags).withKind(ChannelKind.parse(channelDTO.kind)).build();
+                .withDefaultTags(channelDTO.defaultTags).withKind(ChannelKind.parse(channelDTO.kind))
+                .withAutoUpdatePolicy(AutoUpdatePolicy.parse(channelDTO.autoUpdatePolicy)).build();
     }
 }

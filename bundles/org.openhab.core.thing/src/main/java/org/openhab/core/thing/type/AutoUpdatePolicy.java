@@ -36,5 +36,26 @@ public enum AutoUpdatePolicy {
      * An automatic state update should be sent by the framework because no updates will be sent by the binding.
      * This usually is the case when devices don't expose their current state to the handler.
      */
-    RECOMMEND,
+    RECOMMEND;
+
+    /**
+     * Parses the input string into a {@link AutoUpdatePolicy}.
+     *
+     * @param input the input string
+     * @return the parsed AutoUpdatePolicy
+     * @throws IllegalArgumentException if the input couldn't be parsed.
+     */
+    public static AutoUpdatePolicy parse(String input) {
+        if (input == null) {
+            return DEFAULT;
+        }
+
+        for (AutoUpdatePolicy value : values()) {
+            if (value.name().equalsIgnoreCase(input)) {
+                return value;
+            }
+        }
+
+        throw new IllegalArgumentException(String.format("Unknown auto update policy: '%s'", input));
+    }
 }
