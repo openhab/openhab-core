@@ -98,6 +98,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
          * tracker.
          */
         if (providerClazz != null) {
+            Class<P> providerClazz = this.providerClazz;
             providerTracker = new ProviderTracker(context, providerClazz);
             providerTracker.open();
         }
