@@ -13,6 +13,7 @@
 package org.openhab.core.common.registry;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link ManagedProvider} is a specific {@link Provider} that enables to
@@ -41,6 +42,7 @@ public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<
      * @return element that was removed, or null if no element with the given
      *         key exists
      */
+    @Nullable
     E remove(@NonNull K key);
 
     /**
@@ -50,6 +52,7 @@ public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<
      * @return returns the old element or null if no element with the same key
      *         exists
      */
+    @Nullable
     E update(@NonNull E element);
 
     /**
@@ -59,6 +62,7 @@ public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<
      * @param key key
      * @return returns element or null, if no element for the given key exists
      */
+    @Nullable
     E get(K key);
 
 }
