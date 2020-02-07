@@ -12,31 +12,15 @@
  */
 package org.openhab.core.ui.components;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.openhab.core.storage.StorageService;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * A factory for {@link UIComponentRegistry} instances based on the namespace.
  *
  * @author Yannick Schaus - Initial contribution
  */
-@Component(service = UIComponentRegistryFactory.class, immediate = true)
-public class UIComponentRegistryFactory {
-    StorageService storageService;
-    Map<String, UIComponentRegistry> registries = new HashMap<>();
-
-    @Reference
-    protected void setStorageService(StorageService storageService) {
-        this.storageService = storageService;
-    }
-
-    protected void unsetStorageService(StorageService storageService) {
-        this.storageService = null;
-    }
+@NonNullByDefault
+public interface UIComponentRegistryFactory {
 
     /**
      * Gets the {@link UIComponentRegistry} for the specified namespace.
@@ -44,13 +28,6 @@ public class UIComponentRegistryFactory {
      * @param namespace the namespace
      * @return a registry for UI elements in the namespace
      */
-    public UIComponentRegistry getRegistry(String namespace) {
-        if (registries.containsKey(namespace)) {
-            return registries.get(namespace);
-        } else {
-            UIComponentRegistry registry = new UIComponentRegistry(namespace, storageService);
-            registries.put(namespace, registry);
-            return registry;
-        }
-    }
+    UIComponentRegistry getRegistry(String namespace);
+
 }
