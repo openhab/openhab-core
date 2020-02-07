@@ -23,7 +23,6 @@
 
 		<!-- Apache Commons -->
 		<bundle dependency="true">mvn:commons-codec/commons-codec/1.6</bundle>
-		<bundle dependency="true">mvn:org.apache.commons/commons-exec/1.1</bundle>
 		<bundle dependency="true">mvn:commons-io/commons-io/2.2</bundle>
 		<bundle dependency="true">mvn:commons-lang/commons-lang/2.6</bundle>
 
