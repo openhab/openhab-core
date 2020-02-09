@@ -74,15 +74,15 @@ public class ExecUtil {
             try {
                 process.waitFor(timeout, TimeUnit.MILLISECONDS);
                 int exitCode = process.exitValue();
-                String result = "";
+                final StringBuilder result = new StringBuilder();
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line = "";
                     while ((line = reader.readLine()) != null) {
-                        result = result + line;
+                        result.append(line).append("\n");
                     }
                 }
                 logger.debug("exit code '{}', result '{}'", exitCode, result);
-                return result;
+                return result.toString();
             } catch (IOException e) {
                 logger.warn("I/O exception occurred when executing commandLine '{}'", commandLine, e);
             } catch (InterruptedException e) {
@@ -93,10 +93,10 @@ public class ExecUtil {
     }
 
     private static @Nullable Process internalExecute(String commandLine) {
-        Process process;
+        final Process process;
         try {
             if (commandLine.contains(CMD_LINE_DELIMITER)) {
-                List<String> cmdArray = Arrays.asList(commandLine.split(CMD_LINE_DELIMITER));
+                final List<String> cmdArray = Arrays.asList(commandLine.split(CMD_LINE_DELIMITER));
                 process = new ProcessBuilder(cmdArray).start();
                 logger.info("executed commandLine '{}'", cmdArray);
             } else {
@@ -105,7 +105,7 @@ public class ExecUtil {
             }
         } catch (IOException e) {
             logger.error("couldn't execute commandLine '{}'", commandLine, e);
-            process = null;
+            return null;
         }
         return process;
     }
