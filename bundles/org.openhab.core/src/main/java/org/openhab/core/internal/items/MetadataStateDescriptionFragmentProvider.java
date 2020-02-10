@@ -16,10 +16,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -28,6 +30,8 @@ import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateDescriptionFragmentProvider;
 import org.openhab.core.types.StateOption;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -39,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - initial contribution
  *
  */
+@NonNullByDefault
 @Component(service = StateDescriptionFragmentProvider.class)
 public class MetadataStateDescriptionFragmentProvider implements StateDescriptionFragmentProvider {
 
@@ -46,7 +51,22 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
 
     public static final String STATEDESCRIPTION_METADATA_NAMESPACE = "stateDescription";
 
-    private MetadataRegistry metadataRegistry;
+    private final MetadataRegistry metadataRegistry;
+
+    private final Integer rank;
+
+    @Activate
+    public MetadataStateDescriptionFragmentProvider(final @Reference MetadataRegistry metadataRegistry,
+            Map<String, Object> properties) {
+        this.metadataRegistry = metadataRegistry;
+
+        Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
+        if (serviceRanking instanceof Integer) {
+            rank = (Integer) serviceRanking;
+        } else {
+            rank = 1; // takes precedence over other providers usually ranked 0
+        }
+    }
 
     @Override
     public @Nullable StateDescriptionFragment getStateDescriptionFragment(@NonNull String itemName,
@@ -126,15 +146,6 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
 
     @Override
     public @NonNull Integer getRank() {
-        return 0;
-    }
-
-    @Reference
-    protected void setMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = metadataRegistry;
-    }
-
-    protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
+        return rank;
     }
 }
