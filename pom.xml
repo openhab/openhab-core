@@ -315,6 +315,13 @@ Import-Package: \\
           <version>2.10.3</version>
           <configuration>
             <failOnError>!${quality.skip}</failOnError>
+            <!-- Turn off doclint -->
+            <additionalparam>-Xdoclint:none</additionalparam>
+            <!-- Frames are deprecated and will disappear at some point -->
+            <additionalparam>--frames</additionalparam>
+            <!-- Prevents the "undefined" module in path name, which causes a file not found when searching -->
+            <additionalJOption>--no-module-directories</additionalJOption>
+            <excludePackageNames>*.internal.*,nl.*</excludePackageNames>
           </configuration>
         </plugin>
 
@@ -742,5 +749,4 @@ Import-Package: \\
       </build>
     </profile>
   </profiles>
-
 </project>

@@ -63,7 +63,7 @@ public class ASTNode {
     }
 
     /**
-     * @return the value of this node as {@link String[]}
+     * @return the value of this node as {link String[]}
      */
     public String[] getValueAsStringArray() {
         Object[] objs = value instanceof Object[] ? (Object[]) value : new Object[] { value };
@@ -83,10 +83,10 @@ public class ASTNode {
 
     /**
      * Breadth searches this (sub-) tree/node for a node with the given name and returning its value as a
-     * {@link String[]}.
+     * {link String[]}.
      *
      * @param name the name of the named node to be found
-     * @return the value of the resulting node as {@link String[]} or null if not found
+     * @return the value of the resulting node as {link String[]} or null if not found
      */
     public String[] findValueAsStringArray(String name) {
         ASTNode node = findNode(name);
