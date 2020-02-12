@@ -21,6 +21,8 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.io.rest.sse.SseResource;
+import org.openhab.core.io.rest.sse.SseStatesResource;
+import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -38,10 +40,13 @@ public class SseEventSubscriber implements EventSubscriber {
     private final Set<String> subscribedEventTypes = Collections.singleton(EventSubscriber.ALL_EVENT_TYPES);
 
     private final SseResource sseResource;
+    private final SseStatesResource sseItemResource;
 
     @Activate
-    public SseEventSubscriber(final @Reference SseResource sseResource) {
+    public SseEventSubscriber(final @Reference SseResource sseResource,
+            final @Reference SseStatesResource sseStatesResource) {
         this.sseResource = sseResource;
+        this.sseItemResource = sseStatesResource;
     }
 
     @Override
@@ -57,5 +62,8 @@ public class SseEventSubscriber implements EventSubscriber {
     @Override
     public void receive(Event event) {
         sseResource.broadcastEvent(event);
+        if (event instanceof ItemStateChangedEvent) {
+            sseItemResource.broadcastEvent((ItemStateChangedEvent) event);
+        }
     }
 }
