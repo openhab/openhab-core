@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.sse;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,18 +36,24 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.sse.internal.ItemStateChangesSseBroadcaster;
+import org.openhab.core.io.rest.sse.internal.SseActivator;
 import org.openhab.core.io.rest.sse.internal.SseStateEventOutput;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemStateChangedEvent;
-import org.openhab.core.types.State;
+import org.openhab.core.transform.TransformationException;
+import org.openhab.core.transform.TransformationHelper;
+import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -65,6 +72,8 @@ import io.swagger.annotations.ApiResponses;
 @Singleton
 @Api(value = SseStatesResource.PATH_EVENTS, hidden = true)
 public class SseStatesResource {
+
+    private final Logger logger = LoggerFactory.getLogger(SseStatesResource.class);
 
     public static final String PATH_EVENTS = "events/states";
 
@@ -110,9 +119,8 @@ public class SseStatesResource {
      */
     @GET
     @Produces(SseFeature.SERVER_SENT_EVENTS)
-    @ApiOperation(value = "Send.", response = EventOutput.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 400, message = "Topic is empty or contains invalid characters") })
+    @ApiOperation(value = "Initiates a new item state tracker connection", response = EventOutput.class)
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Object getStateEvents() throws IOException, InterruptedException {
 
         final SseStateEventOutput eventOutput = new SseStateEventOutput();
@@ -144,12 +152,12 @@ public class SseStatesResource {
             @ApiParam("items") Collection<String> itemNames) {
 
         // Send the current states of the new tracked items on the SSE connection
-        // TODO: apply eventual transformations
-        Map<String, State> newTrackedItems = new HashMap<>();
+        Map<String, String> newTrackedItems = new HashMap<>();
         itemNames.stream().forEach(i -> {
             Item item = itemRegistry.get(i);
             if (item != null) {
-                newTrackedItems.put(item.getName(), item.getState());
+                String transformedState = considerTransformation(item.getState().toString(), item, null);
+                newTrackedItems.put(item.getName(), transformedState);
             }
         });
 
@@ -172,12 +180,35 @@ public class SseStatesResource {
             @Override
             public void run() {
                 OutboundEvent.Builder builder = new OutboundEvent.Builder();
-                Map<String, State> payload = new HashMap<>();
-                // TODO: apply eventual transformation
-                payload.put(stateChangeEvent.getItemName(), stateChangeEvent.getItemState());
-                OutboundEvent outboundEvent = builder.mediaType(MediaType.APPLICATION_JSON_TYPE).data(payload).build();
-                broadcaster.broadcast(outboundEvent);
+                Map<String, String> payload = new HashMap<>();
+                Item item = itemRegistry.get(stateChangeEvent.getItemName());
+                if (item != null) {
+                    String transformedState = considerTransformation(item.getState().toString(), item, null);
+                    payload.put(item.getName(), transformedState);
+                    OutboundEvent outboundEvent = builder.mediaType(MediaType.APPLICATION_JSON_TYPE).data(payload)
+                            .build();
+                    broadcaster.broadcast(outboundEvent);
+                }
             }
         });
+    }
+
+    private @Nullable String considerTransformation(String state, Item item, @Nullable Locale locale) {
+        StateDescription stateDescription = item.getStateDescription(locale);
+        if (stateDescription != null) {
+            String pattern = stateDescription.getPattern();
+            if (pattern != null) {
+                try {
+                    return TransformationHelper.transform(SseActivator.getContext(), pattern, state);
+                } catch (NoClassDefFoundError ex) {
+                    // TransformationHelper is optional dependency, so ignore if class not found
+                    // return state as it is without transformation
+                } catch (TransformationException e) {
+                    logger.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
+                            item.getName(), pattern, e.getMessage());
+                }
+            }
+        }
+        return state;
     }
 }

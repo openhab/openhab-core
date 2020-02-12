@@ -22,7 +22,6 @@ import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseBroadcaster;
 import org.glassfish.jersey.server.ChunkedOutput;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +84,7 @@ public class ItemStateChangesSseBroadcaster extends SseBroadcaster {
      * @param connectionId the connection id
      * @param newTrackedItems the list of items and their current state to send to the client
      */
-    public void updateTrackedItems(String connectionId, Map<String, State> newTrackedItems) {
+    public void updateTrackedItems(String connectionId, Map<String, String> newTrackedItems) {
         SseStateEventOutput eventOutput = eventOutputs.get(connectionId);
 
         if (eventOutput == null) {
