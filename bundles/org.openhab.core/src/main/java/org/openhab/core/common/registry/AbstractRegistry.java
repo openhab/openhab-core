@@ -63,7 +63,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
 
     private final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
 
-    private final Class<P> providerClazz;
+    private final @Nullable Class<P> providerClazz;
     private @Nullable ServiceTracker<P, P> providerTracker;
 
     private final ReentrantReadWriteLock elementLock = new ReentrantReadWriteLock();
@@ -86,18 +86,19 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
      * @param providerClazz the class of the providers (see e.g. {@link AbstractRegistry#addProvider(Provider)}), null
      *            if no providers should be tracked automatically after activation
      */
-    protected AbstractRegistry(final Class<P> providerClazz) {
+    protected AbstractRegistry(final @Nullable Class<P> providerClazz) {
         this.providerClazz = providerClazz;
     }
 
     protected void activate(final BundleContext context) {
+        /*
+         * The handlers for 'add' and 'remove' the services implementing the provider class (cardinality is
+         * multiple) rely on an active component.
+         * To grant that the add and remove functions are called only for an active component, we use a provider
+         * tracker.
+         */
         if (providerClazz != null) {
-            /*
-             * The handlers for 'add' and 'remove' the services implementing the provider class (cardinality is
-             * multiple) rely on an active component.
-             * To grant that the add and remove functions are called only for an active component, we use a provider
-             * tracker.
-             */
+            Class<P> providerClazz = this.providerClazz;
             providerTracker = new ProviderTracker(context, providerClazz);
             providerTracker.open();
         }
@@ -327,7 +328,7 @@ public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends P
     }
 
     @Override
-    public E update(E element) {
+    public @Nullable E update(E element) {
         return managedProvider.orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"))
                 .update(element);
     }
