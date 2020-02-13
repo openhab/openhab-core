@@ -76,6 +76,7 @@
     <slf4j.version>1.7.21</slf4j.version>
     <xtext.version>2.19.0</xtext.version>
     <spotless.version>1.24.3</spotless.version>
+    <spotless.check.skip>true</spotless.check.skip> <!-- Spotless disabled for now -->
   </properties>
 
   <dependencyManagement>
