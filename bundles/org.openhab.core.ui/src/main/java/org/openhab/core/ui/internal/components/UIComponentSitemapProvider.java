@@ -12,15 +12,18 @@
  */
 package org.openhab.core.ui.internal.components;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigUtil;
+import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
@@ -65,25 +68,30 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - Initial contribution
  */
 @Component(service = SitemapProvider.class)
-public class UIComponentSitemapProvider implements SitemapProvider {
+public class UIComponentSitemapProvider implements SitemapProvider, RegistryChangeListener<RootUIComponent> {
     private final Logger logger = LoggerFactory.getLogger(UIComponentSitemapProvider.class);
 
     public static final String SITEMAP_NAMESPACE = "system:sitemap";
 
+    private static final String SITEMAP_PREFIX = "uicomponents_";
+    private static final String SITEMAP_SUFFIX = ".sitemap";
+
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private UIComponentRegistryFactory componentRegistryFactory;
+    private UIComponentRegistry sitemapComponentRegistry;
+
+    private final Set<ModelRepositoryChangeListener> modelChangeListeners = new CopyOnWriteArraySet<>();
 
     @Override
     public @Nullable Sitemap getSitemap(@NonNull String sitemapName) {
-        buildSitemap(sitemapName);
+        buildSitemap(sitemapName.replaceFirst(SITEMAP_PREFIX, ""));
         return sitemaps.get(sitemapName);
     }
 
     @Override
     public @NonNull Set<@NonNull String> getSitemapNames() {
         sitemaps.clear();
-        UIComponentRegistry registry = componentRegistryFactory.getRegistry(SITEMAP_NAMESPACE);
-        Collection<RootUIComponent> rootComponents = registry.getAll();
+        Collection<RootUIComponent> rootComponents = sitemapComponentRegistry.getAll();
         // try building all sitemaps to leave the invalid ones out
         for (RootUIComponent rootComponent : rootComponents) {
             try {
@@ -98,8 +106,7 @@ public class UIComponentSitemapProvider implements SitemapProvider {
     }
 
     protected Sitemap buildSitemap(String sitemapName) {
-        UIComponentRegistry registry = componentRegistryFactory.getRegistry(SITEMAP_NAMESPACE);
-        RootUIComponent rootComponent = registry.get(sitemapName);
+        RootUIComponent rootComponent = sitemapComponentRegistry.get(sitemapName);
         if (rootComponent != null) {
             try {
                 Sitemap sitemap = buildSitemap(rootComponent);
@@ -119,7 +126,7 @@ public class UIComponentSitemapProvider implements SitemapProvider {
         }
 
         SitemapImpl sitemap = (SitemapImpl) SitemapFactory.eINSTANCE.createSitemap();
-        sitemap.setName(rootComponent.getUID());
+        sitemap.setName(SITEMAP_PREFIX + rootComponent.getUID());
         sitemap.setLabel(rootComponent.getConfig().get("label").toString());
 
         if (rootComponent.getSlots() != null && rootComponent.getSlots().containsKey("widgets")) {
@@ -263,11 +270,8 @@ public class UIComponentSitemapProvider implements SitemapProvider {
         if (value == null) {
             return;
         }
-        if (value instanceof Double) {
-            value = new BigDecimal((Double) value);
-        }
         WidgetImpl widgetImpl = (WidgetImpl) widget;
-        widgetImpl.eSet(feature, value);
+        widgetImpl.eSet(feature, ConfigUtil.normalizeType(value));
     }
 
     private void addWidgetMappings(EList<Mapping> mappings, UIComponent component) {
@@ -289,18 +293,45 @@ public class UIComponentSitemapProvider implements SitemapProvider {
 
     @Override
     public void addModelChangeListener(@NonNull ModelRepositoryChangeListener listener) {
+        modelChangeListeners.add(listener);
     }
 
     @Override
     public void removeModelChangeListener(@NonNull ModelRepositoryChangeListener listener) {
+        modelChangeListeners.remove(listener);
+    }
+
+    @Override
+    public void added(RootUIComponent element) {
+        for (ModelRepositoryChangeListener listener : modelChangeListeners) {
+            listener.modelChanged(SITEMAP_PREFIX + element.getUID() + SITEMAP_SUFFIX, EventType.ADDED);
+        }
+    }
+
+    @Override
+    public void removed(RootUIComponent element) {
+        for (ModelRepositoryChangeListener listener : modelChangeListeners) {
+            listener.modelChanged(SITEMAP_PREFIX + element.getUID() + SITEMAP_SUFFIX, EventType.REMOVED);
+        }
+    }
+
+    @Override
+    public void updated(RootUIComponent oldElement, RootUIComponent element) {
+        for (ModelRepositoryChangeListener listener : modelChangeListeners) {
+            listener.modelChanged(SITEMAP_PREFIX + element.getUID() + SITEMAP_SUFFIX, EventType.MODIFIED);
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     protected void setComponentRegistryFactory(UIComponentRegistryFactory componentRegistryFactory) {
         this.componentRegistryFactory = componentRegistryFactory;
+        this.sitemapComponentRegistry = this.componentRegistryFactory.getRegistry(SITEMAP_NAMESPACE);
+        this.sitemapComponentRegistry.addRegistryChangeListener(this);
     }
 
     protected void unsetComponentRegistryFactory(UIComponentRegistryFactory componentRegistryFactory) {
         this.componentRegistryFactory = null;
+        this.sitemapComponentRegistry.removeRegistryChangeListener(this);
+        this.sitemapComponentRegistry = null;
     }
 }

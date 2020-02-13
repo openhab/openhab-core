@@ -28,17 +28,10 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = UIComponentRegistryFactory.class, immediate = true)
 public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactory {
-    StorageService storageService;
     Map<String, UIComponentRegistryImpl> registries = new HashMap<>();
 
     @Reference
-    protected void setStorageService(StorageService storageService) {
-        this.storageService = storageService;
-    }
-
-    protected void unsetStorageService(StorageService storageService) {
-        this.storageService = null;
-    }
+    StorageService storageService;
 
     @Override
     public UIComponentRegistryImpl getRegistry(String namespace) {
