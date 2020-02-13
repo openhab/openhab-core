@@ -13,9 +13,11 @@
 package org.openhab.core.internal.items;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.types.CommandDescriptionImpl;
 import org.openhab.core.items.Metadata;
@@ -24,6 +26,7 @@ import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandDescriptionProvider;
 import org.openhab.core.types.CommandOption;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -35,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - initial contribution
  *
  */
+@NonNullByDefault
 @Component(service = CommandDescriptionProvider.class)
 public class MetadataCommandDescriptionProvider implements CommandDescriptionProvider {
 
@@ -43,6 +47,12 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
     public static final String COMMANDDESCRIPTION_METADATA_NAMESPACE = "commandDescription";
 
     private MetadataRegistry metadataRegistry;
+
+    @Activate
+    protected MetadataCommandDescriptionProvider(final @Reference MetadataRegistry metadataRegistry,
+            Map<String, Object> properties) {
+        this.metadataRegistry = metadataRegistry;
+    }
 
     @Override
     public @Nullable CommandDescription getCommandDescription(@NonNull String itemName, @Nullable Locale locale) {
@@ -60,24 +70,15 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
                             commandDescription.addCommandOption(new CommandOption(o.trim(), null));
                         }
                     });
-                }
 
-                return commandDescription;
+                    return commandDescription;
+                }
             } catch (Exception e) {
-                logger.error("Unable to parse the commandDescription from metadata for item {}", itemName, e);
+                logger.warn("Unable to parse the commandDescription from metadata for item {}, ignoring it", itemName);
                 return null;
             }
         }
 
         return null;
-    }
-
-    @Reference
-    protected void setMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = metadataRegistry;
-    }
-
-    protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
     }
 }

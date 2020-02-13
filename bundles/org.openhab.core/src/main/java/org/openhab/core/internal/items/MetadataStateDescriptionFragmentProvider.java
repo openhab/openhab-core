@@ -83,10 +83,10 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
                     builder.withMinimum(getBigDecimal(metadata.getConfiguration().get("min")));
                 }
                 if (metadata.getConfiguration().containsKey("max")) {
-                    builder.withMaximum(getBigDecimal(metadata.getConfiguration().get("min")));
+                    builder.withMaximum(getBigDecimal(metadata.getConfiguration().get("max")));
                 }
                 if (metadata.getConfiguration().containsKey("step")) {
-                    builder.withStep(getBigDecimal(metadata.getConfiguration().get("min")));
+                    builder.withStep(getBigDecimal(metadata.getConfiguration().get("step")));
                 }
                 if (metadata.getConfiguration().containsKey("readOnly")) {
                     builder.withReadOnly(getBoolean(metadata.getConfiguration().get("readOnly")));
@@ -103,7 +103,7 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
 
                 return builder.build();
             } catch (Exception e) {
-                logger.error("Unable to parse the stateDescription from metadata for item {}", itemName, e);
+                logger.warn("Unable to parse the stateDescription from metadata for item {}, ignoring it", itemName);
             }
         }
 
