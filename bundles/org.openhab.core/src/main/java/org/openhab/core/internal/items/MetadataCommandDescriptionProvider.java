@@ -49,7 +49,7 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
     private MetadataRegistry metadataRegistry;
 
     @Activate
-    protected MetadataCommandDescriptionProvider(final @Reference MetadataRegistry metadataRegistry,
+    public MetadataCommandDescriptionProvider(final @Reference MetadataRegistry metadataRegistry,
             Map<String, Object> properties) {
         this.metadataRegistry = metadataRegistry;
     }
