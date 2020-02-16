@@ -102,6 +102,8 @@ public final class SmartHomeUnits extends CustomUnits {
             new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000000))));
     public static final Unit<Dimensionless> ONE = addUnit(AbstractUnit.ONE);
     public static final Unit<Dimensionless> PERCENT = addUnit(Units.PERCENT);
+    public static final Unit<Dimensionless> PARTS_PER_BILLION = addUnit(
+            new TransformedUnit<>(ONE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000000))));
     public static final Unit<Dimensionless> PARTS_PER_MILLION = addUnit(
             new TransformedUnit<>(ONE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000))));
     public static final Unit<Dimensionless> DECIBEL = addUnit(ONE.transform(
@@ -150,6 +152,8 @@ public final class SmartHomeUnits extends CustomUnits {
             new RationalConverter(BigInteger.valueOf(100000), BigInteger.ONE)));
     public static final Unit<Pressure> MILLIBAR = addUnit(MetricPrefix.MILLI(BAR));
     public static final Unit<Radioactivity> BECQUEREL = addUnit(Units.BECQUEREL);
+    public static final Unit<Density> BECQUEREL_PER_CUBIC_METRE = addUnit(
+            new AlternateUnit<Density>(Units.BECQUEREL.divide(Units.CUBIC_METRE), "Bq/m³"));
     public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(Units.GRAY);
     public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(Units.SIEVERT);
     public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(new TransformedUnit<>("mm/h",
@@ -204,6 +208,7 @@ public final class SmartHomeUnits extends CustomUnits {
         // Ordered alphabetical by name
         SimpleUnitFormat.getInstance().label(AMPERE_HOUR, "Ah");
         SimpleUnitFormat.getInstance().label(BAR, BAR.getSymbol());
+        SimpleUnitFormat.getInstance().label(BECQUEREL_PER_CUBIC_METRE, "Bq/m³");
         SimpleUnitFormat.getInstance().label(BIT, BIT.getSymbol());
         SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, "bit/s");
         SimpleUnitFormat.getInstance().label(BYTE, "B");
@@ -238,6 +243,7 @@ public final class SmartHomeUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MILLIBAR, "mbar");
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
         SimpleUnitFormat.getInstance().label(OCTET, "o");
+        SimpleUnitFormat.getInstance().label(PARTS_PER_BILLION, "ppb");
         SimpleUnitFormat.getInstance().label(PARTS_PER_MILLION, "ppm");
         SimpleUnitFormat.getInstance().label(STANDARD_GRAVITY, "gₙ");
         SimpleUnitFormat.getInstance().label(SIEMENS_PER_METRE, "S/m");
