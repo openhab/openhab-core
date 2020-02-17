@@ -229,7 +229,7 @@ public class ScriptFileWatcher extends AbstractWatchService {
         String fileExtension = fileName.substring(idx + 1);
 
         // ignore known file extensions for "temp" files
-         if (fileExtension.equals("txt") || fileExtension.endsWith("~") || fileExtension.endsWith("swp")) {
+        if (fileExtension.equals("txt") || fileExtension.endsWith("~") || fileExtension.endsWith("swp")) {
             return null;
         }
         return fileExtension;
