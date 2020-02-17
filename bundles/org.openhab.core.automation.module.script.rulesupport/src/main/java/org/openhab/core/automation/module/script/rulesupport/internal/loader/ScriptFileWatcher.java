@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -155,7 +156,7 @@ public class ScriptFileWatcher extends AbstractWatchService {
     }
 
     private synchronized void importFile(URL url) {
-        String fileName = getFileName(url);
+        String fileName = url.getFile();
         if (loaded.contains(url)) {
             this.removeFile(url); // if already loaded, remove first
         }
@@ -184,20 +185,10 @@ public class ScriptFileWatcher extends AbstractWatchService {
                     }
                 } else {
                     enqueueUrl(url, scriptType);
-
                     logger.info("ScriptEngine for {} not available", scriptType);
                 }
             }
         }
-    }
-
-    private String getFileName(URL url) {
-        String fileName = url.getFile();
-        String parentPath = FILE_DIRECTORY.replace('\\', '/');
-        if (fileName.contains(parentPath)) {
-            fileName = fileName.substring(fileName.lastIndexOf(parentPath) + parentPath.length() + 1);
-        }
-        return fileName;
     }
 
     private void enqueueUrl(URL url, String scriptType) {
@@ -252,16 +243,26 @@ public class ScriptFileWatcher extends AbstractWatchService {
         SortedSet<URL> reimportUrls = new TreeSet<URL>(new Comparator<URL>() {
             @Override
             public int compare(URL o1, URL o2) {
-                Path path1 = Paths.get(o1.getPath());
-                Path path2 = Paths.get(o2.getPath());
-                String name1 = path1.getFileName().toString();
-                String name2 = path2.getFileName().toString();
-                int nameCompare = name1.compareToIgnoreCase(name2);
-                if (nameCompare != 0) {
-                    return nameCompare;
-                } else {
-                    int pathCompare = path1.getParent().toString().compareToIgnoreCase(path2.getParent().toString());
-                    return pathCompare;
+                try {
+                    Path path1 = Paths.get(o1.toURI());
+                    String name1 = path1.getFileName().toString();
+                    logger.trace("o1 [{}], path1 [{}], name1 [{}]", o1, path1, name1);
+
+                    Path path2 = Paths.get(o2.toURI());
+                    String name2 = path2.getFileName().toString();
+                    logger.trace("o2 [{}], path2 [{}], name2 [{}]", o2, path2, name2);
+
+                    int nameCompare = name1.compareToIgnoreCase(name2);
+                    if (nameCompare != 0) {
+                        return nameCompare;
+                    } else {
+                        int pathCompare = path1.getParent().toString()
+                                .compareToIgnoreCase(path2.getParent().toString());
+                        return pathCompare;
+                    }
+                } catch (URISyntaxException e) {
+                    logger.error("URI syntax exception", e);
+                    return 0;
                 }
             }
         });
