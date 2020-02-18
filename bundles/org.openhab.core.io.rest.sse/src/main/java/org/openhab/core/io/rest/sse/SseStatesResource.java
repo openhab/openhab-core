@@ -13,10 +13,7 @@
 package org.openhab.core.io.rest.sse;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,25 +28,18 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseFeature;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.sse.internal.ItemStateChangesSseBroadcaster;
-import org.openhab.core.io.rest.sse.internal.SseActivator;
 import org.openhab.core.io.rest.sse.internal.SseStateEventOutput;
-import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemStateChangedEvent;
-import org.openhab.core.transform.TransformationException;
-import org.openhab.core.transform.TransformationHelper;
-import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -88,6 +78,7 @@ public class SseStatesResource {
     @Reference
     protected void setItemRegistry(ItemRegistry itemRegistry) {
         this.itemRegistry = itemRegistry;
+        this.broadcaster.setItemRegistry(itemRegistry);
     }
 
     protected void unsetItemRegistry(ItemRegistry itemRegistry) {
@@ -105,7 +96,7 @@ public class SseStatesResource {
 
     public SseStatesResource() {
         this.executorService = Executors.newSingleThreadExecutor();
-        this.broadcaster = new ItemStateChangesSseBroadcaster(itemRegistry);
+        this.broadcaster = new ItemStateChangesSseBroadcaster();
     }
 
     /**
@@ -149,20 +140,10 @@ public class SseStatesResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Unknown connectionId") })
     public Object updateTrackedItems(@PathParam("connectionId") String connectionId,
-            @ApiParam("items") Collection<String> itemNames) {
-
-        // Send the current states of the new tracked items on the SSE connection
-        Map<String, String> newTrackedItems = new HashMap<>();
-        itemNames.stream().forEach(i -> {
-            Item item = itemRegistry.get(i);
-            if (item != null) {
-                String transformedState = considerTransformation(item.getState().toString(), item, null);
-                newTrackedItems.put(item.getName(), transformedState);
-            }
-        });
+            @ApiParam("items") Set<String> itemNames) {
 
         try {
-            broadcaster.updateTrackedItems(connectionId, newTrackedItems);
+            broadcaster.updateTrackedItems(connectionId, itemNames);
         } catch (IllegalArgumentException e) {
             return Response.status(Status.NOT_FOUND).build();
         }
@@ -179,36 +160,11 @@ public class SseStatesResource {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                OutboundEvent.Builder builder = new OutboundEvent.Builder();
-                Map<String, String> payload = new HashMap<>();
-                Item item = itemRegistry.get(stateChangeEvent.getItemName());
-                if (item != null) {
-                    String transformedState = considerTransformation(item.getState().toString(), item, null);
-                    payload.put(item.getName(), transformedState);
-                    OutboundEvent outboundEvent = builder.mediaType(MediaType.APPLICATION_JSON_TYPE).data(payload)
-                            .build();
-                    broadcaster.broadcast(outboundEvent);
+                OutboundEvent event = broadcaster.buildStateEvent(Set.of(stateChangeEvent.getItemName()));
+                if (event != null) {
+                    broadcaster.broadcast(event);
                 }
             }
         });
-    }
-
-    private @Nullable String considerTransformation(String state, Item item, @Nullable Locale locale) {
-        StateDescription stateDescription = item.getStateDescription(locale);
-        if (stateDescription != null) {
-            String pattern = stateDescription.getPattern();
-            if (pattern != null) {
-                try {
-                    return TransformationHelper.transform(SseActivator.getContext(), pattern, state);
-                } catch (NoClassDefFoundError ex) {
-                    // TransformationHelper is optional dependency, so ignore if class not found
-                    // return state as it is without transformation
-                } catch (TransformationException e) {
-                    logger.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
-                            item.getName(), pattern, e.getMessage());
-                }
-            }
-        }
-        return state;
     }
 }

@@ -58,6 +58,15 @@ public class SseStateEventOutput extends EventOutput {
         this.trackedItems = itemNames;
     }
 
+    /**
+     * Gets the list of tracked items for this connection
+     *
+     * @return a list of tracked item names
+     */
+    protected Collection<String> getTrackedItems() {
+        return trackedItems;
+    }
+
     @Override
     public void write(OutboundEvent chunk) throws IOException {
         if (chunk.getData() instanceof Map<?, ?>) {
