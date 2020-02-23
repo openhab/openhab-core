@@ -54,7 +54,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true)
 public class ScriptFileWatcher extends AbstractWatchService {
     private static final Set<String> EXCLUDED_FILE_EXTENSIONS = new HashSet<>(
-            Arrays.asList("txt", "old", "example", "backup", "md", "swp"));
+            Arrays.asList("txt", "old", "example", "backup", "md", "swp", "tmp", "bak"));
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
     private static final long INITIAL_DELAY = 25;
     private static final long RECHECK_INTERVAL = 20;
