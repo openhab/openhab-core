@@ -46,16 +46,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yannick Schaus - initial contribution
  */
-public class ItemStateChangesSseBroadcaster extends SseBroadcaster {
+public class ItemStatesSseBroadcaster extends SseBroadcaster {
 
-    private final Logger logger = LoggerFactory.getLogger(ItemStateChangesSseBroadcaster.class);
+    private final Logger logger = LoggerFactory.getLogger(ItemStatesSseBroadcaster.class);
 
     private Map<String, SseStateEventOutput> eventOutputs = new HashMap<>();
 
     private ItemRegistry itemRegistry;
 
-    public ItemStateChangesSseBroadcaster() {
+    public ItemStatesSseBroadcaster(ItemRegistry itemRegistry) {
         super();
+        this.itemRegistry = itemRegistry;
     }
 
     @Override
@@ -218,7 +219,6 @@ public class ItemStateChangesSseBroadcaster extends SseBroadcaster {
                                         state, item.getName(), pattern, e.getMessage());
                                 displayState = new String("Err");
                             }
-
                         }
                     }
                 }
@@ -226,9 +226,5 @@ public class ItemStateChangesSseBroadcaster extends SseBroadcaster {
         }
 
         return displayState;
-    }
-
-    public void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
     }
 }
