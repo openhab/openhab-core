@@ -15,13 +15,14 @@ package org.openhab.core.library.unit;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
-import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 
 import java.math.BigDecimal;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
+import javax.measure.quantity.Power;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
@@ -49,8 +50,8 @@ public class SmartHomeUnitsTest {
         Quantity<Pressure> inHg = Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.INCH_OF_MERCURY);
 
         assertThat(inHg.to(SIUnits.PASCAL), is(Quantities.getQuantity(new BigDecimal("3386.388"), SIUnits.PASCAL)));
-        assertThat(inHg.to(HECTO(SIUnits.PASCAL)),
-                is(Quantities.getQuantity(new BigDecimal("33.86388"), HECTO(SIUnits.PASCAL))));
+        assertThat(inHg.to(MetricPrefix.HECTO(SIUnits.PASCAL)),
+                is(Quantities.getQuantity(new BigDecimal("33.86388"), MetricPrefix.HECTO(SIUnits.PASCAL))));
     }
 
     @Test
@@ -64,7 +65,7 @@ public class SmartHomeUnitsTest {
         Quantity<Pressure> pascal = Quantities.getQuantity(new BigDecimal("3386.388"), SIUnits.PASCAL);
 
         assertThat(pascal.to(ImperialUnits.INCH_OF_MERCURY),
-                is(Quantities.getQuantity(new BigDecimal("1.000"), ImperialUnits.INCH_OF_MERCURY)));
+                is(Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.INCH_OF_MERCURY)));
     }
 
     @Test
@@ -72,8 +73,8 @@ public class SmartHomeUnitsTest {
         Quantity<Pressure> mmHg = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.MILLIMETRE_OF_MERCURY);
 
         assertThat(mmHg.to(SIUnits.PASCAL), is(Quantities.getQuantity(new BigDecimal("133.322368"), SIUnits.PASCAL)));
-        assertThat(mmHg.to(HECTO(SIUnits.PASCAL)),
-                is(Quantities.getQuantity(new BigDecimal("1.33322368"), HECTO(SIUnits.PASCAL))));
+        assertThat(mmHg.to(MetricPrefix.HECTO(SIUnits.PASCAL)),
+                is(Quantities.getQuantity(new BigDecimal("1.33322368"), MetricPrefix.HECTO(SIUnits.PASCAL))));
     }
 
     @Test
@@ -87,19 +88,20 @@ public class SmartHomeUnitsTest {
         Quantity<Pressure> pascal = Quantities.getQuantity(new BigDecimal("133.322368"), SIUnits.PASCAL);
 
         assertThat(pascal.to(SmartHomeUnits.MILLIMETRE_OF_MERCURY),
-                is(Quantities.getQuantity(new BigDecimal("1.000"), SmartHomeUnits.MILLIMETRE_OF_MERCURY)));
+                is(Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.MILLIMETRE_OF_MERCURY)));
     }
 
     @Test
     public void testHectoPascal2Pascal() {
         Quantity<Pressure> pascal = Quantities.getQuantity(BigDecimal.valueOf(100), SIUnits.PASCAL);
 
-        assertThat(pascal.to(HECTO(SIUnits.PASCAL)), is(Quantities.getQuantity(BigDecimal.ONE, HECTO(SIUnits.PASCAL))));
+        assertThat(pascal.to(MetricPrefix.HECTO(SIUnits.PASCAL)),
+                is(Quantities.getQuantity(BigDecimal.ONE, MetricPrefix.HECTO(SIUnits.PASCAL))));
     }
 
     @Test
     public void testHpaUnitSymbol() {
-        assertThat(HECTO(SIUnits.PASCAL).toString(), is("hPa"));
+        assertThat(MetricPrefix.HECTO(SIUnits.PASCAL).toString(), is("hPa"));
     }
 
     @Test
@@ -168,30 +170,43 @@ public class SmartHomeUnitsTest {
         assertThat(SmartHomeUnits.KNOT.getSymbol(), is("kn"));
         assertThat(SmartHomeUnits.KNOT.toString(), is("kn"));
     }
-    
+
     @Test
     public void testVarUnitSymbol() {
         assertThat(SmartHomeUnits.VAR.getSymbol(), is("var"));
         assertThat(SmartHomeUnits.VAR.toString(), is("var"));
         assertThat(SmartHomeUnits.VAR_HOUR.toString(), is("varh"));
     }
-    
+
     @Test
     public void testKVarUnitSymbol() {
         assertThat(SmartHomeUnits.KILOVAR.toString(), is("kvar"));
         assertThat(SmartHomeUnits.KILOVAR_HOUR.toString(), is("kvarh"));
+
+        Quantity<Power> kvar = Quantities.getQuantity(BigDecimal.TEN, MetricPrefix.KILO(SmartHomeUnits.VAR));
+        assertThat(kvar.getUnit().toString(), is("kvar"));
+
+        Quantity<Energy> kvarh = Quantities.getQuantity(BigDecimal.TEN, MetricPrefix.KILO(SmartHomeUnits.VAR_HOUR));
+        assertThat(kvarh.getUnit().toString(), is("kvarh"));
     }
-    
+
     @Test
     public void testKVarHFromString() {
         assertThat(QuantityType.valueOf("2.60 kvarh").getUnit().toString(), is("kvarh"));
     }
-    
+
     @Test
     public void testVoltAmpereUnitSymbol() {
         assertThat(SmartHomeUnits.VOLT_AMPERE.toString(), is("VA"));
         assertThat(SmartHomeUnits.VOLT_AMPERE.getSymbol(), is("VA"));
         assertThat(SmartHomeUnits.VOLT_AMPERE_HOUR.toString(), is("VAh"));
+
+        Quantity<Power> kVA = Quantities.getQuantity(BigDecimal.TEN, MetricPrefix.KILO(SmartHomeUnits.VOLT_AMPERE));
+        assertThat(kVA.getUnit().toString(), is("kVA"));
+
+        Quantity<Energy> kVAh = Quantities.getQuantity(BigDecimal.TEN,
+                MetricPrefix.KILO(SmartHomeUnits.VOLT_AMPERE_HOUR));
+        assertThat(kVAh.getUnit().toString(), is("kVAh"));
     }
 
     @Test
