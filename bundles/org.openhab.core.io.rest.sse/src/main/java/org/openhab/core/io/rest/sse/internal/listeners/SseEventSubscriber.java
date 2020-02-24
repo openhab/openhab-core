@@ -21,6 +21,8 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.io.rest.sse.SseResource;
+import org.openhab.core.io.rest.sse.internal.ItemStatesSseBroadcaster;
+import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -30,6 +32,7 @@ import org.osgi.service.component.annotations.Reference;
  * to currently listening SSE clients.
  *
  * @author Stefan Bußweiler - Initial contribution
+ * @author Yannick Schaus - Broadcast state events to the specialized {@link ItemStatesSseBroadcaster}
  */
 @Component
 @NonNullByDefault
@@ -57,5 +60,8 @@ public class SseEventSubscriber implements EventSubscriber {
     @Override
     public void receive(Event event) {
         sseResource.broadcastEvent(event);
+        if (event instanceof ItemStateChangedEvent) {
+            sseResource.broadcastStateEvent((ItemStateChangedEvent) event);
+        }
     }
 }
