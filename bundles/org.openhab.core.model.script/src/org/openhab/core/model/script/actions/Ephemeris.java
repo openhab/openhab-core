@@ -77,7 +77,7 @@ public class Ephemeris {
 
     @ActionDoc(text = "checks if today plus or minus a given offset is bank holiday from a given userfile")
     public static boolean isBankHoliday(int offset, String filename) {
-        return isBankHoliday(ZonedDateTime.now().plusDays(offset));
+        return isBankHoliday(ZonedDateTime.now().plusDays(offset), filename);
     }
 
     @ActionDoc(text = "checks a given day is bank holiday from a given userfile")
