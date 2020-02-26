@@ -18,8 +18,13 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.scoping.impl.ImportNormalizer;
 import org.eclipse.xtext.xbase.scoping.XImportSectionNamespaceScopeProvider;
 
+/**
+ * @author Oliver Libutzki - Initial contribution
+ */
 public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNamespaceScopeProvider {
 
+    public static final QualifiedName CORE_LIBRARY_UNITS_PACKAGE = QualifiedName.create("org", "openhab", "core",
+            "library", "unit");
     public static final QualifiedName CORE_LIBRARY_TYPES_PACKAGE = QualifiedName.create("org", "openhab", "core",
             "library", "types");
     public static final QualifiedName CORE_LIBRARY_ITEMS_PACKAGE = QualifiedName.create("org", "openhab", "core",
@@ -34,6 +39,7 @@ public class ScriptImportSectionNamespaceScopeProvider extends XImportSectionNam
     @Override
     protected List<ImportNormalizer> getImplicitImports(boolean ignoreCase) {
         List<ImportNormalizer> implicitImports = super.getImplicitImports(ignoreCase);
+        implicitImports.add(doCreateImportNormalizer(CORE_LIBRARY_UNITS_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_LIBRARY_TYPES_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_LIBRARY_ITEMS_PACKAGE, true, false));
         implicitImports.add(doCreateImportNormalizer(CORE_ITEMS_PACKAGE, true, false));
