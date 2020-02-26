@@ -213,7 +213,7 @@ public class ConfigDispatcher {
         if (progArg != null) {
             return progArg;
         } else {
-            return ConfigConstants.getConfigFolder() + File.separator + SERVICE_CFG_FILE;
+            return SERVICE_CFG_FILE;
         }
     }
 
