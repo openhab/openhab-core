@@ -36,7 +36,7 @@ import org.osgi.service.component.annotations.Reference;
 public class ConfigDispatcherFileWatcher extends AbstractWatchService {
 
     /** The program argument name for setting the service config directory path */
-    public static final String SERVICEDIR_PROG_ARGUMENT = "smarthome.servicedir";
+    public static final String SERVICEDIR_PROG_ARGUMENT = "openhab.servicedir";
 
     /** The default folder name of the configuration folder of services */
     public static final String SERVICES_FOLDER = "services";
