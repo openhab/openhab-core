@@ -128,8 +128,7 @@ public class ItemStatesSseBroadcaster extends SseBroadcaster {
         for (String itemName : itemNames) {
             try {
                 // Check that the item is tracked by at least one connection
-                if (itemRegistry != null
-                        && eventOutputs.values().stream().anyMatch(c -> c.getTrackedItems().contains(itemName))) {
+                if (eventOutputs.values().stream().anyMatch(c -> c.getTrackedItems().contains(itemName))) {
                     Item item = itemRegistry.getItem(itemName);
                     StateDTO stateDto = new StateDTO();
                     stateDto.state = item.getState().toString();

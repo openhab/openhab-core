@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.sse.internal;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ import org.glassfish.jersey.media.sse.OutboundEvent;
 public class SseStateEventOutput extends EventOutput {
 
     private String connectionId;
-    private Collection<String> trackedItems;
+    private Collection<String> trackedItems = Collections.emptySet();
 
     public SseStateEventOutput() {
         super();
