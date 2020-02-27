@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,6 +53,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(immediate = true)
 public class ScriptFileWatcher extends AbstractWatchService {
+    private static final Set<String> EXCLUDED_FILE_EXTENSIONS = new HashSet<>(
+            Arrays.asList("txt", "old", "example", "backup", "md", "swp", "tmp", "bak"));
     private static final String FILE_DIRECTORY = "automation" + File.separator + "jsr223";
     private static final long INITIAL_DELAY = 25;
     private static final long RECHECK_INTERVAL = 20;
@@ -222,14 +225,14 @@ public class ScriptFileWatcher extends AbstractWatchService {
 
     private String getScriptType(URL url) {
         String fileName = url.getPath();
-        int idx = fileName.lastIndexOf(".");
-        if (idx == -1) {
+        int index = fileName.lastIndexOf(".");
+        if (index == -1) {
             return null;
         }
-        String fileExtension = fileName.substring(idx + 1);
+        String fileExtension = fileName.substring(index + 1);
 
         // ignore known file extensions for "temp" files
-        if (fileExtension.equals("txt") || fileExtension.endsWith("~") || fileExtension.endsWith("swp")) {
+        if (EXCLUDED_FILE_EXTENSIONS.contains(fileExtension) || fileExtension.endsWith("~")) {
             return null;
         }
         return fileExtension;
