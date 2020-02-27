@@ -20,10 +20,10 @@ package org.openhab.core.config.core;
 public class ConfigConstants {
 
     /** The program argument name for setting the user data directory path */
-    public static final String USERDATA_DIR_PROG_ARGUMENT = "smarthome.userdata";
+    public static final String USERDATA_DIR_PROG_ARGUMENT = "openhab.userdata";
 
     /** The program argument name for setting the main config directory path */
-    public static final String CONFIG_DIR_PROG_ARGUMENT = "smarthome.configdir";
+    public static final String CONFIG_DIR_PROG_ARGUMENT = "openhab.conf";
 
     /** The default main configuration directory name */
     public static final String DEFAULT_CONFIG_FOLDER = "conf";
@@ -32,7 +32,7 @@ public class ConfigConstants {
     public static final String DEFAULT_USERDATA_FOLDER = "userdata";
 
     /** The property to recognize a service instance created by a service factory */
-    public static final String SERVICE_CONTEXT = "esh.servicecontext";
+    public static final String SERVICE_CONTEXT = "openhab.servicecontext";
 
     /** The property to separate service PIDs from their contexts */
     public static final String SERVICE_CONTEXT_MARKER = "#";

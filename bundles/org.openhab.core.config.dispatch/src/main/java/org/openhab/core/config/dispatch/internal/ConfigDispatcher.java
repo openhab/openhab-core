@@ -55,9 +55,9 @@ import com.google.gson.JsonSyntaxException;
  * config folder files and dispatch it to the different bundles using the {@link ConfigurationAdmin} service.
  *
  * <p>
- * The name of the configuration folder can be provided as a program argument "smarthome.configdir" (default is "conf").
+ * The name of the configuration folder can be provided as a program argument "openhab.configdir" (default is "conf").
  * Configurations for OSGi services are kept in a subfolder that can be provided as a program argument
- * "smarthome.servicedir" (default is "services"). Any file in this folder with the extension .cfg will be processed.
+ * "openhab.servicecfg" (default is "services"). Any file in this folder with the extension .cfg will be processed.
  *
  * <p>
  * The format of the configuration file is similar to a standard property file, with the exception that the property
@@ -67,12 +67,11 @@ import com.google.gson.JsonSyntaxException;
  * &lt;service-pid&gt;:&lt;property&gt;=&lt;value&gt;
  *
  * <p>
- * In case the pid does not contain any ".", the default service pid namespace is prefixed, which can be defined by the
- * program argument "smarthome.servicepid" (default is "org.openhab.core").
+ * In case the pid does not contain any ".", the default service pid namespace "org.openhab" is prefixed.
  *
  * <p>
  * If no pid is defined in the property line, the default pid namespace will be used together with the filename. E.g. if
- * you have a file "security.cfg", the pid that will be used is "org.openhab.core.security".
+ * you have a file "security.cfg", the pid that will be used is "org.openhab.security".
  *
  * <p>
  * Last but not least, a pid can be defined in the first line of a cfg file by prefixing it with "pid:", e.g.
@@ -97,12 +96,6 @@ public class ConfigDispatcher {
 
     private final Gson gson = new Gson();
 
-    /** The program argument name for setting the service pid namespace */
-    public static final String SERVICEPID_PROG_ARGUMENT = "smarthome.servicepid";
-
-    /** The property to recognize a service instance created by a service factory */
-    public static final String SERVICE_CONTEXT = "esh.servicecontext";
-
     /** The property to separate service PIDs from their contexts */
     public static final String SERVICE_CONTEXT_MARKER = "#";
 
@@ -110,13 +103,13 @@ public class ConfigDispatcher {
      * The program argument name for setting the default services config file
      * name
      */
-    public static final String SERVICECFG_PROG_ARGUMENT = "smarthome.servicecfg";
+    public static final String SERVICECFG_PROG_ARGUMENT = "openhab.servicecfg";
 
     /** The default namespace for service pids */
-    public static final String SERVICE_PID_NAMESPACE = "org.openhab.core";
+    public static final String SERVICE_PID_NAMESPACE = "org.openhab";
 
     /** The default services configuration filename */
-    public static final String SERVICE_CFG_FILE = "smarthome.cfg";
+    public static final String SERVICE_CFG_FILE = "services.cfg";
 
     private static final String PID_MARKER = "pid:";
 
@@ -149,9 +142,7 @@ public class ConfigDispatcher {
     private void loadExclusivePIDList() {
         try (FileReader reader = new FileReader(exclusivePIDStore)) {
             exclusivePIDMap = gson.fromJson(reader, ExclusivePIDMap.class);
-            if (exclusivePIDMap != null) {
-                exclusivePIDMap.initializeProcessPIDMapping();
-            }
+            exclusivePIDMap.initializeProcessPIDMapping();
         } catch (JsonSyntaxException | JsonIOException e) {
             logger.error("Error parsing exclusive pids from '{}': {}", exclusivePIDStore.getAbsolutePath(),
                     e.getMessage());
@@ -222,7 +213,7 @@ public class ConfigDispatcher {
         if (progArg != null) {
             return progArg;
         } else {
-            return ConfigConstants.getConfigFolder() + File.separator + SERVICE_CFG_FILE;
+            return SERVICE_CFG_FILE;
         }
     }
 
@@ -264,15 +255,6 @@ public class ConfigDispatcher {
         storeCurrentExclusivePIDList();
     }
 
-    private static String getServicePidNamespace() {
-        String progArg = System.getProperty(SERVICEPID_PROG_ARGUMENT);
-        if (progArg != null) {
-            return progArg;
-        } else {
-            return SERVICE_PID_NAMESPACE;
-        }
-    }
-
     /**
      * The filename of a given configuration file is assumed to be the service PID. If the filename
      * without extension contains ".", we assume it is the fully qualified name.
@@ -286,7 +268,7 @@ public class ConfigDispatcher {
             // it is a fully qualified namespace
             return filenameWithoutExt;
         } else {
-            return getServicePidNamespace() + "." + filenameWithoutExt;
+            return SERVICE_PID_NAMESPACE + "." + filenameWithoutExt;
         }
     }
 
@@ -437,7 +419,7 @@ public class ConfigDispatcher {
             pid = pid.trim();
             // PID is not fully qualified, so prefix with namespace
             if (!pid.contains(".")) {
-                pid = getServicePidNamespace() + "." + pid;
+                pid = SERVICE_PID_NAMESPACE + "." + pid;
             }
         }
         if (!trimmedLine.isEmpty() && trimmedLine.substring(1).contains(DEFAULT_VALUE_DELIMITER)) {
