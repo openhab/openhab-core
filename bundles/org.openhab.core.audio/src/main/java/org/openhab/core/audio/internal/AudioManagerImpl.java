@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.audio", property = { //
-        Constants.SERVICE_PID + "=org.openhab.core.audio", //
+        Constants.SERVICE_PID + "=org.openhab.audio", //
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + AudioManagerImpl.CONFIG_URI, //
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Audio" //

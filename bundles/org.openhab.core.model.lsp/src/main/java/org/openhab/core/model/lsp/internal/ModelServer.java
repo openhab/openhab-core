@@ -45,8 +45,7 @@ import com.google.inject.Injector;
  * @author Simon Kaufmann - Initial contribution
  */
 @Component(immediate = true, service = ModelServer.class, configurationPid = ModelServer.CONFIGURATION_PID, property = {
-        Constants.SERVICE_PID + "=org.openhab.core.lsp",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=misc:lsp",
+        Constants.SERVICE_PID + "=org.openhab.lsp", ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=misc:lsp",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Language Server (LSP)",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=misc" })
 public class ModelServer {
