@@ -22,7 +22,7 @@ import org.osgi.service.component.annotations.Component;
  */
 
 @Component(immediate = true, service = MagicMultiInstanceServiceMarker.class, property = {
-        Constants.SERVICE_PID + "=org.openhab.core.magicMultiInstance",
+        Constants.SERVICE_PID + "=org.openhab.magicMultiInstance",
         ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=true",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=MagicMultiInstanceService",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=test",

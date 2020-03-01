@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * @author Wouter Born - Sort TTS options
  */
 @Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, property = { //
-        Constants.SERVICE_PID + "=org.openhab.core.voice", //
+        Constants.SERVICE_PID + "=org.openhab.voice", //
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Voice", //
         ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + VoiceManagerImpl.CONFIG_URI //

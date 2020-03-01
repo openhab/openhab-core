@@ -24,7 +24,7 @@ import org.osgi.service.component.annotations.Component;
  * @author David Graeff - Initial contribution
  */
 @Component(immediate = true, service = MqttBrokerConnectionServiceInstanceMarker.class, property = {
-        Constants.SERVICE_PID + "=org.openhab.core.mqttbroker",
+        Constants.SERVICE_PID + "=org.openhab.mqttbroker",
         ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=true",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=MQTT system broker connection",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=MQTT",

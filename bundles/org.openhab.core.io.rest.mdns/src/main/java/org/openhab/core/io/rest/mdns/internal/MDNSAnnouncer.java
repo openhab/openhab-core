@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Markus Rathgeb - Use HTTP service utility functions
  */
 @Component(immediate = true, configurationPid = "org.openhab.mdns", property = {
-        Constants.SERVICE_PID + "=org.openhab.core.mdns" //
+        Constants.SERVICE_PID + "=org.openhab.mdns" //
 })
 public class MDNSAnnouncer {
 

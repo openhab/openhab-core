@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  * @author Erdoan Hadzhiyusein - Added time zone
  */
 @Component(immediate = true, configurationPid = I18nProviderImpl.CONFIGURATION_PID, property = {
-        Constants.SERVICE_PID + "=org.openhab.core.i18n", //
+        Constants.SERVICE_PID + "=org.openhab.i18n", //
         "service.config.label=Regional Settings", //
         "service.config.category=system", //
         "service.config.description.uri=system:i18n" })
