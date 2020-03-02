@@ -48,13 +48,10 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
     private ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
     private ItemChannelLinkRegistry itemChannelLinkRegistry;
     private ManagedThingProvider managedThingProvider;
-    private ThingLinkManager thingLinkManager;
 
     @Before
     public void setup() {
         registerVolatileStorageService();
-        thingLinkManager = getService(ThingLinkManager.class);
-        thingLinkManager.deactivate();
         managedThingProvider = getService(ManagedThingProvider.class);
         managedThingProvider.add(ThingBuilder.create(THING_TYPE_UID, THING_UID)
                 .withChannel(ChannelBuilder.create(CHANNEL_UID, "Color").build()).build());
@@ -69,7 +66,6 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
         managedThingProvider.getAll().forEach(it -> managedThingProvider.remove(it.getUID()));
         ComponentContext componentContext = mock(ComponentContext.class);
         when(componentContext.getProperties()).thenReturn(new Hashtable<>());
-        thingLinkManager.activate(componentContext);
     }
 
     @Test

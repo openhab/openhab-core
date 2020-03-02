@@ -18,11 +18,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -75,7 +72,6 @@ import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
-import org.openhab.core.thing.link.ThingLinkManager;
 import org.openhab.core.thing.type.ChannelDefinitionBuilder;
 import org.openhab.core.thing.type.ChannelGroupType;
 import org.openhab.core.thing.type.ChannelGroupTypeBuilder;
@@ -89,7 +85,6 @@ import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.types.Command;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -144,8 +139,6 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         )).build();
         registerVolatileStorageService();
 
-        configureAutoLinking(false);
-
         managedThingProvider = getService(ManagedThingProvider.class);
 
         itemRegistry = getService(ItemRegistry.class);
@@ -194,7 +187,6 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             managedThingProvider.remove(it.getUID());
         });
         storage.remove(THING_UID.getAsString());
-        configureAutoLinking(true);
     }
 
     @Test
@@ -1052,17 +1044,6 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         when(mockChannelGroupTypeProvider.getChannelGroupType(eq(CHANNEL_GROUP_TYPE_UID), any()))
                 .thenReturn(channelGroupType);
         registerService(mockChannelGroupTypeProvider);
-    }
-
-    private void configureAutoLinking(Boolean on) throws IOException {
-        ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
-        org.osgi.service.cm.Configuration config = configAdmin.getConfiguration(ThingLinkManager.CONFIGURATION_PID);
-        Dictionary<String, Object> properties = config.getProperties();
-        if (properties == null) {
-            properties = new Hashtable<>();
-        }
-        properties.put(ThingLinkManager.AUTO_LINKS, on.toString());
-        config.update(properties);
     }
 
     private static class TestThingHandlerFactory extends BaseThingHandlerFactory {
