@@ -89,7 +89,6 @@ import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
-import org.openhab.core.thing.link.ThingLinkManager;
 import org.openhab.core.thing.testutil.i18n.DefaultLocaleSetter;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeBuilder;
@@ -127,7 +126,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     private ManagedThingProvider managedThingProvider;
     private ReadyService readyService;
     private Thing thing;
-    private ThingLinkManager thingLinkManager;
 
     @Before
     @SuppressWarnings("null")
@@ -142,8 +140,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                 .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", "Switch").build());
         registerService(channelTypeProvider);
 
-        thingLinkManager = getService(ThingLinkManager.class);
-        thingLinkManager.deactivate();
         managedItemChannelLinkProvider = getService(ManagedItemChannelLinkProvider.class);
         managedThingProvider = getService(ManagedThingProvider.class);
         eventPublisher = getService(EventPublisher.class);
@@ -192,7 +188,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
         ComponentContext componentContext = mock(ComponentContext.class);
         when(componentContext.getProperties()).thenReturn(new Hashtable<>());
-        thingLinkManager.activate(componentContext);
     }
 
     @Test

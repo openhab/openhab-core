@@ -40,7 +40,6 @@ import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.link.AbstractLink;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
-import org.openhab.core.thing.link.ThingLinkManager;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -72,7 +71,6 @@ public class ItemChannelLinkResource implements RESTResource {
     public static final String PATH_LINKS = "links";
 
     private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ThingLinkManager thingLinkManager;
 
     @Context
     UriInfo uriInfo;
@@ -95,15 +93,6 @@ public class ItemChannelLinkResource implements RESTResource {
         }
 
         return Response.ok(new Stream2JSONInputStream(linkStream)).build();
-    }
-
-    @GET
-    @Path("/auto")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Tells whether automatic link mode is active or not", response = Boolean.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Boolean.class) })
-    public Response isAutomatic() {
-        return Response.ok(thingLinkManager.isAutoLinksEnabled()).build();
     }
 
     @GET
@@ -181,15 +170,6 @@ public class ItemChannelLinkResource implements RESTResource {
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setThingLinkManager(ThingLinkManager thingLinkManager) {
-        this.thingLinkManager = thingLinkManager;
-    }
-
-    protected void unsetThingLinkManager(ThingLinkManager thingLinkManager) {
-        this.thingLinkManager = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
     }
@@ -205,7 +185,7 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @Override
     public boolean isSatisfied() {
-        return itemChannelLinkRegistry != null && thingLinkManager != null;
+        return itemChannelLinkRegistry != null;
     }
 
 }
