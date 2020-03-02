@@ -14,7 +14,6 @@ package org.openhab.core.karaf.internal;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -58,8 +57,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This service reads addons.cfg and installs listed add-ons (= Karaf features) and the selected package.
- * It furthermore allows configuration of the base package through the Paper UI as well as administrating Karaf to
- * access remote repos and certain feature repos like for legacy or experimental features.
+ * It furthermore allows configuration of the base package through the UI as well as administrating Karaf to
+ * access remote repos and certain feature repos like for experimental features.
  *
  * @author Kai Kreuzer - Initial contribution
  */
@@ -80,7 +79,6 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String SIMPLE_PACKAGE = "simple";
     public static final String MINIMAL_PACKAGE = "minimal";
     private static final String CFG_REMOTE = "remote";
-    private static final String CFG_LEGACY = "legacy";
 
     private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
     private static final String ADDONS_PID = "org.openhab.addons";
@@ -97,7 +95,6 @@ public class FeatureInstaller implements ConfigurationListener {
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
     private String onlineRepoUrl = null;
-    private URI legacyAddonsUrl = null;
 
     private final ConfigurationAdmin configurationAdmin;
     private final FeaturesService featuresService;
@@ -129,7 +126,6 @@ public class FeatureInstaller implements ConfigurationListener {
     @Activate
     protected void activate(final Map<String, Object> config) {
         setOnlineRepoUrl();
-        setLegacyRepoUrl();
         modified(config);
         scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleWithFixedDelay(() -> {
@@ -180,7 +176,6 @@ public class FeatureInstaller implements ConfigurationListener {
             if (configChanged) {
                 waitForConfigUpdateEvent();
             }
-            setLegacyExtensions(service, config);
             if (installPackage(service, config)) {
                 // our package selection has changed, so let's wait for the values to be available in config admin
                 // which we will receive as another call to modified
@@ -266,49 +261,6 @@ public class FeatureInstaller implements ConfigurationListener {
             this.onlineRepoUrl = repo.trim() + "@id=openhab@snapshots";
         } else {
             logger.warn("Cannot determine online repo url - online repo support will be disabled.");
-        }
-    }
-
-    private void setLegacyRepoUrl() {
-        Properties prop = new Properties();
-
-        Path versionFilePath = Paths.get(ConfigConstants.getUserDataFolder(), "etc", "version.properties");
-        try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
-            prop.load(fis);
-        } catch (Exception e) {
-            logger.warn("Cannot determine distro version - legacy addon support will be disabled. Error: {}",
-                    e.getMessage());
-        }
-
-        String version = prop.getProperty("openhab-distro");
-        if (version != null && !version.trim().isEmpty()) {
-            this.legacyAddonsUrl = URI
-                    .create("mvn:org.openhab.distro/openhab-addons-legacy/" + version.trim() + "/xml/features");
-        } else {
-            logger.warn("Cannot determine distro version - legacy addon support will be disabled.");
-        }
-    }
-
-    private void setLegacyExtensions(FeaturesService service, Map<String, Object> config) {
-        if (legacyAddonsUrl != null) {
-            if (config.get(CFG_LEGACY) != null && "true".equals(config.get(CFG_LEGACY).toString())) {
-                try {
-                    service.addRepository(legacyAddonsUrl);
-                } catch (Exception e) {
-                    logger.debug("Failed adding feature repo for legacy features - we might be offline: {}",
-                            e.getMessage());
-                }
-            } else {
-                try {
-                    service.removeRepository(legacyAddonsUrl);
-                } catch (Exception e) {
-                    // This usually throws an error like
-                    // "Feature named 'openhab-binding-homematic1/1.9.0.SNAPSHOT' is not installed"
-                    // as Karaf seems to try to uninstall all features for whatever reason
-                    // the repo is removed nonetheless in such a case
-                    logger.debug("Failed removing feature repo of legacy features: {}", e.getMessage());
-                }
-            }
         }
     }
 
