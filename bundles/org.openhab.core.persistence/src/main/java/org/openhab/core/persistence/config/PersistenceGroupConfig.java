@@ -13,23 +13,25 @@
 package org.openhab.core.persistence.config;
 
 /**
- * This class represents the configuration that identify item(s) by name.
+ * This class represents the configuration that is used for group items.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleItemConfig extends SimpleConfig {
-    final String item;
+public class PersistenceGroupConfig extends PersistenceConfig {
 
-    public SimpleItemConfig(final String item) {
-        this.item = item;
+    private final String group;
+
+    public PersistenceGroupConfig(final String group) {
+        this.group = group;
     }
 
-    public String getItem() {
-        return item;
+    public String getGroup() {
+        return group;
     }
 
     @Override
     public String toString() {
-        return String.format("%s [item=%s]", getClass().getSimpleName(), item);
+        return String.format("%s [group=%s]", getClass().getSimpleName(), group);
     }
+
 }

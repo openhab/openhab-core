@@ -15,30 +15,30 @@ package org.openhab.core.persistence;
 import java.util.Arrays;
 import java.util.List;
 
-import org.openhab.core.persistence.config.SimpleConfig;
-import org.openhab.core.persistence.strategy.SimpleStrategy;
+import org.openhab.core.persistence.config.PersistenceConfig;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 
 /**
  * This class holds the configuration of a persistence strategy for specific items.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleItemConfiguration {
+public class PersistenceItemConfiguration {
 
-    private final List<SimpleConfig> items;
+    private final List<PersistenceConfig> items;
     private final String alias;
-    private final List<SimpleStrategy> strategies;
-    private final List<SimpleFilter> filters;
+    private final List<PersistenceStrategy> strategies;
+    private final List<PersistenceFilter> filters;
 
-    public SimpleItemConfiguration(final List<SimpleConfig> items, final String alias,
-            final List<SimpleStrategy> strategies, final List<SimpleFilter> filters) {
+    public PersistenceItemConfiguration(final List<PersistenceConfig> items, final String alias,
+            final List<PersistenceStrategy> strategies, final List<PersistenceFilter> filters) {
         this.items = items;
         this.alias = alias;
         this.strategies = strategies;
         this.filters = filters;
     }
 
-    public List<SimpleConfig> getItems() {
+    public List<PersistenceConfig> getItems() {
         return items;
     }
 
@@ -46,11 +46,11 @@ public class SimpleItemConfiguration {
         return alias;
     }
 
-    public List<SimpleStrategy> getStrategies() {
+    public List<PersistenceStrategy> getStrategies() {
         return strategies;
     }
 
-    public List<SimpleFilter> getFilters() {
+    public List<PersistenceFilter> getFilters() {
         return filters;
     }
 

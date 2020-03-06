@@ -12,11 +12,13 @@
  */
 package org.openhab.core.persistence;
 
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 
 /**
  * A persistence service which can be used to store data from openHAB.
@@ -70,4 +72,11 @@ public interface PersistenceService {
      * @param alias the alias under which the item should be persisted.
      */
     void store(Item item, String alias);
+
+    /**
+     * Provides default persistence strategies that are used for all items if no user defined configuration is found.
+     *
+     * @return The default persistence strategies
+     */
+    List<PersistenceStrategy> getDefaultStrategies();
 }

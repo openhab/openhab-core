@@ -19,16 +19,16 @@ import java.util.Objects;
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleStrategy {
+public class PersistenceStrategy {
     public static class Globals {
-        public static final SimpleStrategy UPDATE = new SimpleStrategy("everyUpdate");
-        public static final SimpleStrategy CHANGE = new SimpleStrategy("everyChange");
-        public static final SimpleStrategy RESTORE = new SimpleStrategy("restoreOnStartup");
+        public static final PersistenceStrategy UPDATE = new PersistenceStrategy("everyUpdate");
+        public static final PersistenceStrategy CHANGE = new PersistenceStrategy("everyChange");
+        public static final PersistenceStrategy RESTORE = new PersistenceStrategy("restoreOnStartup");
     }
 
     private final String name;
 
-    public SimpleStrategy(final String name) {
+    public PersistenceStrategy(final String name) {
         this.name = name;
     }
 
@@ -52,13 +52,10 @@ public class SimpleStrategy {
         if (obj == null) {
             return false;
         }
-        // if (getClass() != obj.getClass()) {
-        // return false;
-        // }
-        if (!(obj instanceof SimpleStrategy)) {
+        if (!(obj instanceof PersistenceStrategy)) {
             return false;
         }
-        final SimpleStrategy other = (SimpleStrategy) obj;
+        final PersistenceStrategy other = (PersistenceStrategy) obj;
         if (!Objects.equals(name, other.name)) {
             return false;
         }

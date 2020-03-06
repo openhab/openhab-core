@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence;
+package org.openhab.core.persistence.config;
 
 /**
- *
+ * This class is a base class that needs to be used by every item configuration.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleFilter {
+public abstract class PersistenceConfig {
 
 }

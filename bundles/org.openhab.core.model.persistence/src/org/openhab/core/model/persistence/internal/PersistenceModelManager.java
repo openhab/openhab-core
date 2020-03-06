@@ -19,14 +19,14 @@ import org.eclipse.emf.ecore.EObject;
 import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceConfiguration;
-import org.openhab.core.persistence.SimpleFilter;
-import org.openhab.core.persistence.SimpleItemConfiguration;
-import org.openhab.core.persistence.config.SimpleAllConfig;
-import org.openhab.core.persistence.config.SimpleConfig;
-import org.openhab.core.persistence.config.SimpleGroupConfig;
-import org.openhab.core.persistence.config.SimpleItemConfig;
-import org.openhab.core.persistence.strategy.SimpleCronStrategy;
-import org.openhab.core.persistence.strategy.SimpleStrategy;
+import org.openhab.core.persistence.PersistenceFilter;
+import org.openhab.core.persistence.PersistenceItemConfiguration;
+import org.openhab.core.persistence.config.PersistenceAllConfig;
+import org.openhab.core.persistence.config.PersistenceConfig;
+import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -120,55 +120,55 @@ public class PersistenceModelManager implements ModelRepositoryChangeListener {
         return modelName.substring(0, modelName.length() - ".persist".length());
     }
 
-    private List<SimpleItemConfiguration> mapConfigs(List<PersistenceConfiguration> configs) {
-        final List<SimpleItemConfiguration> lst = new LinkedList<>();
+    private List<PersistenceItemConfiguration> mapConfigs(List<PersistenceConfiguration> configs) {
+        final List<PersistenceItemConfiguration> lst = new LinkedList<>();
         for (final PersistenceConfiguration config : configs) {
             lst.add(mapConfig(config));
         }
         return lst;
     }
 
-    private SimpleItemConfiguration mapConfig(PersistenceConfiguration config) {
-        final List<SimpleConfig> items = new LinkedList<>();
+    private PersistenceItemConfiguration mapConfig(PersistenceConfiguration config) {
+        final List<PersistenceConfig> items = new LinkedList<>();
         for (final EObject item : config.getItems()) {
             if (item instanceof AllConfig) {
-                items.add(new SimpleAllConfig());
+                items.add(new PersistenceAllConfig());
             } else if (item instanceof GroupConfig) {
-                items.add(new SimpleGroupConfig(((GroupConfig) item).getGroup()));
+                items.add(new PersistenceGroupConfig(((GroupConfig) item).getGroup()));
             } else if (item instanceof ItemConfig) {
-                items.add(new SimpleItemConfig(((ItemConfig) item).getItem()));
+                items.add(new PersistenceItemConfig(((ItemConfig) item).getItem()));
             }
         }
-        return new SimpleItemConfiguration(items, config.getAlias(), mapStrategies(config.getStrategies()),
+        return new PersistenceItemConfiguration(items, config.getAlias(), mapStrategies(config.getStrategies()),
                 mapFilters(config.getFilters()));
     }
 
-    private List<SimpleStrategy> mapStrategies(List<Strategy> strategies) {
-        final List<SimpleStrategy> lst = new LinkedList<>();
+    private List<PersistenceStrategy> mapStrategies(List<Strategy> strategies) {
+        final List<PersistenceStrategy> lst = new LinkedList<>();
         for (final Strategy strategy : strategies) {
             lst.add(mapStrategy(strategy));
         }
         return lst;
     }
 
-    private SimpleStrategy mapStrategy(Strategy strategy) {
+    private PersistenceStrategy mapStrategy(Strategy strategy) {
         if (strategy instanceof CronStrategy) {
-            return new SimpleCronStrategy(strategy.getName(), ((CronStrategy) strategy).getCronExpression());
+            return new PersistenceCronStrategy(strategy.getName(), ((CronStrategy) strategy).getCronExpression());
         } else {
-            return new SimpleStrategy(strategy.getName());
+            return new PersistenceStrategy(strategy.getName());
         }
     }
 
-    private List<SimpleFilter> mapFilters(List<Filter> filters) {
-        final List<SimpleFilter> lst = new LinkedList<>();
+    private List<PersistenceFilter> mapFilters(List<Filter> filters) {
+        final List<PersistenceFilter> lst = new LinkedList<>();
         for (final Filter filter : filters) {
             lst.add(mapFilter(filter));
         }
         return lst;
     }
 
-    private SimpleFilter mapFilter(Filter filter) {
-        return new SimpleFilter();
+    private PersistenceFilter mapFilter(Filter filter) {
+        return new PersistenceFilter();
     }
 
 }

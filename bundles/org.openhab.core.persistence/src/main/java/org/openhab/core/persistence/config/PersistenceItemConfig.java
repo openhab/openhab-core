@@ -13,10 +13,23 @@
 package org.openhab.core.persistence.config;
 
 /**
- * This class is a base class that needs to be used by every item configuration.
+ * This class represents the configuration that identify item(s) by name.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public abstract class SimpleConfig {
+public class PersistenceItemConfig extends PersistenceConfig {
+    final String item;
 
+    public PersistenceItemConfig(final String item) {
+        this.item = item;
+    }
+
+    public String getItem() {
+        return item;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s [item=%s]", getClass().getSimpleName(), item);
+    }
 }

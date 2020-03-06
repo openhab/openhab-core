@@ -13,25 +13,15 @@
 package org.openhab.core.persistence.config;
 
 /**
- * This class represents the configuration that is used for group items.
+ * This class represents the configuration that stand for "using all items".
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleGroupConfig extends SimpleConfig {
-
-    private final String group;
-
-    public SimpleGroupConfig(final String group) {
-        this.group = group;
-    }
-
-    public String getGroup() {
-        return group;
-    }
+public class PersistenceAllConfig extends PersistenceConfig {
 
     @Override
     public String toString() {
-        return String.format("%s [group=%s]", getClass().getSimpleName(), group);
+        return String.format("%s []", getClass().getSimpleName());
     }
 
 }

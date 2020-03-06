@@ -17,11 +17,11 @@ package org.openhab.core.persistence.strategy;
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleCronStrategy extends SimpleStrategy {
+public class PersistenceCronStrategy extends PersistenceStrategy {
 
     private final String cronExpression;
 
-    public SimpleCronStrategy(final String name, final String cronExpression) {
+    public PersistenceCronStrategy(final String name, final String cronExpression) {
         super(name);
         this.cronExpression = cronExpression;
     }

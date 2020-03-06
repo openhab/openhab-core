@@ -10,18 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence.config;
+package org.openhab.core.persistence;
 
 /**
- * This class represents the configuration that stand for "using all items".
+ *
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleAllConfig extends SimpleConfig {
-
-    @Override
-    public String toString() {
-        return String.format("%s []", getClass().getSimpleName());
-    }
+public class PersistenceFilter {
 
 }
