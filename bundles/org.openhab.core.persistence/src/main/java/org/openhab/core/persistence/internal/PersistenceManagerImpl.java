@@ -108,9 +108,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     protected void addPersistenceService(PersistenceService persistenceService) {
         logger.debug("Initializing {} persistence service.", persistenceService.getId());
         persistenceServices.put(persistenceService.getId(), persistenceService);
-        if (!persistenceServiceConfigs.containsKey(persistenceService.getId())) {
-            persistenceServiceConfigs.put(persistenceService.getId(), getDefaultConfig(persistenceService));
-        }
+        persistenceServiceConfigs.putIfAbsent(persistenceService.getId(), getDefaultConfig(persistenceService));
         if (started) {
             stopEventHandling(persistenceService.getId());
             startEventHandling(persistenceService.getId());
