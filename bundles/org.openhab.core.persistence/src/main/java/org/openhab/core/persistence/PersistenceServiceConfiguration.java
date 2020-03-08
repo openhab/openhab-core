@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 
 /**
@@ -24,6 +25,7 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class PersistenceServiceConfiguration {
     private final List<PersistenceItemConfiguration> configs;
     private final List<PersistenceStrategy> defaults;

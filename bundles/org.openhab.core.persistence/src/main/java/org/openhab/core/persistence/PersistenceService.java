@@ -71,7 +71,7 @@ public interface PersistenceService {
      * @param item the item which state should be persisted.
      * @param alias the alias under which the item should be persisted.
      */
-    void store(Item item, String alias);
+    void store(Item item, @Nullable String alias);
 
     /**
      * Provides default persistence strategies that are used for all items if no user defined configuration is found.

@@ -12,11 +12,14 @@
  */
 package org.openhab.core.persistence.config;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class represents the configuration that is used for group items.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class PersistenceGroupConfig extends PersistenceConfig {
 
     private final String group;

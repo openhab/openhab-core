@@ -12,11 +12,14 @@
  */
 package org.openhab.core.persistence.config;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class is a base class that needs to be used by every item configuration.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public abstract class PersistenceConfig {
 
 }

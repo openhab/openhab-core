@@ -12,11 +12,14 @@
  */
 package org.openhab.core.persistence;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  *
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class PersistenceFilter {
 
 }

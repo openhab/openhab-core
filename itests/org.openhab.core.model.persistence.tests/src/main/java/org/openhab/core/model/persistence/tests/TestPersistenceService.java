@@ -51,7 +51,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
     }
 
     @Override
-    public void store(Item item, String alias) {
+    public void store(Item item, @Nullable String alias) {
     }
 
     @SuppressWarnings("deprecation")

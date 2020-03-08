@@ -12,11 +12,14 @@
  */
 package org.openhab.core.persistence.config;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class represents the configuration that stand for "using all items".
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class PersistenceAllConfig extends PersistenceConfig {
 
     @Override

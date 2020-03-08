@@ -12,11 +12,14 @@
  */
 package org.openhab.core.persistence.config;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This class represents the configuration that identify item(s) by name.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class PersistenceItemConfig extends PersistenceConfig {
     final String item;
 
