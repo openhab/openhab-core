@@ -302,7 +302,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
                                     }
                                 } else if (service != null) {
                                     logger.warn(
-                                            "Failed to restore item states as persistence service '{}' can not be queried.",
+                                            "Failed to restore item states as persistence service '{}' cannot be queried.",
                                             serviceName);
                                 }
                             }
