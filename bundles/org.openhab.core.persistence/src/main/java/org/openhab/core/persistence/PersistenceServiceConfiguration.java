@@ -12,24 +12,27 @@
  */
 package org.openhab.core.persistence;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.openhab.core.persistence.strategy.SimpleStrategy;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 
 /**
  * This class represents the configuration for a persistence service.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class PersistenceServiceConfiguration {
-    private final List<SimpleItemConfiguration> configs;
-    private final List<SimpleStrategy> defaults;
-    private final List<SimpleStrategy> strategies;
+    private final List<PersistenceItemConfiguration> configs;
+    private final List<PersistenceStrategy> defaults;
+    private final List<PersistenceStrategy> strategies;
 
-    public PersistenceServiceConfiguration(final List<SimpleItemConfiguration> configs,
-            final List<SimpleStrategy> defaults, final List<SimpleStrategy> strategies) {
+    public PersistenceServiceConfiguration(final Collection<PersistenceItemConfiguration> configs,
+            final Collection<PersistenceStrategy> defaults, final Collection<PersistenceStrategy> strategies) {
         this.configs = Collections.unmodifiableList(new LinkedList<>(configs));
         this.defaults = Collections.unmodifiableList(new LinkedList<>(defaults));
         this.strategies = Collections.unmodifiableList(new LinkedList<>(strategies));
@@ -40,7 +43,7 @@ public class PersistenceServiceConfiguration {
      *
      * @return an unmodifiable list of the item configurations
      */
-    public List<SimpleItemConfiguration> getConfigs() {
+    public List<PersistenceItemConfiguration> getConfigs() {
         return configs;
     }
 
@@ -49,7 +52,7 @@ public class PersistenceServiceConfiguration {
      *
      * @return an unmodifiable list of the default strategies
      */
-    public List<SimpleStrategy> getDefaults() {
+    public List<PersistenceStrategy> getDefaults() {
         return defaults;
     }
 
@@ -58,7 +61,7 @@ public class PersistenceServiceConfiguration {
      *
      * @return an unmodifiable list of the defined strategies
      */
-    public List<SimpleStrategy> getStrategies() {
+    public List<PersistenceStrategy> getStrategies() {
         return strategies;
     }
 

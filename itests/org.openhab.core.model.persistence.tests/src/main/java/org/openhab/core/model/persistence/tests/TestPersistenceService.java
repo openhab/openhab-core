@@ -28,6 +28,7 @@ import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 
 /**
@@ -50,7 +51,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
     }
 
     @Override
-    public void store(Item item, String alias) {
+    public void store(Item item, @Nullable String alias) {
     }
 
     @SuppressWarnings("deprecation")
@@ -104,6 +105,11 @@ public class TestPersistenceService implements QueryablePersistenceService {
     @Override
     public String getLabel(@Nullable Locale locale) {
         return "Test Label";
+    }
+
+    @Override
+    public List<PersistenceStrategy> getDefaultStrategies() {
+        return Collections.emptyList();
     }
 
 }

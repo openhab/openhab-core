@@ -12,24 +12,14 @@
  */
 package org.openhab.core.persistence.config;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- * This class represents the configuration that identify item(s) by name.
+ * This class is a base class that needs to be used by every item configuration.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleItemConfig extends SimpleConfig {
-    final String item;
+@NonNullByDefault
+public abstract class PersistenceConfig {
 
-    public SimpleItemConfig(final String item) {
-        this.item = item;
-    }
-
-    public String getItem() {
-        return item;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s [item=%s]", getClass().getSimpleName(), item);
-    }
 }

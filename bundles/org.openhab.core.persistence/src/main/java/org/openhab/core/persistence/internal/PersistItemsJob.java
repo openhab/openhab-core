@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 import org.openhab.core.items.Item;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceConfiguration;
-import org.openhab.core.persistence.SimpleItemConfiguration;
-import org.openhab.core.persistence.strategy.SimpleStrategy;
+import org.openhab.core.persistence.PersistenceItemConfiguration;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.scheduler.SchedulerRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class PersistItemsJob implements SchedulerRunnable {
             final PersistenceServiceConfiguration config = manager.persistenceServiceConfigs.get(dbId);
 
             if (persistenceService != null) {
-                for (SimpleItemConfiguration itemConfig : config.getConfigs()) {
+                for (PersistenceItemConfiguration itemConfig : config.getConfigs()) {
                     if (hasStrategy(config.getDefaults(), itemConfig, strategyName)) {
                         for (Item item : manager.getAllItems(itemConfig)) {
                             long startTime = System.nanoTime();
@@ -66,9 +66,9 @@ public class PersistItemsJob implements SchedulerRunnable {
         }
     }
 
-    private boolean hasStrategy(List<SimpleStrategy> defaults, SimpleItemConfiguration config, String strategyName) {
+    private boolean hasStrategy(List<PersistenceStrategy> defaults, PersistenceItemConfiguration config, String strategyName) {
         // check if the strategy is directly defined on the config
-        for (SimpleStrategy strategy : config.getStrategies()) {
+        for (PersistenceStrategy strategy : config.getStrategies()) {
             if (strategyName.equals(strategy.getName())) {
                 return true;
             }
@@ -80,8 +80,8 @@ public class PersistItemsJob implements SchedulerRunnable {
         return false;
     }
 
-    private boolean isDefault(List<SimpleStrategy> defaults, String strategyName) {
-        for (SimpleStrategy strategy : defaults) {
+    private boolean isDefault(List<PersistenceStrategy> defaults, String strategyName) {
+        for (PersistenceStrategy strategy : defaults) {
             if (strategy.getName().equals(strategyName)) {
                 return true;
             }

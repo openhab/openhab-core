@@ -15,42 +15,45 @@ package org.openhab.core.persistence;
 import java.util.Arrays;
 import java.util.List;
 
-import org.openhab.core.persistence.config.SimpleConfig;
-import org.openhab.core.persistence.strategy.SimpleStrategy;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.persistence.config.PersistenceConfig;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 
 /**
  * This class holds the configuration of a persistence strategy for specific items.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleItemConfiguration {
+@NonNullByDefault
+public class PersistenceItemConfiguration {
 
-    private final List<SimpleConfig> items;
-    private final String alias;
-    private final List<SimpleStrategy> strategies;
-    private final List<SimpleFilter> filters;
+    private final List<PersistenceConfig> items;
+    private final @Nullable String alias;
+    private final @Nullable List<PersistenceStrategy> strategies;
+    private final @Nullable List<PersistenceFilter> filters;
 
-    public SimpleItemConfiguration(final List<SimpleConfig> items, final String alias,
-            final List<SimpleStrategy> strategies, final List<SimpleFilter> filters) {
+    public PersistenceItemConfiguration(final List<PersistenceConfig> items, @Nullable final String alias,
+            @Nullable final List<PersistenceStrategy> strategies, @Nullable final List<PersistenceFilter> filters) {
         this.items = items;
         this.alias = alias;
         this.strategies = strategies;
         this.filters = filters;
     }
 
-    public List<SimpleConfig> getItems() {
+    public List<PersistenceConfig> getItems() {
         return items;
     }
 
-    public String getAlias() {
+    public @Nullable String getAlias() {
         return alias;
     }
 
-    public List<SimpleStrategy> getStrategies() {
+    public @Nullable List<PersistenceStrategy> getStrategies() {
         return strategies;
     }
 
-    public List<SimpleFilter> getFilters() {
+    public @Nullable List<PersistenceFilter> getFilters() {
         return filters;
     }
 

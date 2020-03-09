@@ -12,16 +12,29 @@
  */
 package org.openhab.core.persistence.config;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- * This class represents the configuration that stand for "using all items".
+ * This class represents the configuration that is used for group items.
  *
  * @author Markus Rathgeb - Initial contribution
  */
-public class SimpleAllConfig extends SimpleConfig {
+@NonNullByDefault
+public class PersistenceGroupConfig extends PersistenceConfig {
+
+    private final String group;
+
+    public PersistenceGroupConfig(final String group) {
+        this.group = group;
+    }
+
+    public String getGroup() {
+        return group;
+    }
 
     @Override
     public String toString() {
-        return String.format("%s []", getClass().getSimpleName());
+        return String.format("%s [group=%s]", getClass().getSimpleName(), group);
     }
 
 }
