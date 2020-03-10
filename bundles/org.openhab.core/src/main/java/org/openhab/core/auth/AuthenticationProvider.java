@@ -12,12 +12,15 @@
  */
 package org.openhab.core.auth;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Realizations of this type are responsible for checking validity of various credentials and giving back authentication
  * which defines access scope for authenticated user or system.
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public interface AuthenticationProvider {
 
     /**
