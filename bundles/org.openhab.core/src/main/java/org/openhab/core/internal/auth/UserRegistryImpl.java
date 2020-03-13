@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.openhab.core.internal.auth;
 
 import java.security.NoSuchAlgorithmException;
@@ -33,11 +45,16 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The implementation of a {@link UserRegistry} for {@link ManagedUser} entities.
+ *
+ * @author Yannick Schaus - initial contribution
+ */
 @NonNullByDefault
 @Component(service = UserRegistry.class, immediate = true)
 public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvider> implements UserRegistry {
 
-    private final Logger logger = LoggerFactory.getLogger(UserRegistry.class);
+    private final Logger logger = LoggerFactory.getLogger(UserRegistryImpl.class);
 
     private static final int ITERATIONS = 65536;
     private static final int KEY_LENGTH = 512;
@@ -59,11 +76,6 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
             rank = 1; // takes precedence over other providers usually ranked 0
         }
     }
-
-    // @Activate
-    // protected void activate(BundleContext context, Map<String, Object> properties) {
-    //
-    // }
 
     @Override
     @Deactivate

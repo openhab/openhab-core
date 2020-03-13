@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
@@ -19,12 +31,23 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.server.model.AnnotatedMethod;
 import org.openhab.core.auth.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// @PreMatching
+/**
+ * A {@link DynamicFeature} supporting the {@code javax.annotation.security.RolesAllowed},
+ * {@code javax.annotation.security.PermitAll} and {@code javax.annotation.security.DenyAll}
+ * on resource methods and sub-resource methods.
+ *
+ * Ported from {@link RolesAllowedDynamicFeature} with modifications.
+ *
+ * @author Paul Sandoz - initial contribution
+ * @author Martin Matula - initial contribution
+ * @author Yannick Schaus - port to openHAB with modifications
+ */
 @Provider
 public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
     private final Logger logger = LoggerFactory.getLogger(TokenResource.class);

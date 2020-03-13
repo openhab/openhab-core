@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.openhab.core.auth.jaas.internal;
 
 import java.util.Map;
@@ -19,10 +31,15 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This {@link LoginModule} delegates the authentication to a {@link UserRegistry}
+ *
+ * @author Yannick Schaus - initial contribution
+ */
 @Component(service = LoginModule.class, property = { "jaas.realmName=openhab" })
-public class ManagedLoginModule implements LoginModule {
+public class ManagedUserLoginModule implements LoginModule {
 
-    private final Logger logger = LoggerFactory.getLogger(ManagedLoginModule.class);
+    private final Logger logger = LoggerFactory.getLogger(ManagedUserLoginModule.class);
 
     private UserRegistry userRegistry;
 
@@ -67,14 +84,11 @@ public class ManagedLoginModule implements LoginModule {
 
     @Override
     public boolean abort() throws LoginException {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean logout() throws LoginException {
-        // TODO Auto-generated method stub
         return false;
     }
-
 }

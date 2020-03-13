@@ -46,6 +46,7 @@ import org.osgi.service.component.annotations.Modified;
  *
  * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Removed ManagedService and used DS configuration instead
+ * @author Yannick Schaus - provides a configuration with the ManagedUserLoginModule as a sufficient login module
  */
 @Component(configurationPid = "org.openhab.jaas")
 public class JaasAuthenticationProvider implements AuthenticationProvider {
@@ -56,7 +57,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(final Credentials credentials) throws AuthenticationException {
         if (realmName == null) { // configuration is not yet ready or set
-            throw new AuthenticationException("Empty realm");
+            realmName = DEFAULT_REALM;
         }
 
         if (!(credentials instanceof UsernamePasswordCredentials)) {
@@ -73,7 +74,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
             Principal userPrincipal = new GenericUser(name);
             Subject subject = new Subject(true, Set.of(userPrincipal), Collections.emptySet(), Set.of(userCredentials));
 
-            Thread.currentThread().setContextClassLoader(ManagedLoginModule.class.getClassLoader());
+            Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
             LoginContext loginContext = new LoginContext(realmName, subject, new CallbackHandler() {
                 @Override
                 public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
@@ -87,7 +88,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
                         }
                     }
                 }
-            }, new ManagedLoginConfiguration());
+            }, new ManagedUserLoginConfiguration());
             loginContext.login();
 
             return getAuthentication(name, loginContext.getSubject());
@@ -123,7 +124,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
     @Modified
     protected void modified(Map<String, Object> properties) {
         if (properties == null) {
-            realmName = DEFAULT_REALM; // null;
+            realmName = DEFAULT_REALM;
             return;
         }
 
@@ -135,8 +136,8 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
                 realmName = propertyValue.toString();
             }
         } else {
-            // value could be unset, we should reset it value
-            realmName = DEFAULT_REALM; // null;
+            // value could be unset, we should reset its value
+            realmName = DEFAULT_REALM;
         }
     }
 

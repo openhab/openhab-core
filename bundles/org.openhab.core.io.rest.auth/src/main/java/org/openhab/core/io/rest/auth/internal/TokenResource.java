@@ -225,7 +225,7 @@ public class TokenResource implements RESTResource {
     @POST
     @Path("/logout")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @ApiOperation(value = "Delete the session associated with an refresh token.")
+    @ApiOperation(value = "Delete the session associated with a refresh token.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response deleteSession(@FormParam("refresh_token") String refreshToken,
             @Context SecurityContext securityContext) {

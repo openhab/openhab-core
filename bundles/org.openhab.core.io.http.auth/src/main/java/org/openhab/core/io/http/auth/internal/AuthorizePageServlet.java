@@ -1,6 +1,19 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Map;
@@ -36,6 +49,17 @@ import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A servlet serving the authorization page part of the OAuth2 authorization code flow.
+ *
+ * The page can register the first administrator account when there are no users yet in the {@link UserRegistry}, and
+ * authenticates the user otherwise. It also presents the scope that is about to be granted to the client, so the user
+ * can review what kind of access is being authorized. If successful, it redirects the client back to the URI which was
+ * specified and creates an authorization code stored for later in the user's profile.
+ *
+ * @author Yannick Schaus - initial contribution
+ *
+ */
 @NonNullByDefault
 @Component(immediate = true)
 public class AuthorizePageServlet extends HttpServlet {
@@ -66,7 +90,7 @@ public class AuthorizePageServlet extends HttpServlet {
                 try {
                     pageTemplate = IOUtils.toString(resource.openStream());
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedIOException(e);
                 }
                 httpService.registerServlet("/auth", this, null, null);
             }
@@ -117,7 +141,7 @@ public class AuthorizePageServlet extends HttpServlet {
                 if (!params.containsKey(("username"))) {
                     throw new AuthenticationException("no username");
                 }
-                if (!params.containsKey(("username"))) {
+                if (!params.containsKey(("password"))) {
                     throw new AuthenticationException("no password");
                 }
                 if (!params.containsKey("csrf_token") || !csrfTokens.contains(params.get("csrf_token")[0])) {

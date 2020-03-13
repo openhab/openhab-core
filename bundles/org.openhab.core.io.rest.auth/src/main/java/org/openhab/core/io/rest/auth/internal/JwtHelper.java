@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.openhab.core.io.rest.auth.internal;
 
 import java.io.File;
@@ -31,6 +43,11 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class helps with JWT tokens' building, signing, verifying and parsing.
+ *
+ * @author Yannick Schaus - initial contribution
+ */
 @NonNullByDefault
 @Component(immediate = true, service = JwtHelper.class)
 public class JwtHelper {
@@ -75,6 +92,15 @@ public class JwtHelper {
         }
     }
 
+    /**
+     * Builds a new access token.
+     *
+     * @param user the user (subject) to build the token, it will also add the roles as claims
+     * @param clientId the client ID the token is for
+     * @param scope the scope the token is valid for
+     *
+     * @return a base64-encoded signed JWT token to be passed as a bearer token in API requests
+     */
     public String getJwtAccessToken(User user, String clientId, String scope) {
         try {
             JwtClaims jwtClaims = new JwtClaims();
@@ -104,6 +130,13 @@ public class JwtHelper {
         }
     }
 
+    /**
+     * Performs verifications on a JWT token, then parses it into a {@link AuthenticationException} instance
+     *
+     * @param jwt the base64-encoded JWT token from the request
+     * @return the {@link Authentication} derived from the information in the token
+     * @throws AuthenticationException
+     */
     public Authentication verifyAndParseJwtAccessToken(String jwt) throws AuthenticationException {
         JwtConsumer jwtConsumer = new JwtConsumerBuilder().setRequireExpirationTime().setAllowedClockSkewInSeconds(30)
                 .setRequireSubject().setExpectedIssuer(ISSUER_NAME).setExpectedAudience(AUDIENCE)
