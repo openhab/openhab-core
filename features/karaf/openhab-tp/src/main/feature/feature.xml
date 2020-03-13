@@ -176,6 +176,11 @@
 		<bundle>mvn:org.jmdns/jmdns/3.5.5</bundle>
 	</feature>
 
+	<feature name="openhab.tp-jose4j" description="jose4j JWT library" version="${project.version}">
+		<capability>openhab.tp;feature=jose4j;version=0.7.0</capability>
+		<bundle>mvn:org.bitbucket.b_c/jose4j/0.7.0</bundle>
+	</feature>
+
 	<feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
 		<capability>openhab.tp;feature=jupnp;version=2.5.2</capability>
 		<feature dependency="true">http</feature>
