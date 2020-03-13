@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
-    private final Logger logger = LoggerFactory.getLogger(TokenResource.class);
+    private final Logger logger = LoggerFactory.getLogger(RolesAllowedDynamicFeatureImpl.class);
 
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext configuration) {

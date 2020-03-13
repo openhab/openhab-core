@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.auth.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.AuthenticationException;
 
 /**
@@ -22,12 +23,13 @@ import org.openhab.core.auth.AuthenticationException;
  *
  * @author Yannick Schaus - initial contribution
  */
+@NonNullByDefault
 public class TokenEndpointException extends AuthenticationException {
     private static final long serialVersionUID = 610324537843397832L;
 
     /**
      * Represents the error types which are supported in token issuing error responses.
-     * 
+     *
      * @author Yannick Schaus - initial contribution
      */
     public enum ErrorType {
