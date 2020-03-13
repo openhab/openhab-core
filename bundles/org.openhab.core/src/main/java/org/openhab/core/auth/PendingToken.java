@@ -6,12 +6,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class PendingToken {
     private String authorizationCode;
     private String clientId;
+    private String redirectUri;
     private String scope;
 
-    public PendingToken(String authorizationCode, String clientId, String scope) {
+    public PendingToken(String authorizationCode, String clientId, String redirectUri, String scope) {
         super();
         this.authorizationCode = authorizationCode;
         this.clientId = clientId;
+        this.redirectUri = redirectUri;
         this.scope = scope;
     }
 
@@ -21,6 +23,10 @@ public class PendingToken {
 
     public String getClientId() {
         return clientId;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
     }
 
     public String getScope() {

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -37,6 +38,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.openhab.core.auth.Role;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
@@ -84,6 +86,7 @@ import io.swagger.annotations.ResponseHeader;
 @Path("rules")
 @Api("rules")
 @Component
+@RolesAllowed({ Role.ADMIN })
 public class RuleResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(RuleResource.class);
@@ -272,6 +275,7 @@ public class RuleResource implements RESTResource {
     }
 
     @POST
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{ruleUID}/runnow")
     @Consumes(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Executes actions of the rule.")

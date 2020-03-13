@@ -10,6 +10,7 @@ import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -19,6 +20,7 @@ import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 
 import org.glassfish.jersey.server.model.AnnotatedMethod;
+import org.openhab.core.auth.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,14 +86,13 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
         public void filter(final ContainerRequestContext requestContext) throws IOException {
             if (!denyAll) {
                 // TODO: temporarily, until the complete authorization story is implemented, we consider operations
-                // allowed for both the user and the administrator roles to be permitted unrestricted (even
-                // to unauthenticated users)
-                if (rolesAllowed.length == 2) {
+                // allowed for user roles to be permitted unrestricted (even to unauthenticated users)
+                if (Arrays.asList(rolesAllowed).contains(Role.USER)) {
                     return;
                 }
 
                 if (rolesAllowed.length > 0 && !isAuthenticated(requestContext)) {
-                    throw new ForbiddenException("User not authorized");
+                    throw new NotAuthorizedException("User is not authenticated");
                 }
 
                 for (final String role : rolesAllowed) {
@@ -101,7 +102,7 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
                 }
             }
 
-            throw new ForbiddenException("User not authorized");
+            throw new ForbiddenException("User is authenticated but doesn't have access to this resource");
         }
 
         private static boolean isAuthenticated(final ContainerRequestContext requestContext) {

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.security.sasl.AuthenticationException;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(immediate = true, service = JwtHelper.class)
 public class JwtHelper {
-    private final Logger logger = LoggerFactory.getLogger(TokenResource.class);
+    private final Logger logger = LoggerFactory.getLogger(JwtHelper.class);
 
     private static final String KEY_FILE_PATH = ConfigConstants.getUserDataFolder() + File.separator + "secrets"
             + File.separator + "rsa_json_web_key.json";
@@ -73,16 +75,18 @@ public class JwtHelper {
         }
     }
 
-    public String getJwtAccessToken(User user, String clientId) {
+    public String getJwtAccessToken(User user, String clientId, String scope) {
         try {
             JwtClaims jwtClaims = new JwtClaims();
             jwtClaims.setIssuer(ISSUER_NAME);
             jwtClaims.setAudience(AUDIENCE);
-            jwtClaims.setExpirationTimeMinutesInTheFuture(24 * 60);
+            jwtClaims.setExpirationTimeMinutesInTheFuture(3600);
             jwtClaims.setGeneratedJwtId();
             jwtClaims.setIssuedAtToNow();
             jwtClaims.setNotBeforeMinutesInThePast(2);
             jwtClaims.setSubject(user.getName());
+            jwtClaims.setClaim("client_id", clientId);
+            jwtClaims.setClaim("scope", scope);
             jwtClaims.setStringListClaim("role",
                     new ArrayList<>((user.getRoles() != null) ? user.getRoles() : Collections.emptySet()));
 
@@ -90,7 +94,7 @@ public class JwtHelper {
             jws.setPayload(jwtClaims.toJson());
             jws.setKey(jwtWebKey.getPrivateKey());
             jws.setKeyIdHeaderValue(jwtWebKey.getKeyId());
-            jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA512);
+            jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
             String jwt = jws.getCompactSerialization();
 
             return jwt;
@@ -100,11 +104,11 @@ public class JwtHelper {
         }
     }
 
-    public Authentication verifyAndParseJwtAccessToken(String jwt) {
+    public Authentication verifyAndParseJwtAccessToken(String jwt) throws AuthenticationException {
         JwtConsumer jwtConsumer = new JwtConsumerBuilder().setRequireExpirationTime().setAllowedClockSkewInSeconds(30)
                 .setRequireSubject().setExpectedIssuer(ISSUER_NAME).setExpectedAudience(AUDIENCE)
                 .setVerificationKey(jwtWebKey.getKey())
-                .setJwsAlgorithmConstraints(ConstraintType.WHITELIST, AlgorithmIdentifiers.RSA_USING_SHA512).build();
+                .setJwsAlgorithmConstraints(ConstraintType.WHITELIST, AlgorithmIdentifiers.RSA_USING_SHA256).build();
 
         try {
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jwt);
@@ -114,7 +118,7 @@ public class JwtHelper {
             return auth;
         } catch (Exception e) {
             logger.error("Error while processing JWT token", e);
-            throw new RuntimeException(e.getMessage());
+            throw new AuthenticationException(e.getMessage());
         }
     }
 }

@@ -36,8 +36,6 @@ import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jdk.internal.joptsimple.internal.Strings;
-
 @NonNullByDefault
 @Component(immediate = true)
 public class AuthorizePageServlet extends HttpServlet {
@@ -84,9 +82,20 @@ public class AuthorizePageServlet extends HttpServlet {
             Map<String, String[]> params = req.getParameterMap();
 
             try {
-                String message = Strings.EMPTY;
-                if (userRegistry.getAll().size() == 0) {
+                String message = "";
+                String scope = (params.containsKey("scope")) ? params.get("scope")[0] : "";
+                String clientId = (params.containsKey("client_id")) ? params.get("client_id")[0] : "";
+
+                // Basic sanity check
+                if (scope.contains("<") || clientId.contains("<")) {
+                    throw new IllegalArgumentException("invalid_request");
+                }
+
+                // TODO: i18n
+                if (isSignupMode()) {
                     message = "Create a first administrator account to continue.";
+                } else {
+                    message = String.format("Sign in to grant <b>%s</b> access to <b>%s</b>:", scope, clientId);
                 }
                 resp.setContentType("text/html;charset=UTF-8");
                 resp.getWriter().append(getPageBody(params, message));
@@ -143,8 +152,18 @@ public class AuthorizePageServlet extends HttpServlet {
                 String password = params.get("password")[0];
 
                 User user;
-                if (userRegistry.getAll().size() == 0) {
+                if (isSignupMode()) {
                     // Create a first administrator account with the supplied credentials
+
+                    // first verify the password confirmation and bail out if necessary
+                    if (!params.containsKey("password_repeat") || !password.equals(params.get("password_repeat")[0])) {
+                        resp.setContentType("text/html;charset=UTF-8");
+                        // TODO: i18n
+                        resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again."));
+                        resp.getWriter().close();
+                        return;
+                    }
+
                     user = userRegistry.register(username, password, Set.of(Role.ADMIN));
                     logger.info("First user account created: {}", username);
                 } else {
@@ -159,7 +178,7 @@ public class AuthorizePageServlet extends HttpServlet {
 
                 if (user instanceof ManagedUser) {
                     ManagedUser managedUser = (ManagedUser) user;
-                    PendingToken pendingToken = new PendingToken(authorizationCode, clientId, scope);
+                    PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope);
                     managedUser.setPendingToken(pendingToken);
                     userRegistry.update(managedUser);
                 }
@@ -170,8 +189,8 @@ public class AuthorizePageServlet extends HttpServlet {
 
             } catch (AuthenticationException e) {
                 resp.setContentType("text/html;charset=UTF-8");
-                logger.warn("Authentication failed: ", e.getMessage());
-                resp.getWriter().append(getPageBody(params, "Please try again")); // TODO: i18n
+                logger.warn("Authentication failed: {}", e.getMessage());
+                resp.getWriter().append(getPageBody(params, "Please try again.")); // TODO: i18n
                 resp.getWriter().close();
             } catch (IllegalArgumentException e) {
                 @Nullable
@@ -192,7 +211,11 @@ public class AuthorizePageServlet extends HttpServlet {
 
     private String getPageBody(Map<String, String[]> params, String message) {
         String responseBody = pageTemplate.replace("{form_fields}", getFormFields(params));
+        String repeatPasswordFieldType = (isSignupMode()) ? "password" : "hidden";
+        String buttonLabel = (isSignupMode()) ? "Create Account" : "Sign In"; // TODO: i18n
         responseBody = responseBody.replace("{message}", message);
+        responseBody = responseBody.replace("{repeatPasswordFieldType}", repeatPasswordFieldType);
+        responseBody = responseBody.replace("{buttonLabel}", buttonLabel);
         return responseBody;
     }
 
@@ -251,6 +274,10 @@ public class AuthorizePageServlet extends HttpServlet {
         String csrfToken = UUID.randomUUID().toString().replace("-", "");
         csrfTokens.add(csrfToken);
         return csrfToken;
+    }
+
+    private boolean isSignupMode() {
+        return userRegistry.getAll().isEmpty();
     }
 
     @Deactivate

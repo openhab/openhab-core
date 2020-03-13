@@ -15,18 +15,20 @@
 <style>
 body {
 	text-align: center;
-	font-family: -apple-system, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, Arial, sans-serif;
+	font-family: -apple-system, system-ui, -apple-system, "Segoe UI", Roboto,
+		Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, Arial,
+		sans-serif;
 }
 
 .logo {
 	margin-top: 3rem;
 	margin-bottom: 2rem;
-	width: 300px;
+	width: 240px;
 }
 
 .message {
-    font-size: 11pt;
-    margin-bottom: 2rem;
+	font-size: 11pt;
+	margin-bottom: 2rem;
 }
 
 input {
@@ -38,13 +40,15 @@ input {
 input.field {
 	width: 300px;
 	border-bottom: 1px solid #aaa;
+	margin-bottom: 1rem;
 }
 
 input.submit {
 	cursor: pointer;
 	margin-top: 2rem;
-	background-color: transparent;
-	color: blue;
+	background-color: rgb(33, 150, 243);
+	color: white;
+	border-radius: 4px;
 	font-size: 11pt;
 	text-transform: uppercase;
 }
@@ -57,13 +61,16 @@ input.submit {
 		{form_fields}
 		<div class="message">{message}</div>
 		<div>
-			<input class="field" autocomplete="off" type="text" placeholder="User name" name="username" required />
+			<input class="field" autocomplete="off" type="text" placeholder="User name" name="username" required autofocus />
 		</div>
 		<div>
 			<input class="field" type="password" placeholder="Password" name="password" required />
 		</div>
 		<div>
-			<input class="submit" type="Submit" value="Login" />
+			<input class="field" type="{repeatPasswordFieldType}" placeholder="Confirm Password" name="password_repeat" />
+		</div>
+		<div>
+			<input class="submit" type="Submit" value="{buttonLabel}" />
 		</div>
 	</form>
 </body>

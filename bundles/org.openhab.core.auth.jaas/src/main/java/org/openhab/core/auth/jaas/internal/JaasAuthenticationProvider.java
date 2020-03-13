@@ -92,7 +92,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
 
             return getAuthentication(name, loginContext.getSubject());
         } catch (LoginException e) {
-            throw new AuthenticationException("Could not obtain authentication over login context", e);
+            throw new AuthenticationException(e.getMessage());
         } finally {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
         }

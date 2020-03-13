@@ -133,16 +133,16 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         UsernamePasswordCredentials usernamePasswordCreds = (UsernamePasswordCredentials) credentials;
         User user = this.get(usernamePasswordCreds.getUsername());
         if (user == null) {
-            throw new AuthenticationException("User not found");
+            throw new AuthenticationException("User not found: " + usernamePasswordCreds.getUsername());
         }
         if (!(user instanceof ManagedUser)) {
-            throw new AuthenticationException("User is not managed");
+            throw new AuthenticationException("User is not managed: " + usernamePasswordCreds.getUsername());
         }
 
         ManagedUser managedUser = (ManagedUser) user;
         String hashedPassword = hashPassword(usernamePasswordCreds.getPassword(), managedUser.getPasswordSalt()).get();
         if (!hashedPassword.equals(managedUser.getPasswordHash())) {
-            throw new AuthenticationException("Wrong password");
+            throw new AuthenticationException("Wrong password for user " + usernamePasswordCreds.getUsername());
         }
 
         Authentication authentication = new Authentication(managedUser.getName());

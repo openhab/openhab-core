@@ -5,13 +5,13 @@ import org.openhab.core.auth.User;
 public class TokenResponseDTO {
     public String access_token;
     public String token_type;
-    public String expires_in;
+    public Integer expires_in;
     public String refresh_token;
     public String scope;
     public String error;
     public UserDTO user;
 
-    public TokenResponseDTO(String access_token, String token_type, String expires_in, String refresh_token,
+    public TokenResponseDTO(String access_token, String token_type, Integer expires_in, String refresh_token,
             String scope, User user) {
         super();
         this.access_token = access_token;

@@ -62,7 +62,6 @@ import io.swagger.annotations.ApiResponses;
  * @author Yannick Schaus - Added filters to getAll
  */
 @Path(ItemChannelLinkResource.PATH_LINKS)
-@RolesAllowed({ Role.ADMIN })
 @Api(value = ItemChannelLinkResource.PATH_LINKS)
 @Component(service = { RESTResource.class, ItemChannelLinkResource.class })
 public class ItemChannelLinkResource implements RESTResource {
@@ -115,6 +114,7 @@ public class ItemChannelLinkResource implements RESTResource {
     }
 
     @PUT
+    @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
     @ApiOperation(value = "Links item to a channel.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
@@ -147,6 +147,7 @@ public class ItemChannelLinkResource implements RESTResource {
     }
 
     @DELETE
+    @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
     @ApiOperation(value = "Unlinks item from a channel.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
