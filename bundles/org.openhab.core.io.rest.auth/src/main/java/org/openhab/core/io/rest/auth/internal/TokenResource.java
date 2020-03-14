@@ -13,13 +13,16 @@
 package org.openhab.core.io.rest.auth.internal;
 
 import java.net.URI;
+import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -36,12 +39,15 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.jose4j.base64url.Base64Url;
 import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.ManagedUser;
+import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UserSession;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.auth.internal.TokenEndpointException.ErrorType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -95,8 +101,8 @@ public class TokenResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
-            @FormParam("refresh_token") String refreshToken, @QueryParam("useCookie") boolean useCookie,
-            @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie) {
+            @FormParam("refresh_token") String refreshToken, @FormParam("code_verifier") String codeVerifier,
+            @QueryParam("useCookie") boolean useCookie, @CookieParam(SESSIONID_COOKIE_NAME) Cookie sessionCookie) {
         try {
             switch (grantType) {
                 case "authorization_code":
@@ -112,11 +118,15 @@ public class TokenResource implements RESTResource {
                     }
 
                     ManagedUser managedUser = (ManagedUser) user.get();
-                    if (!managedUser.getPendingToken().getClientId().equals(clientId)) {
+                    PendingToken pendingToken = managedUser.getPendingToken();
+                    if (pendingToken == null) {
+                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+                    }
+                    if (!pendingToken.getClientId().equals(clientId)) {
                         logger.warn("client_id doesn't match pending token information");
                         throw new TokenEndpointException(ErrorType.INVALID_GRANT);
                     }
-                    if (!managedUser.getPendingToken().getRedirectUri().equals(redirectUri)) {
+                    if (!pendingToken.getRedirectUri().equals(redirectUri)) {
                         logger.warn("client_id doesn't match pending token information");
                         throw new TokenEndpointException(ErrorType.INVALID_GRANT);
                     }
@@ -124,7 +134,37 @@ public class TokenResource implements RESTResource {
                     // create a new session ID and refresh token
                     String sessionId = UUID.randomUUID().toString();
                     String newRefreshToken = UUID.randomUUID().toString().replace("-", "");
-                    String scope = managedUser.getPendingToken().getScope();
+                    String scope = pendingToken.getScope();
+
+                    // if there is PKCE information in the pending token, check that first
+                    String codeChallengeMethod = pendingToken.getCodeChallengeMethod();
+                    if (codeChallengeMethod != null) {
+                        String codeChallenge = pendingToken.getCodeChallenge();
+                        if (codeChallenge == null || codeVerifier == null) {
+                            logger.warn("the PKCE code challenge or code verifier information is missing");
+                            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+                        }
+                        switch (codeChallengeMethod) {
+                            case "plain":
+                                if (!codeVerifier.equals(codeChallenge)) {
+                                    logger.warn("PKCE verification failed");
+                                    throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+                                }
+                                break;
+                            case "S256":
+                                MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256");
+                                String computedCodeChallenge = Base64Url
+                                        .encode(sha256Digest.digest(codeVerifier.getBytes()));
+                                if (!computedCodeChallenge.equals(codeChallenge)) {
+                                    logger.warn("PKCE verification failed");
+                                    throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+                                }
+                                break;
+                            default:
+                                logger.warn("PKCE transformation algorithm not found");
+                                throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
+                        }
+                    }
 
                     // create an access token
                     String accessToken = jwtHelper.getJwtAccessToken(managedUser, clientId, scope);
@@ -222,12 +262,31 @@ public class TokenResource implements RESTResource {
         }
     }
 
+    @GET
+    @Path("/sessions")
+    @ApiOperation(value = "List the sessions associated to the authenticated user.")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = UserSessionDTO.class) })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response getSessions(@Context SecurityContext securityContext) {
+        if (securityContext.getUserPrincipal() == null) {
+            throw new NotAuthorizedException("User not authenticated");
+        }
+
+        ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        Stream<UserSessionDTO> sessions = user.getSessions().stream().map(this::toUserSessionDTO);
+        return Response.ok(new Stream2JSONInputStream(sessions)).build();
+    }
+
     @POST
     @Path("/logout")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @ApiOperation(value = "Delete the session associated with a refresh token.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response deleteSession(@FormParam("refresh_token") String refreshToken,
+    public Response deleteSession(@FormParam("refresh_token") String refreshToken, @FormParam("id") String id,
             @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
             throw new NotAuthorizedException("User not authenticated");
@@ -238,8 +297,14 @@ public class TokenResource implements RESTResource {
             throw new NotFoundException("User not found");
         }
 
-        Optional<UserSession> session = user.getSessions().stream()
-                .filter(s -> s.getRefreshToken().equals(refreshToken)).findAny();
+        Optional<UserSession> session;
+        if (refreshToken != null) {
+            session = user.getSessions().stream().filter(s -> s.getRefreshToken().equals(refreshToken)).findAny();
+        } else if (id != null) {
+            session = user.getSessions().stream().filter(s -> s.getSessionId().startsWith(id + "-")).findAny();
+        } else {
+            throw new IllegalArgumentException("no refresh_token or id specified");
+        }
         if (session.isEmpty()) {
             throw new NotFoundException("Session not found");
         }
@@ -263,4 +328,10 @@ public class TokenResource implements RESTResource {
         return response.build();
     }
 
+    private UserSessionDTO toUserSessionDTO(UserSession session) {
+        // we only divulge the prefix of the session ID to the client (otherwise an XSS attacker may find the
+        // session ID for a stolen refresh token easily by using the sessions endpoint).
+        return new UserSessionDTO(session.getSessionId().split("-")[0], session.getCreatedTime(),
+                session.getLastRefreshTime(), session.getClientId(), session.getScope());
+    }
 }

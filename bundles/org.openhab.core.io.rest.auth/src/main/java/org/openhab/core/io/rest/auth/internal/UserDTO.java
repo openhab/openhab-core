@@ -17,7 +17,7 @@ import java.util.Collection;
 import org.openhab.core.auth.User;
 
 /**
- * A DTO object representing an {@link User}.
+ * A DTO representing an {@link User}.
  *
  * @author Yannick Schaus - initial contribution
  */

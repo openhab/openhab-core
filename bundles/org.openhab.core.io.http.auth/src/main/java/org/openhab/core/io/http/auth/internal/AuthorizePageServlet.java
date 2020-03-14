@@ -201,8 +201,15 @@ public class AuthorizePageServlet extends HttpServlet {
                 String authorizationCode = UUID.randomUUID().toString().replace("-", "");
 
                 if (user instanceof ManagedUser) {
+                    String state = (params.containsKey("state")) ? params.get("state")[0] : null;
+                    String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0]
+                            : null;
+                    String codeChallengeMethod = (params.containsKey("code_challenge_method"))
+                            ? params.get("code_challenge_method")[0]
+                            : null;
                     ManagedUser managedUser = (ManagedUser) user;
-                    PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope);
+                    PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope,
+                            codeChallenge, codeChallengeMethod);
                     managedUser.setPendingToken(pendingToken);
                     userRegistry.update(managedUser);
                 }
@@ -263,8 +270,11 @@ public class AuthorizePageServlet extends HttpServlet {
         String responseType = params.get("response_type")[0];
         String clientId = params.get("client_id")[0];
         String scope = params.get("scope")[0];
-        @Nullable
         String state = (params.containsKey("state")) ? params.get("state")[0] : null;
+        String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0] : null;
+        String codeChallengeMethod = (params.containsKey("code_challenge_method"))
+                ? params.get("code_challenge_method")[0]
+                : null;
         hiddenFormFields += "<input type=\"hidden\" name=\"csrf_token\" value=\"" + csrfToken + "\">";
         hiddenFormFields += "<input type=\"hidden\" name=\"redirect_uri\" value=\"" + redirectUri + "\">";
         hiddenFormFields += "<input type=\"hidden\" name=\"response_type\" value=\"" + responseType + "\">";
@@ -272,6 +282,11 @@ public class AuthorizePageServlet extends HttpServlet {
         hiddenFormFields += "<input type=\"hidden\" name=\"scope\" value=\"" + scope + "\">";
         if (state != null) {
             hiddenFormFields += "<input type=\"hidden\" name=\"state\" value=\"" + state + "\">";
+        }
+        if (codeChallenge != null && codeChallengeMethod != null) {
+            hiddenFormFields += "<input type=\"hidden\" name=\"code_challenge\" value=\"" + codeChallenge + "\">";
+            hiddenFormFields += "<input type=\"hidden\" name=\"code_challenge_method\" value=\"" + codeChallengeMethod
+                    + "\">";
         }
 
         return hiddenFormFields;

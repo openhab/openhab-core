@@ -13,6 +13,7 @@
 package org.openhab.core.auth;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The pending information used in a OAuth2 authorization flow, set after the user has authorized the client to access
@@ -22,6 +23,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * The authorization code for a token is sensible information while it is valid, therefore the client is supposed to
  * call the token endpoint to perform the exchange it immediately after receiving it. The information should remain in
  * the @link {@link ManagedUser} profile for a limited time only.
+ *
+ * Additionally, and optionally, information about the code challenge as specified by PKCE (RFC 7636) can be stored
+ * along with the code.
  *
  * @author Yannick Schaus - initial contribution
  *
@@ -33,6 +37,11 @@ public class PendingToken {
     private String redirectUri;
     private String scope;
 
+    @Nullable
+    private String codeChallenge;
+    @Nullable
+    private String codeChallengeMethod;
+
     /**
      * Constructs a pending token.
      *
@@ -40,13 +49,18 @@ public class PendingToken {
      * @param clientId the client ID making the request
      * @param redirectUri the provided redirect URI
      * @param scope the requested scopes
+     * @param codeChallenge the code challenge (optional)
+     * @param codeChallengeMethod the code challenge method (optional)
      */
-    public PendingToken(String authorizationCode, String clientId, String redirectUri, String scope) {
+    public PendingToken(String authorizationCode, String clientId, String redirectUri, String scope,
+            @Nullable String codeChallenge, @Nullable String codeChallengeMethod) {
         super();
         this.authorizationCode = authorizationCode;
         this.clientId = clientId;
         this.redirectUri = redirectUri;
         this.scope = scope;
+        this.codeChallenge = codeChallenge;
+        this.codeChallengeMethod = codeChallengeMethod;
     }
 
     /**
@@ -84,4 +98,23 @@ public class PendingToken {
     public String getScope() {
         return scope;
     }
+
+    /**
+     * Gets the code challenge
+     *
+     * @return the code challenge
+     */
+    public @Nullable String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    /**
+     * Gets the code challenge method
+     *
+     * @return the code challenge method
+     */
+    public @Nullable String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
 }

@@ -40,6 +40,8 @@ import org.osgi.service.component.annotations.Reference;
 @Provider
 @Component(immediate = true, service = AuthFilter.class)
 public class AuthFilter implements ContainerRequestFilter {
+    private static final String COOKIE_AUTH_HEADER = "X-OPENHAB-AUTH-HEADER";
+    private static final String ALT_AUTH_HEADER = "X-OPENHAB-TOKEN";
 
     @Reference
     private JwtHelper jwtHelper;
@@ -57,6 +59,15 @@ public class AuthFilter implements ContainerRequestFilter {
                         requestContext.setSecurityContext(new JwtSecurityContext(auth));
                         return;
                     }
+                }
+            }
+
+            if (requestContext.getCookies().containsKey(COOKIE_AUTH_HEADER)) {
+                String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
+                if (altTokenHeader != null) {
+                    Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(altTokenHeader);
+                    requestContext.setSecurityContext(new JwtSecurityContext(auth));
+                    return;
                 }
             }
 
