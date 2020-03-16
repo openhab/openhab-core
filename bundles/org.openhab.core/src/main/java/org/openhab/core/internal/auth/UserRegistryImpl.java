@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -99,7 +100,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         String passwordSalt = generateSalt(KEY_LENGTH / 8).get();
         String passwordHash = hashPassword(password, passwordSalt).get();
         ManagedUser user = new ManagedUser(username, passwordSalt, passwordHash);
-        user.setRoles(roles);
+        user.setRoles(new HashSet<>(roles));
         super.add(user);
         return user;
     }
