@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * An {@link User} source from a {@link UserProvider} managed provider.
+ * A {@link User} sourced from a managed {@link UserProvider}.
  *
  * @author Yannick Schaus - initial contribution
  */
@@ -37,8 +37,8 @@ public class ManagedUser implements User {
     private List<UserApiToken> apiTokens = new ArrayList<>();
 
     /**
-     * Constructs an user with a password hash & salt provided by the caller.
-     * 
+     * Constructs a user with a password hash & salt provided by the caller.
+     *
      * @param name the username (account name)
      * @param passwordSalt the salt to compute the password hash
      * @param passwordHash the result of the hashing of the salted password

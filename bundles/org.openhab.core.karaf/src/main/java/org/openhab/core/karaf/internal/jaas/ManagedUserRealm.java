@@ -51,7 +51,7 @@ public class ManagedUserRealm implements JaasRealm {
     @Activate
     public ManagedUserRealm(BundleContext bundleContext, @Reference LoginModule loginModule) {
         this.bundleContext = bundleContext;
-        logger.info("Using login module {} for the openhab realm", loginModule.getClass().getCanonicalName());
+        logger.debug("Using login module {} for the openhab realm", loginModule.getClass().getCanonicalName());
     }
 
     @Override
@@ -68,7 +68,6 @@ public class ManagedUserRealm implements JaasRealm {
     public AppConfigurationEntry[] getEntries() {
         Map<String, Object> options = new HashMap<>();
         options.put(ProxyLoginModule.PROPERTY_MODULE, MODULE_CLASS);
-        // options.put(ProxyLoginModule.PROPERTY_BUNDLE, bundleContext.getBundle().getBundleId());
 
         return new AppConfigurationEntry[] {
                 new AppConfigurationEntry(MODULE_CLASS, LoginModuleControlFlag.SUFFICIENT, options) };

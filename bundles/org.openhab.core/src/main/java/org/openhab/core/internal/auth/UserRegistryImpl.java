@@ -36,7 +36,6 @@ import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.common.registry.AbstractRegistry;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -60,22 +59,12 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     private static final int ITERATIONS = 65536;
     private static final int KEY_LENGTH = 512;
     private static final String ALGORITHM = "PBKDF2WithHmacSHA512";
-
-    private int rank = 0;
-
     private static final SecureRandom RAND = new SecureRandom();
 
     @Activate
     public UserRegistryImpl(BundleContext context, Map<String, Object> properties) {
         super(UserProvider.class);
         super.activate(context);
-
-        Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
-        if (serviceRanking instanceof Integer) {
-            rank = (Integer) serviceRanking;
-        } else {
-            rank = 1; // takes precedence over other providers usually ranked 0
-        }
     }
 
     @Override
@@ -106,7 +95,6 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     }
 
     private Optional<String> generateSalt(final int length) {
-
         if (length < 1) {
             logger.error("error in generateSalt: length must be > 0");
             return Optional.empty();
@@ -119,7 +107,6 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     }
 
     private Optional<String> hashPassword(String password, String salt) {
-
         char[] chars = password.toCharArray();
         byte[] bytes = salt.getBytes();
 
@@ -131,11 +118,9 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
             SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
             byte[] securePassword = fac.generateSecret(spec).getEncoded();
             return Optional.of(Base64.getEncoder().encodeToString(securePassword));
-
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             logger.error("Exception encountered in hashPassword", e);
             return Optional.empty();
-
         } finally {
             spec.clearPassword();
         }

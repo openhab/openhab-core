@@ -22,8 +22,8 @@ import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.GenericUser;
 
 /**
- * This {@link SecurityContext} contains information about an user and authorizations granted to a client as parsed from
- * the contents of a JSON Web Token
+ * This {@link SecurityContext} contains information about a user, roles and authorizations granted to a client as
+ * parsed from the contents of a JSON Web Token
  *
  * @author Yannick Schaus - initial contribution
  */

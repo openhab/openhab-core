@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.net.URI;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,18 +78,18 @@ public class TokenResource implements RESTResource {
     /** The name of the HTTP-only cookie holding the session ID */
     public static final String SESSIONID_COOKIE_NAME = "X-OPENHAB-SESSIONID";
 
+    /** The default lifetime of tokens in minutes before they expire */
+    public static final int TOKEN_LIFETIME = 60;
+
     @Context
     private UriInfo uriInfo;
 
-    @Reference
-    private AuthenticationProvider authenticationProvider;
-
     private UserRegistry userRegistry;
-
     private JwtHelper jwtHelper;
 
     @Activate
-    public TokenResource(final @Reference UserRegistry userRegistry, final @Reference JwtHelper jwtHelper) {
+    public TokenResource(final @Reference UserRegistry userRegistry, final @Reference JwtHelper jwtHelper,
+            final @Reference AuthenticationProvider authenticationProvider) {
         this.userRegistry = userRegistry;
         this.jwtHelper = jwtHelper;
     }
@@ -106,149 +107,10 @@ public class TokenResource implements RESTResource {
         try {
             switch (grantType) {
                 case "authorization_code":
-                    // find an user with the authorization code pending
-                    Optional<User> user = userRegistry.getAll().stream()
-                            .filter(u -> ((ManagedUser) u).getPendingToken() != null
-                                    && ((ManagedUser) u).getPendingToken().getAuthorizationCode().equals(code))
-                            .findAny();
-
-                    if (!user.isPresent()) {
-                        logger.warn("Couldn't find an user with the provided authentication code pending");
-                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                    }
-
-                    ManagedUser managedUser = (ManagedUser) user.get();
-                    PendingToken pendingToken = managedUser.getPendingToken();
-                    if (pendingToken == null) {
-                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                    }
-                    if (!pendingToken.getClientId().equals(clientId)) {
-                        logger.warn("client_id doesn't match pending token information");
-                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                    }
-                    if (!pendingToken.getRedirectUri().equals(redirectUri)) {
-                        logger.warn("client_id doesn't match pending token information");
-                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                    }
-
-                    // create a new session ID and refresh token
-                    String sessionId = UUID.randomUUID().toString();
-                    String newRefreshToken = UUID.randomUUID().toString().replace("-", "");
-                    String scope = pendingToken.getScope();
-
-                    // if there is PKCE information in the pending token, check that first
-                    String codeChallengeMethod = pendingToken.getCodeChallengeMethod();
-                    if (codeChallengeMethod != null) {
-                        String codeChallenge = pendingToken.getCodeChallenge();
-                        if (codeChallenge == null || codeVerifier == null) {
-                            logger.warn("the PKCE code challenge or code verifier information is missing");
-                            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                        }
-                        switch (codeChallengeMethod) {
-                            case "plain":
-                                if (!codeVerifier.equals(codeChallenge)) {
-                                    logger.warn("PKCE verification failed");
-                                    throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                                }
-                                break;
-                            case "S256":
-                                MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256");
-                                String computedCodeChallenge = Base64Url
-                                        .encode(sha256Digest.digest(codeVerifier.getBytes()));
-                                if (!computedCodeChallenge.equals(codeChallenge)) {
-                                    logger.warn("PKCE verification failed");
-                                    throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                                }
-                                break;
-                            default:
-                                logger.warn("PKCE transformation algorithm not found");
-                                throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
-                        }
-                    }
-
-                    // create an access token
-                    String accessToken = jwtHelper.getJwtAccessToken(managedUser, clientId, scope);
-
-                    UserSession newSession = new UserSession(sessionId, newRefreshToken, clientId, redirectUri, scope);
-
-                    ResponseBuilder response = Response
-                            .ok(new TokenResponseDTO(accessToken, "bearer", 3600, newRefreshToken, scope, managedUser));
-
-                    // if the client has requested a http-only cookie for the session, set it
-                    if (useCookie) {
-                        try {
-                            // this feature is only available for root redirect URIs: the targeted client is the main
-                            // UI; even though the cookie will be set for the entire domain (i.e. no path) so that
-                            // other servlets can make use of it
-                            URI domainUri = new URI(redirectUri);
-                            if (!("".equals(domainUri.getPath()) || "/".equals(domainUri.getPath()))) {
-                                throw new IllegalArgumentException(
-                                        "Will not honor the request to set a session cookie for this client, because it's only allowed for root redirect URIs");
-                            }
-                            NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, sessionId, "/",
-                                    domainUri.getHost(), null, 2147483647, false, true);
-                            response.cookie(newCookie);
-
-                            // also mark the session as supported by a cookie
-                            newSession.setSessionCookie(true);
-                        } catch (Exception e) {
-                            logger.warn("Error while setting a session cookie: {}", e.getMessage());
-                            throw new TokenEndpointException(ErrorType.UNAUTHORIZED_CLIENT);
-                        }
-                    }
-
-                    // add the new session to the user profile and clear the pending token information
-                    managedUser.getSessions().add(newSession);
-                    managedUser.setPendingToken(null);
-                    userRegistry.update(managedUser);
-
-                    return response.build();
+                    return processAuthorizationCodeGrant(code, redirectUri, clientId, codeVerifier, useCookie);
 
                 case "refresh_token":
-                    if (refreshToken == null) {
-                        throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
-                    }
-
-                    // find an user associated with the provided refresh token
-                    Optional<User> refreshTokenUser = userRegistry.getAll().stream().filter(u -> ((ManagedUser) u)
-                            .getSessions().stream().anyMatch(s -> refreshToken.equals(s.getRefreshToken()))).findAny();
-
-                    if (!refreshTokenUser.isPresent()) {
-                        logger.warn("Couldn't find an user with a session matching the provided refresh_token");
-                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                    }
-
-                    // get the session from the refresh token
-                    ManagedUser refreshTokenManagedUser = (ManagedUser) refreshTokenUser.get();
-                    UserSession session = refreshTokenManagedUser.getSessions().stream()
-                            .filter(s -> s.getRefreshToken().equals(refreshToken)).findAny().get();
-
-                    // if the cookie flag is present on the session, verify that the cookie is present and corresponds
-                    // to this session
-                    if (session.hasSessionCookie()) {
-                        if (sessionCookie == null || !sessionCookie.getValue().equals(session.getSessionId())) {
-                            logger.warn(
-                                    "Not refreshing token for session {} of user {}, missing or invalid session cookie",
-                                    session.getSessionId(), refreshTokenManagedUser.getName());
-                            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
-                        }
-                    }
-
-                    // issue a new access token
-                    String refreshedAccessToken = jwtHelper.getJwtAccessToken(refreshTokenManagedUser, clientId,
-                            session.getScope());
-
-                    logger.debug("Refreshing session {} of user {}", session.getSessionId(),
-                            refreshTokenManagedUser.getName());
-
-                    ResponseBuilder refreshResponse = Response.ok(new TokenResponseDTO(refreshedAccessToken, "bearer",
-                            3600, refreshToken, session.getScope(), refreshTokenManagedUser));
-
-                    // update the last refresh time of the session in the user's profile
-                    session.setLastRefreshTime(new Date());
-                    userRegistry.update(refreshTokenManagedUser);
-
-                    return refreshResponse.build();
+                    return processRefreshTokenGrant(clientId, refreshToken, sessionCookie);
 
                 default:
                     throw new TokenEndpointException(ErrorType.UNSUPPORTED_GRANT_TYPE);
@@ -334,4 +196,152 @@ public class TokenResource implements RESTResource {
         return new UserSessionDTO(session.getSessionId().split("-")[0], session.getCreatedTime(),
                 session.getLastRefreshTime(), session.getClientId(), session.getScope());
     }
+
+    private Response processAuthorizationCodeGrant(String code, String redirectUri, String clientId,
+            String codeVerifier, boolean useCookie) throws TokenEndpointException, NoSuchAlgorithmException {
+        // find an user with the authorization code pending
+        Optional<User> user = userRegistry.getAll().stream().filter(u -> ((ManagedUser) u).getPendingToken() != null
+                && ((ManagedUser) u).getPendingToken().getAuthorizationCode().equals(code)).findAny();
+
+        if (!user.isPresent()) {
+            logger.warn("Couldn't find a user with the provided authentication code pending");
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+        }
+
+        ManagedUser managedUser = (ManagedUser) user.get();
+        PendingToken pendingToken = managedUser.getPendingToken();
+        if (pendingToken == null) {
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+        }
+        if (!pendingToken.getClientId().equals(clientId)) {
+            logger.warn("client_id '{}' doesn't match pending token information '{}'", clientId,
+                    pendingToken.getClientId());
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+        }
+        if (!pendingToken.getRedirectUri().equals(redirectUri)) {
+            logger.warn("redirect_uri '{}' doesn't match pending token information '{}'", redirectUri,
+                    pendingToken.getRedirectUri());
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+        }
+
+        // create a new session ID and refresh token
+        String sessionId = UUID.randomUUID().toString();
+        String newRefreshToken = UUID.randomUUID().toString().replace("-", "");
+        String scope = pendingToken.getScope();
+
+        // if there is PKCE information in the pending token, check that first
+        String codeChallengeMethod = pendingToken.getCodeChallengeMethod();
+        if (codeChallengeMethod != null) {
+            String codeChallenge = pendingToken.getCodeChallenge();
+            if (codeChallenge == null || codeVerifier == null) {
+                logger.warn("the PKCE code challenge or code verifier information is missing");
+                throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+            }
+            switch (codeChallengeMethod) {
+                case "plain":
+                    if (!codeVerifier.equals(codeChallenge)) {
+                        logger.warn("PKCE verification failed");
+                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+                    }
+                    break;
+                case "S256":
+                    MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256");
+                    String computedCodeChallenge = Base64Url.encode(sha256Digest.digest(codeVerifier.getBytes()));
+                    if (!computedCodeChallenge.equals(codeChallenge)) {
+                        logger.warn("PKCE verification failed");
+                        throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+                    }
+                    break;
+                default:
+                    logger.warn("PKCE transformation algorithm '{}' not supported", codeChallengeMethod);
+                    throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
+            }
+        }
+
+        // create an access token
+        String accessToken = jwtHelper.getJwtAccessToken(managedUser, clientId, scope, TOKEN_LIFETIME);
+
+        UserSession newSession = new UserSession(sessionId, newRefreshToken, clientId, redirectUri, scope);
+
+        ResponseBuilder response = Response.ok(
+                new TokenResponseDTO(accessToken, "bearer", TOKEN_LIFETIME * 60, newRefreshToken, scope, managedUser));
+
+        // if the client has requested an http-only cookie for the session, set it
+        if (useCookie) {
+            try {
+                // this feature is only available for root redirect URIs: the targeted client is the main
+                // UI; even though the cookie will be set for the entire domain (i.e. no path) so that
+                // other servlets can make use of it
+                URI domainUri = new URI(redirectUri);
+                if (!("".equals(domainUri.getPath()) || "/".equals(domainUri.getPath()))) {
+                    throw new IllegalArgumentException(
+                            "Will not honor the request to set a session cookie for this client, because it's only allowed for root redirect URIs");
+                }
+                NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, sessionId, "/", domainUri.getHost(), null,
+                        2147483647, false, true);
+                response.cookie(newCookie);
+
+                // also mark the session as supported by a cookie
+                newSession.setSessionCookie(true);
+            } catch (Exception e) {
+                logger.warn("Error while setting a session cookie: {}", e.getMessage());
+                throw new TokenEndpointException(ErrorType.UNAUTHORIZED_CLIENT);
+            }
+        }
+
+        // add the new session to the user profile and clear the pending token information
+        managedUser.getSessions().add(newSession);
+        managedUser.setPendingToken(null);
+        userRegistry.update(managedUser);
+
+        return response.build();
+    }
+
+    private Response processRefreshTokenGrant(String clientId, String refreshToken, Cookie sessionCookie)
+            throws TokenEndpointException {
+        if (refreshToken == null) {
+            throw new TokenEndpointException(ErrorType.INVALID_REQUEST);
+        }
+
+        // find an user associated with the provided refresh token
+        Optional<User> refreshTokenUser = userRegistry.getAll().stream().filter(
+                u -> ((ManagedUser) u).getSessions().stream().anyMatch(s -> refreshToken.equals(s.getRefreshToken())))
+                .findAny();
+
+        if (!refreshTokenUser.isPresent()) {
+            logger.warn("Couldn't find a user with a session matching the provided refresh_token");
+            throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+        }
+
+        // get the session from the refresh token
+        ManagedUser refreshTokenManagedUser = (ManagedUser) refreshTokenUser.get();
+        UserSession session = refreshTokenManagedUser.getSessions().stream()
+                .filter(s -> s.getRefreshToken().equals(refreshToken)).findAny().get();
+
+        // if the cookie flag is present on the session, verify that the cookie is present and corresponds
+        // to this session
+        if (session.hasSessionCookie()) {
+            if (sessionCookie == null || !sessionCookie.getValue().equals(session.getSessionId())) {
+                logger.warn("Not refreshing token for session {} of user {}, missing or invalid session cookie",
+                        session.getSessionId(), refreshTokenManagedUser.getName());
+                throw new TokenEndpointException(ErrorType.INVALID_GRANT);
+            }
+        }
+
+        // issue a new access token
+        String refreshedAccessToken = jwtHelper.getJwtAccessToken(refreshTokenManagedUser, clientId, session.getScope(),
+                TOKEN_LIFETIME);
+
+        logger.debug("Refreshing session {} of user {}", session.getSessionId(), refreshTokenManagedUser.getName());
+
+        ResponseBuilder refreshResponse = Response.ok(new TokenResponseDTO(refreshedAccessToken, "bearer",
+                TOKEN_LIFETIME * 60, refreshToken, session.getScope(), refreshTokenManagedUser));
+
+        // update the last refresh time of the session in the user's profile
+        session.setLastRefreshTime(new Date());
+        userRegistry.update(refreshTokenManagedUser);
+
+        return refreshResponse.build();
+    }
+
 }

@@ -15,7 +15,9 @@ package org.openhab.core.io.http.auth.internal;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.util.HashSet;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -68,11 +70,14 @@ public class AuthorizePageServlet extends HttpServlet {
 
     private final Logger logger = LoggerFactory.getLogger(AuthorizePageServlet.class);
 
-    private HashSet<String> csrfTokens = new HashSet<>();
+    private HashMap<String, Instant> csrfTokens = new HashMap<>();
 
     private HttpService httpService;
     private UserRegistry userRegistry;
     private AuthenticationProvider authProvider;
+    @Nullable
+    private Instant lastAuthenticationFailure;
+    private int authenticationFailureCount = 0;
 
     private String pageTemplate;
 
@@ -144,7 +149,7 @@ public class AuthorizePageServlet extends HttpServlet {
                 if (!params.containsKey(("password"))) {
                     throw new AuthenticationException("no password");
                 }
-                if (!params.containsKey("csrf_token") || !csrfTokens.contains(params.get("csrf_token")[0])) {
+                if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
                     throw new AuthenticationException("CSRF check failed");
                 }
                 if (!params.containsKey(("redirect_uri"))) {
@@ -159,6 +164,9 @@ public class AuthorizePageServlet extends HttpServlet {
                 if (!params.containsKey(("scope"))) {
                     throw new IllegalArgumentException("invalid_scope");
                 }
+
+                csrfTokens.remove(params.get("csrf_token")[0]);
+
                 String baseRedirectUri = params.get("redirect_uri")[0];
                 String responseType = params.get("response_type")[0];
                 String clientId = params.get("redirect_uri")[0];
@@ -191,17 +199,25 @@ public class AuthorizePageServlet extends HttpServlet {
                     user = userRegistry.register(username, password, Set.of(Role.ADMIN));
                     logger.info("First user account created: {}", username);
                 } else {
+                    // Enforce a dynamic cooldown period after a failed authentication attempt: the number of
+                    // consecutive failures in seconds
+                    if (lastAuthenticationFailure != null && lastAuthenticationFailure
+                            .isAfter(Instant.now().minus(Duration.ofSeconds(authenticationFailureCount)))) {
+                        throw new AuthenticationException("Too many consecutive login attempts");
+                    }
+
                     // Authenticate the user with the supplied credentials
                     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
                     Authentication auth = authProvider.authenticate(credentials);
                     logger.debug("Login successful: {}", auth.getUsername());
+                    lastAuthenticationFailure = null;
+                    authenticationFailureCount = 0;
                     user = userRegistry.get(auth.getUsername());
                 }
 
                 String authorizationCode = UUID.randomUUID().toString().replace("-", "");
 
                 if (user instanceof ManagedUser) {
-                    String state = (params.containsKey("state")) ? params.get("state")[0] : null;
                     String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0]
                             : null;
                     String codeChallengeMethod = (params.containsKey("code_challenge_method"))
@@ -217,8 +233,9 @@ public class AuthorizePageServlet extends HttpServlet {
                 String state = params.containsKey("state") ? params.get("state")[0] : null;
                 resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, authorizationCode, null, state));
                 resp.setStatus(HttpStatus.SC_MOVED_TEMPORARILY);
-
             } catch (AuthenticationException e) {
+                lastAuthenticationFailure = Instant.now();
+                authenticationFailureCount += 1;
                 resp.setContentType("text/html;charset=UTF-8");
                 logger.warn("Authentication failed: {}", e.getMessage());
                 resp.getWriter().append(getPageBody(params, "Please try again.")); // TODO: i18n
@@ -311,7 +328,9 @@ public class AuthorizePageServlet extends HttpServlet {
 
     private String addCsrfToken() {
         String csrfToken = UUID.randomUUID().toString().replace("-", "");
-        csrfTokens.add(csrfToken);
+        csrfTokens.put(csrfToken, Instant.now());
+        // remove old tokens (created earlier than 10 minutes ago) - this gives users a 10-minute window to sign in
+        csrfTokens.entrySet().removeIf(e -> e.getValue().isBefore(Instant.now().minus(Duration.ofMinutes(10))));
         return csrfToken;
     }
 

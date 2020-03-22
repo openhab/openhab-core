@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Registry;
 
 /**
- * An interface for a generic {@link Registry} of {@link User} entities. User registries can also be used as a
+ * An interface for a generic {@link Registry} of {@link User} entities. User registries can also be used as
  * {@link AuthenticationProvider}.
  *
  * @author Yannick Schaus - initial contribution

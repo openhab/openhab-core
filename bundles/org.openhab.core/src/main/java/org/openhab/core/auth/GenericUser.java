@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Interface for a generic {@link User}
+ * Represents a generic {@link User} with a set of roles
  *
  * @author Yannick Schaus - initial contribution
  *
@@ -31,7 +31,7 @@ public class GenericUser implements User {
     private Set<String> roles;
 
     /**
-     * Constructs an user attributed with a set of roles.
+     * Constructs a user attributed with a set of roles.
      *
      * @param name the username (account name)
      * @param roles the roles attributed to this user
@@ -42,7 +42,7 @@ public class GenericUser implements User {
     }
 
     /**
-     * Constructs an user with no roles.
+     * Constructs a user with no roles.
      *
      * @param name the username (account name)
      */

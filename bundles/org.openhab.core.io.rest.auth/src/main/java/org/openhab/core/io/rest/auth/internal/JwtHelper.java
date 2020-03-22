@@ -87,8 +87,9 @@ public class JwtHelper {
             List<String> lines = IOUtils.readLines(new FileInputStream(KEY_FILE_PATH));
             return (RsaJsonWebKey) JsonWebKey.Factory.newJwk(lines.get(0));
         } catch (IOException | JoseException e) {
-            logger.info("Creating new JWT signature key");
-            return generateNewKey();
+            RsaJsonWebKey key = generateNewKey();
+            logger.debug("Created JWT signature key in {}", KEY_FILE_PATH);
+            return key;
         }
     }
 
@@ -98,15 +99,16 @@ public class JwtHelper {
      * @param user the user (subject) to build the token, it will also add the roles as claims
      * @param clientId the client ID the token is for
      * @param scope the scope the token is valid for
+     * @param tokenLifetime the lifetime of the token in minutes before it expires
      *
      * @return a base64-encoded signed JWT token to be passed as a bearer token in API requests
      */
-    public String getJwtAccessToken(User user, String clientId, String scope) {
+    public String getJwtAccessToken(User user, String clientId, String scope, int tokenLifetime) {
         try {
             JwtClaims jwtClaims = new JwtClaims();
             jwtClaims.setIssuer(ISSUER_NAME);
             jwtClaims.setAudience(AUDIENCE);
-            jwtClaims.setExpirationTimeMinutesInTheFuture(3600);
+            jwtClaims.setExpirationTimeMinutesInTheFuture(tokenLifetime);
             jwtClaims.setGeneratedJwtId();
             jwtClaims.setIssuedAtToNow();
             jwtClaims.setNotBeforeMinutesInThePast(2);

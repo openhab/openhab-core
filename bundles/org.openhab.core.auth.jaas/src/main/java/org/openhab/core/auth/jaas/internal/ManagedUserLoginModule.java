@@ -27,7 +27,6 @@ import org.openhab.core.auth.UserRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yannick Schaus - initial contribution
  */
-@Component(service = LoginModule.class, property = { "jaas.realmName=openhab" })
 public class ManagedUserLoginModule implements LoginModule {
 
     private final Logger logger = LoggerFactory.getLogger(ManagedUserLoginModule.class);

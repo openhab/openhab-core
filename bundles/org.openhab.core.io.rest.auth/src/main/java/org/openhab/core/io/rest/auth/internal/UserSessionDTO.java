@@ -15,7 +15,7 @@ package org.openhab.core.io.rest.auth.internal;
 import java.util.Date;
 
 /**
- * A DTO representing an user session, without the sensible information.
+ * A DTO representing a user session, without the sensible information.
  *
  * @author Yannick Schaus - initial contribution
  */
