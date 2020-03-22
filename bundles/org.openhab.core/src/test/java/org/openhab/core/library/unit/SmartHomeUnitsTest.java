@@ -326,7 +326,7 @@ public class SmartHomeUnitsTest {
     public void testMicrowattPerSquareCentimetre2KilogramPerSquareCentiMetre() {
         Quantity<Intensity> oneMwCm2 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.IRRADIANCE);
         Quantity<Intensity> converted = oneMwCm2.to(SmartHomeUnits.MICROWATT_PER_SQUARE_CENTIMETRE);
-        assertThat(converted.getValue().doubleValue(), is(100));
+        assertThat(converted.getValue().doubleValue(), is(100d));
     }
 
     @Test
