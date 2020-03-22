@@ -134,7 +134,7 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<Frequency> HERTZ = addUnit(Units.HERTZ);
     public static final Unit<Intensity> IRRADIANCE = addUnit(new ProductUnit<>(Units.WATT.divide(Units.SQUARE_METRE)));
     public static final Unit<Intensity> MICROWATT_PER_SQUARE_CENTIMETRE = addUnit(
-            new TransformedUnit<>(IRRADIANCE, new RationalConverter(BigInteger.valueOf(100), BigInteger.ONE)));
+            new TransformedUnit<>(IRRADIANCE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(100))));
     public static final Unit<Illuminance> LUX = addUnit(Units.LUX);
     public static final Unit<LuminousFlux> LUMEN = addUnit(Units.LUMEN);
     public static final Unit<LuminousIntensity> CANDELA = addUnit(Units.CANDELA);
