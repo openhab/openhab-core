@@ -41,7 +41,6 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.jose4j.base64url.Base64Url;
-import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.User;
@@ -88,8 +87,7 @@ public class TokenResource implements RESTResource {
     private JwtHelper jwtHelper;
 
     @Activate
-    public TokenResource(final @Reference UserRegistry userRegistry, final @Reference JwtHelper jwtHelper,
-            final @Reference AuthenticationProvider authenticationProvider) {
+    public TokenResource(final @Reference UserRegistry userRegistry, final @Reference JwtHelper jwtHelper) {
         this.userRegistry = userRegistry;
         this.jwtHelper = jwtHelper;
     }

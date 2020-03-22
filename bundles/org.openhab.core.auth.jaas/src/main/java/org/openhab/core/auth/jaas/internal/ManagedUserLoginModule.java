@@ -19,10 +19,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Credentials;
-import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -41,11 +39,7 @@ public class ManagedUserLoginModule implements LoginModule {
 
     private UserRegistry userRegistry;
 
-    @Nullable
     private Subject subject;
-
-    @Nullable
-    private User user;
 
     @Override
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
