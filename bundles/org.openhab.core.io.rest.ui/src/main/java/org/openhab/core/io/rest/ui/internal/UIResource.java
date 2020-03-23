@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.ui.internal;
 import java.security.InvalidParameterException;
 import java.util.stream.Stream;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -28,6 +29,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.ui.TileDTO;
@@ -107,6 +109,7 @@ public class UIResource implements RESTResource {
     }
 
     @POST
+    @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Add an UI component in the specified namespace.")
@@ -119,6 +122,7 @@ public class UIResource implements RESTResource {
     }
 
     @PUT
+    @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a specific UI component in the specified namespace.")
@@ -141,6 +145,7 @@ public class UIResource implements RESTResource {
     }
 
     @DELETE
+    @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Remove a specific UI component in the specified namespace.")

@@ -138,6 +138,7 @@
 
 	<feature name="openhab-core-io-http-auth" version="${project.version}">
 		<feature>openhab-core-base</feature>
+		<feature>openhab-core-auth-jaas</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth/${project.version}</bundle>
 	</feature>
 
@@ -153,7 +154,10 @@
 
 	<feature name="openhab-core-io-rest-auth" version="${project.version}">
 		<feature>openhab-core-base</feature>
+		<feature>openhab-core-auth-jaas</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.auth/${project.version}</bundle>
+		<requirement>openhab.tp;filter:="(feature=jose4j)"</requirement>
+		<feature dependency="true">openhab.tp-jose4j</feature>
 	</feature>
 
 	<feature name="openhab-core-io-rest-log" version="${project.version}">

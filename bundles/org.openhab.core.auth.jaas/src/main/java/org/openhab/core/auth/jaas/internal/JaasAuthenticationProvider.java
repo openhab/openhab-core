@@ -14,6 +14,7 @@ package org.openhab.core.auth.jaas.internal;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.Credentials;
+import org.openhab.core.auth.GenericUser;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -44,16 +46,18 @@ import org.osgi.service.component.annotations.Modified;
  *
  * @author Łukasz Dywicki - Initial contribution
  * @author Kai Kreuzer - Removed ManagedService and used DS configuration instead
+ * @author Yannick Schaus - provides a configuration with the ManagedUserLoginModule as a sufficient login module
  */
 @Component(configurationPid = "org.openhab.jaas")
 public class JaasAuthenticationProvider implements AuthenticationProvider {
+    private final String DEFAULT_REALM = "openhab";
 
     private String realmName;
 
     @Override
     public Authentication authenticate(final Credentials credentials) throws AuthenticationException {
         if (realmName == null) { // configuration is not yet ready or set
-            return null;
+            realmName = DEFAULT_REALM;
         }
 
         if (!(credentials instanceof UsernamePasswordCredentials)) {
@@ -64,8 +68,14 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
         final String name = userCredentials.getUsername();
         final char[] password = userCredentials.getPassword().toCharArray();
 
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            LoginContext loginContext = new LoginContext(realmName, new CallbackHandler() {
+
+            Principal userPrincipal = new GenericUser(name);
+            Subject subject = new Subject(true, Set.of(userPrincipal), Collections.emptySet(), Set.of(userCredentials));
+
+            Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
+            LoginContext loginContext = new LoginContext(realmName, subject, new CallbackHandler() {
                 @Override
                 public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
                     for (Callback callback : callbacks) {
@@ -78,12 +88,14 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
                         }
                     }
                 }
-            });
+            }, new ManagedUserLoginConfiguration());
             loginContext.login();
 
             return getAuthentication(name, loginContext.getSubject());
         } catch (LoginException e) {
-            throw new AuthenticationException("Could not obtain authentication over login context", e);
+            throw new AuthenticationException(e.getMessage());
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
     }
 
@@ -112,7 +124,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
     @Modified
     protected void modified(Map<String, Object> properties) {
         if (properties == null) {
-            realmName = null;
+            realmName = DEFAULT_REALM;
             return;
         }
 
@@ -124,8 +136,8 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
                 realmName = propertyValue.toString();
             }
         } else {
-            // value could be unset, we should reset it value
-            realmName = null;
+            // value could be unset, we should reset its value
+            realmName = DEFAULT_REALM;
         }
     }
 
