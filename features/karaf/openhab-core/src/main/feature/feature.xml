@@ -432,8 +432,11 @@
 		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
 		<feature dependency="true">openhab.tp-commons-net</feature>
 		<feature>openhab-core-base</feature>
+		<feature>openhab-core-auth-jaas</feature>
 		<feature>openhab-core-ephemeris</feature>
 		<feature>openhab-core-io-console-karaf</feature>
+		<feature>openhab-core-io-http-auth</feature>
+		<feature>openhab-core-io-rest-auth</feature>
 		<feature>openhab-core-io-rest-sitemap</feature>
 		<feature>openhab-core-io-rest-audio</feature>
 		<feature>openhab-core-io-rest-voice</feature>
