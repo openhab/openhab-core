@@ -455,6 +455,7 @@
 		<feature>openhab-transport-http</feature>
 		<feature prerequisite="true">shell</feature>
 		<feature prerequisite="true">wrapper</feature>
+		<feature prerequisite="true">jaas</feature>
 		<!-- This bundle needs to be started early as it registers the 404 and startup pages on Jetty -->
 		<!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422 -->
 		<!-- <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
