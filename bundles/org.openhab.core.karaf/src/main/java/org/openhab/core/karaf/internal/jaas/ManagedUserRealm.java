@@ -18,18 +18,12 @@ import java.util.Map;
 import javax.inject.Singleton;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
-import javax.security.auth.spi.LoginModule;
 
 import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.openhab.core.auth.UserRegistry;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A JAAS realm description for the {@link UserRegistry} based login module.
@@ -43,16 +37,6 @@ public class ManagedUserRealm implements JaasRealm {
 
     public static final String REALM_NAME = "openhab";
     public static final String MODULE_CLASS = "org.openhab.core.auth.jaas.internal.ManagedUserLoginModule";
-
-    private final Logger logger = LoggerFactory.getLogger(ManagedUserRealm.class);
-
-    BundleContext bundleContext;
-
-    @Activate
-    public ManagedUserRealm(BundleContext bundleContext, @Reference LoginModule loginModule) {
-        this.bundleContext = bundleContext;
-        logger.debug("Using login module {} for the openhab realm", loginModule.getClass().getCanonicalName());
-    }
 
     @Override
     public String getName() {
