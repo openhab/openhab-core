@@ -12,10 +12,7 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.script.ScriptEngine;
@@ -100,15 +97,18 @@ public class ScriptExtensionManager {
         }
     }
 
-    public void importPreset(String preset, ScriptEngineFactory engineProvider, ScriptEngine scriptEngine,
+    public Map<String, Object> importPreset(String preset, ScriptEngineFactory engineProvider, ScriptEngine scriptEngine,
             String scriptIdentifier) {
+        Map<String, Object> allValues = new HashMap<>();
         for (ScriptExtensionProvider provider : scriptExtensionProviders) {
             if (provider.getPresets().contains(preset)) {
                 Map<String, Object> scopeValues = provider.importPreset(scriptIdentifier, preset);
 
                 engineProvider.scopeValues(scriptEngine, scopeValues);
+                allValues.putAll(scopeValues);
             }
         }
+        return allValues;
     }
 
     public void dispose(String scriptIdentifier) {
