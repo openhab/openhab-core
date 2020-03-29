@@ -28,8 +28,10 @@ Import-Package: \
  org.openhab.core.library.types,\
  org.openhab.core.library.unit,\
  org.openhab.core.persistence,\
+ org.openhab.core.scheduler,\
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\
+ org.openhab.core.thing.events,\
  org.openhab.core.transform.actions,\
  org.openhab.core.types,\
  org.openhab.core.voice,\
@@ -48,7 +50,6 @@ Import-Package: \
  org.eclipse.jetty.http.*,\
  org.eclipse.xtext.xbase.lib,\
  org.osgi.*,\
- org.quartz.*,\
  org.slf4j.*
 Require-Bundle: org.antlr.runtime,\
  org.eclipse.emf.common,\

@@ -40,7 +40,6 @@
     <module>org.openhab.core.extension.sample</module>
     <module>org.openhab.core.id</module>
     <module>org.openhab.core.persistence</module>
-    <module>org.openhab.core.scheduler</module>
     <module>org.openhab.core.semantics</module>
     <module>org.openhab.core.thing</module>
     <module>org.openhab.core.thing.xml</module>

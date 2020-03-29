@@ -1,2 +1,1 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.openhab.core.internal.CoreActivator

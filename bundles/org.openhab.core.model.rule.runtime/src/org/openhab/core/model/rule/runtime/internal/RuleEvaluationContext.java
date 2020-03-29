@@ -10,13 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.rule.runtime.internal.engine;
+package org.openhab.core.model.rule.runtime.internal;
 
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationContext;
 
-@SuppressWarnings("restriction")
 public class RuleEvaluationContext extends DefaultEvaluationContext {
 
     private IEvaluationContext globalContext = null;

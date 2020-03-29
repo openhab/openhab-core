@@ -22,6 +22,10 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.openhab.core.items.Item
+import org.openhab.core.types.Command
+import org.openhab.core.types.State
+import org.openhab.core.thing.events.ChannelTriggeredEvent
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -35,6 +39,21 @@ import org.slf4j.LoggerFactory
 class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
 	static private final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
+
+    /** Variable name for the item in a "state triggered" or "command triggered" rule */
+    public static final String VAR_TRIGGERING_ITEM = "triggeringItem";
+
+    /** Variable name for the previous state of an item in a "changed state triggered" rule */
+    public static final String VAR_PREVIOUS_STATE = "previousState";
+
+    /** Variable name for the new state of an item in a "changed state triggered" or "updated state triggered" rule */
+    public static final String VAR_NEW_STATE = "newState";
+
+    /** Variable name for the received command in a "command triggered" rule */
+    public static final String VAR_RECEIVED_COMMAND = "receivedCommand";
+
+    /** Variable name for the received event in a "trigger event" rule */
+    public static final String VAR_RECEIVED_EVENT = "receivedEvent";
 
     /**
      * conveninence API to build and initialize JvmTypes and their members.
@@ -61,7 +80,6 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 	 	val className = script.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Script"
 		acceptor.accept(script.toClass(className)).initializeLater [
 		
-			
 		val Set<String> fieldNames = newHashSet()
 		 
 		val types = stateAndCommandProvider.allTypes
@@ -76,19 +94,29 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 			}
 		]
 
-		 itemRegistry?.items?.forEach[ item |
-		 	val name = item.name
-				if (fieldNames.add(name)) {
-		 		members += 	script.toField(item.name, script.newTypeRef(item.class)) [
-			 		static = true
-			 	]
-		 	} else {
-		 		logger.warn("Duplicate field: '{}'. Ignoring '{}'.", item.name, item.class.name)
-		 	}
-		 ]
+        itemRegistry?.items?.forEach[ item |
+         	val name = item.name
+        		if (fieldNames.add(name)) {
+         		members += 	script.toField(item.name, script.newTypeRef(item.class)) [
+        	 		static = true
+        	 	]
+         	} else {
+         		logger.warn("Duplicate field: '{}'. Ignoring '{}'.", item.name, item.class.name)
+         	}
+        ]
 		 
 		members += script.toMethod("_script", null) [
 				static = true
+                val itemTypeRef = script.newTypeRef(Item)
+                parameters += script.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
+                val commandTypeRef = script.newTypeRef(Command)
+                parameters += script.toParameter(VAR_RECEIVED_COMMAND, commandTypeRef)
+                val stateTypeRef = script.newTypeRef(State)
+                parameters += script.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
+                val eventTypeRef = script.newTypeRef(ChannelTriggeredEvent)
+                parameters += script.toParameter(VAR_RECEIVED_EVENT, eventTypeRef)
+                val stateTypeRef2 = script.newTypeRef(State)
+                parameters += script.toParameter(VAR_NEW_STATE, stateTypeRef2)
 				body = script
 			]
 		]

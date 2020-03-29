@@ -21,6 +21,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.script.engine.ScriptEngine;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.scheduler.Scheduler;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.binding.ThingActions;
 import org.osgi.service.component.annotations.Activate;
@@ -49,6 +50,7 @@ public class ScriptServiceUtil {
     private final ThingRegistry thingRegistry;
     private final EventPublisher eventPublisher;
     private final ModelRepository modelRepository;
+    private final Scheduler scheduler;
 
     private final AtomicReference<ScriptEngine> scriptEngine = new AtomicReference<>();
     public final List<ActionService> actionServices = new CopyOnWriteArrayList<>();
@@ -56,11 +58,13 @@ public class ScriptServiceUtil {
 
     @Activate
     public ScriptServiceUtil(final @Reference ItemRegistry itemRegistry, final @Reference ThingRegistry thingRegistry,
-            final @Reference EventPublisher eventPublisher, final @Reference ModelRepository modelRepository) {
+            final @Reference EventPublisher eventPublisher, final @Reference ModelRepository modelRepository,
+            final @Reference Scheduler scheduler) {
         this.itemRegistry = itemRegistry;
         this.thingRegistry = thingRegistry;
         this.eventPublisher = eventPublisher;
         this.modelRepository = modelRepository;
+        this.scheduler = scheduler;
 
         if (instance != null) {
             throw new IllegalStateException("ScriptServiceUtil should only be activated once!");
@@ -101,6 +105,14 @@ public class ScriptServiceUtil {
 
     public ModelRepository getModelRepositoryInstance() {
         return modelRepository;
+    }
+
+    public static Scheduler getScheduler() {
+        return getInstance().scheduler;
+    }
+
+    public Scheduler getSchedulerInstance() {
+        return scheduler;
     }
 
     public static ScriptEngine getScriptEngine() {

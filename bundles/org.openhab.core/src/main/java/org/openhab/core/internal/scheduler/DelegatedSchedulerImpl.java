@@ -14,6 +14,7 @@ package org.openhab.core.internal.scheduler;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.TemporalAdjuster;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 import org.openhab.core.scheduler.Scheduler;
 import org.openhab.core.scheduler.SchedulerRunnable;
-import org.openhab.core.scheduler.SchedulerTemporalAdjuster;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -92,8 +92,7 @@ public class DelegatedSchedulerImpl implements Scheduler {
     }
 
     @Override
-    public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable,
-            SchedulerTemporalAdjuster temporalAdjuster) {
+    public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, TemporalAdjuster temporalAdjuster) {
         return add(delegate.schedule(runnable, temporalAdjuster));
     }
 
