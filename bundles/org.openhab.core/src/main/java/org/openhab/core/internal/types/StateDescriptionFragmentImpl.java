@@ -190,7 +190,45 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         if (this.options == null || this.options.isEmpty()) {
             this.options = fragment.getOptions();
         }
-
         return this;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (minimum != null ? minimum.hashCode() : 0);
+        result = prime * result + (maximum != null ? maximum.hashCode() : 0);
+        result = prime * result + (step != null ? step.hashCode() : 0);
+        result = prime * result + (pattern != null ? pattern.hashCode() : 0);
+        result = prime * result + (readOnly ? 1231 : 1237);
+        result = prime * result + (options != null ? options.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        StateDescriptionFragmentImpl other = (StateDescriptionFragmentImpl) obj;
+        return (minimum != null ? minimum.equals(other.minimum) : other.minimum == null)
+                && (maximum != null ? maximum.equals(other.maximum) : other.maximum == null)
+                && (step != null ? step.equals(other.step) : other.step == null)
+                && (pattern != null ? pattern.equals(other.pattern) : other.pattern == null)
+                && readOnly == other.readOnly //
+                && (options != null ? options.equals(other.options) : other.options == null);
+    }
+
+    @Override
+    public String toString() {
+        return "StateDescription [minimum=" + minimum + ", maximum=" + maximum + ", step=" + step + ", pattern="
+                + pattern + ", readOnly=" + readOnly + ", channelStateOptions=" + options + "]";
     }
 }

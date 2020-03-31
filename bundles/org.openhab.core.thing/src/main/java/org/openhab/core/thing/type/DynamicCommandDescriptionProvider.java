@@ -20,20 +20,23 @@ import org.openhab.core.thing.Channel;
 import org.openhab.core.types.CommandDescription;
 
 /**
- * Implementations may provide channel specific {@link CommandDescription}s. Therefore the provider must be registered
- * as OSGi service.
+ * Implementations may provide {@link Channel} specific {@link CommandDescription}s. Therefore the provider must be
+ * registered as OSGi service.
  *
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
 public interface DynamicCommandDescriptionProvider {
     /**
-     * For a given channel UID, return a {@link CommandDescription} that should be used for the channel, instead of the
-     * one defined statically in the {@link ChannelType}.
+     * For a given {@link Channel}, return a {@link CommandDescription} that should be used for the channel, instead of
+     * the one defined statically in the {@link ChannelType}.
      *
      * For a particular channel, there should be only one provider of the dynamic command description. When more than
      * one description is provided for the same channel (by different providers), only one will be used, from the
      * provider that registered first.
+     *
+     * If the given channel will not be managed by the provider null should be returned. You never must return the
+     * original command description in such case.
      *
      * @param channel channel
      * @param originalCommandDescription original command description retrieved from the channel type

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.type;
+package org.openhab.core.thing.internal;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -58,10 +57,15 @@ import org.openhab.core.thing.binding.BaseThingHandlerFactory;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
-import org.openhab.core.thing.internal.ChannelStateDescriptionProvider;
-import org.openhab.core.thing.internal.SimpleThingTypeProvider;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.type.ChannelDefinition;
+import org.openhab.core.thing.type.ChannelDefinitionBuilder;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeProvider;
+import org.openhab.core.thing.type.ChannelTypeUID;
+import org.openhab.core.thing.type.DynamicStateDescriptionProvider;
+import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
@@ -163,8 +167,6 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         thingStatusInfoI18nLocalizationService.setBundleResolver(new BundleResolverImpl());
 
-        registerService(new TestDynamicStateDescriptionProvider(), DynamicStateDescriptionProvider.class.getName());
-
         List<ChannelDefinition> channelDefinitions = new ArrayList<>();
         channelDefinitions.add(new ChannelDefinitionBuilder("1", channelType.getUID()).build());
         channelDefinitions.add(new ChannelDefinitionBuilder("2", channelType2.getUID()).build());
@@ -196,6 +198,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     public void teardown() throws BundleException {
         testBundle.uninstall();
         ManagedThingProvider managedThingProvider = getService(ManagedThingProvider.class);
+        assertNotNull(managedThingProvider);
         managedThingProvider.getAll().forEach(thing -> {
             managedThingProvider.remove(thing.getUID());
         });
@@ -204,7 +207,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         });
     }
 
-    private static @NonNull Channel getChannel(final @NonNull Thing thing, final @NonNull String channelId) {
+    private static Channel getChannel(final Thing thing, final String channelId) {
         final Channel channel = thing.getChannel(channelId);
         if (channel == null) {
             throw new IllegalArgumentException(String.format("The thing '%s' does not seems to contain a channel '%s'.",
@@ -220,7 +223,11 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     @Test
     public void presentItemStateDescription() throws ItemNotFoundException {
         ThingRegistry thingRegistry = getService(ThingRegistry.class);
+        assertNotNull(thingRegistry);
         ManagedThingProvider managedThingProvider = getService(ManagedThingProvider.class);
+        assertNotNull(managedThingProvider);
+
+        registerService(new TestDynamicStateDescriptionProvider(), DynamicStateDescriptionProvider.class.getName());
 
         Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
                 null, "test thing", new Configuration());
@@ -343,20 +350,59 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(BigDecimal.valueOf(101), state.getMaximum());
         assertEquals(BigDecimal.valueOf(20), state.getStep());
         assertEquals("NEW %d Peek", state.getPattern());
-        assertEquals(true, state.isReadOnly());
+        assertEquals(false, state.isReadOnly());
 
         opts = state.getOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
         final StateOption opt2 = opts.get(0);
-        assertEquals("SOUND", opt2.getValue());
-        assertEquals("My great sound.", opt2.getLabel());
+        assertEquals("NEW SOUND", opt2.getValue());
+        assertEquals("My great new sound.", opt2.getLabel());
+    }
+
+    @Test
+    public void wrongItemStateDescription() throws ItemNotFoundException {
+        ThingRegistry thingRegistry = getService(ThingRegistry.class);
+        assertNotNull(thingRegistry);
+        ManagedThingProvider managedThingProvider = getService(ManagedThingProvider.class);
+        assertNotNull(managedThingProvider);
+
+        registerService(new TestMalfunctioningDynamicStateDescriptionProvider(),
+                DynamicStateDescriptionProvider.class.getName());
+        registerService(new TestDynamicStateDescriptionProvider(), DynamicStateDescriptionProvider.class.getName());
+
+        Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
+                null, "test thing", new Configuration());
+        assertNotNull(thing);
+        managedThingProvider.add(thing);
+        ItemChannelLink link = new ItemChannelLink("TestItem7_2", getChannel(thing, "7_2").getUID());
+        linkRegistry.add(link);
+        //
+        final Collection<Item> items = itemRegistry.getItems();
+        assertEquals(false, items.isEmpty());
+
+        Item item = itemRegistry.getItem("TestItem7_2");
+
+        StateDescription state = item.getStateDescription();
+        assertNotNull(state);
+
+        assertEquals(BigDecimal.valueOf(1), state.getMinimum());
+        assertEquals(BigDecimal.valueOf(101), state.getMaximum());
+        assertEquals(BigDecimal.valueOf(20), state.getStep());
+        assertEquals("NEW %d Peek", state.getPattern());
+        assertEquals(false, state.isReadOnly());
+
+        List<StateOption> opts = state.getOptions();
+        assertNotNull(opts);
+        assertEquals(1, opts.size());
+        final StateOption opt2 = opts.get(0);
+        assertEquals("NEW SOUND", opt2.getValue());
+        assertEquals("My great new sound.", opt2.getLabel());
     }
 
     /*
      * Helper
      */
-
     class TestDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
         final StateDescription newState = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.valueOf(10))
                 .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.valueOf(5)).withPattern("VALUE %d")
@@ -365,8 +411,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
                 .build().toStateDescription();
 
         @Override
-        public @Nullable StateDescription getStateDescription(@NonNull Channel channel,
-                @Nullable StateDescription original, @Nullable Locale locale) {
+        public @Nullable StateDescription getStateDescription(Channel channel, @Nullable StateDescription original,
+                @Nullable Locale locale) {
             String id = channel.getUID().getIdWithoutGroup();
             if ("7_1".equals(id)) {
                 assertEquals(channel.getChannelTypeUID(), CHANNEL_TYPE_7_UID);
@@ -378,9 +424,19 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
                 return builder.withMinimum(original.getMinimum().add(BigDecimal.ONE))
                         .withMaximum(original.getMaximum().add(BigDecimal.ONE))
                         .withStep(original.getStep().add(BigDecimal.TEN)).withPattern("NEW " + original.getPattern())
-                        .withReadOnly(true).build().toStateDescription();
+                        .withReadOnly(!original.isReadOnly())
+                        .withOptions(Collections.singletonList(new StateOption("NEW SOUND", "My great new sound.")))
+                        .build().toStateDescription();
             }
             return null;
+        }
+    }
+
+    class TestMalfunctioningDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
+        @Override
+        public @Nullable StateDescription getStateDescription(Channel channel, @Nullable StateDescription original,
+                @Nullable Locale locale) {
+            return original;
         }
     }
 

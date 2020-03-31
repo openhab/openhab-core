@@ -29,15 +29,14 @@ import org.openhab.core.types.StateDescription;
 public interface DynamicStateDescriptionProvider {
     /**
      * For a given {@link Channel}, return a {@link StateDescription} that should be used for the channel, instead of
-     * the
-     * one defined statically in the {@link ChannelType}.
+     * the one defined statically in the {@link ChannelType}.
      *
      * For a particular channel, there should be only one provider of the dynamic state description. When more than one
      * description is provided for the same channel (by different providers), only one will be used, from the provider
      * that registered first.
      *
-     * If the given channel will not be managed by the provider null should be returned. You never must return the in
-     * such case.
+     * If the given channel will not be managed by the provider null should be returned. You never must return the
+     * original state description in such case.
      *
      * @param channel channel
      * @param originalStateDescription original state description retrieved from the channel type

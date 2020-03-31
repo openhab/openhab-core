@@ -56,6 +56,30 @@ public final class StateOption {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + value.hashCode();
+        result = prime * result + (label != null ? label.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        StateOption other = (StateOption) obj;
+        return value.equals(other.value) && (label != null ? label.equals(other.label) : other.label == null);
+    }
+
+    @Override
     public String toString() {
         return "StateOption [value=" + value + ", label=" + label + "]";
     }

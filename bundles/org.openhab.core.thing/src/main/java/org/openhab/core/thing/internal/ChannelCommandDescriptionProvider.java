@@ -89,7 +89,8 @@ public class ChannelCommandDescriptionProvider implements CommandDescriptionProv
             try {
                 CommandDescription dynamicCommandDescription = dynamicCommandDescriptionProvider
                         .getCommandDescription(channel, originalCommandDescription, locale);
-                if (dynamicCommandDescription != null) {
+                if (dynamicCommandDescription != null
+                        && !dynamicCommandDescription.equals(originalCommandDescription)) {
                     return dynamicCommandDescription;
                 }
             } catch (Exception e) {

@@ -64,6 +64,30 @@ public class CommandOption {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + command.hashCode();
+        result = prime * result + (label != null ? label.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        CommandOption other = (CommandOption) obj;
+        return command.equals(other.command) && (label != null ? label.equals(other.label) : other.label == null);
+    }
+
+    @Override
     public String toString() {
         return "CommandOption [command=" + command + ", label=" + label + "]";
     }
