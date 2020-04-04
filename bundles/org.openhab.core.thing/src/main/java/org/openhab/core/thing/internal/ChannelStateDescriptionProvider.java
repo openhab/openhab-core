@@ -132,8 +132,14 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
             @Nullable StateDescription originalStateDescription, @Nullable Locale locale) {
         for (DynamicStateDescriptionProvider provider : dynamicStateDescriptionProviders) {
             StateDescription stateDescription = provider.getStateDescription(channel, originalStateDescription, locale);
-            if (stateDescription != null && !stateDescription.equals(originalStateDescription)) {
-                return stateDescription;
+            if (stateDescription != null) {
+                if (stateDescription.equals(originalStateDescription)) {
+                    logger.error(
+                            "Dynamic state description matches original state description. DynamicStateDescriptionProvider implementations must never return the original state description. {} has to be fixed.",
+                            provider.getClass());
+                } else {
+                    return stateDescription;
+                }
             }
         }
         return null;
