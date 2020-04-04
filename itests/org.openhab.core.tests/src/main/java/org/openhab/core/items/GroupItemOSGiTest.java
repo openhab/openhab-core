@@ -389,7 +389,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         group2.addMember(new TestItem("sub2-3"));
 
         // count: rootMember, sub1, sub2-1, sub2-2, sub2-3
-        assertThat(rootGroup.getStateAs(DecimalType.class), is(new DecimalType(5)));
+        DecimalType state = rootGroup.getStateAs(DecimalType.class);
+        assertThat(state, is(notNullValue()));
+        if (state != null) {
+            assertThat(state, is(new DecimalType(5)));
+        }
     }
 
     @Test
@@ -412,7 +416,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         group2.addMember(new TestItem("sub2-3"));
 
         // count: rootMember, sub1, group2
-        assertThat(rootGroup.getStateAs(DecimalType.class), is(new DecimalType(3)));
+        DecimalType state = rootGroup.getStateAs(DecimalType.class);
+        assertThat(state, is(notNullValue()));
+        if (state != null) {
+            assertThat(state, is(new DecimalType(3)));
+        }
     }
 
     @Test
