@@ -35,7 +35,6 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * @param username the username of the new user
      * @param password the user password
      * @param roles the roles attributed to the new user
-     *
      * @return the new registered {@link User} instance
      */
     public User register(String username, String password, Set<String> roles);

@@ -158,7 +158,6 @@ public class SseResource {
     @ApiOperation(value = "Initiates a new item state tracker connection", response = EventOutput.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Object getStateEvents() throws IOException, InterruptedException {
-
         final SseStateEventOutput eventOutput = new SseStateEventOutput();
         statesBroadcaster.add(eventOutput);
 
@@ -186,7 +185,6 @@ public class SseResource {
             @ApiResponse(code = 404, message = "Unknown connectionId") })
     public Object updateTrackedItems(@PathParam("connectionId") String connectionId,
             @ApiParam("items") Set<String> itemNames) {
-
         try {
             statesBroadcaster.updateTrackedItems(connectionId, itemNames);
         } catch (IllegalArgumentException e) {

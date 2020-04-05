@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +57,7 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
  * @author Andre Fuechsel - Added tests for device id
  * @author Simon Kaufmann - ported to Java
  */
+@NonNullByDefault
 public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
 
     private static final int DEFAULT_TTL = 60;
@@ -73,11 +74,11 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
     private static final ThingType THING_TYPE = ThingTypeBuilder.instance(THING_TYPE_UID, "label")
             .withRepresentationProperty(DEVICE_ID_KEY).isListed(true).build();
 
-    private Inbox inbox;
-    private ManagedThingProvider managedThingProvider;
-    private ThingHandler thingHandler;
+    private @NonNullByDefault({}) Inbox inbox;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ThingHandler thingHandler;
 
-    private volatile ThingHandlerCallback callback;
+    private volatile @NonNullByDefault({}) ThingHandlerCallback callback;
 
     @Before
     public void setUp() {
@@ -110,12 +111,12 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
         ThingHandlerFactory thingHandlerFactory = new BaseThingHandlerFactory() {
 
             @Override
-            public boolean supportsThingType(@NonNull ThingTypeUID thingTypeUID) {
+            public boolean supportsThingType(ThingTypeUID thingTypeUID) {
                 return THING_TYPE_UID.equals(thingTypeUID);
             }
 
             @Override
-            protected @Nullable ThingHandler createHandler(@NonNull Thing thing) {
+            protected @Nullable ThingHandler createHandler(Thing thing) {
                 thingHandler = createThingHandler(thing);
                 return thingHandler;
             }

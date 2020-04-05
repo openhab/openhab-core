@@ -53,11 +53,11 @@ public class ExternalServiceTile implements Tile {
 
     @Override
     public String toString() {
-        final int MAXLEN = 100;
+        final int maxlen = 100;
 
         String limitedImageUrl = imageUrl;
-        if (limitedImageUrl != null && limitedImageUrl.length() > MAXLEN) {
-            limitedImageUrl = imageUrl.substring(0, MAXLEN) + "...";
+        if (limitedImageUrl != null && limitedImageUrl.length() > maxlen) {
+            limitedImageUrl = imageUrl.substring(0, maxlen) + "...";
         }
 
         return "[name=" + name + ", url=" + url + ", overlay=" + overlay + ", imageUrl=" + limitedImageUrl + "]";

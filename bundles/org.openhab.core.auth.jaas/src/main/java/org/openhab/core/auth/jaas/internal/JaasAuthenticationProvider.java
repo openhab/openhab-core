@@ -27,6 +27,8 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
@@ -48,11 +50,12 @@ import org.osgi.service.component.annotations.Modified;
  * @author Kai Kreuzer - Removed ManagedService and used DS configuration instead
  * @author Yannick Schaus - provides a configuration with the ManagedUserLoginModule as a sufficient login module
  */
+@NonNullByDefault
 @Component(configurationPid = "org.openhab.jaas")
 public class JaasAuthenticationProvider implements AuthenticationProvider {
-    private final String DEFAULT_REALM = "openhab";
+    private static final String DEFAULT_REALM = "openhab";
 
-    private String realmName;
+    private @Nullable String realmName;
 
     @Override
     public Authentication authenticate(final Credentials credentials) throws AuthenticationException {
@@ -70,14 +73,14 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
 
         final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-
             Principal userPrincipal = new GenericUser(name);
             Subject subject = new Subject(true, Set.of(userPrincipal), Collections.emptySet(), Set.of(userCredentials));
 
             Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
             LoginContext loginContext = new LoginContext(realmName, subject, new CallbackHandler() {
                 @Override
-                public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                public void handle(@NonNullByDefault({}) Callback[] callbacks)
+                        throws IOException, UnsupportedCallbackException {
                     for (Callback callback : callbacks) {
                         if (callback instanceof PasswordCallback) {
                             ((PasswordCallback) callback).setPassword(password);

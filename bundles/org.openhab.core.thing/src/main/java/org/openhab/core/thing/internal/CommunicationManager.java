@@ -27,7 +27,6 @@ import java.util.function.Function;
 
 import javax.measure.Quantity;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.AbstractUID;
@@ -650,12 +649,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private static class NoOpProfile implements Profile {
         @Override
-        public @NonNull ProfileTypeUID getProfileTypeUID() {
+        public ProfileTypeUID getProfileTypeUID() {
             return new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "noop");
         }
 
         @Override
-        public void onStateUpdateFromItem(@NonNull State state) {
+        public void onStateUpdateFromItem(State state) {
             // no-op
         }
     }

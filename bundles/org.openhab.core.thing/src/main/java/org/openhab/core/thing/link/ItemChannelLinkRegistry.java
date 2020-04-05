@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
@@ -74,7 +73,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     public Set<Item> getLinkedItems(final UID uid) {
-        return ((Stream<@NonNull Item>) super.getLinkedItemNames(uid).parallelStream()
+        return ((Stream<Item>) super.getLinkedItemNames(uid).parallelStream()
                 .map(itemName -> itemRegistry.get(itemName)).filter(Objects::nonNull)).collect(Collectors.toSet());
     }
 
@@ -85,7 +84,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      * @return an unmodifiable set of bound things for the given item name
      */
     public Set<Thing> getBoundThings(final String itemName) {
-        return ((Stream<@NonNull Thing>) getBoundChannels(itemName).parallelStream()
+        return ((Stream<Thing>) getBoundChannels(itemName).parallelStream()
                 .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull))
                         .collect(Collectors.toSet());
     }

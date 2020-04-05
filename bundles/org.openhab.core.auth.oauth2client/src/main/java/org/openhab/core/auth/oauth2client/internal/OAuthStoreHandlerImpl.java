@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
@@ -124,7 +123,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     }
 
     @Override
-    public void saveAccessTokenResponse(@NonNull String handle, @Nullable AccessTokenResponse pAccessTokenResponse) {
+    public void saveAccessTokenResponse(String handle, @Nullable AccessTokenResponse pAccessTokenResponse) {
         AccessTokenResponse accessTokenResponse = pAccessTokenResponse;
         if (accessTokenResponse == null) {
             accessTokenResponse = new AccessTokenResponse(); // put empty

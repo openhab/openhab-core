@@ -23,7 +23,7 @@ import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Improved startup behavior and background discovery
  * @author Andre Fuechsel - make {@link #startScan()} asynchronous
  */
+@NonNullByDefault
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.mdns")
 public class MDNSDiscoveryService extends AbstractDiscoveryService implements ServiceListener {
 
@@ -59,7 +60,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
-    private MDNSClient mdnsClient;
+    private @NonNullByDefault({}) MDNSClient mdnsClient;
 
     public MDNSDiscoveryService() {
         super(5);
@@ -90,7 +91,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     @Modified
     @Override
-    protected void modified(@Nullable Map<@NonNull String, @Nullable Object> configProperties) {
+    protected void modified(@Nullable Map<String, @Nullable Object> configProperties) {
         super.modified(configProperties);
     }
 
@@ -229,12 +230,12 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     @Override
-    public void serviceAdded(ServiceEvent serviceEvent) {
+    public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         considerService(serviceEvent);
     }
 
     @Override
-    public void serviceRemoved(ServiceEvent serviceEvent) {
+    public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         for (MDNSDiscoveryParticipant participant : participants) {
             if (participant.getServiceType().equals(serviceEvent.getType())) {
                 try {
@@ -262,7 +263,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     @Override
-    public void serviceResolved(ServiceEvent serviceEvent) {
+    public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         considerService(serviceEvent);
     }
 

@@ -13,13 +13,14 @@
 package org.openhab.core.ui.internal.components;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigUtil;
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yannick Schaus - Initial contribution
  */
+@NonNullByDefault
 @Component(service = SitemapProvider.class)
 public class UIComponentSitemapProvider implements SitemapProvider, RegistryChangeListener<RootUIComponent> {
     private final Logger logger = LoggerFactory.getLogger(UIComponentSitemapProvider.class);
@@ -77,21 +79,26 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private static final String SITEMAP_SUFFIX = ".sitemap";
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
-    private UIComponentRegistryFactory componentRegistryFactory;
-    private UIComponentRegistry sitemapComponentRegistry;
+    private @Nullable UIComponentRegistryFactory componentRegistryFactory;
+    private @Nullable UIComponentRegistry sitemapComponentRegistry;
 
     private final Set<ModelRepositoryChangeListener> modelChangeListeners = new CopyOnWriteArraySet<>();
 
     @Override
-    public @Nullable Sitemap getSitemap(@NonNull String sitemapName) {
+    public @Nullable Sitemap getSitemap(String sitemapName) {
         buildSitemap(sitemapName.replaceFirst(SITEMAP_PREFIX, ""));
         return sitemaps.get(sitemapName);
     }
 
     @Override
-    public @NonNull Set<@NonNull String> getSitemapNames() {
+    public Set<String> getSitemapNames() {
+        UIComponentRegistry registry = sitemapComponentRegistry;
+        if (registry == null) {
+            return Collections.emptySet();
+        }
+
         sitemaps.clear();
-        Collection<RootUIComponent> rootComponents = sitemapComponentRegistry.getAll();
+        Collection<RootUIComponent> rootComponents = registry.getAll();
         // try building all sitemaps to leave the invalid ones out
         for (RootUIComponent rootComponent : rootComponents) {
             try {
@@ -105,8 +112,13 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         return sitemaps.keySet();
     }
 
-    protected Sitemap buildSitemap(String sitemapName) {
-        RootUIComponent rootComponent = sitemapComponentRegistry.get(sitemapName);
+    protected @Nullable Sitemap buildSitemap(String sitemapName) {
+        UIComponentRegistry registry = sitemapComponentRegistry;
+        if (registry == null) {
+            return null;
+        }
+
+        RootUIComponent rootComponent = registry.get(sitemapName);
         if (rootComponent != null) {
             try {
                 Sitemap sitemap = buildSitemap(rootComponent);
@@ -141,7 +153,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         return sitemap;
     }
 
-    protected Widget buildWidget(UIComponent component) {
+    protected @Nullable Widget buildWidget(UIComponent component) {
         Widget widget = null;
 
         switch (component.getType()) {
@@ -261,8 +273,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         return widget;
     }
 
-    private void setWidgetPropertyFromComponentConfig(Widget widget, UIComponent component, String configParamName,
-            int feature) {
+    private void setWidgetPropertyFromComponentConfig(Widget widget, @Nullable UIComponent component,
+            String configParamName, int feature) {
         if (component == null || component.getConfig() == null) {
             return;
         }
@@ -292,12 +304,12 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     }
 
     @Override
-    public void addModelChangeListener(@NonNull ModelRepositoryChangeListener listener) {
+    public void addModelChangeListener(ModelRepositoryChangeListener listener) {
         modelChangeListeners.add(listener);
     }
 
     @Override
-    public void removeModelChangeListener(@NonNull ModelRepositoryChangeListener listener) {
+    public void removeModelChangeListener(ModelRepositoryChangeListener listener) {
         modelChangeListeners.remove(listener);
     }
 
@@ -330,8 +342,12 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     }
 
     protected void unsetComponentRegistryFactory(UIComponentRegistryFactory componentRegistryFactory) {
+        UIComponentRegistry registry = this.sitemapComponentRegistry;
+        if (registry != null) {
+            registry.removeRegistryChangeListener(this);
+        }
+
         this.componentRegistryFactory = null;
-        this.sitemapComponentRegistry.removeRegistryChangeListener(this);
         this.sitemapComponentRegistry = null;
     }
 }

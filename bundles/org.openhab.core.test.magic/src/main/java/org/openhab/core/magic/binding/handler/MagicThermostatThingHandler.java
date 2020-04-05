@@ -16,7 +16,7 @@ import static org.openhab.core.magic.binding.MagicBindingConstants.*;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.thing.ChannelUID;
@@ -30,6 +30,7 @@ import org.openhab.core.types.Command;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class MagicThermostatThingHandler extends BaseThingHandler {
 
     public MagicThermostatThingHandler(Thing thing) {
@@ -37,7 +38,7 @@ public class MagicThermostatThingHandler extends BaseThingHandler {
     }
 
     @Override
-    public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+    public void handleCommand(ChannelUID channelUID, Command command) {
         if (channelUID.getId().equals(CHANNEL_SET_TEMPERATURE)) {
             if (command instanceof DecimalType || command instanceof QuantityType) {
                 String state = command.toFullString() + (command instanceof DecimalType ? " °C" : "");

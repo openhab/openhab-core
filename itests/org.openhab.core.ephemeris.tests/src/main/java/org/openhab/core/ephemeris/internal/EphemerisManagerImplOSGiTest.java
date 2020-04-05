@@ -295,7 +295,6 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
             delay = ephemerisManager.getDaysUntil(today, next);
             assertEquals(4, delay);
         }
-
     }
 
     @Test

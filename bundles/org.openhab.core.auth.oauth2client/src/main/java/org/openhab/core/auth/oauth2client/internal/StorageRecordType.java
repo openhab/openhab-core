@@ -12,13 +12,15 @@
  */
 package org.openhab.core.auth.oauth2client.internal;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Enum of types being used in the store
  *
  * @author Gary Tse - Initial contribution
  */
+@NonNullByDefault
 public enum StorageRecordType {
 
     LAST_USED(".LastUsed"),
@@ -31,7 +33,7 @@ public enum StorageRecordType {
         this.suffix = suffix;
     }
 
-    public @NonNull String getKey(String handle) {
+    public String getKey(@Nullable String handle) {
         return (handle == null) ? this.suffix : (handle + this.suffix);
     }
 

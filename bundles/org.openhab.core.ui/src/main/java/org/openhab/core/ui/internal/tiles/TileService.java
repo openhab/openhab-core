@@ -42,15 +42,15 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, name = "org.openhab.core.ui.tiles")
 public class TileService implements TileProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(TileService.class);
+    private final Logger logger = LoggerFactory.getLogger(TileService.class);
 
     protected ConfigurationAdmin configurationAdmin;
 
     protected Set<Tile> tiles = new CopyOnWriteArraySet<>();
 
-    private final static String LINK_NAME = "link-name";
-    private final static String LINK_URL = "link-url";
-    private final static String LINK_IMAGEURL = "link-imageurl";
+    private static final String LINK_NAME = "link-name";
+    private static final String LINK_URL = "link-url";
+    private static final String LINK_IMAGEURL = "link-imageurl";
 
     @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {

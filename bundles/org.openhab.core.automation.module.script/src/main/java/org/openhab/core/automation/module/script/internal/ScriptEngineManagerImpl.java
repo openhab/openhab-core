@@ -21,7 +21,6 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
@@ -112,7 +111,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     }
 
     @Override
-    public @Nullable ScriptEngineContainer createScriptEngine(String scriptType, @NonNull String engineIdentifier) {
+    public @Nullable ScriptEngineContainer createScriptEngine(String scriptType, String engineIdentifier) {
         ScriptEngineContainer result = null;
         ScriptEngineFactory engineFactory = findEngineFactory(scriptType);
         if (engineFactory == null) {
