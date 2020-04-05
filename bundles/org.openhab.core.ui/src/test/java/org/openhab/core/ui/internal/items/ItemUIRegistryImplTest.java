@@ -224,7 +224,7 @@ public class ItemUIRegistryImplTest {
         when(widget.getLabel()).thenReturn(testLabel);
         when(item.getState()).thenReturn(new DecimalType(10f / 3f));
         String label = uiRegistry.getLabel(widget);
-        assertEquals("Label [3" + SEP + "333 ]", label);
+        assertEquals("Label [3" + SEP + "333]", label);
     }
 
     @Test

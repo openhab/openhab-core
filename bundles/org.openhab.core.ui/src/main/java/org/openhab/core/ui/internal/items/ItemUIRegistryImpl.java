@@ -400,7 +400,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         // for DecimalTypes we don't want to risk format exceptions, if pattern contains unit
                         // placeholder
                         if (formatPattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
-                            formatPattern = formatPattern.replaceAll(UnitUtils.UNIT_PLACEHOLDER, "");
+                            formatPattern = formatPattern.replaceAll(UnitUtils.UNIT_PLACEHOLDER, "").stripTrailing();
                         }
                     } else if (state instanceof QuantityType) {
                         QuantityType<?> quantityState = (QuantityType<?>) state;
