@@ -46,7 +46,7 @@ public class StateDescriptionFragmentBuilder {
         this.pattern = legacy.getPattern();
         this.readOnly = Boolean.valueOf(legacy.isReadOnly());
         if (!legacy.getOptions().isEmpty()) {
-            this.options = legacy.getOptions();
+            this.options = new ArrayList<>(legacy.getOptions());
         }
     }
 

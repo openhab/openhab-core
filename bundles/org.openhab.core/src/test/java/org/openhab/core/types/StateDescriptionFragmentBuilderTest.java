@@ -85,7 +85,8 @@ public class StateDescriptionFragmentBuilderTest {
     public void builderWithStateDescription() {
         StateDescription source = new StateDescription(BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.ONE, "pattern", true,
                 Collections.singletonList(new StateOption("value", "label")));
-        StateDescriptionFragment fragment = StateDescriptionFragmentBuilder.create(source).build();
+        StateDescriptionFragmentBuilder builder = StateDescriptionFragmentBuilder.create(source);
+        StateDescriptionFragment fragment = builder.build();
 
         assertThat(fragment.getMinimum(), is(source.getMinimum()));
         assertThat(fragment.getMaximum(), is(source.getMaximum()));
@@ -93,6 +94,8 @@ public class StateDescriptionFragmentBuilderTest {
         assertThat(fragment.getPattern(), is(source.getPattern()));
         assertThat(fragment.isReadOnly(), is(source.isReadOnly()));
         assertThat(fragment.getOptions(), is(source.getOptions()));
+
+        builder.withOption(new StateOption("NEW value", "NEW label"));
     }
 
     @Test
