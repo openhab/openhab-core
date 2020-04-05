@@ -36,6 +36,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.NumberItem;
@@ -118,20 +119,20 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         final StateDescription state2 = new StateDescription(BigDecimal.ZERO, BigDecimal.valueOf(256),
                 BigDecimal.valueOf(8), null, false, null);
 
-        final ChannelType channelType = new ChannelType(new ChannelTypeUID("hue:alarm"), false, "Number", " ", "", null,
-                null, state, null);
-        final ChannelType channelType2 = new ChannelType(new ChannelTypeUID("hue:num"), false, "Number", " ", "", null,
-                null, state2, null);
-        final ChannelType channelType3 = new ChannelType(new ChannelTypeUID("hue:info"), true, "String", " ", "", null,
-                null, (StateDescription) null, null);
-        final ChannelType channelType4 = new ChannelType(new ChannelTypeUID("hue:color"), false, "Color", "Color", "",
-                "ColorLight", null, (StateDescription) null, null);
-        final ChannelType channelType5 = new ChannelType(new ChannelTypeUID("hue:brightness"), false, "Dimmer",
-                "Brightness", "", "DimmableLight", null, (StateDescription) null, null);
-        final ChannelType channelType6 = new ChannelType(new ChannelTypeUID("hue:switch"), false, "Switch", "Switch",
-                "", "Light", null, (StateDescription) null, null);
-        final ChannelType channelType7 = new ChannelType(CHANNEL_TYPE_7_UID, false, "Number", " ", "", "Light", null,
-                state, null);
+        final ChannelType channelType = new ChannelType(new ChannelTypeUID("hue:alarm"), false, CoreItemFactory.NUMBER,
+                " ", "", null, null, state, null);
+        final ChannelType channelType2 = new ChannelType(new ChannelTypeUID("hue:num"), false, CoreItemFactory.NUMBER,
+                " ", "", null, null, state2, null);
+        final ChannelType channelType3 = new ChannelType(new ChannelTypeUID("hue:info"), true, CoreItemFactory.STRING,
+                " ", "", null, null, (StateDescription) null, null);
+        final ChannelType channelType4 = new ChannelType(new ChannelTypeUID("hue:color"), false, CoreItemFactory.COLOR,
+                "Color", "", "ColorLight", null, (StateDescription) null, null);
+        final ChannelType channelType5 = new ChannelType(new ChannelTypeUID("hue:brightness"), false,
+                CoreItemFactory.DIMMER, "Brightness", "", "DimmableLight", null, (StateDescription) null, null);
+        final ChannelType channelType6 = new ChannelType(new ChannelTypeUID("hue:switch"), false,
+                CoreItemFactory.SWITCH, "Switch", "", "Light", null, (StateDescription) null, null);
+        final ChannelType channelType7 = new ChannelType(CHANNEL_TYPE_7_UID, false, CoreItemFactory.NUMBER, " ", "",
+                "Light", null, state, null);
 
         List<ChannelType> channelTypes = new ArrayList<>();
         channelTypes.add(channelType);
@@ -254,7 +255,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(false, items.isEmpty());
 
         Item item = itemRegistry.getItem("TestItem");
-        assertEquals("Number", item.getType());
+        assertEquals(CoreItemFactory.NUMBER, item.getType());
 
         StateDescription state = item.getStateDescription();
         assertNotNull(state);
@@ -271,7 +272,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals("My great sound.", opt.getLabel());
 
         item = itemRegistry.getItem("TestItem2");
-        assertEquals("Number", item.getType());
+        assertEquals(CoreItemFactory.NUMBER, item.getType());
 
         state = item.getStateDescription();
         assertNotNull(state);
@@ -285,7 +286,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(0, opts.size());
 
         item = itemRegistry.getItem("TestItem3");
-        assertEquals("String", item.getType());
+        assertEquals(CoreItemFactory.STRING, item.getType());
 
         state = item.getStateDescription();
         assertNotNull(state);
@@ -299,25 +300,25 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(0, opts.size());
 
         item = itemRegistry.getItem("TestItem4");
-        assertEquals("Color", item.getType());
+        assertEquals(CoreItemFactory.COLOR, item.getType());
 
         state = item.getStateDescription();
         assertNull(state);
 
         item = itemRegistry.getItem("TestItem5");
-        assertEquals("Dimmer", item.getType());
+        assertEquals(CoreItemFactory.DIMMER, item.getType());
 
         state = item.getStateDescription();
         assertNull(state);
 
         item = itemRegistry.getItem("TestItem6");
-        assertEquals("Switch", item.getType());
+        assertEquals(CoreItemFactory.SWITCH, item.getType());
 
         state = item.getStateDescription();
         assertNull(state);
 
         item = itemRegistry.getItem("TestItem7_1");
-        assertEquals("Number", item.getType());
+        assertEquals(CoreItemFactory.NUMBER, item.getType());
 
         state = item.getStateDescription();
         assertNotNull(state);
@@ -341,7 +342,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertEquals(opt1.getLabel(), "label1");
 
         item = itemRegistry.getItem("TestItem7_2");
-        assertEquals("Number", item.getType());
+        assertEquals(CoreItemFactory.NUMBER, item.getType());
 
         state = item.getStateDescription();
         assertNotNull(state);
