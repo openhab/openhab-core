@@ -357,9 +357,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         state = item.getStateAs(DecimalType.class);
                     }
 
-                    // for fraction digits in state we dont want to risk format exceptions,
+                    // for fraction digits in state we don't want to risk format exceptions,
                     // so treat everything as floats:
-                    formatPattern = formatPattern.replaceAll("\\%d", "%.0f");
+                    formatPattern = formatPattern.replaceAll("%d", "%.0f");
                 }
             }
         } catch (ItemNotFoundException e) {
@@ -396,7 +396,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         }
                     }
 
-                    if (state instanceof QuantityType) {
+                    if (state instanceof DecimalType) {
+                        // for DecimalTypes we don't want to risk format exceptions, if pattern contains unit
+                        // placeholder
+                        if (formatPattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
+                            formatPattern = formatPattern.replaceAll(UnitUtils.UNIT_PLACEHOLDER, "").stripTrailing();
+                        }
+                    } else if (state instanceof QuantityType) {
                         QuantityType<?> quantityState = (QuantityType<?>) state;
                         // sanity convert current state to the item state description unit in case it was updated in the
                         // meantime. The item state is still in the "original" unit while the state description will

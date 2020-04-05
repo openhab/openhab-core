@@ -47,6 +47,7 @@ import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
@@ -126,6 +127,32 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
+    public void getLabelLabelWithoutPatterAndIntegerValue() {
+        String testLabel = "Label";
+
+        when(widget.getLabel()).thenReturn(testLabel);
+        when(item.getState()).thenReturn(new DecimalType(20));
+        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
+        when(item.getStateDescription())
+                .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%d").build().toStateDescription());
+        String label = uiRegistry.getLabel(widget);
+        assertEquals("Label [20]", label);
+    }
+
+    @Test
+    public void getLabelLabelWithoutPatterAndFractionalDigitsValue() {
+        String testLabel = "Label";
+
+        when(widget.getLabel()).thenReturn(testLabel);
+        when(item.getState()).thenReturn(new DecimalType(20.5));
+        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20.5));
+        when(item.getStateDescription())
+                .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%d").build().toStateDescription());
+        String label = uiRegistry.getLabel(widget);
+        assertEquals("Label [21]", label);
+    }
+
+    @Test
     public void getLabelLabelWithIntegerValue() {
         String testLabel = "Label [%d]";
 
@@ -134,6 +161,17 @@ public class ItemUIRegistryImplTest {
         when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20));
         String label = uiRegistry.getLabel(widget);
         assertEquals("Label [20]", label);
+    }
+
+    @Test
+    public void getLabelLabelWithFractionalDigitsValue() {
+        String testLabel = "Label [%d]";
+
+        when(widget.getLabel()).thenReturn(testLabel);
+        when(item.getState()).thenReturn(new DecimalType(20.5));
+        when(item.getStateAs(DecimalType.class)).thenReturn(new DecimalType(20.5));
+        String label = uiRegistry.getLabel(widget);
+        assertEquals("Label [21]", label);
     }
 
     @Test
@@ -170,13 +208,23 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
-    public void getLabelLabelWithDecimalValueAndUnit() {
+    public void getLabelLabelWithDecimalValueAndUnitUpdatedWithQuantityType() {
         String testLabel = "Label [%.3f " + UnitUtils.UNIT_PLACEHOLDER + "]";
 
         when(widget.getLabel()).thenReturn(testLabel);
         when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " °C"));
         String label = uiRegistry.getLabel(widget);
         assertEquals("Label [3" + SEP + "333 °C]", label);
+    }
+
+    @Test
+    public void getLabelLabelWithDecimalValueAndUnitUpdatedWithDecimalType() {
+        String testLabel = "Label [%.3f " + UnitUtils.UNIT_PLACEHOLDER + "]";
+
+        when(widget.getLabel()).thenReturn(testLabel);
+        when(item.getState()).thenReturn(new DecimalType(10f / 3f));
+        String label = uiRegistry.getLabel(widget);
+        assertEquals("Label [3" + SEP + "333]", label);
     }
 
     @Test
@@ -217,6 +265,16 @@ public class ItemUIRegistryImplTest {
         when(item.getState()).thenReturn(new QuantityType<>("33 %"));
         String label = uiRegistry.getLabel(widget);
         assertEquals("Label [33 %]", label);
+    }
+
+    @Test
+    public void getLabelLabelWithFractionalDigitsValueAndUnit5() {
+        String testLabel = "Label [%d " + UnitUtils.UNIT_PLACEHOLDER + "]";
+
+        when(widget.getLabel()).thenReturn(testLabel);
+        when(item.getState()).thenReturn(new QuantityType<>("" + 10f / 3f + " %"));
+        String label = uiRegistry.getLabel(widget);
+        assertEquals("Label [3 %]", label);
     }
 
     @Test
