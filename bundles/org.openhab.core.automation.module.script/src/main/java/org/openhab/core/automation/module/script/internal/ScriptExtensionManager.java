@@ -12,11 +12,17 @@
  */
 package org.openhab.core.automation.module.script.internal;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.script.ScriptEngine;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.osgi.service.component.annotations.Component;
@@ -30,8 +36,10 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Simon Merschjohann - Initial contribution
  */
 @Component(service = ScriptExtensionManager.class)
+@NonNullByDefault
 public class ScriptExtensionManager {
-    private Set<ScriptExtensionProvider> scriptExtensionProviders = new CopyOnWriteArraySet<>();
+
+    private final Set<ScriptExtensionProvider> scriptExtensionProviders = new CopyOnWriteArraySet<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addScriptExtensionProvider(ScriptExtensionProvider provider) {
@@ -70,7 +78,7 @@ public class ScriptExtensionManager {
         return presets;
     }
 
-    public Object get(String type, String scriptIdentifier) {
+    public @Nullable Object get(String type, String scriptIdentifier) {
         for (ScriptExtensionProvider provider : scriptExtensionProviders) {
             if (provider.getTypes().contains(type)) {
                 return provider.get(scriptIdentifier, type);
@@ -97,8 +105,8 @@ public class ScriptExtensionManager {
         }
     }
 
-    public Map<String, Object> importPreset(String preset, ScriptEngineFactory engineProvider, ScriptEngine scriptEngine,
-            String scriptIdentifier) {
+    public Map<String, Object> importPreset(String preset, ScriptEngineFactory engineProvider,
+            ScriptEngine scriptEngine, String scriptIdentifier) {
         Map<String, Object> allValues = new HashMap<>();
         for (ScriptExtensionProvider provider : scriptExtensionProviders) {
             if (provider.getPresets().contains(preset)) {

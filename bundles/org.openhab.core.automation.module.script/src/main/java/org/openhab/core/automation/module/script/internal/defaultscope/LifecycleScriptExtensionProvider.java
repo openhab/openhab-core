@@ -12,11 +12,17 @@
  */
 package org.openhab.core.automation.module.script.internal.defaultscope;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.osgi.service.component.annotations.Component;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ScriptExtensionProvider which providers a 'lifecycleTracker' object allowing scripts to register for disposal events.
@@ -24,12 +30,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Jonathan Gilbert - Initial contribution
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider {
 
     private static final String LIFECYCLE_PRESET_NAME = "lifecycle";
     private static final String LIFECYCLE_TRACKER_NAME = "lifecycleTracker";
 
-    private Map<String, LifecycleTracker> idToTracker= new ConcurrentHashMap<>();
+    private final Map<String, LifecycleTracker> idToTracker = new ConcurrentHashMap<>();
 
     @Override
     public Collection<String> getDefaultPresets() {
@@ -47,8 +54,8 @@ public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider
     }
 
     @Override
-    public Object get(String scriptIdentifier, String type) throws IllegalArgumentException {
-        if(LIFECYCLE_TRACKER_NAME.equals(type)) {
+    public @Nullable Object get(String scriptIdentifier, String type) throws IllegalArgumentException {
+        if (LIFECYCLE_TRACKER_NAME.equals(type)) {
             return idToTracker.computeIfAbsent(scriptIdentifier, k -> new LifecycleTracker());
         }
 
@@ -57,8 +64,11 @@ public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider
 
     @Override
     public Map<String, Object> importPreset(String scriptIdentifier, String preset) {
-        if(LIFECYCLE_PRESET_NAME.equals(preset)) {
-            return Collections.singletonMap(LIFECYCLE_TRACKER_NAME, get(scriptIdentifier, LIFECYCLE_TRACKER_NAME));
+        if (LIFECYCLE_PRESET_NAME.equals(preset)) {
+            final Object requestedType = get(scriptIdentifier, LIFECYCLE_TRACKER_NAME);
+            if (requestedType != null) {
+                return Collections.singletonMap(LIFECYCLE_TRACKER_NAME, requestedType);
+            }
         }
 
         return Collections.emptyMap();
@@ -67,8 +77,7 @@ public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider
     @Override
     public void unload(String scriptIdentifier) {
         LifecycleTracker tracker = idToTracker.remove(scriptIdentifier);
-
-        if(tracker != null) {
+        if (tracker != null) {
             tracker.dispose();
         }
     }
@@ -81,7 +90,7 @@ public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider
         }
 
         void dispose() {
-            for(Disposable disposable : disposables) {
+            for (Disposable disposable : disposables) {
                 disposable.dispose();
             }
         }
