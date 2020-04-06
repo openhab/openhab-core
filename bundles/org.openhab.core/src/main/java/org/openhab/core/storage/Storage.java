@@ -21,8 +21,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A Storage is the generic way to store key-value pairs in ESH. Each Storage
- * implementation can store its data differently, e.g in-memory or in-database.
+ * A {@link Storage} is the generic way to store key-value pairs in OHC. Each storage implementation can store its data
+ * differently, e.g in-memory or in-database.
  *
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  * @author Kai Kreuzer - improved return values
@@ -31,7 +31,7 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface Storage<T> {
 
     /**
-     * Puts a key-value mapping into this Storage.
+     * Puts a key-value mapping into this storage.
      *
      * @param key the key to add
      * @param value the value to add
@@ -50,7 +50,7 @@ public interface Storage<T> {
     T remove(String key);
 
     /**
-     * Check if the storage contains a key.
+     * Checks if the storage contains a key.
      *
      * @param key the key
      * @return true if the storage contains the key, otherwise false
@@ -67,21 +67,21 @@ public interface Storage<T> {
     T get(String key);
 
     /**
-     * Gets all keys of this Storage.
+     * Gets all keys of this storage.
      *
-     * @return the keys of this Storage
+     * @return the keys of this storage
      */
     Collection<String> getKeys();
 
     /**
-     * Gets all values of this Storage.
+     * Gets all values of this storage.
      *
-     * @return the values of this Storage
+     * @return the values of this storage
      */
     Collection<@Nullable T> getValues();
 
     /**
-     * Get all storage entries.
+     * Gets all storage entries as {@link Stream}.
      *
      * @return a stream of all storage entries
      */
