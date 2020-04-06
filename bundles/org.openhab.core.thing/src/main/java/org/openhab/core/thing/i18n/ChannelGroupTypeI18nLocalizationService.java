@@ -39,6 +39,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Laurent Garnier - fix localized label and description for channel group definition
  * @author Christoph Weitkamp - factored out from {@link XmlChannelTypeProvider} and {@link XmlChannelGroupTypeProvider}
  * @author Henning Treu - factored out from {@link ThingTypeI18nLocalizationService}
+ * @author Christoph Weitkamp - Removed "advanced" attribute
  */
 @Component(service = ChannelGroupTypeI18nLocalizationService.class)
 @NonNullByDefault
