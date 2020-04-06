@@ -54,7 +54,7 @@ public interface ScriptExtensionProvider {
      *
      * @param scriptIdentifier the identifier of the script that requests the given type
      * @param type the type that is requested (must be part of the collection returned by the {@code #getTypes()} method
-     * @return the requested type
+     * @return the requested type or null
      * @throws IllegalArgumentException if the given type does not match to one returned by the {@code #getTypes()}
      *             method
      */

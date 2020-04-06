@@ -66,10 +66,9 @@ public class ScriptExtensionManagerWrapper {
      * preset name.
      *
      * @implNote This call both returns the imported objects, and requests that the {@link ScriptEngineFactory} import
-     *           them.
-     *           The mechanism of how they are imported by the ScriptEngineFactory, or whether they are imported at all
-     *           (aside from
-     *           being returned by this call) is dependent of the implementation of the ScriptEngineFactory.
+     *           them. The mechanism of how they are imported by the ScriptEngineFactory, or whether they are imported
+     *           at all (aside from eing returned by this call) is dependent of the implementation of the
+     *           ScriptEngineFactory.
      *
      * @apiNote Objects may appear in multiple named presets.
      * @see ScriptExtensionManager
