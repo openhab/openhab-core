@@ -248,8 +248,7 @@ public abstract class GenericItem implements ActiveItem {
 
     protected void notifyListeners(final State oldState, final State newState) {
         // if nothing has changed, we send update notifications
-        Set<StateChangeListener> clonedListeners = null;
-        clonedListeners = new CopyOnWriteArraySet<>(listeners);
+        Set<StateChangeListener> clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         try {
             final boolean stateChanged = newState != null && !newState.equals(oldState);
@@ -265,8 +264,8 @@ public abstract class GenericItem implements ActiveItem {
                                 GenericItem.this.getName(), e.getMessage(), e);
                     }
                 }));
-        } catch (Exception e) {
-            logger.warn("failed comparing oldState '{}' to newState '{}' about state update of item {}: {}", oldState,
+        } catch (IllegalArgumentException e) {
+            logger.warn("failed comparing oldState '{}' to newState '{}' for item {}: {}", oldState,
                     newState, GenericItem.this.getName(), e.getMessage(), e);
         }
     }
