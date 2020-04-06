@@ -34,24 +34,14 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Michael Grammling - Initial contribution
  * @author Chris Jackson - Modified to support channel properties
+ * @author Christoph Weitkamp - Removed "advanced" attribute
  */
 public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<ChannelGroupTypeXmlResult> {
 
     public ChannelGroupTypeConverter() {
         super(ChannelGroupTypeXmlResult.class, "channel-group-type");
 
-        super.attributeMapValidator = new ConverterAttributeMapValidator(
-                new String[][] { { "id", "true" }, { "advanced", "false" } });
-    }
-
-    private boolean isAdvanced(Map<String, String> attributes, boolean defaultValue) {
-        Object advancedObj = attributes.get("advanced");
-
-        if (advancedObj != null) {
-            return Boolean.parseBoolean((String) advancedObj);
-        }
-
-        return defaultValue;
+        super.attributeMapValidator = new ConverterAttributeMapValidator(new String[][] { { "id", "true" } });
     }
 
     @SuppressWarnings("unchecked")
@@ -64,14 +54,12 @@ public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         ChannelGroupTypeUID channelGroupTypeUID = new ChannelGroupTypeUID(super.getUID(attributes, context));
 
-        boolean advanced = isAdvanced(attributes, false);
-
         String label = super.readLabel(nodeIterator);
         String description = super.readDescription(nodeIterator);
         String category = readCategory(nodeIterator);
         List<ChannelXmlResult> channelTypeDefinitions = readChannelTypeDefinitions(nodeIterator);
 
-        ChannelGroupTypeXmlResult groupChannelType = new ChannelGroupTypeXmlResult(channelGroupTypeUID, advanced, label,
+        ChannelGroupTypeXmlResult groupChannelType = new ChannelGroupTypeXmlResult(channelGroupTypeUID, label,
                 description, category, channelTypeDefinitions);
 
         return groupChannelType;
@@ -79,11 +67,7 @@ public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<
 
     private String readCategory(NodeIterator nodeIterator) {
         Object category = nodeIterator.nextValue("category", false);
-        if (category != null) {
-            return category.toString();
-        } else {
-            return null;
-        }
+        return category == null ? null : category.toString();
     }
 
 }

@@ -274,13 +274,12 @@ public class ThingFactoryTest extends JavaOSGiTest {
         ChannelDefinition channelDef2 = new ChannelDefinitionBuilder("ch2", channelType2.getUID()).build();
 
         ChannelGroupType channelGroupType1 = ChannelGroupTypeBuilder
-                .instance(new ChannelGroupTypeUID("bindingid:groupTypeId1"), "label").isAdvanced(false)
-                .withDescription("description").withCategory("myCategory1")
+                .instance(new ChannelGroupTypeUID("bindingid:groupTypeId1"), "label").withDescription("description")
+                .withCategory("myCategory1")
                 .withChannelDefinitions(Stream.of(channelDef1, channelDef2).collect(toList())).build();
         ChannelGroupType channelGroupType2 = ChannelGroupTypeBuilder
-                .instance(new ChannelGroupTypeUID("bindingid:groupTypeId2"), "label").isAdvanced(false)
-                .withDescription("description").withCategory("myCategory2")
-                .withChannelDefinitions(singletonList(channelDef1)).build();
+                .instance(new ChannelGroupTypeUID("bindingid:groupTypeId2"), "label").withDescription("description")
+                .withCategory("myCategory2").withChannelDefinitions(singletonList(channelDef1)).build();
 
         ChannelGroupDefinition channelGroupDef1 = new ChannelGroupDefinition("group1", channelGroupType1.getUID());
         ChannelGroupDefinition channelGroupDef2 = new ChannelGroupDefinition("group2", channelGroupType2.getUID());

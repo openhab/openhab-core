@@ -73,8 +73,7 @@ public class ChannelGroupTypeI18nLocalizationService {
 
         ChannelGroupTypeBuilder builder = ChannelGroupTypeBuilder
                 .instance(channelGroupTypeUID, label == null ? defaultLabel : label)
-                .isAdvanced(channelGroupType.isAdvanced()).withCategory(channelGroupType.getCategory())
-                .withChannelDefinitions(localizedChannelDefinitions);
+                .withCategory(channelGroupType.getCategory()).withChannelDefinitions(localizedChannelDefinitions);
         if (description != null) {
             builder.withDescription(description);
         }

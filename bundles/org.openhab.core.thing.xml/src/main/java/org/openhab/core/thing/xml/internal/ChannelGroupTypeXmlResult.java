@@ -31,20 +31,19 @@ import com.thoughtworks.xstream.converters.ConversionException;
  *
  * @author Michael Grammling - Initial contribution
  * @author Chris Jackson - Updated to support channel properties
+ * @author Christoph Weitkamp - Removed "advanced" attribute
  */
 public class ChannelGroupTypeXmlResult {
 
     private final ChannelGroupTypeUID channelGroupTypeUID;
-    private final boolean advanced;
     private final String label;
     private final String description;
     private final String category;
     private final List<ChannelXmlResult> channelTypeReferences;
 
-    public ChannelGroupTypeXmlResult(ChannelGroupTypeUID channelGroupTypeUID, boolean advanced, String label,
-            String description, String category, List<ChannelXmlResult> channelTypeReferences) {
+    public ChannelGroupTypeXmlResult(ChannelGroupTypeUID channelGroupTypeUID, String label, String description,
+            String category, List<ChannelXmlResult> channelTypeReferences) {
         this.channelGroupTypeUID = channelGroupTypeUID;
-        this.advanced = advanced;
         this.label = label;
         this.description = description;
         this.category = category;
@@ -52,7 +51,7 @@ public class ChannelGroupTypeXmlResult {
     }
 
     public ChannelGroupTypeUID getUID() {
-        return this.channelGroupTypeUID;
+        return channelGroupTypeUID;
     }
 
     protected List<ChannelDefinition> toChannelDefinitions(List<ChannelXmlResult> channelTypeReferences)
@@ -61,10 +60,9 @@ public class ChannelGroupTypeXmlResult {
 
         if (channelTypeReferences != null && !channelTypeReferences.isEmpty()) {
             channelTypeDefinitions = new ArrayList<>(channelTypeReferences.size());
-
             for (ChannelXmlResult channelTypeReference : channelTypeReferences) {
                 channelTypeDefinitions
-                        .add(channelTypeReference.toChannelDefinition(this.channelGroupTypeUID.getBindingId()));
+                        .add(channelTypeReference.toChannelDefinition(channelGroupTypeUID.getBindingId()));
             }
         }
 
@@ -72,18 +70,25 @@ public class ChannelGroupTypeXmlResult {
     }
 
     public ChannelGroupType toChannelGroupType() throws ConversionException {
-        ChannelGroupType channelGroupType = ChannelGroupTypeBuilder.instance(this.channelGroupTypeUID, this.label)
-                .isAdvanced(this.advanced).withDescription(this.description).withCategory(this.category)
-                .withChannelDefinitions(toChannelDefinitions(this.channelTypeReferences)).build();
-
-        return channelGroupType;
+        ChannelGroupTypeBuilder builder = ChannelGroupTypeBuilder.instance(channelGroupTypeUID, label);
+        if (description != null) {
+            builder.withDescription(description);
+        }
+        if (category != null) {
+            builder.withCategory(category);
+        }
+        List<ChannelDefinition> channelDefinitions = toChannelDefinitions(channelTypeReferences);
+        if (channelDefinitions != null) {
+            builder.withChannelDefinitions(channelDefinitions);
+        }
+        return builder.build();
     }
 
     @Override
     public String toString() {
-        return "ChannelGroupTypeXmlResult [channelGroupTypeUID=" + channelGroupTypeUID + ", advanced=" + advanced
-                + ", label=" + label + ", description=" + description + ", category=" + category
-                + ", channelTypeReferences=" + channelTypeReferences + "]";
+        return "ChannelGroupTypeXmlResult [channelGroupTypeUID=" + channelGroupTypeUID + ", label=" + label
+                + ", description=" + description + ", category=" + category + ", channelTypeReferences="
+                + channelTypeReferences + "]";
     }
 
 }

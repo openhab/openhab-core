@@ -141,7 +141,7 @@
 	</channel-type>
 
 	<!-- Channel Group -->
-	<channel-group-type id="lampgroup" advanced="true">
+	<channel-group-type id="lampgroup">
 		<label>Alarm System</label>
 		<description>The alarm system.</description>
 		<channels>
@@ -152,7 +152,7 @@
 	</channel-group-type>
 
 	<!-- Channel Group without channels -->
-	<channel-group-type id="lampgroup-without-channels" advanced="true">
+	<channel-group-type id="lampgroup-without-channels">
 		<label>Alarm System</label>
 		<description>The alarm system without channels.</description>
 	</channel-group-type>

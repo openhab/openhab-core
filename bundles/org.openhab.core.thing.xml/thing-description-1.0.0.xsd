@@ -91,7 +91,6 @@
             <xs:element name="channels" type="thing-description:channels" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="id" type="config-description:idRestrictionPattern" use="required"/>
-        <xs:attribute name="advanced" type="xs:boolean" default="false" use="optional"/>
     </xs:complexType>
 
     <xs:complexType name="supportedBridgeTypeRefs">

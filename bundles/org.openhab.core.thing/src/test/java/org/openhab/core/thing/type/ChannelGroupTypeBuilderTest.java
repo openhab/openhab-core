@@ -56,20 +56,6 @@ public class ChannelGroupTypeBuilderTest {
     }
 
     @Test
-    public void withDefaultAdvancedIsFalse() {
-        ChannelGroupType channelGroupType = builder.build();
-
-        assertFalse(channelGroupType.isAdvanced());
-    }
-
-    @Test
-    public void isAdvancedShouldSetAdvanced() {
-        ChannelGroupType channelGroupType = builder.isAdvanced(true).build();
-
-        assertTrue(channelGroupType.isAdvanced());
-    }
-
-    @Test
     public void withDescriptionShouldSetDescription() {
         ChannelGroupType channelGroupType = builder.withDescription(DESCRIPTION).build();
 
