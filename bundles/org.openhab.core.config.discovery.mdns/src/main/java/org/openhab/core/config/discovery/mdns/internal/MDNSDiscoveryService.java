@@ -32,7 +32,9 @@ import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -60,15 +62,17 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
-    private @NonNullByDefault({}) MDNSClient mdnsClient;
+    private final MDNSClient mdnsClient;
 
-    public MDNSDiscoveryService() {
+    @Activate
+    public MDNSDiscoveryService(final @Nullable Map<String, @Nullable Object> configProperties,
+            final @Reference MDNSClient mdnsClient) {
         super(5);
-    }
 
-    @Reference
-    public void setMDNSClient(MDNSClient mdnsClient) {
         this.mdnsClient = mdnsClient;
+
+        super.activate(configProperties);
+
         if (isBackgroundDiscoveryEnabled()) {
             for (MDNSDiscoveryParticipant participant : participants) {
                 mdnsClient.addServiceListener(participant.getServiceType(), this);
@@ -79,14 +83,17 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         }
     }
 
-    public void unsetMDNSClient(MDNSClient mdnsClient) {
+    @Deactivate
+    @Override
+    protected void deactivate() {
+        super.deactivate();
+
         for (MDNSDiscoveryParticipant participant : participants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
         for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
-        this.mdnsClient = null;
     }
 
     @Modified

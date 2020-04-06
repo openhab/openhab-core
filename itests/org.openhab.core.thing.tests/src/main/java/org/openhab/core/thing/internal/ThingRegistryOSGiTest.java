@@ -238,7 +238,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
             assertTrue(thingResultWrapper.get() != null);
         });
 
-        assertThat(this, is(notNullValue()));
+        assertThat(thing, is(notNullValue()));
         if (thing != null) {
             assertThat(thing, is(thingResultWrapper.get()));
         }
