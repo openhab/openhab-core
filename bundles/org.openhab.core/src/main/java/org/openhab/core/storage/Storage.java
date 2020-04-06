@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A {@link Storage} is the generic way to store key-value pairs in ESH. Each storage implementation can store its data
+ * A {@link Storage} is the generic way to store key-value pairs in OHC. Each storage implementation can store its data
  * differently, e.g in-memory or in-database.
  *
  * @author Thomas Eichstaedt-Engelen - Initial contribution
