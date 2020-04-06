@@ -193,16 +193,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
         this.participants.add(participant);
-        if (mdnsClient != null && isBackgroundDiscoveryEnabled()) {
+        if (isBackgroundDiscoveryEnabled()) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
     }
 
     protected void removeMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
         this.participants.remove(participant);
-        if (mdnsClient != null) {
-            mdnsClient.removeServiceListener(participant.getServiceType(), this);
-        }
+        mdnsClient.removeServiceListener(participant.getServiceType(), this);
     }
 
     @Deprecated
@@ -210,7 +208,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     protected void addMDNSDiscoveryParticipant_old(
             org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
         this.oldParticipants.add(participant);
-        if (mdnsClient != null && isBackgroundDiscoveryEnabled()) {
+        if (isBackgroundDiscoveryEnabled()) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
     }
@@ -219,9 +217,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     protected void removeMDNSDiscoveryParticipant_old(
             org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
         this.oldParticipants.remove(participant);
-        if (mdnsClient != null) {
-            mdnsClient.removeServiceListener(participant.getServiceType(), this);
-        }
+        mdnsClient.removeServiceListener(participant.getServiceType(), this);
     }
 
     @Override
