@@ -20,8 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * The {@link StateDescription} describes restrictions of an item state and gives information how to interpret
- * it.
+ * The {@link StateDescription} describes restrictions of an item state and gives information how to interpret it.
  *
  * @author Dennis Nobel - Initial contribution
  */
@@ -112,6 +111,39 @@ public class StateDescription {
      */
     public List<StateOption> getOptions() {
         return options;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (minimum != null ? minimum.hashCode() : 0);
+        result = prime * result + (maximum != null ? maximum.hashCode() : 0);
+        result = prime * result + (step != null ? step.hashCode() : 0);
+        result = prime * result + (pattern != null ? pattern.hashCode() : 0);
+        result = prime * result + (readOnly ? 1231 : 1237);
+        result = prime * result + options.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        StateDescription other = (StateDescription) obj;
+        return (minimum != null ? minimum.equals(other.minimum) : other.minimum == null)
+                && (maximum != null ? maximum.equals(other.maximum) : other.maximum == null)
+                && (step != null ? step.equals(other.step) : other.step == null)
+                && (pattern != null ? pattern.equals(other.pattern) : other.pattern == null)
+                && readOnly == other.readOnly //
+                && options.equals(other.options);
     }
 
     @Override

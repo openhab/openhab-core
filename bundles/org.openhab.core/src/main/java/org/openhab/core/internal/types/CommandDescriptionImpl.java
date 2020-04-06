@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 
@@ -46,5 +47,33 @@ public class CommandDescriptionImpl implements CommandDescription {
     @Override
     public List<CommandOption> getCommandOptions() {
         return Collections.unmodifiableList(commandOptions);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + commandOptions.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        CommandDescriptionImpl other = (CommandDescriptionImpl) obj;
+        return commandOptions.equals(other.commandOptions);
+    }
+
+    @Override
+    public String toString() {
+        return "CommandDescription [commandOptions=" + commandOptions + "]";
     }
 }
