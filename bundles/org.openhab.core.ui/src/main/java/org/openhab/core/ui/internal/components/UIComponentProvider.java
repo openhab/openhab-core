@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractProvider;
@@ -62,7 +61,7 @@ public class UIComponentProvider extends AbstractProvider<RootUIComponent>
     }
 
     @Override
-    public void add(@NonNull RootUIComponent element) {
+    public void add(RootUIComponent element) {
         if (StringUtils.isEmpty(element.getUID())) {
             throw new IllegalArgumentException("Invalid UID");
         }
@@ -76,7 +75,7 @@ public class UIComponentProvider extends AbstractProvider<RootUIComponent>
     }
 
     @Override
-    public @Nullable RootUIComponent remove(@NonNull String key) {
+    public @Nullable RootUIComponent remove(String key) {
         RootUIComponent element = storage.remove(key);
         if (element != null) {
             notifyListenersAboutRemovedElement(element);
@@ -87,7 +86,7 @@ public class UIComponentProvider extends AbstractProvider<RootUIComponent>
     }
 
     @Override
-    public @Nullable RootUIComponent update(@NonNull RootUIComponent element) {
+    public @Nullable RootUIComponent update(RootUIComponent element) {
         if (storage.get(element.getUID()) != null) {
             RootUIComponent oldElement = storage.put(element.getUID(), element);
             if (oldElement != null) {

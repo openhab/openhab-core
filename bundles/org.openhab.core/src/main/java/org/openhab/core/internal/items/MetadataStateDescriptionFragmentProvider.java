@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Metadata;
@@ -69,8 +68,7 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
     }
 
     @Override
-    public @Nullable StateDescriptionFragment getStateDescriptionFragment(@NonNull String itemName,
-            @Nullable Locale locale) {
+    public @Nullable StateDescriptionFragment getStateDescriptionFragment(String itemName, @Nullable Locale locale) {
         Metadata metadata = metadataRegistry.get(new MetadataKey(STATEDESCRIPTION_METADATA_NAMESPACE, itemName));
 
         if (metadata != null) {
@@ -145,7 +143,7 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
     }
 
     @Override
-    public @NonNull Integer getRank() {
+    public Integer getRank() {
         return rank;
     }
 }

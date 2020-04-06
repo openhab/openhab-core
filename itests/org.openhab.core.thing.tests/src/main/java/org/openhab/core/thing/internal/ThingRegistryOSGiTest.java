@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -58,10 +58,11 @@ import org.osgi.framework.ServiceRegistration;
  * @author Stefan Bußweiler - Initial contribution
  * @author Kai Kreuzer - Moved createThing test from managed provider
  */
+@NonNullByDefault
 public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
-    ManagedThingProvider managedThingProvider;
-    ServiceRegistration<?> thingHandlerFactoryServiceReg;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ServiceRegistration<?> thingHandlerFactoryServiceReg;
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "id");
@@ -69,8 +70,8 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
     private static final String THING1_ID = "testThing1";
     private static final String THING2_ID = "testThing2";
 
-    Map<@NonNull String, @NonNull Object> changedParameters = null;
-    Event receivedEvent = null;
+    private @Nullable Map<String, Object> changedParameters = null;
+    private @Nullable Event receivedEvent = null;
 
     @Before
     public void setUp() {
@@ -99,7 +100,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
 
@@ -143,12 +144,11 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         ThingHandler thingHandler = new BaseThingHandler(thing) {
 
             @Override
-            public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+            public void handleCommand(ChannelUID channelUID, Command command) {
             }
 
             @Override
-            public void handleConfigurationUpdate(
-                    @NonNull Map<@NonNull String, @NonNull Object> configurationParameters) {
+            public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
                 changedParameters = configurationParameters;
             }
         };
@@ -158,16 +158,16 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         ThingProvider thingProvider = new ThingProvider() {
 
             @Override
-            public void addProviderChangeListener(ProviderChangeListener<@NonNull Thing> listener) {
+            public void addProviderChangeListener(ProviderChangeListener<Thing> listener) {
             }
 
             @Override
-            public Collection<@NonNull Thing> getAll() {
+            public Collection<Thing> getAll() {
                 return Collections.singleton(thing);
             }
 
             @Override
-            public void removeProviderChangeListener(ProviderChangeListener<@NonNull Thing> listener) {
+            public void removeProviderChangeListener(ProviderChangeListener<Thing> listener) {
             }
 
         };
@@ -208,17 +208,17 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         ThingHandlerFactory thingHandlerFactory = new BaseThingHandlerFactory() {
 
             @Override
-            public boolean supportsThingType(@NonNull ThingTypeUID thingTypeUID) {
+            public boolean supportsThingType(ThingTypeUID thingTypeUID) {
                 return true;
             }
 
             @Override
-            protected @Nullable ThingHandler createHandler(@NonNull Thing thing) {
+            protected @Nullable ThingHandler createHandler(Thing thing) {
                 return null;
             }
 
             @Override
-            public @Nullable Thing createThing(@NonNull ThingTypeUID thingTypeUID, @NonNull Configuration configuration,
+            public @Nullable Thing createThing(ThingTypeUID thingTypeUID, Configuration configuration,
                     @Nullable ThingUID thingUID, @Nullable ThingUID bridgeUID) {
                 assertThat(thingTypeUID, is(expectedThingTypeUID));
                 assertThat(configuration, is(expectedConfiguration));
@@ -237,7 +237,11 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertTrue(thingResultWrapper.get() != null);
         });
-        assertThat(thing, is(thingResultWrapper.get()));
+
+        assertThat(thing, is(notNullValue()));
+        if (thing != null) {
+            assertThat(thing, is(thingResultWrapper.get()));
+        }
     }
 
     private void registerThingHandlerFactory(ThingHandlerFactory thingHandlerFactory) {

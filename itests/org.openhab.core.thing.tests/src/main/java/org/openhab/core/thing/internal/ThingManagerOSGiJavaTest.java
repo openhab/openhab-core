@@ -26,7 +26,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -93,20 +93,14 @@ import org.osgi.service.component.ComponentContext;
  * @author Simon Kaufmann - Initial contribution
  * @author Christoph Weitkamp - Added preconfigured ChannelGroupBuilder
  */
+@NonNullByDefault
 public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
-
-    private ManagedThingProvider managedThingProvider;
-    private ItemRegistry itemRegistry;
-    private ThingRegistry thingRegistry;
-    private ReadyService readyService;
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ThingManager thingManager;
 
     private static final String CONFIG_PARAM_NAME = "test";
 
     private static final String BINDING_ID = "binding";
-
     private static final String CHANNEL_ID = "channel";
+
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID(BINDING_ID, CHANNEL_ID);
 
     private static final String CHANNEL_GROUP_ID = "channel-group";
@@ -123,16 +117,22 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
     private static final ChannelGroupUID CHANNEL_GROUP_UID = new ChannelGroupUID(THING_UID, CHANNEL_GROUP_ID);
 
-    private Thing thing;
-    private URI configDescriptionThing;
-    private URI configDescriptionChannel;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) ReadyService readyService;
+    private @NonNullByDefault({}) Storage<Boolean> storage;
+    private @NonNullByDefault({}) ThingManager thingManager;
 
-    private Storage<Boolean> storage;
+    private @NonNullByDefault({}) URI configDescriptionChannel;
+    private @NonNullByDefault({}) URI configDescriptionThing;
+    private @NonNullByDefault({}) Thing thing;
 
     @Before
     public void setUp() throws Exception {
-        configDescriptionThing = new URI("test:test");
         configDescriptionChannel = new URI("test:channel");
+        configDescriptionThing = new URI("test:test");
         thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(Collections.singletonList( //
                 ChannelBuilder.create(CHANNEL_UID, "Switch").withLabel("Test Label").withDescription("Test Description")
                         .withType(CHANNEL_TYPE_UID).withDefaultTags(Collections.singleton("Test Tag")).build() //
@@ -320,7 +320,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         registerChannelTypeProvider();
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
             @Override
-            public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+            public void handleCommand(ChannelUID channelUID, Command command) {
             }
         });
 
@@ -354,7 +354,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
         registerThingHandlerFactory(BRIDGE_TYPE_UID, bridge -> new BaseBridgeHandler((Bridge) bridge) {
             @Override
-            public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+            public void handleCommand(ChannelUID channelUID, Command command) {
             }
 
             @Override
@@ -373,7 +373,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
             @Override
-            public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+            public void handleCommand(ChannelUID channelUID, Command command) {
             }
 
             @Override
@@ -430,7 +430,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
         registerThingHandlerFactory(BRIDGE_TYPE_UID, bridge -> new BaseBridgeHandler((Bridge) bridge) {
             @Override
-            public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+            public void handleCommand(ChannelUID channelUID, Command command) {
             }
 
             @Override
@@ -449,7 +449,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
             @Override
-            public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+            public void handleCommand(ChannelUID channelUID, Command command) {
             }
 
             @Override
@@ -506,7 +506,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
 
         registerThingHandlerFactory(BRIDGE_TYPE_UID, bridge -> new BaseBridgeHandler((Bridge) bridge) {
             @Override
-            public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+            public void handleCommand(ChannelUID channelUID, Command command) {
             }
 
             @Override
@@ -525,7 +525,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
             @Override
-            public void handleCommand(@NonNull ChannelUID channelUID, @NonNull Command command) {
+            public void handleCommand(ChannelUID channelUID, Command command) {
             }
 
             @Override
@@ -1062,12 +1062,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         }
 
         @Override
-        public boolean supportsThingType(@NonNull ThingTypeUID thingTypeUID) {
+        public boolean supportsThingType(ThingTypeUID thingTypeUID) {
             return this.thingTypeUID.equals(thingTypeUID);
         }
 
         @Override
-        protected @Nullable ThingHandler createHandler(@NonNull Thing thing) {
+        protected @Nullable ThingHandler createHandler(Thing thing) {
             return thingHandlerProducer.apply(thing);
         }
     };
@@ -1079,12 +1079,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         AtomicReference<ThingHandlerCallback> thc = new AtomicReference<>();
         ThingHandlerFactory thingHandlerFactory = new BaseThingHandlerFactory() {
             @Override
-            public boolean supportsThingType(@NonNull ThingTypeUID thingTypeUID) {
+            public boolean supportsThingType(ThingTypeUID thingTypeUID) {
                 return true;
             }
 
             @Override
-            protected @Nullable ThingHandler createHandler(@NonNull Thing thing) {
+            protected @Nullable ThingHandler createHandler(Thing thing) {
                 ThingHandler mockHandler = mock(ThingHandler.class);
                 doAnswer(a -> {
                     thc.set((ThingHandlerCallback) a.getArguments()[0]);

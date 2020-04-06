@@ -12,7 +12,7 @@
  */
 package org.openhab.core.config.core.status;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The {@link ConfigStatusSource} represents a source which would like to propagate its new configuration status. It is
@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Höfer - Initial contribution
  */
+@NonNullByDefault
 public abstract class ConfigStatusSource {
 
     /** The id of the entity whose new configuration status is to be propagated. */
@@ -30,7 +31,7 @@ public abstract class ConfigStatusSource {
      *
      * @param entityId the id of the entity whose new configuration status is to be propagated
      */
-    public ConfigStatusSource(@NonNull String entityId) {
+    public ConfigStatusSource(String entityId) {
         super();
         this.entityId = entityId;
     }

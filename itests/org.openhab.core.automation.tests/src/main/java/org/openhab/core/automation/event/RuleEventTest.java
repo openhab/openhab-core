@@ -27,7 +27,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.automation.Action;
@@ -57,7 +58,6 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.openhab.core.test.storage.VolatileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,13 +67,13 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Kai Kreuzer - ported test to Java
  */
+@NonNullByDefault
 public class RuleEventTest extends JavaOSGiTest {
 
-    final Logger logger = LoggerFactory.getLogger(RuleEventTest.class);
-    VolatileStorageService volatileStorageService = new VolatileStorageService();
+    private final Logger logger = LoggerFactory.getLogger(RuleEventTest.class);
 
-    Event itemEvent = null;
-    Event ruleRemovedEvent = null;
+    private @Nullable Event itemEvent = null;
+    private @Nullable Event ruleRemovedEvent = null;
 
     public RuleEventTest() {
     }
@@ -87,7 +87,7 @@ public class RuleEventTest extends JavaOSGiTest {
             }
 
             @Override
-            public @NonNull Collection<@NonNull Item> getAll() {
+            public Collection<Item> getAll() {
                 return Arrays.asList(new Item[] { new SwitchItem("myMotionItem"), new SwitchItem("myPresenceItem"),
                         new SwitchItem("myLampItem"), new SwitchItem("myMotionItem2"),
                         new SwitchItem("myPresenceItem2"), new SwitchItem("myLampItem2") });
@@ -118,7 +118,7 @@ public class RuleEventTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
 
@@ -186,7 +186,7 @@ public class RuleEventTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
         };
@@ -215,7 +215,7 @@ public class RuleEventTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
 

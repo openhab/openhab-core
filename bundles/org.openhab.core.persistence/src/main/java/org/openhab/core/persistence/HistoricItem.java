@@ -14,7 +14,7 @@ package org.openhab.core.persistence;
 
 import java.util.Date;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
 
@@ -28,6 +28,7 @@ import org.openhab.core.types.State;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface HistoricItem {
 
     /**
@@ -35,7 +36,6 @@ public interface HistoricItem {
      *
      * @return the timestamp of the item
      */
-    @NonNull
     Date getTimestamp();
 
     /**
@@ -43,7 +43,6 @@ public interface HistoricItem {
      *
      * @return the current state
      */
-    @NonNull
     State getState();
 
     /**
@@ -51,7 +50,6 @@ public interface HistoricItem {
      *
      * @return the name of the item
      */
-    @NonNull
     String getName();
 
 }

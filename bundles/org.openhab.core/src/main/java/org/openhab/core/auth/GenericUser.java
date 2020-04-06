@@ -15,7 +15,6 @@ package org.openhab.core.auth;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -56,7 +55,7 @@ public class GenericUser implements User {
     }
 
     @Override
-    public @NonNull String getUID() {
+    public String getUID() {
         return name;
     }
 

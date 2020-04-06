@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,10 +41,11 @@ import org.openhab.core.test.java.JavaOSGiTest;
  * @author Andre Fuechsel - extended with tag tests
  * @author Kai Kreuzer - added tests for all items changed cases
  */
+@NonNullByDefault
 public class ItemUpdaterOSGiTest extends JavaOSGiTest {
 
-    private EventPublisher eventPublisher;
-    private ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) EventPublisher eventPublisher;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private final ConcurrentLinkedQueue<Event> receivedEvents = new ConcurrentLinkedQueue<>();
 
     @Before
@@ -60,12 +61,12 @@ public class ItemUpdaterOSGiTest extends JavaOSGiTest {
 
         EventSubscriber eventSubscriber = new EventSubscriber() {
             @Override
-            public void receive(@NonNull Event event) {
+            public void receive(Event event) {
                 receivedEvents.add(event);
             }
 
             @Override
-            public @NonNull Set<@NonNull String> getSubscribedEventTypes() {
+            public Set<String> getSubscribedEventTypes() {
                 return Collections.singleton(ItemStateChangedEvent.TYPE);
             }
 

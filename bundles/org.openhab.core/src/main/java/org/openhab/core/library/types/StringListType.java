@@ -33,7 +33,7 @@ import org.openhab.core.types.State;
 @NonNullByDefault
 public class StringListType implements Command, State {
 
-    final protected List<String> typeDetails;
+    protected final List<String> typeDetails;
 
     // constants
     public static final String DELIMITER = ",";

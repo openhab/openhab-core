@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.events.EventPublisher;
@@ -45,6 +45,7 @@ import org.openhab.core.types.StateOption;
  * @author Christoph Knauf - Initial contribution, event tests
  * @author Simon Kaufmann - migrated from Groovy to Java
  */
+@NonNullByDefault
 @SuppressWarnings("null")
 public class GenericItemTest {
 
@@ -150,7 +151,7 @@ public class GenericItemTest {
         when(commandDescriptionService.getCommandDescription("test", null)).thenReturn(new CommandDescription() {
 
             @Override
-            public @NonNull List<@NonNull CommandOption> getCommandOptions() {
+            public List<CommandOption> getCommandOptions() {
                 return Arrays.asList(new CommandOption("ALERT", "Alert"), new CommandOption("REBOOT", "Reboot"));
             }
         });
@@ -168,7 +169,7 @@ public class GenericItemTest {
                 .thenReturn(new CommandDescription() {
 
                     @Override
-                    public @NonNull List<@NonNull CommandOption> getCommandOptions() {
+                    public List<CommandOption> getCommandOptions() {
                         return Arrays.asList(new CommandOption("C1", "Command 1"), new CommandOption("C2", "Command 2"),
                                 new CommandOption("C3", "Command 3"));
                     }
@@ -183,7 +184,7 @@ public class GenericItemTest {
         TestItem item = new TestItem("test");
 
         StateDescriptionService stateDescriptionService = mock(StateDescriptionService.class);
-        List<@NonNull StateOption> stateOptions = Arrays.asList(new StateOption("STATE1", "State 1"),
+        List<StateOption> stateOptions = Arrays.asList(new StateOption("STATE1", "State 1"),
                 new StateOption("STATE2", "State 2"));
         when(stateDescriptionService.getStateDescription("test", null)).thenReturn(
                 StateDescriptionFragmentBuilder.create().withOptions(stateOptions).build().toStateDescription());

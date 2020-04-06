@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.types.CommandDescriptionImpl;
@@ -55,7 +54,7 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
     }
 
     @Override
-    public @Nullable CommandDescription getCommandDescription(@NonNull String itemName, @Nullable Locale locale) {
+    public @Nullable CommandDescription getCommandDescription(String itemName, @Nullable Locale locale) {
         Metadata metadata = metadataRegistry.get(new MetadataKey(COMMANDDESCRIPTION_METADATA_NAMESPACE, itemName));
 
         if (metadata != null) {

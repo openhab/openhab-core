@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.thing.ThingTypeUID;
@@ -34,6 +34,7 @@ import org.openhab.core.thing.ThingTypeUID;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class ThingTypeBuilderTest {
 
     private static final String CONF_URI = "conf:uri";
@@ -44,7 +45,7 @@ public class ThingTypeBuilderTest {
     private static final String THING_TYPE_ID = "thingTypeId";
     private static final String BINDING_ID = "bindingId";
 
-    private ThingTypeBuilder builder;
+    private @NonNullByDefault({}) ThingTypeBuilder builder;
 
     @Before
     public void setup() {
@@ -212,15 +213,15 @@ public class ThingTypeBuilderTest {
         assertThat(bridgeType.getLabel(), is(LABEL));
     }
 
-    private Map<@NonNull String, String> mockProperties() {
-        Map<@NonNull String, String> result = new HashMap<>();
+    private Map<String, String> mockProperties() {
+        Map<String, String> result = new HashMap<>();
         result.put("key1", "value1");
         result.put("key2", "value2");
 
         return result;
     }
 
-    private <T> @NonNull List<T> mockList(Class<T> entityClass, int size) {
+    private <T> List<T> mockList(Class<T> entityClass, int size) {
         List<T> result = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             result.add(mock(entityClass));

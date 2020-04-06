@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -84,19 +85,20 @@ import org.osgi.service.component.ComponentContext;
  * @author Thomas Höfer - Thing type constructor modified because of thing properties introduction
  * @author Markus Rathgeb - Migrated from Groovy to plain Java
  */
+@NonNullByDefault 
 public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "thingStatusInfoI18nTest.bundle";
     private static final ChannelTypeUID CHANNEL_TYPE_7_UID = new ChannelTypeUID("hue:num-dynamic");
 
-    private ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
-    private ItemRegistry itemRegistry;
-    private ItemChannelLinkRegistry linkRegistry;
+    private @NonNullByDefault({}) ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry linkRegistry;
 
     @Mock
-    private ComponentContext componentContext;
+    private @NonNullByDefault({}) ComponentContext componentContext;
 
-    private Bundle testBundle;
+    private @NonNullByDefault({}) Bundle testBundle;
 
     @Before
     public void setup() throws Exception {
@@ -145,12 +147,12 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         registerService(new ChannelTypeProvider() {
             @Override
-            public Collection<ChannelType> getChannelTypes(Locale locale) {
+            public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
                 return channelTypes;
             }
 
             @Override
-            public ChannelType getChannelType(ChannelTypeUID channelTypeUID, Locale locale) {
+            public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
                 for (final ChannelType channelType : channelTypes) {
                     if (channelType.getUID().equals(channelTypeUID)) {
                         return channelType;
@@ -405,9 +407,9 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
      * Helper
      */
     class TestDynamicStateDescriptionProvider extends BaseDynamicStateDescriptionProvider {
-        final StateDescription newState = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.valueOf(10))
-                .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.valueOf(5)).withPattern("VALUE %d")
-                .withReadOnly(false)
+        final @Nullable StateDescription newState = StateDescriptionFragmentBuilder.create()
+                .withMinimum(BigDecimal.valueOf(10)).withMaximum(BigDecimal.valueOf(100))
+                .withStep(BigDecimal.valueOf(5)).withPattern("VALUE %d").withReadOnly(false)
                 .withOptions(Arrays.asList(new StateOption("value0", "label0"), new StateOption("value1", "label1")))
                 .build().toStateDescription();
 
@@ -454,7 +456,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
 
         @Override
-        protected ThingHandler createHandler(Thing thing) {
+        protected @Nullable ThingHandler createHandler(Thing thing) {
             return new AbstractThingHandler(thing) {
                 @Override
                 public void handleCommand(ChannelUID channelUID, Command command) {
@@ -502,7 +504,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
      */
     private class BundleResolverImpl implements BundleResolver {
         @Override
-        public Bundle resolveBundle(Class<?> clazz) {
+        public Bundle resolveBundle(@Nullable Class<?> clazz) {
             if (clazz != null && clazz.equals(AbstractThingHandler.class)) {
                 return testBundle;
             } else {

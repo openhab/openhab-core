@@ -23,7 +23,7 @@ import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -32,7 +32,9 @@ import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -48,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Improved startup behavior and background discovery
  * @author Andre Fuechsel - make {@link #startScan()} asynchronous
  */
+@NonNullByDefault
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.mdns")
 public class MDNSDiscoveryService extends AbstractDiscoveryService implements ServiceListener {
 
@@ -59,15 +62,17 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
 
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
-    private MDNSClient mdnsClient;
+    private final MDNSClient mdnsClient;
 
-    public MDNSDiscoveryService() {
+    @Activate
+    public MDNSDiscoveryService(final @Nullable Map<String, @Nullable Object> configProperties,
+            final @Reference MDNSClient mdnsClient) {
         super(5);
-    }
 
-    @Reference
-    public void setMDNSClient(MDNSClient mdnsClient) {
         this.mdnsClient = mdnsClient;
+
+        super.activate(configProperties);
+
         if (isBackgroundDiscoveryEnabled()) {
             for (MDNSDiscoveryParticipant participant : participants) {
                 mdnsClient.addServiceListener(participant.getServiceType(), this);
@@ -78,19 +83,22 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         }
     }
 
-    public void unsetMDNSClient(MDNSClient mdnsClient) {
+    @Deactivate
+    @Override
+    protected void deactivate() {
+        super.deactivate();
+
         for (MDNSDiscoveryParticipant participant : participants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
         for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
-        this.mdnsClient = null;
     }
 
     @Modified
     @Override
-    protected void modified(@Nullable Map<@NonNull String, @Nullable Object> configProperties) {
+    protected void modified(@Nullable Map<String, @Nullable Object> configProperties) {
         super.modified(configProperties);
     }
 
@@ -185,16 +193,14 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
         this.participants.add(participant);
-        if (mdnsClient != null && isBackgroundDiscoveryEnabled()) {
+        if (isBackgroundDiscoveryEnabled()) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
     }
 
     protected void removeMDNSDiscoveryParticipant(MDNSDiscoveryParticipant participant) {
         this.participants.remove(participant);
-        if (mdnsClient != null) {
-            mdnsClient.removeServiceListener(participant.getServiceType(), this);
-        }
+        mdnsClient.removeServiceListener(participant.getServiceType(), this);
     }
 
     @Deprecated
@@ -202,7 +208,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     protected void addMDNSDiscoveryParticipant_old(
             org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
         this.oldParticipants.add(participant);
-        if (mdnsClient != null && isBackgroundDiscoveryEnabled()) {
+        if (isBackgroundDiscoveryEnabled()) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
     }
@@ -211,9 +217,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     protected void removeMDNSDiscoveryParticipant_old(
             org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
         this.oldParticipants.remove(participant);
-        if (mdnsClient != null) {
-            mdnsClient.removeServiceListener(participant.getServiceType(), this);
-        }
+        mdnsClient.removeServiceListener(participant.getServiceType(), this);
     }
 
     @Override
@@ -229,12 +233,12 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     @Override
-    public void serviceAdded(ServiceEvent serviceEvent) {
+    public void serviceAdded(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         considerService(serviceEvent);
     }
 
     @Override
-    public void serviceRemoved(ServiceEvent serviceEvent) {
+    public void serviceRemoved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         for (MDNSDiscoveryParticipant participant : participants) {
             if (participant.getServiceType().equals(serviceEvent.getType())) {
                 try {
@@ -262,7 +266,7 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     }
 
     @Override
-    public void serviceResolved(ServiceEvent serviceEvent) {
+    public void serviceResolved(@NonNullByDefault({}) ServiceEvent serviceEvent) {
         considerService(serviceEvent);
     }
 
