@@ -28,7 +28,6 @@ import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeUID;
-import org.openhab.core.thing.type.StateChannelTypeBuilder;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.StateDescription;
@@ -187,18 +186,23 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
 
         ChannelKind cKind = ChannelKind.parse(kind);
         URI configDescriptionURI = (URI) configDescriptionObjects[0];
-        ChannelType channelType = null;
+        final ChannelTypeBuilder<?> builder;
         if (cKind == ChannelKind.STATE) {
-            StateChannelTypeBuilder builder = ChannelTypeBuilder.state(channelTypeUID, label, itemType)
-                    .isAdvanced(advanced).withDescription(description).withCategory(category).withTags(tags)
-                    .withConfigDescriptionURI(configDescriptionURI).withStateDescription(stateDescription)
-                    .withAutoUpdatePolicy(autoUpdatePolicy).withCommandDescription(commandDescription);
-            channelType = builder.build();
+            builder = ChannelTypeBuilder.state(channelTypeUID, label, itemType).isAdvanced(advanced)
+                    .withCategory(category).withTags(tags).withConfigDescriptionURI(configDescriptionURI)
+                    .withStateDescription(stateDescription).withAutoUpdatePolicy(autoUpdatePolicy)
+                    .withCommandDescription(commandDescription);
         } else if (cKind == ChannelKind.TRIGGER) {
-            channelType = ChannelTypeBuilder.trigger(channelTypeUID, label).isAdvanced(advanced)
-                    .withDescription(description).withCategory(category).withTags(tags)
-                    .withConfigDescriptionURI(configDescriptionURI).withEventDescription(eventDescription).build();
+            builder = ChannelTypeBuilder.trigger(channelTypeUID, label).isAdvanced(advanced).withCategory(category)
+                    .withTags(tags).withConfigDescriptionURI(configDescriptionURI)
+                    .withEventDescription(eventDescription);
+        } else {
+            throw new IllegalArgumentException(String.format("Unknown channel kind: '%s'", cKind));
         }
+        if (description != null) {
+            builder.withDescription(description);
+        }
+        ChannelType channelType = builder.build();
 
         ChannelTypeXmlResult channelTypeXmlResult = new ChannelTypeXmlResult(channelType,
                 (ConfigDescription) configDescriptionObjects[1], system);

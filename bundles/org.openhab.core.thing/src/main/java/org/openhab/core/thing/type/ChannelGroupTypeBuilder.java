@@ -22,11 +22,11 @@ import org.eclipse.jdt.annotation.Nullable;
  * A {@link ChannelGroupType} builder.
  *
  * @author Christoph Weitkamp - Initial contribution
+ * @author Christoph Weitkamp - Removed "advanced" attribute
  */
 @NonNullByDefault
 public class ChannelGroupTypeBuilder {
 
-    private boolean advanced;
     private @Nullable List<ChannelDefinition> channelDefinitions;
     private @Nullable String category;
     private @Nullable String description;
@@ -64,18 +64,7 @@ public class ChannelGroupTypeBuilder {
      * @return the created {@link ChannelGroupType}
      */
     public ChannelGroupType build() {
-        return new ChannelGroupType(channelGroupTypeUID, advanced, label, description, category, channelDefinitions);
-    }
-
-    /**
-     * Specify whether this is an advanced {@link ChannelGroupType}, default is false
-     *
-     * @param advanced true if this is an advanced {@link ChannelGroupType}
-     * @return this Builder
-     */
-    public ChannelGroupTypeBuilder isAdvanced(boolean advanced) {
-        this.advanced = advanced;
-        return this;
+        return new ChannelGroupType(channelGroupTypeUID, label, description, category, channelDefinitions);
     }
 
     /**

@@ -122,9 +122,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private static final Pattern LABEL_PATTERN = Pattern.compile(".*?\\[.*? (.*?)\\]");
 
-    protected Set<ItemUIProvider> itemUIProviders = new HashSet<>();
+    protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
-    protected @Nullable ItemRegistry itemRegistry;
+    private @Nullable ItemRegistry itemRegistry;
 
     private @Nullable ItemBuilderFactory itemBuilderFactory;
 

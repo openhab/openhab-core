@@ -94,7 +94,7 @@
 	</channel-type>
 
 	<!-- Alarm System Channel -->
-	<channel-group-type id="alarm_system" advanced="false">
+	<channel-group-type id="alarm_system">
 		<label>Alarm System</label>
 		<description>The alarm system.</description>
 		<channels>
