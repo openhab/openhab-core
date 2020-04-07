@@ -90,9 +90,9 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
 
     private @Mock @NonNullByDefault({}) ComponentContext componentContextMock;
 
-    private @NonNullByDefault({}) Bundle testBundle;
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @NonNullByDefault({}) ItemChannelLinkRegistry linkRegistry;
+    private @NonNullByDefault({}) Bundle testBundle;
     private @NonNullByDefault({}) ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
 
     @Before
