@@ -49,6 +49,7 @@ import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.TriggerBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -72,11 +73,11 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
 
     private final Map<String, Map<String, Object>> objectCache = new ConcurrentHashMap<>();
 
-    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
-    private @NonNullByDefault({}) ScriptedRuleProvider ruleProvider;
-    private @NonNullByDefault({}) ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory;
-    private @NonNullByDefault({}) ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider;
-    private @NonNullByDefault({}) ScriptedPrivateModuleHandlerFactory scriptedPrivateModuleHandlerFactory;
+    private final RuleRegistry ruleRegistry;
+    private final ScriptedRuleProvider ruleProvider;
+    private final ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory;
+    private final ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider;
+    private final ScriptedPrivateModuleHandlerFactory scriptedPrivateModuleHandlerFactory;
 
     static {
         STATIC_TYPES.put("SimpleActionHandler", SimpleActionHandler.class);
@@ -118,50 +119,17 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
                         "ConfigDescriptionParameter", "ModuleType", "ActionType", "Visibility"));
     }
 
-    @Reference
-    public void setRuleRegistry(RuleRegistry ruleRegistry) {
+    @Activate
+    public RuleSupportScriptExtension(final @Reference RuleRegistry ruleRegistry,
+            final @Reference ScriptedRuleProvider ruleProvider,
+            final @Reference ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory,
+            final @Reference ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider,
+            final @Reference ScriptedPrivateModuleHandlerFactory scriptedPrivateModuleHandlerFactory) {
         this.ruleRegistry = ruleRegistry;
-    }
-
-    public void unsetRuleRegistry(RuleRegistry ruleRegistry) {
-        this.ruleRegistry = null;
-    }
-
-    @Reference
-    public void setRuleProvider(ScriptedRuleProvider ruleProvider) {
         this.ruleProvider = ruleProvider;
-    }
-
-    public void unsetRuleProvider(ScriptedRuleProvider ruleProvider) {
-        this.ruleProvider = null;
-    }
-
-    @Reference
-    public void setScriptedCustomModuleHandlerFactory(ScriptedCustomModuleHandlerFactory factory) {
-        this.scriptedCustomModuleHandlerFactory = factory;
-    }
-
-    public void unsetScriptedCustomModuleHandlerFactory(ScriptedCustomModuleHandlerFactory factory) {
-        this.scriptedCustomModuleHandlerFactory = null;
-    }
-
-    @Reference
-    public void setScriptedCustomModuleTypeProvider(ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider) {
+        this.scriptedCustomModuleHandlerFactory = scriptedCustomModuleHandlerFactory;
         this.scriptedCustomModuleTypeProvider = scriptedCustomModuleTypeProvider;
-    }
-
-    public void unsetScriptedCustomModuleTypeProvider(
-            ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider) {
-        this.scriptedCustomModuleTypeProvider = null;
-    }
-
-    @Reference
-    public void setScriptedPrivateModuleHandlerFactory(ScriptedPrivateModuleHandlerFactory factory) {
-        this.scriptedPrivateModuleHandlerFactory = factory;
-    }
-
-    public void unsetScriptedPrivateModuleHandlerFactory(ScriptedPrivateModuleHandlerFactory factory) {
-        this.scriptedPrivateModuleHandlerFactory = null;
+        this.scriptedPrivateModuleHandlerFactory = scriptedPrivateModuleHandlerFactory;
     }
 
     @Override
