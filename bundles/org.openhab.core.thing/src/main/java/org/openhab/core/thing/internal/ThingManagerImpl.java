@@ -361,7 +361,7 @@ public class ThingManagerImpl
             final @Reference ReadyService readyService, //
             final @Reference SafeCaller safeCaller, //
             final @Reference StorageService storageService, //
-            final @Reference ThingRegistryImpl thingRegistry,
+            final @Reference ThingRegistry thingRegistry,
             final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
             final @Reference ThingTypeRegistry thingTypeRegistry) {
         this.bundleResolver = bundleResolver;
@@ -374,12 +374,12 @@ public class ThingManagerImpl
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.readyService = readyService;
         this.safeCaller = safeCaller;
-        this.thingRegistry = thingRegistry;
+        this.thingRegistry = (ThingRegistryImpl) thingRegistry;
         this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
         this.thingTypeRegistry = thingTypeRegistry;
 
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
-        thingRegistry.addThingTracker(this);
+        this.thingRegistry.addThingTracker(this);
         storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
     }
 
