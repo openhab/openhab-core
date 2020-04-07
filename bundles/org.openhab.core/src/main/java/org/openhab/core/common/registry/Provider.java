@@ -14,6 +14,7 @@ package org.openhab.core.common.registry;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -42,7 +43,7 @@ public interface Provider<E> {
      *
      * @return collection of all elements
      */
-    Collection<E> getAll();
+    Collection<@NonNull E> getAll();
 
     /**
      * Removes a {@link ProviderChangeListener}.

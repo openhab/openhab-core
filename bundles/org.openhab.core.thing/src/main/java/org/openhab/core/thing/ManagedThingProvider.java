@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.DefaultAbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
@@ -28,6 +29,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Dennis Nobel - Integrated Storage
  * @author Michael Grammling - Added dynamic configuration update
  */
+@NonNullByDefault
 @Component(immediate = true, service = { ThingProvider.class, ManagedThingProvider.class })
 public class ManagedThingProvider extends DefaultAbstractManagedProvider<Thing, ThingUID> implements ThingProvider {
 

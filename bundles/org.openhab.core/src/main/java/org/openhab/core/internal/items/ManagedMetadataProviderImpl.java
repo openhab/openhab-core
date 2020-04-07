@@ -13,6 +13,7 @@
 package org.openhab.core.internal.items;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.items.ManagedMetadataProvider;
 import org.openhab.core.items.Metadata;
@@ -33,8 +34,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(immediate = true, service = { MetadataProvider.class, ManagedMetadataProvider.class })
 @NonNullByDefault
+@Component(immediate = true, service = { MetadataProvider.class, ManagedMetadataProvider.class })
 public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadata, MetadataKey, Metadata>
         implements ManagedMetadataProvider {
 
@@ -56,7 +57,7 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
     }
 
     @Override
-    protected Metadata toElement(String key, Metadata persistableElement) {
+    protected @Nullable Metadata toElement(String key, Metadata persistableElement) {
         return persistableElement;
     }
 

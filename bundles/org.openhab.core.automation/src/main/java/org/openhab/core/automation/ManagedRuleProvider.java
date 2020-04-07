@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.dto.RuleDTO;
 import org.openhab.core.automation.dto.RuleDTOMapper;
 import org.openhab.core.common.registry.AbstractManagedProvider;
@@ -28,6 +30,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @author Markus Rathgeb - fix mapping between element and persistable element
  */
+@NonNullByDefault
 @Component(service = { RuleProvider.class, ManagedRuleProvider.class })
 public class ManagedRuleProvider extends AbstractManagedProvider<Rule, String, RuleDTO> implements RuleProvider {
 
@@ -47,7 +50,7 @@ public class ManagedRuleProvider extends AbstractManagedProvider<Rule, String, R
     }
 
     @Override
-    protected Rule toElement(String key, RuleDTO persistableElement) {
+    protected @Nullable Rule toElement(String key, RuleDTO persistableElement) {
         return RuleDTOMapper.map(persistableElement);
     }
 

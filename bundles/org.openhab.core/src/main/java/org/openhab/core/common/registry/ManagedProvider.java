@@ -13,6 +13,7 @@
 package org.openhab.core.common.registry;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -26,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @param <K>
  *            type of the element key
  */
+@NonNullByDefault
 public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<E> {
 
     /**
@@ -63,6 +65,6 @@ public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<
      * @return returns element or null, if no element for the given key exists
      */
     @Nullable
-    E get(K key);
+    E get(@NonNull K key);
 
 }

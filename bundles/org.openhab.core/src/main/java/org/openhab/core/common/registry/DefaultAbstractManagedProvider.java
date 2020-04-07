@@ -12,6 +12,7 @@
  */
 package org.openhab.core.common.registry;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.storage.StorageService;
 
 /**
@@ -27,6 +28,7 @@ import org.openhab.core.storage.StorageService;
  * @param <K>
  *            type of the element key
  */
+@NonNullByDefault
 public abstract class DefaultAbstractManagedProvider<E extends Identifiable<K>, K>
         extends AbstractManagedProvider<E, K, E> {
 

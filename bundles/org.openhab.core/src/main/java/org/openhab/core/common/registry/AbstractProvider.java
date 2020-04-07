@@ -15,6 +15,7 @@ package org.openhab.core.common.registry;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * @param <E>
  *            type of the provided elements
  */
+@NonNullByDefault
 public abstract class AbstractProvider<E> implements Provider<E> {
 
     private enum EventType {
