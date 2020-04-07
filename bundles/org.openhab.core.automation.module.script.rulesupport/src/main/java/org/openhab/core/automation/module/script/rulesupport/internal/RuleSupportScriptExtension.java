@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -47,6 +49,7 @@ import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.TriggerBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -57,106 +60,76 @@ import org.osgi.service.component.annotations.Reference;
  * @author Simon Merschjohann - Initial contribution
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class RuleSupportScriptExtension implements ScriptExtensionProvider {
+
     private static final String RULE_SUPPORT = "RuleSupport";
     private static final String RULE_REGISTRY = "ruleRegistry";
     private static final String AUTOMATION_MANAGER = "automationManager";
 
-    private static Map<String, Collection<String>> presets = new HashMap<>();
-    private static Map<String, Object> staticTypes = new HashMap<>();
-    private static Set<String> types = new HashSet<>();
+    private static final Map<String, Collection<String>> PRESETS = new HashMap<>();
+    private static final Map<String, Object> STATIC_TYPES = new HashMap<>();
+    private static final Set<String> TYPES = new HashSet<>();
+
     private final Map<String, Map<String, Object>> objectCache = new ConcurrentHashMap<>();
 
-    private RuleRegistry ruleRegistry;
-    private ScriptedRuleProvider ruleProvider;
-    private ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory;
-    private ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider;
-    private ScriptedPrivateModuleHandlerFactory scriptedPrivateModuleHandlerFactory;
+    private final RuleRegistry ruleRegistry;
+    private final ScriptedRuleProvider ruleProvider;
+    private final ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory;
+    private final ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider;
+    private final ScriptedPrivateModuleHandlerFactory scriptedPrivateModuleHandlerFactory;
 
     static {
-        staticTypes.put("SimpleActionHandler", SimpleActionHandler.class);
-        staticTypes.put("SimpleConditionHandler", SimpleConditionHandler.class);
-        staticTypes.put("SimpleTriggerHandler", SimpleTriggerHandler.class);
-        staticTypes.put("SimpleRule", SimpleRule.class);
+        STATIC_TYPES.put("SimpleActionHandler", SimpleActionHandler.class);
+        STATIC_TYPES.put("SimpleConditionHandler", SimpleConditionHandler.class);
+        STATIC_TYPES.put("SimpleTriggerHandler", SimpleTriggerHandler.class);
+        STATIC_TYPES.put("SimpleRule", SimpleRule.class);
 
-        staticTypes.put("ActionHandlerFactory", ScriptedActionHandlerFactory.class);
-        staticTypes.put("ConditionHandlerFactory", ScriptedConditionHandlerFactory.class);
-        staticTypes.put("TriggerHandlerFactory", ScriptedTriggerHandlerFactory.class);
+        STATIC_TYPES.put("ActionHandlerFactory", ScriptedActionHandlerFactory.class);
+        STATIC_TYPES.put("ConditionHandlerFactory", ScriptedConditionHandlerFactory.class);
+        STATIC_TYPES.put("TriggerHandlerFactory", ScriptedTriggerHandlerFactory.class);
 
-        staticTypes.put("ModuleBuilder", ModuleBuilder.class);
-        staticTypes.put("ActionBuilder", ActionBuilder.class);
-        staticTypes.put("ConditionBuilder", ConditionBuilder.class);
-        staticTypes.put("TriggerBuilder", TriggerBuilder.class);
+        STATIC_TYPES.put("ModuleBuilder", ModuleBuilder.class);
+        STATIC_TYPES.put("ActionBuilder", ActionBuilder.class);
+        STATIC_TYPES.put("ConditionBuilder", ConditionBuilder.class);
+        STATIC_TYPES.put("TriggerBuilder", TriggerBuilder.class);
 
-        staticTypes.put("Configuration", Configuration.class);
-        staticTypes.put("Action", Action.class);
-        staticTypes.put("Condition", Condition.class);
-        staticTypes.put("Trigger", Trigger.class);
-        staticTypes.put("Rule", Rule.class);
-        staticTypes.put("ModuleType", ModuleType.class);
-        staticTypes.put("ActionType", ActionType.class);
-        staticTypes.put("TriggerType", TriggerType.class);
-        staticTypes.put("Visibility", Visibility.class);
-        staticTypes.put("ConfigDescriptionParameter", ConfigDescriptionParameter.class);
+        STATIC_TYPES.put("Configuration", Configuration.class);
+        STATIC_TYPES.put("Action", Action.class);
+        STATIC_TYPES.put("Condition", Condition.class);
+        STATIC_TYPES.put("Trigger", Trigger.class);
+        STATIC_TYPES.put("Rule", Rule.class);
+        STATIC_TYPES.put("ModuleType", ModuleType.class);
+        STATIC_TYPES.put("ActionType", ActionType.class);
+        STATIC_TYPES.put("TriggerType", TriggerType.class);
+        STATIC_TYPES.put("Visibility", Visibility.class);
+        STATIC_TYPES.put("ConfigDescriptionParameter", ConfigDescriptionParameter.class);
 
-        types.addAll(staticTypes.keySet());
+        TYPES.addAll(STATIC_TYPES.keySet());
 
-        types.add(AUTOMATION_MANAGER);
-        types.add(RULE_REGISTRY);
+        TYPES.add(AUTOMATION_MANAGER);
+        TYPES.add(RULE_REGISTRY);
 
-        presets.put(RULE_SUPPORT, Arrays.asList("Configuration", "Action", "Condition", "Trigger", "Rule",
+        PRESETS.put(RULE_SUPPORT, Arrays.asList("Configuration", "Action", "Condition", "Trigger", "Rule",
                 "ModuleBuilder", "ActionBuilder", "ConditionBuilder", "TriggerBuilder"));
-        presets.put("RuleSimple", Arrays.asList("SimpleActionHandler", "SimpleConditionHandler", "SimpleTriggerHandler",
+        PRESETS.put("RuleSimple", Arrays.asList("SimpleActionHandler", "SimpleConditionHandler", "SimpleTriggerHandler",
                 "SimpleRule", "TriggerType", "ConfigDescriptionParameter", "ModuleType", "ActionType", "Visibility"));
-        presets.put("RuleFactories",
+        PRESETS.put("RuleFactories",
                 Arrays.asList("ActionHandlerFactory", "ConditionHandlerFactory", "TriggerHandlerFactory", "TriggerType",
                         "ConfigDescriptionParameter", "ModuleType", "ActionType", "Visibility"));
     }
 
-    @Reference
-    public void setRuleRegistry(RuleRegistry ruleRegistry) {
+    @Activate
+    public RuleSupportScriptExtension(final @Reference RuleRegistry ruleRegistry,
+            final @Reference ScriptedRuleProvider ruleProvider,
+            final @Reference ScriptedCustomModuleHandlerFactory scriptedCustomModuleHandlerFactory,
+            final @Reference ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider,
+            final @Reference ScriptedPrivateModuleHandlerFactory scriptedPrivateModuleHandlerFactory) {
         this.ruleRegistry = ruleRegistry;
-    }
-
-    public void unsetRuleRegistry(RuleRegistry ruleRegistry) {
-        this.ruleRegistry = null;
-    }
-
-    @Reference
-    public void setRuleProvider(ScriptedRuleProvider ruleProvider) {
         this.ruleProvider = ruleProvider;
-    }
-
-    public void unsetRuleProvider(ScriptedRuleProvider ruleProvider) {
-        this.ruleProvider = null;
-    }
-
-    @Reference
-    public void setScriptedCustomModuleHandlerFactory(ScriptedCustomModuleHandlerFactory factory) {
-        this.scriptedCustomModuleHandlerFactory = factory;
-    }
-
-    public void unsetScriptedCustomModuleHandlerFactory(ScriptedCustomModuleHandlerFactory factory) {
-        this.scriptedCustomModuleHandlerFactory = null;
-    }
-
-    @Reference
-    public void setScriptedCustomModuleTypeProvider(ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider) {
+        this.scriptedCustomModuleHandlerFactory = scriptedCustomModuleHandlerFactory;
         this.scriptedCustomModuleTypeProvider = scriptedCustomModuleTypeProvider;
-    }
-
-    public void unsetScriptedCustomModuleTypeProvider(
-            ScriptedCustomModuleTypeProvider scriptedCustomModuleTypeProvider) {
-        this.scriptedCustomModuleTypeProvider = null;
-    }
-
-    @Reference
-    public void setScriptedPrivateModuleHandlerFactory(ScriptedPrivateModuleHandlerFactory factory) {
-        this.scriptedPrivateModuleHandlerFactory = factory;
-    }
-
-    public void unsetScriptedPrivateModuleHandlerFactory(ScriptedPrivateModuleHandlerFactory factory) {
-        this.scriptedPrivateModuleHandlerFactory = null;
+        this.scriptedPrivateModuleHandlerFactory = scriptedPrivateModuleHandlerFactory;
     }
 
     @Override
@@ -166,23 +139,22 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getPresets() {
-        return presets.keySet();
+        return PRESETS.keySet();
     }
 
     @Override
     public Collection<String> getTypes() {
-        return types;
+        return TYPES;
     }
 
     @Override
-    public Object get(String scriptIdentifier, String type) {
-        Object obj = staticTypes.get(type);
+    public @Nullable Object get(String scriptIdentifier, String type) {
+        Object obj = STATIC_TYPES.get(type);
         if (obj != null) {
             return obj;
         }
 
         Map<String, Object> objects = objectCache.get(scriptIdentifier);
-
         if (objects == null) {
             objects = new HashMap<>();
             objectCache.put(scriptIdentifier, objects);
@@ -213,17 +185,22 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
     public Map<String, Object> importPreset(String scriptIdentifier, String preset) {
         Map<String, Object> scopeValues = new HashMap<>();
 
-        Collection<String> values = presets.get(preset);
+        Collection<String> values = PRESETS.get(preset);
 
         for (String value : values) {
-            scopeValues.put(value, staticTypes.get(value));
+            scopeValues.put(value, STATIC_TYPES.get(value));
         }
 
         if (preset.equals(RULE_SUPPORT)) {
-            scopeValues.put(AUTOMATION_MANAGER, get(scriptIdentifier, AUTOMATION_MANAGER));
+            Object automationManager = get(scriptIdentifier, AUTOMATION_MANAGER);
+            if (automationManager != null) {
+                scopeValues.put(AUTOMATION_MANAGER, automationManager);
+            }
 
             Object ruleRegistry = get(scriptIdentifier, RULE_REGISTRY);
-            scopeValues.put(RULE_REGISTRY, ruleRegistry);
+            if (ruleRegistry != null) {
+                scopeValues.put(RULE_REGISTRY, ruleRegistry);
+            }
         }
 
         return scopeValues;
@@ -232,13 +209,11 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
     @Override
     public void unload(String scriptIdentifier) {
         Map<String, Object> objects = objectCache.remove(scriptIdentifier);
-
         if (objects != null) {
-            Object hr = objects.get(AUTOMATION_MANAGER);
-            if (hr != null) {
-                ScriptedAutomationManager automationManager = (ScriptedAutomationManager) hr;
-
-                automationManager.removeAll();
+            Object automationManager = objects.get(AUTOMATION_MANAGER);
+            if (automationManager != null) {
+                ScriptedAutomationManager scriptedAutomationManager = (ScriptedAutomationManager) automationManager;
+                scriptedAutomationManager.removeAll();
             }
         }
     }

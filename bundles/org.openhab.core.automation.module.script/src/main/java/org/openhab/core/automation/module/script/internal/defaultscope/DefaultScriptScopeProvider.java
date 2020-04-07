@@ -22,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.openhab.core.events.EventPublisher;
@@ -69,6 +71,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Simon Merschjohann - Refactored to be a {@link ScriptExtensionProvider}
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     private static final String PRESET_DEFAULT = "default";
@@ -193,7 +196,7 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
     }
 
     @Override
-    public Object get(String scriptIdentifier, String type) {
+    public @Nullable Object get(String scriptIdentifier, String type) {
         return elements.get(type);
     }
 

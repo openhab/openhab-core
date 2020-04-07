@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
@@ -26,8 +27,9 @@ import org.openhab.core.automation.module.script.ScriptExtensionProvider;
  */
 @NonNullByDefault
 public class ScriptExtensionManagerWrapper {
-    private ScriptEngineContainer container;
-    private ScriptExtensionManager manager;
+
+    private final ScriptEngineContainer container;
+    private final ScriptExtensionManager manager;
 
     public ScriptExtensionManagerWrapper(ScriptExtensionManager manager, ScriptEngineContainer container) {
         this.manager = manager;
@@ -50,7 +52,7 @@ public class ScriptExtensionManagerWrapper {
         return manager.getPresets();
     }
 
-    public Object get(String type) {
+    public @Nullable Object get(String type) {
         return manager.get(type, container.getIdentifier());
     }
 
@@ -63,9 +65,10 @@ public class ScriptExtensionManagerWrapper {
      * under their object name, and categorized by preset name. This method will import all named objects for a specific
      * preset name.
      *
-     * @implNote This call both returns the imported objects, and requests that the {@link ScriptEngineFactory} import them.
-     * The mechanism of how they are imported by the ScriptEngineFactory, or whether they are imported at all (aside from
-     * being returned by this call) is dependent of the implementation of the ScriptEngineFactory.
+     * @implNote This call both returns the imported objects, and requests that the {@link ScriptEngineFactory} import
+     *           them. The mechanism of how they are imported by the ScriptEngineFactory, or whether they are imported
+     *           at all (aside from eing returned by this call) is dependent of the implementation of the
+     *           ScriptEngineFactory.
      *
      * @apiNote Objects may appear in multiple named presets.
      * @see ScriptExtensionManager
@@ -74,6 +77,7 @@ public class ScriptExtensionManagerWrapper {
      * @return a map of host object names to objects
      */
     public Map<String, Object> importPreset(String preset) {
-        return manager.importPreset(preset, container.getFactory(), container.getScriptEngine(), container.getIdentifier());
+        return manager.importPreset(preset, container.getFactory(), container.getScriptEngine(),
+                container.getIdentifier());
     }
 }

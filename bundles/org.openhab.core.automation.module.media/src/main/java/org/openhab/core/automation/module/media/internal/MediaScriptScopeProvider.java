@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.openhab.core.voice.VoiceManager;
@@ -29,8 +31,10 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class MediaScriptScopeProvider implements ScriptExtensionProvider {
-    Map<String, Object> elements = new HashMap<>();
+
+    private final Map<String, Object> elements = new HashMap<>();
 
     @Reference
     protected void setAudioManager(AudioManager audioManager) {
@@ -66,7 +70,7 @@ public class MediaScriptScopeProvider implements ScriptExtensionProvider {
     }
 
     @Override
-    public Object get(String scriptIdentifier, String type) {
+    public @Nullable Object get(String scriptIdentifier, String type) {
         return elements.get(type);
     }
 
