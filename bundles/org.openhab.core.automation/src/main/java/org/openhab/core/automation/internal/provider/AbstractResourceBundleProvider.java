@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
@@ -69,7 +70,7 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("rawtypes")
 @NonNullByDefault
-public abstract class AbstractResourceBundleProvider<E> {
+public abstract class AbstractResourceBundleProvider<@NonNull E> {
 
     public AbstractResourceBundleProvider(String path) {
         this.path = path;
@@ -459,7 +460,7 @@ public abstract class AbstractResourceBundleProvider<E> {
         }
     }
 
-    protected void updateWaitingProviders(Parser<E> parser, Bundle bundle, URL url) {
+    protected void updateWaitingProviders(@Nullable Parser<E> parser, Bundle bundle, URL url) {
         List<URL> urlList = waitingProviders.get(bundle);
         if (parser == null) {
             if (urlList == null) {

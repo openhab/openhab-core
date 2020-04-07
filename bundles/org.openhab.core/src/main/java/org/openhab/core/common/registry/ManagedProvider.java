@@ -28,7 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *            type of the element key
  */
 @NonNullByDefault
-public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<E> {
+public interface ManagedProvider<@NonNull E extends Identifiable<K>, @NonNull K> extends Provider<E> {
 
     /**
      * Adds an element.

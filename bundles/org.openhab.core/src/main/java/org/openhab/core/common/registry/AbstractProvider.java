@@ -15,7 +15,9 @@ package org.openhab.core.common.registry;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *            type of the provided elements
  */
 @NonNullByDefault
-public abstract class AbstractProvider<E> implements Provider<E> {
+public abstract class AbstractProvider<@NonNull E> implements Provider<E> {
 
     private enum EventType {
         ADDED,
@@ -50,7 +52,7 @@ public abstract class AbstractProvider<E> implements Provider<E> {
         listeners.remove(listener);
     }
 
-    private void notifyListeners(E oldElement, E element, EventType eventType) {
+    private void notifyListeners(@Nullable E oldElement, E element, EventType eventType) {
         for (ProviderChangeListener<E> listener : this.listeners) {
             try {
                 switch (eventType) {
@@ -61,7 +63,7 @@ public abstract class AbstractProvider<E> implements Provider<E> {
                         listener.removed(this, element);
                         break;
                     case UPDATED:
-                        listener.updated(this, oldElement, element);
+                        listener.updated(this, oldElement != null ? oldElement : element, element);
                         break;
                     default:
                         break;

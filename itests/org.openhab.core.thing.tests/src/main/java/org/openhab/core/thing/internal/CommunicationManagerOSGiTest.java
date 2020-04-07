@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -82,6 +83,7 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
@@ -130,39 +132,19 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_1, "").withKind(ChannelKind.TRIGGER).build(),
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_2, "").withKind(ChannelKind.TRIGGER).build()).build();
 
-    private CommunicationManager manager;
+    private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private @Mock @NonNullByDefault({}) EventPublisher eventPublisher;
+    private @Mock @NonNullByDefault({}) StateProfile stateProfile;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @Mock @NonNullByDefault({}) AutoUpdateManager mockAutoUpdateManager;
+    private @Mock @NonNullByDefault({}) ThingHandler mockHandler;
+    private @Mock @NonNullByDefault({}) ProfileFactory mockProfileFactory;
+    private @Mock @NonNullByDefault({}) ProfileAdvisor mockProfileAdvisor;
+    private @Mock @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private @Mock @NonNullByDefault({}) TriggerProfile triggerProfile;
 
-    @Mock
-    private ProfileFactory mockProfileFactory;
-
-    @Mock
-    private ProfileAdvisor mockProfileAdvisor;
-
-    @Mock
-    private StateProfile stateProfile;
-
-    @Mock
-    private TriggerProfile triggerProfile;
-
-    @Mock
-    private EventPublisher eventPublisher;
-
-    @Mock
-    private ItemRegistry itemRegistry;
-
-    @Mock
-    private ThingRegistry thingRegistry;
-
-    @Mock
-    private ThingHandler mockHandler;
-
-    @Mock
-    private AutoUpdateManager mockAutoUpdateManager;
-
-    @Mock
-    private ChannelTypeRegistry channelTypeRegistry;
-
-    private SafeCaller safeCaller;
+    private @NonNullByDefault({}) CommunicationManager manager;
+    private @NonNullByDefault({}) SafeCaller safeCaller;
 
     @Before
     public void setup() {

@@ -17,6 +17,8 @@ import static org.junit.Assert.*;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,7 @@ import org.openhab.core.thing.binding.builder.ThingBuilder;
  * @author Oliver Libutzki - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@NonNullByDefault
 public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
 
     private static final String BINDIND_ID = "testBinding";
@@ -43,8 +46,8 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
     private static final String THING1_ID = "testThing1";
     private static final String THING2_ID = "testThing2";
 
-    private ManagedThingProvider managedThingProvider;
-    private ProviderChangeListener<Thing> thingChangeListener;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ProviderChangeListener<@NonNull Thing> thingChangeListener;
 
     @Before
     public void setup() {
@@ -60,7 +63,7 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
     }
 
-    private void registerThingsChangeListener(ProviderChangeListener<Thing> thingChangeListener) {
+    private void registerThingsChangeListener(ProviderChangeListener<@NonNull Thing> thingChangeListener) {
         unregisterCurrentThingsChangeListener();
         this.thingChangeListener = thingChangeListener;
         managedThingProvider.addProviderChangeListener(this.thingChangeListener);

@@ -12,7 +12,9 @@
  */
 package org.openhab.core.common.registry;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.StorageService;
 
 /**
@@ -29,7 +31,7 @@ import org.openhab.core.storage.StorageService;
  *            type of the element key
  */
 @NonNullByDefault
-public abstract class DefaultAbstractManagedProvider<E extends Identifiable<K>, K>
+public abstract class DefaultAbstractManagedProvider<@NonNull E extends Identifiable<K>, @NonNull K>
         extends AbstractManagedProvider<E, K, E> {
 
     public DefaultAbstractManagedProvider(final StorageService storageService) {
@@ -37,7 +39,7 @@ public abstract class DefaultAbstractManagedProvider<E extends Identifiable<K>, 
     }
 
     @Override
-    protected E toElement(String key, E element) {
+    protected @Nullable E toElement(String key, E element) {
         return element;
     }
 

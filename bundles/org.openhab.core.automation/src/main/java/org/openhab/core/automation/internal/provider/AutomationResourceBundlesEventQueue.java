@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.template.TemplateProvider;
 import org.openhab.core.automation.type.ModuleTypeProvider;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  * @param <E>
  */
-public class AutomationResourceBundlesEventQueue<E> implements Runnable {
+public class AutomationResourceBundlesEventQueue<@NonNull E> implements Runnable {
 
     /**
      * This field keeps instance of {@link Logger} that is used for logging.

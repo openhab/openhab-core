@@ -12,6 +12,7 @@
  */
 package org.openhab.core.common.registry;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -24,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @param <E> type of the element from the provider
  */
 @NonNullByDefault
-public interface ProviderChangeListener<E> {
+public interface ProviderChangeListener<@NonNull E> {
 
     /**
      * Notifies the listener that a single element has been added.

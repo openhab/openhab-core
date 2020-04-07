@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -67,7 +68,7 @@ public class ChannelItemProviderTest {
     @Mock
     private ItemFactory itemFactory;
     @Mock
-    private ProviderChangeListener<Item> listener;
+    private ProviderChangeListener<@NonNull Item> listener;
     @Mock
     private LocaleProvider localeProvider;
     @Mock

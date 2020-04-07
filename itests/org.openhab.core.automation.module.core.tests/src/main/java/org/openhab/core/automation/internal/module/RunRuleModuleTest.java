@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Markus Rathgeb - Migrated Groovy tests to pure Java ones and made it more robust
  */
+@NonNullByDefault
 public class RunRuleModuleTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(RunRuleModuleTest.class);
@@ -182,7 +185,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
         });

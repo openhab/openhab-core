@@ -28,6 +28,24 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <compilerId>eclipse</compilerId>
+            <compilerArgs>
+              <!-- Xtend doesn't support type annotations so warn on null analysis issues -->
+              <!-- See: https://bugs.eclipse.org/bugs/show_bug.cgi?id=506374 -->
+              <arg>-warn:+nullAnnot(org.eclipse.jdt.annotation.Nullable|org.eclipse.jdt.annotation.NonNull|org.eclipse.jdt.annotation.NonNullByDefault),+inheritNullAnnot,-nullUncheckedConversion,+null,+inheritNullAnnot,+nullAnnotConflict,-nullUncheckedConversion,+nullAnnotRedundant,+nullDereference</arg>
+            </compilerArgs>
+            <showWarnings>true</showWarnings>
+            <showDeprecation>true</showDeprecation>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

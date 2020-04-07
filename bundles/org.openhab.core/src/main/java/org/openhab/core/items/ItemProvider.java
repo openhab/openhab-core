@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Provider;
 
@@ -23,6 +24,6 @@ import org.openhab.core.common.registry.Provider;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-public interface ItemProvider extends Provider<Item> {
+public interface ItemProvider extends Provider<@NonNull Item> {
 
 }

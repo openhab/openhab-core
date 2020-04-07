@@ -44,8 +44,8 @@ import org.slf4j.LoggerFactory;
  *            type of the persistable element
  */
 @NonNullByDefault
-public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> extends AbstractProvider<E>
-        implements ManagedProvider<E, K> {
+public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>, @NonNull K, PE>
+        extends AbstractProvider<E> implements ManagedProvider<E, K> {
 
     private volatile Storage<PE> storage;
 
@@ -85,7 +85,7 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
     }
 
     @Override
-    public @Nullable E remove(@NonNull K key) {
+    public @Nullable E remove(K key) {
         String keyAsString = keyToString(key);
         PE persistableElement = storage.remove(keyAsString);
         if (persistableElement != null) {
@@ -102,7 +102,7 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
     }
 
     @Override
-    public @Nullable E update(@NonNull E element) {
+    public @Nullable E update(E element) {
         String key = getKeyAsString(element);
         if (storage.get(key) != null) {
             PE persistableElement = storage.put(key, toPersistableElement(element));
@@ -124,7 +124,7 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
         return null;
     }
 
-    private String getKeyAsString(@NonNull E element) {
+    private String getKeyAsString(E element) {
         return keyToString(element.getUID());
     }
 
@@ -141,7 +141,7 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
      * @param key key
      * @return string representation of the key
      */
-    protected abstract String keyToString(@NonNull K key);
+    protected abstract String keyToString(K key);
 
     /**
      * Converts the persistable element into the original element.
@@ -158,6 +158,6 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
      * @param element original element
      * @return persistable element
      */
-    protected abstract PE toPersistableElement(@NonNull E element);
+    protected abstract PE toPersistableElement(E element);
 
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.parser.Parser;
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("rawtypes")
 @NonNullByDefault
-public abstract class AbstractCommandProvider<E> implements ServiceTrackerCustomizer {
+public abstract class AbstractCommandProvider<@NonNull E> implements ServiceTrackerCustomizer {
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractCommandProvider.class);
 

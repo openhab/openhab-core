@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -28,6 +29,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = { ScriptedRuleProvider.class, RuleProvider.class })
 public class ScriptedRuleProvider implements RuleProvider {
     private final Collection<ProviderChangeListener<Rule>> listeners = new ArrayList<>();

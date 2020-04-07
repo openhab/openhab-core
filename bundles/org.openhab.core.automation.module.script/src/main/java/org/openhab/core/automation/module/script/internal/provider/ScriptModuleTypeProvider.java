@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 
 import javax.script.ScriptEngine;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.internal.handler.AbstractScriptModuleHandler;
@@ -51,6 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Scott Rushworth - Initial contribution
  */
+@NonNullByDefault
 @Component
 public class ScriptModuleTypeProvider implements ModuleTypeProvider {
 
@@ -59,7 +62,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
 
     @SuppressWarnings("unchecked")
     @Override
-    public ModuleType getModuleType(String UID, Locale locale) {
+    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
         if (ScriptActionHandler.TYPE_ID.equals(UID)) {
             return getScriptActionType(locale);
         } else if (ScriptConditionHandler.TYPE_ID.equals(UID)) {
@@ -69,7 +72,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
         }
     }
 
-    private ModuleType getScriptActionType(Locale locale) {
+    private @Nullable ModuleType getScriptActionType(@Nullable Locale locale) {
         if (parameterOptions.isEmpty()) {
             return null;
         } else {
@@ -82,7 +85,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
         }
     }
 
-    private ModuleType getScriptConditionType(Locale locale) {
+    private @Nullable ModuleType getScriptConditionType(@Nullable Locale locale) {
         if (parameterOptions.isEmpty()) {
             return null;
         } else {
@@ -98,7 +101,7 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
      *
      * @return a list of {#link ConfigurationDescriptionParameter}s
      */
-    private List<ConfigDescriptionParameter> getConfigDescriptions(Locale locale) {
+    private List<ConfigDescriptionParameter> getConfigDescriptions(@Nullable Locale locale) {
         List<ParameterOption> parameterOptionsList = new ArrayList<>();
         for (Map.Entry<String, String> entry : parameterOptions.entrySet()) {
             parameterOptionsList.add(new ParameterOption(entry.getKey(), entry.getValue()));
@@ -114,8 +117,9 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
     }
 
     @Override
-    public Collection<ModuleType> getModuleTypes(Locale locale) {
-        return Stream.of(getScriptActionType(locale), getScriptConditionType(locale)).collect(Collectors.toList());
+    public Collection<ModuleType> getModuleTypes(@Nullable Locale locale) {
+        return (Collection<ModuleType>) Stream.of(getScriptActionType(locale), getScriptConditionType(locale))
+                .collect(Collectors.toList());
     }
 
     @Override

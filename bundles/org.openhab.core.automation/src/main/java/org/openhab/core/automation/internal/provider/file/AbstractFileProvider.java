@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Ana Dimova - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractFileProvider<E> implements Provider<E> {
+public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
 
     protected static final String CONFIG_PROPERTY_ROOTS = "roots";
     protected final Logger logger = LoggerFactory.getLogger(AbstractFileProvider.class);
