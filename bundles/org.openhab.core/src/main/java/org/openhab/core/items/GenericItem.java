@@ -248,21 +248,25 @@ public abstract class GenericItem implements ActiveItem {
 
     protected void notifyListeners(final State oldState, final State newState) {
         // if nothing has changed, we send update notifications
-        Set<StateChangeListener> clonedListeners = null;
-        clonedListeners = new CopyOnWriteArraySet<>(listeners);
+        Set<StateChangeListener> clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
-        for (final StateChangeListener listener : clonedListeners) {
-            pool.execute(() -> {
-                try {
-                    listener.stateUpdated(GenericItem.this, newState);
-                    if (newState != null && !newState.equals(oldState)) {
-                        listener.stateChanged(GenericItem.this, oldState, newState);
+        try {
+            final boolean stateChanged = newState != null && !newState.equals(oldState);
+            clonedListeners.forEach(listener ->
+                pool.execute(() -> {
+                    try {
+                        listener.stateUpdated(GenericItem.this, newState);
+                        if (stateChanged) {
+                            listener.stateChanged(GenericItem.this, oldState, newState);
+                        }
+                    } catch (Exception e) {
+                        logger.warn("failed notifying listener '{}' about state update of item {}: {}", listener,
+                                GenericItem.this.getName(), e.getMessage(), e);
                     }
-                } catch (Exception e) {
-                    logger.warn("failed notifying listener '{}' about state update of item {}: {}", listener,
-                            GenericItem.this.getName(), e.getMessage(), e);
-                }
-            });
+                }));
+        } catch (IllegalArgumentException e) {
+            logger.warn("failed comparing oldState '{}' to newState '{}' for item {}: {}", oldState,
+                    newState, GenericItem.this.getName(), e.getMessage(), e);
         }
     }
 
