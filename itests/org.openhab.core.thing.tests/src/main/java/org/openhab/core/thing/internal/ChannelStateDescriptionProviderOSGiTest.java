@@ -85,7 +85,7 @@ import org.osgi.service.component.ComponentContext;
  * @author Thomas Höfer - Thing type constructor modified because of thing properties introduction
  * @author Markus Rathgeb - Migrated from Groovy to plain Java
  */
-@NonNullByDefault 
+@NonNullByDefault
 public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "thingStatusInfoI18nTest.bundle";
@@ -115,11 +115,12 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         thingHandlerFactory.activate(componentContext);
         registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
 
-        final StateDescription state = new StateDescription(BigDecimal.ZERO, BigDecimal.valueOf(100), BigDecimal.TEN,
-                "%d Peek", true, Collections.singletonList(new StateOption("SOUND", "My great sound.")));
+        final StateDescription state = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.TEN).withPattern("%d Peek").withReadOnly(true)
+                .withOption(new StateOption("SOUND", "My great sound.")).build().toStateDescription();
 
-        final StateDescription state2 = new StateDescription(BigDecimal.ZERO, BigDecimal.valueOf(256),
-                BigDecimal.valueOf(8), null, false, null);
+        final StateDescription state2 = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                .withMaximum(BigDecimal.valueOf(256)).withStep(BigDecimal.valueOf(8)).build().toStateDescription();
 
         final ChannelType channelType = new ChannelType(new ChannelTypeUID("hue:alarm"), false, CoreItemFactory.NUMBER,
                 " ", "", null, null, state, null);

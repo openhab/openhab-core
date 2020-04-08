@@ -28,6 +28,8 @@ import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.EventOption;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
  * Tests the {@link ChannelTypeBuilder}.
@@ -44,8 +46,10 @@ public class ChannelTypeBuilderTest {
     private static final List<String> TAGS = Arrays.asList("TAG1", "TAG2");
     private static URI configDescriptionUri;
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("bindingId", "channelId");
-    private static final StateDescription STATE_DESCRIPTION = new StateDescription(BigDecimal.ZERO, new BigDecimal(100),
-            BigDecimal.ONE, "%s", false, null);
+    private static final StateDescriptionFragment STATE_DESCRIPTION_FRAGMENT = StateDescriptionFragmentBuilder.create()
+            .withMinimum(BigDecimal.ZERO).withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withPattern("%s")
+            .build();
+    private static final StateDescription STATE_DESCRIPTION = STATE_DESCRIPTION_FRAGMENT.toStateDescription();
     private static final EventDescription EVENT_DESCRIPTION = new EventDescription(
             Arrays.asList(new EventOption(CommonTriggerEvents.DIR1_PRESSED, null),
                     new EventOption(CommonTriggerEvents.DIR1_RELEASED, null)));
@@ -135,9 +139,17 @@ public class ChannelTypeBuilderTest {
         assertThat(channelType.getTags(), is(hasSize(2)));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void withStateDescriptionShouldSetStateDescription() {
         ChannelType channelType = stateBuilder.withStateDescription(STATE_DESCRIPTION).build();
+
+        assertThat(channelType.getState(), is(STATE_DESCRIPTION));
+    }
+
+    @Test
+    public void withStateDescriptionFragmentShouldSetStateDescription() {
+        ChannelType channelType = stateBuilder.withStateDescriptionFragment(STATE_DESCRIPTION_FRAGMENT).build();
 
         assertThat(channelType.getState(), is(STATE_DESCRIPTION));
     }

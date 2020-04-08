@@ -28,24 +28,23 @@ import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateDescriptionFragmentProvider;
-import org.openhab.core.types.StateDescriptionProvider;
 import org.openhab.core.types.StateOption;
 
 /**
- * Tests for the StateDescriptionService implementation
+ * Tests for the {@link StateDescriptionServiceImpl}.
  *
  * @author Lyubomir Papazov - Initial contribution
  */
-@SuppressWarnings({ "deprecation", "null" })
+@SuppressWarnings("null")
 public class StateDescriptionServiceImplTest {
 
     private static final String ITEM_NAME = "Item1";
     private static final int STATE_DESCRIPTION_PROVIDER_DEFAULT_SERVICE_RANKING = 0;
-    private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE = new BigDecimal("0");
-    private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE = new BigDecimal("0");
-    private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP = new BigDecimal("0");
+    private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE = BigDecimal.ZERO;
+    private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE = BigDecimal.ZERO;
+    private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP = BigDecimal.ZERO;
     private static final String STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN = "pattern1";
-    private static final boolean STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY = false;
+    private static final Boolean STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY = Boolean.FALSE;
     private static final List<StateOption> STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS = Collections.emptyList();
 
     private StateDescriptionServiceImpl stateDescriptionService;
@@ -60,156 +59,143 @@ public class StateDescriptionServiceImplTest {
     }
 
     @Test
-    public void legacyTestServiceWithOneStateDescriptionProvider() {
-        StateDescriptionProvider stateDescriptionProviderDefault = mock(StateDescriptionProvider.class);
-        when(stateDescriptionProviderDefault.getRank()).thenReturn(STATE_DESCRIPTION_PROVIDER_DEFAULT_SERVICE_RANKING);
-        StateDescription stateDescription = new StateDescription(STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE,
-                STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE, STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP,
-                STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN, STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY,
-                STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS);
-        when(stateDescriptionProviderDefault.getStateDescription(ITEM_NAME, null)).thenReturn(stateDescription);
-        stateDescriptionService.addStateDescriptionProvider(stateDescriptionProviderDefault);
-
-        StateDescription finalStateDescription = item.getStateDescription();
-
-        assertThat(finalStateDescription.getMinimum(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE));
-        assertThat(finalStateDescription.getMaximum(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE));
-        assertThat(finalStateDescription.getStep(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP));
-        assertThat(finalStateDescription.getPattern(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN));
-        assertThat(finalStateDescription.isReadOnly(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY));
-        assertThat(finalStateDescription.getOptions(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS));
-    }
-
-    @Test
-    public void legacyTestMinValueMaxValueStepAndPatternTwoDescriptionProviders() {
-        StateDescription stateDescription1 = new StateDescription(new BigDecimal("-1"), new BigDecimal("-1"),
-                new BigDecimal("-1"), "pattern1", false, null);
-        StateDescription stateDescription2 = new StateDescription(new BigDecimal("-2"), new BigDecimal("-2"),
-                new BigDecimal("-2"), "pattern2", false, null);
-
-        registerStateDescriptionProvider(stateDescription1, -1);
-        registerStateDescriptionProvider(stateDescription2, -2);
-        StateDescription finalStateDescription = item.getStateDescription();
-
-        assertThat(finalStateDescription.getMinimum(), is(stateDescription1.getMinimum()));
-        assertThat(finalStateDescription.getMaximum(), is(stateDescription1.getMaximum()));
-        assertThat(finalStateDescription.getStep(), is(stateDescription1.getStep()));
-        assertThat(finalStateDescription.getPattern(), is(stateDescription1.getPattern()));
-    }
-
-    @Test
-    public void legacyTestIsReadOnlyWhenTwoDescriptionProvidersHigherRankingIsNotReadOnly() {
-        StateDescription stateDescription1 = new StateDescription(null, null, null, null, false, null);
-        StateDescription stateDescription2 = new StateDescription(null, null, null, null, true, null);
-
-        registerStateDescriptionProvider(stateDescription1, -1);
-        registerStateDescriptionProvider(stateDescription2, -2);
-        StateDescription finalStateDescription = item.getStateDescription();
-
-        assertThat(finalStateDescription.isReadOnly(), is(stateDescription1.isReadOnly()));
-    }
-
-    @Test
-    public void legacyTestIsReadOnlyWhenTwoDescriptionProvidersHigherRankingIsReadOnly() {
-        StateDescription stateDescription1 = new StateDescription(null, null, null, null, true, null);
-        StateDescription stateDescription2 = new StateDescription(null, null, null, null, false, null);
-
-        registerStateDescriptionProvider(stateDescription1, -1);
-        registerStateDescriptionProvider(stateDescription2, -2);
-        StateDescription finalStateDescription = item.getStateDescription();
-
-        assertThat(finalStateDescription.isReadOnly(), is(stateDescription1.isReadOnly()));
-    }
-
-    @Test
-    public void legacyTestOptionsWhenTwoDescriptionProvidersHigherRankingProvidesOptions() {
-        StateDescription stateDescription1 = new StateDescription(null, null, null, null, false,
-                Arrays.asList(new StateOption("value", "label")));
-        StateDescription stateDescription2 = new StateDescription(null, null, null, null, false,
-                Collections.emptyList());
-
-        registerStateDescriptionProvider(stateDescription1, -1);
-        registerStateDescriptionProvider(stateDescription2, -2);
-        StateDescription finalStateDescription = item.getStateDescription();
-
-        assertThat(finalStateDescription.getOptions(), is(stateDescription1.getOptions()));
-    }
-
-    @Test
-    public void legacyTestOptionsWhenTwoDescriptionProvidersHigherRankingDoesntProvideOptions() {
-        StateDescription stateDescription1 = new StateDescription(null, null, null, null, false,
-                Collections.emptyList());
-        StateDescription stateDescription2 = new StateDescription(null, null, null, null, false,
-                Arrays.asList(new StateOption("value", "label")));
-
-        registerStateDescriptionProvider(stateDescription1, -1);
-        registerStateDescriptionProvider(stateDescription2, -2);
-        StateDescription finalStateDescription = item.getStateDescription();
-
-        assertThat(finalStateDescription.getOptions(), is(stateDescription2.getOptions()));
-    }
-
-    @Test
-    public void testLegacyProviderMergedBeforeFragmentProvider() {
-        StateDescription stateDescription = new StateDescription(null, null, null, "pattern", false, null);
-        registerStateDescriptionProvider(stateDescription, 1);
-
-        List<StateOption> options = Arrays.asList(new StateOption("value", "label"));
+    public void testServiceWithOneStateDescriptionProvider() {
         StateDescriptionFragment stateDescriptionFragment = StateDescriptionFragmentBuilder.create()
-                .withMinimum(BigDecimal.ZERO).withMaximum(BigDecimal.TEN).withOptions(options).build();
-        registerStateDescriptionFragmentProvider(stateDescriptionFragment, 1);
+                .withMinimum(STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE)
+                .withMaximum(STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE)
+                .withStep(STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP)
+                .withPattern(STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN)
+                .withReadOnly(STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY)
+                .withOptions(STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS).build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment,
+                STATE_DESCRIPTION_PROVIDER_DEFAULT_SERVICE_RANKING);
 
-        StateDescription finalStateDescription = item.getStateDescription();
+        StateDescription stateDescription = item.getStateDescription();
 
-        assertThat(finalStateDescription.getMinimum(), is(BigDecimal.ZERO));
-        assertThat(finalStateDescription.getMaximum(), is(BigDecimal.TEN));
-        assertThat(finalStateDescription.getPattern(), is("pattern"));
-        assertThat(finalStateDescription.isReadOnly(), is(false));
-        assertThat(finalStateDescription.getOptions(), is(options));
+        assertThat(stateDescription.getMinimum(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE));
+        assertThat(stateDescription.getMaximum(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE));
+        assertThat(stateDescription.getStep(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP));
+        assertThat(stateDescription.getPattern(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN));
+        assertThat(stateDescription.isReadOnly(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY));
+        assertThat(stateDescription.getOptions(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS));
     }
 
     @Test
-    public void testFragmentProviderOrder() {
-        List<StateOption> options = Arrays.asList(new StateOption("value", "label"));
+    public void testMinValueMaxValueStepAndPatternTwoDescriptionProviders() {
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create()
+                .withMinimum(new BigDecimal(-1)) //
+                .withMaximum(new BigDecimal(-1)) //
+                .withStep(new BigDecimal(-1)) //
+                .withPattern("pattern1").build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
 
-        StateDescriptionFragment firstFragment = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO) //
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create()
+                .withMinimum(new BigDecimal(-2)) //
+                .withMaximum(new BigDecimal(-2)) //
+                .withStep(new BigDecimal(-2)) //
+                .withPattern("pattern2").build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
+
+        StateDescription stateDescription = item.getStateDescription();
+
+        assertThat(stateDescription.getMinimum(), is(stateDescriptionFragment1.getMinimum()));
+        assertThat(stateDescription.getMaximum(), is(stateDescriptionFragment1.getMaximum()));
+        assertThat(stateDescription.getStep(), is(stateDescriptionFragment1.getStep()));
+        assertThat(stateDescription.getPattern(), is(stateDescriptionFragment1.getPattern()));
+    }
+
+    @Test
+    public void testIsReadOnlyWhenTwoDescriptionProvidersHigherRankingIsNotReadOnly() {
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create().build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
+
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create()
+                .withReadOnly(Boolean.TRUE).build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
+
+        StateDescription stateDescription = item.getStateDescription();
+
+        assertThat(stateDescription.isReadOnly(), is(stateDescriptionFragment1.isReadOnly()));
+    }
+
+    @Test
+    public void testIsReadOnlyWhenTwoDescriptionProvidersHigherRankingIsReadOnly() {
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create()
+                .withReadOnly(Boolean.TRUE).build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
+
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create().build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
+
+        StateDescription stateDescription = item.getStateDescription();
+
+        assertThat(stateDescription.isReadOnly(), is(stateDescriptionFragment1.isReadOnly()));
+    }
+
+    @Test
+    public void testOptionsWhenTwoDescriptionProvidersHigherRankingProvidesOptions() {
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create()
+                .withOption(new StateOption("value", "label")).build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
+
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create().build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
+
+        StateDescription stateDescription = item.getStateDescription();
+
+        assertThat(stateDescription.getOptions(), is(stateDescriptionFragment1.getOptions()));
+    }
+
+    @Test
+    public void testOptionsWhenTwoDescriptionProvidersHigherRankingDoesntProvideOptions() {
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create().build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
+
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create()
+                .withOption(new StateOption("value", "label")).build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
+
+        StateDescription stateDescription = item.getStateDescription();
+
+        assertThat(stateDescription.getOptions(), is(stateDescriptionFragment2.getOptions()));
+    }
+
+    @Test
+    public void testFragmentsAreMergedInProviderOrder() {
+        final List<StateOption> options = Arrays.asList(new StateOption("value", "label"));
+
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create()
+                .withMinimum(BigDecimal.ZERO) //
                 .withMaximum(BigDecimal.TEN) //
                 .withPattern("pattern") //
                 .withReadOnly(Boolean.TRUE) //
                 .withOptions(options).build();
-        registerStateDescriptionFragmentProvider(firstFragment, -1);
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
 
-        StateDescriptionFragment secondFragment = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ONE) //
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create()
+                .withMinimum(BigDecimal.ONE) //
                 .withMaximum(BigDecimal.ONE) //
                 .withStep(BigDecimal.ONE) //
                 .withPattern("base_pattern") //
                 .withOptions(options).build();
-        registerStateDescriptionFragmentProvider(secondFragment, -2);
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
 
-        StateDescription finalStateDescription = item.getStateDescription();
+        StateDescription stateDescription = item.getStateDescription();
 
-        assertThat(finalStateDescription.getMinimum(), is(BigDecimal.ZERO));
-        assertThat(finalStateDescription.getMaximum(), is(BigDecimal.TEN));
-        assertThat(finalStateDescription.getStep(), is(BigDecimal.ONE));
-        assertThat(finalStateDescription.getPattern(), is("pattern"));
-        assertThat(finalStateDescription.isReadOnly(), is(true));
-        assertThat(finalStateDescription.getOptions(), is(options));
+        assertThat(stateDescription.getMinimum(), is(BigDecimal.ZERO));
+        assertThat(stateDescription.getMaximum(), is(BigDecimal.TEN));
+        assertThat(stateDescription.getStep(), is(BigDecimal.ONE));
+        assertThat(stateDescription.getPattern(), is("pattern"));
+        assertThat(stateDescription.isReadOnly(), is(true));
+        assertThat(stateDescription.getOptions(), is(options));
     }
 
-    private void registerStateDescriptionProvider(StateDescription stateDescription, int serviceRanking) {
-        StateDescriptionProvider stateDescriptionProvider = mock(StateDescriptionProvider.class);
-
-        when(stateDescriptionProvider.getRank()).thenReturn(serviceRanking);
-        when(stateDescriptionProvider.getStateDescription(ITEM_NAME, null)).thenReturn(stateDescription);
-        stateDescriptionService.addStateDescriptionProvider(stateDescriptionProvider);
-    }
-
-    private void registerStateDescriptionFragmentProvider(StateDescriptionFragment stateDescription,
+    private void registerStateDescriptionFragmentProvider(StateDescriptionFragment stateDescriptionFragment,
             int serviceRanking) {
         StateDescriptionFragmentProvider stateDescriptionProvider = mock(StateDescriptionFragmentProvider.class);
-
         when(stateDescriptionProvider.getRank()).thenReturn(serviceRanking);
-        when(stateDescriptionProvider.getStateDescriptionFragment(ITEM_NAME, null)).thenReturn(stateDescription);
+        when(stateDescriptionProvider.getStateDescriptionFragment(ITEM_NAME, null))
+                .thenReturn(stateDescriptionFragment);
         stateDescriptionService.addStateDescriptionFragmentProvider(stateDescriptionProvider);
     }
 

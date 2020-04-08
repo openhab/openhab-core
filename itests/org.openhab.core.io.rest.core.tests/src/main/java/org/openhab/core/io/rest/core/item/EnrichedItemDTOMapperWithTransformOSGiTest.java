@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +27,7 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.service.StateDescriptionService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 
 /**
@@ -44,8 +44,9 @@ public class EnrichedItemDTOMapperWithTransformOSGiTest extends JavaOSGiTest {
     public void setup() {
         initMocks(this);
 
-        StateDescription stateDescription = new StateDescription(BigDecimal.ZERO, BigDecimal.valueOf(100),
-                BigDecimal.TEN, "%d °C", true, Collections.singletonList(new StateOption("SOUND", "My great sound.")));
+        StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.TEN).withPattern("%d °C").withReadOnly(true)
+                .withOption(new StateOption("SOUND", "My great sound.")).build().toStateDescription();
         when(stateDescriptionService.getStateDescription(ITEM_NAME, null)).thenReturn(stateDescription);
     }
 

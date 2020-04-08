@@ -36,14 +36,14 @@ public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Tr
     }
 
     @Override
-    public ChannelType build() {
-        return new ChannelType(channelTypeUID, advanced, null, ChannelKind.TRIGGER, label, description, category,
-                tags.isEmpty() ? null : tags, null, eventDescription, configDescriptionURI);
-    }
-
-    @Override
     public TriggerChannelTypeBuilder withEventDescription(EventDescription eventDescription) {
         this.eventDescription = eventDescription;
         return this;
+    }
+
+    @Override
+    public ChannelType build() {
+        return new ChannelType(channelTypeUID, advanced, null, ChannelKind.TRIGGER, label, description, category,
+                tags.isEmpty() ? null : tags, null, eventDescription, configDescriptionURI, null);
     }
 }

@@ -20,7 +20,7 @@ import org.openhab.core.thing.internal.type.StateChannelTypeBuilderImpl;
 import org.openhab.core.thing.internal.type.TriggerChannelTypeBuilderImpl;
 
 /**
- * Interface for ChannelTypeBuilder
+ * Interface for {@link ChannelTypeBuilder}.
  *
  * @author Stefan Triller - Initial contribution
  */
