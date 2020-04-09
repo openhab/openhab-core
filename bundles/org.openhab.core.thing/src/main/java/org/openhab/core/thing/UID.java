@@ -42,7 +42,7 @@ public abstract class UID extends AbstractUID {
      * Parses a UID for a given string. The UID must be in the format
      * 'bindingId:segment:segment:...'.
      *
-     * @param uid uid in form a string (must not be null)
+     * @param uid uid in form a string
      */
     public UID(String uid) {
         super(uid);
@@ -51,7 +51,7 @@ public abstract class UID extends AbstractUID {
     /**
      * Creates a UID for list of segments.
      *
-     * @param segments segments (must not be null)
+     * @param segments segments
      */
     public UID(String... segments) {
         super(segments);
@@ -60,7 +60,7 @@ public abstract class UID extends AbstractUID {
     /**
      * Creates a UID for list of segments.
      *
-     * @param segments segments (must not be null)
+     * @param segments segments
      */
     protected UID(List<String> segments) {
         super(segments);

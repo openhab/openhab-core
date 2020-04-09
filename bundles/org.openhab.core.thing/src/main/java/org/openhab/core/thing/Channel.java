@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -75,43 +74,6 @@ public class Channel {
      * @deprecated - use {@link ChannelBuilder} instead
      */
     @Deprecated
-    public Channel(ChannelUID uid, String acceptedItemType) {
-        this.uid = uid;
-        this.acceptedItemType = acceptedItemType;
-        this.kind = ChannelKind.STATE;
-        this.configuration = new Configuration();
-        this.properties = Map.of();
-    }
-
-    /**
-     * @deprecated - use {@link ChannelBuilder} instead
-     */
-    @Deprecated
-    public Channel(ChannelUID uid, String acceptedItemType, Configuration configuration) {
-        this(uid, null, acceptedItemType, ChannelKind.STATE, configuration, new HashSet<>(0), null, null, null, null);
-    }
-
-    /**
-     * @deprecated - use {@link ChannelBuilder} instead
-     */
-    @Deprecated
-    public Channel(ChannelUID uid, String acceptedItemType, Set<String> defaultTags) {
-        this(uid, null, acceptedItemType, ChannelKind.STATE, null, defaultTags, null, null, null, null);
-    }
-
-    /**
-     * @deprecated - use {@link ChannelBuilder} instead
-     */
-    @Deprecated
-    public Channel(ChannelUID uid, String acceptedItemType, Configuration configuration, Set<String> defaultTags,
-            Map<String, String> properties) {
-        this(uid, null, acceptedItemType, ChannelKind.STATE, null, defaultTags, properties, null, null, null);
-    }
-
-    /**
-     * @deprecated - use ChannelBuilder instead
-     */
-    @Deprecated
     public Channel(ChannelUID uid, @Nullable ChannelTypeUID channelTypeUID, @Nullable String acceptedItemType,
             ChannelKind kind, @Nullable Configuration configuration, Set<String> defaultTags,
             @Nullable Map<String, String> properties, @Nullable String label, @Nullable String description,
@@ -134,7 +96,7 @@ public class Channel {
      * @return accepted item type
      */
     public @Nullable String getAcceptedItemType() {
-        return this.acceptedItemType;
+        return acceptedItemType;
     }
 
     /**
@@ -152,7 +114,7 @@ public class Channel {
      * @return unique id of the channel
      */
     public ChannelUID getUID() {
-        return this.uid;
+        return uid;
     }
 
     /**
@@ -171,7 +133,7 @@ public class Channel {
      * @return the label for the channel. Can be null.
      */
     public @Nullable String getLabel() {
-        return this.label;
+        return label;
     }
 
     /**
@@ -182,7 +144,7 @@ public class Channel {
      * @return the description for the channel. Can be null.
      */
     public @Nullable String getDescription() {
-        return this.description;
+        return description;
     }
 
     /**

@@ -15,12 +15,16 @@ package org.openhab.core.thing;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * {@link ThingUID} represents a unique identifier for things.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Jochen Hiller - Bugfix 455434: added default constructor
  */
+@NonNullByDefault
 public class ThingUID extends UID {
 
     private static final String NO_THING_TYPE = "";
@@ -86,7 +90,7 @@ public class ThingUID extends UID {
         super(getArray(bindingId, NO_THING_TYPE, id, bridgeUID.getBridgeIds(), bridgeUID.getId()));
     }
 
-    private static String[] getArray(String bindingId, String thingTypeId, String id, String... bridgeIds) {
+    private static String[] getArray(String bindingId, String thingTypeId, String id, @Nullable String... bridgeIds) {
         if (bridgeIds == null || bridgeIds.length == 0) {
             return new String[] { bindingId, thingTypeId, id };
         }
@@ -129,42 +133,10 @@ public class ThingUID extends UID {
     /**
      * Instantiates a new thing UID.
      *
-     * @param segments segments (must not be null)
+     * @param segments segments
      */
     public ThingUID(String... segments) {
         super(segments);
-    }
-
-    /**
-     * Returns the thing type id.
-     *
-     * @return thing type id
-     * @deprecated use {@link Thing#getThingTypeUID()} instead.
-     */
-    @Deprecated
-    public String getThingTypeId() {
-        String thingType = getSegment(1);
-        if (NO_THING_TYPE.equals(thingType)) {
-            return null;
-        } else {
-            return thingType;
-        }
-    }
-
-    /**
-     * Returns the thing type uid.
-     *
-     * @return thing type uid
-     * @deprecated use {@link Thing#getThingTypeUID()} instead.
-     */
-    @Deprecated
-    public ThingTypeUID getThingTypeUID() {
-        String thingType = getSegment(1);
-        if (NO_THING_TYPE.equals(thingType)) {
-            return null;
-        } else {
-            return new ThingTypeUID(getSegment(0), getSegment(1));
-        }
     }
 
     /**

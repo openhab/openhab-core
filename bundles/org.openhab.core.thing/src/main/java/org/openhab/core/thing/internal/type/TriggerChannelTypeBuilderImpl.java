@@ -14,7 +14,6 @@ package org.openhab.core.thing.internal.type;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.TriggerChannelTypeBuilder;
@@ -41,9 +40,10 @@ public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Tr
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ChannelType build() {
-        return new ChannelType(channelTypeUID, advanced, null, ChannelKind.TRIGGER, label, description, category,
-                tags.isEmpty() ? null : tags, null, eventDescription, configDescriptionURI, null);
+        return new ChannelType(channelTypeUID, advanced, label, description, category, tags, eventDescription,
+                configDescriptionURI);
     }
 }

@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.AbstractUID;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
@@ -101,7 +102,11 @@ public class DiscoveryResultImpl implements DiscoveryResult {
             return localThingTypeUID;
         } else {
             // fallback for discovery result which were created before the thingTypeUID field was added
-            return thingUID.getThingTypeUID();
+            String[] segments = thingUID.getAsString().split(AbstractUID.SEPARATOR);
+            if (!segments[1].isEmpty()) {
+                return new ThingTypeUID(thingUID.getBindingId(), segments[1]);
+            }
+            throw new IllegalArgumentException("ThingTypeUID of thing '" + thingUID.getAsString() + "' is null.");
         }
     }
 

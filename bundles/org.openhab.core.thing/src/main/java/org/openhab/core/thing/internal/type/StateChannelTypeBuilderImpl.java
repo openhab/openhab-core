@@ -15,7 +15,6 @@ package org.openhab.core.thing.internal.type;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
-import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.StateChannelTypeBuilder;
@@ -75,15 +74,11 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ChannelType build() {
-        if (stateDescriptionFragment != null) {
-            return new ChannelType(channelTypeUID, advanced, itemType, ChannelKind.STATE, label, description, category,
-                    tags.isEmpty() ? null : tags, stateDescriptionFragment.toStateDescription(), null,
-                    configDescriptionURI, autoUpdatePolicy);
-        }
-
-        return new ChannelType(channelTypeUID, advanced, itemType, label, description, category,
-                tags.isEmpty() ? null : tags, commandDescription, configDescriptionURI, autoUpdatePolicy);
+        return new ChannelType(channelTypeUID, advanced, itemType, label, description, category, tags,
+                stateDescriptionFragment != null ? stateDescriptionFragment.toStateDescription() : null,
+                commandDescription, configDescriptionURI, autoUpdatePolicy);
     }
 }

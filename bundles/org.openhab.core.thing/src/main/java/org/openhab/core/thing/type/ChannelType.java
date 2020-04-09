@@ -15,6 +15,8 @@ package org.openhab.core.thing.type;
 import java.net.URI;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.types.CommandDescription;
@@ -31,66 +33,45 @@ import org.openhab.core.types.StateDescription;
  * @author Michael Grammling - Initial contribution
  * @author Henning Treu - add command options
  */
+@NonNullByDefault
 public class ChannelType extends AbstractDescriptionType {
 
     private final boolean advanced;
-    private final String itemType;
+    private final @Nullable String itemType;
     private final ChannelKind kind;
     private final Set<String> tags;
-    private final String category;
-    private final StateDescription state;
-    private final CommandDescription commandDescription;
-    private final EventDescription event;
-    private final URI configDescriptionURI;
-    private final AutoUpdatePolicy autoUpdatePolicy;
+    private final @Nullable String category;
+    private final @Nullable StateDescription state;
+    private final @Nullable CommandDescription commandDescription;
+    private final @Nullable EventDescription event;
+    private final @Nullable URI configDescriptionURI;
+    private final @Nullable AutoUpdatePolicy autoUpdatePolicy;
 
     /**
-     * @deprecated Use the {@link ChannelTypeBuilder} instead.
-     */
-    @Deprecated
-    public ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, String label, String description,
-            String category, Set<String> tags, StateDescription state, URI configDescriptionURI) {
-        this(uid, advanced, itemType, ChannelKind.STATE, label, description, category, tags, state, null,
-                configDescriptionURI);
-    }
-
-    /**
-     * @deprecated Use the {@link ChannelTypeBuilder} instead.
-     */
-    @Deprecated
-    public ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, ChannelKind kind, String label,
-            String description, String category, Set<String> tags, StateDescription state, EventDescription event,
-            URI configDescriptionURI) throws IllegalArgumentException {
-        this(uid, advanced, itemType, kind, label, description, category, tags, state, event, configDescriptionURI,
-                null);
-    }
-
-    /**
-     * Creates a new instance of a "write-only" {@link ChannelType} with command options. The purpose of this
-     * {@link ChannelType} is to send command to a device without updating the state of the corresponding channel.
-     * E.g. activate a special device mode which is not represented as a definitive state.
+     * Creates a new instance of this class with the specified parameters.
      *
-     * @param uid the unique identifier which identifies this Channel type within
-     *            the overall system (must neither be null, nor empty)
-     * @param advanced true if this channel type contains advanced features, otherwise false
-     * @param itemType the item type of this Channel type, e.g. {@code ColorItem} (must neither be null nor empty)
-     * @param label the human readable label for the according type
-     *            (must neither be null nor empty)
-     * @param description the human readable description for the according type
-     *            (could be null or empty)
-     * @param category the category of this Channel type, e.g. {@code TEMPERATURE} (could be null or empty)
-     * @param tags all tags of this {@link ChannelType}, e.g. {@code Alarm} (could be null or empty)
-     * @param commandDescription a {@link CommandDescription} which should be rendered as push-buttons. The command
-     *            values will be send to the channel from this {@link ChannelType}.
-     * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
-     * @param autoUpdatePolicy the {@link AutoUpdatePolicy} to use.
-     * @throws IllegalArgumentException if the UID or the item type is null or empty,
-     *             or the meta information is null
+     * @deprecated Use the {@link ChannelTypeBuilder#trigger(ChannelTypeUID, String)} instead.
      */
-    public ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, String label, String description,
-            String category, Set<String> tags, CommandDescription commandDescription, URI configDescriptionURI,
-            AutoUpdatePolicy autoUpdatePolicy) {
-        this(uid, advanced, itemType, ChannelKind.STATE, label, description, category, tags, null, commandDescription,
+    @Deprecated
+    public ChannelType(ChannelTypeUID uid, boolean advanced, String label, @Nullable String description,
+            @Nullable String category, @Nullable Set<String> tags, @Nullable EventDescription event,
+            @Nullable URI configDescriptionURI) throws IllegalArgumentException {
+        this(uid, advanced, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, event,
+                configDescriptionURI, null);
+    }
+
+    /**
+     * Creates a new instance of this class with the specified parameters.
+     *
+     * @deprecated Use the {@link ChannelTypeBuilder#state(ChannelTypeUID, String, String)} instead.
+     */
+    @Deprecated
+    public ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, String label,
+            @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
+            @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
+            @Nullable URI configDescriptionURI, @Nullable AutoUpdatePolicy autoUpdatePolicy)
+            throws IllegalArgumentException {
+        this(uid, advanced, itemType, ChannelKind.STATE, label, description, category, tags, state, commandDescription,
                 null, configDescriptionURI, autoUpdatePolicy);
     }
 
@@ -108,29 +89,20 @@ public class ChannelType extends AbstractDescriptionType {
      *            (could be null or empty)
      * @param category the category of this Channel type, e.g. {@code TEMPERATURE} (could be null or empty)
      * @param tags all tags of this {@link ChannelType}, e.g. {@code Alarm} (could be null or empty)
-     * @param state the restrictions of an item state which gives information how to interpret it
-     *            (could be null)
+     * @param state a {@link StateDescription} of an items state which gives information how to interpret it.
+     * @param commandDescription a {@link CommandDescription} which should be rendered as push-buttons. The command
+     *            values will be send to the channel from this {@link ChannelType}.
      * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
      * @param autoUpdatePolicy the {@link AutoUpdatePolicy} to use.
      * @throws IllegalArgumentException if the UID or the item type is null or empty,
      *             or the meta information is null
      */
-    public ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, ChannelKind kind, String label,
-            String description, String category, Set<String> tags, StateDescription state, EventDescription event,
-            URI configDescriptionURI, AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
-        this(uid, advanced, itemType, kind, label, description, category, tags, state, null, event,
-                configDescriptionURI, autoUpdatePolicy);
-    }
-
-    private ChannelType(ChannelTypeUID uid, boolean advanced, String itemType, ChannelKind kind, String label,
-            String description, String category, Set<String> tags, StateDescription state,
-            CommandDescription commandDescription, EventDescription event, URI configDescriptionURI,
-            AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
+    ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, ChannelKind kind, String label,
+            @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
+            @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
+            @Nullable EventDescription event, @Nullable URI configDescriptionURI,
+            @Nullable AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
         super(uid, label, description);
-
-        if (kind == null) {
-            throw new IllegalArgumentException("Kind must not be null!");
-        }
 
         if (kind == ChannelKind.STATE && (itemType == null || itemType.isBlank())) {
             throw new IllegalArgumentException("If the kind is 'state', the item type must be set!");
@@ -143,12 +115,7 @@ public class ChannelType extends AbstractDescriptionType {
         this.kind = kind;
         this.configDescriptionURI = configDescriptionURI;
 
-        if (tags != null) {
-            this.tags = Set.copyOf(tags);
-        } else {
-            this.tags = Set.of();
-        }
-
+        this.tags = tags == null ? Set.of() : Set.copyOf(tags);
         this.advanced = advanced;
         this.category = category;
         this.state = state;
@@ -168,7 +135,7 @@ public class ChannelType extends AbstractDescriptionType {
      * @return the item type of this Channel type, e.g. {@code ColorItem}. Can be null if the channel is a trigger
      *         channel.
      */
-    public String getItemType() {
+    public @Nullable String getItemType() {
         return this.itemType;
     }
 
@@ -184,7 +151,7 @@ public class ChannelType extends AbstractDescriptionType {
     /**
      * Returns all tags of this {@link ChannelType}, e.g. {@code Alarm}.
      *
-     * @return all tags of this Channel type, e.g. {@code Alarm} (not null, could be empty)
+     * @return all tags of this Channel type, e.g. {@code Alarm}
      */
     public Set<String> getTags() {
         return this.tags;
@@ -198,29 +165,27 @@ public class ChannelType extends AbstractDescriptionType {
     /**
      * Returns the link to a concrete {@link ConfigDescription}.
      *
-     * @return the link to a concrete ConfigDescription (could be null)
+     * @return the link to a concrete ConfigDescription
      */
-    public URI getConfigDescriptionURI() {
+    public @Nullable URI getConfigDescriptionURI() {
         return this.configDescriptionURI;
     }
 
     /**
-     * Returns the restrictions of an item state which gives information how to interpret it.
+     * Returns the {@link StateDescription} of an items state which gives information how to interpret it.
      *
-     * @return the restriction of an item state which gives information how to interpret it
-     *         (could be null)
+     * @return the {@link StateDescription}
      */
-    public StateDescription getState() {
+    public @Nullable StateDescription getState() {
         return state;
     }
 
     /**
      * Returns informations about the supported events.
      *
-     * @return the event information
-     *         (could be null)
+     * @return the event information. Can be null if the channel is a state channel.
      */
-    public EventDescription getEvent() {
+    public @Nullable EventDescription getEvent() {
         return event;
     }
 
@@ -238,22 +203,28 @@ public class ChannelType extends AbstractDescriptionType {
     /**
      * Returns the category of this {@link ChannelType}, e.g. {@code TEMPERATURE}.
      *
-     * @return the category of this Channel type, e.g. {@code TEMPERATURE} (could be null or empty)
+     * @return the category of this Channel type, e.g. {@code TEMPERATURE}
      */
-    public String getCategory() {
+    public @Nullable String getCategory() {
         return category;
     }
 
     /**
      * Returns the {@link AutoUpdatePolicy} of for channels of this type.
      *
-     * @return the {@link AutoUpdatePolicy}
+     * @return the {@link AutoUpdatePolicy}. Can be null if the channel is a trigger
+     *         channel.
      */
-    public AutoUpdatePolicy getAutoUpdatePolicy() {
+    public @Nullable AutoUpdatePolicy getAutoUpdatePolicy() {
         return autoUpdatePolicy;
     }
 
-    public CommandDescription getCommandDescription() {
+    /**
+     * Returns the {@link CommandDescription} which should be rendered as push-buttons.
+     *
+     * @return the {@link CommandDescription}
+     */
+    public @Nullable CommandDescription getCommandDescription() {
         return commandDescription;
     }
 }

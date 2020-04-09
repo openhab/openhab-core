@@ -64,6 +64,7 @@ import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.type.ChannelDefinition;
 import org.openhab.core.thing.type.ChannelDefinitionBuilder;
 import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeProvider;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.DynamicStateDescriptionProvider;
@@ -121,20 +122,24 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         final StateDescription state2 = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                 .withMaximum(BigDecimal.valueOf(256)).withStep(BigDecimal.valueOf(8)).build().toStateDescription();
 
-        final ChannelType channelType = new ChannelType(new ChannelTypeUID("hue:alarm"), false, CoreItemFactory.NUMBER,
-                " ", "", null, null, state, null);
-        final ChannelType channelType2 = new ChannelType(new ChannelTypeUID("hue:num"), false, CoreItemFactory.NUMBER,
-                " ", "", null, null, state2, null);
-        final ChannelType channelType3 = new ChannelType(new ChannelTypeUID("hue:info"), true, CoreItemFactory.STRING,
-                " ", "", null, null, (StateDescription) null, null);
-        final ChannelType channelType4 = new ChannelType(new ChannelTypeUID("hue:color"), false, CoreItemFactory.COLOR,
-                "Color", "", "ColorLight", null, (StateDescription) null, null);
-        final ChannelType channelType5 = new ChannelType(new ChannelTypeUID("hue:brightness"), false,
-                CoreItemFactory.DIMMER, "Brightness", "", "DimmableLight", null, (StateDescription) null, null);
-        final ChannelType channelType6 = new ChannelType(new ChannelTypeUID("hue:switch"), false,
-                CoreItemFactory.SWITCH, "Switch", "", "Light", null, (StateDescription) null, null);
-        final ChannelType channelType7 = new ChannelType(CHANNEL_TYPE_7_UID, false, CoreItemFactory.NUMBER, " ", "",
-                "Light", null, state, null);
+        final ChannelType channelType = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:alarm"), " ", CoreItemFactory.NUMBER).withStateDescription(state)
+                .build();
+        final ChannelType channelType2 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:num"), " ", CoreItemFactory.NUMBER).withStateDescription(state2).build();
+        final ChannelType channelType3 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:info"), " ", CoreItemFactory.STRING).isAdvanced(true).build();
+        final ChannelType channelType4 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:color"), "Color", CoreItemFactory.COLOR).withCategory("ColorLight")
+                .build();
+        final ChannelType channelType5 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:brightness"), "Brightness", CoreItemFactory.DIMMER)
+                .withCategory("DimmableLight").build();
+        final ChannelType channelType6 = ChannelTypeBuilder
+                .state(new ChannelTypeUID("hue:switch"), "Switch", CoreItemFactory.SWITCH).withCategory("Light")
+                .build();
+        final ChannelType channelType7 = ChannelTypeBuilder.state(CHANNEL_TYPE_7_UID, " ", CoreItemFactory.NUMBER)
+                .withCategory("Light").withStateDescription(state).build();
 
         List<ChannelType> channelTypes = new ArrayList<>();
         channelTypes.add(channelType);

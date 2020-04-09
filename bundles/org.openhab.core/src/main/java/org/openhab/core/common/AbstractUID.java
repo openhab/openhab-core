@@ -28,7 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public abstract class AbstractUID {
 
-    public static final String SEGMENT_PATTERN = "[A-Za-z0-9_-]*";
+    public static final String SEGMENT_PATTERN = "[\\w-]*";
     public static final String SEPARATOR = ":";
     private final List<String> segments;
 
@@ -43,7 +43,7 @@ public abstract class AbstractUID {
      * Parses a UID for a given string. The UID must be in the format
      * 'bindingId:segment:segment:...'.
      *
-     * @param uid uid in form a string (must not be null)
+     * @param uid uid in form a string
      */
     public AbstractUID(String uid) {
         this(splitToSegments(uid));
@@ -61,7 +61,7 @@ public abstract class AbstractUID {
     /**
      * Creates a UID for list of segments.
      *
-     * @param segments segments (must not be null)
+     * @param segments segments
      */
     public AbstractUID(List<String> segments) {
         int minNumberOfSegments = getMinimalNumberOfSegments();

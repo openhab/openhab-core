@@ -177,10 +177,9 @@ public class ProfileTypeResource implements RESTResource {
 
             Collection<String> supportedItemTypesOfChannelOnProfileType = stateProfileType
                     .getSupportedItemTypesOfChannel();
-            if (supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(channelType.getItemType()))
-                    || supportedItemTypesOfChannelOnProfileType.contains(channelType.getItemType())) {
-                return true;
-            }
+            String itemType = channelType.getItemType();
+            return itemType != null
+                    && supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(itemType));
         }
         return false;
     }

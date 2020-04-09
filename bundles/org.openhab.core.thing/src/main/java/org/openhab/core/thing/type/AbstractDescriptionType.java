@@ -46,7 +46,7 @@ public abstract class AbstractDescriptionType implements Identifiable<UID> {
      */
     public AbstractDescriptionType(UID uid, String label, @Nullable String description)
             throws IllegalArgumentException {
-        if ((label == null) || (label.isEmpty())) {
+        if (label == null || label.isEmpty()) {
             throw new IllegalArgumentException("The label must neither be null nor empty!");
         }
 
