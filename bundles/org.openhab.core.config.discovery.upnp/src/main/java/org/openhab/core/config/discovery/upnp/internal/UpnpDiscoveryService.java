@@ -57,9 +57,6 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
 
     private final Logger logger = LoggerFactory.getLogger(UpnpDiscoveryService.class);
 
-    @Deprecated
-    private final Set<org.openhab.core.config.discovery.UpnpDiscoveryParticipant> oldParticipants = new CopyOnWriteArraySet<>();
-
     private final Set<UpnpDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
     public UpnpDiscoveryService() {
@@ -117,36 +114,10 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
         this.participants.remove(participant);
     }
 
-    @Deprecated
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addUpnpDiscoveryParticipant_old(
-            org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant) {
-        this.oldParticipants.add(participant);
-
-        if (upnpService != null) {
-            Collection<RemoteDevice> devices = upnpService.getRegistry().getRemoteDevices();
-            for (RemoteDevice device : devices) {
-                DiscoveryResult result = participant.createResult(device);
-                if (result != null) {
-                    thingDiscovered(result);
-                }
-            }
-        }
-    }
-
-    @Deprecated
-    protected void removeUpnpDiscoveryParticipant_old(
-            org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant) {
-        this.oldParticipants.remove(participant);
-    }
-
     @Override
     public Set<ThingTypeUID> getSupportedThingTypes() {
         Set<ThingTypeUID> supportedThingTypes = new HashSet<>();
         for (UpnpDiscoveryParticipant participant : participants) {
-            supportedThingTypes.addAll(participant.getSupportedThingTypeUIDs());
-        }
-        for (org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
             supportedThingTypes.addAll(participant.getSupportedThingTypeUIDs());
         }
         return supportedThingTypes;
@@ -192,31 +163,11 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
                 logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
             }
         }
-        for (org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
-            try {
-                DiscoveryResult result = participant.createResult(device);
-                if (result != null) {
-                    thingDiscovered(result);
-                }
-            } catch (Exception e) {
-                logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
-            }
-        }
     }
 
     @Override
     public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
         for (UpnpDiscoveryParticipant participant : participants) {
-            try {
-                ThingUID thingUID = participant.getThingUID(device);
-                if (thingUID != null) {
-                    thingRemoved(thingUID);
-                }
-            } catch (Exception e) {
-                logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
-            }
-        }
-        for (org.openhab.core.config.discovery.UpnpDiscoveryParticipant participant : oldParticipants) {
             try {
                 ThingUID thingUID = participant.getThingUID(device);
                 if (thingUID != null) {
