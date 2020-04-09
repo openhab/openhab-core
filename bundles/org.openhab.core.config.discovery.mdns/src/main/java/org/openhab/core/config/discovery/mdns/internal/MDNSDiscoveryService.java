@@ -57,9 +57,6 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private static final Duration FOREGROUND_SCAN_TIMEOUT = Duration.ofMillis(200);
     private final Logger logger = LoggerFactory.getLogger(MDNSDiscoveryService.class);
 
-    @Deprecated
-    private final Set<org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant> oldParticipants = new CopyOnWriteArraySet<>();
-
     private final Set<MDNSDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
 
     private final MDNSClient mdnsClient;
@@ -77,9 +74,6 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
             for (MDNSDiscoveryParticipant participant : participants) {
                 mdnsClient.addServiceListener(participant.getServiceType(), this);
             }
-            for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
-                mdnsClient.addServiceListener(participant.getServiceType(), this);
-            }
         }
     }
 
@@ -89,9 +83,6 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         super.deactivate();
 
         for (MDNSDiscoveryParticipant participant : participants) {
-            mdnsClient.removeServiceListener(participant.getServiceType(), this);
-        }
-        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
     }
@@ -107,18 +98,12 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         for (MDNSDiscoveryParticipant participant : participants) {
             mdnsClient.addServiceListener(participant.getServiceType(), this);
         }
-        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
-            mdnsClient.addServiceListener(participant.getServiceType(), this);
-        }
         startScan(true);
     }
 
     @Override
     protected void stopBackgroundDiscovery() {
         for (MDNSDiscoveryParticipant participant : participants) {
-            mdnsClient.removeServiceListener(participant.getServiceType(), this);
-        }
-        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             mdnsClient.removeServiceListener(participant.getServiceType(), this);
         }
     }
@@ -171,23 +156,6 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 }
             }
         }
-        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
-            long start = System.currentTimeMillis();
-            ServiceInfo[] services;
-            if (isBackground) {
-                services = mdnsClient.list(participant.getServiceType());
-            } else {
-                services = mdnsClient.list(participant.getServiceType(), FOREGROUND_SCAN_TIMEOUT);
-            }
-            logger.debug("{} services found for {}; duration: {}ms", services.length, participant.getServiceType(),
-                    System.currentTimeMillis() - start);
-            for (ServiceInfo service : services) {
-                DiscoveryResult result = participant.createResult(service);
-                if (result != null) {
-                    thingDiscovered(result);
-                }
-            }
-        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -203,30 +171,10 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
         mdnsClient.removeServiceListener(participant.getServiceType(), this);
     }
 
-    @Deprecated
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addMDNSDiscoveryParticipant_old(
-            org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
-        this.oldParticipants.add(participant);
-        if (isBackgroundDiscoveryEnabled()) {
-            mdnsClient.addServiceListener(participant.getServiceType(), this);
-        }
-    }
-
-    @Deprecated
-    protected void removeMDNSDiscoveryParticipant_old(
-            org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant) {
-        this.oldParticipants.remove(participant);
-        mdnsClient.removeServiceListener(participant.getServiceType(), this);
-    }
-
     @Override
     public Set<ThingTypeUID> getSupportedThingTypes() {
         Set<ThingTypeUID> supportedThingTypes = new HashSet<>();
         for (MDNSDiscoveryParticipant participant : participants) {
-            supportedThingTypes.addAll(participant.getSupportedThingTypeUIDs());
-        }
-        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
             supportedThingTypes.addAll(participant.getSupportedThingTypeUIDs());
         }
         return supportedThingTypes;
@@ -251,18 +199,6 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
                 }
             }
         }
-        for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
-            if (participant.getServiceType().equals(serviceEvent.getType())) {
-                try {
-                    ThingUID thingUID = participant.getThingUID(serviceEvent.getInfo());
-                    if (thingUID != null) {
-                        thingRemoved(thingUID);
-                    }
-                } catch (Exception e) {
-                    logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
-                }
-            }
-        }
     }
 
     @Override
@@ -273,18 +209,6 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private void considerService(ServiceEvent serviceEvent) {
         if (isBackgroundDiscoveryEnabled()) {
             for (MDNSDiscoveryParticipant participant : participants) {
-                if (participant.getServiceType().equals(serviceEvent.getType())) {
-                    try {
-                        DiscoveryResult result = participant.createResult(serviceEvent.getInfo());
-                        if (result != null) {
-                            thingDiscovered(result);
-                        }
-                    } catch (Exception e) {
-                        logger.error("Participant '{}' threw an exception", participant.getClass().getName(), e);
-                    }
-                }
-            }
-            for (org.openhab.core.io.transport.mdns.discovery.MDNSDiscoveryParticipant participant : oldParticipants) {
                 if (participant.getServiceType().equals(serviceEvent.getType())) {
                     try {
                         DiscoveryResult result = participant.createResult(serviceEvent.getInfo());
