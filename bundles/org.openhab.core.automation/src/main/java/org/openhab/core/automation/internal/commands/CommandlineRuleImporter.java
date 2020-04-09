@@ -70,7 +70,7 @@ public class CommandlineRuleImporter extends AbstractCommandProvider<Rule> {
      */
     @Override
     public @Nullable Object addingService(@SuppressWarnings("rawtypes") @Nullable ServiceReference reference) {
-        if (reference != null && reference.getProperty(Parser.PARSER_TYPE).equals(Parser.PARSER_RULE)) {
+        if (reference != null && Parser.PARSER_RULE.equals(reference.getProperty(Parser.PARSER_TYPE))) {
             return super.addingService(reference);
         }
         return null;

@@ -198,7 +198,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     protected @Nullable Item toElement(String itemName, PersistedItem persistedItem) {
         Item item = null;
 
-        if (persistedItem.itemType.equals(GroupItem.TYPE)) {
+        if (GroupItem.TYPE.equals(persistedItem.itemType)) {
             String baseItemType = persistedItem.baseItemType;
             if (baseItemType != null) {
                 Item baseItem = createItem(baseItemType, itemName);
