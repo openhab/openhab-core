@@ -47,7 +47,6 @@ import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.config.discovery.inbox.Inbox;
-import org.openhab.core.config.discovery.inbox.InboxFilterCriteria;
 import org.openhab.core.config.discovery.inbox.InboxListener;
 import org.openhab.core.config.discovery.inbox.events.InboxEventFactory;
 import org.openhab.core.events.EventPublisher;
@@ -306,28 +305,11 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     }
 
     @Override
-    public List<DiscoveryResult> get(@Nullable InboxFilterCriteria criteria) throws IllegalStateException {
-        List<DiscoveryResult> filteredEntries = new ArrayList<>();
-
-        for (DiscoveryResult discoveryResult : this.discoveryResultStorage.getValues()) {
-            if (discoveryResult == null) {
-                continue;
-            }
-            if (matchFilter(discoveryResult, criteria)) {
-                filteredEntries.add(discoveryResult);
-            }
-        }
-
-        return filteredEntries;
-    }
-
-    @Override
     public List<DiscoveryResult> getAll() {
         return stream().collect(Collectors.toList());
     }
 
     @Override
-    @NonNullByDefault({})
     public Stream<DiscoveryResult> stream() {
         final Storage<DiscoveryResult> discoveryResultStorage = this.discoveryResultStorage;
         if (discoveryResultStorage == null) {
@@ -344,7 +326,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                     discoveryResultStorage.getClass());
             return Stream.empty();
         }
-        return values.stream().filter(Objects::nonNull);
+        return (Stream<DiscoveryResult>) values.stream().filter(Objects::nonNull);
     }
 
     @Override
@@ -454,39 +436,6 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         }
 
         return null;
-    }
-
-    private boolean matchFilter(DiscoveryResult discoveryResult, @Nullable InboxFilterCriteria criteria) {
-        if (criteria != null) {
-            String bindingId = criteria.getBindingId();
-            if ((bindingId != null) && (!bindingId.isEmpty())) {
-                if (!discoveryResult.getBindingId().equals(bindingId)) {
-                    return false;
-                }
-            }
-
-            ThingTypeUID thingTypeUID = criteria.getThingTypeUID();
-            if (thingTypeUID != null) {
-                if (!discoveryResult.getThingTypeUID().equals(thingTypeUID)) {
-                    return false;
-                }
-            }
-
-            ThingUID thingUID = criteria.getThingUID();
-            if (thingUID != null) {
-                if (!discoveryResult.getThingUID().equals(thingUID)) {
-                    return false;
-                }
-            }
-
-            DiscoveryResultFlag flag = criteria.getFlag();
-            if (flag != null) {
-                if (discoveryResult.getFlag() != flag) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     private void notifyListeners(DiscoveryResult result, EventType type) {

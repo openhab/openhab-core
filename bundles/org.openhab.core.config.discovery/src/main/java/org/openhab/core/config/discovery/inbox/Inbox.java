@@ -72,23 +72,6 @@ public interface Inbox {
     boolean remove(@Nullable ThingUID thingUID);
 
     /**
-     * Returns all {@link DiscoveryResult}s in this {@link Inbox} which fit to the specified {@link InboxFilterCriteria}
-     * .
-     * <p>
-     * If the specified {@link InboxFilterCriteria} is {@code null}, all {@link DiscoveryResult}s in this {@link Inbox}
-     * are returned.
-     *
-     * @param criteria the filter criteria to be used for filtering all discovery results
-     *            (could be null)
-     * @return all discovery results in this inbox which fit to the specified filter criteria
-     *         (not null, could be empty)
-     *
-     * @deprecated use {@link InboxPredicates} to filter on streams of {@link DiscoveryResult}s
-     */
-    @Deprecated
-    List<DiscoveryResult> get(@Nullable InboxFilterCriteria criteria);
-
-    /**
      * Returns all {@link DiscoveryResult}s in this {@link Inbox}.
      *
      * @return all discovery results in this inbox (not null, could be empty)
