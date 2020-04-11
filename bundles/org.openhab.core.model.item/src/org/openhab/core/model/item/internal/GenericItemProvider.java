@@ -26,9 +26,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ActiveItem;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupFunction;
@@ -38,9 +39,6 @@ import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.dto.GroupFunctionDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
-import org.openhab.core.types.StateDescriptionFragment;
-import org.openhab.core.types.StateDescriptionFragmentBuilder;
-import org.openhab.core.types.StateDescriptionFragmentProvider;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -52,6 +50,9 @@ import org.openhab.core.model.items.ModelGroupFunction;
 import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
 import org.openhab.core.model.items.ModelNormalItem;
+import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.StateDescriptionFragmentProvider;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -68,6 +69,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
+@NonNullByDefault
 @Component(service = { ItemProvider.class, StateDescriptionFragmentProvider.class }, immediate = true)
 public class GenericItemProvider extends AbstractProvider<Item>
         implements ModelRepositoryChangeListener, ItemProvider, StateDescriptionFragmentProvider {
@@ -218,7 +220,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         }
     }
 
-    private Item createItemFromModelItem(ModelItem modelItem) {
+    private @Nullable Item createItemFromModelItem(ModelItem modelItem) {
         Item item = null;
         if (modelItem instanceof ModelGroupItem) {
             ModelGroupItem modelGroupItem = (ModelGroupItem) modelItem;
@@ -264,7 +266,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         }
     }
 
-    private String extractFormat(String label) {
+    private @Nullable String extractFormat(@Nullable String label) {
         if (label == null) {
             return null;
         }
@@ -292,7 +294,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return new GroupItem(modelGroupItem.getName(), baseItem, groupFunction);
     }
 
-    private void dispatchBindingsPerItemType(BindingConfigReader reader, String[] itemTypes) {
+    private void dispatchBindingsPerItemType(@Nullable BindingConfigReader reader, String[] itemTypes) {
         for (String modelName : modelRepository.getAllModelNamesOfType("items")) {
             ItemModel model = (ItemModel) modelRepository.getModel(modelName);
             if (model != null) {
@@ -338,7 +340,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         internalDispatchBindings(null, modelName, item, bindings);
     }
 
-    private void internalDispatchBindings(BindingConfigReader reader, String modelName, Item item,
+    private void internalDispatchBindings(@Nullable BindingConfigReader reader, String modelName, Item item,
             EList<ModelBinding> bindings) {
         for (ModelBinding binding : bindings) {
             String bindingType = binding.getType();
@@ -492,7 +494,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
      *
      * @return An Item instance of type {@code itemType} or null if no item factory for it was found.
      */
-    private Item createItemOfType(String itemType, String itemName) {
+    private @Nullable Item createItemOfType(@Nullable String itemType, String itemName) {
         if (itemType == null) {
             return null;
         }

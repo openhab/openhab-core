@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.internal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistryChangeListener;
 
@@ -25,6 +26,7 @@ import org.openhab.core.thing.ThingRegistryChangeListener;
  * @author Michael Grammling - Added dynamic configuration update
  * @author Simon Kaufmann - Added THING_REMOVING state
  */
+@NonNullByDefault
 public interface ThingTracker {
 
     public enum ThingTrackerEvent {

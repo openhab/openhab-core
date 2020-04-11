@@ -21,6 +21,7 @@ import java.util.Collection;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,7 @@ import org.openhab.core.types.State;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM_NAME = "Switch1";
@@ -52,11 +54,9 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
     private static final String NUMBER_ITEM_DECIMAL = "NumberB";
     private static final String NUMBER_ITEM_LENGTH = "NumberC";
 
-    private ItemProvider itemProvider;
-
-    private ScriptEngine scriptEngine;
-
-    private ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ItemProvider itemProvider;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ScriptEngine scriptEngine;
 
     @Before
     public void setup() {

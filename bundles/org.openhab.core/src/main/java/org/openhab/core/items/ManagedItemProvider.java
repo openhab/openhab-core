@@ -54,10 +54,10 @@ import com.google.gson.InstanceCreator;
  * @author Kai Kreuzer - improved return values
  * @author Alex Tugarev - added tags
  */
+@NonNullByDefault
 @Component(immediate = true, service = { ItemProvider.class, ManagedItemProvider.class })
 public class ManagedItemProvider extends AbstractManagedProvider<Item, String, PersistedItem> implements ItemProvider {
 
-    @NonNullByDefault
     public static class PersistedItem {
 
         public PersistedItem(String itemType) {
@@ -78,7 +78,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     public static class PersistedItemInstanceCreator implements InstanceCreator<PersistedItem> {
 
         @Override
-        public PersistedItem createInstance(Type type) {
+        public PersistedItem createInstance(@NonNullByDefault({}) Type type) {
             return new PersistedItem("");
         }
     }
@@ -100,7 +100,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
      * @param recursive if set to true all members of the item will be removed, too.
      * @return removed item or null if no item with that name exists
      */
-    public Item remove(String itemName, boolean recursive) {
+    public @Nullable Item remove(String itemName, boolean recursive) {
         Item item = get(itemName);
         if (recursive && item instanceof GroupItem) {
             for (String member : getMemberNamesRecursively((GroupItem) item, getAll())) {
@@ -128,7 +128,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         return memberNames;
     }
 
-    private Item createItem(String itemType, String itemName) {
+    private @Nullable Item createItem(String itemType, String itemName) {
         for (ItemFactory factory : itemFactories) {
             Item item = factory.createItem(itemType, itemName);
             if (item != null) {
@@ -195,12 +195,13 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     }
 
     @Override
-    protected Item toElement(String itemName, PersistedItem persistedItem) {
+    protected @Nullable Item toElement(String itemName, PersistedItem persistedItem) {
         Item item = null;
 
-        if (persistedItem.itemType.equals(GroupItem.TYPE)) {
-            if (persistedItem.baseItemType != null) {
-                Item baseItem = createItem(persistedItem.baseItemType, itemName);
+        if (GroupItem.TYPE.equals(persistedItem.itemType)) {
+            String baseItemType = persistedItem.baseItemType;
+            if (baseItemType != null) {
+                Item baseItem = createItem(baseItemType, itemName);
                 if (persistedItem.functionName != null) {
                     GroupFunction function = getGroupFunction(persistedItem, baseItem);
                     item = new GroupItem(itemName, baseItem, function);
@@ -227,7 +228,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         return item;
     }
 
-    private GroupFunction getGroupFunction(PersistedItem persistedItem, Item baseItem) {
+    private GroupFunction getGroupFunction(PersistedItem persistedItem, @Nullable Item baseItem) {
         GroupFunctionDTO functionDTO = new GroupFunctionDTO();
         functionDTO.name = persistedItem.functionName;
         if (persistedItem.functionParams != null) {
@@ -237,24 +238,22 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     }
 
     private void configureItem(PersistedItem persistedItem, ActiveItem item) {
-        if (item != null) {
-            List<String> groupNames = persistedItem.groupNames;
-            if (groupNames != null) {
-                for (String groupName : groupNames) {
-                    item.addGroupName(groupName);
-                }
+        List<String> groupNames = persistedItem.groupNames;
+        if (groupNames != null) {
+            for (String groupName : groupNames) {
+                item.addGroupName(groupName);
             }
-
-            Set<String> tags = persistedItem.tags;
-            if (tags != null) {
-                for (String tag : tags) {
-                    item.addTag(tag);
-                }
-            }
-
-            item.setLabel(persistedItem.label);
-            item.setCategory(persistedItem.category);
         }
+
+        Set<String> tags = persistedItem.tags;
+        if (tags != null) {
+            for (String tag : tags) {
+                item.addTag(tag);
+            }
+        }
+
+        item.setLabel(persistedItem.label);
+        item.setCategory(persistedItem.category);
     }
 
     @Override

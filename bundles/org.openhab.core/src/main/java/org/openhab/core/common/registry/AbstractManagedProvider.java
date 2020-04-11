@@ -17,6 +17,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.slf4j.Logger;
@@ -41,8 +43,9 @@ import org.slf4j.LoggerFactory;
  * @param <PE>
  *            type of the persistable element
  */
-public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> extends AbstractProvider<E>
-        implements ManagedProvider<E, K> {
+@NonNullByDefault
+public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>, @NonNull K, PE>
+        extends AbstractProvider<E> implements ManagedProvider<E, K> {
 
     private volatile Storage<PE> storage;
 
@@ -67,37 +70,26 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
 
     @Override
     public Collection<E> getAll() {
-        return storage.getKeys().stream().map(key -> {
-            PE persistableElement = storage.get(key);
-            if (persistableElement != null) {
-                return toElement(key, persistableElement);
-            } else {
-                return null;
-            }
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        return (Collection<E>) storage.getKeys().stream().map(this::getElement).filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public E get(K key) {
-        if (key == null) {
-            throw new IllegalArgumentException("Cannot get null element");
-        }
+    public @Nullable E get(K key) {
+        return getElement(keyToString(key));
+    }
 
-        String keyAsString = keyToString(key);
-
-        PE persistableElement = storage.get(keyAsString);
-        if (persistableElement != null) {
-            return toElement(keyAsString, persistableElement);
-        } else {
-            return null;
-        }
+    private @Nullable E getElement(String key) {
+        PE persistableElement = storage.get(key);
+        return persistableElement != null ? toElement(key, persistableElement) : null;
     }
 
     @Override
-    public E remove(K key) {
+    public @Nullable E remove(K key) {
         String keyAsString = keyToString(key);
         PE persistableElement = storage.remove(keyAsString);
         if (persistableElement != null) {
+            @Nullable
             E element = toElement(keyAsString, persistableElement);
             if (element != null) {
                 notifyListenersAboutRemovedElement(element);
@@ -110,12 +102,16 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
     }
 
     @Override
-    public E update(E element) {
+    public @Nullable E update(E element) {
         String key = getKeyAsString(element);
         if (storage.get(key) != null) {
             PE persistableElement = storage.put(key, toPersistableElement(element));
             if (persistableElement != null) {
+                @Nullable
                 E oldElement = toElement(key, persistableElement);
+                if (oldElement == null) {
+                    oldElement = element;
+                }
                 notifyListenersAboutUpdatedElement(oldElement, element);
                 logger.debug("Updated element {} in {}.", key, this.getClass().getSimpleName());
                 return oldElement;
@@ -128,7 +124,7 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
         return null;
     }
 
-    private @NonNull String getKeyAsString(@NonNull E element) {
+    private String getKeyAsString(E element) {
         return keyToString(element.getUID());
     }
 
@@ -145,7 +141,7 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
      * @param key key
      * @return string representation of the key
      */
-    protected abstract @NonNull String keyToString(@NonNull K key);
+    protected abstract String keyToString(K key);
 
     /**
      * Converts the persistable element into the original element.
@@ -154,7 +150,7 @@ public abstract class AbstractManagedProvider<E extends Identifiable<K>, K, PE> 
      * @param persistableElement persistable element
      * @return original element
      */
-    protected abstract E toElement(@NonNull String key, @NonNull PE persistableElement);
+    protected abstract @Nullable E toElement(String key, @NonNull PE persistableElement);
 
     /**
      * Converts the original element into an element that can be persisted.

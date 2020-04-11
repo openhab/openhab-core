@@ -14,6 +14,7 @@ package org.openhab.core.common.registry;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -27,7 +28,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @param <E> type of the provided elements
  */
 @NonNullByDefault
-public interface Provider<E> {
+public interface Provider<@NonNull E> {
 
     /**
      * Adds a {@link ProviderChangeListener} which must be notified if there are

@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.parser.Parser;
@@ -42,6 +44,7 @@ import org.osgi.framework.ServiceReference;
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
+@NonNullByDefault
 public class CommandlineRuleImporter extends AbstractCommandProvider<Rule> {
 
     private final RuleRegistry ruleRegistry;
@@ -66,8 +69,8 @@ public class CommandlineRuleImporter extends AbstractCommandProvider<Rule> {
      * @see AbstractCommandProvider#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public Object addingService(@SuppressWarnings("rawtypes") ServiceReference reference) {
-        if (reference.getProperty(Parser.PARSER_TYPE).equals(Parser.PARSER_RULE)) {
+    public @Nullable Object addingService(@SuppressWarnings("rawtypes") @Nullable ServiceReference reference) {
+        if (reference != null && Parser.PARSER_RULE.equals(reference.getProperty(Parser.PARSER_TYPE))) {
             return super.addingService(reference);
         }
         return null;

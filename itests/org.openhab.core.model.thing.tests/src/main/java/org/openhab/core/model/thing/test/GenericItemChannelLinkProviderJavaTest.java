@@ -22,6 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +45,7 @@ import org.openhab.core.thing.link.ItemChannelLinkRegistry;
  *
  * @author Simon Kaufmann - Initial contribution and API
  */
+@NonNullByDefault
 public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
 
     private static final String THINGS_TESTMODEL_NAME = "test.things";
@@ -52,14 +55,13 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
     private static final String CHANNEL = "test:test:test:test";
     private static final String LINK = ITEM + " -> " + CHANNEL;
 
-    private ModelRepository modelRepository;
-    private ThingRegistry thingRegistry;
-    private ItemRegistry itemRegistry;
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ItemChannelLinkProvider itemChannelLinkProvider;
+    private @Mock @Nullable ProviderChangeListener<ItemChannelLink> listenerMock;
 
-    @Mock
-    private ProviderChangeListener<ItemChannelLink> listener;
+    private @NonNullByDefault({}) ModelRepository modelRepository;
+    private @NonNullByDefault({}) ThingRegistry thingRegistry;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private @NonNullByDefault({}) ItemChannelLinkProvider itemChannelLinkProvider;
 
     @Before
     public void setUp() {
@@ -137,29 +139,38 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
     @Test
     public void testNoAmnesia() throws Exception {
         GenericItemChannelLinkProvider provider = new GenericItemChannelLinkProvider();
-        provider.addProviderChangeListener(listener);
+
+        ProviderChangeListener<ItemChannelLink> localListenerMock = listenerMock;
+
+        if (localListenerMock != null) {
+            provider.addProviderChangeListener(localListenerMock);
+        } else {
+            throw new IllegalStateException("listenerMock is null");
+        }
 
         provider.startConfigurationUpdate(ITEMS_TESTMODEL_NAME);
         provider.processBindingConfiguration(ITEMS_TESTMODEL_NAME, "Number", ITEM, CHANNEL, new Configuration());
         provider.stopConfigurationUpdate(ITEMS_TESTMODEL_NAME);
         assertThat(provider.getAll().size(), is(1));
         assertThat(provider.getAll().iterator().next().toString(), is(LINK));
-        verify(listener, only()).added(same(provider), eq(new ItemChannelLink(ITEM, new ChannelUID(CHANNEL))));
+        verify(localListenerMock, only()).added(same(provider), eq(new ItemChannelLink(ITEM, new ChannelUID(CHANNEL))));
 
-        reset(listener);
+        reset(localListenerMock);
         provider.startConfigurationUpdate(ITEMS_TESTMODEL_NAME);
         provider.processBindingConfiguration(ITEMS_TESTMODEL_NAME, "Number", ITEM, CHANNEL, new Configuration());
         provider.stopConfigurationUpdate(ITEMS_TESTMODEL_NAME);
         assertThat(provider.getAll().size(), is(1));
         assertThat(provider.getAll().iterator().next().toString(), is(LINK));
-        verify(listener, only()).updated(same(provider), eq(new ItemChannelLink(ITEM, new ChannelUID(CHANNEL))),
+        verify(localListenerMock, only()).updated(same(provider),
+                eq(new ItemChannelLink(ITEM, new ChannelUID(CHANNEL))),
                 eq(new ItemChannelLink(ITEM, new ChannelUID(CHANNEL))));
 
-        reset(listener);
+        reset(localListenerMock);
         provider.startConfigurationUpdate(ITEMS_TESTMODEL_NAME);
         provider.stopConfigurationUpdate(ITEMS_TESTMODEL_NAME);
         assertThat(provider.getAll().size(), is(0));
-        verify(listener, only()).removed(same(provider), eq(new ItemChannelLink(ITEM, new ChannelUID(CHANNEL))));
+        verify(localListenerMock, only()).removed(same(provider),
+                eq(new ItemChannelLink(ITEM, new ChannelUID(CHANNEL))));
     }
 
     @Test

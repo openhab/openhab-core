@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import javax.measure.quantity.Temperature;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -82,6 +83,7 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
@@ -130,39 +132,19 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_1, "").withKind(ChannelKind.TRIGGER).build(),
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_2, "").withKind(ChannelKind.TRIGGER).build()).build();
 
-    private CommunicationManager manager;
+    private @Mock @NonNullByDefault({}) AutoUpdateManager autoUpdateManagerMock;
+    private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
+    private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
+    private @Mock @NonNullByDefault({}) ProfileAdvisor profileAdvisorMock;
+    private @Mock @NonNullByDefault({}) ProfileFactory profileFactoryMock;
+    private @Mock @NonNullByDefault({}) StateProfile stateProfileMock;
+    private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
+    private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
+    private @Mock @NonNullByDefault({}) TriggerProfile triggerProfileMock;
 
-    @Mock
-    private ProfileFactory mockProfileFactory;
-
-    @Mock
-    private ProfileAdvisor mockProfileAdvisor;
-
-    @Mock
-    private StateProfile stateProfile;
-
-    @Mock
-    private TriggerProfile triggerProfile;
-
-    @Mock
-    private EventPublisher eventPublisher;
-
-    @Mock
-    private ItemRegistry itemRegistry;
-
-    @Mock
-    private ThingRegistry thingRegistry;
-
-    @Mock
-    private ThingHandler mockHandler;
-
-    @Mock
-    private AutoUpdateManager mockAutoUpdateManager;
-
-    @Mock
-    private ChannelTypeRegistry channelTypeRegistry;
-
-    private SafeCaller safeCaller;
+    private @NonNullByDefault({}) CommunicationManager manager;
+    private @NonNullByDefault({}) SafeCaller safeCaller;
 
     @Before
     public void setup() {
@@ -175,7 +157,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         assertNotNull(profileFactory);
 
         manager = new CommunicationManager();
-        manager.setEventPublisher(eventPublisher);
+        manager.setEventPublisher(eventPublisherMock);
         manager.setDefaultProfileFactory(profileFactory);
         manager.setSafeCaller(safeCaller);
 
@@ -187,25 +169,26 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
                     return new ProfileTypeUID("test:trigger");
             }
             return null;
-        }).when(mockProfileAdvisor).getSuggestedProfileTypeUID(isA(Channel.class), isA(String.class));
+        }).when(profileAdvisorMock).getSuggestedProfileTypeUID(isA(Channel.class), isA(String.class));
         doAnswer(invocation -> {
             switch (((ProfileTypeUID) invocation.getArguments()[0]).toString()) {
                 case "test:state":
-                    return stateProfile;
+                    return stateProfileMock;
                 case "test:trigger":
-                    return triggerProfile;
+                    return triggerProfileMock;
             }
             return null;
-        }).when(mockProfileFactory).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+        }).when(profileFactoryMock).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                 isA(ProfileContext.class));
 
-        when(mockProfileFactory.getSupportedProfileTypeUIDs()).thenReturn(Stream
+        when(profileFactoryMock.getSupportedProfileTypeUIDs()).thenReturn(Stream
                 .of(new ProfileTypeUID("test:state"), new ProfileTypeUID("test:trigger")).collect(Collectors.toList()));
 
-        manager.addProfileFactory(mockProfileFactory);
-        manager.addProfileAdvisor(mockProfileAdvisor);
+        manager.addProfileFactory(profileFactoryMock);
+        manager.addProfileAdvisor(profileAdvisorMock);
 
-        ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistry, itemRegistry);
+        ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
+                itemRegistryMock);
         iclRegistry.addProvider(new ItemChannelLinkProvider() {
             @Override
             public void addProviderChangeListener(ProviderChangeListener<ItemChannelLink> listener) {
@@ -223,24 +206,24 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         });
         manager.setItemChannelLinkRegistry(iclRegistry);
 
-        when(itemRegistry.get(eq(ITEM_NAME_1))).thenReturn(ITEM_1);
-        when(itemRegistry.get(eq(ITEM_NAME_2))).thenReturn(ITEM_2);
-        when(itemRegistry.get(eq(ITEM_NAME_3))).thenReturn(ITEM_3);
-        when(itemRegistry.get(eq(ITEM_NAME_4))).thenReturn(ITEM_4);
-        manager.setItemRegistry(itemRegistry);
+        when(itemRegistryMock.get(eq(ITEM_NAME_1))).thenReturn(ITEM_1);
+        when(itemRegistryMock.get(eq(ITEM_NAME_2))).thenReturn(ITEM_2);
+        when(itemRegistryMock.get(eq(ITEM_NAME_3))).thenReturn(ITEM_3);
+        when(itemRegistryMock.get(eq(ITEM_NAME_4))).thenReturn(ITEM_4);
+        manager.setItemRegistry(itemRegistryMock);
 
         ChannelType channelType4 = mock(ChannelType.class);
         when(channelType4.getItemType()).thenReturn("Number:Temperature");
 
-        when(channelTypeRegistry.getChannelType(CHANNEL_TYPE_UID_4)).thenReturn(channelType4);
-        manager.setChannelTypeRegistry(channelTypeRegistry);
+        when(channelTypeRegistryMock.getChannelType(CHANNEL_TYPE_UID_4)).thenReturn(channelType4);
+        manager.setChannelTypeRegistry(channelTypeRegistryMock);
 
-        THING.setHandler(mockHandler);
+        THING.setHandler(thingHandlerMock);
 
-        when(thingRegistry.get(eq(THING_UID))).thenReturn(THING);
-        manager.setThingRegistry(thingRegistry);
+        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(THING);
+        manager.setThingRegistry(thingRegistryMock);
         manager.addItemFactory(new CoreItemFactory());
-        manager.setAutoUpdateManager(mockAutoUpdateManager);
+        manager.setAutoUpdateManager(autoUpdateManagerMock);
 
         UnitProvider unitProvider = mock(UnitProvider.class);
         when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
@@ -252,51 +235,51 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     public void testStateUpdatedSingleLink() {
         manager.stateUpdated(STATE_CHANNEL_UID_1, OnOffType.ON);
         waitForAssert(() -> {
-            verify(stateProfile).onStateUpdateFromHandler(eq(OnOffType.ON));
+            verify(stateProfileMock).onStateUpdateFromHandler(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
     public void testStateUpdatedMultiLink() {
         manager.stateUpdated(STATE_CHANNEL_UID_2, OnOffType.ON);
         waitForAssert(() -> {
-            verify(stateProfile, times(2)).onStateUpdateFromHandler(eq(OnOffType.ON));
+            verify(stateProfileMock, times(2)).onStateUpdateFromHandler(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
     public void testPostCommandSingleLink() {
         manager.postCommand(STATE_CHANNEL_UID_1, OnOffType.ON);
         waitForAssert(() -> {
-            verify(stateProfile).onCommandFromHandler(eq(OnOffType.ON));
+            verify(stateProfileMock).onCommandFromHandler(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
     public void testPostCommandMultiLink() {
         manager.postCommand(STATE_CHANNEL_UID_2, OnOffType.ON);
         waitForAssert(() -> {
-            verify(stateProfile, times(2)).onCommandFromHandler(eq(OnOffType.ON));
+            verify(stateProfileMock, times(2)).onCommandFromHandler(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
     public void testItemCommandEventSingleLink() {
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_2, OnOffType.ON));
         waitForAssert(() -> {
-            verify(stateProfile).onCommandFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock).onCommandFromItem(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
-        verify(mockAutoUpdateManager).receiveCommand(isA(ItemCommandEvent.class), isA(Item.class));
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
+        verify(autoUpdateManagerMock).receiveCommand(isA(ItemCommandEvent.class), isA(Item.class));
     }
 
     @Test
@@ -304,10 +287,10 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         // Take unit from accepted item type (see channel built from STATE_CHANNEL_UID_3)
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_3, DecimalType.valueOf("20")));
         waitForAssert(() -> {
-            verify(stateProfile).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
+            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
@@ -320,10 +303,10 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_3, DecimalType.valueOf("20")));
         waitForAssert(() -> {
-            verify(stateProfile).onCommandFromItem(eq(QuantityType.valueOf("20 °F")));
+            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °F")));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
 
         ITEM_3.setStateDescriptionService(null);
     }
@@ -335,21 +318,21 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         // current ThingType.
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_4, DecimalType.valueOf("20")));
         waitForAssert(() -> {
-            verify(stateProfile).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
+            verify(stateProfileMock).onCommandFromItem(eq(QuantityType.valueOf("20 °C")));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
     public void testItemCommandEventMultiLink() {
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_1, OnOffType.ON));
         waitForAssert(() -> {
-            verify(stateProfile, times(2)).onCommandFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock, times(2)).onCommandFromItem(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
-        verify(mockAutoUpdateManager).receiveCommand(isA(ItemCommandEvent.class), isA(Item.class));
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
+        verify(autoUpdateManagerMock).receiveCommand(isA(ItemCommandEvent.class), isA(Item.class));
     }
 
     @Test
@@ -357,33 +340,33 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         manager.receive(
                 ItemEventFactory.createCommandEvent(ITEM_NAME_1, OnOffType.ON, STATE_CHANNEL_UID_2.getAsString()));
         waitForAssert(() -> {
-            verify(stateProfile).onCommandFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock).onCommandFromItem(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
-        verify(mockAutoUpdateManager).receiveCommand(isA(ItemCommandEvent.class), isA(Item.class));
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
+        verify(autoUpdateManagerMock).receiveCommand(isA(ItemCommandEvent.class), isA(Item.class));
     }
 
     @Test
     public void testItemStateEventSingleLink() {
         manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_2, OnOffType.ON));
         waitForAssert(() -> {
-            verify(stateProfile).onStateUpdateFromItem(eq(OnOffType.ON));
-            verify(triggerProfile).onStateUpdateFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
+            verify(triggerProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
     public void testItemStateEventMultiLink() {
         manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_1, OnOffType.ON));
         waitForAssert(() -> {
-            verify(stateProfile, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
-            verify(triggerProfile, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
+            verify(triggerProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
@@ -391,31 +374,31 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         manager.receive(
                 ItemEventFactory.createStateEvent(ITEM_NAME_1, OnOffType.ON, STATE_CHANNEL_UID_2.getAsString()));
         waitForAssert(() -> {
-            verify(stateProfile).onStateUpdateFromItem(eq(OnOffType.ON));
-            verify(triggerProfile, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
+            verify(stateProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
+            verify(triggerProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
     public void testChannelTriggeredEventSingleLink() {
         manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_1));
         waitForAssert(() -> {
-            verify(triggerProfile).onTriggerFromHandler(eq(EVENT));
+            verify(triggerProfileMock).onTriggerFromHandler(eq(EVENT));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
     public void testChannelTriggeredEventMultiLink() {
         manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
         waitForAssert(() -> {
-            verify(triggerProfile, times(2)).onTriggerFromHandler(eq(EVENT));
+            verify(triggerProfileMock, times(2)).onTriggerFromHandler(eq(EVENT));
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
@@ -425,13 +408,13 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }
 
         waitForAssert(() -> {
-            verify(mockProfileFactory, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+            verify(profileFactoryMock, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                     isA(ProfileContext.class));
-            verify(mockProfileFactory, atLeast(0)).getSupportedProfileTypeUIDs();
-            verify(mockProfileAdvisor, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
+            verify(profileFactoryMock, atLeast(0)).getSupportedProfileTypeUIDs();
+            verify(profileAdvisorMock, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
         });
-        verifyNoMoreInteractions(mockProfileFactory);
-        verifyNoMoreInteractions(mockProfileAdvisor);
+        verifyNoMoreInteractions(profileFactoryMock);
+        verifyNoMoreInteractions(profileAdvisorMock);
     }
 
     @Test
@@ -439,24 +422,24 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         for (int i = 0; i < 3; i++) {
             manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
         }
-        verify(mockProfileFactory, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+        verify(profileFactoryMock, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                 isA(ProfileContext.class));
 
-        manager.removeProfileFactory(mockProfileFactory);
-        manager.addProfileFactory(mockProfileFactory);
+        manager.removeProfileFactory(profileFactoryMock);
+        manager.addProfileFactory(profileFactoryMock);
 
         for (int i = 0; i < 3; i++) {
             manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
         }
 
         waitForAssert(() -> {
-            verify(mockProfileFactory, times(4)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+            verify(profileFactoryMock, times(4)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                     isA(ProfileContext.class));
-            verify(mockProfileFactory, atLeast(0)).getSupportedProfileTypeUIDs();
-            verify(mockProfileAdvisor, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
+            verify(profileFactoryMock, atLeast(0)).getSupportedProfileTypeUIDs();
+            verify(profileAdvisorMock, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
         });
-        verifyNoMoreInteractions(mockProfileFactory);
-        verifyNoMoreInteractions(mockProfileAdvisor);
+        verifyNoMoreInteractions(profileFactoryMock);
+        verifyNoMoreInteractions(profileAdvisorMock);
     }
 
     @Test
@@ -465,7 +448,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
             manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
         }
         waitForAssert(() -> {
-            verify(mockProfileFactory, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+            verify(profileFactoryMock, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                     isA(ProfileContext.class));
         });
 
@@ -477,13 +460,13 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }
 
         waitForAssert(() -> {
-            verify(mockProfileFactory, times(3)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+            verify(profileFactoryMock, times(3)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                     isA(ProfileContext.class));
-            verify(mockProfileFactory, atLeast(0)).getSupportedProfileTypeUIDs();
-            verify(mockProfileAdvisor, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
+            verify(profileFactoryMock, atLeast(0)).getSupportedProfileTypeUIDs();
+            verify(profileAdvisorMock, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
         });
-        verifyNoMoreInteractions(mockProfileFactory);
-        verifyNoMoreInteractions(mockProfileAdvisor);
+        verifyNoMoreInteractions(profileFactoryMock);
+        verifyNoMoreInteractions(profileAdvisorMock);
     }
 
     @Test
@@ -500,13 +483,13 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }
 
         waitForAssert(() -> {
-            verify(mockProfileFactory, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+            verify(profileFactoryMock, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                     isA(ProfileContext.class));
-            verify(mockProfileFactory, atLeast(0)).getSupportedProfileTypeUIDs();
-            verify(mockProfileAdvisor, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
+            verify(profileFactoryMock, atLeast(0)).getSupportedProfileTypeUIDs();
+            verify(profileAdvisorMock, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
         });
-        verifyNoMoreInteractions(mockProfileFactory);
-        verifyNoMoreInteractions(mockProfileAdvisor);
+        verifyNoMoreInteractions(profileFactoryMock);
+        verifyNoMoreInteractions(profileAdvisorMock);
     }
 
     @Test
@@ -514,7 +497,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         for (int i = 0; i < 3; i++) {
             manager.receive(ThingEventFactory.createTriggerEvent(EVENT, TRIGGER_CHANNEL_UID_2));
         }
-        verify(mockProfileFactory, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+        verify(profileFactoryMock, times(2)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                 isA(ProfileContext.class));
 
         manager.updated(LINK_2_T2, LINK_2_T2);
@@ -524,13 +507,13 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }
 
         waitForAssert(() -> {
-            verify(mockProfileFactory, times(3)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
+            verify(profileFactoryMock, times(3)).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                     isA(ProfileContext.class));
-            verify(mockProfileFactory, atLeast(0)).getSupportedProfileTypeUIDs();
-            verify(mockProfileAdvisor, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
+            verify(profileFactoryMock, atLeast(0)).getSupportedProfileTypeUIDs();
+            verify(profileAdvisorMock, atLeast(0)).getSuggestedProfileTypeUID(any(Channel.class), any());
         });
-        verifyNoMoreInteractions(mockProfileFactory);
-        verifyNoMoreInteractions(mockProfileAdvisor);
+        verifyNoMoreInteractions(profileFactoryMock);
+        verifyNoMoreInteractions(profileAdvisorMock);
     }
 
     @Test
@@ -538,19 +521,19 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
                 .withChannels(ChannelBuilder.create(STATE_CHANNEL_UID_2, "Dimmer").withKind(ChannelKind.STATE).build())
                 .build();
-        thing.setHandler(mockHandler);
-        when(thingRegistry.get(eq(THING_UID))).thenReturn(thing);
+        thing.setHandler(thingHandlerMock);
+        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
 
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_2, HSBType.fromRGB(128, 128, 128)));
         waitForAssert(() -> {
             ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
-            verify(stateProfile).onCommandFromItem(commandCaptor.capture());
+            verify(stateProfileMock).onCommandFromItem(commandCaptor.capture());
             Command command = commandCaptor.getValue();
             assertNotNull(command);
             assertEquals(PercentType.class, command.getClass());
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
     @Test
@@ -558,19 +541,19 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
                 .withChannels(ChannelBuilder.create(STATE_CHANNEL_UID_2, "Dimmer").withKind(ChannelKind.STATE).build())
                 .build();
-        thing.setHandler(mockHandler);
-        when(thingRegistry.get(eq(THING_UID))).thenReturn(thing);
+        thing.setHandler(thingHandlerMock);
+        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
 
         manager.receive(ItemEventFactory.createStateEvent(ITEM_NAME_2, HSBType.fromRGB(128, 128, 128)));
         waitForAssert(() -> {
             ArgumentCaptor<State> stateCaptor = ArgumentCaptor.forClass(State.class);
-            verify(stateProfile).onStateUpdateFromItem(stateCaptor.capture());
+            verify(stateProfileMock).onStateUpdateFromItem(stateCaptor.capture());
             State state = stateCaptor.getValue();
             assertNotNull(state);
             assertEquals(PercentType.class, state.getClass());
         });
-        verifyNoMoreInteractions(stateProfile);
-        verifyNoMoreInteractions(triggerProfile);
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
     }
 
 }

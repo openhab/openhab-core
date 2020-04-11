@@ -34,6 +34,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.ThreadPoolManager;
@@ -120,6 +121,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added preconfigured ChannelGroupBuilder
  * @author Yordan Zhelev - Added thing disabling mechanism
  */
+@NonNullByDefault
 @Component(immediate = true, service = { ThingTypeMigrationService.class, ThingManager.class })
 public class ThingManagerImpl
         implements ThingManager, ThingTracker, ThingTypeMigrationService, ReadyService.ReadyTracker {
@@ -135,31 +137,30 @@ public class ThingManagerImpl
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(THING_MANAGER_THREADPOOL_NAME);
 
-    private EventPublisher eventPublisher;
-
-    private CommunicationManager communicationManager;
-
-    private ReadyService readyService;
-
     private final List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<>();
-
     private final Map<ThingUID, ThingHandler> thingHandlers = new ConcurrentHashMap<>();
-
     private final Map<ThingHandlerFactory, Set<ThingHandler>> thingHandlersByFactory = new HashMap<>();
 
-    private ThingTypeRegistry thingTypeRegistry;
-    private ChannelTypeRegistry channelTypeRegistry;
-    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-
-    private ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
-
+    private final Set<Thing> things = new CopyOnWriteArraySet<>();
     private final Map<ThingUID, Lock> thingLocks = new HashMap<>();
+    private final Set<ThingUID> thingUpdatedLock = new HashSet<>();
     private final Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet<>();
-    private SafeCaller safeCaller;
-    private volatile boolean active = false;
-    private StorageService storageService;
-    private Storage<String> storage;
+
+    private BundleResolver bundleResolver;
+
+    private final ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final CommunicationManager communicationManager;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
+    private final ConfigDescriptionValidator configDescriptionValidator;
+    private final EventPublisher eventPublisher;
+    private final ThingTypeRegistry thingTypeRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ReadyService readyService;
+    private final SafeCaller safeCaller;
+    private final Storage<String> storage;
+    private final ThingRegistryImpl thingRegistry;
+    private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
 
     private final ThingHandlerCallback thingHandlerCallback = new ThingHandlerCallback() {
 
@@ -246,9 +247,9 @@ public class ThingManagerImpl
         @Override
         public void thingUpdated(final Thing thing) {
             thingUpdatedLock.add(thing.getUID());
-            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            AccessController.doPrivileged(new PrivilegedAction<@Nullable Void>() {
                 @Override
-                public Void run() {
+                public @Nullable Void run() {
                     Provider<Thing> provider = thingRegistry.getProvider(thing);
                     if (provider == null) {
                         throw new IllegalArgumentException(MessageFormat.format(
@@ -347,20 +348,53 @@ public class ThingManagerImpl
         }
     };
 
-    private ThingRegistryImpl thingRegistry;
+    @Activate
+    public ThingManagerImpl( //
+            final @Reference BundleResolver bundleResolver,
+            final @Reference ChannelGroupTypeRegistry channelGroupTypeRegistry,
+            final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference CommunicationManager communicationManager,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference ConfigDescriptionValidator configDescriptionValidator,
+            final @Reference EventPublisher eventPublisher,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+            final @Reference ReadyService readyService, //
+            final @Reference SafeCaller safeCaller, //
+            final @Reference StorageService storageService, //
+            final @Reference ThingRegistry thingRegistry,
+            final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
+            final @Reference ThingTypeRegistry thingTypeRegistry) {
+        this.bundleResolver = bundleResolver;
+        this.channelGroupTypeRegistry = channelGroupTypeRegistry;
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.communicationManager = communicationManager;
+        this.configDescriptionRegistry = configDescriptionRegistry;
+        this.configDescriptionValidator = configDescriptionValidator;
+        this.eventPublisher = eventPublisher;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.readyService = readyService;
+        this.safeCaller = safeCaller;
+        this.thingRegistry = (ThingRegistryImpl) thingRegistry;
+        this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
+        this.thingTypeRegistry = thingTypeRegistry;
 
-    private BundleResolver bundleResolver;
+        readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
+        this.thingRegistry.addThingTracker(this);
+        storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
+    }
 
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private ConfigDescriptionValidator configDescriptionValidator;
-
-    private final Set<Thing> things = new CopyOnWriteArraySet<>();
-
-    private final Set<ThingUID> thingUpdatedLock = new HashSet<>();
+    @Deactivate
+    protected synchronized void deactivate(ComponentContext componentContext) {
+        thingRegistry.removeThingTracker(this);
+        for (ThingHandlerFactory factory : thingHandlerFactories) {
+            removeThingHandlerFactory(factory);
+        }
+        readyService.unregisterTracker(this);
+    }
 
     @Override
     public void migrateThingType(final Thing thing, final ThingTypeUID thingTypeUID,
-            final Configuration configuration) {
+            final @Nullable Configuration configuration) {
         final ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
         if (thingType == null) {
             throw new IllegalStateException(
@@ -379,8 +413,12 @@ public class ThingManagerImpl
                     final ThingHandlerFactory oldThingHandlerFactory = findThingHandlerFactory(thing.getThingTypeUID());
                     if (oldThingHandlerFactory != null) {
                         ThingHandler thingHandler = thing.getHandler();
-                        unregisterAndDisposeHandler(oldThingHandlerFactory, thing, thingHandler);
-                        waitUntilHandlerUnregistered(thing, 60 * 1000);
+                        if (thingHandler != null) {
+                            unregisterAndDisposeHandler(oldThingHandlerFactory, thing, thingHandler);
+                            waitUntilHandlerUnregistered(thing, 60 * 1000);
+                        } else {
+                            logger.debug("No ThingHandler to dispose for {}", thing.getUID());
+                        }
                     } else {
                         logger.debug("No ThingHandlerFactory available that can handle {}", thing.getThingTypeUID());
                     }
@@ -511,7 +549,12 @@ public class ThingManagerImpl
                             logger.debug("Replacing uninitialized handler for updated thing '{}'",
                                     thing.getThingTypeUID());
                             ThingHandlerFactory thingHandlerFactory = getThingHandlerFactory(thing);
-                            unregisterHandler(thingHandler.getThing(), thingHandlerFactory);
+                            if (thingHandlerFactory != null) {
+                                unregisterHandler(thingHandler.getThing(), thingHandlerFactory);
+                            } else {
+                                logger.debug("No ThingHandlerFactory available that can handle {}",
+                                        thing.getThingTypeUID());
+                            }
                             registerAndInitializeHandler(thing, thingHandlerFactory);
                         }
                     }
@@ -524,16 +567,18 @@ public class ThingManagerImpl
         }
     }
 
-    private ThingHandler replaceThing(Thing oldThing, Thing newThing) {
+    private @Nullable ThingHandler replaceThing(@Nullable Thing oldThing, Thing newThing) {
         final ThingHandler thingHandler = thingHandlers.get(newThing.getUID());
         if (oldThing != newThing) {
-            this.things.remove(oldThing);
+            if (oldThing != null) {
+                this.things.remove(oldThing);
+            }
             this.things.add(newThing);
         }
         return thingHandler;
     }
 
-    private Thing getThing(ThingUID id) {
+    private @Nullable Thing getThing(ThingUID id) {
         for (Thing thing : this.things) {
             if (thing.getUID().equals(id)) {
                 return thing;
@@ -546,7 +591,7 @@ public class ThingManagerImpl
         return thingTypeRegistry.getThingType(thing.getThingTypeUID());
     }
 
-    private ThingHandlerFactory findThingHandlerFactory(ThingTypeUID thingTypeUID) {
+    private @Nullable ThingHandlerFactory findThingHandlerFactory(ThingTypeUID thingTypeUID) {
         for (ThingHandlerFactory factory : thingHandlerFactories) {
             if (factory.supportsThingType(thingTypeUID)) {
                 return factory;
@@ -645,11 +690,9 @@ public class ThingManagerImpl
             ThingHandler handler = thing.getHandler();
             if (handler == null) {
                 throw new IllegalStateException("Handler should not be null here");
-            } else {
-                if (handler.getThing() != thing) {
-                    logger.warn("The model of {} is inconsistent [thing.getHandler().getThing() != thing]",
-                            thing.getUID());
-                }
+            }
+            if (handler.getThing() != thing) {
+                logger.warn("The model of {} is inconsistent [thing.getHandler().getThing() != thing]", thing.getUID());
             }
             ThingType thingType = getThingType(thing);
             if (thingType != null) {
@@ -659,7 +702,7 @@ public class ThingManagerImpl
 
             if (isInitializable(thing, thingType)) {
                 setThingStatus(thing, buildStatusInfo(ThingStatus.INITIALIZING, ThingStatusDetail.NONE));
-                doInitializeHandler(thing.getHandler());
+                doInitializeHandler(handler);
             } else {
                 logger.debug("Thing '{}' not initializable, check required configuration parameters.", thing.getUID());
                 setThingStatus(thing,
@@ -670,7 +713,7 @@ public class ThingManagerImpl
         }
     }
 
-    private boolean isInitializable(Thing thing, ThingType thingType) {
+    private boolean isInitializable(Thing thing, @Nullable ThingType thingType) {
         if (!isComplete(thingType, thing.getUID(), tt -> tt.getConfigDescriptionURI(), thing.getConfiguration())) {
             return false;
         }
@@ -696,8 +739,8 @@ public class ThingManagerImpl
      * @param configuration the current configuration
      * @return true if all required configuration parameters are given, false otherwise
      */
-    private <T extends Identifiable<?>> boolean isComplete(T prototype, UID targetUID,
-            Function<T, URI> configDescriptionURIFunction, Configuration configuration) {
+    private <T extends Identifiable<?>> boolean isComplete(@Nullable T prototype, UID targetUID,
+            Function<T, @Nullable URI> configDescriptionURIFunction, Configuration configuration) {
         if (prototype == null) {
             logger.debug("Prototype for '{}' is not known, assuming it is initializable", targetUID);
             return true;
@@ -718,12 +761,8 @@ public class ThingManagerImpl
         return propertyKeys.containsAll(requiredParameters);
     }
 
-    private ConfigDescription resolve(URI configDescriptionURI, Locale locale) {
-        if (configDescriptionURI == null) {
-            return null;
-        }
-
-        return configDescriptionRegistry != null
+    private @Nullable ConfigDescription resolve(@Nullable URI configDescriptionURI, @Nullable Locale locale) {
+        return configDescriptionURI != null
                 ? configDescriptionRegistry.getConfigDescription(configDescriptionURI, locale)
                 : null;
     }
@@ -770,9 +809,12 @@ public class ThingManagerImpl
         return thing.getBridgeUID() != null;
     }
 
-    private Bridge getBridge(ThingUID bridgeUID) {
+    private @Nullable Bridge getBridge(@Nullable ThingUID bridgeUID) {
+        if (bridgeUID == null) {
+            return null;
+        }
         Thing bridge = thingRegistry.get(bridgeUID);
-        return isBridge(bridge) ? (Bridge) bridge : null;
+        return bridge instanceof Bridge ? (Bridge) bridge : null;
     }
 
     private void unregisterHandler(Thing thing, ThingHandlerFactory thingHandlerFactory) {
@@ -969,9 +1011,9 @@ public class ThingManagerImpl
             @Override
             public void run() {
                 try {
-                    AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                    AccessController.doPrivileged(new PrivilegedAction<@Nullable Void>() {
                         @Override
-                        public Void run() {
+                        public @Nullable Void run() {
                             thingRegistry.forceRemove(thing.getUID());
                             return null;
                         }
@@ -988,32 +1030,11 @@ public class ThingManagerImpl
         });
     }
 
-    @Activate
-    protected synchronized void activate(ComponentContext componentContext) {
-        readyService.registerTracker(this, new ReadyMarkerFilter().withType(XML_THING_TYPE));
-        for (ThingHandlerFactory factory : thingHandlerFactories) {
-            handleThingHandlerFactoryAddition(getBundleIdentifier(factory));
-        }
-        thingRegistry.addThingTracker(this);
-        active = true;
-    }
-
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected synchronized void addThingHandlerFactory(ThingHandlerFactory thingHandlerFactory) {
         logger.debug("Thing handler factory '{}' added", thingHandlerFactory.getClass().getSimpleName());
         thingHandlerFactories.add(thingHandlerFactory);
-        if (active) {
-            handleThingHandlerFactoryAddition(getBundleIdentifier(thingHandlerFactory));
-        }
-    }
-
-    @Reference
-    public void setReadyService(ReadyService readyService) {
-        this.readyService = readyService;
-    }
-
-    public void unsetReadyService(ReadyService readyService) {
-        this.readyService = null;
+        handleThingHandlerFactoryAddition(getBundleIdentifier(thingHandlerFactory));
     }
 
     @Override
@@ -1049,7 +1070,8 @@ public class ThingManagerImpl
         return ReadyMarkerUtils.getIdentifier(bundleResolver.resolveBundle(thingHandlerFactory.getClass()));
     }
 
-    private void registerAndInitializeHandler(final Thing thing, final ThingHandlerFactory thingHandlerFactory) {
+    private void registerAndInitializeHandler(final Thing thing,
+            final @Nullable ThingHandlerFactory thingHandlerFactory) {
         if (thingHandlerFactory != null) {
             final String identifier = getBundleIdentifier(thingHandlerFactory);
             if (loadedXmlThingTypes.contains(identifier)) {
@@ -1066,7 +1088,7 @@ public class ThingManagerImpl
         }
     }
 
-    private ThingHandlerFactory getThingHandlerFactory(Thing thing) {
+    private @Nullable ThingHandlerFactory getThingHandlerFactory(Thing thing) {
         ThingHandlerFactory thingHandlerFactory = findThingHandlerFactory(thing.getThingTypeUID());
         if (thingHandlerFactory != null) {
             return thingHandlerFactory;
@@ -1076,22 +1098,10 @@ public class ThingManagerImpl
         return null;
     }
 
-    @Deactivate
-    protected synchronized void deactivate(ComponentContext componentContext) {
-        active = false;
-        thingRegistry.removeThingTracker(this);
-        for (ThingHandlerFactory factory : thingHandlerFactories) {
-            removeThingHandlerFactory(factory);
-        }
-        readyService.unregisterTracker(this);
-    }
-
     protected synchronized void removeThingHandlerFactory(ThingHandlerFactory thingHandlerFactory) {
         logger.debug("Thing handler factory '{}' removed", thingHandlerFactory.getClass().getSimpleName());
         thingHandlerFactories.remove(thingHandlerFactory);
-        if (active) {
-            handleThingHandlerFactoryRemoval(thingHandlerFactory);
-        }
+        handleThingHandlerFactoryRemoval(thingHandlerFactory);
     }
 
     private void handleThingHandlerFactoryRemoval(ThingHandlerFactory thingHandlerFactory) {
@@ -1117,53 +1127,8 @@ public class ThingManagerImpl
         return thingLocks.get(thingUID);
     }
 
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = (ThingRegistryImpl) thingRegistry;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = null;
-    }
-
-    @Reference
-    protected void setConfigDescriptionValidator(ConfigDescriptionValidator configDescriptionValidator) {
-        this.configDescriptionValidator = configDescriptionValidator;
-    }
-
-    protected void unsetConfigDescriptionValidator(ConfigDescriptionValidator configDescriptionValidator) {
-        this.configDescriptionValidator = null;
-    }
-
-    @Reference
-    protected void setBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
-    protected void unsetBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
     private ThingStatusInfo buildStatusInfo(ThingStatus thingStatus, ThingStatusDetail thingStatusDetail,
-            String description) {
+            @Nullable String description) {
         ThingStatusInfoBuilder statusInfoBuilder = ThingStatusInfoBuilder.create(thingStatus, thingStatusDetail);
         statusInfoBuilder.withDescription(description);
         return statusInfoBuilder.build();
@@ -1228,11 +1193,19 @@ public class ThingManagerImpl
 
             logger.debug("Thing {} will be disabled.", thingUID);
 
+            boolean disposed = false;
+
             if (isHandlerRegistered(thing)) {
                 // Dispose handler if registered.
+                ThingHandler thingHandler = thing.getHandler();
                 ThingHandlerFactory thingHandlerFactory = findThingHandlerFactory(thing.getThingTypeUID());
-                unregisterAndDisposeHandler(thingHandlerFactory, thing, thing.getHandler());
-            } else {
+                if (thingHandler != null && thingHandlerFactory != null) {
+                    unregisterAndDisposeHandler(thingHandlerFactory, thing, thingHandler);
+                    disposed = true;
+                }
+            }
+
+            if (!disposed) {
                 // Only set the correct status to the thing. There is no handler to be disposed
                 setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.DISABLED));
             }
@@ -1254,12 +1227,6 @@ public class ThingManagerImpl
     }
 
     private void persistThingEnableStatus(ThingUID thingUID, boolean enabled) {
-        if (storage == null) {
-            logger.debug("Cannot persist enable status of thing with UID {}. Persistent storage unavailable.",
-                    thingUID);
-            return;
-        }
-
         logger.debug("Thing with UID {} will be persisted as {}.", thingUID, enabled ? "enabled." : "disabled.");
         if (enabled) {
             // Clear the disabled thing storage. Otherwise the handler will NOT be initialized later.
@@ -1283,86 +1250,11 @@ public class ThingManagerImpl
     }
 
     private boolean isDisabledByStorage(ThingUID thingUID) {
-        return storage != null && storage.containsKey(thingUID.getAsString());
+        return storage.containsKey(thingUID.getAsString());
     }
 
-    @Reference
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = thingTypeRegistry;
+    void setBundleResolver(BundleResolver bundleResolver) {
+        this.bundleResolver = bundleResolver;
     }
 
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = channelGroupTypeRegistry;
-    }
-
-    protected void unsetChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
-    @Reference
-    protected void setThingStatusInfoI18nLocalizationService(
-            ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService) {
-        this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
-    }
-
-    protected void unsetThingStatusInfoI18nLocalizationService(
-            ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService) {
-        this.thingStatusInfoI18nLocalizationService = null;
-    }
-
-    @Reference
-    protected void setInboundCommunication(CommunicationManager communicationManager) {
-        this.communicationManager = communicationManager;
-    }
-
-    protected void unsetInboundCommunication(CommunicationManager communicationManager) {
-        this.communicationManager = null;
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
-    }
-
-    @Reference
-    protected void setStorageService(StorageService storageService) {
-        if (this.storageService != storageService) {
-            this.storageService = storageService;
-            storage = storageService.getStorage(THING_STATUS_STORAGE_NAME, this.getClass().getClassLoader());
-        }
-    }
-
-    protected void unsetStorageService(StorageService storageService) {
-        if (this.storageService == storageService) {
-            this.storageService = null;
-            this.storage = null;
-        }
-    }
 }

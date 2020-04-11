@@ -14,6 +14,7 @@ package org.openhab.core.thing.link;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.DefaultAbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.thing.ThingUID;
@@ -27,6 +28,7 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Dennis Nobel - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = { ItemChannelLinkProvider.class, ManagedItemChannelLinkProvider.class })
 public class ManagedItemChannelLinkProvider extends DefaultAbstractManagedProvider<ItemChannelLink, String>
         implements ItemChannelLinkProvider {

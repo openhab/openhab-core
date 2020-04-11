@@ -20,6 +20,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.parser.Parser;
@@ -40,12 +42,13 @@ import org.osgi.framework.Bundle;
  * @author Ana Dimova - Initial contribution
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation
  */
+@NonNullByDefault
 public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<Rule> {
 
     /**
      * This field holds the reference to the Rule Registry.
      */
-    protected ManagedRuleProvider mProvider;
+    protected @Nullable ManagedRuleProvider mProvider;
 
     /**
      * This constructor is responsible for initializing the path to resources and tracking the managing service of the

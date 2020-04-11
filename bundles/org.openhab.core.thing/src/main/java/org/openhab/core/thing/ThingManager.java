@@ -12,11 +12,14 @@
  */
 package org.openhab.core.thing;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * {@link ThingManager} interface defines methods for managing a {@link Thing}.
  *
  * @author Yordan Zhelev - Initial contribution
  */
+@NonNullByDefault
 public interface ThingManager {
 
     /**

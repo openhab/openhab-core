@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -67,6 +69,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - Initial contribution
  * @author Markus Rathgeb - Migrated Groovy tests to pure Java ones and made it more robust
  */
+@NonNullByDefault
 public class RuntimeRuleTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
@@ -115,7 +118,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
         });
@@ -178,7 +181,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
         });
@@ -219,7 +222,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     }
 
     private void assertSatisfiedHandlerInput(final CompareConditionHandler handler, final boolean expected,
-            final Object input) {
+            final @Nullable Object input) {
         final boolean is = handler.isSatisfied(Collections.singletonMap("input", input));
         if (expected) {
             Assert.assertTrue(is);
@@ -390,7 +393,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
             }
 
             @Override
-            public EventFilter getEventFilter() {
+            public @Nullable EventFilter getEventFilter() {
                 return null;
             }
         });

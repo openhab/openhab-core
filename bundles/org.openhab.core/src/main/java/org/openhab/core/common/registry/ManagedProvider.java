@@ -13,6 +13,7 @@
 package org.openhab.core.common.registry;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -26,14 +27,15 @@ import org.eclipse.jdt.annotation.Nullable;
  * @param <K>
  *            type of the element key
  */
-public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<E> {
+@NonNullByDefault
+public interface ManagedProvider<@NonNull E extends Identifiable<K>, @NonNull K> extends Provider<E> {
 
     /**
      * Adds an element.
      *
      * @param element element to be added
      */
-    void add(@NonNull E element);
+    void add(E element);
 
     /**
      * Removes an element and returns the removed element.
@@ -43,7 +45,7 @@ public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<
      *         key exists
      */
     @Nullable
-    E remove(@NonNull K key);
+    E remove(K key);
 
     /**
      * Updates an element.
@@ -53,7 +55,7 @@ public interface ManagedProvider<E extends Identifiable<K>, K> extends Provider<
      *         exists
      */
     @Nullable
-    E update(@NonNull E element);
+    E update(E element);
 
     /**
      * Returns an element for the given key or null if no element for the given

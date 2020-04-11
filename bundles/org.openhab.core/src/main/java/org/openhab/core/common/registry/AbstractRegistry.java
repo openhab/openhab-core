@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * @param <E> type of the element
  */
 @NonNullByDefault
-public abstract class AbstractRegistry<E extends Identifiable<K>, K, P extends Provider<E>>
+public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonNull K, @NonNull P extends Provider<E>>
         implements ProviderChangeListener<E>, Registry<E, K> {
 
     private enum EventType {

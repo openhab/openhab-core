@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -81,25 +82,24 @@ import org.osgi.service.component.ComponentContext;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
+@NonNullByDefault
 public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
 
     private static final String TEST_BUNDLE_NAME = "thingStatusInfoI18nTest.bundle";
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("hue:dynamic");
 
-    private ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
-    private ItemRegistry itemRegistry;
-    private ItemChannelLinkRegistry linkRegistry;
+    private @Mock @NonNullByDefault({}) ComponentContext componentContextMock;
 
-    @Mock
-    private ComponentContext componentContext;
-
-    private Bundle testBundle;
+    private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry linkRegistry;
+    private @NonNullByDefault({}) Bundle testBundle;
+    private @NonNullByDefault({}) ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
 
     @Before
     public void setup() throws Exception {
         initMocks(this);
 
-        Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
+        Mockito.when(componentContextMock.getBundleContext()).thenReturn(bundleContext);
 
         registerVolatileStorageService();
 
@@ -107,7 +107,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertNotNull(itemRegistry);
 
         final TestThingHandlerFactory thingHandlerFactory = new TestThingHandlerFactory();
-        thingHandlerFactory.activate(componentContext);
+        thingHandlerFactory.activate(componentContextMock);
         registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
 
         final StateDescription state = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
@@ -132,12 +132,12 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         registerService(new ChannelTypeProvider() {
             @Override
-            public Collection<ChannelType> getChannelTypes(Locale locale) {
+            public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
                 return channelTypes;
             }
 
             @Override
-            public ChannelType getChannelType(ChannelTypeUID channelTypeUID, Locale locale) {
+            public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
                 for (final ChannelType channelType : channelTypes) {
                     if (channelType.getUID().equals(channelTypeUID)) {
                         return channelType;
@@ -337,7 +337,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
 
         @Override
-        protected ThingHandler createHandler(Thing thing) {
+        protected @Nullable ThingHandler createHandler(Thing thing) {
             return new AbstractThingHandler(thing) {
                 @Override
                 public void handleCommand(ChannelUID channelUID, Command command) {
@@ -385,7 +385,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
      */
     private class BundleResolverImpl implements BundleResolver {
         @Override
-        public Bundle resolveBundle(Class<?> clazz) {
+        public Bundle resolveBundle(@NonNullByDefault({}) Class<?> clazz) {
             if (clazz != null && clazz.equals(AbstractThingHandler.class)) {
                 return testBundle;
             } else {

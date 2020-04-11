@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -60,18 +61,12 @@ public class ChannelItemProviderTest {
     private static final NumberItem ITEM = new NumberItem(ITEM_NAME);
     private static final ItemChannelLink LINK = new ItemChannelLink(ITEM_NAME, CHANNEL_UID);
 
-    @Mock
-    private ItemRegistry itemRegistry;
-    @Mock
-    private ThingRegistry thingRegistry;
-    @Mock
-    private ItemFactory itemFactory;
-    @Mock
-    private ProviderChangeListener<Item> listener;
-    @Mock
-    private LocaleProvider localeProvider;
-    @Mock
-    private ItemChannelLinkRegistry linkRegistry;
+    private @Mock ItemFactory itemFactoryMock;
+    private @Mock ItemRegistry itemRegistryMock;
+    private @Mock ItemChannelLinkRegistry linkRegistryMock;
+    private @Mock ProviderChangeListener<@NonNull Item> listenerMock;
+    private @Mock LocaleProvider localeProviderMock;
+    private @Mock ThingRegistry thingRegistryMock;
 
     private ChannelItemProvider provider;
 
@@ -86,9 +81,9 @@ public class ChannelItemProviderTest {
         props.put("initialDelay", "false");
         provider.activate(props);
 
-        when(thingRegistry.getChannel(same(CHANNEL_UID))).thenReturn(CHANNEL);
-        when(itemFactory.createItem(CoreItemFactory.NUMBER, ITEM_NAME)).thenReturn(ITEM);
-        when(localeProvider.getLocale()).thenReturn(Locale.ENGLISH);
+        when(thingRegistryMock.getChannel(same(CHANNEL_UID))).thenReturn(CHANNEL);
+        when(itemFactoryMock.createItem(CoreItemFactory.NUMBER, ITEM_NAME)).thenReturn(ITEM);
+        when(localeProviderMock.getLocale()).thenReturn(Locale.ENGLISH);
     }
 
     @Test
@@ -96,17 +91,17 @@ public class ChannelItemProviderTest {
         resetAndPrepareListener();
 
         provider.thingRegistryListener.added(THING);
-        verify(listener, only()).added(same(provider), same(ITEM));
+        verify(listenerMock, only()).added(same(provider), same(ITEM));
     }
 
     @Test
     public void testItemCreationFromThingAlreadyExists() {
-        when(itemRegistry.get(eq(ITEM_NAME))).thenReturn(ITEM);
+        when(itemRegistryMock.get(eq(ITEM_NAME))).thenReturn(ITEM);
 
         resetAndPrepareListener();
 
         provider.thingRegistryListener.added(THING);
-        verify(listener, never()).added(same(provider), same(ITEM));
+        verify(listenerMock, never()).added(same(provider), same(ITEM));
     }
 
     @Test
@@ -116,22 +111,22 @@ public class ChannelItemProviderTest {
         resetAndPrepareListener();
 
         provider.thingRegistryListener.removed(THING);
-        verify(listener, never()).added(same(provider), same(ITEM));
-        verify(listener, only()).removed(same(provider), same(ITEM));
+        verify(listenerMock, never()).added(same(provider), same(ITEM));
+        verify(listenerMock, only()).removed(same(provider), same(ITEM));
     }
 
     @Test
     public void testItemCreationFromLinkNotThere() {
         provider.linkRegistryListener.added(LINK);
-        verify(listener, only()).added(same(provider), same(ITEM));
+        verify(listenerMock, only()).added(same(provider), same(ITEM));
     }
 
     @Test
     public void testItemCreationFromLinkAlreadyExists() {
-        when(itemRegistry.get(eq(ITEM_NAME))).thenReturn(ITEM);
+        when(itemRegistryMock.get(eq(ITEM_NAME))).thenReturn(ITEM);
 
         provider.linkRegistryListener.added(LINK);
-        verify(listener, never()).added(same(provider), same(ITEM));
+        verify(listenerMock, never()).added(same(provider), same(ITEM));
     }
 
     @Test
@@ -141,8 +136,8 @@ public class ChannelItemProviderTest {
         resetAndPrepareListener();
 
         provider.linkRegistryListener.removed(LINK);
-        verify(listener, never()).added(same(provider), same(ITEM));
-        verify(listener, only()).removed(same(provider), same(ITEM));
+        verify(listenerMock, never()).added(same(provider), same(ITEM));
+        verify(listenerMock, only()).removed(same(provider), same(ITEM));
     }
 
     @Test
@@ -152,14 +147,14 @@ public class ChannelItemProviderTest {
         resetAndPrepareListener();
 
         provider.itemRegistryListener.beforeAdding(new NumberItem(ITEM_NAME));
-        verify(listener, only()).removed(same(provider), same(ITEM));
-        verify(listener, never()).added(same(provider), same(ITEM));
+        verify(listenerMock, only()).removed(same(provider), same(ITEM));
+        verify(listenerMock, never()).added(same(provider), same(ITEM));
     }
 
     @Test
     public void testDisableBeforeDelayedInitialization() throws Exception {
         provider = createProvider();
-        reset(linkRegistry);
+        reset(linkRegistryMock);
 
         // Set the initialization delay to 40ms so we don't have to wait 2000ms to do the assertion
         Field field = ChannelItemProvider.class.getDeclaredField("INITIALIZATION_DELAY_NANOS");
@@ -174,8 +169,8 @@ public class ChannelItemProviderTest {
         provider.activate(props);
 
         provider.linkRegistryListener.added(LINK);
-        verify(listener, never()).added(same(provider), same(ITEM));
-        verify(linkRegistry, never()).getAll();
+        verify(listenerMock, never()).added(same(provider), same(ITEM));
+        verify(linkRegistryMock, never()).getAll();
 
         props = new HashMap<>();
         props.put("enabled", "false");
@@ -184,32 +179,32 @@ public class ChannelItemProviderTest {
         Thread.sleep(100);
 
         provider.linkRegistryListener.added(LINK);
-        verify(listener, never()).added(same(provider), same(ITEM));
-        verify(linkRegistry, never()).getAll();
+        verify(listenerMock, never()).added(same(provider), same(ITEM));
+        verify(linkRegistryMock, never()).getAll();
     }
 
     @SuppressWarnings("unchecked")
     private void resetAndPrepareListener() {
-        reset(listener);
+        reset(listenerMock);
         doAnswer(invocation -> {
             // this is crucial as it mimics the real ItemRegistry's behavior
             provider.itemRegistryListener.afterRemoving((Item) invocation.getArguments()[1]);
             return null;
-        }).when(listener).removed(same(provider), any(Item.class));
+        }).when(listenerMock).removed(same(provider), any(Item.class));
         doAnswer(invocation -> {
             // this is crucial as it mimics the real ItemRegistry's behavior
             provider.itemRegistryListener.beforeAdding((Item) invocation.getArguments()[1]);
             return null;
-        }).when(listener).added(same(provider), any(Item.class));
-        when(linkRegistry.getBoundChannels(eq(ITEM_NAME))).thenReturn(Collections.singleton(CHANNEL_UID));
-        when(linkRegistry.getLinks(eq(CHANNEL_UID))).thenReturn(Collections.singleton(LINK));
+        }).when(listenerMock).added(same(provider), any(Item.class));
+        when(linkRegistryMock.getBoundChannels(eq(ITEM_NAME))).thenReturn(Collections.singleton(CHANNEL_UID));
+        when(linkRegistryMock.getLinks(eq(CHANNEL_UID))).thenReturn(Collections.singleton(LINK));
     }
 
     private ChannelItemProvider createProvider() {
-        ChannelItemProvider provider = new ChannelItemProvider(localeProvider, mock(ChannelTypeRegistry.class),
-                thingRegistry, itemRegistry, linkRegistry);
-        provider.addItemFactory(itemFactory);
-        provider.addProviderChangeListener(listener);
+        ChannelItemProvider provider = new ChannelItemProvider(localeProviderMock, mock(ChannelTypeRegistry.class),
+                thingRegistryMock, itemRegistryMock, linkRegistryMock);
+        provider.addItemFactory(itemFactoryMock);
+        provider.addProviderChangeListener(listenerMock);
         return provider;
     }
 

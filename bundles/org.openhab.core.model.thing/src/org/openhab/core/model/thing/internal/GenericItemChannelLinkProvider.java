@@ -20,13 +20,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.openhab.core.config.core.Configuration;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.config.core.Configuration;
+import org.openhab.core.model.item.BindingConfigParseException;
+import org.openhab.core.model.item.BindingConfigReader;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkProvider;
-import org.openhab.core.model.item.BindingConfigParseException;
-import org.openhab.core.model.item.BindingConfigReader;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -35,6 +37,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Oliver Libutzki - Initial contribution
  * @author Alex Tugarev - Added parsing of multiple Channel UIDs
  */
+@NonNullByDefault
 @Component(immediate = true, service = { ItemChannelLinkProvider.class, BindingConfigReader.class })
 public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannelLink>
         implements BindingConfigReader, ItemChannelLinkProvider {
@@ -48,7 +51,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
      */
     protected Map<String, Set<String>> contextMap = new ConcurrentHashMap<>();
 
-    private Set<String> previousItemNames;
+    private @Nullable Set<String> previousItemNames;
 
     @Override
     public String getBindingType() {

@@ -17,103 +17,129 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.common.SafeCaller;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
+import org.openhab.core.events.EventPublisher;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
+import org.openhab.core.thing.internal.ThingTracker.ThingTrackerEvent;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.type.ChannelGroupTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
-import org.osgi.service.component.ComponentContext;
 
 /**
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class ThingManagerImplTest {
 
-    private @Mock BundleResolver mockBundleResolver;
-    private @Mock Bundle mockBundle;
-    private @Mock ComponentContext mockComponentContext;
-    private @Mock ReadyService mockReadyService;
-    private @Mock Thing mockThing;
+    private @Mock @NonNullByDefault({}) Bundle bundleMock;
+    private @Mock @NonNullByDefault({}) BundleResolver bundleResolverMock;
+    private @Mock @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistryMock;
+    private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
+    private @Mock @NonNullByDefault({}) CommunicationManager communicationManagerMock;
+    private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
+    private @Mock @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistryMock;
+    private @Mock @NonNullByDefault({}) ConfigDescriptionValidator configDescriptionValidatorMock;
+    private @Mock @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistryMock;
+    private @Mock @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistryMock;
+    private @Mock @NonNullByDefault({}) ReadyService readyServiceMock;
+    private @Mock @NonNullByDefault({}) SafeCaller safeCallerMock;
+    private @Mock @NonNullByDefault({}) Storage<Object> storageMock;
+    private @Mock @NonNullByDefault({}) StorageService storageServiceMock;
+    private @Mock @NonNullByDefault({}) Thing thingMock;
+    private @Mock @NonNullByDefault({}) ThingRegistryImpl thingRegistryMock;
 
-    private @Mock StorageService mockStorageService;
-    private @Mock Storage<Object> mockStorage;
-
-    private final ThingRegistryImpl thingRegistry = new ThingRegistryImpl();
+    // This class is final so it cannot be mocked
+    private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService = new ThingStatusInfoI18nLocalizationService();
 
     @Before
     public void setup() {
         initMocks(this);
-        when(mockBundle.getSymbolicName()).thenReturn("test");
-        when(mockBundleResolver.resolveBundle(any())).thenReturn(mockBundle);
-        when(mockThing.getUID()).thenReturn(new ThingUID("test", "thing"));
+
+        when(bundleMock.getSymbolicName()).thenReturn("test");
+        when(bundleResolverMock.resolveBundle(any())).thenReturn(bundleMock);
+        when(thingMock.getUID()).thenReturn(new ThingUID("test", "thing"));
+    }
+
+    private ThingManagerImpl createThingManager() {
+        return new ThingManagerImpl(bundleResolverMock, channelGroupTypeRegistryMock, channelTypeRegistryMock,
+                communicationManagerMock, configDescriptionRegistryMock, configDescriptionValidatorMock,
+                eventPublisherMock, itemChannelLinkRegistryMock, readyServiceMock, safeCallerMock, storageServiceMock,
+                thingRegistryMock, thingStatusInfoI18nLocalizationService, thingTypeRegistryMock);
     }
 
     @Test
-    public void testThingHandlerFactoryLifecycle() {
+    public void thingHandlerFactoryLifecycle() {
         ThingHandlerFactory mockFactory1 = mock(ThingHandlerFactory.class);
         ThingHandlerFactory mockFactory2 = mock(ThingHandlerFactory.class);
 
-        ThingManagerImpl thingManager = new ThingManagerImpl();
-        thingManager.setBundleResolver(mockBundleResolver);
-        thingManager.setThingRegistry(thingRegistry);
-        thingManager.setReadyService(mockReadyService);
-        thingManager.thingAdded(mockThing, null);
+        ThingManagerImpl thingManager = createThingManager();
 
-        // ensure usage is delayed until activation
+        thingManager.thingAdded(thingMock, ThingTrackerEvent.THING_ADDED);
+
         thingManager.addThingHandlerFactory(mockFactory1);
-        verify(mockFactory1, times(0)).supportsThingType(any());
-        thingManager.activate(mockComponentContext);
         verify(mockFactory1, atLeastOnce()).supportsThingType(any());
+        thingManager.removeThingHandlerFactory(mockFactory1);
 
-        // ensure it is directly used
         thingManager.addThingHandlerFactory(mockFactory2);
         verify(mockFactory2, atLeastOnce()).supportsThingType(any());
+        thingManager.removeThingHandlerFactory(mockFactory2);
     }
 
     @Test
-    public void testCallSetEnabledWithUnknownThingUID() throws Exception {
+    public void setEnabledWithUnknownThingUID() throws Exception {
         ThingUID unknownUID = new ThingUID("someBundle", "someType", "someID");
-        ThingManagerImpl thingManager = new ThingManagerImpl();
 
-        when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(mockStorage);
-        thingManager.setStorageService(mockStorageService);
+        when(storageServiceMock.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(storageMock);
+
+        ThingManagerImpl thingManager = createThingManager();
+
         thingManager.setEnabled(unknownUID, true);
-        verify(mockStorage).remove(eq(unknownUID.getAsString()));
+        verify(storageMock).remove(eq(unknownUID.getAsString()));
 
         thingManager.setEnabled(unknownUID, false);
-        verify(mockStorage).put(eq(unknownUID.getAsString()), eq(""));
+        verify(storageMock).put(eq(unknownUID.getAsString()), eq(""));
     }
 
     @Test
-    public void testCallIsEnabledWithUnknownThingUIDAndNullStorage() throws Exception {
+    public void isEnabledWithUnknownThingUIDAndNullStorage() throws Exception {
         ThingUID unknownUID = new ThingUID("someBundle", "someType", "someID");
-        ThingManagerImpl thingManager = new ThingManagerImpl();
 
-        when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(mockStorage);
-        thingManager.setStorageService(mockStorageService);
+        when(storageServiceMock.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(storageMock);
+
+        ThingManagerImpl thingManager = createThingManager();
+
         assertEquals(thingManager.isEnabled(unknownUID), true);
-
     }
 
     @Test
-    public void testCallIsEnabledWithUnknownThingUIDAndNonNullStorage() throws Exception {
+    public void isEnabledWithUnknownThingUIDAndNonNullStorage() throws Exception {
         ThingUID unknownUID = new ThingUID("someBundle", "someType", "someID");
-        ThingManagerImpl thingManager = new ThingManagerImpl();
 
-        when(mockStorage.containsKey(unknownUID.getAsString())).thenReturn(false);
-        when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(mockStorage);
-        thingManager.setStorageService(mockStorageService);
+        when(storageMock.containsKey(unknownUID.getAsString())).thenReturn(false);
+        when(storageServiceMock.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(storageMock);
+
+        ThingManagerImpl thingManager = createThingManager();
+
         assertEquals(thingManager.isEnabled(unknownUID), true);
 
-        when(mockStorage.containsKey(unknownUID.getAsString())).thenReturn(true);
-        when(mockStorageService.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(mockStorage);
-        thingManager.setStorageService(mockStorageService);
+        when(storageMock.containsKey(unknownUID.getAsString())).thenReturn(true);
+        when(storageServiceMock.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(storageMock);
+
         assertEquals(thingManager.isEnabled(unknownUID), false);
     }
 }
