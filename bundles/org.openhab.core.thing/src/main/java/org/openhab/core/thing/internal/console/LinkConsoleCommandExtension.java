@@ -14,23 +14,23 @@ package org.openhab.core.thing.internal.console;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
-import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.stream.Collectors;
 
 /**
  * {@link LinkConsoleCommandExtension} provides console commands for listing,
@@ -66,7 +66,7 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
                     list(console, itemChannelLinkRegistry.getAll());
                     return;
                 case SUBCMD_ORPHAN:
-                    if (args.length != 2 || (!args[1].equals("list") && !args[1].equals("purge"))) {
+                    if (args.length == 2 && (args[1].equals("list") || args[1].equals("purge"))) {
                         orphan(console, args[1], itemChannelLinkRegistry.getAll(), thingRegistry.getAll(),
                                 itemRegistry.getAll());
                     } else {
@@ -106,12 +106,13 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     private void orphan(Console console, String action, Collection<ItemChannelLink> itemChannelLinks,
             Collection<Thing> things, Collection<Item> items) {
-        Collection<ThingUID> thingUIDs = things.stream().map(Thing::getUID).collect(Collectors.toSet());
-        Collection<String> itemNames = items.stream().map(Item::getName).collect(Collectors.toSet());
+        Collection<ChannelUID> channelUIDS = things.stream().map(Thing::getChannels).flatMap(List::stream)
+                .map(Channel::getUID).collect(Collectors.toCollection(HashSet::new));
+        Collection<String> itemNames = items.stream().map(Item::getName).collect(Collectors.toCollection(HashSet::new));
 
         itemChannelLinks.forEach(itemChannelLink -> {
-            if (!thingUIDs.contains(itemChannelLink.getLinkedUID().getThingUID())) {
-                console.println("Thing missing: " + itemChannelLink.toString());
+            if (!channelUIDS.contains(itemChannelLink.getLinkedUID())) {
+                console.println("Thing channel missing: " + itemChannelLink.toString());
                 if (action.equals("purge")) {
                     removeChannelLink(console, itemChannelLink.getItemName(), itemChannelLink.getLinkedUID());
                 }
