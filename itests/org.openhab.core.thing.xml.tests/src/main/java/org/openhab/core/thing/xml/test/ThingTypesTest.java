@@ -68,7 +68,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(null);
 
             // HUE Bridge
-            BridgeType bridgeType = (BridgeType) thingTypes.stream().filter(it -> it.toString().equals("hue:bridge"))
+            BridgeType bridgeType = (BridgeType) thingTypes.stream().filter(it -> "hue:bridge".equals(it.toString()))
                     .findFirst().get();
             assertThat(bridgeType, is(notNullValue()));
             assertThat(bridgeType.getCategory(), is("NetworkAppliance"));
@@ -80,7 +80,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(bridgeType.getRepresentationProperty(), is("serialNumber"));
 
             // HUE Lamp
-            ThingType thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp")).findFirst().get();
+            ThingType thingType = thingTypes.stream().filter(it -> "hue:lamp".equals(it.toString())).findFirst().get();
 
             assertThat(thingType, is(notNullValue()));
             assertThat(thingType.getCategory(), is("Lightbulb"));
@@ -98,7 +98,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             List<ChannelDefinition> channelDefinitions = thingType.getChannelDefinitions();
 
             assertThat(channelDefinitions.size(), is(3));
-            ChannelDefinition colorChannel = channelDefinitions.stream().filter(it -> it.getId().equals("color"))
+            ChannelDefinition colorChannel = channelDefinitions.stream().filter(it -> "color".equals(it.getId()))
                     .findFirst().get();
             assertThat(colorChannel, is(notNullValue()));
 
@@ -122,7 +122,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(tags.contains("AlarmSystem"), is(false));
 
             ChannelDefinition colorTemperatureChannel = channelDefinitions.stream()
-                    .filter(it -> it.getId().equals("color_temperature")).findFirst().get();
+                    .filter(it -> "color_temperature".equals(it.getId())).findFirst().get();
 
             assertThat(colorTemperatureChannel, is(notNullValue()));
             assertThat(colorTemperatureChannel.getProperties().size(), is(0));
@@ -143,7 +143,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(tags.contains("ColorLamp"), is(false));
             assertThat(tags.contains("AlarmSystem"), is(false));
 
-            ChannelDefinition alarmChannel = channelDefinitions.stream().filter(it -> it.getId().equals("alarm"))
+            ChannelDefinition alarmChannel = channelDefinitions.stream().filter(it -> "alarm".equals(it.getId()))
                     .findFirst().get();
             assertThat(alarmChannel, is(notNullValue()));
             ChannelType alarmChannelType = channelTypeRegistry.getChannelType(alarmChannel.getChannelTypeUID());
@@ -173,7 +173,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(state.getOptions().get(0).getLabel(), is(equalTo("My great sound.")));
 
             // HUE Lamp with group
-            thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp-with-group")).findFirst().get();
+            thingType = thingTypes.stream().filter(it -> "hue:lamp-with-group".equals(it.toString())).findFirst().get();
             assertThat(thingType, is(notNullValue()));
             assertThat(thingType.getProperties().size(), is(0));
             assertThat(thingType.getCategory(), is(nullValue()));
@@ -185,7 +185,7 @@ public class ThingTypesTest extends JavaOSGiTest {
 
             // Channel Group
             ChannelGroupDefinition channelGroupDefinition = channelGroupDefinitions.stream()
-                    .filter(it -> it.getId().equals("lampgroup")).findFirst().get();
+                    .filter(it -> "lampgroup".equals(it.getId())).findFirst().get();
             assertThat(channelGroupDefinition, is(notNullValue()));
             ChannelGroupType channelGroupType = channelGroupTypeRegistry
                     .getChannelGroupType(channelGroupDefinition.getTypeUID());
@@ -195,7 +195,7 @@ public class ThingTypesTest extends JavaOSGiTest {
 
             // Channel Group without channels
             channelGroupDefinition = channelGroupDefinitions.stream()
-                    .filter(it -> it.getId().equals("lampgroup-without-channels")).findFirst().get();
+                    .filter(it -> "lampgroup-without-channels".equals(it.getId())).findFirst().get();
             assertThat(channelGroupDefinition, is(notNullValue()));
             channelGroupType = channelGroupTypeRegistry.getChannelGroupType(channelGroupDefinition.getTypeUID());
             assertThat(channelGroupType, is(notNullValue()));
@@ -203,7 +203,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(channelDefinitions.size(), is(0));
 
             // HUE Lamp without channels
-            thingType = thingTypes.stream().filter(it -> it.toString().equals("hue:lamp-without-channels")).findFirst()
+            thingType = thingTypes.stream().filter(it -> "hue:lamp-without-channels".equals(it.toString())).findFirst()
                     .get();
             assertThat(thingType, is(notNullValue()));
             channelDefinitions = thingType.getChannelDefinitions();

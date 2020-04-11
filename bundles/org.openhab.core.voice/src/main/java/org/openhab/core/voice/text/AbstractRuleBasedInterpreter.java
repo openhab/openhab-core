@@ -588,7 +588,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             return parts;
         }
         String[] split;
-        if (localeSafe.getLanguage().equalsIgnoreCase(Locale.FRENCH.getLanguage())) {
+        if (Locale.FRENCH.getLanguage().equalsIgnoreCase(localeSafe.getLanguage())) {
             split = text.toLowerCase(localeSafe).replaceAll("[\\']", " ").replaceAll("[^\\w\\sàâäçéèêëîïôùûü]", " ")
                     .split("\\s");
         } else {

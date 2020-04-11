@@ -146,7 +146,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         assertThat(bulb3, isA(Thing.class));
         assertThat(bulb3.getChannels().size(), is(3));
         Channel firstChannel = bulb3.getChannels().stream()
-                .filter(c -> c.getUID().toString().equals("hue:LCT001:bulb3:notification")).findFirst().get();
+                .filter(c -> "hue:LCT001:bulb3:notification".equals(c.getUID().toString())).findFirst().get();
         assertThat(firstChannel.getUID().toString(), is("hue:LCT001:bulb3:notification"));
         assertThat(firstChannel.getAcceptedItemType(), is("Switch"));
         assertThat(firstChannel.getConfiguration().values().size(), is(1));

@@ -136,9 +136,9 @@ public class AutomationCommandImport extends AutomationCommand {
             if (null == parameterValues[i]) {
                 continue;
             }
-            if (parameterValues[i].equals(OPTION_ST)) {
+            if (OPTION_ST.equals(parameterValues[i])) {
                 st = true;
-            } else if (parameterValues[i].equalsIgnoreCase(OPTION_P)) {
+            } else if (OPTION_P.equalsIgnoreCase(parameterValues[i])) {
                 i++;
                 if (i >= parameterValues.length) {
                     return String.format("The option [%s] should be followed by value for the parser type.", OPTION_P);

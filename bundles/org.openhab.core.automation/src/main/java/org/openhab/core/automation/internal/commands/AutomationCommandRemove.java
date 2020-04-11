@@ -138,7 +138,7 @@ public class AutomationCommandRemove extends AutomationCommand {
             if (null == parameterValues[i]) {
                 continue;
             }
-            if (parameterValues[i].equals(OPTION_ST)) {
+            if (OPTION_ST.equals(parameterValues[i])) {
                 st = true;
             } else if (parameterValues[i].charAt(0) == '-') {
                 return String.format("Unsupported option: %s", parameterValues[i]);

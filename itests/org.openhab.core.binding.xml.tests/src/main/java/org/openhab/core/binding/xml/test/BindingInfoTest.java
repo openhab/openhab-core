@@ -90,14 +90,14 @@ public class BindingInfoTest extends JavaOSGiTest {
             List<ConfigDescriptionParameter> parameters = configDescription.getParameters();
             assertThat(parameters.size(), is(2));
 
-            ConfigDescriptionParameter listParameter = parameters.stream().filter(p -> p.getName().equals("list"))
+            ConfigDescriptionParameter listParameter = parameters.stream().filter(p -> "list".equals(p.getName()))
                     .findFirst().get();
             assertThat(listParameter, is(notNullValue()));
             assertThat(listParameter.getOptions().stream().map(p -> p.toString()).collect(Collectors.joining(", ")), is(
                     "ParameterOption [value=\"key1\", label=\"label1\"], ParameterOption [value=\"key2\", label=\"label2\"]"));
 
             ConfigDescriptionParameter lightParameter = parameters.stream()
-                    .filter(p -> p.getName().equals("color-alarming-light")).findFirst().get();
+                    .filter(p -> "color-alarming-light".equals(p.getName())).findFirst().get();
             assertThat(lightParameter, is(notNullValue()));
             assertThat(
                     lightParameter.getFilterCriteria().stream().map(p -> p.toString())

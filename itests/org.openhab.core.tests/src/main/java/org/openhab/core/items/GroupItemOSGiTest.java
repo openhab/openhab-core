@@ -287,7 +287,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         Set<Item> members = rootGroupItem.getMembers(i -> i instanceof GroupItem);
         assertThat(members.size(), is(1));
 
-        members = rootGroupItem.getMembers(i -> i.getLabel().equals("mem1"));
+        members = rootGroupItem.getMembers(i -> "mem1".equals(i.getLabel()));
         assertThat(members.size(), is(2));
     }
 
@@ -447,12 +447,12 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(changes.size(), is(1));
 
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
-        assertTrue(change.getItemName().equals(groupItem.getName()));
-        assertTrue(change.getMemberName().equals(member.getName()));
-        assertTrue(change.getTopic().equals(groupitemStateChangedEventTopic.replace("{memberName}", member.getName())
+        assertThat(change.getItemName(), is(groupItem.getName()));
+        assertThat(change.getMemberName(), is(member.getName()));
+        assertThat(change.getTopic(), is(groupitemStateChangedEventTopic.replace("{memberName}", member.getName())
                 .replace("{itemName}", groupItem.getName())));
-        assertTrue(change.getItemState().equals(groupItem.getState()));
-        assertTrue(change.getOldItemState().equals(oldGroupState));
+        assertThat(change.getItemState(), is(groupItem.getState()));
+        assertThat(change.getOldItemState(), is(oldGroupState));
 
         events.clear();
 
@@ -558,11 +558,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(changes, hasSize(1));
 
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
-        assertTrue(change.getItemName().equals(groupItem.getName()));
+        assertThat(change.getItemName(), is(groupItem.getName()));
 
         // we expect that the group should now have status "ON"
-        assertTrue(change.getOldItemState().equals(UnDefType.NULL));
-        assertTrue(change.getItemState().equals(OnOffType.ON));
+        assertThat(change.getOldItemState(), is(UnDefType.NULL));
+        assertThat(change.getItemState(), is(OnOffType.ON));
 
         assertThat(groupItem.getState(), is(OnOffType.ON));
 
@@ -578,7 +578,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         assertThat(events, hasSize(0));
 
-        assertTrue(groupItem.getState().equals(OnOffType.ON));
+        assertThat(groupItem.getState(), is(OnOffType.ON));
     }
 
     @Test
@@ -605,11 +605,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(changes, hasSize(1));
 
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
-        assertTrue(change.getItemName().equals(groupItem.getName()));
+        assertThat(change.getItemName(), is(groupItem.getName()));
 
         // we expect that the group should now have status "OFF"
-        assertTrue(change.getOldItemState().equals(UnDefType.NULL));
-        assertTrue(change.getItemState().equals(OnOffType.OFF));
+        assertThat(change.getOldItemState(), is(UnDefType.NULL));
+        assertThat(change.getItemState(), is(OnOffType.OFF));
 
         assertThat(groupItem.getState(), is(OnOffType.OFF));
 
@@ -624,13 +624,13 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(changes, hasSize(1));
 
         change = (GroupItemStateChangedEvent) changes.get(0);
-        assertTrue(change.getItemName().equals(groupItem.getName()));
+        assertThat(change.getItemName(), is(groupItem.getName()));
 
         // we expect that the group should now have status "ON"
-        assertTrue(change.getOldItemState().equals(OnOffType.OFF));
-        assertTrue(change.getItemState().equals(OnOffType.ON));
+        assertThat(change.getOldItemState(), is(OnOffType.OFF));
+        assertThat(change.getItemState(), is(OnOffType.ON));
 
-        assertTrue(groupItem.getState().equals(OnOffType.ON));
+        assertThat(groupItem.getState(), is(OnOffType.ON));
     }
 
     @SuppressWarnings("deprecation")
@@ -653,7 +653,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         assertThat(events.size(), is(0));
 
-        assertTrue(groupItem.getState().equals(oldGroupState));
+        assertThat(groupItem.getState(), is(oldGroupState));
     }
 
     @Test
@@ -665,7 +665,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         State groupStateAsOnOff = groupItem.getStateAs(OnOffType.class);
 
         // any value >0 means on, so 50% means the group state should be ON
-        assertTrue(OnOffType.ON.equals(groupStateAsOnOff));
+        assertThat(groupStateAsOnOff, is(OnOffType.ON));
     }
 
     @Test
@@ -682,7 +682,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         groupStateAsOnOff = groupItem.getStateAs(OnOffType.class);
 
         // any value >0 means on, so 50% means the group state should be ON
-        assertTrue(OnOffType.ON.equals(groupStateAsOnOff));
+        assertThat(groupStateAsOnOff, is(OnOffType.ON));
     }
 
     @Test
@@ -738,7 +738,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         List<Event> changes = events.stream().filter(it -> it instanceof GroupItemStateChangedEvent)
                 .collect(Collectors.toList());
         GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
-        assertTrue(change.getItemName().equals(groupItem.getName()));
+        assertThat(change.getItemName(), is(groupItem.getName()));
 
         State newEventState = change.getItemState();
         assertTrue(newEventState instanceof PercentType);
@@ -758,7 +758,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(changes.size(), is(1));
 
         change = (GroupItemStateChangedEvent) changes.get(0);
-        assertTrue(change.getItemName().equals(groupItem.getName()));
+        assertThat(change.getItemName(), is(groupItem.getName()));
 
         newEventState = change.getItemState();
         assertTrue(newEventState instanceof PercentType);

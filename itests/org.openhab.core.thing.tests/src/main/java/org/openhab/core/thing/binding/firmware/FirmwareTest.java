@@ -259,7 +259,7 @@ public class FirmwareTest extends JavaOSGiTest {
     @Test
     public void firmwareRestrictedFirmwareIsNotSuitable() {
         Firmware firmware = FirmwareBuilder.create(THING_TYPE_UID, "1.2.3")
-                .withFirmwareRestriction(thing -> thing.getLabel().equals("label")).build();
+                .withFirmwareRestriction(thing -> "label".equals(thing.getLabel())).build();
 
         Thing thing = ThingBuilder.create(THING_TYPE_UID, "thing").withLabel("invalid_label").build();
 

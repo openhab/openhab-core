@@ -12,6 +12,7 @@
  */
 package org.openhab.core.magic.binding.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -24,6 +25,7 @@ import org.openhab.core.types.Command;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class MagicDimmableLightHandler extends BaseThingHandler {
 
     public MagicDimmableLightHandler(Thing thing) {
@@ -32,9 +34,6 @@ public class MagicDimmableLightHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        // process the command for the brightness channel here
-        // if (channelUID.getId().equals(MagicBindingConstants.CHANNEL_BRIGHTNESS)) {
-        // }
     }
 
     @Override

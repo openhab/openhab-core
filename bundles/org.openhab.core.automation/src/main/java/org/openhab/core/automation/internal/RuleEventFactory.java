@@ -67,13 +67,13 @@ public class RuleEventFactory extends AbstractEventFactory {
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
         logger.trace("creating ruleEvent of type: {}", eventType);
-        if (eventType.equals(RuleAddedEvent.TYPE)) {
+        if (RuleAddedEvent.TYPE.equals(eventType)) {
             return createRuleAddedEvent(topic, payload, source);
-        } else if (eventType.equals(RuleRemovedEvent.TYPE)) {
+        } else if (RuleRemovedEvent.TYPE.equals(eventType)) {
             return createRuleRemovedEvent(topic, payload, source);
-        } else if (eventType.equals(RuleStatusInfoEvent.TYPE)) {
+        } else if (RuleStatusInfoEvent.TYPE.equals(eventType)) {
             return createRuleStatusInfoEvent(topic, payload, source);
-        } else if (eventType.equals(RuleUpdatedEvent.TYPE)) {
+        } else if (RuleUpdatedEvent.TYPE.equals(eventType)) {
             return createRuleUpdatedEvent(topic, payload, source);
         }
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");

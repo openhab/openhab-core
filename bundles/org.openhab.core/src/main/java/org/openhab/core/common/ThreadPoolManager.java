@@ -23,6 +23,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.openhab.core.internal.common.WrappedScheduledExecutorService;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,8 +75,8 @@ public class ThreadPoolManager {
 
     protected void modified(Map<String, Object> properties) {
         for (Entry<String, Object> entry : properties.entrySet()) {
-            if (entry.getKey().equals("service.pid") || entry.getKey().equals("component.id")
-                    || entry.getKey().equals("component.name")) {
+            if (Constants.SERVICE_PID.equals(entry.getKey()) || ComponentConstants.COMPONENT_ID.equals(entry.getKey())
+                    || ComponentConstants.COMPONENT_NAME.equals(entry.getKey())) {
                 continue;
             }
             String poolName = entry.getKey();

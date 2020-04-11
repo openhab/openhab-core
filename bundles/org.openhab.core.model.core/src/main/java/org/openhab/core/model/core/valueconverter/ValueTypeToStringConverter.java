@@ -39,7 +39,7 @@ public class ValueTypeToStringConverter implements IValueConverter<Object> {
                 throw new ValueConverterException(e.getMessage(), node, e);
             }
         }
-        if (string.equals("true") || string.equals("false")) {
+        if ("true".equals(string) || "false".equals(string)) {
             return Boolean.valueOf(string);
         }
         try {

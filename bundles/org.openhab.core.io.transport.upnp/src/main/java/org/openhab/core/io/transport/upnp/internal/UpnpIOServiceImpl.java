@@ -390,8 +390,8 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     private Service findService(Device device, String serviceID) {
         Service service = null;
         String namespace = device.getType().getNamespace();
-        if (namespace.equals(UDAServiceId.DEFAULT_NAMESPACE)
-                || namespace.equals(UDAServiceId.BROKEN_DEFAULT_NAMESPACE)) {
+        if (UDAServiceId.DEFAULT_NAMESPACE.equals(namespace)
+                || UDAServiceId.BROKEN_DEFAULT_NAMESPACE.equals(namespace)) {
             service = device.findService(new UDAServiceId(serviceID));
         } else {
             service = device.findService(new ServiceId(namespace, serviceID));

@@ -472,7 +472,7 @@ public class FeatureInstaller implements ConfigurationListener {
         if (packageName instanceof String) {
             currentPackage = (String) packageName;
             String fullName = PREFIX + PREFIX_PACKAGE + ((String) packageName).trim();
-            if (currentPackage.equals(MINIMAL_PACKAGE)) {
+            if (MINIMAL_PACKAGE.equals(currentPackage)) {
                 // no changes are done to the add-ons list, so the installer should proceed
                 configChanged = false;
             } else {
@@ -510,7 +510,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     @Override
     public void configurationEvent(ConfigurationEvent event) {
-        if (event.getPid().equals(PAX_URL_PID) && event.getType() == ConfigurationEvent.CM_UPDATED) {
+        if (PAX_URL_PID.equals(event.getPid()) && event.getType() == ConfigurationEvent.CM_UPDATED) {
             paxCfgUpdated = true;
         }
     }

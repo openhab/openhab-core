@@ -186,8 +186,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         // e.g. the default widget of a rollerblind is "Switch".
         // We want to provide a dedicated default category for it
         // like "rollerblind".
-        if (itemType.equals(NumberItem.class) || itemType.equals(ContactItem.class)
-                || itemType.equals(RollershutterItem.class)) {
+        if (NumberItem.class.equals(itemType) || ContactItem.class.equals(itemType)
+                || RollershutterItem.class.equals(itemType)) {
             return itemType.getSimpleName().replace("Item", "").toLowerCase();
         }
         return null;
@@ -244,47 +244,47 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         boolean readOnly = isReadOnly(itemName);
         int nbOptions = getNbOptions(itemName);
 
-        if (itemType.equals(SwitchItem.class)) {
+        if (SwitchItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createSwitch();
         }
-        if (itemType.equals(GroupItem.class)) {
+        if (GroupItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createGroup();
         }
         if (NumberItem.class.isAssignableFrom(itemType)) {
             return (!readOnly && nbOptions > 0) ? SitemapFactory.eINSTANCE.createSelection()
                     : SitemapFactory.eINSTANCE.createText();
         }
-        if (itemType.equals(ContactItem.class)) {
+        if (ContactItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createText();
         }
-        if (itemType.equals(DateTimeItem.class)) {
+        if (DateTimeItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createText();
         }
-        if (itemType.equals(RollershutterItem.class)) {
+        if (RollershutterItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createSwitch();
         }
-        if (itemType.equals(StringItem.class)) {
+        if (StringItem.class.equals(itemType)) {
             return (!readOnly && nbOptions > 0) ? SitemapFactory.eINSTANCE.createSelection()
                     : SitemapFactory.eINSTANCE.createText();
         }
-        if (itemType.equals(LocationItem.class)) {
+        if (LocationItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createMapview();
         }
-        if (itemType.equals(CallItem.class)) {
+        if (CallItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createText();
         }
-        if (itemType.equals(DimmerItem.class)) {
+        if (DimmerItem.class.equals(itemType)) {
             Slider slider = SitemapFactory.eINSTANCE.createSlider();
             slider.setSwitchEnabled(true);
             return slider;
         }
-        if (itemType.equals(ColorItem.class)) {
+        if (ColorItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createColorpicker();
         }
-        if (itemType.equals(PlayerItem.class)) {
+        if (PlayerItem.class.equals(itemType)) {
             return createPlayerButtons();
         }
-        if (itemType.equals(ImageItem.class)) {
+        if (ImageItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createImage();
         }
 
@@ -962,7 +962,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
         }
 
-        if (unquotedValue.equals(UnDefType.NULL.toString()) || unquotedValue.equals(UnDefType.UNDEF.toString())) {
+        if (UnDefType.NULL.toString().equals(unquotedValue) || UnDefType.UNDEF.toString().equals(unquotedValue)) {
             switch (condition) {
                 case EQUAL:
                     if (unquotedValue.equals(state.toString())) {

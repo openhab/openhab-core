@@ -139,11 +139,11 @@ public class ScriptFileWatcher extends AbstractWatchService {
         if (!file.isHidden()) {
             try {
                 URL fileUrl = file.toURI().toURL();
-                if (kind.equals(ENTRY_DELETE)) {
+                if (ENTRY_DELETE.equals(kind)) {
                     this.removeFile(fileUrl);
                 }
 
-                if (file.canRead() && (kind.equals(ENTRY_CREATE) || kind.equals(ENTRY_MODIFY))) {
+                if (file.canRead() && (ENTRY_CREATE.equals(kind) || ENTRY_MODIFY.equals(kind))) {
                     this.importFile(fileUrl);
                 }
             } catch (MalformedURLException e) {

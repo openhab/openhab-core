@@ -144,7 +144,7 @@ public class IconServlet extends SmartHomeServlet {
             return;
         }
 
-        if (format.equals(Format.SVG)) {
+        if (Format.SVG.equals(format)) {
             resp.setContentType("image/svg+xml");
         } else {
             resp.setContentType("image/png");

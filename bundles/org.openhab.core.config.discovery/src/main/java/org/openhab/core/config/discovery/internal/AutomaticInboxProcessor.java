@@ -128,9 +128,9 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
     protected void modified(@Nullable Map<String, @Nullable Object> properties) {
         if (properties != null) {
             Object value = properties.get(AUTO_IGNORE_CONFIG_PROPERTY);
-            autoIgnore = value == null || !value.toString().equals("false");
+            autoIgnore = value == null || !"false".equals(value.toString());
             value = properties.get(ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY);
-            alwaysAutoApprove = value != null && value.toString().equals("true");
+            alwaysAutoApprove = value != null && "true".equals(value.toString());
             autoApproveInboxEntries();
         }
     }
@@ -261,7 +261,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     private void autoApproveInboxEntries() {
         for (DiscoveryResult result : inbox.getAll()) {
-            if (result.getFlag().equals(DiscoveryResultFlag.NEW)) {
+            if (DiscoveryResultFlag.NEW.equals(result.getFlag())) {
                 if (alwaysAutoApprove || isToBeAutoApproved(result)) {
                     inbox.approve(result.getThingUID(), result.getLabel());
                 }
@@ -277,7 +277,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
     protected void addInboxAutoApprovePredicate(InboxAutoApprovePredicate inboxAutoApprovePredicate) {
         inboxAutoApprovePredicates.add(inboxAutoApprovePredicate);
         for (DiscoveryResult result : inbox.getAll()) {
-            if (result.getFlag().equals(DiscoveryResultFlag.NEW) && inboxAutoApprovePredicate.test(result)) {
+            if (DiscoveryResultFlag.NEW.equals(result.getFlag()) && inboxAutoApprovePredicate.test(result)) {
                 inbox.approve(result.getThingUID(), result.getLabel());
             }
         }

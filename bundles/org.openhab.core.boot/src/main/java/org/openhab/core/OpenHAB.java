@@ -44,7 +44,7 @@ public class OpenHAB {
         // if the version string contains a "snapshot" qualifier, remove it!
         if (StringUtils.countMatches(versionString, ".") == 3) {
             String qualifier = StringUtils.substringAfterLast(versionString, ".");
-            if (StringUtils.isNumeric(qualifier) || qualifier.equals("qualifier")) {
+            if (StringUtils.isNumeric(qualifier) || "qualifier".equals(qualifier)) {
                 versionString = StringUtils.substringBeforeLast(versionString, ".");
             }
         }

@@ -319,7 +319,7 @@ public class AudioFormat {
             }
 
             // Prefer WAVE container
-            if (!currentAudioFormat.getContainer().equals("WAVE")) {
+            if (!CONTAINER_WAVE.equals(currentAudioFormat.getContainer())) {
                 continue;
             }
 
@@ -341,7 +341,7 @@ public class AudioFormat {
             }
 
             // Prefer WAVE container
-            if (!format.getContainer().equals(AudioFormat.CONTAINER_WAVE)) {
+            if (!CONTAINER_WAVE.equals(format.getContainer())) {
                 continue;
             }
 

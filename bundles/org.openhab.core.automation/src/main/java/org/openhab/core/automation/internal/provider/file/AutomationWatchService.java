@@ -53,7 +53,7 @@ public class AutomationWatchService extends AbstractWatchService {
     protected void processWatchEvent(WatchEvent<?> event, Kind<?> kind, Path path) {
         File file = path.toFile();
         if (!file.isHidden()) {
-            if (kind.equals(ENTRY_DELETE)) {
+            if (ENTRY_DELETE.equals(kind)) {
                 provider.removeResources(file);
             } else if (file.canRead()) {
                 provider.importResources(file);

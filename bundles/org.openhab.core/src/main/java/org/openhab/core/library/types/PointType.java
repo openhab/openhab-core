@@ -179,7 +179,7 @@ public class PointType implements ComplexType, Command, State {
         StringBuilder sb = new StringBuilder(latitude.toPlainString());
         sb.append(',');
         sb.append(longitude.toPlainString());
-        if (!altitude.equals(BigDecimal.ZERO)) {
+        if (!BigDecimal.ZERO.equals(altitude)) {
             sb.append(',');
             sb.append(altitude.toPlainString());
         }

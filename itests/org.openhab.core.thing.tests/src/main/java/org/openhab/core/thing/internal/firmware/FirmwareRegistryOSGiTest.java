@@ -141,13 +141,13 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
 
         @Override
         public @Nullable Set<Firmware> getFirmwares(Thing thing, @Nullable Locale locale) {
-            if (thing.getThingTypeUID().equals(THING_TYPE_UID1)) {
+            if (THING_TYPE_UID1.equals(thing.getThingTypeUID())) {
                 if (Locale.ENGLISH.equals(locale)) {
                     return Collections.singleton(FW111_FIX_EN);
                 } else {
                     return Collections.singleton(FW111_FIX_DE);
                 }
-            } else if (thing.getThingTypeUID().equals(THING_TYPE_UID2)) {
+            } else if (THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
                 if (Locale.ENGLISH.equals(locale)) {
                     return Stream.of(FWALPHA_EN, FWBETA_EN, FWGAMMA_EN).collect(Collectors.toSet());
                 } else {

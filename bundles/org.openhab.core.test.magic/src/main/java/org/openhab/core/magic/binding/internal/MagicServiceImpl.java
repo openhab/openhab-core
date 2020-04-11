@@ -19,10 +19,14 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigOptionProvider;
+import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.magic.binding.MagicService;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -33,21 +37,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 @Component(configurationPid = "org.openhab.magic", service = ConfigOptionProvider.class, immediate = true, property = {
-        "service.pid=org.openhab.core.magic", "service.config.description.uri=test:magic", "service.config.label=Magic",
-        "service.config.category=test" })
+        Constants.SERVICE_PID + "=org.openhab.core.magic",
+        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=test:magic",
+        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Magic",
+        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=test" })
 public class MagicServiceImpl implements MagicService {
     private final Logger logger = LoggerFactory.getLogger(MagicServiceImpl.class);
 
     static final String PARAMETER_BACKEND_DECIMAL = "select_decimal_limit";
 
     @Override
-    public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
-        if (!uri.equals(CONFIG_URI)) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+        if (!CONFIG_URI.equals(uri)) {
             return null;
         }
 
-        if (param.equals(PARAMETER_BACKEND_DECIMAL)) {
+        if (PARAMETER_BACKEND_DECIMAL.equals(param)) {
             return Arrays.asList(new ParameterOption(BigDecimal.ONE.toPlainString(), "1"),
                     new ParameterOption(BigDecimal.TEN.toPlainString(), "10"),
                     new ParameterOption(BigDecimal.valueOf(21d).toPlainString(), "21"));

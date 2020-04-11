@@ -47,11 +47,11 @@ public class InboxEventFactory extends AbstractEventFactory {
 
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
-        if (eventType.equals(InboxAddedEvent.TYPE)) {
+        if (InboxAddedEvent.TYPE.equals(eventType)) {
             return createAddedEvent(topic, payload);
-        } else if (eventType.equals(InboxRemovedEvent.TYPE)) {
+        } else if (InboxRemovedEvent.TYPE.equals(eventType)) {
             return createRemovedEvent(topic, payload);
-        } else if (eventType.equals(InboxUpdatedEvent.TYPE)) {
+        } else if (InboxUpdatedEvent.TYPE.equals(eventType)) {
             return createUpdatedEvent(topic, payload);
         }
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");

@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Dimitar Ivanov - The firmwares are provided by thing and version
  */
 @Component(immediate = true, service = FirmwareRegistry.class)
-@NonNullByDefault()
+@NonNullByDefault
 public final class FirmwareRegistryImpl implements FirmwareRegistry {
 
     private final Logger logger = LoggerFactory.getLogger(FirmwareRegistryImpl.class);

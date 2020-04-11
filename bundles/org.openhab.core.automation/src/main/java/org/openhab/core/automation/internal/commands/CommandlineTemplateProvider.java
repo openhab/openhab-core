@@ -85,7 +85,7 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
      */
     @Override
     public @Nullable Object addingService(@SuppressWarnings("rawtypes") @Nullable ServiceReference reference) {
-        if (reference.getProperty(Parser.PARSER_TYPE).equals(Parser.PARSER_TEMPLATE)) {
+        if (reference != null && Parser.PARSER_TEMPLATE.equals(reference.getProperty(Parser.PARSER_TYPE))) {
             return super.addingService(reference);
         }
         return null;

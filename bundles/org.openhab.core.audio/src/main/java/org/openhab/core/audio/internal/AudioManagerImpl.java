@@ -291,7 +291,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
-        if (uri.toString().equals(CONFIG_URI)) {
+        if (CONFIG_URI.equals(uri.toString())) {
             final Locale safeLocale = locale != null ? locale : Locale.getDefault();
             if (CONFIG_DEFAULT_SOURCE.equals(param)) {
                 return audioSources.values().stream().sorted(comparing(s -> s.getLabel(safeLocale)))

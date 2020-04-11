@@ -258,7 +258,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     @SuppressWarnings("null")
     private void initialize(Item item) {
         // get the last persisted state from the persistence service if no state is yet set
-        if (item.getState().equals(UnDefType.NULL) && item instanceof GenericItem) {
+        if (UnDefType.NULL.equals(item.getState()) && item instanceof GenericItem) {
             for (Entry<String, @Nullable PersistenceServiceConfiguration> entry : persistenceServiceConfigs
                     .entrySet()) {
                 final String serviceName = entry.getKey();

@@ -104,13 +104,13 @@ public class ModuleTypeResource implements RESTResource {
         final String[] tags = tagList != null ? tagList.split(",") : new String[0];
         final List<ModuleTypeDTO> modules = new ArrayList<>();
 
-        if (type == null || type.equals("trigger")) {
+        if (type == null || "trigger".equals(type)) {
             modules.addAll(TriggerTypeDTOMapper.map(moduleTypeRegistry.getTriggers(locale, tags)));
         }
-        if (type == null || type.equals("condition")) {
+        if (type == null || "condition".equals(type)) {
             modules.addAll(ConditionTypeDTOMapper.map(moduleTypeRegistry.getConditions(locale, tags)));
         }
-        if (type == null || type.equals("action")) {
+        if (type == null || "action".equals(type)) {
             modules.addAll(ActionTypeDTOMapper.map(moduleTypeRegistry.getActions(locale, tags)));
         }
         return Response.ok(modules).build();

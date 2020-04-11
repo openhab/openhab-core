@@ -196,11 +196,11 @@ public class RuleEventTest extends JavaOSGiTest {
         assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem2/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
         assertThat(ruleEvents.size(), is(not(0)));
-        assertThat(ruleEvents.stream().filter(e -> e.getTopic().equals("smarthome/rules/myRule21/added")).findFirst()
+        assertThat(ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/added".equals(e.getTopic())).findFirst()
                 .isPresent(), is(true));
-        assertThat(ruleEvents.stream().filter(e -> e.getTopic().equals("smarthome/rules/myRule21/state")).findFirst()
+        assertThat(ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/state".equals(e.getTopic())).findFirst()
                 .isPresent(), is(true));
-        List<Event> stateEvents = ruleEvents.stream().filter(e -> e.getTopic().equals("smarthome/rules/myRule21/state"))
+        List<Event> stateEvents = ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/state".equals(e.getTopic()))
                 .collect(Collectors.toList());
         assertThat(stateEvents, is(notNullValue()));
         Optional<Event> runningEvent = stateEvents.stream()

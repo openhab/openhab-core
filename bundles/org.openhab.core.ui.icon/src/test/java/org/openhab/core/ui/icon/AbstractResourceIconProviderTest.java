@@ -57,7 +57,7 @@ public class AbstractResourceIconProviderTest {
             protected boolean hasResource(String iconset, String resourceName) {
                 String state = StringUtils.substringAfterLast(resourceName, "-");
                 state = StringUtils.substringBeforeLast(state, ".");
-                return state.equals("30") || state.equals("y z");
+                return "30".equals(state) || "y z".equals(state);
             };
 
             @Override

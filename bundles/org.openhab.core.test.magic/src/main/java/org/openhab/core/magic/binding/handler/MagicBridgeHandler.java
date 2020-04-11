@@ -12,6 +12,7 @@
  */
 package org.openhab.core.magic.binding.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ThingStatus;
@@ -23,6 +24,7 @@ import org.openhab.core.types.Command;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class MagicBridgeHandler extends BaseBridgeHandler {
 
     public MagicBridgeHandler(Bridge thing) {

@@ -194,25 +194,25 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
             assertThat(moduleType1.getOutputs(), is(notNullValue()));
             Optional<Output> output1 = moduleType1.getOutputs().stream()
-                    .filter(o -> o.getName().equals("customTriggerOutput1")).findFirst();
+                    .filter(o -> "customTriggerOutput1".equals(o.getName())).findFirst();
             assertThat(output1.isPresent(), is(true));
             assertThat(output1.get().getDefaultValue(), is("true"));
 
             assertThat(moduleType2.getOutputs(), is(notNullValue()));
             Optional<Output> output2 = moduleType2.getOutputs().stream()
-                    .filter(o -> o.getName().equals("customTriggerOutput2")).findFirst();
+                    .filter(o -> "customTriggerOutput2".equals(o.getName())).findFirst();
             assertThat(output2.isPresent(), is(true));
             assertThat(output2.get().getDefaultValue(), is("event"));
 
             assertThat(moduleType4.getInputs(), is(notNullValue()));
             Optional<Input> input = moduleType4.getInputs().stream()
-                    .filter(o -> o.getName().equals("customActionInput")).findFirst();
+                    .filter(o -> "customActionInput".equals(o.getName())).findFirst();
             assertThat(input.isPresent(), is(true));
             assertThat(input.get().getDefaultValue(), is("5"));
 
             assertThat(moduleType3.getOutputs(), is(notNullValue()));
             Optional<Output> output3 = moduleType3.getOutputs().stream()
-                    .filter(o -> o.getName().equals("customActionOutput3")).findFirst();
+                    .filter(o -> "customActionOutput3".equals(o.getName())).findFirst();
             assertThat(output3.isPresent(), is(true));
             assertThat(output3.get().getDefaultValue(), is("{\"command\":\"OFF\"}"));
         }, 10000, 200);
@@ -243,14 +243,14 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         assertTrue(rule.getTags().contains("item"));
         assertTrue(rule.getTags().contains("rule"));
         Optional<? extends Trigger> trigger = rule.getTriggers().stream()
-                .filter(t -> t.getId().equals("ItemStateChangeTriggerID")).findFirst();
+                .filter(t -> "ItemStateChangeTriggerID".equals(t.getId())).findFirst();
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
         assertThat(trigger.get().getConfiguration().get("eventSource"), is("myMotionItem"));
         assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/*"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
         Optional<? extends Action> action = rule.getActions().stream()
-                .filter(a -> a.getId().equals("ItemPostCommandActionID")).findFirst();
+                .filter(a -> "ItemPostCommandActionID".equals(a.getId())).findFirst();
         assertThat(action.isPresent(), is(true));
         assertThat(action.get().getTypeUID(), is("core.ItemCommandAction"));
         assertThat(action.get().getConfiguration().get("itemName"), is("myLampItem"));
@@ -283,13 +283,13 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         assertTrue(rule.getTags().contains("rule"));
         assertTrue(rule.getTags().contains("references"));
         Optional<? extends Trigger> trigger = rule.getTriggers().stream()
-                .filter(t -> t.getId().equals("ItemStateChangeTriggerID")).findFirst();
+                .filter(t -> "ItemStateChangeTriggerID".equals(t.getId())).findFirst();
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
         assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/*"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
         Optional<? extends Action> action = rule.getActions().stream()
-                .filter(a -> a.getId().equals("ItemPostCommandActionID")).findFirst();
+                .filter(a -> "ItemPostCommandActionID".equals(a.getId())).findFirst();
         assertThat(action.isPresent(), is(true));
         assertThat(action.get().getTypeUID(), is("core.ItemCommandAction"));
         assertThat(action.get().getConfiguration().get("command"), is("ON"));
@@ -365,7 +365,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             @Override
             public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
-                if (e.getTopic().equals("smarthome/items/myLampItem/command")) {
+                if ("smarthome/items/myLampItem/command".equals(e.getTopic())) {
                     itemEvent = e;
                 }
             }

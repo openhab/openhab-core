@@ -317,7 +317,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
             return Parser.FORMAT_JSON;
         }
         String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
-        if (fileExtension.equals("txt")) {
+        if ("txt".equals(fileExtension)) {
             return Parser.FORMAT_JSON;
         }
         return fileExtension;

@@ -83,64 +83,65 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
     protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
-        if (thingTypeUID.equals(THING_TYPE_EXTENSIBLE_THING)) {
+        if (THING_TYPE_EXTENSIBLE_THING.equals(thingTypeUID)) {
             return new MagicExtensibleThingHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_ON_OFF_LIGHT)) {
+        if (THING_TYPE_ON_OFF_LIGHT.equals(thingTypeUID)) {
             return new MagicOnOffLightHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_DIMMABLE_LIGHT)) {
+        if (THING_TYPE_DIMMABLE_LIGHT.equals(thingTypeUID)) {
             return new MagicDimmableLightHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_COLOR_LIGHT)) {
+        if (THING_TYPE_COLOR_LIGHT.equals(thingTypeUID)) {
             return new MagicColorLightHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_CONTACT_SENSOR)) {
+        if (THING_TYPE_CONTACT_SENSOR.equals(thingTypeUID)) {
             return new MagicContactHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_CONFIG_THING)) {
+        if (THING_TYPE_CONFIG_THING.equals(thingTypeUID)) {
             return new MagicConfigurableThingHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_DELAYED_THING)) {
+        if (THING_TYPE_DELAYED_THING.equals(thingTypeUID)) {
             return new MagicDelayedOnlineHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_LOCATION)) {
+        if (THING_TYPE_LOCATION.equals(thingTypeUID)) {
             return new MagicLocationThingHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_THERMOSTAT)) {
+        if (THING_TYPE_THERMOSTAT.equals(thingTypeUID)) {
             return new MagicThermostatThingHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_FIRMWARE_UPDATE)) {
+        if (THING_TYPE_FIRMWARE_UPDATE.equals(thingTypeUID)) {
             return new MagicFirmwareUpdateThingHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_BRIDGED_THING)) {
+        if (THING_TYPE_BRIDGED_THING.equals(thingTypeUID)) {
             return new MagicBridgedThingHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_CHATTY_THING)) {
+        if (THING_TYPE_CHATTY_THING.equals(thingTypeUID)) {
             return new MagicChattyThingHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_ROLLERSHUTTER)) {
+        if (THING_TYPE_ROLLERSHUTTER.equals(thingTypeUID)) {
             return new MagicRolllershutterHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_PLAYER)) {
+        if (THING_TYPE_PLAYER.equals(thingTypeUID)) {
             return new MagicPlayerHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_IMAGE)) {
+        if (THING_TYPE_IMAGE.equals(thingTypeUID)) {
             return new MagicImageHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_ACTION_MODULE)) {
+        if (THING_TYPE_ACTION_MODULE.equals(thingTypeUID)) {
             return new MagicActionModuleThingHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_DYNAMIC_STATE_DESCRIPTION)) {
+        if (THING_TYPE_DYNAMIC_STATE_DESCRIPTION.equals(thingTypeUID)) {
             return new MagicDynamicStateDescriptionThingHandler(thing, stateDescriptionProvider);
         }
-        if (thingTypeUID.equals(THING_TYPE_ONLINE_OFFLINE)) {
+        if (THING_TYPE_ONLINE_OFFLINE.equals(thingTypeUID)) {
             return new MagicOnlineOfflineHandler(thing);
         }
-        if (thingTypeUID.equals(THING_TYPE_BRIDGE_1) || thingTypeUID.equals(THING_TYPE_BRIDGE_2)) {
+        if (THING_TYPE_BRIDGE_1.equals(thingTypeUID) || THING_TYPE_BRIDGE_2.equals(thingTypeUID)) {
             return new MagicBridgeHandler((Bridge) thing);
         }
 
         return null;
     }
+
 }

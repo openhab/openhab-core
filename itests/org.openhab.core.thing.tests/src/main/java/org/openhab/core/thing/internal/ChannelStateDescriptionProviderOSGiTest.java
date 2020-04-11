@@ -91,14 +91,12 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     private static final String TEST_BUNDLE_NAME = "thingStatusInfoI18nTest.bundle";
     private static final ChannelTypeUID CHANNEL_TYPE_7_UID = new ChannelTypeUID("hue:num-dynamic");
 
-    private @NonNullByDefault({}) ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
+    private @Mock @NonNullByDefault({}) ComponentContext componentContext;
+
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @NonNullByDefault({}) ItemChannelLinkRegistry linkRegistry;
-
-    @Mock
-    private @NonNullByDefault({}) ComponentContext componentContext;
-
     private @NonNullByDefault({}) Bundle testBundle;
+    private @NonNullByDefault({}) ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
 
     @Before
     public void setup() throws Exception {

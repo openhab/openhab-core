@@ -232,7 +232,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         final String formatPattern;
 
         if (pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
-            String unitSymbol = getUnit().equals(SmartHomeUnits.PERCENT) ? "%%" : getUnit().toString();
+            String unitSymbol = SmartHomeUnits.PERCENT.equals(getUnit()) ? "%%" : getUnit().toString();
             formatPattern = pattern.replace(UnitUtils.UNIT_PLACEHOLDER, unitSymbol);
         } else {
             formatPattern = pattern;

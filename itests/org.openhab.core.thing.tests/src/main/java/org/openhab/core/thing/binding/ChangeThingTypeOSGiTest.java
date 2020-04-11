@@ -185,10 +185,10 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
 
         @Override
         protected ThingHandler createHandler(Thing thing) {
-            if (thing.getThingTypeUID().equals(THING_TYPE_GENERIC_UID)) {
+            if (THING_TYPE_GENERIC_UID.equals(thing.getThingTypeUID())) {
                 return new GenericThingHandler(thing);
             }
-            if (thing.getThingTypeUID().equals(THING_TYPE_SPECIFIC_UID)) {
+            if (THING_TYPE_SPECIFIC_UID.equals(thing.getThingTypeUID())) {
                 return new SpecificThingHandler(thing);
             }
 

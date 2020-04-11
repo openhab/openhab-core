@@ -237,7 +237,7 @@ public class PageChangeListener implements StateChangeListener {
                     String widgetTypeName = w.eClass().getInstanceTypeName()
                             .substring(w.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
                     boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
-                    Predicate<Item> itemFilter = (i -> i.getType().equals(CoreItemFactory.LOCATION));
+                    Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
                     event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
 
                     // event.state is an adjustment of the item state to the widget type.

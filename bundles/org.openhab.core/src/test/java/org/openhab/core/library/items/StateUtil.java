@@ -103,7 +103,7 @@ public class StateUtil {
         for (State s : getAllStates()) {
             item.setState(s);
             if (item.isAcceptedState(item.getAcceptedDataTypes(), s)) {
-                if (s.equals(UnDefType.NULL)) {
+                if (UnDefType.NULL.equals(s)) {
                     // if we set null, the item should stay null
                     assertEquals(UnDefType.NULL, item.getState());
                 } else {

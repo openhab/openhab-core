@@ -391,15 +391,15 @@ public class AutomaticInboxProcessorTest {
     @Test
     public void testAutomaticDiscoveryResultApprovalIfInboxEntriesAddedAfterApprovalPredicatesAreAdded() {
         automaticInboxProcessor.addInboxAutoApprovePredicate(
-                discoveryResult -> discoveryResult.getThingTypeUID().equals(THING_TYPE_UID));
+                discoveryResult -> THING_TYPE_UID.equals(discoveryResult.getThingTypeUID()));
 
         // The following discovery result is automatically approved, as it has matching thing type UID
         inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID)));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID.equals(thing.getUID())));
 
         // The following discovery result is not automatically approved, as it does not have matching thing type UID
         inbox.add(DiscoveryResultBuilder.create(THING_UID3).build());
-        verify(thingRegistry, never()).add(argThat(thing -> thing.getUID().equals(THING_UID3)));
+        verify(thingRegistry, never()).add(argThat(thing -> THING_UID3.equals(thing.getUID())));
     }
 
     @Test
@@ -411,20 +411,20 @@ public class AutomaticInboxProcessorTest {
         // Adding this inboxAutoApprovePredicate will auto-approve the first two discovery results as they have matching
         // thing type UID.
         automaticInboxProcessor.addInboxAutoApprovePredicate(
-                discoveryResult -> discoveryResult.getThingTypeUID().equals(THING_TYPE_UID));
+                discoveryResult -> THING_TYPE_UID.equals(discoveryResult.getThingTypeUID()));
 
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID)));
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID2)));
-        verify(thingRegistry, never()).add(argThat(thing -> thing.getUID().equals(THING_UID3)));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID.equals(thing.getUID())));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID2.equals(thing.getUID())));
+        verify(thingRegistry, never()).add(argThat(thing -> THING_UID3.equals(thing.getUID())));
 
         // Adding this inboxAutoApprovePredicate will auto-approve the third discovery results as it has matching
         // thing type UID.
         automaticInboxProcessor.addInboxAutoApprovePredicate(
-                discoveryResult -> discoveryResult.getThingTypeUID().equals(THING_TYPE_UID3));
+                discoveryResult -> THING_TYPE_UID3.equals(discoveryResult.getThingTypeUID()));
 
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID)));
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID2)));
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID3)));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID.equals(thing.getUID())));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID2.equals(thing.getUID())));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID3.equals(thing.getUID())));
     }
 
     @Test
@@ -432,18 +432,18 @@ public class AutomaticInboxProcessorTest {
         // Before setting the always auto approve property, existing inbox results are not approved
         inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
 
-        verify(thingRegistry, never()).add(argThat(thing -> thing.getUID().equals(THING_UID)));
+        verify(thingRegistry, never()).add(argThat(thing -> THING_UID.equals(thing.getUID())));
 
         // After setting the always auto approve property, all existing inbox results are approved.
         Map<String, Object> configProperties = new HashMap<>();
         configProperties.put(AutomaticInboxProcessor.ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY, true);
         automaticInboxProcessor.activate(configProperties);
 
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID)));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID.equals(thing.getUID())));
 
         // Newly added inbox results are also approved.
         inbox.add(DiscoveryResultBuilder.create(THING_UID2).build());
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID2)));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID2.equals(thing.getUID())));
     }
 
     @Test
@@ -453,14 +453,14 @@ public class AutomaticInboxProcessorTest {
             throw new RuntimeException("I am an evil inboxAutoApprovePredicate");
         });
         automaticInboxProcessor.addInboxAutoApprovePredicate(
-                discoveryResult -> discoveryResult.getThingTypeUID().equals(THING_TYPE_UID));
+                discoveryResult -> THING_TYPE_UID.equals(discoveryResult.getThingTypeUID()));
         automaticInboxProcessor.addInboxAutoApprovePredicate(discoveryResult -> {
             throw new RuntimeException("I am another evil inboxAutoApprovePredicate");
         });
 
         // The discovery result is auto-approved in the presence of the evil predicates
         inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
-        verify(thingRegistry, times(1)).add(argThat(thing -> thing.getUID().equals(THING_UID)));
+        verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID.equals(thing.getUID())));
     }
 
 }

@@ -126,7 +126,7 @@ public class ScriptRuleTest extends JavaOSGiTest {
         Rule rule = ruleRegistry.get("javascript.rule1");
         assertThat(rule, is(notNullValue()));
         assertThat(rule.getName(), is("DemoScriptRule"));
-        Optional<? extends Trigger> trigger = rule.getTriggers().stream().filter(t -> t.getId().equals("trigger"))
+        Optional<? extends Trigger> trigger = rule.getTriggers().stream().filter(t -> "trigger".equals(t.getId()))
                 .findFirst();
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
@@ -134,12 +134,12 @@ public class ScriptRuleTest extends JavaOSGiTest {
         assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/MyTrigger/state"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
         Optional<? extends Condition> condition1 = rule.getConditions().stream()
-                .filter(c -> c.getId().equals("condition")).findFirst();
+                .filter(c -> "condition".equals(c.getId())).findFirst();
         assertThat(condition1.isPresent(), is(true));
         assertThat(condition1.get().getTypeUID(), is("script.ScriptCondition"));
         assertThat(condition1.get().getConfiguration().get("type"), is("application/javascript"));
         assertThat(condition1.get().getConfiguration().get("script"), is("event.itemState==ON"));
-        Optional<? extends Action> action = rule.getActions().stream().filter(a -> a.getId().equals("action"))
+        Optional<? extends Action> action = rule.getActions().stream().filter(a -> "action".equals(a.getId()))
                 .findFirst();
         assertThat(action.isPresent(), is(true));
         assertThat(action.get().getTypeUID(), is("script.ScriptAction"));

@@ -89,7 +89,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
      */
     @Override
     public @Nullable Object addingService(@SuppressWarnings("rawtypes") @Nullable ServiceReference reference) {
-        if (reference.getProperty(Parser.PARSER_TYPE).equals(Parser.PARSER_MODULE_TYPE)) {
+        if (reference != null && Parser.PARSER_MODULE_TYPE.equals(reference.getProperty(Parser.PARSER_TYPE))) {
             return super.addingService(reference);
         }
         return null;

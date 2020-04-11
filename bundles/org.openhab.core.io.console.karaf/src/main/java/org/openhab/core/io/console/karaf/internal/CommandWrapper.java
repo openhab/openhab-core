@@ -113,7 +113,7 @@ public class CommandWrapper implements Command, Action {
     public Object execute() throws Exception {
         List<Command> commands = registry.getCommands();
         for (Command command : commands) {
-            if (command.getScope().equals(SCOPE) && command instanceof CommandWrapper) {
+            if (SCOPE.equals(command.getScope()) && command instanceof CommandWrapper) {
                 command.execute(null, Arrays.asList(new Object[] { "--help" }));
             }
         }

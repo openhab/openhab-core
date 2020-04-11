@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.net.CidrAddress;
@@ -32,6 +34,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 @Component
 public class NetworkConfigOptionProvider implements ConfigOptionProvider {
     static final URI CONFIG_URI = URI.create("system:network");
@@ -39,18 +42,18 @@ public class NetworkConfigOptionProvider implements ConfigOptionProvider {
     static final String PARAM_BROADCAST_ADDRESS = "broadcastAddress";
 
     @Override
-    public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
-        if (!uri.equals(CONFIG_URI)) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+        if (!CONFIG_URI.equals(uri)) {
             return null;
         }
 
-        if (param.equals(PARAM_PRIMARY_ADDRESS)) {
+        if (PARAM_PRIMARY_ADDRESS.equals(param)) {
             Stream<CidrAddress> ipv4Addresses = NetUtil.getAllInterfaceAddresses().stream()
                     .filter(a -> a.getAddress() instanceof Inet4Address);
             return ipv4Addresses.map(a -> new ParameterOption(a.toString(), a.toString())).collect(Collectors.toList());
         }
 
-        if (param.equals(PARAM_BROADCAST_ADDRESS)) {
+        if (PARAM_BROADCAST_ADDRESS.equals(param)) {
             List<String> broadcastAddrList = new ArrayList<>(NetUtil.getAllBroadcastAddresses());
             broadcastAddrList.add("255.255.255.255");
             return broadcastAddrList.stream().map(a -> new ParameterOption(a, a)).collect(Collectors.toList());

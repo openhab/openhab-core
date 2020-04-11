@@ -12,6 +12,7 @@
  */
 package org.openhab.core.magic.binding;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ThingTypeUID;
 
 /**
@@ -20,6 +21,7 @@ import org.openhab.core.thing.ThingTypeUID;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class MagicBindingConstants {
 
     public static final String BINDING_ID = "magic";

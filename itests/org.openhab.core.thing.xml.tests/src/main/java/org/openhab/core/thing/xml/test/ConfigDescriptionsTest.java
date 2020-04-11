@@ -64,7 +64,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             Collection<ConfigDescriptionParameter> parameters = bridgeConfigDescription.getParameters();
             assertThat(parameters.size(), is(2));
 
-            ConfigDescriptionParameter ipParameter = parameters.stream().filter(it -> it.getName().equals("ip"))
+            ConfigDescriptionParameter ipParameter = parameters.stream().filter(it -> "ip".equals(it.getName()))
                     .findFirst().get();
             assertThat(ipParameter, is(notNullValue()));
             assertThat(ipParameter.getType(), is(Type.TEXT));
@@ -74,7 +74,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(ipParameter.isRequired(), is(true));
 
             ConfigDescriptionParameter userNameParameter = parameters.stream()
-                    .filter(it -> it.getName().equals("username")).findFirst().get();
+                    .filter(it -> "username".equals(it.getName())).findFirst().get();
             assertThat(userNameParameter, is(notNullValue()));
 
             assertThat(userNameParameter.isAdvanced(), is(true));
@@ -95,14 +95,14 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(parameters.size(), is(1));
 
             ConfigDescriptionParameter lastDimValueParameter = parameters.stream()
-                    .filter(it -> it.getName().equals("lastDimValue")).findFirst().get();
+                    .filter(it -> "lastDimValue".equals(it.getName())).findFirst().get();
             assertThat(lastDimValueParameter, is(notNullValue()));
             assertThat(lastDimValueParameter.getType(), is(Type.BOOLEAN));
 
             Collection<ConfigDescriptionParameterGroup> groups = bridgeConfigDescription.getParameterGroups();
             assertThat(groups.size(), is(2));
 
-            ConfigDescriptionParameterGroup group1 = groups.stream().filter(it -> it.getName().equals("group1"))
+            ConfigDescriptionParameterGroup group1 = groups.stream().filter(it -> "group1".equals(it.getName()))
                     .findFirst().get();
             assertThat(group1, is(notNullValue()));
             assertThat(group1.getContext(), is("Group1-context"));
@@ -122,14 +122,14 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             Collection<ConfigDescriptionParameter> parameters = bridgeConfigDescription.getParameters();
             assertThat(parameters.size(), is(2));
 
-            ConfigDescriptionParameter unitParameter = parameters.stream().filter(it -> it.getName().equals("unit"))
+            ConfigDescriptionParameter unitParameter = parameters.stream().filter(it -> "unit".equals(it.getName()))
                     .findFirst().get();
             assertThat(unitParameter, is(notNullValue()));
             assertThat(join(unitParameter.getOptions(), ","), is(
                     "ParameterOption [value=\"us\", label=\"US\"],ParameterOption [value=\"metric\", label=\"Metric\"]"));
 
             ConfigDescriptionParameter lightParameter = parameters.stream()
-                    .filter(it -> it.getName().equals("color-alarming-light")).findFirst().get();
+                    .filter(it -> "color-alarming-light".equals(it.getName())).findFirst().get();
             assertThat(lightParameter, is(notNullValue()));
             assertThat(join(lightParameter.getFilterCriteria(), ","), is(
                     "FilterCriteria [name=\"tags\", value=\"alarm, light\"],FilterCriteria [name=\"type\", value=\"color\"],FilterCriteria [name=\"binding-id\", value=\"hue\"]"));

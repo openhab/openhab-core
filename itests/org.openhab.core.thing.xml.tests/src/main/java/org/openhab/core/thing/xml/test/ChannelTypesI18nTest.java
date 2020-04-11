@@ -69,7 +69,7 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
 
             ChannelType channelType1 = waitForAssert(() -> {
                 final Optional<ChannelType> opt = channelTypeProvider.getChannelTypes(null).stream()
-                        .filter(c -> c.getUID().toString().equals("somebinding:channel-with-i18n")).findFirst();
+                        .filter(c -> "somebinding:channel-with-i18n".equals(c.getUID().toString())).findFirst();
                 assertTrue(opt.isPresent());
                 return opt.get();
             });
@@ -83,7 +83,7 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
 
             Collection<ChannelGroupType> channelGroupTypes = channelGroupTypeProvider.getChannelGroupTypes(null);
             ChannelGroupType channelGroupType = channelGroupTypes.stream()
-                    .filter(c -> c.getUID().toString().equals("somebinding:channelgroup-with-i18n")).findFirst().get();
+                    .filter(c -> "somebinding:channelgroup-with-i18n".equals(c.getUID().toString())).findFirst().get();
             assertThat(channelGroupType, is(not(nullValue())));
             assertThat(channelGroupType.getLabel(), is(equalTo("Channel Group Label")));
             assertThat(channelGroupType.getDescription(), is(equalTo("Channel Group Description")));
@@ -98,7 +98,7 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
 
             ThingType thingType = waitForAssert(() -> {
                 Optional<ThingType> thingTypeOpt = thingTypeProvider.getThingTypes(null).stream()
-                        .filter(it -> it.getUID().toString().equals("somebinding:something")).findFirst();
+                        .filter(it -> "somebinding:something".equals(it.getUID().toString())).findFirst();
                 Assert.assertTrue(thingTypeOpt.isPresent());
                 final ThingType thingTypeTmp = thingTypeOpt.get();
                 // assertThat(thingTypeTmp, is(notNullValue()));
@@ -107,12 +107,12 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
             });
 
             ChannelDefinition channelDefinition1 = thingType.getChannelDefinitions().stream()
-                    .filter(it -> it.getId().equals("channelPlain")).findFirst().get();
+                    .filter(it -> "channelPlain".equals(it.getId())).findFirst().get();
             assertThat(channelDefinition1.getLabel(), is(equalTo("Channel Plain Label")));
             assertThat(channelDefinition1.getDescription(), is(equalTo("Channel Plain Description")));
 
             ChannelDefinition channelDefinition2 = thingType.getChannelDefinitions().stream()
-                    .filter(it -> it.getId().equals("channelInplace")).findFirst().get();
+                    .filter(it -> "channelInplace".equals(it.getId())).findFirst().get();
             assertThat(channelDefinition2.getLabel(), is(equalTo("Channel Inplace Label")));
             assertThat(channelDefinition2.getDescription(), is(equalTo("Channel Inplace Description")));
         }

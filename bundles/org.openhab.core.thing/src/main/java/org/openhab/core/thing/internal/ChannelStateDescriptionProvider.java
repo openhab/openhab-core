@@ -103,7 +103,7 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
                     if ((channelType.getItemType() != null)
                             && ((stateDescription == null) || (stateDescription.getPattern() == null))) {
                         String pattern = null;
-                        if (channelType.getItemType().equalsIgnoreCase(CoreItemFactory.STRING)) {
+                        if (CoreItemFactory.STRING.equalsIgnoreCase(channelType.getItemType())) {
                             pattern = "%s";
                         } else if (channelType.getItemType().startsWith(CoreItemFactory.NUMBER)) {
                             pattern = "%.0f";
