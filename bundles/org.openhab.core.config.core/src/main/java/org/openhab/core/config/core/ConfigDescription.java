@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
 
 /**
@@ -42,6 +44,7 @@ import org.openhab.core.common.registry.Identifiable;
  * @author Chris Jackson - Added parameter groups
  * @author Thomas Höfer - Added convenient operation to get config description parameters in a map
  */
+@NonNullByDefault
 public class ConfigDescription implements Identifiable<URI> {
 
     private final URI uri;
@@ -90,8 +93,8 @@ public class ConfigDescription implements Identifiable<URI> {
      * @throws IllegalArgumentException if the URI is null or invalid
      */
     @Deprecated
-    public ConfigDescription(URI uri, List<ConfigDescriptionParameter> parameters,
-            List<ConfigDescriptionParameterGroup> groups) {
+    public ConfigDescription(@Nullable URI uri, @Nullable List<ConfigDescriptionParameter> parameters,
+            @Nullable List<ConfigDescriptionParameterGroup> groups) {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null!");
         }

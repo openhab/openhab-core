@@ -13,7 +13,6 @@
 package org.openhab.core.binding.xml.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.binding.BindingInfoProvider;
 import org.openhab.core.config.core.ConfigDescription;
@@ -68,20 +67,18 @@ public class BindingInfoXmlProvider implements XmlDocumentProvider<BindingInfoXm
     }
 
     @Override
-    public synchronized void addingObject(@Nullable BindingInfoXmlResult bindingInfoXmlResult) {
-        if (bindingInfoXmlResult != null) {
-            ConfigDescription configDescription = bindingInfoXmlResult.getConfigDescription();
+    public synchronized void addingObject(BindingInfoXmlResult bindingInfoXmlResult) {
+        ConfigDescription configDescription = bindingInfoXmlResult.getConfigDescription();
 
-            if (configDescription != null) {
-                try {
-                    configDescriptionProvider.add(bundle, configDescription);
-                } catch (Exception ex) {
-                    logger.error("Could not register ConfigDescription!", ex);
-                }
+        if (configDescription != null) {
+            try {
+                configDescriptionProvider.add(bundle, configDescription);
+            } catch (Exception ex) {
+                logger.error("Could not register ConfigDescription!", ex);
             }
-
-            bindingInfoProvider.add(bundle, bindingInfoXmlResult.getBindingInfo());
         }
+
+        bindingInfoProvider.add(bundle, bindingInfoXmlResult.getBindingInfo());
     }
 
     @Override

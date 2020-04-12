@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.binding.BindingInfoProvider;
@@ -48,6 +49,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Michael Grammling - Refactoring: Provider/Registry pattern is used, added locale support
  * @author Simon Kaufmann - factored out common aspects into {@link AbstractXmlBasedProvider}
  */
+@NonNullByDefault
 @Component
 public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, BindingInfo>
         implements BindingInfoProvider, XmlDocumentProviderFactory<BindingInfoXmlResult> {
@@ -65,8 +67,10 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
 
     @Activate
     public XmlBindingInfoProvider(final @Reference BindingI18nLocalizationService bindingI18nService,
+            final @Reference(target = "(esh.scope=core.xml.binding)") ConfigDescriptionProvider configDescriptionProvider,
             final @Reference ReadyService readyService) {
         this.bindingI18nService = bindingI18nService;
+        this.configDescriptionProvider = (AbstractXmlConfigDescriptionProvider) configDescriptionProvider;
         this.readyService = readyService;
     }
 
@@ -102,15 +106,6 @@ public class XmlBindingInfoProvider extends AbstractXmlBasedProvider<String, Bin
     @Override
     public synchronized Set<BindingInfo> getBindingInfos(@Nullable Locale locale) {
         return new HashSet<>(getAll(locale));
-    }
-
-    @Reference(target = "(esh.scope=core.xml.binding)")
-    public void setConfigDescriptionProvider(ConfigDescriptionProvider configDescriptionProvider) {
-        this.configDescriptionProvider = (AbstractXmlConfigDescriptionProvider) configDescriptionProvider;
-    }
-
-    public void unsetConfigDescriptionProvider(ConfigDescriptionProvider configDescriptionProvider) {
-        this.configDescriptionProvider = null;
     }
 
     @Override

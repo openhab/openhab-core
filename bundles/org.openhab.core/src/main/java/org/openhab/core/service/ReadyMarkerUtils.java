@@ -14,6 +14,7 @@ package org.openhab.core.service;
 
 import java.util.Arrays;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.framework.Bundle;
 
 /**
@@ -21,6 +22,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class ReadyMarkerUtils {
 
     /**

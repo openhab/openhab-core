@@ -32,6 +32,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.xml.util.XmlDocumentReader;
 import org.openhab.core.service.ReadyMarker;
@@ -61,7 +64,8 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> the result type of the conversion
  */
-public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
+@NonNullByDefault
+public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> {
 
     /**
      * Execute given method while take the lock and unlock before return.
@@ -108,8 +112,7 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     private final ReadWriteLock lockOpenState = new ReentrantReadWriteLock();
     private OpenState openState = OpenState.CREATED;
 
-    @SuppressWarnings("rawtypes")
-    private BundleTracker relevantBundlesTracker;
+    private @Nullable BundleTracker<?> relevantBundlesTracker;
     private final ReadyService readyService;
 
     /**
@@ -129,22 +132,6 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
             String readyMarkerKey, ReadyService readyService) throws IllegalArgumentException {
         super(bundleContext, Bundle.ACTIVE, null);
 
-        if (bundleContext == null) {
-            throw new IllegalArgumentException("The BundleContext must not be null!");
-        }
-        if ((xmlDirectory == null) || (xmlDirectory.isEmpty())) {
-            throw new IllegalArgumentException("The XML directory must neither be null, nor empty!");
-        }
-        if (xmlDocumentTypeReader == null) {
-            throw new IllegalArgumentException("The XmlDocumentTypeReader must not be null!");
-        }
-        if (xmlDocumentProviderFactory == null) {
-            throw new IllegalArgumentException("The XmlDocumentProviderFactory must not be null!");
-        }
-        if (readyService == null) {
-            throw new IllegalArgumentException("The ReadyService must not be null!");
-        }
-
         this.readyMarkerKey = readyMarkerKey;
         this.xmlDirectory = xmlDirectory;
         this.xmlDocumentTypeReader = xmlDocumentTypeReader;
@@ -161,10 +148,11 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     }
 
     private Set<Bundle> getRelevantBundles() {
-        if (relevantBundlesTracker.getBundles() == null) {
+        BundleTracker<?> bundleTracker = relevantBundlesTracker;
+        if (bundleTracker == null || bundleTracker.getBundles() == null) {
             return Collections.emptySet();
         }
-        return Arrays.stream(relevantBundlesTracker.getBundles()).collect(Collectors.toSet());
+        return (Set<Bundle>) Arrays.stream(bundleTracker.getBundles()).collect(Collectors.toSet());
     }
 
     @Override
@@ -184,7 +172,8 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
         relevantBundlesTracker = new BundleTracker(context,
                 Bundle.RESOLVED | Bundle.STARTING | Bundle.STOPPING | Bundle.ACTIVE, null) {
             @Override
-            public Object addingBundle(Bundle bundle, BundleEvent event) {
+            public @Nullable Object addingBundle(@NonNullByDefault({}) Bundle bundle,
+                    @NonNullByDefault({}) BundleEvent event) {
                 return withLock(lockOpenState.readLock(),
                         () -> openState == OpenState.OPENED && isBundleRelevant(bundle) ? bundle : null);
             }
@@ -216,11 +205,7 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
         queue.clear();
     }
 
-    private XmlDocumentProvider<T> acquireXmlDocumentProvider(Bundle bundle) {
-        if (bundle == null) {
-            return null;
-        }
-
+    private @Nullable XmlDocumentProvider<T> acquireXmlDocumentProvider(Bundle bundle) {
         XmlDocumentProvider<T> xmlDocumentProvider = bundleDocumentProviderMap.get(bundle);
         if (xmlDocumentProvider == null) {
             xmlDocumentProvider = xmlDocumentProviderFactory.createDocumentProvider(bundle);
@@ -232,9 +217,6 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     }
 
     private void releaseXmlDocumentProvider(Bundle bundle) {
-        if (bundle == null) {
-            return;
-        }
         XmlDocumentProvider<T> xmlDocumentProvider = bundleDocumentProviderMap.get(bundle);
         if (xmlDocumentProvider == null) {
             return;
@@ -270,13 +252,15 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
     }
 
     @Override
-    public final synchronized Bundle addingBundle(Bundle bundle, BundleEvent event) {
+    public final synchronized Bundle addingBundle(@NonNullByDefault({}) Bundle bundle,
+            @NonNullByDefault({}) BundleEvent event) {
         addingBundle(bundle);
         return bundle;
     }
 
     @Override
-    public final synchronized void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+    public final synchronized void removedBundle(@NonNullByDefault({}) Bundle bundle,
+            @NonNullByDefault({}) BundleEvent event, Bundle object) {
         logger.trace("Removing the XML related objects from module '{}'...", ReadyMarkerUtils.getIdentifier(bundle));
         finishedBundles.remove(bundle);
         Future<?> future = queue.remove(bundle);
@@ -408,8 +392,11 @@ public class XmlDocumentBundleTracker<T> extends BundleTracker<Bundle> {
             String xmlDocumentFile = xmlDocumentURL.getFile();
             logger.debug("Reading the XML document '{}' in module '{}'...", xmlDocumentFile, moduleName);
             try {
+                @Nullable
                 T object = xmlDocumentTypeReader.readFromXML(xmlDocumentURL);
-                addingObject(bundle, object);
+                if (object != null) {
+                    addingObject(bundle, object);
+                }
                 numberOfParsedXmlDocuments++;
             } catch (Exception ex) {
                 // If we are not open, we can stop here.

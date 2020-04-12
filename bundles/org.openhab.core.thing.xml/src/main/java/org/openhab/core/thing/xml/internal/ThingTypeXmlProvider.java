@@ -15,6 +15,8 @@ package org.openhab.core.thing.xml.internal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.xml.AbstractXmlConfigDescriptionProvider;
@@ -51,6 +53,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * @author Michael Grammling - Initial contribution
  * @author Ivan Iliev - Added support for system wide channel types
  */
+@NonNullByDefault
 public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
 
     private final Logger logger = LoggerFactory.getLogger(ThingTypeXmlProvider.class);
@@ -70,18 +73,6 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
     public ThingTypeXmlProvider(Bundle bundle, AbstractXmlConfigDescriptionProvider configDescriptionProvider,
             XmlThingTypeProvider thingTypeProvider, XmlChannelTypeProvider channelTypeProvider,
             XmlChannelGroupTypeProvider channelGroupTypeProvider) throws IllegalArgumentException {
-        if (bundle == null) {
-            throw new IllegalArgumentException("The Bundle must not be null!");
-        }
-
-        if (configDescriptionProvider == null) {
-            throw new IllegalArgumentException("The XmlConfigDescriptionProvider must not be null!");
-        }
-
-        if (thingTypeProvider == null) {
-            throw new IllegalArgumentException("The XmlThingTypeProvider must not be null!");
-        }
-
         this.bundle = bundle;
         this.configDescriptionProvider = configDescriptionProvider;
         this.thingTypeProvider = thingTypeProvider;
@@ -91,27 +82,25 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
 
     @Override
     public synchronized void addingObject(List<?> types) {
-        if (types != null) {
-            for (Object type : types) {
-                if (type instanceof ThingTypeXmlResult) {
-                    ThingTypeXmlResult typeResult = (ThingTypeXmlResult) type;
-                    addConfigDescription(typeResult.getConfigDescription());
-                    thingTypeRefs.add(typeResult);
-                } else if (type instanceof ChannelGroupTypeXmlResult) {
-                    ChannelGroupTypeXmlResult typeResult = (ChannelGroupTypeXmlResult) type;
-                    channelGroupTypeRefs.add(typeResult);
-                } else if (type instanceof ChannelTypeXmlResult) {
-                    ChannelTypeXmlResult typeResult = (ChannelTypeXmlResult) type;
-                    channelTypeRefs.add(typeResult);
-                    addConfigDescription(typeResult.getConfigDescription());
-                } else {
-                    throw new ConversionException("Unknown data type for '" + type + "'!");
-                }
+        for (Object type : types) {
+            if (type instanceof ThingTypeXmlResult) {
+                ThingTypeXmlResult typeResult = (ThingTypeXmlResult) type;
+                addConfigDescription(typeResult.getConfigDescription());
+                thingTypeRefs.add(typeResult);
+            } else if (type instanceof ChannelGroupTypeXmlResult) {
+                ChannelGroupTypeXmlResult typeResult = (ChannelGroupTypeXmlResult) type;
+                channelGroupTypeRefs.add(typeResult);
+            } else if (type instanceof ChannelTypeXmlResult) {
+                ChannelTypeXmlResult typeResult = (ChannelTypeXmlResult) type;
+                channelTypeRefs.add(typeResult);
+                addConfigDescription(typeResult.getConfigDescription());
+            } else {
+                throw new ConversionException("Unknown data type for '" + type + "'!");
             }
         }
     }
 
-    private void addConfigDescription(ConfigDescription configDescription) {
+    private void addConfigDescription(@Nullable ConfigDescription configDescription) {
         if (configDescription != null) {
             try {
                 configDescriptionProvider.add(bundle, configDescription);

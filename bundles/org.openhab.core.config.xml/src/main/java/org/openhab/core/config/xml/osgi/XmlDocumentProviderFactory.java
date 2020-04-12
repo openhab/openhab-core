@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.xml.osgi;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.framework.Bundle;
 
@@ -29,7 +30,7 @@ import org.osgi.framework.Bundle;
  * @see XmlDocumentProvider
  */
 @NonNullByDefault
-public interface XmlDocumentProviderFactory<T> {
+public interface XmlDocumentProviderFactory<@NonNull T> {
 
     /**
      * Creates an XML document provider for the specified module which is used to process

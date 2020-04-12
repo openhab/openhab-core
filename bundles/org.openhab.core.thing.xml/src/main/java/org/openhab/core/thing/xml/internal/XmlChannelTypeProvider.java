@@ -15,6 +15,7 @@ package org.openhab.core.thing.xml.internal;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.AbstractXmlBasedProvider;
 import org.openhab.core.thing.UID;
@@ -36,6 +37,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Henning Treu - QuantityType implementation
  * @author Christoph Weitkamp - factored out common aspects into ThingTypeI18nLocalizationService
  */
+@NonNullByDefault
 @Component(property = { "esh.scope=core.xml.channels" })
 public class XmlChannelTypeProvider extends AbstractXmlBasedProvider<UID, ChannelType> implements ChannelTypeProvider {
 

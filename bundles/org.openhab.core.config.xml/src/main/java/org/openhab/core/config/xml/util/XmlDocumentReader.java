@@ -14,6 +14,10 @@ package org.openhab.core.config.xml.util;
 
 import java.net.URL;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
@@ -29,21 +33,18 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
  *
  * @param <T> the result type of the conversion
  */
-public abstract class XmlDocumentReader<T> {
+@NonNullByDefault
+public abstract class XmlDocumentReader<@NonNull T> {
 
-    private XStream xstream;
+    private final XStream xstream = new XStream(new StaxDriver());
 
     /**
      * The default constructor of this class initializes the {@code XStream} object, and calls
      * the abstract methods {@link #registerConverters()} and {@link #registerAliases()}.
      */
     public XmlDocumentReader() {
-        StaxDriver driver = new StaxDriver();
-
-        this.xstream = new XStream(driver);
-
-        registerConverters(this.xstream);
-        registerAliases(this.xstream);
+        registerConverters(xstream);
+        registerAliases(xstream);
     }
 
     /**
@@ -52,7 +53,7 @@ public abstract class XmlDocumentReader<T> {
      * @param classLoader the classloader to set (must not be null)
      */
     public void setClassLoader(ClassLoader classLoader) {
-        this.xstream.setClassLoader(classLoader);
+        xstream.setClassLoader(classLoader);
     }
 
     /**
@@ -80,12 +81,8 @@ public abstract class XmlDocumentReader<T> {
      * @throws ConversionException if the specified document contains invalid content
      */
     @SuppressWarnings("unchecked")
-    public T readFromXML(URL xmlURL) throws ConversionException {
-        if (xmlURL != null) {
-            return (T) this.xstream.fromXML(xmlURL);
-        }
-
-        return null;
+    public @Nullable T readFromXML(URL xmlURL) throws ConversionException {
+        return (@Nullable T) xstream.fromXML(xmlURL);
     }
 
 }

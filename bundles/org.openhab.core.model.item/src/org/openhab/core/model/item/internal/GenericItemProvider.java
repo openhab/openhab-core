@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractProvider;
@@ -512,8 +511,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
     }
 
     @Override
-    public @Nullable StateDescriptionFragment getStateDescriptionFragment(@NonNull String itemName,
-            @Nullable Locale locale) {
+    public @Nullable StateDescriptionFragment getStateDescriptionFragment(String itemName, @Nullable Locale locale) {
         return stateDescriptionFragments.get(itemName);
     }
 

@@ -199,7 +199,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
     }
 
     @Override
-    public Collection<@NonNull E> getAll() {
+    public Collection<E> getAll() {
         elementReadLock.lock();
         try {
             return new HashSet<>(elements);
