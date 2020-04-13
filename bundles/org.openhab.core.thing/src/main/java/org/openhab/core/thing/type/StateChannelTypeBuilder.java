@@ -32,7 +32,7 @@ public interface StateChannelTypeBuilder extends ChannelTypeBuilder<StateChannel
      *
      * @param stateDescription StateDescription for the ChannelType
      * @return this Builder
-     * @deprecated use {@link StateChannelTypeBuilder::withStateDescriptionFragment} instead.
+     * @deprecated use {@link StateChannelTypeBuilder#withStateDescriptionFragment(StateDescriptionFragment)} instead.
      */
     @Deprecated
     StateChannelTypeBuilder withStateDescription(@Nullable StateDescription stateDescription);
