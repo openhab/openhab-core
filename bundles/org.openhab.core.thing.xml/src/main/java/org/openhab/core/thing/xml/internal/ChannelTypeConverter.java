@@ -155,6 +155,7 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         return null;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected ChannelTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
@@ -188,7 +189,6 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         URI configDescriptionURI = (URI) configDescriptionObjects[0];
         final ChannelTypeBuilder<?> builder;
         if (cKind == ChannelKind.STATE) {
-            @SuppressWarnings("deprecation")
             builder = ChannelTypeBuilder.state(channelTypeUID, label, itemType).isAdvanced(advanced)
                     .withCategory(category).withTags(tags).withConfigDescriptionURI(configDescriptionURI)
                     .withStateDescription(stateDescription).withAutoUpdatePolicy(autoUpdatePolicy)
