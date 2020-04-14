@@ -33,9 +33,7 @@ import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.discovery.DiscoveryListener;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
-import org.openhab.core.config.discovery.DiscoveryServiceCallback;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
-import org.openhab.core.config.discovery.ExtendedDiscoveryService;
 import org.openhab.core.config.discovery.ScanListener;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -427,11 +425,6 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
 
     private void addDiscoveryServiceActivated(final DiscoveryService discoveryService) {
         discoveryService.addDiscoveryListener(this);
-        if (discoveryService instanceof ExtendedDiscoveryService) {
-            safeCaller.create((ExtendedDiscoveryService) discoveryService, ExtendedDiscoveryService.class).build()
-                    .setDiscoveryServiceCallback(new DiscoveryServiceCallback() {
-                    });
-        }
         this.discoveryServices.add(discoveryService);
     }
 
