@@ -29,7 +29,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLHandshakeException;
@@ -44,7 +43,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.openhab.core.io.net.http.TrustManagerProvider;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -55,18 +53,12 @@ public class WebClientFactoryImplTest {
 
     private static final String TEST_URL = "https://www.eclipse.org/";
 
-    @Mock
-    private TrustManagerProvider trustmanagerProvider;
-
-    @Mock
-    private ExtensibleTrustManagerImpl extensibleTrustManager;
+    private @Mock ExtensibleTrustManagerImpl extensibleTrustManager;
 
     @Before
     public void setup() {
         initMocks(this);
         webClientFactory = new WebClientFactoryImpl(extensibleTrustManager);
-        webClientFactory.setTrustmanagerProvider(trustmanagerProvider);
-
         webClientFactory.activate(createConfigMap(4, 200, 60, 2, 10, 60));
     }
 
@@ -103,28 +95,6 @@ public class WebClientFactoryImplTest {
         assertThat(sslEngineCaptor.getValue().getPeerPort(), is(443));
         assertThat(certificateChainCaptor.getValue()[0].getSubjectX500Principal().getName(),
                 containsString("eclipse.org"));
-    }
-
-    @Test
-    public void testGetHttpClientWithEndpoint() throws Exception {
-        when(trustmanagerProvider.getTrustManagers("https://www.heise.de")).thenReturn(Stream.empty());
-
-        HttpClient httpClient = webClientFactory.createHttpClient("consumer", TEST_URL);
-
-        assertThat(httpClient, is(notNullValue()));
-        verify(trustmanagerProvider).getTrustManagers(TEST_URL);
-        httpClient.stop();
-    }
-
-    @Test
-    public void testGetWebSocketClientWithEndpoint() throws Exception {
-        when(trustmanagerProvider.getTrustManagers("https://www.heise.de")).thenReturn(Stream.empty());
-
-        WebSocketClient webSocketClient = webClientFactory.createWebSocketClient("consumer", TEST_URL);
-
-        assertThat(webSocketClient, is(notNullValue()));
-        verify(trustmanagerProvider).getTrustManagers(TEST_URL);
-        webSocketClient.stop();
     }
 
     @Ignore("connecting to the outside world makes this test flaky")
@@ -196,7 +166,7 @@ public class WebClientFactoryImplTest {
         final int maxRequests = 2;
 
         for (int i = 0; i < maxClients; i++) {
-            HttpClient httpClient = webClientFactory.createHttpClient("consumer" + i, "https://www.heise.de");
+            HttpClient httpClient = webClientFactory.createHttpClient("consumer" + i);
             clients.add(httpClient);
         }
 

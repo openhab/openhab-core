@@ -20,7 +20,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -34,15 +33,12 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.openhab.core.io.net.http.ExtensibleTrustManager;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.openhab.core.io.net.http.HttpClientInitializationException;
-import org.openhab.core.io.net.http.TrustManagerProvider;
 import org.openhab.core.io.net.http.WebSocketFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +66,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     private static final int MAX_CONSUMER_NAME_LENGTH = 20;
     private static final Pattern CONSUMER_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_\\-]*");
 
-    private volatile @Nullable TrustManagerProvider trustmanagerProvider;
     private final ExtensibleTrustManager extensibleTrustManager;
 
     private @NonNullByDefault({}) QueuedThreadPool threadPool;
@@ -130,28 +125,10 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     @Override
-    @Deprecated
-    public HttpClient createHttpClient(String consumerName, String endpoint) {
-        Objects.requireNonNull(endpoint, "endpoint must not be null");
-        logger.debug("http client for endpoint {} requested", endpoint);
-        checkConsumerName(consumerName);
-        return createHttpClientInternal(consumerName, endpoint, false, null);
-    }
-
-    @Override
     public HttpClient createHttpClient(String consumerName) {
         logger.debug("http client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
         return createHttpClientInternal(consumerName, null, false, null);
-    }
-
-    @Override
-    @Deprecated
-    public WebSocketClient createWebSocketClient(String consumerName, String endpoint) {
-        Objects.requireNonNull(endpoint, "endpoint must not be null");
-        logger.debug("web socket client for endpoint {} requested", endpoint);
-        checkConsumerName(consumerName);
-        return createWebSocketClientInternal(consumerName, endpoint, false, null);
     }
 
     @Override
@@ -373,7 +350,9 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         if (endpoint == null) {
             return createSslContextFactoryFromExtensibleTrustManager();
         } else {
-            return createSslContextFactoryFromTrustManagerProvider(endpoint);
+            SslContextFactory sslContextFactory = new SslContextFactory();
+            sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
+            return sslContextFactory;
         }
     }
 
@@ -389,43 +368,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             throw new HttpClientInitializationException("Cannot create an TLS context!", ex);
         }
         return sslContextFactory;
-    }
-
-    @Deprecated
-    private SslContextFactory createSslContextFactoryFromTrustManagerProvider(@Nullable String endpoint) {
-        SslContextFactory sslContextFactory = new SslContextFactory();
-        sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
-        if (endpoint != null && trustmanagerProvider != null) {
-            Stream<TrustManager> trustManagerStream = trustmanagerProvider.getTrustManagers(endpoint);
-            TrustManager[] trustManagers = trustManagerStream.toArray(TrustManager[]::new);
-            if (trustManagers.length > 0) {
-                logger.debug("using custom trustmanagers (certificate pinning) for httpClient for endpoint {}",
-                        endpoint);
-                try {
-                    SSLContext sslContext = SSLContext.getInstance("TLS");
-                    sslContext.init(null, trustManagers, null);
-                    sslContextFactory.setSslContext(sslContext);
-                } catch (NoSuchAlgorithmException | KeyManagementException ex) {
-                    throw new HttpClientInitializationException(
-                            "Cannot create an TLS context for the endpoint '" + endpoint + "'!", ex);
-                }
-            }
-        }
-
-        return sslContextFactory;
-    }
-
-    @Reference(service = TrustManagerProvider.class, cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    @Deprecated
-    protected void setTrustmanagerProvider(TrustManagerProvider trustmanagerProvider) {
-        this.trustmanagerProvider = trustmanagerProvider;
-    }
-
-    @Deprecated
-    protected void unsetTrustmanagerProvider(TrustManagerProvider trustmanagerProvider) {
-        if (this.trustmanagerProvider == trustmanagerProvider) {
-            this.trustmanagerProvider = null;
-        }
     }
 
 }
