@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -123,8 +124,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         modelRepo = new ModelRepoDummy();
 
-        folderObserver = new FolderObserver();
-        folderObserver.setModelRepository(modelRepo);
+        folderObserver = new FolderObserver(modelRepo);
         folderObserver.addModelParser(modelParser);
     }
 
@@ -348,11 +348,12 @@ public class FolderObserverTest extends JavaOSGiTest {
                 throw new RuntimeException("intentional failure.");
             }
         };
-        folderObserver.setModelRepository(modelRepo);
+        FolderObserver localFolderObserver = new FolderObserver(modelRepo);
+        localFolderObserver.addModelParser(modelParser);
 
         String validExtension = "java";
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg," + validExtension);
-        folderObserver.activate(context);
+        localFolderObserver.activate(context);
 
         File mockFileWithValidExt = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
         mockFileWithValidExt.createNewFile();
@@ -469,7 +470,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         }
 
         @Override
-        public EObject getModel(String name) {
+        public @Nullable EObject getModel(String name) {
             return null;
         }
 
@@ -482,7 +483,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         @Override
         public Set<String> removeAllModelsOfType(String modelType) {
-            return null;
+            return Collections.emptySet();
         }
     }
 }

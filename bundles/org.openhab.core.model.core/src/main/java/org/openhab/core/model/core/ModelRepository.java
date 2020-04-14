@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The model repository stores the configuration files (EMF models).
@@ -25,6 +27,7 @@ import org.eclipse.emf.ecore.EObject;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface ModelRepository {
 
     /**
@@ -33,7 +36,8 @@ public interface ModelRepository {
      * @param name name of the requested model
      * @return the model or null, if not found
      */
-    public EObject getModel(String name);
+    @Nullable
+    EObject getModel(String name);
 
     /**
      * Adds a model to the repository or refreshes it if it already exists
@@ -42,7 +46,7 @@ public interface ModelRepository {
      * @param inputStream an input stream with the model's content, optional if the file already exists
      * @return true, if it was successfully processed, false otherwise
      */
-    public boolean addOrRefreshModel(String name, InputStream inputStream);
+    boolean addOrRefreshModel(String name, InputStream inputStream);
 
     /**
      * Removes a model from the repository
@@ -50,7 +54,7 @@ public interface ModelRepository {
      * @param name the name of the model to remove
      * @return true, if model was removed, false, if it did not exist
      */
-    public boolean removeModel(String name);
+    boolean removeModel(String name);
 
     /**
      * Returns all names of models of a given type (file extension)
@@ -58,14 +62,14 @@ public interface ModelRepository {
      * @param modelType the model type to get the names for
      * @return all names of available models
      */
-    public Iterable<String> getAllModelNamesOfType(String modelType);
+    Iterable<String> getAllModelNamesOfType(String modelType);
 
     /**
      * Reload and parse all models of the given type
      *
      * @param modelType the model type to reload
      */
-    public void reloadAllModelsOfType(final String modelType);
+    void reloadAllModelsOfType(final String modelType);
 
     /**
      * Remove all models of the given type
@@ -73,19 +77,19 @@ public interface ModelRepository {
      * @param modelType the model type to remove
      * @return all names of the removed models
      */
-    public Set<String> removeAllModelsOfType(final String modelType);
+    Set<String> removeAllModelsOfType(final String modelType);
 
     /**
      * Adds a change listener
      *
      * @param listener the listener to add
      */
-    public void addModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
+    void addModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
 
     /**
      * Removes a change listener
      *
      * @param listener the listener to remove
      */
-    public void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
+    void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
 }
