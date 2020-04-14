@@ -39,6 +39,18 @@ public class StateDescriptionFragmentBuilder {
         //
     }
 
+    private StateDescriptionFragmentBuilder(StateDescriptionFragment fragment) {
+        this.minimum = fragment.getMinimum();
+        this.maximum = fragment.getMaximum();
+        this.step = fragment.getStep();
+        this.pattern = fragment.getPattern();
+        this.readOnly = fragment.isReadOnly();
+        final List<StateOption> stateOptions = fragment.getOptions();
+        if (stateOptions != null && !stateOptions.isEmpty()) {
+            this.options = new ArrayList<>(stateOptions);
+        }
+    }
+
     private StateDescriptionFragmentBuilder(StateDescription legacy) {
         this.minimum = legacy.getMinimum();
         this.maximum = legacy.getMaximum();
@@ -51,7 +63,7 @@ public class StateDescriptionFragmentBuilder {
     }
 
     /**
-     * Create and return a fresh builder instance.
+     * Creates and returns a fresh builder instance.
      *
      * @return a fresh {@link StateDescriptionFragmentBuilder} instance.
      */
@@ -60,7 +72,18 @@ public class StateDescriptionFragmentBuilder {
     }
 
     /**
-     * Create a builder instance and initialize all fields from the given {@link StateDescription}.
+     * Creates a builder instance and initializes all fields from the given {@link StateDescriptionFragment}.
+     * Note: State options will only be taken into account if the list is not empty.
+     *
+     * @param fragment the {@link StateDescriptionFragment} this builder be initialized from.
+     * @return the builder.
+     */
+    public static StateDescriptionFragmentBuilder create(StateDescriptionFragment fragment) {
+        return new StateDescriptionFragmentBuilder(fragment);
+    }
+
+    /**
+     * Creates a builder instance and initializes all fields from the given {@link StateDescription}.
      * Note: State options will only be taken into account if the list is not empty.
      *
      * @param legacy the {@link StateDescription} this builder be initialized from.
@@ -71,7 +94,7 @@ public class StateDescriptionFragmentBuilder {
     }
 
     /**
-     * Build a {@link StateDescriptionFragment} from the values of this builder.
+     * Builds a {@link StateDescriptionFragment} from the values of this builder.
      *
      * @return a {@link StateDescriptionFragment} from the values of this builder.
      */

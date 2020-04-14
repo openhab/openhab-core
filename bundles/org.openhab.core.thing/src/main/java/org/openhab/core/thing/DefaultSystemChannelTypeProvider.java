@@ -34,7 +34,6 @@ import org.openhab.core.thing.type.ChannelTypeProvider;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.EventOption;
-import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.util.BundleResolver;
@@ -68,10 +67,12 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_CHANNEL_SIGNAL_STRENGTH = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "signal-strength"), "Signal Strength", "Number")
             .withCategory("QualityOfService")
-            .withStateDescription(new StateDescription(BigDecimal.ZERO, new BigDecimal(4), BigDecimal.ONE, null, true,
-                    Arrays.asList(new StateOption("0", "no signal"), new StateOption("1", "weak"),
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                    .withMaximum(new BigDecimal(4)).withStep(BigDecimal.ONE).withReadOnly(Boolean.TRUE)
+                    .withOptions(Arrays.asList(new StateOption("0", "no signal"), new StateOption("1", "weak"),
                             new StateOption("2", "average"), new StateOption("3", "good"),
-                            new StateOption("4", "excellent"))))
+                            new StateOption("4", "excellent")))
+                    .build())
             .build();
 
     /**
@@ -80,17 +81,16 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_CHANNEL_LOW_BATTERY = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "low-battery"), "Low Battery", "Switch").withCategory("Battery")
-            .withStateDescription(
-                    StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
-            .build();
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build()).build();
 
     /**
      * Battery level default system wide {@link ChannelType}. Represents the battery level as a percentage.
      */
     public static final ChannelType SYSTEM_CHANNEL_BATTERY_LEVEL = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "battery-level"), "Battery Level", "Number").withCategory("Battery")
-            .withStateDescription(
-                    new StateDescription(BigDecimal.ZERO, new BigDecimal(100), BigDecimal.ONE, "%.0f %%", true, null))
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                    .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(true).withPattern("%.0f %%")
+                    .build())
             .build();
 
     /**
@@ -146,8 +146,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_LOCATION = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "location"), "Location", "Location")
             .withDescription("Location in lat./lon./height coordinates")
-            .withStateDescription(StateDescriptionFragmentBuilder.create().withReadOnly(true)
-                    .withPattern("%2$s°N %3$s°E %1$sm").build().toStateDescription())
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true)
+                    .withPattern("%2$s°N %3$s°E %1$sm").build())
             .build();
 
     /**
@@ -155,9 +155,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_MOTION = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "motion"), "Motion", "Switch")
-            .withDescription("Motion detected by the device").withCategory("Motion").withStateDescription(
-                    StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
-            .build();
+            .withDescription("Motion detected by the device").withCategory("Motion")
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build()).build();
 
     /**
      * Brightness: default system wide {@link ChannelType} which allows changing the brightness from 0-100%
@@ -165,8 +164,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_BRIGHTNESS = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "brightness"), "Brightness", "Dimmer")
             .withDescription("Controls the brightness and switches the light on and off").withCategory("DimmableLight")
-            .withStateDescription(
-                    new StateDescription(BigDecimal.ZERO, new BigDecimal(100), null, "%d %%", false, null))
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                    .withMaximum(new BigDecimal(100)).withPattern("%d %%").build())
             .build();
 
     /**
@@ -182,7 +181,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_COLOR_TEMPERATURE = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "color-temperature"), "Color Temperature", "Dimmer")
             .withDescription("Controls the color temperature of the light").withCategory("ColorLight")
-            .withStateDescription(new StateDescription(BigDecimal.ZERO, new BigDecimal(100), null, "%d", false, null))
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                    .withMaximum(new BigDecimal(100)).withPattern("%d").build())
             .build();
 
     // media channels
@@ -193,8 +193,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_VOLUME = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "volume"), "Volume", "Dimmer")
             .withDescription("Change the sound volume of a device")
-            .withStateDescription(
-                    new StateDescription(BigDecimal.ZERO, new BigDecimal(100), null, "%d %%", false, null))
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                    .withMaximum(new BigDecimal(100)).withPattern("%d %%").build())
             .withCategory("SoundVolume").build();
 
     /**
@@ -216,18 +216,16 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_MEDIA_TITLE = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "media-title"), "Media Title", "String")
-            .withDescription("Title of a (played) media file").withStateDescription(
-                    StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
-            .build();
+            .withDescription("Title of a (played) media file")
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build()).build();
 
     /**
      * Media-artist: default system wide {@link ChannelType} which displays the artist of a (played) song
      */
     public static final ChannelType SYSTEM_MEDIA_ARTIST = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "media-artist"), "Media Artist", "String")
-            .withDescription("Artist of a (played) media file").withStateDescription(
-                    StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
-            .build();
+            .withDescription("Artist of a (played) media file")
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build()).build();
 
     // weather channels
 
@@ -237,8 +235,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_WIND_DIRECTION = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "wind-direction"), "Wind Direction", "Number:Angle")
             .withDescription("Current wind direction expressed as an angle").withCategory("Wind")
-            .withStateDescription(
-                    new StateDescription(BigDecimal.ZERO, new BigDecimal(360), null, "%.0f %unit%", true, null))
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
+                    .withMaximum(new BigDecimal(360)).withReadOnly(true).withPattern("%.0f %unit%").build())
             .build();
 
     /**
@@ -247,8 +245,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_WIND_SPEED = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "wind-speed"), "Wind Speed", "Number:Speed")
             .withDescription("Current wind speed").withCategory("Wind")
-            .withStateDescription(StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%")
-                    .build().toStateDescription())
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
             .build();
 
     /**
@@ -257,8 +255,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_OUTDOOR_TEMPERATURE = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "outdoor-temperature"), "Outdoor Temperature", "Number:Temperature")
             .withDescription("Current outdoor temperature").withCategory("Temperature")
-            .withStateDescription(StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%")
-                    .build().toStateDescription())
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
             .build();
 
     /**
@@ -268,8 +266,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .state(new ChannelTypeUID(BINDING_ID, "atmospheric-humidity"), "Atmospheric Humidity",
                     "Number:Dimensionless")
             .withDescription("Current atmospheric relative humidity").withCategory("Humidity")
-            .withStateDescription(StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.0f %%")
-                    .build().toStateDescription())
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.0f %%").build())
             .build();
 
     /**
@@ -278,8 +276,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_BAROMETRIC_PRESSURE = ChannelTypeBuilder
             .state(new ChannelTypeUID(BINDING_ID, "barometric-pressure"), "Barometric Pressure", "Number:Pressure")
             .withDescription("Current barometric pressure").withCategory("Pressure")
-            .withStateDescription(StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.3f %unit%")
-                    .build().toStateDescription())
+            .withStateDescriptionFragment(
+                    StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.3f %unit%").build())
             .build();
 
     private static final Collection<ChannelType> CHANNEL_TYPES = Collections

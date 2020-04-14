@@ -155,6 +155,7 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         return null;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected ChannelTypeXmlResult unmarshalType(HierarchicalStreamReader reader, UnmarshallingContext context,
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {

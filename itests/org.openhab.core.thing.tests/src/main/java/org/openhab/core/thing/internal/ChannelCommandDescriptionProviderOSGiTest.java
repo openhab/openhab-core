@@ -68,7 +68,7 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
-import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.util.BundleResolver;
@@ -110,15 +110,16 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         thingHandlerFactory.activate(componentContextMock);
         registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
 
-        final StateDescription state = StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
-                .withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.TEN).withPattern("%d Peek").withReadOnly(true)
-                .withOption(new StateOption("SOUND", "My great sound.")).build().toStateDescription();
+        final StateDescriptionFragment stateDescriptionFragment = StateDescriptionFragmentBuilder.create()
+                .withMinimum(BigDecimal.ZERO).withMaximum(BigDecimal.valueOf(100)).withStep(BigDecimal.TEN)
+                .withPattern("%d Peek").withReadOnly(true).withOption(new StateOption("SOUND", "My great sound."))
+                .build();
         final CommandDescription command = CommandDescriptionBuilder.create()
                 .withCommandOption(new CommandOption("COMMAND", "My command.")).build();
 
         final ChannelType channelType1 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("hue:state-as-command"), " ", CoreItemFactory.NUMBER)
-                .withStateDescription(state).build();
+                .withStateDescriptionFragment(stateDescriptionFragment).build();
         final ChannelType channelType2 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("hue:static"), " ", CoreItemFactory.STRING).withTag("Light")
                 .withCommandDescription(command).build();

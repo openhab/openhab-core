@@ -24,6 +24,7 @@ import org.openhab.core.config.xml.util.NodeIterator;
 import org.openhab.core.config.xml.util.NodeList;
 import org.openhab.core.config.xml.util.NodeValue;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 
 import com.thoughtworks.xstream.converters.ConversionException;
@@ -112,22 +113,20 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
         String pattern = attributes.get("pattern");
         boolean readOnly = toBoolean(attributes, "readOnly", false);
 
-        List<StateOption> channelOptions = null;
+        StateDescriptionFragmentBuilder stateDescriptionFragmentBuilder = StateDescriptionFragmentBuilder.create()
+                .withMinimum(minimum).withMaximum(maximum).withStep(step).withPattern(pattern).withReadOnly(readOnly);
 
         NodeList nodes = (NodeList) context.convertAnother(context, NodeList.class);
         NodeIterator nodeIterator = new NodeIterator(nodes.getList());
 
         NodeList optionNodes = (NodeList) nodeIterator.next();
         if (optionNodes != null) {
-            channelOptions = toListOfChannelState(optionNodes);
+            stateDescriptionFragmentBuilder.withOptions(toListOfChannelState(optionNodes));
         }
 
         nodeIterator.assertEndOfType();
 
-        StateDescription stateDescription = new StateDescription(minimum, maximum, step, pattern, readOnly,
-                channelOptions);
-
-        return stateDescription;
+        return stateDescriptionFragmentBuilder.build().toStateDescription();
     }
 
 }

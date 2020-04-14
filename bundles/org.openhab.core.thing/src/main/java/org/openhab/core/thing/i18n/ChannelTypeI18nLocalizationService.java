@@ -29,6 +29,7 @@ import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 import org.osgi.framework.Bundle;
@@ -76,7 +77,21 @@ public class ChannelTypeI18nLocalizationService {
         return localizedOptions;
     }
 
+    /**
+     * @deprecated use
+     *             {@link ChannelTypeI18nLocalizationService#createLocalizedStateDescriptionFragment(Bundle, StateDescription, ChannelTypeUID, Locale)}
+     *             instead.
+     */
+    @Deprecated
     public @Nullable StateDescription createLocalizedStateDescription(final Bundle bundle,
+            final @Nullable StateDescription state, final ChannelTypeUID channelTypeUID,
+            final @Nullable Locale locale) {
+        StateDescriptionFragment stateDescriptionFragment = createLocalizedStateDescriptionFragment(bundle, state,
+                channelTypeUID, locale);
+        return stateDescriptionFragment == null ? null : stateDescriptionFragment.toStateDescription();
+    }
+
+    public @Nullable StateDescriptionFragment createLocalizedStateDescriptionFragment(final Bundle bundle,
             final @Nullable StateDescription state, final ChannelTypeUID channelTypeUID,
             final @Nullable Locale locale) {
         if (state == null) {
@@ -94,7 +109,7 @@ public class ChannelTypeI18nLocalizationService {
         if (localizedPattern != null) {
             builder.withPattern(localizedPattern);
         }
-        return builder.withOptions(localizedOptions).build().toStateDescription();
+        return builder.withOptions(localizedOptions).build();
     }
 
     public List<CommandOption> createLocalizedCommandOptions(final Bundle bundle, List<CommandOption> commandOptions,
@@ -134,8 +149,8 @@ public class ChannelTypeI18nLocalizationService {
 
         switch (channelType.getKind()) {
             case STATE:
-                StateDescription state = createLocalizedStateDescription(bundle, channelType.getState(), channelTypeUID,
-                        locale);
+                StateDescriptionFragment stateDescriptionFragment = createLocalizedStateDescriptionFragment(bundle,
+                        channelType.getState(), channelTypeUID, locale);
                 CommandDescription command = createLocalizedCommandDescription(bundle,
                         channelType.getCommandDescription(), channelTypeUID, locale);
 
@@ -143,8 +158,8 @@ public class ChannelTypeI18nLocalizationService {
                         .state(channelTypeUID, label == null ? defaultLabel : label, channelType.getItemType())
                         .isAdvanced(channelType.isAdvanced()).withCategory(channelType.getCategory())
                         .withConfigDescriptionURI(channelType.getConfigDescriptionURI()).withTags(channelType.getTags())
-                        .withStateDescription(state).withAutoUpdatePolicy(channelType.getAutoUpdatePolicy())
-                        .withCommandDescription(command);
+                        .withStateDescriptionFragment(stateDescriptionFragment)
+                        .withAutoUpdatePolicy(channelType.getAutoUpdatePolicy()).withCommandDescription(command);
                 if (description != null) {
                     stateBuilder.withDescription(description);
                 }

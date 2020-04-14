@@ -81,6 +81,7 @@ public class StateDescriptionFragmentBuilderTest {
         assertThat(builder.withOptions(options).build().getOptions(), is(options));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void builderWithStateDescription() {
         StateDescription source = new StateDescription(BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.ONE, "pattern", true,

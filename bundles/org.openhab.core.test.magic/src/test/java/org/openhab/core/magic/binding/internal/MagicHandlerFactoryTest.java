@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.magic.binding.MagicBindingConstants;
@@ -30,13 +31,14 @@ import org.openhab.core.thing.ThingTypeUID;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class MagicHandlerFactoryTest {
 
-    private MagicHandlerFactory factory;
+    private @NonNullByDefault({}) MagicHandlerFactory factory;
 
     @Before
     public void setup() {
-        factory = new MagicHandlerFactory();
+        factory = new MagicHandlerFactory(mock(MagicDynamicStateDescriptionProvider.class));
     }
 
     @Test

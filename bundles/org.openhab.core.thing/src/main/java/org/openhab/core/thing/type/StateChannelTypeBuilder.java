@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
 
 /**
  * Interface for builders for {@link ChannelType}s of kind STATE
@@ -27,27 +28,36 @@ import org.openhab.core.types.StateDescription;
 public interface StateChannelTypeBuilder extends ChannelTypeBuilder<StateChannelTypeBuilder> {
 
     /**
-     * Sets the StateDescription for the ChannelType
+     * Sets the {@link StateDescription} for the {@link ChannelType}
      *
      * @param stateDescription StateDescription for the ChannelType
      * @return this Builder
+     * @deprecated use {@link StateChannelTypeBuilder#withStateDescriptionFragment(StateDescriptionFragment)} instead.
      */
+    @Deprecated
     StateChannelTypeBuilder withStateDescription(@Nullable StateDescription stateDescription);
 
     /**
-     * Sets the auto update policy for the ChannelType
+     * Sets the {@link StateDescriptionFragment} for the {@link ChannelType}
      *
-     * @param autoUpdatePolicy the auto update policy
+     * @param stateDescriptionFragment StateDescriptionFragment for the ChannelType
+     * @return this Builder
+     */
+    StateChannelTypeBuilder withStateDescriptionFragment(@Nullable StateDescriptionFragment stateDescriptionFragment);
+
+    /**
+     * Sets the {@link AutoUpdatePolicy} for the {@link ChannelType}
+     *
+     * @param autoUpdatePolicy the AutoUpdatePolicy for the ChannelType
      * @return this builder
      */
     StateChannelTypeBuilder withAutoUpdatePolicy(@Nullable AutoUpdatePolicy autoUpdatePolicy);
 
     /**
-     * Sets the list of {@link CommandOption}s for the ChannelType
+     * Sets the list of {@link CommandOption}s for the {@link ChannelType}
      *
      * @param commandOptions the list of {@link CommandOption}s
      * @return this builder
-     *
      */
     StateChannelTypeBuilder withCommandDescription(@Nullable CommandDescription commandDescription);
 

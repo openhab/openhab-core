@@ -22,6 +22,8 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.StateChannelTypeBuilder;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.StateDescriptionFragment;
+import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
  * StateChannelTypeBuilder to create {@link ChannelType}s of kind STATE
@@ -33,7 +35,7 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
         implements StateChannelTypeBuilder {
 
     private final String itemType;
-    private @Nullable StateDescription stateDescription;
+    private @Nullable StateDescriptionFragment stateDescriptionFragment;
     private @Nullable AutoUpdatePolicy autoUpdatePolicy;
     private @Nullable CommandDescription commandDescription;
 
@@ -49,7 +51,16 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
 
     @Override
     public StateChannelTypeBuilder withStateDescription(@Nullable StateDescription stateDescription) {
-        this.stateDescription = stateDescription;
+        this.stateDescriptionFragment = stateDescription != null
+                ? StateDescriptionFragmentBuilder.create(stateDescription).build()
+                : null;
+        return this;
+    }
+
+    @Override
+    public StateChannelTypeBuilder withStateDescriptionFragment(
+            @Nullable StateDescriptionFragment stateDescriptionFragment) {
+        this.stateDescriptionFragment = stateDescriptionFragment;
         return this;
     }
 
@@ -67,13 +78,13 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
 
     @Override
     public ChannelType build() {
-        if (stateDescription != null) {
+        if (stateDescriptionFragment != null) {
             return new ChannelType(channelTypeUID, advanced, itemType, ChannelKind.STATE, label, description, category,
-                    tags.isEmpty() ? null : tags, stateDescription, null, configDescriptionURI, autoUpdatePolicy);
+                    tags.isEmpty() ? null : tags, stateDescriptionFragment.toStateDescription(), null,
+                    configDescriptionURI, autoUpdatePolicy);
         }
 
         return new ChannelType(channelTypeUID, advanced, itemType, label, description, category,
                 tags.isEmpty() ? null : tags, commandDescription, configDescriptionURI, autoUpdatePolicy);
     }
-
 }

@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.magic.binding.handler.MagicActionModuleThingHandler;
 import org.openhab.core.magic.binding.handler.MagicBridgeHandler;
 import org.openhab.core.magic.binding.handler.MagicBridgedThingHandler;
@@ -44,16 +46,17 @@ import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.BaseThingHandlerFactory;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * The {@link MagicHandlerFactory} is responsible for creating things and thing
- * handlers.
+ * The {@link MagicHandlerFactory} is responsible for creating things and thing handlers.
  *
  * @author Henning Treu - Initial contribution
  */
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.magic")
+@NonNullByDefault
 public class MagicHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
@@ -64,7 +67,12 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
                     THING_TYPE_ROLLERSHUTTER, THING_TYPE_PLAYER, THING_TYPE_IMAGE, THING_TYPE_ACTION_MODULE,
                     THING_TYPE_DYNAMIC_STATE_DESCRIPTION, THING_TYPE_ONLINE_OFFLINE).collect(Collectors.toSet()));
 
-    private MagicDynamicStateDescriptionProvider stateDescriptionProvider;
+    private final MagicDynamicStateDescriptionProvider stateDescriptionProvider;
+
+    @Activate
+    public MagicHandlerFactory(final @Reference MagicDynamicStateDescriptionProvider stateDescriptionProvider) {
+        this.stateDescriptionProvider = stateDescriptionProvider;
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -72,7 +80,7 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Override
-    protected ThingHandler createHandler(Thing thing) {
+    protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(THING_TYPE_EXTENSIBLE_THING)) {
@@ -129,20 +137,10 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
         if (thingTypeUID.equals(THING_TYPE_ONLINE_OFFLINE)) {
             return new MagicOnlineOfflineHandler(thing);
         }
-
         if (thingTypeUID.equals(THING_TYPE_BRIDGE_1) || thingTypeUID.equals(THING_TYPE_BRIDGE_2)) {
             return new MagicBridgeHandler((Bridge) thing);
         }
 
         return null;
-    }
-
-    @Reference
-    protected void setDynamicStateDescriptionProvider(MagicDynamicStateDescriptionProvider stateDescriptionProvider) {
-        this.stateDescriptionProvider = stateDescriptionProvider;
-    }
-
-    protected void unsetDynamicStateDescriptionProvider(MagicDynamicStateDescriptionProvider stateDescriptionProvider) {
-        this.stateDescriptionProvider = null;
     }
 }
