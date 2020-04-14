@@ -63,7 +63,7 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
     }
 
-    private void registerThingsChangeListener(ProviderChangeListener<@NonNull Thing> thingChangeListener) {
+    private void registerThingsChangeListener(ProviderChangeListener<Thing> thingChangeListener) {
         unregisterCurrentThingsChangeListener();
         this.thingChangeListener = thingChangeListener;
         managedThingProvider.addProviderChangeListener(this.thingChangeListener);

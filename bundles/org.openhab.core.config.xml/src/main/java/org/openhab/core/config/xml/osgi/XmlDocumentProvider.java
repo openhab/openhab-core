@@ -12,8 +12,8 @@
  */
 package org.openhab.core.config.xml.osgi;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.xml.internal.ConfigDescriptionReader;
 
 /**
@@ -27,14 +27,14 @@ import org.openhab.core.config.xml.internal.ConfigDescriptionReader;
  * @param <T> the result type of the conversion
  */
 @NonNullByDefault
-public interface XmlDocumentProvider<T> {
+public interface XmlDocumentProvider<@NonNull T> {
 
     /**
      * Adds a new result object from the XML processing for further processing.
      *
-     * @param object the result object to be processed (could be null)
+     * @param object the result object to be processed
      */
-    void addingObject(@Nullable T object);
+    void addingObject(T object);
 
     /**
      * Signals that all available result objects from the XML processing of the

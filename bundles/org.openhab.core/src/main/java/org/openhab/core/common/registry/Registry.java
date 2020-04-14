@@ -15,6 +15,7 @@ package org.openhab.core.common.registry;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -29,7 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @param <E> type of the elements in the registry
  */
 @NonNullByDefault
-public interface Registry<E extends Identifiable<K>, K> {
+public interface Registry<@NonNull E extends Identifiable<K>, @NonNull K> {
 
     /**
      * Adds a {@link RegistryChangeListener} to the registry.

@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
@@ -38,6 +39,7 @@ import org.osgi.framework.Bundle;
  * @author Markus Rathgeb - Use ConfigI18nLocalizerService
  * @author Simon Kaufmann - factored out common aspects into {@link AbstractXmlBasedProvider}
  */
+@NonNullByDefault
 public abstract class AbstractXmlConfigDescriptionProvider extends AbstractXmlBasedProvider<URI, ConfigDescription>
         implements ConfigDescriptionProvider {
 

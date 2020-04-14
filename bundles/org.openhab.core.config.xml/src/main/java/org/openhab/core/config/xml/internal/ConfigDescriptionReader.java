@@ -14,6 +14,7 @@ package org.openhab.core.config.xml.internal;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -42,6 +43,7 @@ import com.thoughtworks.xstream.XStream;
  * @author Alex Tugarev - Extended for options and filter criteria
  * @author Chris Jackson - Added configuration groups
  */
+@NonNullByDefault
 public class ConfigDescriptionReader extends XmlDocumentReader<List<ConfigDescription>> {
 
     /**

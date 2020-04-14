@@ -14,6 +14,7 @@ package org.openhab.core.config.xml.internal;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.xml.AbstractXmlConfigDescriptionProvider;
@@ -32,28 +33,21 @@ import org.osgi.framework.Bundle;
  *
  * @see ConfigDescriptionXmlProviderFactory
  */
+@NonNullByDefault
 public class ConfigDescriptionXmlProvider implements XmlDocumentProvider<List<ConfigDescription>> {
 
-    private Bundle bundle;
-    private AbstractXmlConfigDescriptionProvider configDescriptionProvider;
+    private final Bundle bundle;
+    private final AbstractXmlConfigDescriptionProvider configDescriptionProvider;
 
     public ConfigDescriptionXmlProvider(Bundle bundle, AbstractXmlConfigDescriptionProvider configDescriptionProvider)
             throws IllegalArgumentException {
-        if (bundle == null) {
-            throw new IllegalArgumentException("The Bundle must not be null!");
-        }
-
-        if (configDescriptionProvider == null) {
-            throw new IllegalArgumentException("The XmlConfigDescriptionProvider must not be null!");
-        }
-
         this.bundle = bundle;
         this.configDescriptionProvider = configDescriptionProvider;
     }
 
     @Override
     public synchronized void addingObject(List<ConfigDescription> configDescriptions) {
-        this.configDescriptionProvider.addAll(this.bundle, configDescriptions);
+        this.configDescriptionProvider.addAll(bundle, configDescriptions);
     }
 
     @Override

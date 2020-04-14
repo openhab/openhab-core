@@ -14,6 +14,7 @@ package org.openhab.core.thing.xml.internal;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -48,6 +49,7 @@ import com.thoughtworks.xstream.XStream;
  * @author Chris Jackson - Added parameter groups and channel properties
  * @author Moritz Kammerer - Added triggers
  */
+@NonNullByDefault
 public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
 
     /**

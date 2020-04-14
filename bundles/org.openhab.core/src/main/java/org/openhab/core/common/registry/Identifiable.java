@@ -12,6 +12,7 @@
  */
 package org.openhab.core.common.registry;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -20,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
-public interface Identifiable<T> {
+public interface Identifiable<@NonNull T> {
 
     /**
      * Get the unique identifier.

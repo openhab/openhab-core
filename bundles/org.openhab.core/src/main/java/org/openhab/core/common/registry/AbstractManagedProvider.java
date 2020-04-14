@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *            type of the persistable element
  */
 @NonNullByDefault
-public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>, @NonNull K, PE>
+public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>, @NonNull K, @NonNull PE>
         extends AbstractProvider<E> implements ManagedProvider<E, K> {
 
     private volatile Storage<PE> storage;
@@ -80,6 +80,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
     }
 
     private @Nullable E getElement(String key) {
+        @Nullable
         PE persistableElement = storage.get(key);
         return persistableElement != null ? toElement(key, persistableElement) : null;
     }
@@ -87,6 +88,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
     @Override
     public @Nullable E remove(K key) {
         String keyAsString = keyToString(key);
+        @Nullable
         PE persistableElement = storage.remove(keyAsString);
         if (persistableElement != null) {
             @Nullable
@@ -105,6 +107,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
     public @Nullable E update(E element) {
         String key = getKeyAsString(element);
         if (storage.get(key) != null) {
+            @Nullable
             PE persistableElement = storage.put(key, toPersistableElement(element));
             if (persistableElement != null) {
                 @Nullable
@@ -150,7 +153,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
      * @param persistableElement persistable element
      * @return original element
      */
-    protected abstract @Nullable E toElement(String key, @NonNull PE persistableElement);
+    protected abstract @Nullable E toElement(String key, PE persistableElement);
 
     /**
      * Converts the original element into an element that can be persisted.
