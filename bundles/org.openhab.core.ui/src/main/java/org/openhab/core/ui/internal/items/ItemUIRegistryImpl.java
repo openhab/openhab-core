@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 
 import javax.measure.Unit;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
@@ -125,7 +124,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     private @Nullable ItemRegistry itemRegistry;
-
     private @Nullable ItemBuilderFactory itemBuilderFactory;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
@@ -142,15 +140,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         this.itemRegistry = null;
     }
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addItemUIProvider(ItemUIProvider itemUIProvider) {
-        itemUIProviders.add(itemUIProvider);
-    }
-
-    public void removeItemUIProvider(ItemUIProvider itemUIProvider) {
-        itemUIProviders.remove(itemUIProvider);
-    }
-
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected void setItemBuilderFactory(ItemBuilderFactory itemBuilderFactory) {
         this.itemBuilderFactory = itemBuilderFactory;
@@ -158,6 +147,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     protected void unsetItemBuilderFactory(ItemBuilderFactory itemBuilderFactory) {
         this.itemBuilderFactory = null;
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    public void addItemUIProvider(ItemUIProvider itemUIProvider) {
+        itemUIProviders.add(itemUIProvider);
+    }
+
+    public void removeItemUIProvider(ItemUIProvider itemUIProvider) {
+        itemUIProviders.remove(itemUIProvider);
     }
 
     @Override
@@ -241,8 +239,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         if (itemType == null) {
             return null;
         }
-        boolean readOnly = isReadOnly(itemName);
-        int nbOptions = getNbOptions(itemName);
 
         if (SwitchItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createSwitch();
@@ -251,8 +247,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return SitemapFactory.eINSTANCE.createGroup();
         }
         if (NumberItem.class.isAssignableFrom(itemType)) {
-            return (!readOnly && nbOptions > 0) ? SitemapFactory.eINSTANCE.createSelection()
-                    : SitemapFactory.eINSTANCE.createText();
+            boolean isReadOnly = isReadOnly(itemName);
+            if (!isReadOnly && hasStateOptions(itemName)) {
+                return SitemapFactory.eINSTANCE.createSelection();
+            } else if (!isReadOnly && hasCommandOptions(itemName)) {
+                return SitemapFactory.eINSTANCE.createSwitch();
+            } else {
+                return SitemapFactory.eINSTANCE.createText();
+            }
         }
         if (ContactItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createText();
@@ -264,8 +266,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return SitemapFactory.eINSTANCE.createSwitch();
         }
         if (StringItem.class.equals(itemType)) {
-            return (!readOnly && nbOptions > 0) ? SitemapFactory.eINSTANCE.createSelection()
-                    : SitemapFactory.eINSTANCE.createText();
+            boolean isReadOnly = isReadOnly(itemName);
+            if (!isReadOnly && hasStateOptions(itemName)) {
+                return SitemapFactory.eINSTANCE.createSelection();
+            } else if (!isReadOnly && hasCommandOptions(itemName)) {
+                return SitemapFactory.eINSTANCE.createSwitch();
+            } else {
+                return SitemapFactory.eINSTANCE.createText();
+            }
         }
         if (LocationItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createMapview();
@@ -315,7 +323,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         String label = getLabelFromWidget(w);
 
         String itemName = w.getItem();
-        if (StringUtils.isBlank(itemName)) {
+        if (itemName == null || itemName.isBlank()) {
             return transform(label, true, null);
         }
 
@@ -722,7 +730,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         } else {
             String itemName = widget.getItem();
             if (itemName != null) {
-                Item item = itemRegistry.get(itemName);
+                Item item = get(itemName);
                 if (item != null) {
                     Widget defaultWidget = getDefaultWidget(item.getClass(), item.getName());
                     if (defaultWidget != null) {
@@ -783,34 +791,37 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     private boolean isReadOnly(String itemName) {
         try {
-            Item item = itemRegistry.getItem(itemName);
+            Item item = getItem(itemName);
             StateDescription stateDescription = item.getStateDescription();
             return stateDescription != null ? stateDescription.isReadOnly() : false;
         } catch (ItemNotFoundException e) {
+            return false;
         }
-        return false;
     }
 
-    private int getNbOptions(String itemName) {
+    private boolean hasStateOptions(String itemName) {
         try {
-            Item item = itemRegistry.getItem(itemName);
-            CommandDescription commandDescription = item.getCommandDescription();
-            int nbCommandOptions = (commandDescription != null && commandDescription.getCommandOptions() != null)
-                    ? commandDescription.getCommandOptions().size()
-                    : 0;
+            Item item = getItem(itemName);
             StateDescription stateDescription = item.getStateDescription();
-            int nbStateOptions = (stateDescription != null && stateDescription.getOptions() != null)
-                    ? stateDescription.getOptions().size()
-                    : 0;
-            return nbCommandOptions > nbStateOptions ? nbCommandOptions : nbStateOptions;
+            return stateDescription != null && !stateDescription.getOptions().isEmpty();
         } catch (ItemNotFoundException e) {
+            return false;
         }
-        return 0;
+    }
+
+    private boolean hasCommandOptions(String itemName) {
+        try {
+            Item item = getItem(itemName);
+            CommandDescription commandDescription = item.getCommandDescription();
+            return commandDescription != null && !commandDescription.getCommandOptions().isEmpty();
+        } catch (ItemNotFoundException e) {
+            return false;
+        }
     }
 
     private @Nullable Class<? extends Item> getItemType(String itemName) {
         try {
-            Item item = itemRegistry.getItem(itemName);
+            Item item = getItem(itemName);
             return item.getClass();
         } catch (ItemNotFoundException e) {
             return null;
@@ -820,7 +831,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public @Nullable State getItemState(String itemName) {
         try {
-            Item item = itemRegistry.getItem(itemName);
+            Item item = getItem(itemName);
             return item.getState();
         } catch (ItemNotFoundException e) {
             return null;
@@ -829,7 +840,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     public @Nullable String getItemCategory(String itemName) {
         try {
-            Item item = itemRegistry.getItem(itemName);
+            Item item = getItem(itemName);
             return item.getCategory();
         } catch (ItemNotFoundException e) {
             return null;
@@ -1351,7 +1362,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             // we require the item to define a dimension, otherwise no unit will be reported to the UIs.
             if (item instanceof NumberItem && ((NumberItem) item).getDimension() != null) {
                 String unit = getUnitFromLabel(w.getLabel());
-                if (StringUtils.isNotBlank(unit) && !UnitUtils.UNIT_PLACEHOLDER.equals(unit)) {
+                if (unit != null && !unit.isBlank() && !UnitUtils.UNIT_PLACEHOLDER.equals(unit)) {
                     return unit;
                 }
 
@@ -1370,20 +1381,17 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         if (labelUnit != null && !state.getUnit().toString().equals(labelUnit)) {
             return state.toUnit(labelUnit);
         }
-
         return state;
     }
 
     private @Nullable String getUnitFromLabel(String label) {
-        if (StringUtils.isBlank(label)) {
+        if (label.isBlank()) {
             return null;
         }
-
         Matcher m = LABEL_PATTERN.matcher(label);
         if (m.matches()) {
             return m.group(1);
         }
-
         return null;
     }
 
