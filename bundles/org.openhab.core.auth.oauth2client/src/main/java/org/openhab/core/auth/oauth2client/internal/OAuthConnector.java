@@ -40,7 +40,6 @@ import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.io.net.http.HttpClientFactory;
-import org.openhab.core.io.net.http.TrustManagerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -347,7 +346,7 @@ public class OAuthConnector {
      * @see TrustManagerProvider
      */
     private HttpClient createHttpClient(String tokenUrl) throws OAuthException {
-        HttpClient httpClient = httpClientFactory.createHttpClient(HTTP_CLIENT_CONSUMER_NAME, tokenUrl);
+        HttpClient httpClient = httpClientFactory.createHttpClient(HTTP_CLIENT_CONSUMER_NAME);
         if (!httpClient.isStarted()) {
             try {
                 AccessController.doPrivileged((PrivilegedExceptionAction<@Nullable Void>) () -> {
