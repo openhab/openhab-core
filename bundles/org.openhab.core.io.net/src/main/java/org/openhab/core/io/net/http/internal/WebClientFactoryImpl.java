@@ -128,14 +128,14 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     public HttpClient createHttpClient(String consumerName) {
         logger.debug("http client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
-        return createHttpClientInternal(consumerName, null, false, null);
+        return createHttpClientInternal(consumerName, false, null);
     }
 
     @Override
     public WebSocketClient createWebSocketClient(String consumerName) {
         logger.debug("web socket client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
-        return createWebSocketClientInternal(consumerName, null, false, null);
+        return createWebSocketClientInternal(consumerName, false, null);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                         }
 
                         if (commonHttpClient == null) {
-                            commonHttpClient = createHttpClientInternal("common", null, true, threadPool);
+                            commonHttpClient = createHttpClientInternal("common", true, threadPool);
                             // we need to set the stop timeout AFTER the client has been started, because
                             // otherwise the Jetty client sets it back to the default value.
                             // We need the stop timeout in order to prevent blocking the deactivation of this
@@ -208,7 +208,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                         }
 
                         if (commonWebSocketClient == null) {
-                            commonWebSocketClient = createWebSocketClientInternal("common", null, true, threadPool);
+                            commonWebSocketClient = createWebSocketClientInternal("common", true, threadPool);
                             logger.debug("Jetty shared web socket client created");
                         }
 
@@ -227,21 +227,15 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private HttpClient createHttpClientInternal(String consumerName, @Nullable String endpoint, boolean startClient,
+    private HttpClient createHttpClientInternal(String consumerName, boolean startClient,
             @Nullable QueuedThreadPool threadPool) {
         try {
             return AccessController.doPrivileged(new PrivilegedExceptionAction<HttpClient>() {
                 @Override
                 public HttpClient run() {
-                    if (logger.isDebugEnabled()) {
-                        if (endpoint == null) {
-                            logger.debug("creating http client for consumer {}", consumerName);
-                        } else {
-                            logger.debug("creating http client for consumer {}, endpoint {}", consumerName, endpoint);
-                        }
-                    }
+                    logger.debug("creating http client for consumer {}", consumerName);
 
-                    HttpClient httpClient = new HttpClient(createSslContextFactory(endpoint));
+                    HttpClient httpClient = new HttpClient(createSslContextFactory());
                     httpClient.setMaxConnectionsPerDestination(2);
 
                     if (threadPool != null) {
@@ -275,22 +269,15 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private WebSocketClient createWebSocketClientInternal(String consumerName, @Nullable String endpoint,
-            boolean startClient, @Nullable QueuedThreadPool threadPool) {
+    private WebSocketClient createWebSocketClientInternal(String consumerName, boolean startClient,
+            @Nullable QueuedThreadPool threadPool) {
         try {
             return AccessController.doPrivileged(new PrivilegedExceptionAction<WebSocketClient>() {
                 @Override
                 public WebSocketClient run() {
-                    if (logger.isDebugEnabled()) {
-                        if (endpoint == null) {
-                            logger.debug("creating web socket client for consumer {}", consumerName);
-                        } else {
-                            logger.debug("creating web socket client for consumer {}, endpoint {}", consumerName,
-                                    endpoint);
-                        }
-                    }
+                    logger.debug("creating web socket client for consumer {}", consumerName);
 
-                    WebSocketClient webSocketClient = new WebSocketClient(createSslContextFactory(endpoint));
+                    WebSocketClient webSocketClient = new WebSocketClient(createSslContextFactory());
                     if (threadPool != null) {
                         webSocketClient.setExecutor(threadPool);
                     } else {
@@ -346,19 +333,10 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private SslContextFactory createSslContextFactory(@Nullable String endpoint) {
-        if (endpoint == null) {
-            return createSslContextFactoryFromExtensibleTrustManager();
-        } else {
-            SslContextFactory sslContextFactory = new SslContextFactory();
-            sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
-            return sslContextFactory;
-        }
-    }
-
-    private SslContextFactory createSslContextFactoryFromExtensibleTrustManager() {
+    private SslContextFactory createSslContextFactory() {
         SslContextFactory sslContextFactory = new SslContextFactory();
         sslContextFactory.setEndpointIdentificationAlgorithm("HTTPS");
+
         try {
             logger.debug("Setting up SSLContext for {}", extensibleTrustManager);
             SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -367,6 +345,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         } catch (NoSuchAlgorithmException | KeyManagementException ex) {
             throw new HttpClientInitializationException("Cannot create an TLS context!", ex);
         }
+
         return sslContextFactory;
     }
 
