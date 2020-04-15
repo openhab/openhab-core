@@ -306,15 +306,9 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
      */
     protected String getParserType(URL url) {
         String fileName = url.getPath();
-        int fileExtensionStartIndex = fileName.lastIndexOf(".") + 1;
-        if (fileExtensionStartIndex == -1) {
-            return Parser.FORMAT_JSON;
-        }
-        String fileExtension = fileName.substring(fileExtensionStartIndex);
-        if ("txt".equals(fileExtension)) {
-            return Parser.FORMAT_JSON;
-        }
-        return fileExtension;
+        int index = fileName.lastIndexOf(".");
+        String extension = index != -1 ? fileName.substring(index + 1) : "";
+        return extension.isEmpty() || "txt".equals(extension) ? Parser.FORMAT_JSON : extension;
     }
 
     /**
