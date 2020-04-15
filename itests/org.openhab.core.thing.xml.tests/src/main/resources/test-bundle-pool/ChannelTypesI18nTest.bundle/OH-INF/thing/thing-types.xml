@@ -33,9 +33,19 @@
 	</channel-type>
 
 	<channel-group-type id="channelgroup-with-i18n">
+
 		<label>@text/channelGroupLabel</label>
 		<description>@text/channelGroupDescription</description>
+
 		<channels>
+			<channel id="channelPlain" typeId="string">
+				<label>Channel Plain Label</label>
+				<description>Channel Plain Description</description>
+			</channel>
+			<channel id="channelInplace" typeId="channel-with-i18n">
+				<label>@text/channelInplaceLabel</label>
+				<description>@text/channelInplaceDescription</description>
+			</channel>
 		</channels>
 	</channel-group-type>
 
