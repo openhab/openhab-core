@@ -29,11 +29,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.openhab.core.items.Item;
-import org.openhab.core.thing.ThingStatus;
-import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
-import org.openhab.core.types.Type;
-import org.openhab.core.types.TypeParser;
 import org.openhab.core.model.rule.rules.ChangedEventTrigger;
 import org.openhab.core.model.rule.rules.CommandEventTrigger;
 import org.openhab.core.model.rule.rules.EventEmittedTrigger;
@@ -49,6 +44,11 @@ import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger;
 import org.openhab.core.model.rule.rules.ThingStateUpdateEventTrigger;
 import org.openhab.core.model.rule.rules.TimerTrigger;
 import org.openhab.core.model.rule.rules.UpdateEventTrigger;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
+import org.openhab.core.types.Type;
+import org.openhab.core.types.TypeParser;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -781,9 +781,9 @@ public class RuleTriggerManager {
     private void createTimer(Rule rule, TimerTrigger trigger) throws SchedulerException {
         String cronExpression = trigger.getCron();
         if (trigger.getTime() != null) {
-            if (trigger.getTime().equals("noon")) {
+            if ("noon".equals(trigger.getTime())) {
                 cronExpression = "0 0 12 * * ?";
-            } else if (trigger.getTime().equals("midnight")) {
+            } else if ("midnight".equals(trigger.getTime())) {
                 cronExpression = "0 0 0 * * ?";
             } else {
                 logger.warn("Unrecognized time expression '{}' in rule '{}'", trigger.getTime(), rule.getName());

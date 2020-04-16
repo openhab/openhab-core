@@ -73,21 +73,21 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
-        if (eventType.equals(ItemCommandEvent.TYPE)) {
+        if (ItemCommandEvent.TYPE.equals(eventType)) {
             return createCommandEvent(topic, payload, source);
-        } else if (eventType.equals(ItemStateEvent.TYPE)) {
+        } else if (ItemStateEvent.TYPE.equals(eventType)) {
             return createStateEvent(topic, payload, source);
-        } else if (eventType.equals(ItemStatePredictedEvent.TYPE)) {
+        } else if (ItemStatePredictedEvent.TYPE.equals(eventType)) {
             return createStatePredictedEvent(topic, payload, source);
-        } else if (eventType.equals(ItemStateChangedEvent.TYPE)) {
+        } else if (ItemStateChangedEvent.TYPE.equals(eventType)) {
             return createStateChangedEvent(topic, payload);
-        } else if (eventType.equals(ItemAddedEvent.TYPE)) {
+        } else if (ItemAddedEvent.TYPE.equals(eventType)) {
             return createAddedEvent(topic, payload);
-        } else if (eventType.equals(ItemUpdatedEvent.TYPE)) {
+        } else if (ItemUpdatedEvent.TYPE.equals(eventType)) {
             return createUpdatedEvent(topic, payload);
-        } else if (eventType.equals(ItemRemovedEvent.TYPE)) {
+        } else if (ItemRemovedEvent.TYPE.equals(eventType)) {
             return createRemovedEvent(topic, payload);
-        } else if (eventType.equals(GroupItemStateChangedEvent.TYPE)) {
+        } else if (GroupItemStateChangedEvent.TYPE.equals(eventType)) {
             return createGroupStateChangedEvent(topic, payload);
         }
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");

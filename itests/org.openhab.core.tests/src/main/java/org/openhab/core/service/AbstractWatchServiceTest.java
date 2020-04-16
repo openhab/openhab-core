@@ -239,7 +239,7 @@ public class AbstractWatchServiceTest extends JavaTest {
         waitForAssert(() -> assertThat(watchService.allFullEvents.size() >= 1, is(true)), DFL_TIMEOUT * 2,
                 DFL_SLEEP_TIME);
 
-        if (osSpecific && kind.equals(ENTRY_DELETE)) {
+        if (osSpecific && ENTRY_DELETE.equals(kind)) {
             // There is possibility that one more modify event is triggered on some OS
             // so sleep a bit extra time
             Thread.sleep(500);
@@ -272,7 +272,7 @@ public class AbstractWatchServiceTest extends JavaTest {
         // Related discussion in StackOverflow:
         // http://stackoverflow.com/questions/28201283/watchservice-windows-7-when-deleting-a-file-it-fires-both-entry-modify-and-e
         boolean isDeletedWithPrecedingModify = watchService.allFullEvents.size() == 2
-                && watchService.allFullEvents.get(0).eventKind.equals(ENTRY_MODIFY);
+                && ENTRY_MODIFY.equals(watchService.allFullEvents.get(0).eventKind);
         if (isDeletedWithPrecedingModify) {
             // Remove the ENTRY_MODIFY element as it is not needed
             watchService.allFullEvents.remove(0);

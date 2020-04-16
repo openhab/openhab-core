@@ -61,17 +61,17 @@ public class ThingEventFactory extends AbstractEventFactory {
 
     @Override
     protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
-        if (eventType.equals(ThingStatusInfoEvent.TYPE)) {
+        if (ThingStatusInfoEvent.TYPE.equals(eventType)) {
             return createStatusInfoEvent(topic, payload);
-        } else if (eventType.equals(ThingStatusInfoChangedEvent.TYPE)) {
+        } else if (ThingStatusInfoChangedEvent.TYPE.equals(eventType)) {
             return createStatusInfoChangedEvent(topic, payload);
-        } else if (eventType.equals(ThingAddedEvent.TYPE)) {
+        } else if (ThingAddedEvent.TYPE.equals(eventType)) {
             return createAddedEvent(topic, payload);
-        } else if (eventType.equals(ThingRemovedEvent.TYPE)) {
+        } else if (ThingRemovedEvent.TYPE.equals(eventType)) {
             return createRemovedEvent(topic, payload);
-        } else if (eventType.equals(ThingUpdatedEvent.TYPE)) {
+        } else if (ThingUpdatedEvent.TYPE.equals(eventType)) {
             return createUpdatedEvent(topic, payload);
-        } else if (eventType.equals(ChannelTriggeredEvent.TYPE)) {
+        } else if (ChannelTriggeredEvent.TYPE.equals(eventType)) {
             return createTriggerEvent(topic, payload, source);
         }
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");

@@ -78,7 +78,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
 
         String cronExpression = entries[entries.length - 1].trim();
 
-        reboot = cronExpression.equals("@reboot");
+        reboot = "@reboot".equals(cronExpression);
 
         if (cronExpression.startsWith("@")) {
             cronExpression = preDeclared(cronExpression);

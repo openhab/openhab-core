@@ -28,6 +28,8 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.internal.normalization.Normalizer;
 import org.openhab.core.config.core.internal.normalization.NormalizerFactory;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.ComponentConstants;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -267,7 +269,8 @@ public class ConfigUtil {
      * @param name The configuration parameter name
      */
     private static boolean isOSGiConfigParameter(String name) {
-        return name.equals("objectClass") || name.equals("component.name") || name.equals("component.id");
+        return Constants.OBJECTCLASS.equals(name) || ComponentConstants.COMPONENT_NAME.equals(name)
+                || ComponentConstants.COMPONENT_ID.equals(name);
     }
 
 }

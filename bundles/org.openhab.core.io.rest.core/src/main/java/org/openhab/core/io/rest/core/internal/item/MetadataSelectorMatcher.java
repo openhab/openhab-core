@@ -78,7 +78,7 @@ public class MetadataSelectorMatcher {
             Collection<ConfigDescription> configDescriptions = configDescriptionRegistry.getConfigDescriptions(locale);
 
             Set<String> configNamespaces = configDescriptions.stream()
-                    .filter(cd -> cd.getUID().getScheme().equals(METADATA_SCHEME)).map(cd -> cd.getUID().toString())
+                    .filter(cd -> METADATA_SCHEME.equals(cd.getUID().getScheme())).map(cd -> cd.getUID().toString())
                     .filter(pattern.asPredicate()).map(uri -> uri.substring(METADATA_SCHEME_PREFIX.length()))
                     .collect(toSet());
 

@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ParameterOption;
 import org.osgi.service.component.annotations.Component;
@@ -33,6 +35,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Simon Kaufmann - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone
  */
+@NonNullByDefault
 @Component(immediate = true)
 public class I18nConfigOptionsProvider implements ConfigOptionProvider {
 
@@ -41,15 +44,16 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
     private static final String POSITIVE_OFFSET_FORMAT = "(GMT+%d:%02d) %s";
 
     @Override
-    public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
-        if (uri.toString().equals("system:i18n")) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+        if ("system:i18n".equals(uri.toString())) {
             Locale translation = locale != null ? locale : Locale.getDefault();
             return processParamType(param, locale, translation);
         }
         return null;
     }
 
-    private Collection<ParameterOption> processParamType(String param, Locale locale, Locale translation) {
+    private @Nullable Collection<ParameterOption> processParamType(String param, @Nullable Locale locale,
+            Locale translation) {
         switch (param) {
             case "language":
                 return getAvailable(locale,
@@ -89,7 +93,8 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
         return result;
     }
 
-    private Collection<ParameterOption> getAvailable(Locale locale, Function<Locale, ParameterOption> mapFunction) {
+    private Collection<ParameterOption> getAvailable(@Nullable Locale locale,
+            Function<Locale, ParameterOption> mapFunction) {
         return Arrays.stream(Locale.getAvailableLocales()).map(l -> mapFunction.apply(l)).distinct()
                 .sorted(Comparator.comparing(a -> a.getLabel())).collect(Collectors.toList());
     }

@@ -128,7 +128,7 @@ public class GenericThingProviderTest3 extends JavaOSGiTest {
 
         ChannelTypeProvider channelTypeProvider = mock(ChannelTypeProvider.class);
         when(channelTypeProvider.getChannelType(any(), nullable(Locale.class))).thenAnswer(invocation -> {
-            if (channelType1.getUID().getId().equals("channel1")) {
+            if ("channel1".equals(channelType1.getUID().getId())) {
                 return channelType1;
             }
             return null;

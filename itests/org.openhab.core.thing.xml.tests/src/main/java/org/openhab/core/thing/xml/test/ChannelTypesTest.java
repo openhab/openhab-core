@@ -68,11 +68,11 @@ public class ChannelTypesTest extends JavaOSGiTest {
             });
 
             ChannelType channelType1 = channelTypes.stream()
-                    .filter(it -> it.getUID().toString().equals("somebinding:channel1")).findFirst().get();
+                    .filter(it -> "somebinding:channel1".equals(it.getUID().toString())).findFirst().get();
             assertThat(channelType1, is(not(nullValue())));
 
             ChannelType channelType2 = channelTypes.stream()
-                    .filter(it -> it.getUID().toString().equals("somebinding:channel-without-reference")).findFirst()
+                    .filter(it -> "somebinding:channel-without-reference".equals(it.getUID().toString())).findFirst()
                     .get();
             assertThat(channelType2, is(not(nullValue())));
 
@@ -83,7 +83,7 @@ public class ChannelTypesTest extends JavaOSGiTest {
             });
 
             ChannelGroupType channelGroupType = channelGroupTypes.stream()
-                    .filter(it -> it.getUID().toString().equals("somebinding:channelgroup")).findFirst().get();
+                    .filter(it -> "somebinding:channelgroup".equals(it.getUID().toString())).findFirst().get();
             assertThat(channelGroupType, is(not(nullValue())));
             assertThat(channelGroupType.getCategory(), is("Temperature"));
         }

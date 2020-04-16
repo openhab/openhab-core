@@ -165,7 +165,7 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
             return obj;
         }
 
-        if (type.equals(AUTOMATION_MANAGER) || type.equals(RULE_REGISTRY)) {
+        if (AUTOMATION_MANAGER.equals(type) || RULE_REGISTRY.equals(type)) {
             RuleSupportRuleRegistryDelegate ruleRegistryDelegate = new RuleSupportRuleRegistryDelegate(ruleRegistry,
                     ruleProvider);
             ScriptedAutomationManager automationManager = new ScriptedAutomationManager(ruleRegistryDelegate,
@@ -191,7 +191,7 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
             scopeValues.put(value, STATIC_TYPES.get(value));
         }
 
-        if (preset.equals(RULE_SUPPORT)) {
+        if (RULE_SUPPORT.equals(preset)) {
             Object automationManager = get(scriptIdentifier, AUTOMATION_MANAGER);
             if (automationManager != null) {
                 scopeValues.put(AUTOMATION_MANAGER, automationManager);

@@ -130,8 +130,8 @@ public class RuntimeRuleTest extends JavaOSGiTest {
                 final RuleStatusInfo ruleStatus = ruleEngine.getStatusInfo(rule.getUID());
                 logger.info("Rule status (should be IDLE or RUNNING): {}", ruleStatus);
                 boolean allFine;
-                if (ruleStatus.getStatus().equals(RuleStatus.IDLE)
-                        || ruleStatus.getStatus().equals(RuleStatus.RUNNING)) {
+                if (RuleStatus.IDLE.equals(ruleStatus.getStatus())
+                        || RuleStatus.RUNNING.equals(ruleStatus.getStatus())) {
                     allFine = true;
                 } else {
                     allFine = false;

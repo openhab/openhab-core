@@ -86,23 +86,23 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
     public void thingTyoesShouldHaveProperChannelDefinitions() throws Exception {
         try (final AutoCloseable unused = loadedSystemChannelsBundle()) {
             ThingType wirelessRouterType = thingTypeProvider.getThingTypes(null).stream()
-                    .filter(it -> it.getUID().getAsString().equals("SystemChannels:wireless-router")).findFirst().get();
+                    .filter(it -> "SystemChannels:wireless-router".equals(it.getUID().getAsString())).findFirst().get();
             assertThat(wirelessRouterType, is(notNullValue()));
 
             Collection<ChannelDefinition> channelDefs = wirelessRouterType.getChannelDefinitions();
             assertThat(channelDefs.size(), is(3));
 
             ChannelDefinition myChannel = channelDefs.stream().filter(
-                    it -> it.getId().equals("test") && it.getChannelTypeUID().getAsString().equals("system:my-channel"))
+                    it -> "test".equals(it.getId()) && "system:my-channel".equals(it.getChannelTypeUID().getAsString()))
                     .findFirst().get();
             assertThat(myChannel, is(notNullValue()));
 
-            ChannelDefinition sigStr = channelDefs.stream().filter(it -> it.getId().equals("sigstr")
-                    && it.getChannelTypeUID().getAsString().equals("system:signal-strength")).findFirst().get();
+            ChannelDefinition sigStr = channelDefs.stream().filter(it -> "sigstr".equals(it.getId())
+                    && "system:signal-strength".equals(it.getChannelTypeUID().getAsString())).findFirst().get();
             assertThat(sigStr, is(notNullValue()));
 
-            ChannelDefinition lowBat = channelDefs.stream().filter(it -> it.getId().equals("lowbat")
-                    && it.getChannelTypeUID().getAsString().equals("system:low-battery")).findFirst().get();
+            ChannelDefinition lowBat = channelDefs.stream().filter(it -> "lowbat".equals(it.getId())
+                    && "system:low-battery".equals(it.getChannelTypeUID().getAsString())).findFirst().get();
             assertThat(lowBat, is(notNullValue()));
         }
     }
@@ -119,23 +119,23 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
             ThingType wirelessRouterType = thingTypes.stream()
-                    .filter(it -> it.getUID().getAsString().equals("SystemChannels:wireless-router")).findFirst().get();
+                    .filter(it -> "SystemChannels:wireless-router".equals(it.getUID().getAsString())).findFirst().get();
             assertNotNull(wirelessRouterType);
 
             List<ChannelDefinition> channelDefs = wirelessRouterType.getChannelDefinitions();
             assertEquals(3, channelDefs.size());
 
             ChannelDefinition myChannel = channelDefs.stream().filter(
-                    it -> it.getId().equals("test") && it.getChannelTypeUID().getAsString().equals("system:my-channel"))
+                    it -> "test".equals(it.getId()) && "system:my-channel".equals(it.getChannelTypeUID().getAsString()))
                     .findFirst().get();
             assertNotNull(myChannel);
 
-            ChannelDefinition sigStr = channelDefs.stream().filter(it -> it.getId().equals("sigstr")
-                    && it.getChannelTypeUID().getAsString().equals("system:signal-strength")).findFirst().get();
+            ChannelDefinition sigStr = channelDefs.stream().filter(it -> "sigstr".equals(it.getId())
+                    && "system:signal-strength".equals(it.getChannelTypeUID().getAsString())).findFirst().get();
             assertNotNull(sigStr);
 
-            ChannelDefinition lowBat = channelDefs.stream().filter(it -> it.getId().equals("lowbat")
-                    && it.getChannelTypeUID().getAsString().equals("system:low-battery")).findFirst().get();
+            ChannelDefinition lowBat = channelDefs.stream().filter(it -> "lowbat".equals(it.getId())
+                    && "system:low-battery".equals(it.getChannelTypeUID().getAsString())).findFirst().get();
             assertNotNull(lowBat);
 
             ChannelType lowBatType = systemChannelTypeProvider.getChannelType(lowBat.getChannelTypeUID(),

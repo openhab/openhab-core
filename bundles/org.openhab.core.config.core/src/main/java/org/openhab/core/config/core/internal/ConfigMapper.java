@@ -131,33 +131,33 @@ public class ConfigMapper {
         // Handle the conversion case of BigDecimal to Float,Double,Long,Integer and the respective
         // primitive types
         String typeName = type.getSimpleName();
-        if (value instanceof BigDecimal && !type.equals(BigDecimal.class)) {
+        if (value instanceof BigDecimal && !BigDecimal.class.equals(type)) {
             BigDecimal bdValue = (BigDecimal) value;
-            if (type.equals(Float.class) || typeName.equals("float")) {
+            if (Float.class.equals(type) || "float".equals(typeName)) {
                 result = bdValue.floatValue();
-            } else if (type.equals(Double.class) || typeName.equals("double")) {
+            } else if (Double.class.equals(type) || "double".equals(typeName)) {
                 result = bdValue.doubleValue();
-            } else if (type.equals(Long.class) || typeName.equals("long")) {
+            } else if (Long.class.equals(type) || "long".equals(typeName)) {
                 result = bdValue.longValue();
-            } else if (type.equals(Integer.class) || typeName.equals("int")) {
+            } else if (Integer.class.equals(type) || "int".equals(typeName)) {
                 result = bdValue.intValue();
             }
         } else
         // Handle the conversion case of String to Float,Double,Long,Integer,BigDecimal,Boolean and the respective
         // primitive types
-        if (value instanceof String && !type.equals(String.class)) {
+        if (value instanceof String && !String.class.equals(type)) {
             String bdValue = (String) value;
-            if (type.equals(Float.class) || typeName.equals("float")) {
+            if (Float.class.equals(type) || "float".equals(typeName)) {
                 result = Float.valueOf(bdValue);
-            } else if (type.equals(Double.class) || typeName.equals("double")) {
+            } else if (Double.class.equals(type) || "double".equals(typeName)) {
                 result = Double.valueOf(bdValue);
-            } else if (type.equals(Long.class) || typeName.equals("long")) {
+            } else if (Long.class.equals(type) || "long".equals(typeName)) {
                 result = Long.valueOf(bdValue);
-            } else if (type.equals(BigDecimal.class)) {
+            } else if (BigDecimal.class.equals(type)) {
                 result = new BigDecimal(bdValue);
-            } else if (type.equals(Integer.class) || typeName.equals("int")) {
+            } else if (Integer.class.equals(type) || "int".equals(typeName)) {
                 result = Integer.valueOf(bdValue);
-            } else if (type.equals(Boolean.class) || typeName.equals("boolean")) {
+            } else if (Boolean.class.equals(type) || "boolean".equals(typeName)) {
                 result = Boolean.valueOf(bdValue);
             } else if (type.isEnum()) {
                 @SuppressWarnings({ "rawtypes", "unchecked" })

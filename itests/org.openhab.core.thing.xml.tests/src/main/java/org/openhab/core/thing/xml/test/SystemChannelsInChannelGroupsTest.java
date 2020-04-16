@@ -66,7 +66,7 @@ public class SystemChannelsInChannelGroupsTest extends JavaOSGiTest {
     public void thingTypesWithSystemChannelsInChannelsGoupsShouldHavePorperChannelDefinitions() throws Exception {
         try (final AutoCloseable unused = loadedTestBundle()) {
             List<ThingType> thingTypes = thingTypeProvider.getThingTypes(null).stream()
-                    .filter(it -> it.getUID().getId().equals("wireless-router")).collect(Collectors.toList());
+                    .filter(it -> "wireless-router".equals(it.getUID().getId())).collect(Collectors.toList());
             assertThat(thingTypes.size(), is(1));
 
             List<ChannelGroupType> channelGroupTypes = channelGroupTypeRegistry.getChannelGroupTypes();
@@ -79,17 +79,17 @@ public class SystemChannelsInChannelGroupsTest extends JavaOSGiTest {
             List<ChannelDefinition> channelDefs = channelGroup.getChannelDefinitions();
 
             List<ChannelDefinition> myChannel = channelDefs.stream().filter(
-                    it -> it.getId().equals("test") && it.getChannelTypeUID().getAsString().equals("system:my-channel"))
+                    it -> "test".equals(it.getId()) && "system:my-channel".equals(it.getChannelTypeUID().getAsString()))
                     .collect(Collectors.toList());
 
             List<ChannelDefinition> sigStr = channelDefs.stream()
-                    .filter(it -> it.getId().equals("sigstr")
-                            && it.getChannelTypeUID().getAsString().equals("system:signal-strength"))
+                    .filter(it -> "sigstr".equals(it.getId())
+                            && "system:signal-strength".equals(it.getChannelTypeUID().getAsString()))
                     .collect(Collectors.toList());
 
             List<ChannelDefinition> lowBat = channelDefs.stream()
-                    .filter(it -> it.getId().equals("lowbat")
-                            && it.getChannelTypeUID().getAsString().equals("system:low-battery"))
+                    .filter(it -> "lowbat".equals(it.getId())
+                            && "system:low-battery".equals(it.getChannelTypeUID().getAsString()))
                     .collect(Collectors.toList());
 
             assertThat(myChannel.size(), is(1));

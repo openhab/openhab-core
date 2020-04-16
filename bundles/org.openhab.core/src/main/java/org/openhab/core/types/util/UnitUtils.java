@@ -154,7 +154,7 @@ public class UnitUtils {
             unitSymbol = pattern.substring(lastBlankIndex).trim();
         }
 
-        if (StringUtils.isNotBlank(unitSymbol) && !unitSymbol.equals(UNIT_PLACEHOLDER)) {
+        if (StringUtils.isNotBlank(unitSymbol) && !UNIT_PLACEHOLDER.equals(unitSymbol)) {
             if (UNIT_PERCENT_FORMAT_STRING.equals(unitSymbol)) {
                 return SmartHomeUnits.PERCENT;
             }

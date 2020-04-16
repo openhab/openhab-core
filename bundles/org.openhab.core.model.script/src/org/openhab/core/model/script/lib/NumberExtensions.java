@@ -393,7 +393,7 @@ public class NumberExtensions {
     }
 
     private static boolean isAbstractUnitOne(QuantityType<?> left) {
-        return left.getUnit().equals(SmartHomeUnits.ONE);
+        return SmartHomeUnits.ONE.equals(left.getUnit());
     }
 
 }

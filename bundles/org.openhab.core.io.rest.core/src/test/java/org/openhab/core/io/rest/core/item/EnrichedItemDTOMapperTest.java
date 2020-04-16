@@ -60,21 +60,21 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(1));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> i.getType().equals(CoreItemFactory.NUMBER), URI.create(""), null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()), URI.create(""), null);
         assertThat(dto.members.length, is(1));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> i.getType().equals(CoreItemFactory.NUMBER) || i instanceof GroupItem, URI.create(""), null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, URI.create(""), null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(0));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> i.getType().equals(CoreItemFactory.NUMBER) || i instanceof GroupItem, URI.create(""), null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, URI.create(""), null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(0));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> i.getType().equals(CoreItemFactory.NUMBER) || i.getType().equals(CoreItemFactory.STRING)
+                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i.getType().equals(CoreItemFactory.STRING)
                         || i instanceof GroupItem,
                 URI.create(""), null);
         assertThat(dto.members.length, is(2));

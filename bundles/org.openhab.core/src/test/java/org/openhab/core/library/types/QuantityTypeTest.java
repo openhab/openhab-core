@@ -135,7 +135,7 @@ public class QuantityTypeTest {
     public void testConvertionOnSameUnit() {
         QuantityType<?> dt2 = QuantityType.valueOf("2 m");
         QuantityType<?> dt3 = dt2.toUnit("m");
-        assertTrue(dt3.getUnit().toString().equalsIgnoreCase("m"));
+        assertTrue("m".equalsIgnoreCase(dt3.getUnit().toString()));
     }
 
     @Test

@@ -373,7 +373,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 if (ruleStatus == null) {
                     continue;
                 }
-                if (ruleStatus.equals(RuleStatus.IDLE) || ruleStatus.equals(RuleStatus.RUNNING)) {
+                if (RuleStatus.IDLE.equals(ruleStatus) || RuleStatus.RUNNING.equals(ruleStatus)) {
                     unregister(getManagedRule(rUID), RuleStatusDetail.HANDLER_MISSING_ERROR,
                             "Update Module Type " + moduleType.getUID());
                     setStatus(rUID, new RuleStatusInfo(RuleStatus.INITIALIZING));
@@ -879,7 +879,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     @Override
     public @Nullable Boolean isEnabled(String ruleUID) {
         return getStatus(ruleUID) == null ? null
-                : !getStatusInfo(ruleUID).getStatusDetail().equals(RuleStatusDetail.DISABLED);
+                : !RuleStatusDetail.DISABLED.equals(getStatusInfo(ruleUID).getStatusDetail());
     }
 
     /**

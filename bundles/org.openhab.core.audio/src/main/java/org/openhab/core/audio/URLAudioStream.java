@@ -92,7 +92,7 @@ public class URLAudioStream extends AudioStream {
             }
             URL streamUrl = new URL(url);
             URLConnection connection = streamUrl.openConnection();
-            if (connection.getContentType().equals("unknown/unknown")) {
+            if ("unknown/unknown".equals(connection.getContentType())) {
                 // Java does not parse non-standard headers used by SHOUTCast
                 int port = streamUrl.getPort() > 0 ? streamUrl.getPort() : 80;
                 // Manipulate User-Agent to receive a stream

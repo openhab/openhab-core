@@ -45,7 +45,7 @@ public class GenericEventConditionHandler extends BaseConditionModuleHandler {
         Object mo = module.getConfiguration().get(keyParam);
         String configValue = mo != null && mo instanceof String ? (String) mo : null;
         if (configValue != null) {
-            if (keyParam.equals(PAYLOAD)) {
+            if (PAYLOAD.equals(keyParam)) {
                 // automatically adding wildcards only for payload matching
                 configValue = configValue.startsWith("*") ? configValue : ".*" + configValue;
                 configValue = configValue.endsWith("*") ? configValue : configValue + ".*";

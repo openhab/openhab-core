@@ -276,7 +276,7 @@ public class MqttBrokerConnectionTests extends JavaTest {
         assertNull(connection.getLastWill());
         assertNull(MqttWillAndTestament.fromString(""));
         connection.setLastWill(MqttWillAndTestament.fromString("topic:message:1:true"));
-        assertTrue(connection.getLastWill().getTopic().equals("topic"));
+        assertEquals("topic", connection.getLastWill().getTopic());
         assertEquals(1, connection.getLastWill().getQos());
         assertEquals(true, connection.getLastWill().isRetain());
         byte b[] = { 'm', 'e', 's', 's', 'a', 'g', 'e' };

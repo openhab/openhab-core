@@ -12,6 +12,7 @@
  */
 package org.openhab.core.magic.binding.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.net.http.HttpUtil;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.thing.ChannelUID;
@@ -28,9 +29,10 @@ import org.openhab.core.types.RefreshType;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class MagicImageHandler extends BaseThingHandler {
 
-    private String url;
+    private @NonNullByDefault({}) String url;
 
     public MagicImageHandler(Thing thing) {
         super(thing);
@@ -48,7 +50,7 @@ public class MagicImageHandler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        this.url = (String) getConfig().get("url");
+        url = (String) getConfig().get("url");
         if (url == null || url.isEmpty()) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "The URL must not be blank");
         }

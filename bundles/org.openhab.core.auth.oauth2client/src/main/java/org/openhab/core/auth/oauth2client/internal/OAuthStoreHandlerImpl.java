@@ -282,7 +282,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 }
 
                 // update last used when it is an access token
-                if (recordType.equals(ACCESS_TOKEN_RESPONSE)) {
+                if (ACCESS_TOKEN_RESPONSE.equals(recordType)) {
                     try {
                         AccessTokenResponse accessTokenResponse = gson.fromJson(value, AccessTokenResponse.class);
                         return accessTokenResponse;
@@ -293,7 +293,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                                 value, e);
                         return null;
                     }
-                } else if (recordType.equals(SERVICE_CONFIGURATION)) {
+                } else if (SERVICE_CONFIGURATION.equals(recordType)) {
                     try {
                         PersistedParams params = gson.fromJson(value, PersistedParams.class);
                         return params;
@@ -301,7 +301,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                         logger.error("Unable to deserialize json, discarding PersistedParams. json:\n{}", value, e);
                         return null;
                     }
-                } else if (recordType.equals(LAST_USED)) {
+                } else if (LAST_USED.equals(recordType)) {
                     try {
                         LocalDateTime lastUsedDate = gson.fromJson(value, LocalDateTime.class);
                         return lastUsedDate;

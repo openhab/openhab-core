@@ -135,7 +135,7 @@ public class SystemOffsetProfile implements StateProfile {
                             state, offset);
                 }
                 // take care of temperatures because they start at offset -273°C = 0K
-                if (qtState.getUnit().getSystemUnit().equals(SmartHomeUnits.KELVIN)) {
+                if (SmartHomeUnits.KELVIN.equals(qtState.getUnit().getSystemUnit())) {
                     QuantityType<Temperature> tmp = handleTemperature(qtState, finalOffset);
                     if (tmp != null) {
                         result = tmp;
@@ -147,7 +147,7 @@ public class SystemOffsetProfile implements StateProfile {
             } catch (UnconvertibleException e) {
                 logger.warn("Cannot apply offset '{}' to state '{}' because types do not match.", finalOffset, qtState);
             }
-        } else if (state instanceof DecimalType && finalOffset.getUnit().equals(SmartHomeUnits.ONE)) {
+        } else if (state instanceof DecimalType && SmartHomeUnits.ONE.equals(finalOffset.getUnit())) {
             DecimalType decState = (DecimalType) state;
             result = new DecimalType(decState.doubleValue() + finalOffset.doubleValue());
         } else {
@@ -168,9 +168,9 @@ public class SystemOffsetProfile implements StateProfile {
         QuantityType<Temperature> kelvinState = qtState.toUnit(SmartHomeUnits.KELVIN);
         QuantityType<Temperature> kelvinOffset = offset.toUnit(SmartHomeUnits.KELVIN);
 
-        if (offset.getUnit().equals(SIUnits.CELSIUS)) {
+        if (SIUnits.CELSIUS.equals(offset.getUnit())) {
             finalOffset = kelvinOffset.add(ZERO_CELSIUS_IN_KELVIN.negate());
-        } else if (offset.getUnit().equals(ImperialUnits.FAHRENHEIT)) {
+        } else if (ImperialUnits.FAHRENHEIT.equals(offset.getUnit())) {
             finalOffset = kelvinOffset.add(ZERO_FAHRENHEIT_IN_KELVIN.negate());
         } else {
             // offset is already in kelvin

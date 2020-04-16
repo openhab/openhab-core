@@ -202,7 +202,7 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     @Override
     public Map<String, Object> importPreset(String scriptIdentifier, String preset) {
-        if (preset.equals(PRESET_DEFAULT)) {
+        if (PRESET_DEFAULT.equals(preset)) {
             return Collections.unmodifiableMap(elements);
         }
         return Collections.emptyMap();

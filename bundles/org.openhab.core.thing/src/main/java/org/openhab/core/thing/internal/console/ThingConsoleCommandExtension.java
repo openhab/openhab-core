@@ -105,7 +105,7 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 case SUBCMD_ENABLE:
                     if (args.length > 1) {
                         ThingUID thingUID = new ThingUID(args[1]);
-                        enableThing(console, thingUID, subCommand.equals(SUBCMD_ENABLE));
+                        enableThing(console, thingUID, SUBCMD_ENABLE.equals(subCommand));
                     } else {
                         console.println(
                                 "Command '" + subCommand + "' needs argument <thingUID> (e.g. \"hue:light:1\")");

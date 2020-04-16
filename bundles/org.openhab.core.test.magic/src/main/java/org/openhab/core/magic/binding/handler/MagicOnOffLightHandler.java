@@ -12,6 +12,7 @@
  */
 package org.openhab.core.magic.binding.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -24,6 +25,7 @@ import org.openhab.core.types.Command;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class MagicOnOffLightHandler extends BaseThingHandler {
 
     public MagicOnOffLightHandler(Thing thing) {
@@ -32,9 +34,6 @@ public class MagicOnOffLightHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        // process the command for the switch channel here
-        // if (channelUID.getId().equals(MagicBindingConstants.CHANNEL_SWITCH)) {
-        // }
     }
 
     @Override

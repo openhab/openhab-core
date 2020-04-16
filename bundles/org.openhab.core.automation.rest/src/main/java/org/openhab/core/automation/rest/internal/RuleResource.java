@@ -452,11 +452,11 @@ public class RuleResource implements RESTResource {
     }
 
     protected Module getModule(Rule rule, String moduleCategory, String id) {
-        if (moduleCategory.equals("triggers")) {
+        if ("triggers".equals(moduleCategory)) {
             return getTrigger(rule, id);
-        } else if (moduleCategory.equals("conditions")) {
+        } else if ("conditions".equals(moduleCategory)) {
             return getCondition(rule, id);
-        } else if (moduleCategory.equals("actions")) {
+        } else if ("actions".equals(moduleCategory)) {
             return getAction(rule, id);
         } else {
             return null;
@@ -464,13 +464,13 @@ public class RuleResource implements RESTResource {
     }
 
     protected ModuleDTO getModuleDTO(Rule rule, String moduleCategory, String id) {
-        if (moduleCategory.equals("triggers")) {
+        if ("triggers".equals(moduleCategory)) {
             final Trigger trigger = getTrigger(rule, id);
             return trigger == null ? null : TriggerDTOMapper.map(trigger);
-        } else if (moduleCategory.equals("conditions")) {
+        } else if ("conditions".equals(moduleCategory)) {
             final Condition condition = getCondition(rule, id);
             return condition == null ? null : ConditionDTOMapper.map(condition);
-        } else if (moduleCategory.equals("actions")) {
+        } else if ("actions".equals(moduleCategory)) {
             final Action action = getAction(rule, id);
             return action == null ? null : ActionDTOMapper.map(action);
         } else {

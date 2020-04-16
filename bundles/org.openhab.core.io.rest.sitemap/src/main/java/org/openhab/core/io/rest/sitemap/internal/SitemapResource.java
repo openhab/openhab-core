@@ -490,7 +490,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
                 String widgetTypeName = widget.eClass().getInstanceTypeName()
                         .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
                 boolean isMapview = "mapview".equalsIgnoreCase(widgetTypeName);
-                Predicate<Item> itemFilter = (i -> i.getType().equals(CoreItemFactory.LOCATION));
+                Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
                 bean.item = EnrichedItemDTOMapper.map(item, isMapview, itemFilter, UriBuilder.fromUri(uri).build(),
                         locale);
                 bean.state = itemUIRegistry.getState(widget).toFullString();

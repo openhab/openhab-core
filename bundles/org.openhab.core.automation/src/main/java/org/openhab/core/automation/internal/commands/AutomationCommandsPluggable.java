@@ -331,46 +331,46 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
 
     @Override
     protected @Nullable AutomationCommand parseCommand(String command, String[] params) {
-        if (command.equalsIgnoreCase(IMPORT_MODULE_TYPES)) {
+        if (IMPORT_MODULE_TYPES.equalsIgnoreCase(command)) {
             return new AutomationCommandImport(IMPORT_MODULE_TYPES, params, MODULE_TYPE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(EXPORT_MODULE_TYPES)) {
+        if (EXPORT_MODULE_TYPES.equalsIgnoreCase(command)) {
             return new AutomationCommandExport(EXPORT_MODULE_TYPES, params, MODULE_TYPE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(LIST_MODULE_TYPES)) {
+        if (LIST_MODULE_TYPES.equalsIgnoreCase(command)) {
             return new AutomationCommandList(LIST_MODULE_TYPES, params, MODULE_TYPE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(IMPORT_TEMPLATES)) {
+        if (IMPORT_TEMPLATES.equalsIgnoreCase(command)) {
             return new AutomationCommandImport(IMPORT_TEMPLATES, params, TEMPLATE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(EXPORT_TEMPLATES)) {
+        if (EXPORT_TEMPLATES.equalsIgnoreCase(command)) {
             return new AutomationCommandExport(EXPORT_TEMPLATES, params, TEMPLATE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(LIST_TEMPLATES)) {
+        if (LIST_TEMPLATES.equalsIgnoreCase(command)) {
             return new AutomationCommandList(LIST_TEMPLATES, params, TEMPLATE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(IMPORT_RULES)) {
+        if (IMPORT_RULES.equalsIgnoreCase(command)) {
             return new AutomationCommandImport(IMPORT_RULES, params, RULE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(EXPORT_RULES)) {
+        if (EXPORT_RULES.equalsIgnoreCase(command)) {
             return new AutomationCommandExport(EXPORT_RULES, params, RULE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(LIST_RULES)) {
+        if (LIST_RULES.equalsIgnoreCase(command)) {
             return new AutomationCommandList(LIST_RULES, params, RULE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(REMOVE_TEMPLATES)) {
+        if (REMOVE_TEMPLATES.equalsIgnoreCase(command)) {
             return new AutomationCommandRemove(REMOVE_TEMPLATES, params, TEMPLATE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(REMOVE_MODULE_TYPES)) {
+        if (REMOVE_MODULE_TYPES.equalsIgnoreCase(command)) {
             return new AutomationCommandRemove(REMOVE_MODULE_TYPES, params, MODULE_TYPE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(REMOVE_RULE)) {
+        if (REMOVE_RULE.equalsIgnoreCase(command)) {
             return new AutomationCommandRemove(REMOVE_RULE, params, RULE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(REMOVE_RULES)) {
+        if (REMOVE_RULES.equalsIgnoreCase(command)) {
             return new AutomationCommandRemove(REMOVE_RULES, params, RULE_REGISTRY, this);
         }
-        if (command.equalsIgnoreCase(ENABLE_RULE)) {
+        if (ENABLE_RULE.equalsIgnoreCase(command)) {
             return new AutomationCommandEnableRule(ENABLE_RULE, params, RULE_REGISTRY, this);
         }
         return null;

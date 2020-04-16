@@ -313,13 +313,8 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
 
     private String getParserType(URL url) {
         String fileName = url.getPath();
-        if (fileName.lastIndexOf(".") == -1) {
-            return Parser.FORMAT_JSON;
-        }
-        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
-        if (fileExtension.equals("txt")) {
-            return Parser.FORMAT_JSON;
-        }
-        return fileExtension;
+        int index = fileName.lastIndexOf(".");
+        String extension = index != -1 ? fileName.substring(index + 1) : "";
+        return extension.isEmpty() || "txt".equals(extension) ? Parser.FORMAT_JSON : extension;
     }
 }

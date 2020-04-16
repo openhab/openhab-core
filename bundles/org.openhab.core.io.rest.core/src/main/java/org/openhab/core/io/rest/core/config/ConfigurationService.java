@@ -169,7 +169,7 @@ public class ConfigurationService {
         Enumeration<String> keys = dictionary.keys();
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
-            if (!key.equals(Constants.SERVICE_PID)) {
+            if (!Constants.SERVICE_PID.equals(key)) {
                 properties.put(key, dictionary.get(key));
             }
         }

@@ -14,6 +14,7 @@ package org.openhab.core.magic.binding;
 
 import java.net.URI;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigOptionProvider;
 
 /**
@@ -21,6 +22,7 @@ import org.openhab.core.config.core.ConfigOptionProvider;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public interface MagicService extends ConfigOptionProvider {
 
     static final URI CONFIG_URI = URI.create("test:magic");

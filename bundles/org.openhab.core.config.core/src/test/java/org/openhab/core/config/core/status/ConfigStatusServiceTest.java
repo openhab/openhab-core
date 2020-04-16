@@ -151,7 +151,7 @@ public class ConfigStatusServiceTest extends JavaTest {
         when(configStatusProvider.supportsEntity(anyString()))
                 .thenAnswer(invocation -> invocation.getArgument(0).equals(entityId));
         when(configStatusProvider.getConfigStatus())
-                .thenAnswer(invocation -> entityId.equals(ENTITY_ID1) ? messagesEntity1 : messagesEntity2);
+                .thenAnswer(invocation -> ENTITY_ID1.equals(entityId) ? messagesEntity1 : messagesEntity2);
 
         return configStatusProvider;
     }
@@ -161,7 +161,7 @@ public class ConfigStatusServiceTest extends JavaTest {
         when(translationProvider.getText(any(), anyString(), eq(null), any(), any())).thenAnswer(invocation -> {
             String key = invocation.getArgument(1);
             Locale locale = invocation.getArgument(3);
-            if (locale.equals(LOCALE_DE)) {
+            if (LOCALE_DE.equals(locale)) {
                 if (key.endsWith(MSG_KEY1)) {
                     return MSG1_DE;
                 } else if (key.endsWith(MSG_KEY2)) {

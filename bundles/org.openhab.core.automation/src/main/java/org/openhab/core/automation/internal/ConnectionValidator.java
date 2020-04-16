@@ -263,7 +263,7 @@ public class ConnectionValidator {
         if (!outputs.isEmpty()) {
             for (Output output : outputs) {
                 if (output.getName().equals(outputName)) {
-                    if (input.getType().equals("*")) {
+                    if ("*".equals(input.getType())) {
                         return;
                     } else {
                         try {

@@ -335,7 +335,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             }
 
             // Prefer WAVE container
-            if (!currentAudioFormat.getContainer().equals("WAVE")) {
+            if (!AudioFormat.CONTAINER_WAVE.equals(currentAudioFormat.getContainer())) {
                 continue;
             }
 
@@ -357,7 +357,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
             }
 
             // Prefer WAVE container
-            if (!format.getContainer().equals(AudioFormat.CONTAINER_WAVE)) {
+            if (!AudioFormat.CONTAINER_WAVE.equals(format.getContainer())) {
                 continue;
             }
 
@@ -671,7 +671,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     @Override
     public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
-        if (uri.toString().equals(CONFIG_URI)) {
+        if (CONFIG_URI.equals(uri.toString())) {
             if (CONFIG_DEFAULT_HLI.equals(param)) {
                 return humanLanguageInterpreters.values().stream()
                         .sorted((hli1, hli2) -> hli1.getLabel(locale).compareToIgnoreCase(hli2.getLabel(locale)))

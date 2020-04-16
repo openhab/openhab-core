@@ -12,12 +12,10 @@
  */
 package org.openhab.core.thing.firmware;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -70,8 +68,8 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     @Test
     public void firmwareRestrictionExactFirmwareVersion() {
-        FirmwareRestriction firmwareRestrictionFunction = t -> t.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)
-                .equals(FIRMWARE_VERSION_1);
+        FirmwareRestriction firmwareRestrictionFunction = t -> FIRMWARE_VERSION_1
+                .equals(t.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
 
         Firmware firmware = FirmwareBuilder.create(thingTypeUID, FIRMWARE_VERSION_2)
                 .withFirmwareRestriction(firmwareRestrictionFunction).build();
@@ -83,8 +81,8 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     @Test
     public void firmwareRestrictionExactHardwareVersion() {
-        FirmwareRestriction hardwareRestrictionFunction = t -> t.getProperties().get(Thing.PROPERTY_HARDWARE_VERSION)
-                .equals(HARDWARE_VERSION_A);
+        FirmwareRestriction hardwareRestrictionFunction = t -> HARDWARE_VERSION_A
+                .equals(t.getProperties().get(Thing.PROPERTY_HARDWARE_VERSION));
 
         Firmware firmware = FirmwareBuilder.create(thingTypeUID, FIRMWARE_VERSION_2)
                 .withFirmwareRestriction(hardwareRestrictionFunction).build();
@@ -97,9 +95,9 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     @Test
     public void firmwareRestrictionExactFirmwareAndHardwareVersion() {
-        FirmwareRestriction fwAndHwRestrictionFunction = t -> t.getProperties().get(Thing.PROPERTY_HARDWARE_VERSION)
-                .equals(HARDWARE_VERSION_A)
-                && t.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION).equals(FIRMWARE_VERSION_1);
+        FirmwareRestriction fwAndHwRestrictionFunction = t -> HARDWARE_VERSION_A
+                .equals(t.getProperties().get(Thing.PROPERTY_HARDWARE_VERSION))
+                && FIRMWARE_VERSION_1.equals(t.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
 
         Firmware firmware = FirmwareBuilder.create(thingTypeUID, FIRMWARE_VERSION_2)
                 .withFirmwareRestriction(fwAndHwRestrictionFunction).build();
@@ -112,8 +110,8 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     @Test
     public void firmwareRestrictionAndRestrictedModel() {
-        FirmwareRestriction firmwareRestrictionFunction = t -> t.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)
-                .equals(FIRMWARE_VERSION_1);
+        FirmwareRestriction firmwareRestrictionFunction = t -> FIRMWARE_VERSION_1
+                .equals(t.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
 
         Firmware firmware = FirmwareBuilder.create(thingTypeUID, FIRMWARE_VERSION_2).withModelRestricted(true)
                 .withModel(TEST_MODEL).withFirmwareRestriction(firmwareRestrictionFunction).build();
@@ -125,8 +123,8 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     @Test
     public void firmwareRestrictionAndPrerequisiteVersion() {
-        FirmwareRestriction firmwareRestrictionFunction = t -> t.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)
-                .equals(FIRMWARE_VERSION_1);
+        FirmwareRestriction firmwareRestrictionFunction = t -> FIRMWARE_VERSION_1
+                .equals(t.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
 
         Firmware firmware = FirmwareBuilder.create(thingTypeUID, FIRMWARE_VERSION_2).withPrerequisiteVersion("0.0.5")
                 .withFirmwareRestriction(firmwareRestrictionFunction).build();
@@ -153,11 +151,11 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
         // Define restrictions for the hardware versions
         FirmwareRestriction hwVersion1Restriction = thg -> Integer
                 .parseInt(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)) < 14
-                || thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION).equals(FW_VERSION_32);
+                || FW_VERSION_32.equals(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
 
         FirmwareRestriction hwVersion2Restriction = thg -> Integer
                 .parseInt(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)) >= 14
-                && !thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION).equals(FW_VERSION_32);
+                && !FW_VERSION_32.equals(thg.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION));
 
         // Build firmwares
         Firmware fw38 = FirmwareBuilder.create(thingTypeUID, FW_VERSION_38)

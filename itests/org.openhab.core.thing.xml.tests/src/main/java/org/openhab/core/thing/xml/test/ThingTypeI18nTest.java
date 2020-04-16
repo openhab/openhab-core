@@ -62,7 +62,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
         try (final AutoCloseable unused = loadedTestBundle()) {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
-            ThingType weatherType = thingTypes.stream().filter(it -> it.toString().equals("yahooweather:weather"))
+            ThingType weatherType = thingTypes.stream().filter(it -> "yahooweather:weather".equals(it.toString()))
                     .findFirst().get();
             assertNotNull(weatherType);
 
@@ -78,7 +78,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
             ThingType weatherGroupType = thingTypes.stream()
-                    .filter(it -> it.toString().equals("yahooweather:weather-with-group")).findFirst().get();
+                    .filter(it -> "yahooweather:weather-with-group".equals(it.toString())).findFirst().get();
             assertNotNull(weatherGroupType);
 
             ChannelGroupType channelGroupType = channelGroupTypeRegistry.getChannelGroupType(
@@ -96,12 +96,12 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
             ThingType weatherGroupType = thingTypes.stream()
-                    .filter(it -> it.toString().equals("yahooweather:weather-with-group")).findFirst().get();
+                    .filter(it -> "yahooweather:weather-with-group".equals(it.toString())).findFirst().get();
             assertNotNull(weatherGroupType);
             assertThat(weatherGroupType.getChannelGroupDefinitions().size(), is(2));
 
             ChannelGroupDefinition forecastTodayChannelGroupDefinition = weatherGroupType.getChannelGroupDefinitions()
-                    .stream().filter(it -> it.getId().equals("forecastToday")).findFirst().get();
+                    .stream().filter(it -> "forecastToday".equals(it.getId())).findFirst().get();
             assertNotNull(forecastTodayChannelGroupDefinition);
 
             assertThat(forecastTodayChannelGroupDefinition.getLabel(), is("Wettervorhersage heute"));
@@ -109,7 +109,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
                     is("Wettervorhersage für den heutigen Tag."));
 
             ChannelGroupDefinition forecastTomorrowChannelGroupDefinition = weatherGroupType
-                    .getChannelGroupDefinitions().stream().filter(it -> it.getId().equals("forecastTomorrow"))
+                    .getChannelGroupDefinitions().stream().filter(it -> "forecastTomorrow".equals(it.getId()))
                     .findFirst().get();
             assertNotNull(forecastTomorrowChannelGroupDefinition);
 
@@ -125,12 +125,12 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
             ThingType weatherGroupType = thingTypes.stream()
-                    .filter(it -> it.toString().equals("yahooweather:weather-with-group")).findFirst().get();
+                    .filter(it -> "yahooweather:weather-with-group".equals(it.toString())).findFirst().get();
             assertNotNull(weatherGroupType);
             assertEquals(2, weatherGroupType.getChannelGroupDefinitions().size());
 
             ChannelGroupDefinition forecastTodayChannelGroupDefinition = weatherGroupType.getChannelGroupDefinitions()
-                    .stream().filter(it -> it.getId().equals("forecastToday")).findFirst().get();
+                    .stream().filter(it -> "forecastToday".equals(it.getId())).findFirst().get();
             assertNotNull(forecastTodayChannelGroupDefinition);
 
             ChannelGroupType forecastTodayChannelGroupType = channelGroupTypeRegistry
@@ -139,7 +139,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             assertEquals(3, forecastTodayChannelGroupType.getChannelDefinitions().size());
 
             ChannelDefinition temperatureChannelDefinition = forecastTodayChannelGroupType.getChannelDefinitions()
-                    .stream().filter(it -> it.getId().equals("temperature")).findFirst().get();
+                    .stream().filter(it -> "temperature".equals(it.getId())).findFirst().get();
             assertNotNull(temperatureChannelDefinition);
 
             assertEquals("Temperatur", temperatureChannelDefinition.getLabel());
@@ -147,7 +147,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
                     temperatureChannelDefinition.getDescription());
 
             ChannelDefinition minTemperatureChannelDefinition = forecastTodayChannelGroupType.getChannelDefinitions()
-                    .stream().filter(it -> it.getId().equals("minTemperature")).findFirst().get();
+                    .stream().filter(it -> "minTemperature".equals(it.getId())).findFirst().get();
             assertNotNull(minTemperatureChannelDefinition);
 
             assertEquals("Min. Temperatur", minTemperatureChannelDefinition.getLabel());
@@ -155,7 +155,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
                     minTemperatureChannelDefinition.getDescription());
 
             ChannelDefinition maxTemperatureChannelDefinition = forecastTodayChannelGroupType.getChannelDefinitions()
-                    .stream().filter(it -> it.getId().equals("maxTemperature")).findFirst().get();
+                    .stream().filter(it -> "maxTemperature".equals(it.getId())).findFirst().get();
             assertNotNull(maxTemperatureChannelDefinition);
 
             assertEquals("Max. Temperatur", maxTemperatureChannelDefinition.getLabel());
@@ -169,13 +169,13 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
         try (final AutoCloseable unused = loadedTestBundle()) {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
-            ThingType weatherType = thingTypes.stream().filter(it -> it.toString().equals("yahooweather:weather"))
+            ThingType weatherType = thingTypes.stream().filter(it -> "yahooweather:weather".equals(it.toString()))
                     .findFirst().get();
             assertNotNull(weatherType);
             assertThat(weatherType.getChannelDefinitions().size(), is(2));
 
             ChannelType temperatureChannelType = channelTypeRegistry.getChannelType(weatherType.getChannelDefinitions()
-                    .stream().filter(it -> it.getId().equals("temperature")).findFirst().get().getChannelTypeUID(),
+                    .stream().filter(it -> "temperature".equals(it.getId())).findFirst().get().getChannelTypeUID(),
                     Locale.GERMAN);
             assertNotNull(temperatureChannelType);
 
@@ -192,13 +192,13 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
         try (final AutoCloseable unused = loadedTestBundle()) {
             Collection<ThingType> thingTypes = thingTypeProvider.getThingTypes(Locale.GERMAN);
 
-            ThingType weatherType = thingTypes.stream().filter(it -> it.toString().equals("yahooweather:weather"))
+            ThingType weatherType = thingTypes.stream().filter(it -> "yahooweather:weather".equals(it.toString()))
                     .findFirst().get();
             assertNotNull(weatherType);
             assertThat(weatherType.getChannelDefinitions().size(), is(2));
 
             ChannelDefinition temperatureChannelDefinition = weatherType.getChannelDefinitions().stream()
-                    .filter(it -> it.getId().equals("temperature")).findFirst().get();
+                    .filter(it -> "temperature".equals(it.getId())).findFirst().get();
             assertNotNull(temperatureChannelDefinition);
 
             assertThat(temperatureChannelDefinition.getLabel(), is("Temperatur"));
@@ -206,7 +206,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
                     is("Temperatur in Grad Celsius (Metrisch) oder Fahrenheit (Imperial)."));
 
             ChannelDefinition minTemperatureChannelDefinition = weatherType.getChannelDefinitions().stream()
-                    .filter(it -> it.getId().equals("minTemperature")).findFirst().get();
+                    .filter(it -> "minTemperature".equals(it.getId())).findFirst().get();
             assertNotNull(minTemperatureChannelDefinition);
 
             assertThat(minTemperatureChannelDefinition.getLabel(), is("Min. Temperatur"));
