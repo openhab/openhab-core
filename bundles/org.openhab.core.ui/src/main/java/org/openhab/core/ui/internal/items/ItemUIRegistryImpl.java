@@ -120,6 +120,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected static final String IDENTIFY_FORMAT_PATTERN_PATTERN = "%((unit%)|((\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z])))";
 
     private static final Pattern LABEL_PATTERN = Pattern.compile(".*?\\[.*? (.*?)\\]");
+    private static final int MAX_BUTTONS = 4;
 
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
@@ -242,57 +243,51 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         if (SwitchItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createSwitch();
-        }
-        if (GroupItem.class.equals(itemType)) {
+        } else if (GroupItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createGroup();
-        }
-        if (NumberItem.class.isAssignableFrom(itemType)) {
+        } else if (NumberItem.class.isAssignableFrom(itemType)) {
             boolean isReadOnly = isReadOnly(itemName);
             if (!isReadOnly && hasStateOptions(itemName)) {
                 return SitemapFactory.eINSTANCE.createSelection();
-            } else if (!isReadOnly && hasCommandOptions(itemName)) {
-                return SitemapFactory.eINSTANCE.createSwitch();
+            }
+            int commandOptionsSize = getCommandOptionsSize(itemName);
+            if (!isReadOnly && commandOptionsSize > 0) {
+                return commandOptionsSize <= MAX_BUTTONS ? SitemapFactory.eINSTANCE.createSwitch()
+                        : SitemapFactory.eINSTANCE.createSelection();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }
-        }
-        if (ContactItem.class.equals(itemType)) {
+        } else if (ContactItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createText();
-        }
-        if (DateTimeItem.class.equals(itemType)) {
+        } else if (DateTimeItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createText();
-        }
-        if (RollershutterItem.class.equals(itemType)) {
+        } else if (RollershutterItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createSwitch();
-        }
-        if (StringItem.class.equals(itemType)) {
+        } else if (StringItem.class.equals(itemType)) {
             boolean isReadOnly = isReadOnly(itemName);
             if (!isReadOnly && hasStateOptions(itemName)) {
                 return SitemapFactory.eINSTANCE.createSelection();
-            } else if (!isReadOnly && hasCommandOptions(itemName)) {
-                return SitemapFactory.eINSTANCE.createSwitch();
+            }
+            int commandOptionsSize = getCommandOptionsSize(itemName);
+            if (!isReadOnly && commandOptionsSize > 0) {
+                return commandOptionsSize <= MAX_BUTTONS ? SitemapFactory.eINSTANCE.createSwitch()
+                        : SitemapFactory.eINSTANCE.createSelection();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }
-        }
-        if (LocationItem.class.equals(itemType)) {
+        } else if (LocationItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createMapview();
-        }
-        if (CallItem.class.equals(itemType)) {
+        } else if (CallItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createText();
-        }
-        if (DimmerItem.class.equals(itemType)) {
+        } else if (DimmerItem.class.equals(itemType)) {
             Slider slider = SitemapFactory.eINSTANCE.createSlider();
             slider.setSwitchEnabled(true);
             return slider;
-        }
-        if (ColorItem.class.equals(itemType)) {
+        } else if (ColorItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createColorpicker();
-        }
-        if (PlayerItem.class.equals(itemType)) {
+        } else if (PlayerItem.class.equals(itemType)) {
             return createPlayerButtons();
-        }
-        if (ImageItem.class.equals(itemType)) {
+        } else if (ImageItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createImage();
         }
 
@@ -809,13 +804,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
     }
 
-    private boolean hasCommandOptions(String itemName) {
+    private int getCommandOptionsSize(String itemName) {
         try {
             Item item = getItem(itemName);
             CommandDescription commandDescription = item.getCommandDescription();
-            return commandDescription != null && !commandDescription.getCommandOptions().isEmpty();
+            return commandDescription != null ? commandDescription.getCommandOptions().size() : 0;
         } catch (ItemNotFoundException e) {
-            return false;
+            return 0;
         }
     }
 
