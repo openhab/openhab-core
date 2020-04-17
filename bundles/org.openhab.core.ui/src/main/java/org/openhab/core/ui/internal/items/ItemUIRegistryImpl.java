@@ -241,63 +241,49 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return null;
         }
 
-        if (SwitchItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createSwitch();
-        } else if (GroupItem.class.equals(itemType)) {
+        if (GroupItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createGroup();
-        } else if (NumberItem.class.isAssignableFrom(itemType)) {
-            boolean isReadOnly = isReadOnly(itemName);
-            if (!isReadOnly && hasStateOptions(itemName)) {
-                return SitemapFactory.eINSTANCE.createSelection();
-            }
-            int commandOptionsSize = getCommandOptionsSize(itemName);
-            if (!isReadOnly && commandOptionsSize > 0) {
-                return commandOptionsSize <= MAX_BUTTONS ? SitemapFactory.eINSTANCE.createSwitch()
-                        : SitemapFactory.eINSTANCE.createSelection();
-            } else {
-                return SitemapFactory.eINSTANCE.createText();
-            }
-        } else if (ContactItem.class.equals(itemType)) {
+        } else if (CallItem.class.equals(itemType) //
+                || ContactItem.class.equals(itemType) //
+                || DateTimeItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createText();
-        } else if (DateTimeItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createText();
-        } else if (RollershutterItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createSwitch();
-        } else if (StringItem.class.equals(itemType)) {
-            boolean isReadOnly = isReadOnly(itemName);
-            if (!isReadOnly && hasStateOptions(itemName)) {
-                return SitemapFactory.eINSTANCE.createSelection();
-            }
-            int commandOptionsSize = getCommandOptionsSize(itemName);
-            if (!isReadOnly && commandOptionsSize > 0) {
-                return commandOptionsSize <= MAX_BUTTONS ? SitemapFactory.eINSTANCE.createSwitch()
-                        : SitemapFactory.eINSTANCE.createSelection();
-            } else {
-                return SitemapFactory.eINSTANCE.createText();
-            }
-        } else if (LocationItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createMapview();
-        } else if (CallItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createText();
+        } else if (ColorItem.class.equals(itemType)) {
+            return SitemapFactory.eINSTANCE.createColorpicker();
         } else if (DimmerItem.class.equals(itemType)) {
             Slider slider = SitemapFactory.eINSTANCE.createSlider();
             slider.setSwitchEnabled(true);
             return slider;
-        } else if (ColorItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createColorpicker();
-        } else if (PlayerItem.class.equals(itemType)) {
-            return createPlayerButtons();
         } else if (ImageItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createImage();
+        } else if (LocationItem.class.equals(itemType)) {
+            return SitemapFactory.eINSTANCE.createMapview();
+        } else if (NumberItem.class.isAssignableFrom(itemType) //
+                || StringItem.class.equals(itemType)) {
+            boolean isReadOnly = isReadOnly(itemName);
+            if (!isReadOnly && hasStateOptions(itemName)) {
+                return SitemapFactory.eINSTANCE.createSelection();
+            }
+            int commandOptionsSize = getCommandOptionsSize(itemName);
+            if (!isReadOnly && commandOptionsSize > 0) {
+                return commandOptionsSize <= MAX_BUTTONS ? SitemapFactory.eINSTANCE.createSwitch()
+                        : SitemapFactory.eINSTANCE.createSelection();
+            } else {
+                return SitemapFactory.eINSTANCE.createText();
+            }
+        } else if (PlayerItem.class.equals(itemType)) {
+            return createPlayerButtons();
+        } else if (RollershutterItem.class.equals(itemType) //
+                || SwitchItem.class.equals(itemType)) {
+            return SitemapFactory.eINSTANCE.createSwitch();
         }
 
         return null;
     }
 
     private Switch createPlayerButtons() {
-        Switch playerItemSwitch = SitemapFactory.eINSTANCE.createSwitch();
-        List<Mapping> mappings = playerItemSwitch.getMappings();
-        Mapping commandMapping = null;
+        final Switch playerItemSwitch = SitemapFactory.eINSTANCE.createSwitch();
+        final List<Mapping> mappings = playerItemSwitch.getMappings();
+        Mapping commandMapping;
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(NextPreviousType.PREVIOUS.name());
         commandMapping.setLabel("<<");
