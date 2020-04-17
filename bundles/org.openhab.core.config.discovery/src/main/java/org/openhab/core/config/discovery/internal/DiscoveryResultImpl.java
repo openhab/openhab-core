@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -48,44 +49,20 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @param thingUID
-     *            the Thing UID to be set (must not be null). If a {@code Thing} disappears and is discovered again, the
-     *            same {@code Thing} ID
-     *            must be created. A typical {@code Thing} ID could be the
+     * @param thingTypeUID the {@link ThingTypeUID}
+     * @param thingUID the {@link ThingUID} to be set (must not be null). If a {@code Thing} disappears and is
+     *            discovered again, the same {@code Thing} ID must be created. A typical {@code Thing} ID could be the
      *            serial number. It's usually <i>not</i> a product name.
+     * @param bridgeUID the unique bridge ID to be set
      * @param properties the properties to be set (could be null or empty)
      * @param representationProperty the representationProperty to be set (could be null or empty)
      * @param label the human readable label to set (could be null or empty)
-     * @param bridgeUID the unique bridge ID to be set
      * @param timeToLive time to live in seconds
      *
-     * @throws IllegalArgumentException
-     *             if the Thing type UID or the Thing UID is null
-     * @deprecated use {@link #DiscoveryResultImpl(ThingUID, ThingTypeUID, ThingUID, Map, String, String, long)}
-     *             instead.
+     * @throws IllegalArgumentException if the Thing type UID or the Thing UID is null
+     * @deprecated use {@link DiscoveryResultBuilder} instead
      */
     @Deprecated
-    public DiscoveryResultImpl(ThingUID thingUID, ThingUID bridgeUID, Map<String, Object> properties,
-            String representationProperty, String label, long timeToLive) throws IllegalArgumentException {
-        this(thingUID.getThingTypeUID(), thingUID, bridgeUID, properties, representationProperty, label, timeToLive);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @param thingTypeUID the {@link ThingTypeUID}
-     * @param thingUID the Thing UID to be set (must not be null). If a {@code Thing} disappears and is discovered
-     *            again, the same {@code Thing} ID must be created. A typical {@code Thing} ID could be the serial
-     *            number. It's usually <i>not</i> a product name.
-     * @param properties the properties to be set (could be null or empty)
-     * @param representationProperty the representationProperty to be set (could be null or empty)
-     * @param label the human readable label to set (could be null or empty)
-     * @param bridgeUID the unique bridge ID to be set
-     * @param timeToLive time to live in seconds
-     *
-     * @throws IllegalArgumentException
-     *             if the Thing type UID or the Thing UID is null
-     */
     public DiscoveryResultImpl(ThingTypeUID thingTypeUID, ThingUID thingUID, ThingUID bridgeUID,
             Map<String, Object> properties, String representationProperty, String label, long timeToLive)
             throws IllegalArgumentException {
