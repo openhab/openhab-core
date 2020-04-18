@@ -60,7 +60,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
      * @param timeToLive time to live in seconds
      *
      * @throws IllegalArgumentException if the Thing type UID or the Thing UID is null
-     * @deprecated use {@link DiscoveryResultBuilder} instead
+     * @deprecated use {@link DiscoveryResultBuilder} instead.
      */
     @Deprecated
     public DiscoveryResultImpl(ThingTypeUID thingTypeUID, ThingUID thingUID, ThingUID bridgeUID,
