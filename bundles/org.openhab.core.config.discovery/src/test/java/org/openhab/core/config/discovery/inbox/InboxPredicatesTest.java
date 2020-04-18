@@ -68,15 +68,13 @@ public class InboxPredicatesTest {
 
     private static final List<DiscoveryResult> RESULTS = Arrays.asList(
             DiscoveryResultBuilder.create(THING_UID11).withThingType(THING_TYPE_UID11).withProperties(PROPS1)
-                    .withRepresentationProperty(PROP1).withLabel("label").withTTL(DiscoveryResult.TTL_UNLIMITED)
-                    .build(),
+                    .withRepresentationProperty(PROP1).withLabel("label").build(),
             DiscoveryResultBuilder.create(THING_UID12).withThingType(THING_TYPE_UID11).withProperties(PROPS1)
-                    .withLabel("label").withTTL(DiscoveryResult.TTL_UNLIMITED).build(),
+                    .withLabel("label").build(),
             DiscoveryResultBuilder.create(THING_UID12).withThingType(THING_TYPE_UID12).withProperties(PROPS2)
-                    .withRepresentationProperty(PROP2).withLabel("label").withTTL(DiscoveryResult.TTL_UNLIMITED)
-                    .build(),
+                    .withRepresentationProperty(PROP2).withLabel("label").build(),
             DiscoveryResultBuilder.create(THING_UID22).withThingType(THING_TYPE_UID21).withProperties(PROPS2)
-                    .withLabel("label").withTTL(DiscoveryResult.TTL_UNLIMITED).build());
+                    .withLabel("label").build());
 
     @Before
     public void setUp() throws Exception {
