@@ -13,14 +13,10 @@
 package org.openhab.core.items;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Registry;
-import org.openhab.core.internal.items.ItemBuilderImpl;
-import org.openhab.core.library.CoreItemFactory;
-import org.slf4j.LoggerFactory;
 
 /**
  * The ItemRegistry is the central place, where items are kept in memory and their state
@@ -122,36 +118,5 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @param hook
      */
     void removeRegistryHook(RegistryHook<Item> hook);
-
-    /**
-     * Create a new {@link ItemBuilder}, which is initialized by the given item.
-     *
-     * @param item the template to initialize the builder with
-     * @return an ItemBuilder instance
-     *
-     * @deprecated Use the {@link ItemBuilderFactory} service instead.
-     */
-    @Deprecated
-    default ItemBuilder newItemBuilder(Item item) {
-        LoggerFactory.getLogger(ItemRegistry.class)
-                .warn("Deprecation: You are using a deprecated API. Please use the ItemBuilder OSGi service instead.");
-        return new ItemBuilderImpl(Collections.singleton(new CoreItemFactory()), item);
-    }
-
-    /**
-     * Create a new {@link ItemBuilder}, which is initialized by the given item.
-     *
-     * @param itemType the item type to create
-     * @param itemName the name of the item to create
-     * @return an ItemBuilder instance
-     *
-     * @deprecated Use the {@link ItemBuilderFactory} service instead.
-     */
-    @Deprecated
-    default ItemBuilder newItemBuilder(String itemType, String itemName) {
-        LoggerFactory.getLogger(ItemRegistry.class)
-                .warn("Deprecation: You are using a deprecated API. Please use the ItemBuilder OSGi service instead.");
-        return new ItemBuilderImpl(Collections.singleton(new CoreItemFactory()), itemType, itemName);
-    }
 
 }
