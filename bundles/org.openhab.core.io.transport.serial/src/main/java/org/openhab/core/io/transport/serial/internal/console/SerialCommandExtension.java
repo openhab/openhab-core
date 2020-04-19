@@ -42,8 +42,8 @@ public class SerialCommandExtension extends AbstractConsoleCommandExtension {
     private static final String SUBCMD_IDENTIFIER_NAME = "identifier";
     private static final String SUBCMD_PORT_CREATORS = "creators";
 
-    private SerialPortManager serialPortManager;
-    private SerialPortRegistry serialPortRegistry;
+    private final SerialPortManager serialPortManager;
+    private final SerialPortRegistry serialPortRegistry;
 
     @Activate
     public SerialCommandExtension(final @Reference SerialPortManager serialPortManager,
