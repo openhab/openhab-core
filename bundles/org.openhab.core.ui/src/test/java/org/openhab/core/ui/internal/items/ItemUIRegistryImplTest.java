@@ -12,6 +12,7 @@
  */
 package org.openhab.core.ui.internal.items;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -772,99 +773,97 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getDefaultWidgets() {
         Widget defaultWidget = uiRegistry.getDefaultWidget(GroupItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Group);
+        assertThat(defaultWidget, is(instanceOf(Group.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(CallItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Text);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(ColorItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Colorpicker);
+        assertThat(defaultWidget, is(instanceOf(Colorpicker.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(ContactItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Text);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(DateTimeItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Text);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(DimmerItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Slider);
-        assertTrue(((Slider) defaultWidget).isSwitchEnabled());
+        assertThat(defaultWidget, is(instanceOf(Slider.class)));
+        assertThat(((Slider) defaultWidget).isSwitchEnabled(), is(true));
 
         defaultWidget = uiRegistry.getDefaultWidget(ImageItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Image);
+        assertThat(defaultWidget, is(instanceOf(Image.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(LocationItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Mapview);
+        assertThat(defaultWidget, is(instanceOf(Mapview.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(PlayerItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Switch);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
         assertThat(((Switch) defaultWidget).getMappings(), hasSize(4));
 
         defaultWidget = uiRegistry.getDefaultWidget(RollershutterItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Switch);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
 
         defaultWidget = uiRegistry.getDefaultWidget(SwitchItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Switch);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
     }
 
     @Test
     public void getDefaultWidgetsForNumberItem() {
         // NumberItem without CommandOptions or StateOptions should return Text element
         Widget defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Text);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
 
         // NumberItem with one to four CommandOptions should return Switch element
-        final List<CommandOption> commandOptions = Stream
-                .of(new CommandOption("command1", "label1"), new CommandOption("command2", "label2"),
-                        new CommandOption("command3", "label3"), new CommandOption("command4", "label4"))
-                .collect(Collectors.toList());
-        when(item.getCommandDescription())
-                .thenReturn(CommandDescriptionBuilder.create().withCommandOptions(commandOptions).build());
+        final CommandDescriptionBuilder builder = CommandDescriptionBuilder.create()
+                .withCommandOptions(Stream
+                        .of(new CommandOption("command1", "label1"), new CommandOption("command2", "label2"),
+                                new CommandOption("command3", "label3"), new CommandOption("command4", "label4"))
+                        .collect(Collectors.toList()));
+        when(item.getCommandDescription()).thenReturn(builder.build());
         defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Switch);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
 
         // NumberItem with more than four CommandOptions should return Selection element
-        commandOptions.add(new CommandOption("command5", "label5"));
-        when(item.getCommandDescription())
-                .thenReturn(CommandDescriptionBuilder.create().withCommandOptions(commandOptions).build());
+        builder.withCommandOption(new CommandOption("command5", "label5"));
+        when(item.getCommandDescription()).thenReturn(builder.build());
         defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Selection);
+        assertThat(defaultWidget, is(instanceOf(Selection.class)));
 
         // NumberItem with one or more StateOptions should return Selection element
         when(item.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create()
                 .withOption(new StateOption("value", "label")).build().toStateDescription());
         defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Selection);
+        assertThat(defaultWidget, is(instanceOf(Selection.class)));
     }
 
     @Test
     public void getDefaultWidgetsForStringItem() {
         // StringItem without CommandOptions or StateOptions should return Text element
         Widget defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Text);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
 
         // StringItem with one to four CommandOptions should return Switch element
-        final List<CommandOption> commandOptions = Stream
-                .of(new CommandOption("command1", "label1"), new CommandOption("command2", "label2"),
-                        new CommandOption("command3", "label3"), new CommandOption("command4", "label4"))
-                .collect(Collectors.toList());
-        when(item.getCommandDescription())
-                .thenReturn(CommandDescriptionBuilder.create().withCommandOptions(commandOptions).build());
+        final CommandDescriptionBuilder builder = CommandDescriptionBuilder.create()
+                .withCommandOptions(Stream
+                        .of(new CommandOption("command1", "label1"), new CommandOption("command2", "label2"),
+                                new CommandOption("command3", "label3"), new CommandOption("command4", "label4"))
+                        .collect(Collectors.toList()));
+        when(item.getCommandDescription()).thenReturn(builder.build());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Switch);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
 
         // StringItem with more than four CommandOptions should return Selection element
-        commandOptions.add(new CommandOption("command5", "label5"));
-        when(item.getCommandDescription())
-                .thenReturn(CommandDescriptionBuilder.create().withCommandOptions(commandOptions).build());
+        builder.withCommandOption(new CommandOption("command5", "label5"));
+        when(item.getCommandDescription()).thenReturn(builder.build());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Selection);
+        assertThat(defaultWidget, is(instanceOf(Selection.class)));
 
         // StringItem with one or more StateOptions should return Selection element
         when(item.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create()
                 .withOption(new StateOption("value", "label")).build().toStateDescription());
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
-        assertTrue(defaultWidget instanceof Selection);
+        assertThat(defaultWidget, is(instanceOf(Selection.class)));
     }
 
 }
