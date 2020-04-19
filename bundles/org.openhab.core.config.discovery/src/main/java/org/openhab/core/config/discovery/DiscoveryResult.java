@@ -48,7 +48,7 @@ public interface DiscoveryResult {
      * discovered again, the same {@code Thing} ID must be created. A typical {@code Thing} ID could be the serial
      * number. It's usually <i>not</i> a product number.
      *
-     * @return the Thing ID of this result object (not null, not empty)
+     * @return the Thing ID of this result object
      */
     public ThingUID getThingUID();
 
@@ -58,7 +58,7 @@ public interface DiscoveryResult {
      * A {@code Thing} type ID could be a product number which identifies the same type of {@link Thing}s. It's usually
      * <i>not</i> a serial number.
      *
-     * @return the unique Thing type of this result object (not null, not empty)
+     * @return the unique Thing type of this result object
      */
     public ThingTypeUID getThingTypeUID();
 
@@ -67,7 +67,7 @@ public interface DiscoveryResult {
      * <p>
      * The binding ID is extracted from the unique {@code Thing} ID.
      *
-     * @return the binding ID of this result object (not null, not empty)
+     * @return the binding ID of this result object
      */
     public String getBindingId();
 
@@ -77,7 +77,7 @@ public interface DiscoveryResult {
      * <p>
      * <b>Hint:</b> The returned properties are immutable.
      *
-     * @return the properties of this result object (not null, could be empty)
+     * @return the properties of this result object (could be empty)
      */
     public Map<String, Object> getProperties();
 
@@ -89,7 +89,7 @@ public interface DiscoveryResult {
      * identifiers are typically the <code>ipAddress</code>, the <code>macAddress</code> or the
      * <code>serialNumber</code> of the discovered thing.
      *
-     * @return the representation property of this result object (could be null)
+     * @return the representation property of this result object
      */
     public @Nullable String getRepresentationProperty();
 
@@ -100,21 +100,21 @@ public interface DiscoveryResult {
      * case the result object should be regarded as known by the system so that
      * further processing should be skipped.
      *
-     * @return the flag of this result object (not null)
+     * @return the flag of this result object
      */
     public DiscoveryResultFlag getFlag();
 
     /**
      * Returns the human readable label for this result object.
      *
-     * @return the human readable label for this result object (not null, could be empty)
+     * @return the human readable label for this result object (could be empty)
      */
     public String getLabel();
 
     /**
      * Returns the unique bridge ID of the {@link DiscoveryResult}.
      *
-     * @return the unique bridge ID (could be null)
+     * @return the unique bridge ID
      */
     public @Nullable ThingUID getBridgeUID();
 
