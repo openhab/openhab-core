@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -1035,6 +1034,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
     private String getLastModifiedValueForPoperty(String path, String property) {
         // This method will return null, if there are no files in the directory.
+        final String separator = property + "=";
         String value = null;
 
         File file = getLastModifiedFileFromDir(path);
@@ -1044,8 +1044,9 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             List<String> lines = IOUtils.readLines(fileInputStream);
             for (String line : lines) {
-                if (line.contains(property + "=")) {
-                    value = StringUtils.substringAfter(line, property + "=");
+                int index = line.indexOf(separator);
+                if (index != -1) {
+                    value = line.substring(index + separator.length());
                 }
             }
         } catch (IOException e) {

@@ -14,7 +14,6 @@ package org.openhab.core.thing;
 
 import java.util.Objects;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -88,8 +87,9 @@ public class ThingStatusInfo {
 
     @Override
     public String toString() {
+        String description = getDescription();
         return getStatus() + (getStatusDetail() == ThingStatusDetail.NONE ? "" : " (" + getStatusDetail() + ")")
-                + (StringUtils.isBlank(getDescription()) ? "" : ": " + getDescription());
+                + (description == null || description.isBlank() ? "" : ": " + description);
     }
 
     @Override

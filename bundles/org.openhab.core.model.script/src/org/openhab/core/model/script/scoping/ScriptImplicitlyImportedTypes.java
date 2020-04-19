@@ -20,7 +20,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures;
 import org.openhab.core.library.unit.BinaryPrefix;
 import org.openhab.core.library.unit.ImperialUnits;
@@ -75,7 +74,6 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.remove(BigDecimal.class);
         result.remove(double.class);
         result.add(NumberExtensions.class);
-        result.add(StringUtils.class);
         result.add(URLEncoder.class);
         result.add(PersistenceExtensions.class);
         result.add(BusEvent.class);

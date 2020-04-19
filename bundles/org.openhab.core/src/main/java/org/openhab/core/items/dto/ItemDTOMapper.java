@@ -17,7 +17,6 @@ import java.util.List;
 
 import javax.measure.Quantity;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.items.GroupFunctionHelper;
@@ -64,7 +63,7 @@ public class ItemDTOMapper {
             if (itemDTO instanceof GroupItemDTO && GroupItem.TYPE.equals(itemDTO.type)) {
                 GroupItemDTO groupItemDTO = (GroupItemDTO) itemDTO;
                 Item baseItem = null;
-                if (!StringUtils.isEmpty(groupItemDTO.groupType)) {
+                if (groupItemDTO.groupType != null && !groupItemDTO.groupType.isEmpty()) {
                     baseItem = itemBuilderFactory.newItemBuilder(groupItemDTO.groupType, itemDTO.name).build();
                     builder.withBaseItem(baseItem);
                 }

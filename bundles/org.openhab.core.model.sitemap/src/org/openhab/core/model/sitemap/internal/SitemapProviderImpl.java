@@ -18,15 +18,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
-import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -96,8 +95,8 @@ public class SitemapProviderImpl implements SitemapProvider, ModelRepositoryChan
 
     @Override
     public Set<String> getSitemapNames() {
-        return sitemapModelCache.keySet().stream().map(name -> StringUtils.removeEnd(name, SITEMAP_FILEEXT))
-                .collect(Collectors.toSet());
+        return sitemapModelCache.keySet().stream()
+                .map(name -> name.substring(0, name.length() - SITEMAP_FILEEXT.length())).collect(Collectors.toSet());
     }
 
     @Override

@@ -8,10 +8,6 @@ if(Command === undefined) {
     throw "Command not defined";
 }
 
-if(StringUtils === undefined) {
-    throw "StringUtils not defined";
-}
-
 if(URLEncoder === undefined) {
     throw "URLEncoder not defined";
 }

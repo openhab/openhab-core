@@ -15,6 +15,7 @@ package org.openhab.core.io.net.http.internal;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.lang.reflect.Field;
 import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
@@ -29,7 +30,6 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -41,6 +41,7 @@ import org.openhab.core.io.net.http.TlsTrustManagerProvider;
  * @author Martin van Wingerden - Initial contribution
  */
 public class ExtensibleTrustManagerImplTest {
+
     private ExtensibleTrustManagerImpl subject;
 
     @Mock
@@ -123,8 +124,8 @@ public class ExtensibleTrustManagerImplTest {
 
     @Test
     public void shouldBeResilientAgainstNullSubjectAlternativeNames()
-            throws CertificateException, IllegalAccessException {
-        FieldUtils.writeField(subject, "defaultTrustManager", defaultTrustManager, true);
+            throws CertificateException, IllegalAccessException, NoSuchFieldException, SecurityException {
+        writeField(subject, "defaultTrustManager", defaultTrustManager, true);
 
         when(topOfChain.getSubjectX500Principal())
                 .thenReturn(new X500Principal("CN=example.com, OU=Smarthome, O=Eclipse, C=DE"));
@@ -137,8 +138,9 @@ public class ExtensibleTrustManagerImplTest {
     }
 
     @Test
-    public void shouldBeResilientAgainstMissingCommonNames() throws CertificateException, IllegalAccessException {
-        FieldUtils.writeField(subject, "defaultTrustManager", defaultTrustManager, true);
+    public void shouldBeResilientAgainstMissingCommonNames() throws CertificateException, IllegalAccessException,
+            NoSuchFieldException, SecurityException, IllegalArgumentException {
+        writeField(subject, "defaultTrustManager", defaultTrustManager, true);
 
         when(topOfChain.getSubjectX500Principal()).thenReturn(new X500Principal("OU=Smarthome, O=Eclipse, C=DE"));
 
@@ -149,8 +151,9 @@ public class ExtensibleTrustManagerImplTest {
     }
 
     @Test
-    public void shouldBeResilientAgainstInvalidCertificates() throws CertificateException, IllegalAccessException {
-        FieldUtils.writeField(subject, "defaultTrustManager", defaultTrustManager, true);
+    public void shouldBeResilientAgainstInvalidCertificates() throws CertificateException, IllegalAccessException,
+            NoSuchFieldException, SecurityException, IllegalArgumentException {
+        writeField(subject, "defaultTrustManager", defaultTrustManager, true);
 
         when(topOfChain.getSubjectX500Principal())
                 .thenReturn(new X500Principal("CN=example.com, OU=Smarthome, O=Eclipse, C=DE"));
@@ -164,8 +167,9 @@ public class ExtensibleTrustManagerImplTest {
     }
 
     @Test
-    public void shouldNotForwardCallsToMockForDifferentCN() throws CertificateException, IllegalAccessException {
-        FieldUtils.writeField(subject, "defaultTrustManager", defaultTrustManager, true);
+    public void shouldNotForwardCallsToMockForDifferentCN() throws CertificateException, IllegalAccessException,
+            NoSuchFieldException, SecurityException, IllegalArgumentException {
+        writeField(subject, "defaultTrustManager", defaultTrustManager, true);
         mockSubjectForCertificate(topOfChain, "CN=example.com, OU=Smarthome, O=Eclipse, C=DE");
         mockIssuerForCertificate(topOfChain, "CN=Eclipse, OU=Smarthome, O=Eclipse, C=DE");
         mockSubjectForCertificate(bottomOfChain, "CN=Eclipse, OU=Smarthome, O=Eclipse, C=DE");
@@ -175,7 +179,7 @@ public class ExtensibleTrustManagerImplTest {
         subject.checkServerTrusted(chain, "just");
 
         verify(defaultTrustManager).checkServerTrusted(chain, "just", (Socket) null);
-        verifyZeroInteractions(trustmanager);
+        verifyNoInteractions(trustmanager);
     }
 
     private Collection<List<?>> constructAlternativeNames(String... alternatives) {
@@ -193,5 +197,12 @@ public class ExtensibleTrustManagerImplTest {
 
     private void mockIssuerForCertificate(X509Certificate certificate, String principal) {
         when(certificate.getIssuerX500Principal()).thenReturn(new X500Principal(principal));
+    }
+
+    private void writeField(Object target, String fieldName, Object value, boolean forceAccess)
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(forceAccess);
+        field.set(target, value);
     }
 }

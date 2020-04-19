@@ -14,10 +14,11 @@ package org.openhab.core.cache;
 
 import static org.junit.Assert.*;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +29,11 @@ import org.junit.Test;
  */
 public class ExpiringCacheTest {
     private static final long CACHE_EXPIRY = TimeUnit.SECONDS.toMillis(2);
-    private static final Supplier<String> CACHE_ACTION = () -> RandomStringUtils.random(8);
+    private static final Supplier<String> CACHE_ACTION = () -> {
+        byte[] array = new byte[8];
+        new Random().nextBytes(array);
+        return new String(array, StandardCharsets.UTF_8);
+    };
 
     private ExpiringCache<String> subject;
 

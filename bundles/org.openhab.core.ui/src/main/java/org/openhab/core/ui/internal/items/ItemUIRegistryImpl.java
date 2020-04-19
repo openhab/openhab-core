@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 
 import javax.measure.Unit;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
@@ -314,7 +313,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         String label = getLabelFromWidget(w);
 
         String itemName = w.getItem();
-        if (StringUtils.isBlank(itemName)) {
+        if (itemName == null || itemName.isBlank()) {
             return transform(label, true, null);
         }
 
@@ -1350,7 +1349,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             // we require the item to define a dimension, otherwise no unit will be reported to the UIs.
             if (item instanceof NumberItem && ((NumberItem) item).getDimension() != null) {
                 String unit = getUnitFromLabel(w.getLabel());
-                if (StringUtils.isNotBlank(unit) && !UnitUtils.UNIT_PLACEHOLDER.equals(unit)) {
+                if (!UnitUtils.UNIT_PLACEHOLDER.equals(unit)) {
                     return unit;
                 }
 
@@ -1374,7 +1373,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     private @Nullable String getUnitFromLabel(String label) {
-        if (StringUtils.isBlank(label)) {
+        if (label.isBlank()) {
             return null;
         }
 
