@@ -38,7 +38,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemBuilder;
 import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
@@ -1385,24 +1384,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
 
         return null;
-    }
-
-    @Override
-    public ItemBuilder newItemBuilder(Item item) {
-        if (itemBuilderFactory != null) {
-            return itemBuilderFactory.newItemBuilder(item);
-        } else {
-            throw new IllegalStateException("Cannot create an item builder without the item registry");
-        }
-    }
-
-    @Override
-    public ItemBuilder newItemBuilder(String itemType, String itemName) {
-        if (itemBuilderFactory != null) {
-            return itemBuilderFactory.newItemBuilder(itemType, itemName);
-        } else {
-            throw new IllegalStateException("Cannot create an item builder without the item registry");
-        }
     }
 
 }
