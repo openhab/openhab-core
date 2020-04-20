@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
+import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
@@ -52,16 +53,16 @@ public class DiscoveryResultImpl implements DiscoveryResult {
      * Creates a new instance of this class with the specified parameters.
      *
      * @param thingTypeUID the {@link ThingTypeUID}
-     * @param thingUID the {@link ThingUID} to be set. If a {@code Thing} disappears and is
-     *            discovered again, the same {@code Thing} ID must be created. A typical {@code Thing} ID could be the
-     *            serial number. It's usually <i>not</i> a product name.
-     * @param bridgeUID the unique bridge ID to be set
+     * @param thingUID the {@link ThingUID} to be set. If a {@code Thing} disappears and is discovered again, the same
+     *            {@code Thing} ID must be created. A typical {@code Thing} ID could be the serial number. It's usually
+     *            <i>not</i> a product name.
+     * @param bridgeUID the unique {@link Bridge} ID to be set
      * @param properties the properties to be set
      * @param representationProperty the representationProperty to be set
      * @param label the human readable label to set
      * @param timeToLive time to live in seconds
      *
-     * @throws IllegalArgumentException if the Thing type UID or the Thing UID is null
+     * @throws IllegalArgumentException if the {@link ThingUID} is null or the time to live is less than 1
      * @deprecated use {@link DiscoveryResultBuilder} instead.
      */
     @Deprecated
