@@ -28,10 +28,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
 
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
@@ -232,7 +232,7 @@ public class AuthorizePageServlet extends HttpServlet {
 
                 String state = params.containsKey("state") ? params.get("state")[0] : null;
                 resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, authorizationCode, null, state));
-                resp.setStatus(HttpStatus.SC_MOVED_TEMPORARILY);
+                resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
             } catch (AuthenticationException e) {
                 lastAuthenticationFailure = Instant.now();
                 authenticationFailureCount += 1;
@@ -247,7 +247,7 @@ public class AuthorizePageServlet extends HttpServlet {
                 String state = params.containsKey("state") ? params.get("state")[0] : null;
                 if (baseRedirectUri != null) {
                     resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, null, e.getMessage(), state));
-                    resp.setStatus(HttpStatus.SC_MOVED_TEMPORARILY);
+                    resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
                 } else {
                     resp.setContentType("text/plain;charset=UTF-8");
                     resp.getWriter().append(e.getMessage());
