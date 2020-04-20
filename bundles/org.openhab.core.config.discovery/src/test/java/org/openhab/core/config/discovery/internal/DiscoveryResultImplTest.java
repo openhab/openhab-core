@@ -38,7 +38,7 @@ public class DiscoveryResultImplTest {
     @SuppressWarnings("unused")
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidConstructorForThingType() {
-        new DiscoveryResultImpl(new ThingUID("aa"), null, null, null, null, DEFAULT_TTL);
+        new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL);
     }
 
     @SuppressWarnings("unused")
