@@ -20,7 +20,6 @@ Import-Package: org.apache.log4j,\
  org.osgi.service.cm,\
  org.slf4j
 Require-Bundle: org.antlr.runtime,\
- org.apache.commons.logging;resolution:=optional,\
  org.eclipse.emf.common,\
  org.eclipse.emf.ecore,\
  org.eclipse.emf.mwe2.launch;resolution:=optional,\

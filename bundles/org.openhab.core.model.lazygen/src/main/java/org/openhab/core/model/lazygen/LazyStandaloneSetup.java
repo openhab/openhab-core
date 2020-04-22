@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.LogFactory;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -33,6 +32,8 @@ import org.eclipse.emf.mwe.core.lib.AbstractWorkflowComponent2;
 import org.eclipse.emf.mwe.core.monitor.ProgressMonitor;
 import org.eclipse.emf.mwe.core.resources.ResourceLoaderFactory;
 import org.eclipse.emf.mwe.utils.GenModelHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -72,7 +73,7 @@ public class LazyStandaloneSetup extends AbstractWorkflowComponent2 {
         }
     }
 
-    private final org.apache.commons.logging.Log log = LogFactory.getLog(getClass());
+    private final Logger logger = LoggerFactory.getLogger(LazyStandaloneSetup.class);
 
     private void addRegisterGeneratedEPackage(String interfacename) {
         Class<?> clazz = ResourceLoaderFactory.createResourceLoader().loadClass(interfacename);
@@ -83,7 +84,7 @@ public class LazyStandaloneSetup extends AbstractWorkflowComponent2 {
             EPackage pack = (EPackage) clazz.getDeclaredField("eINSTANCE").get(null);
             if (registry.get(pack.getNsURI()) == null) {
                 registry.put(pack.getNsURI(), pack);
-                log.info("Adding generated EPackage '" + interfacename + "'");
+                logger.info("Adding generated EPackage '{}'", interfacename);
             }
         } catch (Exception e) {
             throw new ConfigurationException("Couldn't register " + interfacename
@@ -129,9 +130,9 @@ public class LazyStandaloneSetup extends AbstractWorkflowComponent2 {
         String nsUri = ((EPackage) object).getNsURI();
         if (registry.get(nsUri) == null) {
             registry.put(nsUri, object);
-            log.info("Adding dynamic EPackage '" + nsUri + "' from '" + fileName + "'");
-        } else if (log.isDebugEnabled()) {
-            log.debug("Dynamic EPackage '" + nsUri + "' from '" + fileName + "' already in the registry!");
+            logger.info("Adding dynamic EPackage '{}' from '{}'", nsUri, fileName);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Dynamic EPackage '{}' from '{}' already in the registry!", nsUri, fileName);
         }
     }
 

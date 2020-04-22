@@ -33,7 +33,6 @@ Import-Package: javax.measure,\
  org.slf4j
 Require-Bundle: com.ibm.icu;resolution:=optional,\
  org.antlr.runtime,\
- org.apache.commons.logging;resolution:=optional,\
  org.eclipse.emf.codegen.ecore;resolution:=optional,\
  org.eclipse.emf.common,\
  org.eclipse.emf.ecore;visibility:=reexport,\

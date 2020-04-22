@@ -35,7 +35,6 @@ Import-Package: org.apache.log4j,\
  org.slf4j,\
  javax.measure
 Require-Bundle: org.antlr.runtime,\
- org.apache.commons.logging;bundle-version="1.0.4";resolution:=optional,\
  org.eclipse.emf.codegen.ecore;resolution:=optional,\
  org.eclipse.emf.common,\
  org.eclipse.emf.ecore,\
