@@ -14,7 +14,6 @@ package org.openhab.core.items;
 
 import java.util.Objects;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.service.BundleResolverImpl;
@@ -58,8 +57,8 @@ public class ItemUtil {
      * @param itemName the name of the item to be checked (could be null or empty)
      * @return true if the specified name is a valid item name, otherwise false
      */
-    public static boolean isValidItemName(final String itemName) {
-        return StringUtils.isNotEmpty(itemName) && itemName.matches("[a-zA-Z0-9_]*");
+    public static boolean isValidItemName(final @Nullable String itemName) {
+        return itemName != null && !itemName.isEmpty() && itemName.matches("[a-zA-Z0-9_]*");
     }
 
     /**

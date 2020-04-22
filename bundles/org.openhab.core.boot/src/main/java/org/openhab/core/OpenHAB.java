@@ -16,8 +16,8 @@ import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.framework.FrameworkUtil;
 
@@ -34,6 +34,17 @@ public class OpenHAB {
     /** the configuraton parameter name used for the base package */
     public static final String CFG_PACKAGE = "package";
 
+    private static String substringAfterLast(String str, String separator) {
+        int index = str.lastIndexOf(separator);
+        return index == -1 || index == str.length() - separator.length() ? ""
+                : str.substring(index + separator.length());
+    }
+
+    private static String substringBeforeLast(String str, String separator) {
+        int index = str.lastIndexOf(separator);
+        return index == -1 ? str : str.substring(0, index);
+    }
+
     /**
      * Returns the current openHAB version, retrieving the information from the core bundle version.
      *
@@ -42,10 +53,11 @@ public class OpenHAB {
     public static String getVersion() {
         String versionString = FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString();
         // if the version string contains a "snapshot" qualifier, remove it!
-        if (StringUtils.countMatches(versionString, ".") == 3) {
-            String qualifier = StringUtils.substringAfterLast(versionString, ".");
-            if (StringUtils.isNumeric(qualifier) || "qualifier".equals(qualifier)) {
-                versionString = StringUtils.substringBeforeLast(versionString, ".");
+        if (versionString.chars().filter(ch -> ch == '.').count() == 3) {
+            final Pattern pattern = Pattern.compile("\\d+(\\.\\d+)?");
+            String qualifier = substringAfterLast(versionString, ".");
+            if (pattern.matcher(qualifier).matches() || "qualifier".equals(qualifier)) {
+                versionString = substringBeforeLast(versionString, ".");
             }
         }
         return versionString;
@@ -53,7 +65,6 @@ public class OpenHAB {
 
     public static String buildString() {
         Properties prop = new Properties();
-
         Path versionFilePath = Paths.get(ConfigConstants.getUserDataFolder(), "etc", "version.properties");
         try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
             prop.load(fis);

@@ -14,14 +14,15 @@ package org.openhab.core.cache;
 
 import static org.junit.Assert.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +38,11 @@ public class ExpiringCacheMapTest {
     private static final String RESPONSE_1 = "ACTION 1";
     private static final String RESPONSE_2 = "ACTION 2";
 
-    private static final Supplier<String> CACHE_ACTION = () -> RandomStringUtils.random(8);
+    private static final Supplier<String> CACHE_ACTION = () -> {
+        byte[] array = new byte[8];
+        new Random().nextBytes(array);
+        return new String(array, StandardCharsets.UTF_8);
+    };
     private static final Supplier<String> PREDICTABLE_CACHE_ACTION_1 = () -> RESPONSE_1;
     private static final Supplier<String> PREDICTABLE_CACHE_ACTION_2 = () -> RESPONSE_2;
 

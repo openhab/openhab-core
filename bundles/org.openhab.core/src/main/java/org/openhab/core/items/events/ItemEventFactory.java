@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
@@ -388,11 +387,13 @@ public class ItemEventFactory extends AbstractEventFactory {
     }
 
     private static String getStateType(State state) {
-        return StringUtils.removeEnd(state.getClass().getSimpleName(), TYPE_POSTFIX);
+        String stateClassName = state.getClass().getSimpleName();
+        return stateClassName.substring(0, stateClassName.length() - TYPE_POSTFIX.length());
     }
 
     private static String getCommandType(Command command) {
-        return StringUtils.removeEnd(command.getClass().getSimpleName(), TYPE_POSTFIX);
+        String commandClassName = command.getClass().getSimpleName();
+        return commandClassName.substring(0, commandClassName.length() - TYPE_POSTFIX.length());
     }
 
     private static void assertValidArguments(String itemName, Type type, String typeArgumentName) {

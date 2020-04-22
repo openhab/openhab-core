@@ -11,8 +11,7 @@ Export-Package: org.openhab.core.model.sitemap,\
  org.openhab.core.model.sitemap.sitemap.impl,\
  org.openhab.core.model.sitemap.sitemap.util,\
  org.openhab.core.model.sitemap.validation
-Import-Package: org.apache.commons.lang,\
- org.apache.log4j,\
+Import-Package: org.apache.log4j,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.openhab.core.items.dto,\
  org.openhab.core.model.core,\

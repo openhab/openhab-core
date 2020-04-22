@@ -17,7 +17,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.ThingTypeUID;
@@ -215,7 +214,7 @@ public final class FirmwareBuilder {
      *             set to true, but the model ({@link #withModel(String)}) is not set
      */
     public Firmware build() {
-        if (modelRestricted && StringUtils.isEmpty(model)) {
+        if (modelRestricted && (model == null || model.isEmpty())) {
             throw new IllegalArgumentException("Cannot create model restricted firmware without model");
         }
 

@@ -46,7 +46,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -546,7 +545,7 @@ public class ThingResource implements RESTResource {
             return getThingNotFoundResponse(thingUID);
         }
 
-        if (StringUtils.isEmpty(firmwareVersion)) {
+        if (firmwareVersion == null || firmwareVersion.isEmpty()) {
             logger.info(
                     "Received HTTP PUT request for firmware update at '{}' for thing '{}' with unknown firmware version '{}'.",
                     uriInfo.getPath(), thingUID, firmwareVersion);

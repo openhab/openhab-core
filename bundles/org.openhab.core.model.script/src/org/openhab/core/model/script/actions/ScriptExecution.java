@@ -18,7 +18,6 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import java.time.Instant;
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -60,7 +59,7 @@ public class ScriptExecution {
         ModelRepository repo = ScriptServiceUtil.getModelRepository();
         if (repo != null) {
             String scriptNameWithExt = scriptName;
-            if (!StringUtils.endsWith(scriptName, Script.SCRIPT_FILEEXT)) {
+            if (scriptName.endsWith(Script.SCRIPT_FILEEXT)) {
                 scriptNameWithExt = scriptName + "." + Script.SCRIPT_FILEEXT;
             }
             XExpression expr = (XExpression) repo.getModel(scriptNameWithExt);

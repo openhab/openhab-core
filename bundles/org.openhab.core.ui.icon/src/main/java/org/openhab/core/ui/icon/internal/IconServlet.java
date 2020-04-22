@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.io.http.servlet.SmartHomeServlet;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
@@ -160,17 +159,28 @@ public class IconServlet extends SmartHomeServlet {
         }
     }
 
+    private String substringAfterLast(String str, String separator) {
+        int index = str.lastIndexOf(separator);
+        return index == -1 || index == str.length() - separator.length() ? ""
+                : str.substring(index + separator.length());
+    }
+
+    private String substringBeforeLast(String str, String separator) {
+        int index = str.lastIndexOf(separator);
+        return index == -1 ? str : str.substring(0, index);
+    }
+
     private String getCategory(HttpServletRequest req) {
-        String category = StringUtils.substringAfterLast(req.getRequestURI(), "/");
-        category = StringUtils.substringBeforeLast(category, ".");
-        return StringUtils.substringBeforeLast(category, "-");
+        String category = substringAfterLast(req.getRequestURI(), "/");
+        category = substringBeforeLast(category, ".");
+        return substringBeforeLast(category, "-");
     }
 
     private Format getFormat(HttpServletRequest req) {
         String format = req.getParameter(PARAM_FORMAT);
         if (format == null) {
-            String filename = StringUtils.substringAfterLast(req.getRequestURI(), "/");
-            format = StringUtils.substringAfterLast(filename, ".");
+            String filename = substringAfterLast(req.getRequestURI(), "/");
+            format = substringAfterLast(filename, ".");
         }
         try {
             Format f = Format.valueOf(format.toUpperCase());
@@ -195,10 +205,10 @@ public class IconServlet extends SmartHomeServlet {
         if (state != null) {
             return state;
         } else {
-            String filename = StringUtils.substringAfterLast(req.getRequestURI(), "/");
-            state = StringUtils.substringAfterLast(filename, "-");
-            state = StringUtils.substringBeforeLast(state, ".");
-            if (StringUtils.isNotEmpty(state)) {
+            String filename = substringAfterLast(req.getRequestURI(), "/");
+            state = substringAfterLast(filename, "-");
+            state = substringBeforeLast(state, ".");
+            if (!state.isEmpty()) {
                 return state;
             } else {
                 return null;

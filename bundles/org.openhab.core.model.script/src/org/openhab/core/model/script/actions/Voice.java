@@ -12,12 +12,11 @@
  */
 package org.openhab.core.model.script.actions;
 
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.library.types.PercentType;
-import org.openhab.core.voice.text.InterpretationException;
 import org.openhab.core.model.script.engine.action.ActionDoc;
 import org.openhab.core.model.script.engine.action.ParamDoc;
 import org.openhab.core.model.script.internal.engine.action.VoiceActionService;
+import org.openhab.core.voice.text.InterpretationException;
 
 /**
  * The static methods of this class are made available as functions in the scripts.
@@ -117,8 +116,9 @@ public class Voice {
     public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") String voice,
             @ParamDoc(name = "sink") String sink,
             @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
-        if (StringUtils.isNotBlank(text.toString())) {
-            VoiceActionService.voiceManager.say(text.toString(), voice, sink, volume);
+        String output = text.toString();
+        if (!output.isBlank()) {
+            VoiceActionService.voiceManager.say(output, voice, sink, volume);
         }
     }
 
