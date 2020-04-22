@@ -24,7 +24,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.openhab.core.io.http.servlet.SmartHomeServlet;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
@@ -144,7 +143,7 @@ public class IconServlet extends SmartHomeServlet {
         resp.setDateHeader("Last-Modified", new Date().getTime());
         ServletOutputStream os = resp.getOutputStream();
         try (InputStream is = provider.getIcon(category, iconSetId, state, format)) {
-            IOUtils.copy(is, os);
+            is.transferTo(os);
             resp.flushBuffer();
         } catch (IOException e) {
             logger.error("Failed sending the icon byte stream as a response: {}", e.getMessage());

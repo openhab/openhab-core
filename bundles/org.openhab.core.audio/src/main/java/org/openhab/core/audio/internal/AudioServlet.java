@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
@@ -144,7 +143,7 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
                 logger.debug("Received request for invalid stream id at {}", req.getRequestURI());
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             } else {
-                IOUtils.copy(stream, resp.getOutputStream());
+                stream.transferTo(resp.getOutputStream());
                 resp.flushBuffer();
             }
         } catch (final AudioException ex) {
@@ -164,7 +163,10 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
             // the stream has expired, we need to remove it!
             final FixedLengthAudioStream stream = multiTimeStreams.remove(streamId);
             streamTimeouts.remove(streamId);
-            IOUtils.closeQuietly(stream);
+            try {
+                stream.close();
+            } catch (IOException e) {
+            }
             logger.debug("Removed timed out stream {}", streamId);
         });
     }

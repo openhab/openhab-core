@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Thing;
@@ -176,7 +175,7 @@ public final class FirmwareImpl implements Firmware {
                 MessageDigest md = MessageDigest.getInstance("MD5");
 
                 try (DigestInputStream dis = new DigestInputStream(inputStream, md)) {
-                    bytes = IOUtils.toByteArray(dis);
+                    bytes = dis.readAllBytes();
                 } catch (IOException ioEx) {
                     logger.error("Cannot read firmware {}.", this, ioEx);
                     return null;

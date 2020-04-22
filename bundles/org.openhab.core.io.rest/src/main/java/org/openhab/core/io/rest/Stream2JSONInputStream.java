@@ -12,12 +12,13 @@
  */
 package org.openhab.core.io.rest;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.IOUtils;
 import org.openhab.core.library.types.DateTimeType;
 
 import com.google.gson.Gson;
@@ -53,7 +54,7 @@ public class Stream2JSONInputStream extends InputStream implements JSONInputStre
         }
 
         iterator = source.map(e -> gson.toJson(e)).iterator();
-        jsonElementStream = IOUtils.toInputStream("");
+        jsonElementStream = new ByteArrayInputStream(new byte[0]);
         firstIteratorElement = true;
     }
 
@@ -94,8 +95,11 @@ public class Stream2JSONInputStream extends InputStream implements JSONInputStre
             postfix = "]";
         }
 
-        IOUtils.closeQuietly(jsonElementStream);
-        jsonElementStream = IOUtils.toInputStream(prefix + entity + postfix);
+        try {
+            jsonElementStream.close();
+        } catch (IOException e) {
+        }
+        jsonElementStream = new ByteArrayInputStream((prefix + entity + postfix).getBytes(StandardCharsets.UTF_8));
     }
 
     private boolean finished() {

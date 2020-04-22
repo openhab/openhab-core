@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -99,7 +98,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         try {
             InputStream inputStream = null;
             if (originalInputStream != null) {
-                byte[] bytes = IOUtils.toByteArray(originalInputStream);
+                byte[] bytes = originalInputStream.readAllBytes();
                 String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
                 if (validationResult != null) {
                     logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name,

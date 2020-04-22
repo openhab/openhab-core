@@ -17,11 +17,11 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.config.core.Configuration;
@@ -121,11 +121,11 @@ public class JsonStorageTest extends JavaTest {
     public void testStableOutput() throws IOException {
         objectStorage.put("DummyObject", new DummyObject());
         persistAndReadAgain();
-        String storageString1 = FileUtils.readFileToString(tmpFile);
+        String storageString1 = Files.readString(tmpFile.toPath());
 
         objectStorage = new JsonStorage<>(tmpFile, this.getClass().getClassLoader(), 0, 0, 0);
         objectStorage.flush();
-        String storageString2 = FileUtils.readFileToString(tmpFile);
+        String storageString2 = Files.readString(tmpFile.toPath());
 
         assertEquals(storageString1, storageString2);
     }

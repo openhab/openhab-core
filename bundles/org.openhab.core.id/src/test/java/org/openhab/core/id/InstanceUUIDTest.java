@@ -26,7 +26,7 @@ import org.openhab.core.config.core.ConfigConstants;
  * @author Kai Kreuzer - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
-public class UUIDTest {
+public class InstanceUUIDTest {
 
     @Test
     public void sameUUID() {

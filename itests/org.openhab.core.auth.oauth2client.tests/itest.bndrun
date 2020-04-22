@@ -31,7 +31,6 @@ Fragment-Host: org.openhab.core.auth.oauth2client
 	net.bytebuddy.byte-buddy;version='[1.9.10,1.9.11)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.9.10,1.9.11)',\
 	org.mockito.mockito-core;version='[3.1.0,3.1.1)',\
-	org.apache.commons.io;version='[2.2.0,2.2.1)',\
 	org.eclipse.jetty.client;version='[9.4.20,9.4.21)',\
 	org.eclipse.jetty.http;version='[9.4.20,9.4.21)',\
 	org.eclipse.jetty.io;version='[9.4.20,9.4.21)',\

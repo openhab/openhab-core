@@ -18,11 +18,15 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -59,8 +63,18 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     @AfterClass
     public static void afterClass() throws IOException {
         // clean up database files ...
-        FileUtils.deleteDirectory(new File(ConfigConstants.getUserDataFolder()));
-        FileUtils.deleteDirectory(new File(ConfigConstants.getConfigFolder()));
+        final Path userData = Paths.get(ConfigConstants.getUserDataFolder());
+        if (Files.exists(userData)) {
+            try (Stream<Path> walk = Files.walk(userData)) {
+                walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+            }
+        }
+        final Path config = Paths.get(ConfigConstants.getConfigFolder());
+        if (Files.exists(config)) {
+            try (Stream<Path> walk = Files.walk(config)) {
+                walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+            }
+        }
     }
 
     @Test

@@ -17,16 +17,17 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -69,26 +70,13 @@ public class AbstractWatchServiceTest extends JavaTest {
     @After
     public void tearDown() throws Exception {
         watchService.deactivate();
-        clearWatchedDir();
-        watchService.allFullEvents.clear();
-
-        File watchedDirectory = new File(WATCHED_DIRECTORY);
-        FileUtils.deleteDirectory(watchedDirectory);
-    }
-
-    private void clearWatchedDir() throws IOException {
-        File watchedDirectory = new File(WATCHED_DIRECTORY);
-        Stream.of(watchedDirectory.listFiles()).forEach(mockedFile -> {
-            if (mockedFile.isFile()) {
-                mockedFile.delete();
-            } else {
-                try {
-                    FileUtils.deleteDirectory(mockedFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        final Path watchedDirectory = Paths.get(WATCHED_DIRECTORY);
+        if (Files.exists(watchedDirectory)) {
+            try (Stream<Path> walk = Files.walk(watchedDirectory)) {
+                walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
-        });
+        }
+        watchService.allFullEvents.clear();
     }
 
     @Test
@@ -213,11 +201,11 @@ public class AbstractWatchServiceTest extends JavaTest {
         fullEventAssertionsByKind(fileName, ENTRY_CREATE, false);
 
         // File modified
-        FileUtils.writeLines(file, Collections.singletonList("Additional content"), true);
+        Files.writeString(file.toPath(), "Additional content", StandardOpenOption.APPEND);
         fullEventAssertionsByKind(fileName, ENTRY_MODIFY, false);
 
         // File modified but identical content
-        FileUtils.writeLines(file, Collections.singletonList("Additional content"), false);
+        Files.writeString(file.toPath(), "Additional content", StandardOpenOption.TRUNCATE_EXISTING);
         assertNoEventsAreProcessed();
 
         // File deleted

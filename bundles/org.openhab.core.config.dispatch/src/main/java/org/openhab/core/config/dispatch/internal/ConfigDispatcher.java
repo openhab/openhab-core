@@ -13,11 +13,12 @@
 package org.openhab.core.config.dispatch.internal;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -29,7 +30,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigConstants;
@@ -300,7 +300,7 @@ public class ConfigDispatcher {
         String context = null;
 
         // configuration file contains a PID Marker
-        List<String> lines = IOUtils.readLines(new FileInputStream(configFile));
+        List<String> lines = Files.readAllLines(configFile.toPath(), StandardCharsets.UTF_8);
         String exclusivePID = lines.size() > 0 ? getPIDFromLine(lines.get(0)) : null;
         if (exclusivePID != null) {
             if (exclusivePIDMap.contains(exclusivePID)) {

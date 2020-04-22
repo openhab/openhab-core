@@ -12,14 +12,12 @@
  */
 package org.openhab.core.id;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
-import org.apache.commons.io.IOUtils;
 import org.openhab.core.config.core.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +35,7 @@ public class InstanceUUID {
 
     static final String UUID_FILE_NAME = "uuid";
 
-    static String uuid = null;
+    static String uuid;
 
     /**
      * Retrieves a unified unique id, based on {@link java.util.UUID.randomUUID()}
@@ -48,7 +46,6 @@ public class InstanceUUID {
         if (uuid == null) {
             try {
                 File file = new File(ConfigConstants.getUserDataFolder() + File.separator + UUID_FILE_NAME);
-
                 if (!file.exists()) {
                     uuid = java.util.UUID.randomUUID().toString();
                     writeFile(file, uuid);
@@ -64,29 +61,26 @@ public class InstanceUUID {
                     }
                 }
             } catch (IOException e) {
-                LOGGER.error("Failed writing instance uuid file: {}", e.getMessage());
+                LOGGER.error("Failed writing the UUID file: {}", e.getMessage());
                 return null;
             }
         }
-
         return uuid;
     }
 
     private static void writeFile(File file, String content) throws IOException {
         // create intermediary directories
         file.getParentFile().mkdirs();
-        try (OutputStream outputStream = new FileOutputStream(file)) {
-            IOUtils.write(content, outputStream);
-        }
+        Files.writeString(file.toPath(), content, StandardCharsets.UTF_8);
     }
 
     private static String readFirstLine(File file) {
-        List<String> lines = null;
-        try {
-            lines = IOUtils.readLines(new FileInputStream(file));
+        try (final BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            String line;
+            return (line = reader.readLine()) == null ? "" : line;
         } catch (IOException ioe) {
             LOGGER.warn("Failed reading the UUID file '{}': {}", file.getAbsolutePath(), ioe.getMessage());
+            return "";
         }
-        return lines == null || lines.isEmpty() ? "" : lines.get(0);
     }
 }

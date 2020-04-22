@@ -23,6 +23,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +35,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -179,7 +179,8 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         itemResource.addTag("Switch", "MyTag");
         Response response = itemResource.getItems(uriInfo, httpHeaders, null, null, "MyTag", null, false, "type,name");
 
-        JsonElement result = parser.parse(IOUtils.toString((InputStream) response.getEntity()));
+        JsonElement result = parser
+                .parse(new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8));
         JsonElement expected = parser.parse("[{type: \"Switch\", name: \"Switch\"}]");
         assertEquals(expected, result);
     }
@@ -201,12 +202,12 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     }
 
     private List<String> readItemNamesFromResponse(Response response) throws IOException {
-        String jsonResponse = IOUtils.toString((InputStream) response.getEntity());
+        String jsonResponse = new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8);
         return JsonPath.read(jsonResponse, "$..name");
     }
 
     private List<String> readItemLabelsFromResponse(Response response) throws IOException {
-        String jsonResponse = IOUtils.toString((InputStream) response.getEntity());
+        String jsonResponse = new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8);
         return JsonPath.read(jsonResponse, "$..label");
     }
 
@@ -230,7 +231,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         items = itemList.toArray(items);
         Response response = itemResource.createOrUpdateItems(items);
 
-        String jsonResponse = IOUtils.toString((InputStream) response.getEntity());
+        String jsonResponse = new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8);
         List<String> statusCodes = JsonPath.read(jsonResponse, "$..status");
 
         // expect 2x created
@@ -248,7 +249,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         items = itemList.toArray(items);
         response = itemResource.createOrUpdateItems(items);
 
-        jsonResponse = IOUtils.toString((InputStream) response.getEntity());
+        jsonResponse = new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8);
         statusCodes = JsonPath.read(jsonResponse, "$..status");
 
         // expect error and updated

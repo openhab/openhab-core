@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigConstants;
@@ -53,6 +52,10 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public abstract class AbstractFileTransformationService<T> implements TransformationService {
+
+    private static final char EXTENSION_SEPARATOR = '.';
+    private static final char UNIX_SEPARATOR = '/';
+    private static final char WINDOWS_SEPARATOR = '\\';
 
     private @Nullable WatchService watchService = null;
 
@@ -244,6 +247,12 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
         }
     }
 
+    private @Nullable String getFileExtension(String fileName) {
+        int extensionPos = fileName.lastIndexOf(EXTENSION_SEPARATOR);
+        int lastSeparatorPos = Math.max(fileName.lastIndexOf(UNIX_SEPARATOR), fileName.lastIndexOf(WINDOWS_SEPARATOR));
+        return lastSeparatorPos > extensionPos ? null : fileName.substring(extensionPos + 1);
+    }
+
     /**
      * Returns the name of the localized transformation file
      * if it actually exists, keeps the original in the other case
@@ -252,17 +261,21 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      * @return original or localized transformation file to use
      */
     protected String getLocalizedProposedFilename(String filename, final WatchService watchService) {
-        String extension = FilenameUtils.getExtension(filename);
-        String prefix = FilenameUtils.getPath(filename);
+        final File file = new File(filename);
+        String extension = getFileExtension(filename);
+        String prefix = file.getPath();
         String result = filename;
 
+        if (extension == null) {
+            extension = "";
+        }
         if (!prefix.isEmpty()) {
             watchSubDirectory(prefix, watchService);
         }
 
         // the filename may already contain locale information
         if (!filename.matches(".*_[a-z]{2}." + extension + "$")) {
-            String basename = FilenameUtils.getBaseName(filename);
+            String basename = file.getName();
             String alternateName = prefix + basename + "_" + getLocale().getLanguage() + "." + extension;
             String alternatePath = getSourcePath() + alternateName;
 

@@ -17,12 +17,12 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import com.google.gson.Gson;
@@ -72,7 +72,7 @@ public class Stream2JSONInputStreamTest {
     }
 
     private String inputStreamToString(InputStream in) throws IOException {
-        return IOUtils.toString(in);
+        return new String(in.readAllBytes(), StandardCharsets.UTF_8);
     }
 
     @SuppressWarnings("unused")

@@ -18,7 +18,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.utils.AudioStreamUtils;
 
@@ -102,7 +101,10 @@ public class FileAudioStream extends FixedLengthAudioStream {
 
     @Override
     public synchronized void reset() throws IOException {
-        IOUtils.closeQuietly(inputStream);
+        try {
+            inputStream.close();
+        } catch (IOException e) {
+        }
         try {
             inputStream = getInputStream(file);
         } catch (AudioException e) {

@@ -20,16 +20,19 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.emf.ecore.EObject;
 import org.junit.After;
 import org.junit.Before;
@@ -134,7 +137,10 @@ public class FolderObserverTest extends JavaOSGiTest {
     @After
     public void tearDown() throws Exception {
         folderObserver.deactivate();
-        FileUtils.deleteDirectory(WATCHED_DIRECTORY);
+        try (Stream<Path> walk = Files.walk(WATCHED_DIRECTORY.toPath())) {
+            walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        }
+
         modelRepo.clean();
         if (defaultWatchedDir != null) {
             System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, defaultWatchedDir);
@@ -165,7 +171,7 @@ public class FolderObserverTest extends JavaOSGiTest {
          * So, it's necessary to put some initial content in that file.
          */
         if (!IS_OS_WINDOWS) {
-            FileUtils.writeStringToFile(file, INITIAL_FILE_CONTENT);
+            Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8);
         }
 
         waitForAssert(() -> assertThat(file.exists(), is(true)));
@@ -206,7 +212,7 @@ public class FolderObserverTest extends JavaOSGiTest {
          * necessary to put some initial content in that file.
          */
         if (!IS_OS_WINDOWS) {
-            FileUtils.writeStringToFile(file, INITIAL_FILE_CONTENT, true);
+            Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
         }
 
         waitForAssert(() -> assertThat(file.exists(), is(true)));
@@ -216,7 +222,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         modelRepo.clean();
 
         String text = "Additional content";
-        FileUtils.writeStringToFile(file, text, true);
+        Files.writeString(file.toPath(), text, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
 
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(true)), DFL_TIMEOUT * 2,
                 DFL_SLEEP_TIME);
@@ -351,14 +357,15 @@ public class FolderObserverTest extends JavaOSGiTest {
         File mockFileWithValidExt = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
         mockFileWithValidExt.createNewFile();
         if (!IS_OS_WINDOWS) {
-            FileUtils.writeStringToFile(mockFileWithValidExt, INITIAL_FILE_CONTENT);
+            Files.writeString(mockFileWithValidExt.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8);
         }
 
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(true)), DFL_TIMEOUT * 2,
                 DFL_SLEEP_TIME);
 
         modelRepo.clean();
-        FileUtils.writeStringToFile(mockFileWithValidExt, "Additional content", true);
+        Files.writeString(mockFileWithValidExt.toPath(), "Additional content", StandardCharsets.UTF_8,
+                StandardOpenOption.APPEND);
 
         waitForAssert(() -> assertThat(modelRepo.isAddOrRefreshModelMethodCalled, is(true)), DFL_TIMEOUT * 2,
                 DFL_SLEEP_TIME);
@@ -387,7 +394,7 @@ public class FolderObserverTest extends JavaOSGiTest {
              */
             File file = new File(EXISTING_SUBDIR_PATH, filename);
             file.createNewFile();
-            FileUtils.writeStringToFile(file, INITIAL_FILE_CONTENT);
+            Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8);
         } else {
             /*
              * In windows a hidden file cannot be created with a single api call.
@@ -400,8 +407,10 @@ public class FolderObserverTest extends JavaOSGiTest {
             File file = new File(UNWATCHED_DIRECTORY, filename);
             file.createNewFile();
             Files.setAttribute(file.toPath(), "dos:hidden", true);
-            FileUtils.moveFileToDirectory(file, EXISTING_SUBDIR_PATH, false);
-            FileUtils.deleteDirectory(UNWATCHED_DIRECTORY);
+            Files.move(file.toPath(), EXISTING_SUBDIR_PATH.toPath());
+            try (Stream<Path> walk = Files.walk(UNWATCHED_DIRECTORY.toPath())) {
+                walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+            }
         }
 
         sleep(WAIT_EVENT_TO_BE_HANDLED);
@@ -421,7 +430,7 @@ public class FolderObserverTest extends JavaOSGiTest {
             calledFileName = name;
             isAddOrRefreshModelMethodCalled = true;
             try {
-                fileContent = IOUtils.toString(inputStream);
+                fileContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                 inputStream.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);

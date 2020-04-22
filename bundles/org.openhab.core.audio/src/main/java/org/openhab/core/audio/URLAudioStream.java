@@ -17,12 +17,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.utils.AudioStreamUtils;
@@ -65,24 +67,20 @@ public class URLAudioStream extends AudioStream {
         try {
             switch (extension) {
                 case M3U_EXTENSION:
-                    try (final InputStream isM3U = new URL(url).openStream()) {
-                        for (final String line : IOUtils.readLines(isM3U)) {
-                            if (!line.isEmpty() && !line.startsWith("#")) {
-                                url = line;
-                                break;
-                            }
+                    for (final String line : Files.readAllLines(Paths.get(URI.create(url)))) {
+                        if (!line.isEmpty() && !line.startsWith("#")) {
+                            url = line;
+                            break;
                         }
                     }
                     break;
                 case PLS_EXTENSION:
-                    try (final InputStream isPLS = new URL(url).openStream()) {
-                        for (final String line : IOUtils.readLines(isPLS)) {
-                            if (!line.isEmpty() && line.startsWith("File")) {
-                                final Matcher matcher = PLS_STREAM_PATTERN.matcher(line);
-                                if (matcher.find()) {
-                                    url = matcher.group(1);
-                                    break;
-                                }
+                    for (final String line : Files.readAllLines(Paths.get(URI.create(url)))) {
+                        if (!line.isEmpty() && line.startsWith("File")) {
+                            final Matcher matcher = PLS_STREAM_PATTERN.matcher(line);
+                            if (matcher.find()) {
+                                url = matcher.group(1);
+                                break;
                             }
                         }
                     }

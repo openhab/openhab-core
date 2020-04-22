@@ -12,16 +12,20 @@ if(URLEncoder === undefined) {
     throw "URLEncoder not defined";
 }
 
-if(FileUtils === undefined) {
-    throw "FileUtils not defined";
-}
-
-if(FilenameUtils === undefined) {
-    throw "FilenameUtils not defined";
-}
-
 if(File === undefined) {
     throw "File not defined";
+}
+
+if(Files === undefined) {
+    throw "Files not defined";
+}
+
+if(Path === undefined) {
+    throw "Path not defined";
+}
+
+if(Paths === undefined) {
+    throw "Paths not defined";
 }
 
 //types
