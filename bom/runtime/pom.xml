@@ -879,14 +879,14 @@
       <version>0.5.8</version>
       <!-- <scope>compile</scope> -->
     </dependency>
-    
+
     <!-- jose4j -->
     <dependency>
       <groupId>org.bitbucket.b_c</groupId>
       <artifactId>jose4j</artifactId>
       <version>0.7.0</version>
       <scope>compile</scope>
-    </dependency>    
+    </dependency>
 
   </dependencies>
 

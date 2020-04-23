@@ -252,21 +252,20 @@ public abstract class GenericItem implements ActiveItem {
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         try {
             final boolean stateChanged = newState != null && !newState.equals(oldState);
-            clonedListeners.forEach(listener ->
-                pool.execute(() -> {
-                    try {
-                        listener.stateUpdated(GenericItem.this, newState);
-                        if (stateChanged) {
-                            listener.stateChanged(GenericItem.this, oldState, newState);
-                        }
-                    } catch (Exception e) {
-                        logger.warn("failed notifying listener '{}' about state update of item {}: {}", listener,
-                                GenericItem.this.getName(), e.getMessage(), e);
+            clonedListeners.forEach(listener -> pool.execute(() -> {
+                try {
+                    listener.stateUpdated(GenericItem.this, newState);
+                    if (stateChanged) {
+                        listener.stateChanged(GenericItem.this, oldState, newState);
                     }
-                }));
+                } catch (Exception e) {
+                    logger.warn("failed notifying listener '{}' about state update of item {}: {}", listener,
+                            GenericItem.this.getName(), e.getMessage(), e);
+                }
+            }));
         } catch (IllegalArgumentException e) {
-            logger.warn("failed comparing oldState '{}' to newState '{}' for item {}: {}", oldState,
-                    newState, GenericItem.this.getName(), e.getMessage(), e);
+            logger.warn("failed comparing oldState '{}' to newState '{}' for item {}: {}", oldState, newState,
+                    GenericItem.this.getName(), e.getMessage(), e);
         }
     }
 

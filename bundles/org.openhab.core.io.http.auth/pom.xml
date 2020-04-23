@@ -26,7 +26,7 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -49,6 +49,6 @@
           </execution>
         </executions>
       </plugin>
-    </plugins>  
+    </plugins>
   </build>
 </project>
