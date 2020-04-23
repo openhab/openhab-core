@@ -576,12 +576,28 @@ Import-Package: \\
                   <include>src/**/*.xml</include>
                 </includes>
                 <excludes>
+                  <exclude>**/feature.xml</exclude>
                   <exclude>**/pom.xml</exclude>
                 </excludes>
                 <eclipseWtp>
                   <type>XML</type>
                   <files>
                     <file>openhab_wst_xml_files.prefs</file>
+                  </files>
+                  <version>4.12.0</version>
+                </eclipseWtp>
+                <trimTrailingWhitespace />
+                <endWithNewline />
+              </format>
+              <format>
+                <!-- feature.xml -->
+                <includes>
+                  <include>src/main/feature/feature.xml</include>
+                </includes>
+                <eclipseWtp>
+                  <type>XML</type>
+                  <files>
+                    <file>openhab_wst_feature_file.prefs</file>
                   </files>
                   <version>4.12.0</version>
                 </eclipseWtp>

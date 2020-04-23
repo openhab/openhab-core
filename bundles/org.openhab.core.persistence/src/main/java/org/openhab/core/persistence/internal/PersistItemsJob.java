@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.openhab.core.items.Item;
+import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceConfiguration;
-import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.scheduler.SchedulerRunnable;
 import org.slf4j.Logger;
@@ -66,7 +66,8 @@ public class PersistItemsJob implements SchedulerRunnable {
         }
     }
 
-    private boolean hasStrategy(List<PersistenceStrategy> defaults, PersistenceItemConfiguration config, String strategyName) {
+    private boolean hasStrategy(List<PersistenceStrategy> defaults, PersistenceItemConfiguration config,
+            String strategyName) {
         // check if the strategy is directly defined on the config
         for (PersistenceStrategy strategy : config.getStrategies()) {
             if (strategyName.equals(strategy.getName())) {

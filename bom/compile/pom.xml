@@ -315,7 +315,7 @@
       <artifactId>jose4j</artifactId>
       <version>0.7.0</version>
       <scope>compile</scope>
-    </dependency>    
+    </dependency>
 
   </dependencies>
 
