@@ -19,6 +19,8 @@ package org.openhab.core.io.rest;
  */
 public class RESTConstants {
 
-    // URI path used for the REST API
+    @Deprecated
     public static final String REST_URI = "/rest";
+
+    public static final String JAX_RS_NAME = "openhab";
 }

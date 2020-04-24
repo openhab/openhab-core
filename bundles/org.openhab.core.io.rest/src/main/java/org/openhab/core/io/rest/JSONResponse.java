@@ -23,7 +23,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.ext.Provider;
 
 import org.openhab.core.library.types.DateTimeType;
 import org.slf4j.Logger;
@@ -162,7 +161,7 @@ public class JSONResponse {
         try {
             // we will not actively close the PipedInputStream since it is read by the receiving end
             // and will be GC'ed once the response is consumed.
-            PipedInputStream in = new PipedInputStream(out);
+            PipedJSONInputStream in = new PipedJSONInputStream(out);
             rp.entity(in);
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -184,11 +183,22 @@ public class JSONResponse {
     }
 
     /**
+     * An piped input stream that is marked to produce JSON string.
+     *
+     * @author Markus Rathgeb - Initial contribution
+     */
+    private static class PipedJSONInputStream extends PipedInputStream implements JSONInputStream {
+
+        public PipedJSONInputStream(PipedOutputStream src) throws IOException {
+            super(src);
+        }
+    }
+
+    /**
      * trap exceptions
      *
      * @author Joerg Plewe
      */
-    @Provider
     public static class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Exception> {
 
         private final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);

@@ -20,10 +20,13 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.ext.Provider;
 
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
 
 /**
  * A filter that only affects resources implementing the {@link SatisfiableRESTResource} interface.
@@ -32,9 +35,11 @@ import org.osgi.service.component.annotations.Component;
  * 503 - Service Unavailable.
  *
  * @author Ivan Iliev - Initial contribution
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
-@Provider
-@Component(immediate = true, service = SatisfiableResourceFilter.class)
+@Component
+@JaxrsExtension
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 public class SatisfiableResourceFilter implements ContainerRequestFilter {
 
     @Override

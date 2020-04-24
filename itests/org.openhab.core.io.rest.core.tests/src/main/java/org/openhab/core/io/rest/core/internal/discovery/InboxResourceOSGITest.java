@@ -58,7 +58,7 @@ public class InboxResourceOSGITest extends JavaOSGiTest {
 
         resource.setInbox(inbox);
         Response reponse = resource.approve(null, testThing.getUID().toString(), testThingLabel);
-        assertTrue(reponse.getStatusInfo() == Status.OK);
+        assertTrue(reponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode());
     }
 
     @Test
@@ -68,6 +68,6 @@ public class InboxResourceOSGITest extends JavaOSGiTest {
 
         resource.setInbox(inbox);
         Response reponse = resource.approve(null, testThing.getUID().toString(), testThingLabel);
-        assertTrue(reponse.getStatusInfo() == Status.NOT_FOUND);
+        assertTrue(reponse.getStatusInfo().getStatusCode() == Status.NOT_FOUND.getStatusCode());
     }
 }

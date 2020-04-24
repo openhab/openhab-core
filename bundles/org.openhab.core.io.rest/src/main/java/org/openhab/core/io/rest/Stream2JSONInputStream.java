@@ -31,7 +31,7 @@ import com.google.gson.GsonBuilder;
  *
  * @author Henning Treu - Initial contribution
  */
-public class Stream2JSONInputStream extends InputStream {
+public class Stream2JSONInputStream extends InputStream implements JSONInputStream {
 
     private final Iterator<String> iterator;
 

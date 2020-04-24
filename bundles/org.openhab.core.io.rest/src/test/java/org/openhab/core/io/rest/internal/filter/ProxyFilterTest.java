@@ -23,9 +23,9 @@ import java.util.Collections;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -156,9 +156,9 @@ public class ProxyFilterTest {
     private void setupContextURIs(String baseURI, String requestURI) {
         try {
             when(uriInfo.getBaseUri()).thenReturn(new URI(baseURI));
-            when(uriInfo.getBaseUriBuilder()).thenReturn(new JerseyUriBuilder().uri(baseURI));
+            when(uriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri(baseURI));
             when(uriInfo.getRequestUri()).thenReturn(new URI(requestURI));
-            when(uriInfo.getRequestUriBuilder()).thenReturn(new JerseyUriBuilder().uri(requestURI));
+            when(uriInfo.getRequestUriBuilder()).thenReturn(UriBuilder.fromUri(requestURI));
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Error while setting up context mock", e);
         }

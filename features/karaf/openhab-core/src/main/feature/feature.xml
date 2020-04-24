@@ -28,8 +28,8 @@
 		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.19.0)(!(version&gt;=2.20.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
-		<requirement>openhab.tp;filter:="(feature=jax-rs)"</requirement>
-		<feature dependency="true">openhab.tp-jax-rs</feature>
+		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
+		<feature dependency="true">openhab.tp-jax-rs-whiteboard</feature>
 
 		<requirement>openhab.tp;filter:="(feature=httpclient)"</requirement>
 		<feature dependency="true">openhab.tp-httpclient</feature>
@@ -56,7 +56,6 @@
 		<feature dependency="true">pax-http-whiteboard</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.optimize/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
 	</feature>
@@ -154,7 +153,9 @@
 	<feature name="openhab-core-io-rest-auth" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-auth-jaas</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.auth/${project.version}</bundle>
+		<!--
+			<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.auth/${project.version}</bundle>
+		-->
 		<requirement>openhab.tp;filter:="(feature=jose4j)"</requirement>
 		<feature dependency="true">openhab.tp-jose4j</feature>
 	</feature>
@@ -169,6 +170,13 @@
 		<feature>openhab-core-ui</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sitemap/${project.version}</bundle>
 		<feature dependency="true">openhab-core-model-sitemap</feature>
+	</feature>
+
+	<feature name="openhab-core-io-rest-swagger1" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.swagger1/${project.version}</bundle>
+		<requirement>openhab.tp;filter:="(feature=jaxrswb-swagger1-gen)"</requirement>
+		<feature dependency="true">openhab.tp-jaxrswb-swagger1-gen</feature>
 	</feature>
 
 	<feature name="openhab-core-io-rest-audio" version="${project.version}">
