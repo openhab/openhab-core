@@ -69,5 +69,4 @@ public interface IconProvider {
      * @return a byte stream of the icon in the given format or null, if no icon exists
      */
     InputStream getIcon(String category, String iconSetId, String state, Format format);
-
 }

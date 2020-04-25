@@ -117,5 +117,4 @@ public class SerialPortUtil {
         }
         return null;
     }
-
 }

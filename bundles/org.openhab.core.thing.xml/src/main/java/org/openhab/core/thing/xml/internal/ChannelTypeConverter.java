@@ -210,5 +210,4 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
 
         return channelTypeXmlResult;
     }
-
 }

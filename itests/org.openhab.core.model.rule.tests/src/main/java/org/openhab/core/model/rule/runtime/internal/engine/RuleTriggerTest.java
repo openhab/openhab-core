@@ -139,5 +139,4 @@ public class RuleTriggerTest extends JavaOSGiTest {
         assertTrue(triggerClass.isInstance(trigger));
         assertEquals("world", valueFunction.apply(triggerClass.cast(trigger)));
     }
-
 }

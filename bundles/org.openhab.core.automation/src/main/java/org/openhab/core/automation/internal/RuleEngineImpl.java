@@ -242,7 +242,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         public void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context) {
             RuleEngineImpl.this.runNow(uid, considerConditions, context);
         }
-
     };
 
     /**
@@ -1432,5 +1431,4 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return outputName;
         }
     }
-
 }

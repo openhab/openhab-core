@@ -15,7 +15,7 @@
 			</tag>
 		</tags>
 		<config-description>
-			<parameter name="range" type="integer" readOnly="true" min="0" max="4" step="1" />
+			<parameter name="range" type="integer" readOnly="true" min="0" max="4" step="1"/>
 		</config-description>
 	</channel-type>
 </thing:thing-descriptions>

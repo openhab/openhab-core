@@ -92,5 +92,4 @@ public class PercentType extends DecimalType {
             return defaultConversion(target);
         }
     }
-
 }

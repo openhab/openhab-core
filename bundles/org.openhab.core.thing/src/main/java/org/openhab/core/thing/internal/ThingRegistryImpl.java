@@ -290,5 +290,4 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
     protected void unsetManagedProvider(ManagedThingProvider managedProvider) {
         super.unsetManagedProvider(managedProvider);
     }
-
 }

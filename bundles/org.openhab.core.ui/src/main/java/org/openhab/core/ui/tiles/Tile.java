@@ -49,5 +49,4 @@ public interface Tile {
      * @return the overlay to use
      */
     String getOverlay();
-
 }

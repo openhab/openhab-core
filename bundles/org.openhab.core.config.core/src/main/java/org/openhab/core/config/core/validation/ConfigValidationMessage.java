@@ -127,5 +127,4 @@ public final class ConfigValidationMessage {
         return "ConfigDescriptionValidationMessage [parameterName=" + parameterName + ", defaultMessage="
                 + defaultMessage + ", messageKey=" + messageKey + ", content=" + Arrays.toString(content) + "]";
     }
-
 }

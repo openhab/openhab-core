@@ -58,5 +58,4 @@ public interface ScriptEngineFactory {
      */
     @Nullable
     ScriptEngine createScriptEngine(String scriptType);
-
 }

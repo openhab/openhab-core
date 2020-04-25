@@ -326,7 +326,6 @@ public final class FirmwareImpl implements Firmware {
                 return Objects.equals(this.versionString, ((Version) other).versionString);
             }
         }
-
     }
 
     @Override
@@ -442,5 +441,4 @@ public final class FirmwareImpl implements Firmware {
                 + ", prerequisiteVersion=" + prerequisiteVersion + ", changelog=" + changelog + ", onlineChangelog="
                 + onlineChangelog + ", md5Hash=" + md5Hash + ", properties=" + properties + "]";
     }
-
 }

@@ -368,5 +368,4 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         assertEquals(3, discoveryServiceRegistry.getMaxScanTimeout(ANY_BINDING_ID_2));
         assertEquals(0, discoveryServiceRegistry.getMaxScanTimeout("unknownBindingId"));
     }
-
 }

@@ -356,5 +356,4 @@ public class JavaOSGiTest extends JavaTest {
         registeredServices.forEach((interfaceName, services) -> services.forEach(service -> service.unregister()));
         registeredServices.clear();
     }
-
 }

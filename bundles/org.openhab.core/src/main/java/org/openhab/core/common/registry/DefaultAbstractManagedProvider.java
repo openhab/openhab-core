@@ -47,5 +47,4 @@ public abstract class DefaultAbstractManagedProvider<@NonNull E extends Identifi
     protected E toPersistableElement(E element) {
         return element;
     }
-
 }

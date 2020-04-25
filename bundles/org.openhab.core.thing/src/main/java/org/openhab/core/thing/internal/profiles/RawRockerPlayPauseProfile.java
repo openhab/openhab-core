@@ -55,5 +55,4 @@ public class RawRockerPlayPauseProfile implements TriggerProfile {
             callback.sendCommand(PlayPauseType.PAUSE);
         }
     }
-
 }

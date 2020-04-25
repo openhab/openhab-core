@@ -72,5 +72,4 @@ public class ThingImplTest {
         assertNotNull(thing.getChannel(SECOND_CHANNEL_ID));
         assertEquals(SECOND_CHANNEL_UID, thing.getChannel(SECOND_CHANNEL_ID).getUID());
     }
-
 }

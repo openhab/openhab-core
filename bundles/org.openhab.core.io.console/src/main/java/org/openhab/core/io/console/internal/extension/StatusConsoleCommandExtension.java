@@ -70,5 +70,4 @@ public class StatusConsoleCommandExtension extends AbstractConsoleCommandExtensi
             printUsage(console);
         }
     }
-
 }

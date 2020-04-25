@@ -914,5 +914,4 @@ public class MqttBrokerConnection {
             timeoutFuture.cancel(false);
         }
     }
-
 }

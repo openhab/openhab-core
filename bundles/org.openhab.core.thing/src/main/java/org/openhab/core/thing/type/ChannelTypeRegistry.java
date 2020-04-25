@@ -95,5 +95,4 @@ public class ChannelTypeRegistry {
     protected void removeChannelTypeProvider(ChannelTypeProvider channelTypeProviders) {
         this.channelTypeProviders.remove(channelTypeProviders);
     }
-
 }

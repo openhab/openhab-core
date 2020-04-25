@@ -90,5 +90,4 @@ public class MetadataSelectorMatcher {
             return result.stream().filter(namespace -> namespace.matches(AbstractUID.SEGMENT_PATTERN)).collect(toSet());
         }
     }
-
 }

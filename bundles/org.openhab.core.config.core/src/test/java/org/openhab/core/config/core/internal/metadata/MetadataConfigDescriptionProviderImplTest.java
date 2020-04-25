@@ -179,5 +179,4 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
         ConfigDescription desc = service.getConfigDescription(URI.create("metadata:foo:nonsense"), null);
         assertNull(desc);
     }
-
 }

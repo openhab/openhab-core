@@ -28,5 +28,4 @@ public interface RESTResource {
     default boolean isSatisfied() {
         return true;
     }
-
 }

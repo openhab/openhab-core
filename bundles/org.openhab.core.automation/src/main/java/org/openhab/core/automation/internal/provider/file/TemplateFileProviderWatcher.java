@@ -51,5 +51,4 @@ public class TemplateFileProviderWatcher extends TemplateFileProvider {
     public void removeParser(Parser<RuleTemplate> parser, Map<String, String> properties) {
         super.removeParser(parser, properties);
     }
-
 }

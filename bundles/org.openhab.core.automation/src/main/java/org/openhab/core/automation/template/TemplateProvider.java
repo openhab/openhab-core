@@ -53,5 +53,4 @@ public interface TemplateProvider<E extends Template> extends Provider<E> {
      * @return a collection of localized {@link Template}s provided by this provider.
      */
     Collection<E> getTemplates(@Nullable Locale locale);
-
 }

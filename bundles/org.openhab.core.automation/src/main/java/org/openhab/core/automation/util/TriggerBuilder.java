@@ -44,5 +44,4 @@ public class TriggerBuilder extends ModuleBuilder<TriggerBuilder, Trigger> {
     public Trigger build() {
         return new TriggerImpl(getId(), getTypeUID(), configuration, label, description);
     }
-
 }

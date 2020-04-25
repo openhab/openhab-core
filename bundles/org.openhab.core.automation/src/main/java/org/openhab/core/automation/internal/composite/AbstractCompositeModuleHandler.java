@@ -115,5 +115,4 @@ public abstract class AbstractCompositeModuleHandler<M extends Module, MT extend
     }
 
     protected abstract List<M> getChildren();
-
 }

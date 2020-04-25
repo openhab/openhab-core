@@ -36,5 +36,4 @@ public enum StorageRecordType {
     public String getKey(@Nullable String handle) {
         return (handle == null) ? this.suffix : (handle + this.suffix);
     }
-
 }

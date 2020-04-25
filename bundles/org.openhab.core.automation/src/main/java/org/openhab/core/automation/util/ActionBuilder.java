@@ -57,5 +57,4 @@ public class ActionBuilder extends ModuleBuilder<ActionBuilder, Action> {
     public Action build() {
         return new ActionImpl(getId(), getTypeUID(), configuration, label, description, inputs);
     }
-
 }

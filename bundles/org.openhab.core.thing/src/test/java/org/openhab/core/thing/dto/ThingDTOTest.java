@@ -82,5 +82,4 @@ public class ThingDTOTest {
                     is(notNullValue()));
         });
     }
-
 }

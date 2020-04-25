@@ -93,5 +93,4 @@ public interface GroupFunction {
             return new State[0];
         }
     }
-
 }

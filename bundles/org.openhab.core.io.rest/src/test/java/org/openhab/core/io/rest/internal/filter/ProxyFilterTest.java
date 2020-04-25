@@ -174,5 +174,4 @@ public class ProxyFilterTest {
         }
         when(context.getHeaders()).thenReturn(headers);
     }
-
 }

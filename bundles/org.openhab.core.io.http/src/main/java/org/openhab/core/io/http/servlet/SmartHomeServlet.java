@@ -41,5 +41,4 @@ public abstract class SmartHomeServlet extends BaseSmartHomeServlet {
     protected void activate(String alias) {
         super.activate(alias, httpContext);
     }
-
 }

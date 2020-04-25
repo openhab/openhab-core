@@ -58,5 +58,4 @@ public class ProfileTypeRegistryImpl implements ProfileTypeRegistry {
     protected void removeProfileTypeProvider(ProfileTypeProvider profileTypeProvider) {
         profileTypeProviders.remove(profileTypeProvider);
     }
-
 }

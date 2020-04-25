@@ -64,5 +64,4 @@ public class SwitchItemTest {
         SwitchItem item = new SwitchItem("test");
         StateUtil.testAcceptedStates(item);
     }
-
 }

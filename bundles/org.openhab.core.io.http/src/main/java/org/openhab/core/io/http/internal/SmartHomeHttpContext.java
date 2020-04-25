@@ -88,5 +88,4 @@ public class SmartHomeHttpContext implements WrappingHttpContext {
     public void removeHandler(Handler handler) {
         this.handlers.remove(handler);
     }
-
 }

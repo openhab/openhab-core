@@ -56,5 +56,4 @@ public class ItemChannelLink extends AbstractLink {
     public Configuration getConfiguration() {
         return configuration;
     }
-
 }

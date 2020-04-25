@@ -60,5 +60,4 @@ public class ExecUtilTest {
         String osName = System.getProperty("os.name").toLowerCase();
         return osName.indexOf("windows") >= 0;
     }
-
 }

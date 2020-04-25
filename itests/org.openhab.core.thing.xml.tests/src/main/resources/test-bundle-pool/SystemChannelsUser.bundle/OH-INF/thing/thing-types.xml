@@ -9,9 +9,9 @@
 		<description>Simple wireless router</description>
 
 		<channels>
-			<channel id="sigstrv2" typeId="system.signal-strength" />
-			<channel id="test" typeId="system.my-channel" />
-			<channel id="lowbat" typeId="system.low-battery" />
+			<channel id="sigstrv2" typeId="system.signal-strength"/>
+			<channel id="test" typeId="system.my-channel"/>
+			<channel id="lowbat" typeId="system.low-battery"/>
 		</channels>
 
 	</thing-type>

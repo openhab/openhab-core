@@ -76,5 +76,4 @@ public interface ThingTracker {
      * @param thingTrackerEvent the event that occurred
      */
     void thingUpdated(Thing thing, ThingTrackerEvent thingTrackerEvent);
-
 }

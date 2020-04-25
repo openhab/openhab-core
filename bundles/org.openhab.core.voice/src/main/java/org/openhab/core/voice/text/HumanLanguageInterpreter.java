@@ -68,5 +68,4 @@ public interface HumanLanguageInterpreter {
      * @return Set of supported grammars (each given by a short name)
      */
     Set<String> getSupportedGrammarFormats();
-
 }

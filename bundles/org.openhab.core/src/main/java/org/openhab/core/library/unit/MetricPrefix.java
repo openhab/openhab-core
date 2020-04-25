@@ -105,5 +105,4 @@ public class MetricPrefix {
     public static <T extends Quantity<T>> Unit<T> YOCTO(Unit<T> unit) {
         return tec.uom.se.unit.MetricPrefix.YOCTO(unit);
     }
-
 }

@@ -80,5 +80,4 @@ public class ChannelGroupTypeI18nLocalizationService {
         }
         return builder.build();
     }
-
 }

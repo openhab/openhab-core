@@ -121,5 +121,4 @@ public abstract class AbstractAudioServletTest extends JavaTest {
     private String generateURL(String protocol, String hostname, int port, String path) {
         return String.format("%s://%s:%s%s", protocol, hostname, port, path);
     }
-
 }

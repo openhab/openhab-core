@@ -63,5 +63,4 @@ public class I18nConfigOptionsProviderTest {
     public void testUnknownParameter() throws Exception {
         assertThat(provider.getParameterOptions(uriI18N, "unknown", Locale.US), nullValue());
     }
-
 }

@@ -470,5 +470,4 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {
         return "discovery." + discoveryResult.getThingUID().getAsString().replaceAll(":", ".") + "." + lastSegment;
     }
-
 }

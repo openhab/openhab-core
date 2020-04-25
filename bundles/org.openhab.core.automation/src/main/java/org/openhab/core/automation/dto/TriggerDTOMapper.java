@@ -61,5 +61,4 @@ public class TriggerDTOMapper extends ModuleDTOMapper {
         }
         return triggers;
     }
-
 }

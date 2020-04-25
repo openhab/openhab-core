@@ -105,5 +105,4 @@ public class HttpServiceUtil {
 
         return -1;
     }
-
 }

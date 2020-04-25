@@ -139,5 +139,4 @@ public class HexUtils {
             throw new IllegalArgumentException("hexString contains illegal character for hexToBytes: " + value);
         }
     }
-
 }

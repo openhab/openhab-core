@@ -95,5 +95,4 @@ public class TimeOfDayConditionHandler extends BaseConditionModuleHandler {
         // If none of these conditions apply false is returned.
         return false;
     }
-
 }

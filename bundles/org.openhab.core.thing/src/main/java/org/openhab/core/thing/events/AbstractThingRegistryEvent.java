@@ -47,5 +47,4 @@ public abstract class AbstractThingRegistryEvent extends AbstractEvent {
     public ThingDTO getThing() {
         return thing;
     }
-
 }

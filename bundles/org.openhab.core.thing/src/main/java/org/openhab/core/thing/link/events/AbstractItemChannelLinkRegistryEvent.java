@@ -32,5 +32,4 @@ public abstract class AbstractItemChannelLinkRegistryEvent extends AbstractEvent
     public ItemChannelLinkDTO getLink() {
         return link;
     }
-
 }

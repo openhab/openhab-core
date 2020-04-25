@@ -40,5 +40,4 @@ public class StorageEntry {
     public Object getValue() {
         return value;
     }
-
 }

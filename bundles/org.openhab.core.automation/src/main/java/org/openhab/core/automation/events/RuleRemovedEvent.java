@@ -44,5 +44,4 @@ public class RuleRemovedEvent extends AbstractRuleRegistryEvent {
     public String toString() {
         return "Rule '" + getRule().uid + "' has been removed.";
     }
-
 }

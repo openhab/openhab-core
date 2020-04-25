@@ -192,5 +192,4 @@ public interface AudioManager {
      * @return ids of matching sinks
      */
     Set<String> getSinkIds(String pattern);
-
 }

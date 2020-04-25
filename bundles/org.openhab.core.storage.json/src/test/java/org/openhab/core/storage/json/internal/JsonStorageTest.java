@@ -155,5 +155,4 @@ public class JsonStorageTest extends JavaTest {
     private static class InnerObject {
         private final Configuration configuration = new Configuration();
     }
-
 }

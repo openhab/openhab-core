@@ -107,5 +107,4 @@ public class UIComponentProvider extends AbstractProvider<RootUIComponent>
         }
         return storage.get(key);
     }
-
 }

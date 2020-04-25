@@ -107,5 +107,4 @@ public class MqttBrokerConnectionServiceInstance {
         }
         connection = null;
     }
-
 }

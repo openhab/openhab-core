@@ -384,5 +384,4 @@ public class ConfigurableServiceResource implements RESTResource {
     public boolean isSatisfied() {
         return configurationService != null && configDescRegistry != null;
     }
-
 }

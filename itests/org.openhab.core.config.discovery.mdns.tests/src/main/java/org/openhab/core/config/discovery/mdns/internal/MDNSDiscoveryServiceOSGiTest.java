@@ -65,5 +65,4 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
         configuration.update(properties);
     }
-
 }

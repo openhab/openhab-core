@@ -29,5 +29,4 @@ public interface UIComponentRegistryFactory {
      * @return a registry for UI elements in the namespace
      */
     UIComponentRegistry getRegistry(String namespace);
-
 }

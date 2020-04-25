@@ -207,5 +207,4 @@ public class ChannelItemProviderTest {
         provider.addProviderChangeListener(listenerMock);
         return provider;
     }
-
 }

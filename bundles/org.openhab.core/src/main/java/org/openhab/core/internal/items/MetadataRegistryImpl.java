@@ -86,5 +86,4 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
         getManagedProvider()
                 .ifPresent(managedProvider -> ((ManagedMetadataProvider) managedProvider).removeItemMetadata(itemName));
     }
-
 }

@@ -59,5 +59,4 @@ public class CatchHandler implements Handler {
     public void handleError(HttpServletRequest request, HttpServletResponse response, HandlerContext context) {
         delegate.handleError(request, response, context);
     }
-
 }

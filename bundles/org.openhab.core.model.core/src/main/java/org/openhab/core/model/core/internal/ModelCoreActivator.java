@@ -36,5 +36,4 @@ public class ModelCoreActivator implements BundleActivator {
     public void stop(BundleContext bundleContext) throws Exception {
         ModelCoreActivator.context = null;
     }
-
 }

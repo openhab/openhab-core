@@ -82,5 +82,4 @@ public interface ExtensionService {
      * @return the extension Id if the URI can be parsed, otherwise <code>null</code>.
      */
     String getExtensionId(URI extensionURI);
-
 }

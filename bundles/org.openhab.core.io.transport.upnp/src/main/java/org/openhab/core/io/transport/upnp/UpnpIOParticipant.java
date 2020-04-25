@@ -43,5 +43,4 @@ public interface UpnpIOParticipant {
      *            when the polling was previously failing
      */
     public void onStatusChanged(boolean status);
-
 }

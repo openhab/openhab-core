@@ -23,5 +23,4 @@ import org.openhab.core.automation.dto.RuleDTO;
 public class EnrichedRuleDTO extends RuleDTO {
 
     public RuleStatusInfo status;
-
 }

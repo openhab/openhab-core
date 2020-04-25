@@ -156,5 +156,4 @@ public class PollingUsbSerialScannerTest {
 
         verify(discoveryListener, never()).usbSerialDeviceDiscovered(any(UsbSerialDeviceInformation.class));
     }
-
 }

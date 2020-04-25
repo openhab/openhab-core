@@ -38,5 +38,4 @@ public class DiscoveryServiceMockOfBridge extends DiscoveryServiceMock {
     public ThingUID getBridge() {
         return bridgeUID;
     }
-
 }

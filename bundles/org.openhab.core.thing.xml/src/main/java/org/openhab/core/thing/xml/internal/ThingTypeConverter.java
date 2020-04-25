@@ -137,5 +137,4 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     protected String getRepresentationProperty(NodeIterator nodeIterator) {
         return (String) nodeIterator.nextValue("representation-property", false);
     }
-
 }

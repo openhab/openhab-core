@@ -116,5 +116,4 @@ public class PendingToken {
     public @Nullable String getCodeChallengeMethod() {
         return codeChallengeMethod;
     }
-
 }

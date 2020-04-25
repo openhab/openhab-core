@@ -55,5 +55,4 @@ public class RawRockerUpDownProfile implements TriggerProfile {
             callback.sendCommand(UpDownType.DOWN);
         }
     }
-
 }

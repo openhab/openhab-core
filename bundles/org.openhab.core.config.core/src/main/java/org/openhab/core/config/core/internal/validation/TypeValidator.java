@@ -43,5 +43,4 @@ final class TypeValidator implements ConfigDescriptionParameterValidator {
         return new ConfigValidationMessage(parameterName, MessageKey.DATA_TYPE_VIOLATED.defaultMessage,
                 MessageKey.DATA_TYPE_VIOLATED.key, type);
     }
-
 }

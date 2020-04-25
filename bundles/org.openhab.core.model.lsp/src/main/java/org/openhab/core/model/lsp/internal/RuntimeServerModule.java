@@ -59,5 +59,4 @@ public class RuntimeServerModule extends AbstractModule {
         bind(IContainer.Manager.class).to(ProjectDescriptionBasedContainerManager.class);
         bind(ILanguageServerShutdownAndExitHandler.class).to(ILanguageServerShutdownAndExitHandler.NullImpl.class);
     }
-
 }

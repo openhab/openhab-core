@@ -124,5 +124,4 @@ public class ScriptExtensionManager {
             provider.unload(scriptIdentifier);
         }
     }
-
 }

@@ -258,5 +258,4 @@ public class ChannelType extends AbstractDescriptionType {
     public CommandDescription getCommandDescription() {
         return commandDescription;
     }
-
 }

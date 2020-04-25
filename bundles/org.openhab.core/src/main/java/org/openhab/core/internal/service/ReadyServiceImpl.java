@@ -121,5 +121,4 @@ public class ReadyServiceImpl implements ReadyService {
         ReadyMarkerFilter f = trackers.get(readyTracker);
         markers.stream().filter(marker -> f.apply(marker)).forEach(action);
     }
-
 }

@@ -2004,5 +2004,4 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                 .thenReturn(configDescription);
         registerService(configDescriptionProvider);
     }
-
 }

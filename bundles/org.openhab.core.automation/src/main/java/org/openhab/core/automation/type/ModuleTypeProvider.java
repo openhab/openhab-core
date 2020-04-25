@@ -50,5 +50,4 @@ public interface ModuleTypeProvider extends Provider<ModuleType> {
      * @return collection of localized {@link ModuleType} provided by this provider.
      */
     <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale);
-
 }

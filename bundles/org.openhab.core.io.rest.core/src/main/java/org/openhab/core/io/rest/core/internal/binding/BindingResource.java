@@ -229,5 +229,4 @@ public class BindingResource implements RESTResource {
         return configurationService != null && configDescRegistry != null && bindingInfoRegistry != null
                 && localeService != null;
     }
-
 }

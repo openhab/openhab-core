@@ -85,5 +85,4 @@ public class LocaleServiceImpl implements LocaleService {
             return Locale.US;
         }
     }
-
 }

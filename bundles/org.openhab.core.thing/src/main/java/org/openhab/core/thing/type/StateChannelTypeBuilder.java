@@ -60,5 +60,4 @@ public interface StateChannelTypeBuilder extends ChannelTypeBuilder<StateChannel
      * @return this builder
      */
     StateChannelTypeBuilder withCommandDescription(@Nullable CommandDescription commandDescription);
-
 }

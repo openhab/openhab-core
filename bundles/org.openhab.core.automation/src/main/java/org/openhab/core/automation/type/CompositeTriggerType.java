@@ -86,5 +86,4 @@ public class CompositeTriggerType extends TriggerType {
     public List<Trigger> getChildren() {
         return children;
     }
-
 }

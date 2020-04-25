@@ -87,5 +87,4 @@ public class DefaultHandlerContext implements HandlerContext {
     public void error(Exception error) {
         this.error = error;
     }
-
 }

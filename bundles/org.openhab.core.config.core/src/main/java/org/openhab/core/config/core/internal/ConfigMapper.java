@@ -178,5 +178,4 @@ public class ConfigMapper {
         }
         return result;
     }
-
 }

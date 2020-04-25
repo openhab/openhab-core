@@ -31,5 +31,4 @@ final class RequiredValidator implements ConfigDescriptionParameterValidator {
 
         return null;
     }
-
 }

@@ -189,5 +189,4 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
 
         return set;
     }
-
 }

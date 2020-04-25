@@ -140,5 +140,4 @@ public final class FirmwareUpdateResultInfo {
     public String toString() {
         return "FirmwareUpdateResultInfo [result=" + result + ", errorMessage=" + errorMessage + "]";
     }
-
 }

@@ -65,5 +65,4 @@ public class MagicThingActionsService implements ThingActions {
     public ThingHandler getThingHandler() {
         return this.handler;
     }
-
 }

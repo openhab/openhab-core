@@ -44,5 +44,4 @@ public interface BridgeHandler extends ThingHandler {
      * @param childThing the thing of the disposed child handler
      */
     void childHandlerDisposed(ThingHandler childHandler, Thing childThing);
-
 }

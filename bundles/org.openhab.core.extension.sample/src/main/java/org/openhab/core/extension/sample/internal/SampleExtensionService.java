@@ -166,5 +166,4 @@ public class SampleExtensionService implements ExtensionService {
             eventPublisher.post(event);
         }
     }
-
 }

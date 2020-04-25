@@ -58,5 +58,4 @@ public class GenericMetadataProviderTest {
         provider.removeMetadata("item");
         assertEquals(1, provider.getAll().size());
     }
-
 }

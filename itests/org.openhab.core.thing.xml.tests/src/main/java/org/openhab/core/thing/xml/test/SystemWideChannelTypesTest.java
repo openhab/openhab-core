@@ -157,5 +157,4 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
             assertNull(lowBatType.getDescription());
         }
     }
-
 }

@@ -27,5 +27,4 @@ public class SitemapDTO {
     public String link;
 
     public PageDTO homepage;
-
 }

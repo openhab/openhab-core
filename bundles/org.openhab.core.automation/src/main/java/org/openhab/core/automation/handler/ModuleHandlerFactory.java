@@ -67,5 +67,4 @@ public interface ModuleHandlerFactory {
      * @param handler the {@link ModuleHandler} instance that is no longer needed.
      */
     public void ungetHandler(Module module, String ruleUID, ModuleHandler handler);
-
 }

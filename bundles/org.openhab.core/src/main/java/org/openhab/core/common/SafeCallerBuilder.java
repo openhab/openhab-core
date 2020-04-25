@@ -76,5 +76,4 @@ public interface SafeCallerBuilder<T> {
      * @return the SafeCallerBuilder itself
      */
     SafeCallerBuilder<T> withAsync();
-
 }

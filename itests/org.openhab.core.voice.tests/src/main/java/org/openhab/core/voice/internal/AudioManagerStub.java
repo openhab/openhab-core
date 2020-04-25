@@ -112,5 +112,4 @@ public class AudioManagerStub implements AudioManager {
     public Set<String> getSinkIds(String pattern) {
         return Collections.emptySet();
     }
-
 }

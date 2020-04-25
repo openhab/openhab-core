@@ -48,5 +48,4 @@ public class SseEventOutput extends EventOutput {
             }
         }
     }
-
 }

@@ -167,5 +167,4 @@ public class ThreadPoolManager {
         Integer cfg = configs.get(poolName);
         return (cfg != null) ? cfg : DEFAULT_THREAD_POOL_SIZE;
     }
-
 }

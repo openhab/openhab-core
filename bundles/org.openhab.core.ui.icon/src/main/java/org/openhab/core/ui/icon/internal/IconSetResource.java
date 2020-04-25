@@ -79,5 +79,4 @@ public class IconSetResource implements RESTResource {
         }
         return Response.ok(iconSets).build();
     }
-
 }

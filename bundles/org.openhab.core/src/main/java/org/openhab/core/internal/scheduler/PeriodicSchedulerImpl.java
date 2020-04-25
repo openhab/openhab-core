@@ -45,5 +45,4 @@ public class PeriodicSchedulerImpl implements PeriodicScheduler {
     public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, Duration... delays) {
         return scheduler.schedule(runnable, new PeriodicAdjuster(delays));
     }
-
 }

@@ -115,5 +115,4 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
         logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
         return event.getTopic().equals(topic);
     }
-
 }

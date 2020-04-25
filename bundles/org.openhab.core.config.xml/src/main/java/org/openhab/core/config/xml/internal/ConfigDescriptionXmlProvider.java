@@ -59,5 +59,4 @@ public class ConfigDescriptionXmlProvider implements XmlDocumentProvider<List<Co
     public synchronized void release() {
         this.configDescriptionProvider.removeAll(bundle);
     }
-
 }

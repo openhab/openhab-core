@@ -150,5 +150,4 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
     public void unsetThingRegistry(ThingRegistry thingRegistry) {
         this.thingRegistry = thingRegistry;
     }
-
 }

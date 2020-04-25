@@ -89,5 +89,4 @@ public abstract class BaseBridgeHandler extends BaseThingHandler implements Brid
     public void childHandlerDisposed(ThingHandler childHandler, Thing childThing) {
         // do nothing by default, can be overridden by subclasses
     }
-
 }

@@ -421,5 +421,4 @@ public class WatchQueueReader implements Runnable {
         Map<Path, @Nullable ScheduledFuture<?>> keyFutures = getKeyFutures(key);
         keyFutures.put(resolvedPath, future);
     }
-
 }

@@ -139,5 +139,4 @@ public class ThingConfigDescriptionAliasProvider implements ConfigDescriptionAli
         URI configURI = channelType.getConfigDescriptionURI();
         return configURI;
     }
-
 }

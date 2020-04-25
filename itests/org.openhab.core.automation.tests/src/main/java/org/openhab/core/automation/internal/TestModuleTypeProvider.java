@@ -116,5 +116,4 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
         return Collections.emptyList();
     }
-
 }

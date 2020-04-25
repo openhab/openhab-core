@@ -25,5 +25,4 @@ public abstract class ItemLookupException extends Exception {
     }
 
     private static final long serialVersionUID = -4617708589675048859L;
-
 }

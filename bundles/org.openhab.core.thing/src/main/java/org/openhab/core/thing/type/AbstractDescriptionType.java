@@ -83,5 +83,4 @@ public abstract class AbstractDescriptionType implements Identifiable<UID> {
     public @Nullable String getDescription() {
         return this.description;
     }
-
 }

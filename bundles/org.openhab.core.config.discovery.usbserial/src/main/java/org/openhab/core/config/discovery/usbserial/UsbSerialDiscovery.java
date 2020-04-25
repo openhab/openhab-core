@@ -51,5 +51,4 @@ public interface UsbSerialDiscovery {
      * Unregisters an {@link UsbSerialDiscoveryListener}.
      */
     void unregisterDiscoveryListener(UsbSerialDiscoveryListener listener);
-
 }

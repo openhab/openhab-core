@@ -188,5 +188,4 @@ public class ItemChannelLinkResource implements RESTResource {
     public boolean isSatisfied() {
         return itemChannelLinkRegistry != null;
     }
-
 }

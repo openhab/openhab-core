@@ -224,5 +224,4 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     @Override
     public void remoteDeviceDiscoveryFailed(Registry registry, RemoteDevice device, Exception ex) {
     }
-
 }

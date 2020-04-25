@@ -62,5 +62,4 @@ public class ActionDTOMapper extends ModuleDTOMapper {
         }
         return actions;
     }
-
 }

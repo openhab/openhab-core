@@ -660,5 +660,4 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     public void updated(RuleTemplate oldElement, RuleTemplate element) {
         // Do nothing - resolved rules are independent from templates
     }
-
 }

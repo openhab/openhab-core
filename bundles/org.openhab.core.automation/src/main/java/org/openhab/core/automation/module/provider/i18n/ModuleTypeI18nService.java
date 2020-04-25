@@ -37,5 +37,4 @@ public interface ModuleTypeI18nService {
      */
     @Nullable
     ModuleType getModuleTypePerLocale(@Nullable ModuleType defModuleType, @Nullable Locale locale, Bundle bundle);
-
 }

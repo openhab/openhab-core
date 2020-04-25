@@ -75,5 +75,4 @@ public interface OAuthFactory {
      * @param handle
      */
     void deleteServiceAndAccessToken(String handle);
-
 }

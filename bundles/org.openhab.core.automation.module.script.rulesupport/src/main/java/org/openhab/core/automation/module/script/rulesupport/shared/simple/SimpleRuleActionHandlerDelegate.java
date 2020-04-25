@@ -33,5 +33,4 @@ public class SimpleRuleActionHandlerDelegate extends SimpleActionHandler {
     public Object execute(Action module, Map<String, ?> inputs) {
         return handler.execute(module, inputs);
     }
-
 }

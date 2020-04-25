@@ -175,5 +175,4 @@ public class AuthenticationHandler implements Handler {
     public void removeCredentialsExtractor(CredentialsExtractor<HttpServletRequest> extractor) {
         this.extractors.remove(extractor);
     }
-
 }

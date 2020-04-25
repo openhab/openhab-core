@@ -146,5 +146,4 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
         logger.trace("->FILTER: {}: {}", event.getTopic(), thingUID);
         return event.getTopic().contains("smarthome/things/" + thingUID + "/");
     }
-
 }

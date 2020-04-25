@@ -198,5 +198,4 @@ public class StateDescriptionServiceImplTest {
                 .thenReturn(stateDescriptionFragment);
         stateDescriptionService.addStateDescriptionFragmentProvider(stateDescriptionProvider);
     }
-
 }

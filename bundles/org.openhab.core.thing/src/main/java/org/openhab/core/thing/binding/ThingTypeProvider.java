@@ -46,5 +46,4 @@ public interface ThingTypeProvider {
      */
     @Nullable
     ThingType getThingType(ThingTypeUID thingTypeUID, @Nullable Locale locale);
-
 }

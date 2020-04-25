@@ -54,5 +54,4 @@ public class HelpConsoleCommandExtension extends AbstractConsoleCommandExtension
     public List<String> getUsages() {
         return Collections.singletonList(buildCommandUsage(getDescription()));
     }
-
 }

@@ -54,5 +54,4 @@ public interface InboxListener {
      * @param result the discovery result which has been removed from the inbox (not null)
      */
     void thingRemoved(Inbox source, DiscoveryResult result);
-
 }

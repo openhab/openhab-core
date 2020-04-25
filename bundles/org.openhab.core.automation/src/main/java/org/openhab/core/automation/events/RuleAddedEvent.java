@@ -44,5 +44,4 @@ public class RuleAddedEvent extends AbstractRuleRegistryEvent {
     public String toString() {
         return "Rule '" + getRule().uid + "' has been added.";
     }
-
 }

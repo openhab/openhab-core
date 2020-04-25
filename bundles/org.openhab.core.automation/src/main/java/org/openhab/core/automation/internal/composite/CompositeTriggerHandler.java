@@ -164,5 +164,4 @@ public class CompositeTriggerHandler
     public void runNow(String uid, boolean considerConditions, Map<String, Object> context) {
         callback.runNow(uid, considerConditions, context);
     }
-
 }

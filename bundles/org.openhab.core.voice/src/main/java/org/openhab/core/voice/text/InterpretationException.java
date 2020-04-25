@@ -29,5 +29,4 @@ public class InterpretationException extends Exception {
     public InterpretationException(String msg) {
         super(msg);
     }
-
 }

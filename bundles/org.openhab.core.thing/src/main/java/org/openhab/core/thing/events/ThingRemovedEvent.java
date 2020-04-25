@@ -47,5 +47,4 @@ public class ThingRemovedEvent extends AbstractThingRegistryEvent {
     public String toString() {
         return "Thing '" + getThing().UID + "' has been removed.";
     }
-
 }

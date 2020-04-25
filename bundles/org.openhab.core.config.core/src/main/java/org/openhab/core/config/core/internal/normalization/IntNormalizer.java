@@ -57,5 +57,4 @@ final class IntNormalizer extends AbstractNormalizer {
         logger.trace("Class \"{}\" cannot be converted to an integer number.", value.getClass().getName());
         return value;
     }
-
 }

@@ -145,5 +145,4 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
         logger.trace("->FILTER: {}:{}", event.getTopic(), itemName);
         return event.getTopic().contains("smarthome/items/" + itemName + "/");
     }
-
 }

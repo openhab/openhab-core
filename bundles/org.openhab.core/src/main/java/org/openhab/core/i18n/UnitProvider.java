@@ -44,5 +44,4 @@ public interface UnitProvider {
      * @return the {@link SystemOfUnits} which is currently set, must not be null.
      */
     SystemOfUnits getMeasurementSystem();
-
 }

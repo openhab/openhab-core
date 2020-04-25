@@ -29,5 +29,4 @@ public class BundleResolverImpl implements BundleResolver {
     public Bundle resolveBundle(Class<?> clazz) {
         return FrameworkUtil.getBundle(clazz);
     }
-
 }

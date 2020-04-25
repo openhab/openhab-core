@@ -72,5 +72,4 @@ public class ConditionTypeDTOMapper extends ModuleTypeDTOMapper {
         conditionTypeDto.inputs = conditionType.getInputs();
         return conditionTypeDto;
     }
-
 }

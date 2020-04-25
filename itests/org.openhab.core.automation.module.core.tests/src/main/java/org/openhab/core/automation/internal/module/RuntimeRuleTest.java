@@ -495,5 +495,4 @@ public class RuntimeRuleTest extends JavaOSGiTest {
             ruleRegistry.remove(secondRuleAction);
         }
     }
-
 }

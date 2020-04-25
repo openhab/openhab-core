@@ -42,5 +42,4 @@ public interface Profile {
      * @param state the new state
      */
     void onStateUpdateFromItem(State state);
-
 }

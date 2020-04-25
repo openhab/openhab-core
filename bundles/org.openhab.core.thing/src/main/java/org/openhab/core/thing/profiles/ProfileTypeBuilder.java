@@ -155,5 +155,4 @@ public final class ProfileTypeBuilder<T extends ProfileType> {
         return profileTypeFactory.create(profileTypeUID, label, supportedItemTypes, supportedItemTypesOfChannel,
                 supportedChannelTypeUIDs);
     }
-
 }

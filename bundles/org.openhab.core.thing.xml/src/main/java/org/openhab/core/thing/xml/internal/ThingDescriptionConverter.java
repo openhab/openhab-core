@@ -54,5 +54,4 @@ public class ThingDescriptionConverter extends GenericUnmarshaller<ThingDescript
 
         return new ThingDescriptionList(typeList);
     }
-
 }

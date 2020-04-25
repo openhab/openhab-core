@@ -200,5 +200,4 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
             console.println(e.getMessage());
         }
     }
-
 }

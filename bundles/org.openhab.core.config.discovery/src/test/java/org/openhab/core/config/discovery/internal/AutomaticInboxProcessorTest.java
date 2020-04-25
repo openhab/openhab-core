@@ -462,5 +462,4 @@ public class AutomaticInboxProcessorTest {
         inbox.add(DiscoveryResultBuilder.create(THING_UID).build());
         verify(thingRegistry, times(1)).add(argThat(thing -> THING_UID.equals(thing.getUID())));
     }
-
 }

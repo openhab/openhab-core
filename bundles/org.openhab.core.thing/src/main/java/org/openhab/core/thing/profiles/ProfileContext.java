@@ -40,5 +40,4 @@ public interface ProfileContext {
      * @return the scheduler
      */
     ScheduledExecutorService getExecutorService();
-
 }

@@ -169,5 +169,4 @@ public class RuleBuilder {
         return new RuleImpl(uid, name, description, tags, triggers, conditions, actions, configDescriptions,
                 configuration, templateUID, visibility);
     }
-
 }

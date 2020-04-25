@@ -145,5 +145,4 @@ public class MetadataConfigDescriptionProviderImpl implements ConfigDescriptionP
             MetadataConfigDescriptionProvider metadataConfigDescriptionProvider) {
         providers.remove(metadataConfigDescriptionProvider);
     }
-
 }

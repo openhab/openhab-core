@@ -50,5 +50,4 @@ public class FilterCriteria {
     public String toString() {
         return this.getClass().getSimpleName() + " [name=\"" + name + "\", value=\"" + value + "\"]";
     }
-
 }

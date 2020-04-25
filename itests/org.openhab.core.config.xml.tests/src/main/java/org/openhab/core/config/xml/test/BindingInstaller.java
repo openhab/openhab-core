@@ -57,5 +57,4 @@ public class BindingInstaller {
         waitForAssert.accept(() -> assertThat(configDescriptionRegistry.getConfigDescriptions().size(),
                 is(initialNumberOfConfigDescriptions)));
     }
-
 }

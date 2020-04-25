@@ -178,7 +178,6 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 throw new RuntimeException(e);
             }
         });
-
     }
 
     @After

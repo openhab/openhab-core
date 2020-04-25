@@ -52,5 +52,4 @@ public class DTOMapperImpl implements DTOMapper {
             return dto;
         });
     }
-
 }

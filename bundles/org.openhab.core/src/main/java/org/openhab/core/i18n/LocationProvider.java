@@ -31,5 +31,4 @@ public interface LocationProvider {
      */
     @Nullable
     PointType getLocation();
-
 }

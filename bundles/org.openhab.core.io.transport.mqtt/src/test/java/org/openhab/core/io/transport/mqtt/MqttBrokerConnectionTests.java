@@ -132,7 +132,6 @@ public class MqttBrokerConnectionTests extends JavaTest {
 
         // Remove subscriber (while connected)
         assertTrue(connection.unsubscribe("topic", subscriber).get(200, TimeUnit.MILLISECONDS));
-
     }
 
     @Test
@@ -361,5 +360,4 @@ public class MqttBrokerConnectionTests extends JavaTest {
         // Subscribers should be removed
         assertThat(connection.hasSubscribers(), is(false));
     }
-
 }

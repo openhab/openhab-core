@@ -37,5 +37,4 @@ public class RuleDTO {
     public Set<String> tags;
     public Visibility visibility;
     public String description;
-
 }

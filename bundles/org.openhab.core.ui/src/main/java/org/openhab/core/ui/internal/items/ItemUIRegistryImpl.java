@@ -1384,5 +1384,4 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         return null;
     }
-
 }

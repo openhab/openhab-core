@@ -60,5 +60,4 @@ public class ConditionImpl extends ModuleImpl implements Condition {
     public Map<String, String> getInputs() {
         return inputs;
     }
-
 }

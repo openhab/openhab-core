@@ -921,5 +921,4 @@ public class ThingResource implements RESTResource {
                 && thingStatusInfoI18nLocalizationService != null && firmwareRegistry != null && localeService != null
                 && thingManager != null;
     }
-
 }

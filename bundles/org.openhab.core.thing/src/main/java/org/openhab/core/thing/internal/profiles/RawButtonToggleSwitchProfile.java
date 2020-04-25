@@ -60,5 +60,4 @@ public class RawButtonToggleSwitchProfile implements TriggerProfile {
     public void onStateUpdateFromItem(State state) {
         previousState = state.as(OnOffType.class);
     }
-
 }

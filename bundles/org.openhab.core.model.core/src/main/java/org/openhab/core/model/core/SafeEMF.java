@@ -36,5 +36,4 @@ public interface SafeEMF {
      * @param func the function to call
      */
     void call(Runnable func);
-
 }

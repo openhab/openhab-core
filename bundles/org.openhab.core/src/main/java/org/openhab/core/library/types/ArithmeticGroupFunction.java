@@ -188,7 +188,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
             State result = super.calculate(items);
             return activeState.equals(result) ? passiveState : activeState;
         }
-
     }
 
     /**
@@ -208,7 +207,6 @@ public interface ArithmeticGroupFunction extends GroupFunction {
             State result = super.calculate(items);
             return activeState.equals(result) ? passiveState : activeState;
         }
-
     }
 
     /**
@@ -426,5 +424,4 @@ public interface ArithmeticGroupFunction extends GroupFunction {
             return new State[] { new StringType(pattern.pattern()) };
         }
     }
-
 }

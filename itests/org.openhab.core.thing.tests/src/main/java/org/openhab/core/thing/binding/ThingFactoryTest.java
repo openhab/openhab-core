@@ -144,7 +144,6 @@ public class ThingFactoryTest extends JavaOSGiTest {
                                 .build());
                         return new ConfigDescription(uri, parameters);
                     }
-
                 });
 
         Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"), configuration,
@@ -206,7 +205,6 @@ public class ThingFactoryTest extends JavaOSGiTest {
 
                         return new ConfigDescription(uri, parameters);
                     }
-
                 });
 
         Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"), configuration,
@@ -345,7 +343,6 @@ public class ThingFactoryTest extends JavaOSGiTest {
                         ChannelTypeUID uid = (ChannelTypeUID) invocation.getArgument(0);
                         return channelTypes.stream().filter(t -> t.getUID().equals(uid)).findFirst().get();
                     }
-
                 });
         registerService(channelTypeProvider);
 
@@ -358,7 +355,6 @@ public class ThingFactoryTest extends JavaOSGiTest {
                         ChannelGroupTypeUID uid = (ChannelGroupTypeUID) invocation.getArgument(0);
                         return channelGroupTypes.stream().filter(t -> t.getUID().equals(uid)).findFirst().get();
                     }
-
                 });
         registerService(channelGroupTypeProvider);
     }

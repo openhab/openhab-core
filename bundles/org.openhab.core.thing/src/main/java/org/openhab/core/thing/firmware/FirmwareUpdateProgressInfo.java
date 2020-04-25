@@ -247,5 +247,4 @@ public final class FirmwareUpdateProgressInfo {
                 + ", progressStep=" + progressStep + ", sequence=" + sequence + ", pending=" + pending + ", progress="
                 + progress + "]";
     }
-
 }

@@ -104,5 +104,4 @@ public class Mqtt5AsyncClientWrapper extends MqttAsyncClientWrapper {
     public CompletableFuture<Void> disconnect() {
         return client.disconnect();
     }
-
 }

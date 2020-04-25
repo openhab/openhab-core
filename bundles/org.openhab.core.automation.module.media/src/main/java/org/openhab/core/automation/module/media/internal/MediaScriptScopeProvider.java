@@ -82,5 +82,4 @@ public class MediaScriptScopeProvider implements ScriptExtensionProvider {
     @Override
     public void unload(String scriptIdentifier) {
     }
-
 }

@@ -72,5 +72,4 @@ public interface Template extends Identifiable<String> {
      * @return the visibility of the Template.
      */
     public Visibility getVisibility();
-
 }

@@ -88,5 +88,4 @@ public interface Storage<T> {
     default Stream<Map.Entry<String, @Nullable T>> stream() {
         return getKeys().stream().map(key -> new AbstractMap.SimpleImmutableEntry<>(key, get(key)));
     }
-
 }

@@ -10,7 +10,7 @@
 		<description>Sample thing for ${bindingIdCamelCase} Binding</description>
 
 		<channels>
-			<channel id="channel1" typeId="sample-channel" />
+			<channel id="channel1" typeId="sample-channel"/>
 		</channels>
 
 		<config-description>

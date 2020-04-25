@@ -81,5 +81,4 @@ public interface Parser<T> {
      *             for some reasons.
      */
     public void serialize(Set<T> dataObjects, OutputStreamWriter writer) throws Exception;
-
 }

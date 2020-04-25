@@ -73,5 +73,4 @@ public class WrappedAction extends WrappedModule<Action, ActionHandler> {
     public void setInputs(@Nullable Map<String, String> inputs) {
         this.inputs = inputs == null ? Collections.emptyMap() : Collections.unmodifiableMap(inputs);
     }
-
 }

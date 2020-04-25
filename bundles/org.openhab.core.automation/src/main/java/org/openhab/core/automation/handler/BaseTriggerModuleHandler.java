@@ -26,5 +26,4 @@ public class BaseTriggerModuleHandler extends BaseModuleHandler<Trigger> impleme
     public BaseTriggerModuleHandler(Trigger module) {
         super(module);
     }
-
 }

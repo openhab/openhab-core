@@ -59,5 +59,4 @@ public interface FirmwareUpdateHandler {
      *         otherwise false
      */
     boolean isUpdateExecutable();
-
 }

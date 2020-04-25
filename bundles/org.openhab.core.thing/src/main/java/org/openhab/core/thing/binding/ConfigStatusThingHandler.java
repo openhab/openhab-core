@@ -75,5 +75,4 @@ public abstract class ConfigStatusThingHandler extends BaseThingHandler implemen
             configStatusCallback.configUpdated(new ThingConfigStatusSource(getThing().getUID().getAsString()));
         }
     }
-
 }

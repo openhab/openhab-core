@@ -55,5 +55,4 @@ public final class TransformationActivator implements BundleActivator {
     public static BundleContext getContext() {
         return context;
     }
-
 }

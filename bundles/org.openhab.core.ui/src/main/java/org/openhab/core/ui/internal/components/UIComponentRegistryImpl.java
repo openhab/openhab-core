@@ -45,5 +45,4 @@ public class UIComponentRegistryImpl extends AbstractRegistry<RootUIComponent, S
         addProvider(provider);
         setManagedProvider(provider);
     }
-
 }

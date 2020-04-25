@@ -53,5 +53,4 @@ public class RawRockerOnOffProfile implements TriggerProfile {
             callback.sendCommand(OnOffType.OFF);
         }
     }
-
 }

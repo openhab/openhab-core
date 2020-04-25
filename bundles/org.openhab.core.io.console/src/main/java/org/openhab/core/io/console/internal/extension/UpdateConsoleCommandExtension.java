@@ -94,5 +94,4 @@ public class UpdateConsoleCommandExtension extends AbstractConsoleCommandExtensi
             printUsage(console);
         }
     }
-
 }

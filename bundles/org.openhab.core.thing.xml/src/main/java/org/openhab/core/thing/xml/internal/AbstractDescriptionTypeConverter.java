@@ -197,5 +197,4 @@ public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarsh
 
         return object;
     }
-
 }

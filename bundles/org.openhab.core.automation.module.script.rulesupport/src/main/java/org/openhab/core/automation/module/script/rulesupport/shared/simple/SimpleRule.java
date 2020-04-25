@@ -257,5 +257,4 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
         }
         return true;
     }
-
 }

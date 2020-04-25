@@ -354,5 +354,4 @@ public class SmartHomeUnitsTest {
         QuantityType<?> converted = oneSM.toUnit("µS/cm");
         assertEquals("10000 µS/cm", converted.toString());
     }
-
 }

@@ -39,5 +39,4 @@ public enum IncreaseDecreaseType implements PrimitiveType, Command {
     public String toFullString() {
         return super.toString();
     }
-
 }

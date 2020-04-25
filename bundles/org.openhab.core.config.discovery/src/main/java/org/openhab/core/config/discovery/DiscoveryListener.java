@@ -94,5 +94,4 @@ public interface DiscoveryListener {
     @Nullable
     Collection<ThingUID> removeOlderResults(DiscoveryService source, long timestamp,
             @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID);
-
 }

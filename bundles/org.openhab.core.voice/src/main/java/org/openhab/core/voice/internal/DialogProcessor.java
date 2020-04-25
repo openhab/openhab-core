@@ -209,5 +209,4 @@ public class DialogProcessor implements KSListener, STTListener {
             logger.error("Error saying '{}': {}", text, e.getMessage());
         }
     }
-
 }

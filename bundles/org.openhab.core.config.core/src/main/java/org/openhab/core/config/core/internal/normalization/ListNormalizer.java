@@ -69,5 +69,4 @@ final class ListNormalizer extends AbstractNormalizer {
     private static boolean isArray(Object object) {
         return object != null && object.getClass().isArray();
     }
-
 }

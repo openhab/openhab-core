@@ -52,5 +52,4 @@ public class Activator implements BundleActivator {
             resourceFilterRegistration = null;
         }
     }
-
 }

@@ -6,14 +6,14 @@
 	<!-- Hue Lamp -->
 	<thing-type id="lamp">
 		<supported-bridge-type-refs>
-			<bridge-type-ref id="bridge" />
+			<bridge-type-ref id="bridge"/>
 		</supported-bridge-type-refs>
 
 		<label>HUE Lamp</label>
 		<description>My own great HUE Lamp.</description>
 
 		<channel-groups>
-			<channel-group id="alarm_system" typeId="alarm_system" />
+			<channel-group id="alarm_system" typeId="alarm_system"/>
 		</channel-groups>
 	</thing-type>
 
@@ -22,7 +22,8 @@
 		<item-type>Color</item-type>
 		<label>Color</label>
 		<description>The color channel allows to control the color of a light.
-			It is also possible to dim values and switch the light on and off.
+			It is also possible to dim values and switch the
+			light on and off.
 		</description>
 		<tags>
 			<tag>Hue</tag>
@@ -30,7 +31,7 @@
 		</tags>
 
 		<config-description>
-			<parameter name="lastDimValue" type="boolean" />
+			<parameter name="lastDimValue" type="boolean"/>
 		</config-description>
 	</channel-type>
 
@@ -39,7 +40,8 @@
 		<item-type>Dimmer</item-type>
 		<label>Brightness</label>
 		<description>The brightness channel allows to control the brightness of a light.
-			It is also possible to switch the light on and off.
+			It is also possible to switch the
+			light on and off.
 		</description>
 		<tags>
 			<tag>Hue</tag>
@@ -47,7 +49,7 @@
 		</tags>
 
 		<config-description>
-			<parameter name="lastDimValue" type="boolean" />
+			<parameter name="lastDimValue" type="boolean"/>
 		</config-description>
 	</channel-type>
 
@@ -76,7 +78,7 @@
 		<state min="0" max="100.0" step="10.0" pattern="%d Peek">
 			<options>
 				<option value="SOUND">My great sound.</option>
-				<option value="LIGHT" />
+				<option value="LIGHT"/>
 			</options>
 		</state>
 	</channel-type>
@@ -98,10 +100,10 @@
 		<label>Alarm System</label>
 		<description>The alarm system.</description>
 		<channels>
-			<channel id="colorId" typeId="color" />
-			<channel id="color_temperatureId" typeId="color_temperature" />
-			<channel id="alarmId" typeId="alarm" />
-			<channel id="motionId" typeId="motion" />
+			<channel id="colorId" typeId="color"/>
+			<channel id="color_temperatureId" typeId="color_temperature"/>
+			<channel id="alarmId" typeId="alarm"/>
+			<channel id="motionId" typeId="motion"/>
 		</channels>
 	</channel-group-type>
 

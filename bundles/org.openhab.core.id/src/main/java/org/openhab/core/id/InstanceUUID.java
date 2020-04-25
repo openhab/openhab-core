@@ -89,5 +89,4 @@ public class InstanceUUID {
         }
         return lines == null || lines.isEmpty() ? "" : lines.get(0);
     }
-
 }

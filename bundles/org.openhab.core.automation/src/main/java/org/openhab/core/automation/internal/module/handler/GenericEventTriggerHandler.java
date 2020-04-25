@@ -137,5 +137,4 @@ public class GenericEventTriggerHandler extends BaseTriggerModuleHandler impleme
         logger.trace("->FILTER: {}:{}", event.getTopic(), source);
         return event.getTopic().contains(source);
     }
-
 }

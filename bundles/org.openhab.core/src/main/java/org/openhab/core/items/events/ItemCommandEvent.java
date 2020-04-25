@@ -74,5 +74,4 @@ public class ItemCommandEvent extends AbstractEvent {
     public String toString() {
         return String.format("Item '%s' received command %s", itemName, command);
     }
-
 }

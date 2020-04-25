@@ -534,5 +534,4 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     protected void unsetBundleResolver(BundleResolver bundleResolver) {
         this.bundleResolver = bundleResolver;
     }
-
 }

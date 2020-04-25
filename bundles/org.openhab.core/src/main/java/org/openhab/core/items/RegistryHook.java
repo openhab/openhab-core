@@ -34,5 +34,4 @@ public interface RegistryHook<E extends Identifiable<?>> {
      * @param element the element that was removed
      */
     void afterRemoving(E element);
-
 }

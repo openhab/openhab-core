@@ -36,5 +36,4 @@ public class FilterCriteriaConverter extends GenericUnmarshaller<FilterCriteria>
         String criteria = reader.getValue();
         return new FilterCriteria(name, criteria);
     }
-
 }

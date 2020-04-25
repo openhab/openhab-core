@@ -69,7 +69,5 @@ public class GenericEventConditionHandler extends BaseConditionModuleHandler {
                     && isConfiguredAndMatches(EVENTTYPE, event.getType());
         }
         return false;
-
     }
-
 }

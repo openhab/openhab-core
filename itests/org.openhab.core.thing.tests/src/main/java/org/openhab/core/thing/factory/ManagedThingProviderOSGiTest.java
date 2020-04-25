@@ -177,5 +177,4 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         assertThat(oldThingWrapper.getWrappedObject(), is(thing1));
         assertThat(updatedThingWrapper.getWrappedObject(), is(thing2));
     }
-
 }

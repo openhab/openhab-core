@@ -112,5 +112,4 @@ public class ConsoleSupportEclipse implements CommandProvider {
     public String getHelp() {
         return ConsoleInterpreter.getHelp(BASE, " ", getConsoleCommandExtensions());
     }
-
 }

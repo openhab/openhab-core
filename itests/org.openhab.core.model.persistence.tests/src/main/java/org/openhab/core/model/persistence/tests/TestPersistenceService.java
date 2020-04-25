@@ -111,5 +111,4 @@ public class TestPersistenceService implements QueryablePersistenceService {
     public List<PersistenceStrategy> getDefaultStrategies() {
         return Collections.emptyList();
     }
-
 }

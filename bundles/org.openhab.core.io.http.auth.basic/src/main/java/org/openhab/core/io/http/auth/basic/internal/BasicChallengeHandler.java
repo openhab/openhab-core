@@ -45,5 +45,4 @@ public class BasicChallengeHandler implements Handler {
 
         context.execute(request, response);
     }
-
 }

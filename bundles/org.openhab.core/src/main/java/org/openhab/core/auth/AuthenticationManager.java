@@ -29,5 +29,4 @@ public interface AuthenticationManager {
      * @throws AuthenticationException when none of available authentication methods succeeded.
      */
     Authentication authenticate(Credentials credentials) throws AuthenticationException;
-
 }

@@ -31,5 +31,4 @@ public class UIDTest {
         new ThingUID("binding:type:ID");
         new ThingUID("00:type:ID");
     }
-
 }

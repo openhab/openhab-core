@@ -259,5 +259,4 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
     private void assertEventCount(EventSubscriber subscriber, int count) {
         waitForAssert(() -> verify(subscriber, times(count)).receive(any()));
     }
-
 }

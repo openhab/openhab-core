@@ -135,5 +135,4 @@ public class ThingFactory {
         }
         return ThingBuilder.create(thingType.getUID(), thingUID);
     }
-
 }

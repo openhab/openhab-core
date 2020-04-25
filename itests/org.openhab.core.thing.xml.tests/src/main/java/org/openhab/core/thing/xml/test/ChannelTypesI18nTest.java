@@ -117,5 +117,4 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
             assertThat(channelDefinition2.getDescription(), is(equalTo("Channel Inplace Description")));
         }
     }
-
 }

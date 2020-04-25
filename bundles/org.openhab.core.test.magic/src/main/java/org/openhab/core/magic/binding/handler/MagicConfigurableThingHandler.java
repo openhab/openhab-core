@@ -46,5 +46,4 @@ public class MagicConfigurableThingHandler extends BaseThingHandler {
     public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
         super.handleConfigurationUpdate(configurationParameters);
     }
-
 }

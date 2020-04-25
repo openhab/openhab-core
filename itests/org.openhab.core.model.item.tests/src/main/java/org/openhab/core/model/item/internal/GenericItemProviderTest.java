@@ -667,5 +667,4 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         assertThat(stateDescription, is(notNullValue()));
         assertThat(stateDescription.getPattern(), is("XPATH(/*[name()='liveStreams']/*[name()='stream']):%s"));
     }
-
 }

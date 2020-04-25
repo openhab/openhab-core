@@ -192,5 +192,4 @@ public class ChannelUID extends UID {
         List<String> allSegments = getAllSegments();
         return new ThingUID(allSegments.subList(0, allSegments.size() - 1).toArray(new String[allSegments.size() - 1]));
     }
-
 }

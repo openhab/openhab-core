@@ -191,5 +191,4 @@ public class ThingUID extends UID {
     protected int getMinimalNumberOfSegments() {
         return 3;
     }
-
 }

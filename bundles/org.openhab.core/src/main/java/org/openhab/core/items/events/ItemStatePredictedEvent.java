@@ -90,5 +90,4 @@ public class ItemStatePredictedEvent extends AbstractEvent {
     public String toString() {
         return String.format("Item '%s' predicted to become %s", itemName, predictedState);
     }
-
 }

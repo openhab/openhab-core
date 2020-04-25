@@ -224,7 +224,6 @@ public class PointType implements ComplexType, Command, State {
             longitude = longitude.add(CIRCLE);
         }
         longitude = longitude.subtract(FLAT);
-
     }
 
     @Override
@@ -253,5 +252,4 @@ public class PointType implements ComplexType, Command, State {
         }
         return true;
     }
-
 }

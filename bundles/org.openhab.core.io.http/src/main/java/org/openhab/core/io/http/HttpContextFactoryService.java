@@ -32,5 +32,4 @@ public interface HttpContextFactoryService {
      * @return the {@link HttpContext} for the given bundle.
      */
     HttpContext createDefaultHttpContext(Bundle bundle);
-
 }

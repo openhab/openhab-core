@@ -42,5 +42,4 @@ public interface ProfileFactory {
      * @return a collection of all profile type identifier which this class is capable of creating
      */
     Collection<ProfileTypeUID> getSupportedProfileTypeUIDs();
-
 }

@@ -99,5 +99,4 @@ public class BridgeImpl extends ThingImpl implements Bridge {
         }
         return bridgeHandler;
     }
-
 }

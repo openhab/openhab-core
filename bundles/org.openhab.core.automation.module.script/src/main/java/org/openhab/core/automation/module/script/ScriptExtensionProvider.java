@@ -77,5 +77,4 @@ public interface ScriptExtensionProvider {
      * @param scriptIdentifier the identifier of the script that is unloaded
      */
     void unload(String scriptIdentifier);
-
 }

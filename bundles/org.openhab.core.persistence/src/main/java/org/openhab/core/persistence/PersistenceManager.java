@@ -36,5 +36,4 @@ public interface PersistenceManager {
      * @param dbId the database id used by the persistence service
      */
     void removeConfig(String dbId);
-
 }

@@ -43,5 +43,4 @@ public class ImageItemTest {
         DateTimeItem item = new DateTimeItem("test");
         StateUtil.testAcceptedStates(item);
     }
-
 }

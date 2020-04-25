@@ -106,5 +106,4 @@ public class SerialCommandExtension extends AbstractConsoleCommandExtension {
             return String.format("[name: %s, current owner: %s]", id.getName(), id.getCurrentOwner());
         }
     }
-
 }

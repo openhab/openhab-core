@@ -46,5 +46,4 @@ public interface SemanticsService {
      * @return as set of items that are located in the given location(s)
      */
     Set<Item> getItemsInLocation(String labelOrSynonym, Locale locale);
-
 }

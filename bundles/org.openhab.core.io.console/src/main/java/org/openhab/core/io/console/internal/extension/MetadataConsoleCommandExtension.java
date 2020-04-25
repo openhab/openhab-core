@@ -182,5 +182,4 @@ public class MetadataConsoleCommandExtension extends AbstractConsoleCommandExten
             console.println("Metadata element for " + key + " could not be found.");
         }
     }
-
 }

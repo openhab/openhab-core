@@ -149,5 +149,4 @@ public abstract class AbstractResourceIconProvider implements IconProvider {
      * @return true, if the resource exists, false otherwise
      */
     protected abstract boolean hasResource(String iconSetId, String resourceName);
-
 }

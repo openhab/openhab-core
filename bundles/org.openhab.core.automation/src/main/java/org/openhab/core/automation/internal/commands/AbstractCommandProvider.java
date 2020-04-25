@@ -192,5 +192,4 @@ public abstract class AbstractCommandProvider<@NonNull E> implements ServiceTrac
      */
     protected abstract Set<E> importData(URL url, Parser<E> parser, InputStreamReader inputStreamReader)
             throws ParsingException;
-
 }

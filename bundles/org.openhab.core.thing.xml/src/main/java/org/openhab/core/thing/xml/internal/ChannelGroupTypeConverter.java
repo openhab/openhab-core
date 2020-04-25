@@ -69,5 +69,4 @@ public class ChannelGroupTypeConverter extends AbstractDescriptionTypeConverter<
         Object category = nodeIterator.nextValue("category", false);
         return category == null ? null : category.toString();
     }
-
 }

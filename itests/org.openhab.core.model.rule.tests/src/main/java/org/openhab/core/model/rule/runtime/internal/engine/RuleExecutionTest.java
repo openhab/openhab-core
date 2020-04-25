@@ -161,5 +161,4 @@ public class RuleExecutionTest extends JavaOSGiTest {
             assertNotNull(resultEvent);
         });
     }
-
 }

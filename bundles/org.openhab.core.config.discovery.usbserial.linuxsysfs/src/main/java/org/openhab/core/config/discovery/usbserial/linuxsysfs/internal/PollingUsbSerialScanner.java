@@ -188,5 +188,4 @@ public class PollingUsbSerialScanner implements UsbSerialDiscovery {
             }
         }
     }
-
 }

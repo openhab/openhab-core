@@ -138,5 +138,4 @@ public abstract class AbstractUID {
         }
         return true;
     }
-
 }

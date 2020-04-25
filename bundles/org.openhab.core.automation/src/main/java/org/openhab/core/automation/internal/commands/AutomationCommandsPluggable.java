@@ -425,5 +425,4 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     public void setEnabled(String uid, boolean isEnabled) {
         ruleManager.setEnabled(uid, isEnabled);
     }
-
 }

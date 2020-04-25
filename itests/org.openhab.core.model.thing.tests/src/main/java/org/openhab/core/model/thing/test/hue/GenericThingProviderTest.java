@@ -602,5 +602,4 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         // ensure an additional property can be set
         assertThat(myGroupedThing.getChannel("group#bar").getConfiguration().get("myProp"), is(equalTo("successful")));
     }
-
 }

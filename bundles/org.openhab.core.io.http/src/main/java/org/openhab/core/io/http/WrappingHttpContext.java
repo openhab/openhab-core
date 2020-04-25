@@ -33,5 +33,4 @@ public interface WrappingHttpContext extends HttpContext {
      * @return New context instance.
      */
     HttpContext wrap(Bundle bundle);
-
 }

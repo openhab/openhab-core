@@ -56,5 +56,4 @@ public interface PersistenceServiceRegistry {
      * @return all available persistence services
      */
     Set<PersistenceService> getAll();
-
 }

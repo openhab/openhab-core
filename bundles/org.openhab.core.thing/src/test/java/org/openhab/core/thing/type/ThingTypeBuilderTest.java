@@ -229,5 +229,4 @@ public class ThingTypeBuilderTest {
 
         return result;
     }
-
 }

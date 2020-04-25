@@ -182,5 +182,4 @@ public class ChannelTypeI18nLocalizationService {
                         channelType.getAutoUpdatePolicy());
         }
     }
-
 }

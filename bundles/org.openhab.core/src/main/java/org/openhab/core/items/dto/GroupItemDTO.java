@@ -21,5 +21,4 @@ public class GroupItemDTO extends ItemDTO {
 
     public String groupType;
     public GroupFunctionDTO function;
-
 }

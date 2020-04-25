@@ -156,5 +156,4 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
         voiceManager.say(msg.toString());
     }
-
 }

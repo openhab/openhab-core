@@ -256,5 +256,4 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     public void updated(Item oldItem, Item item) {
         processItem(item);
     }
-
 }

@@ -121,5 +121,4 @@ public class BindingInfoI18nTest extends JavaOSGiTest {
                     "Das Yahoo Wetter Binding stellt verschiedene Wetterdaten wie die Temperatur, die Luftfeuchtigkeit und den Luftdruck für konfigurierbare Orte vom yahoo Wetterdienst bereit"));
         });
     }
-
 }

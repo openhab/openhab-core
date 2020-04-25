@@ -209,5 +209,4 @@ public class CertificateGenerator implements BundleActivator {
             throw new CertificateException("Failed to generate the new certificate.", e);
         }
     }
-
 }

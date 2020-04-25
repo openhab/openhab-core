@@ -90,7 +90,5 @@ public class DateTimeGroupFunctionTest {
         public List<Class<? extends Command>> getAcceptedCommandTypes() {
             return Collections.emptyList();
         }
-
     }
-
 }

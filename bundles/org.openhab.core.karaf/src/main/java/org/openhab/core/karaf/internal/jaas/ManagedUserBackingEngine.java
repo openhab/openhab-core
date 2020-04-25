@@ -129,5 +129,4 @@ public class ManagedUserBackingEngine implements BackingEngine {
     public void deleteGroupRole(String group, String role) {
         throw new UnsupportedOperationException();
     }
-
 }

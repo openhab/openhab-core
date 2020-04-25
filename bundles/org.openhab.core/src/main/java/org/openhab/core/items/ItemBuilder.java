@@ -83,5 +83,4 @@ public interface ItemBuilder {
      * @return the builder itself
      */
     ItemBuilder withTags(@Nullable Set<String> tags);
-
 }

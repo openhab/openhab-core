@@ -90,5 +90,4 @@ public class ChannelGroupTypeXmlResult {
                 + ", description=" + description + ", category=" + category + ", channelTypeReferences="
                 + channelTypeReferences + "]";
     }
-
 }

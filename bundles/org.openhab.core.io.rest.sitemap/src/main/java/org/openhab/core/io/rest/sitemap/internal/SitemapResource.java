@@ -839,5 +839,4 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
     public boolean isSatisfied() {
         return itemUIRegistry != null && subscriptions != null && localeService != null;
     }
-
 }

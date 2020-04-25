@@ -129,7 +129,6 @@ public class MapDbStorageServiceTest {
             }
             return true;
         }
-
     }
 
     private @NonNullByDefault({}) Path tmpDir;
@@ -265,5 +264,4 @@ public class MapDbStorageServiceTest {
             storage.delete();
         }
     }
-
 }

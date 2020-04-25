@@ -344,5 +344,4 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
         }
         return configDescriptionRegistryServiceTracker.getService();
     }
-
 }

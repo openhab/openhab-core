@@ -56,5 +56,4 @@ public class AutoUpdateConfigDescriptionProvider implements MetadataConfigDescri
     public @Nullable List<ConfigDescriptionParameter> getParameters(String value, @Nullable Locale locale) {
         return null;
     }
-
 }

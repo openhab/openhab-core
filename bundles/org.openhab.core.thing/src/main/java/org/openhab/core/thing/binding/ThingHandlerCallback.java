@@ -165,5 +165,4 @@ public interface ThingHandlerCallback {
      */
     @Nullable
     Bridge getBridge(ThingUID bridgeUID);
-
 }

@@ -81,5 +81,4 @@ public class MapDbStorageService implements DeletableStorageService {
     public <T> DeletableStorage<T> getStorage(String name) {
         return getStorage(name, null);
     }
-
 }

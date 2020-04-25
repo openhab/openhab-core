@@ -52,5 +52,4 @@ final class MessageKey {
         this.key = key;
         this.defaultMessage = defaultMessage;
     }
-
 }

@@ -133,5 +133,4 @@ public class ItemStateConverterImpl implements ItemStateConverter {
     private boolean isAccepted(Item item, State state) {
         return item.getAcceptedDataTypes().contains(state.getClass());
     }
-
 }

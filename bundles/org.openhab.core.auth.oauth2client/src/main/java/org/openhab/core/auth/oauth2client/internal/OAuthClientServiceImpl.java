@@ -395,5 +395,4 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     private String createNewState() {
         return UUID.randomUUID().toString();
     }
-
 }

@@ -167,5 +167,4 @@ public class SafeCallManagerImpl implements SafeCallManager {
     public void setEnforceSingleThreadPerIdentifier(boolean enforceSingleThreadPerIdentifier) {
         this.enforceSingleThreadPerIdentifier = enforceSingleThreadPerIdentifier;
     }
-
 }

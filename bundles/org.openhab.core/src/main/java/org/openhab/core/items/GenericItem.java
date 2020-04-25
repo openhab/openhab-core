@@ -451,5 +451,4 @@ public abstract class GenericItem implements ActiveItem {
                 .forEach(so -> builder.withCommandOption(new CommandOption(so.getValue(), so.getLabel())));
         return builder.build();
     }
-
 }

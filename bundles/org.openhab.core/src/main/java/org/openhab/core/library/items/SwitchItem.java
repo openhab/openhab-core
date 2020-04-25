@@ -75,5 +75,4 @@ public class SwitchItem extends GenericItem {
             logSetTypeError(state);
         }
     }
-
 }

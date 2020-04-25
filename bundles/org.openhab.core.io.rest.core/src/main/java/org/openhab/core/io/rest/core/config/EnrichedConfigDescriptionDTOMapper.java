@@ -73,5 +73,4 @@ public class EnrichedConfigDescriptionDTOMapper extends ConfigDescriptionDTOMapp
         }
         return configDescriptionParameterBeans;
     }
-
 }

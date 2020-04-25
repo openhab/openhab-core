@@ -57,5 +57,4 @@ public class ThingTypeDTO extends StrippedThingTypeDTO {
         this.parameterGroups = parameterGroups;
         this.extensibleChannelTypeIds = extensibleChannelTypeIds;
     }
-
 }

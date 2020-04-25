@@ -133,5 +133,4 @@ public class StateUtil {
         item.setState(UnDefType.NULL);
         assertEquals(UnDefType.NULL, item.getState());
     }
-
 }

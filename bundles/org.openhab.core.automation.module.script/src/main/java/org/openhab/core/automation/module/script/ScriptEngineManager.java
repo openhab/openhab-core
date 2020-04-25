@@ -59,5 +59,4 @@ public interface ScriptEngineManager {
      * @return true, if supported, else false
      */
     boolean isSupported(String scriptType);
-
 }

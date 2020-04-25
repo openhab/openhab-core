@@ -305,7 +305,6 @@ public class AbstractWatchServiceTest extends JavaTest {
         protected boolean watchSubDirectories() {
             return watchSubDirs;
         }
-
     }
 
     private static class FullEvent {

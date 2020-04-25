@@ -464,5 +464,4 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
     public void stateUpdated(Item item, State state) {
         handleStateEvent(item, false);
     }
-
 }

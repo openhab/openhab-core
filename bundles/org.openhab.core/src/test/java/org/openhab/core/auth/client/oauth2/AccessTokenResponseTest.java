@@ -76,5 +76,4 @@ public class AccessTokenResponseTest {
 
         assertTrue("Token should have been expired due to buffer", !token.isExpired(LocalDateTime.now(), 10));
     }
-
 }

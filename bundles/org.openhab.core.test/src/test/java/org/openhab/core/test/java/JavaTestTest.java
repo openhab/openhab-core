@@ -59,5 +59,4 @@ public class JavaTestTest {
     private Object getObject() {
         return null;
     }
-
 }

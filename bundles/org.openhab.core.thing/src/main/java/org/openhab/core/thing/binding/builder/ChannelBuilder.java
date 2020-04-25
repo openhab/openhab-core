@@ -188,5 +188,4 @@ public class ChannelBuilder {
         return new Channel(channelUID, channelTypeUID, acceptedItemType, kind, configuration, defaultTags, properties,
                 label, description, autoUpdatePolicy);
     }
-
 }

@@ -134,5 +134,4 @@ public class NumberItemTest {
 
         assertThat(item.getStateDescription().getPattern(), is("%.1f " + UnitUtils.UNIT_PLACEHOLDER));
     }
-
 }

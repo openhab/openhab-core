@@ -78,5 +78,4 @@ public class ChannelTriggeredEvent extends AbstractEvent {
     public String toString() {
         return channel + " triggered " + event;
     }
-
 }

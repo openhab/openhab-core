@@ -85,5 +85,4 @@ public interface RuleRegistry extends Registry<Rule, String> {
      * @return collection of {@link Rule}s having specified tags.
      */
     public Collection<Rule> getByTags(String... tags);
-
 }

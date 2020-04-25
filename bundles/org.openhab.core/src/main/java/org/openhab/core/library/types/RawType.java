@@ -116,5 +116,4 @@ public class RawType implements PrimitiveType, State {
         }
         return true;
     }
-
 }

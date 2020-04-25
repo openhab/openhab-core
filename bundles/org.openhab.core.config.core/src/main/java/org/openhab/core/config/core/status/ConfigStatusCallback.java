@@ -27,5 +27,4 @@ public interface ConfigStatusCallback {
      * @param configStatusSource the source of the configuration status
      */
     void configUpdated(ConfigStatusSource configStatusSource);
-
 }

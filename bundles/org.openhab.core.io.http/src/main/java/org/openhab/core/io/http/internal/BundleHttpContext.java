@@ -45,5 +45,4 @@ class BundleHttpContext extends DelegatingHttpContext {
         }
         return null;
     }
-
 }

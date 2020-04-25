@@ -140,5 +140,4 @@ public class ResourceFilterImpl implements ResourceFilter {
         }
         return ret;
     }
-
 }

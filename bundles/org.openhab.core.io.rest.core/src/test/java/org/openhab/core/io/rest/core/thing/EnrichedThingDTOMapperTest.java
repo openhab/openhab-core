@@ -118,5 +118,4 @@ public class EnrichedThingDTOMapperTest {
 
         return channels;
     }
-
 }

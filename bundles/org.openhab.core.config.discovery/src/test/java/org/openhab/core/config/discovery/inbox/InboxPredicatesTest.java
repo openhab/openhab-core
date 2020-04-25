@@ -168,5 +168,4 @@ public class InboxPredicatesTest {
                 RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).collect(Collectors.toList()).get(0),
                 is(equalTo(RESULTS.get(2))));
     }
-
 }

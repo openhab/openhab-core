@@ -146,5 +146,4 @@ public class MagicChattyThingHandler extends BaseThingHandler {
         logger.debug("Got state {} from device on channel {}", state, channelUID);
         super.updateState(channelUID, state);
     }
-
 }

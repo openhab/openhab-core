@@ -101,5 +101,4 @@ public final class FirmwareUpdateResultInfoEvent extends AbstractEvent {
 
         return sb.toString();
     }
-
 }

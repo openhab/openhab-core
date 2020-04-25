@@ -433,5 +433,4 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     private boolean hasOwnState(GroupItem item) {
         return item.getFunction() != null && item.getBaseItem() != null;
     }
-
 }

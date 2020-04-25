@@ -199,5 +199,4 @@ public class ThingTypeBuilder {
         this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs;
         return this;
     }
-
 }
