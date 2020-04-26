@@ -29,6 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
@@ -87,13 +88,14 @@ public class GenericThingProviderTest3 extends JavaOSGiTest {
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         registerService(dumbThingHandlerFactory, ThingHandlerFactory.class.getName());
 
-        ConfigDescription configDescription = new ConfigDescription(new URI("test:test"),
-                Stream.of(
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(new URI("test:test"))
+                .withParameters(Stream.of(
                         ConfigDescriptionParameterBuilder.create("testAdditional", ConfigDescriptionParameter.Type.TEXT)
                                 .withRequired(false).withDefault("hello world").build(),
                         ConfigDescriptionParameterBuilder.create("testConf", ConfigDescriptionParameter.Type.TEXT)
                                 .withRequired(false).withDefault("bar").build())
-                        .collect(toList()));
+                        .collect(toList()))
+                .build();
 
         ConfigDescriptionProvider configDescriptionProvider = mock(ConfigDescriptionProvider.class);
         when(configDescriptionProvider.getConfigDescription(any(), nullable(Locale.class)))

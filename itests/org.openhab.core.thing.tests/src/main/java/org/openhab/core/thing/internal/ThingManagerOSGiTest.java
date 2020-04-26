@@ -39,6 +39,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
@@ -1994,10 +1995,11 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     }
 
     private void registerConfigDescriptionProvider(boolean withRequiredParameter) {
-        ConfigDescription configDescription = new ConfigDescription(configDescriptionUri(),
-                singletonList(
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri())
+                .withParameter(
                         ConfigDescriptionParameterBuilder.create("parameter", ConfigDescriptionParameter.Type.TEXT)
-                                .withRequired(withRequiredParameter).build()));
+                                .withRequired(withRequiredParameter).build())
+                .build();
 
         ConfigDescriptionProvider configDescriptionProvider = mock(ConfigDescriptionProvider.class);
         when(configDescriptionProvider.getConfigDescription(any(URI.class), nullable(Locale.class)))

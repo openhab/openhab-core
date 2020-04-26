@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -203,8 +203,8 @@ public class PersistentInboxTest {
         URI configDescriptionURI = new URI("thing-type:test:test");
         ThingType thingType = ThingTypeBuilder.instance(THING_TYPE_UID, "Test")
                 .withConfigDescriptionURI(configDescriptionURI).build();
-        ConfigDescriptionParameter param = ConfigDescriptionParameterBuilder.create(paramName, type).build();
-        ConfigDescription configDesc = new ConfigDescription(configDescriptionURI, Collections.singletonList(param));
+        ConfigDescription configDesc = ConfigDescriptionBuilder.create(configDescriptionURI)
+                .withParameter(ConfigDescriptionParameterBuilder.create(paramName, type).build()).build();
 
         when(thingTypeRegistry.getThingType(THING_TYPE_UID)).thenReturn(thingType);
         when(configDescriptionRegistry.getConfigDescription(eq(configDescriptionURI))).thenReturn(configDesc);

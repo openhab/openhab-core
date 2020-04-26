@@ -44,6 +44,7 @@ import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
@@ -700,9 +701,10 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
     private void registerThingTypeAndConfigDescription() {
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID(BINDING_ID, THING_TYPE_ID), "label")
                 .withConfigDescriptionURI(configDescriptionUri()).build();
-        ConfigDescription configDescription = new ConfigDescription(configDescriptionUri(),
-                singletonList(ConfigDescriptionParameterBuilder
-                        .create("parameter", ConfigDescriptionParameter.Type.TEXT).withRequired(true).build()));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri())
+                .withParameter(ConfigDescriptionParameterBuilder
+                        .create("parameter", ConfigDescriptionParameter.Type.TEXT).withRequired(true).build())
+                .build();
 
         ThingTypeProvider thingTypeProvider = mock(ThingTypeProvider.class);
         when(thingTypeProvider.getThingType(ArgumentMatchers.any(ThingTypeUID.class),
@@ -734,10 +736,11 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
     }
 
     private void registerConfigDescriptionProvider(boolean withRequiredParameter) {
-        ConfigDescription configDescription = new ConfigDescription(configDescriptionUri(),
-                singletonList(
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri())
+                .withParameter(
                         ConfigDescriptionParameterBuilder.create("parameter", ConfigDescriptionParameter.Type.TEXT)
-                                .withRequired(withRequiredParameter).build()));
+                                .withRequired(withRequiredParameter).build())
+                .build();
 
         ConfigDescriptionProvider configDescriptionProvider = mock(ConfigDescriptionProvider.class);
         when(configDescriptionProvider.getConfigDescription(ArgumentMatchers.any(URI.class),

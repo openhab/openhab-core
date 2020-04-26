@@ -30,6 +30,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
@@ -409,14 +410,17 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         ThingType thingType = ThingTypeBuilder.instance(thingTypeUID, "label")
                 .withChannelDefinitions(getChannelDefinitions(thingTypeUID))
                 .withConfigDescriptionURI(configDescriptionUri).withProperties(thingTypeProperties).build();
-        ConfigDescription configDescription = new ConfigDescription(configDescriptionUri,
-                Arrays.asList(
-                        ConfigDescriptionParameterBuilder
-                                .create("parameter" + thingTypeUID.getId(), ConfigDescriptionParameter.Type.TEXT)
-                                .withRequired(false).withDefault("default" + thingTypeUID.getId()).build(),
-                        ConfigDescriptionParameterBuilder
-                                .create("provided" + thingTypeUID.getId(), ConfigDescriptionParameter.Type.TEXT)
-                                .withRequired(false).build()));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri)
+                .withParameters(
+                        Arrays.asList(
+                                ConfigDescriptionParameterBuilder
+                                        .create("parameter" + thingTypeUID.getId(),
+                                                ConfigDescriptionParameter.Type.TEXT)
+                                        .withRequired(false).withDefault("default" + thingTypeUID.getId()).build(),
+                                ConfigDescriptionParameterBuilder
+                                        .create("provided" + thingTypeUID.getId(), ConfigDescriptionParameter.Type.TEXT)
+                                        .withRequired(false).build()))
+                .build();
 
         thingTypes.put(thingTypeUID, thingType);
         configDescriptions.put(configDescriptionUri, configDescription);

@@ -32,7 +32,7 @@ import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.type.TriggerType;
-import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.i18n.ConfigI18nLocalizationService;
 import org.openhab.core.i18n.TranslationProvider;
@@ -109,8 +109,8 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
             @Nullable Locale locale) {
         try {
             return configI18nService
-                    .getLocalizedConfigDescription(bundle,
-                            new ConfigDescription(new URI(prefix + ":" + uid + ".name"), parameters), locale)
+                    .getLocalizedConfigDescription(bundle, ConfigDescriptionBuilder
+                            .create(new URI(prefix + ":" + uid + ".name")).withParameters(parameters).build(), locale)
                     .getParameters();
         } catch (URISyntaxException e) {
             logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);

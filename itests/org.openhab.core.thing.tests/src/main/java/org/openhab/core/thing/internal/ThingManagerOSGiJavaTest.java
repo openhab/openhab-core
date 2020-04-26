@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.openhab.core.common.SafeCaller;
-import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
@@ -324,20 +324,19 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         });
 
         ConfigDescriptionProvider mockConfigDescriptionProvider = mock(ConfigDescriptionProvider.class);
-        List<ConfigDescriptionParameter> parameters = Collections.singletonList( //
-                ConfigDescriptionParameterBuilder.create(CONFIG_PARAM_NAME, Type.TEXT).withRequired(true).build() //
-        );
+        ConfigDescriptionParameter parameter = ConfigDescriptionParameterBuilder.create(CONFIG_PARAM_NAME, Type.TEXT)
+                .withRequired(true).build();
         registerService(mockConfigDescriptionProvider, ConfigDescriptionProvider.class.getName());
 
         // verify a missing mandatory thing config prevents it from getting initialized
         when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionThing), any()))
-                .thenReturn(new ConfigDescription(configDescriptionThing, parameters));
+                .thenReturn(ConfigDescriptionBuilder.create(configDescriptionThing).withParameter(parameter).build());
         assertThingStatus(Collections.emptyMap(), Collections.emptyMap(), ThingStatus.UNINITIALIZED,
                 ThingStatusDetail.HANDLER_CONFIGURATION_PENDING);
 
         // verify a missing mandatory channel config prevents it from getting initialized
         when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionChannel), any()))
-                .thenReturn(new ConfigDescription(configDescriptionChannel, parameters));
+                .thenReturn(ConfigDescriptionBuilder.create(configDescriptionChannel).withParameter(parameter).build());
         assertThingStatus(Collections.singletonMap(CONFIG_PARAM_NAME, "value"), Collections.emptyMap(),
                 ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_CONFIGURATION_PENDING);
 

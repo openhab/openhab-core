@@ -13,6 +13,7 @@
 package org.openhab.core.config.core;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -76,7 +77,7 @@ public class ConfigUtil {
                         LoggerFactory.getLogger(ConfigUtil.class).warn(
                                 "Default value for parameter '{}' of type 'INTEGER' seems not to be an integer value: {}",
                                 parameterName, defaultValue);
-                        return value.setScale(0, BigDecimal.ROUND_DOWN);
+                        return value.setScale(0, RoundingMode.DOWN);
                     }
                     return value;
                 case DECIMAL:

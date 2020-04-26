@@ -105,7 +105,7 @@ public class ConfigDescriptionRegistry {
      * @return all config descriptions or an empty collection if no config
      *         description exists
      */
-    public Collection<ConfigDescription> getConfigDescriptions(Locale locale) {
+    public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
         Map<URI, ConfigDescription> configMap = new HashMap<>();
 
         // Loop over all providers
@@ -126,7 +126,8 @@ public class ConfigDescriptionRegistry {
 
                     // And add the combined configuration to the map
                     configMap.put(configDescription.getUID(),
-                            new ConfigDescription(configDescription.getUID(), parameters, parameterGroups));
+                            ConfigDescriptionBuilder.create(configDescription.getUID()).withParameters(parameters)
+                                    .withParameterGroups(parameterGroups).build());
                 } else {
                     // No - Just add the new configuration to the map
                     configMap.put(configDescription.getUID(), configDescription);
@@ -169,7 +170,7 @@ public class ConfigDescriptionRegistry {
      * @return config description or null if no config description exists for
      *         the given name
      */
-    public @Nullable ConfigDescription getConfigDescription(URI uri, Locale locale) {
+    public @Nullable ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale) {
         List<ConfigDescriptionParameter> parameters = new ArrayList<>();
         List<ConfigDescriptionParameterGroup> parameterGroups = new ArrayList<>();
 
@@ -189,7 +190,8 @@ public class ConfigDescriptionRegistry {
             }
 
             // Return the new configuration description
-            return new ConfigDescription(uri, parametersWithOptions, parameterGroups);
+            return ConfigDescriptionBuilder.create(uri).withParameters(parametersWithOptions)
+                    .withParameterGroups(parameterGroups).build();
         } else {
             // Otherwise null
             return null;
@@ -207,7 +209,7 @@ public class ConfigDescriptionRegistry {
         return ret;
     }
 
-    private boolean fillFromProviders(URI uri, Locale locale, List<ConfigDescriptionParameter> parameters,
+    private boolean fillFromProviders(URI uri, @Nullable Locale locale, List<ConfigDescriptionParameter> parameters,
             List<ConfigDescriptionParameterGroup> parameterGroups) {
         boolean found = false;
         for (ConfigDescriptionProvider configDescriptionProvider : this.configDescriptionProviders) {
@@ -271,20 +273,35 @@ public class ConfigDescriptionRegistry {
 
         if (found) {
             // Return the new parameter
-            return new ConfigDescriptionParameter(parameter.getName(), parameter.getType(), parameter.getMinimum(),
-                    parameter.getMaximum(), parameter.getStepSize(), parameter.getPattern(), parameter.isRequired(),
-                    parameter.isReadOnly(), parameter.isMultiple(), parameter.getContext(), parameter.getDefault(),
-                    parameter.getLabel(), parameter.getDescription(), options, parameter.getFilterCriteria(),
-                    parameter.getGroupName(), parameter.isAdvanced(), parameter.getLimitToOptions(),
-                    parameter.getMultipleLimit(), parameter.getUnit(), parameter.getUnitLabel(),
-                    parameter.isVerifyable());
+            return ConfigDescriptionParameterBuilder.create(parameter.getName(), parameter.getType()) //
+                    .withMinimum(parameter.getMinimum()) //
+                    .withMaximum(parameter.getMaximum()) //
+                    .withStepSize(parameter.getStepSize()) //
+                    .withPattern(parameter.getPattern()) //
+                    .withRequired(parameter.isRequired()) //
+                    .withReadOnly(parameter.isReadOnly()) //
+                    .withMultiple(parameter.isMultiple()) //
+                    .withContext(parameter.getContext()) //
+                    .withDefault(parameter.getDefault()) //
+                    .withLabel(parameter.getLabel()) //
+                    .withDescription(parameter.getDescription()) //
+                    .withOptions(options) //
+                    .withFilterCriteria(parameter.getFilterCriteria()) //
+                    .withGroupName(parameter.getGroupName()) //
+                    .withAdvanced(parameter.isAdvanced()) //
+                    .withLimitToOptions(parameter.getLimitToOptions()) //
+                    .withMultipleLimit(parameter.getMultipleLimit()) //
+                    .withUnit(parameter.getUnit()) //
+                    .withUnitLabel(parameter.getUnitLabel()) //
+                    .withVerify(parameter.isVerifyable()) //
+                    .build();
         } else {
             // Otherwise return the original parameter
             return parameter;
         }
     }
 
-    private boolean fillFromProviders(URI alias, ConfigDescriptionParameter parameter, Locale locale,
+    private boolean fillFromProviders(URI alias, ConfigDescriptionParameter parameter, @Nullable Locale locale,
             List<ParameterOption> options) {
         boolean found = false;
         for (ConfigOptionProvider configOptionProvider : this.configOptionProviders) {

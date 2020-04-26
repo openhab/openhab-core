@@ -14,7 +14,6 @@ package org.openhab.core.config.core.internal.metadata;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -23,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
@@ -121,7 +121,7 @@ public class MetadataConfigDescriptionProviderImpl implements ConfigDescriptionP
         builder.withDescription(description != null ? description : namespace);
         ConfigDescriptionParameter parameter = builder.build();
 
-        return new ConfigDescription(uri, Collections.singletonList(parameter));
+        return ConfigDescriptionBuilder.create(uri).withParameter(parameter).build();
     }
 
     private @Nullable ConfigDescription createParamConfigDescription(MetadataConfigDescriptionProvider provider,
@@ -132,7 +132,7 @@ public class MetadataConfigDescriptionProviderImpl implements ConfigDescriptionP
         if (parameters == null || parameters.isEmpty()) {
             return null;
         }
-        return new ConfigDescription(uri, parameters);
+        return ConfigDescriptionBuilder.create(uri).withParameters(parameters).build();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

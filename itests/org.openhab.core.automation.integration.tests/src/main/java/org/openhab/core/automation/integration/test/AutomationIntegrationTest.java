@@ -61,6 +61,7 @@ import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
@@ -810,8 +811,8 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         List<Trigger> templateTriggers = Collections.emptyList();
         List<Condition> templateConditions = Collections.emptyList();
         List<Action> templateActions = Collections.emptyList();
-        List<ConfigDescriptionParameter> templateConfigDescriptionParameters = Collections
-                .singletonList(new ConfigDescriptionParameter("param", ConfigDescriptionParameter.Type.TEXT));
+        List<ConfigDescriptionParameter> templateConfigDescriptionParameters = Collections.singletonList(
+                ConfigDescriptionParameterBuilder.create("param", ConfigDescriptionParameter.Type.TEXT).build());
         RuleTemplate template = new RuleTemplate(templateUID, "Test template Label", "Test template description", tags,
                 templateTriggers, templateConditions, templateActions, templateConfigDescriptionParameters,
                 Visibility.VISIBLE);

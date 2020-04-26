@@ -42,8 +42,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.Configuration;
@@ -154,9 +154,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private final ThingType testThingType = ThingTypeBuilder.instance(testTypeUID, "label")
             .withConfigDescriptionURI(testURI).build();
     private final ConfigDescription testConfigDescription = ConfigDescriptionBuilder.create(testURI)
-            .withParameters(Stream
-                    .of(new ConfigDescriptionParameter(discoveryResultPropertyKeys.get(0), Type.TEXT),
-                            new ConfigDescriptionParameter(discoveryResultPropertyKeys.get(1), Type.INTEGER))
+            .withParameters(Stream.of(
+                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(0), Type.TEXT).build(),
+                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(1), Type.INTEGER).build())
                     .collect(toList()))
             .build();
     private final String[] keysInConfigDescription = new String[] { discoveryResultPropertyKeys.get(0),
@@ -868,9 +868,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         discoveryResultProperties.keySet().forEach(key -> {
             String thingProperty = addedThing.getProperties().get(key);
             String descResultParam = String.valueOf(discoveryResultProperties.get(key));
-            assertFalse(thingProperty == null);
-            assertFalse(descResultParam == null);
-            assertTrue(thingProperty.equals(descResultParam));
+            assertThat(thingProperty, is(notNullValue()));
+            assertThat(descResultParam, is(notNullValue()));
+            assertThat(thingProperty, is(descResultParam));
         });
     }
 

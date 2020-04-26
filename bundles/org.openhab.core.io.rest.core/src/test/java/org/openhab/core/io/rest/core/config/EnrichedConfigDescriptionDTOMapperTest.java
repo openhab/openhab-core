@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
@@ -40,8 +41,8 @@ public class EnrichedConfigDescriptionDTOMapperTest {
     public void testThatDefaultValuesAreEmptyIfMultipleIsTrue() {
         ConfigDescriptionParameter configDescriptionParameter = ConfigDescriptionParameterBuilder
                 .create(CONFIG_PARAMETER_NAME, Type.TEXT).withMultiple(true).build();
-        ConfigDescription configDescription = new ConfigDescription(CONFIG_URI,
-                Arrays.asList(configDescriptionParameter));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(CONFIG_URI)
+                .withParameter(configDescriptionParameter).build();
 
         ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
@@ -57,8 +58,8 @@ public class EnrichedConfigDescriptionDTOMapperTest {
     public void testThatDefaultValueIsNotAList() {
         ConfigDescriptionParameter configDescriptionParameter = ConfigDescriptionParameterBuilder
                 .create(CONFIG_PARAMETER_NAME, Type.TEXT).withDefault(CONFIG_PARAMETER_DEFAULT_VALUE).build();
-        ConfigDescription configDescription = new ConfigDescription(CONFIG_URI,
-                Arrays.asList(configDescriptionParameter));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(CONFIG_URI)
+                .withParameter(configDescriptionParameter).build();
 
         ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
@@ -76,8 +77,8 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescriptionParameter configDescriptionParameter = ConfigDescriptionParameterBuilder
                 .create(CONFIG_PARAMETER_NAME, Type.TEXT).withDefault(CONFIG_PARAMETER_DEFAULT_VALUE).withMultiple(true)
                 .build();
-        ConfigDescription configDescription = new ConfigDescription(CONFIG_URI,
-                Arrays.asList(configDescriptionParameter));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(CONFIG_URI)
+                .withParameter(configDescriptionParameter).build();
 
         ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));

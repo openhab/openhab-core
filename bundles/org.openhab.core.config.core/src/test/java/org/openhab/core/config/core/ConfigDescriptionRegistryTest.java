@@ -61,33 +61,30 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         uriAliases = new URI("config:Aliased");
 
         configDescriptionRegistry = new ConfigDescriptionRegistry();
-        ConfigDescriptionParameter param1 = new ConfigDescriptionParameter("param1",
-                ConfigDescriptionParameter.Type.INTEGER);
-        List<ConfigDescriptionParameter> pList1 = new ArrayList<>();
-        pList1.add(param1);
+        ConfigDescriptionParameter param1 = ConfigDescriptionParameterBuilder
+                .create("param1", ConfigDescriptionParameter.Type.INTEGER).build();
 
-        configDescription = new ConfigDescription(uriDummy, pList1);
+        configDescription = ConfigDescriptionBuilder.create(uriDummy).withParameter(param1).build();
         when(configDescriptionProviderMock.getConfigDescriptions(any()))
                 .thenReturn(Collections.singleton(configDescription));
         when(configDescriptionProviderMock.getConfigDescription(eq(uriDummy), any())).thenReturn(configDescription);
 
-        configDescription1 = new ConfigDescription(uriDummy1);
+        configDescription1 = ConfigDescriptionBuilder.create(uriDummy1).build();
         when(configDescriptionProviderMock1.getConfigDescriptions(any()))
                 .thenReturn(Collections.singleton(configDescription1));
         when(configDescriptionProviderMock1.getConfigDescription(eq(uriDummy1), any())).thenReturn(configDescription1);
 
-        configDescriptionAliased = new ConfigDescription(uriAliases, Collections
-                .singletonList(new ConfigDescriptionParameter("instanceId", ConfigDescriptionParameter.Type.INTEGER)));
+        configDescriptionAliased = ConfigDescriptionBuilder.create(uriAliases).withParameter(
+                ConfigDescriptionParameterBuilder.create("instanceId", ConfigDescriptionParameter.Type.INTEGER).build())
+                .build();
         when(configDescriptionProviderAliased.getConfigDescriptions(any()))
                 .thenReturn(Collections.singleton(configDescriptionAliased));
         when(configDescriptionProviderAliased.getConfigDescription(eq(uriAliases), any()))
                 .thenReturn(configDescriptionAliased);
 
-        ConfigDescriptionParameter param2 = new ConfigDescriptionParameter("param2",
-                ConfigDescriptionParameter.Type.INTEGER);
-        List<ConfigDescriptionParameter> pList2 = new ArrayList<>();
-        pList2.add(param2);
-        configDescription2 = new ConfigDescription(uriDummy, pList2);
+        ConfigDescriptionParameter param2 = ConfigDescriptionParameterBuilder
+                .create("param2", ConfigDescriptionParameter.Type.INTEGER).build();
+        configDescription2 = ConfigDescriptionBuilder.create(uriDummy).withParameter(param2).build();
         when(configDescriptionProviderMock2.getConfigDescriptions(any()))
                 .thenReturn(Collections.singleton(configDescription2));
         when(configDescriptionProviderMock2.getConfigDescription(eq(uriDummy), any())).thenReturn(configDescription2);

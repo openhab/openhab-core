@@ -121,20 +121,6 @@ public class ConfigDescriptionParameter {
      *
      * @param name the name of the configuration parameter (must neither be null
      *            nor empty)
-     * @param type the data type of the configuration parameter (must not be
-     *            null)
-     * @throws IllegalArgumentException if the name is null or empty, or the type is null
-     */
-    public ConfigDescriptionParameter(String name, Type type) throws IllegalArgumentException {
-        this(name, type, null, null, null, null, false, false, false, null, null, null, null, null, null, null, false,
-                true, null, null, null, false);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @param name the name of the configuration parameter (must neither be null
-     *            nor empty)
      * @param type the data type of the configuration parameter (nullable)
      * @param minimum the minimal value for numeric types, or the minimal length of
      *            strings, or the minimal number of selected options (nullable)
@@ -180,7 +166,9 @@ public class ConfigDescriptionParameter {
      *             https://openhab.org/documentation/development/bindings/xml-reference.html for the list
      *             of valid units)</li>
      *             </ul>
+     * @deprecated Use {@link ConfigDescriptionParameterBuilder} instead.
      */
+    @Deprecated
     ConfigDescriptionParameter(String name, Type type, BigDecimal minimum, BigDecimal maximum, BigDecimal stepsize,
             String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context, String defaultValue,
             String label, String description, List<ParameterOption> options, List<FilterCriteria> filterCriteria,
