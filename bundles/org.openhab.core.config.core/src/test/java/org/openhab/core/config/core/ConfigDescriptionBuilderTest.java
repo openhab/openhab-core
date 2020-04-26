@@ -36,10 +36,10 @@ public class ConfigDescriptionBuilderTest {
             .create("TEST PARAM 1", Type.TEXT).build();
     private static final ConfigDescriptionParameter PARAM2 = ConfigDescriptionParameterBuilder
             .create("TEST PARAM 2", Type.INTEGER).build();
-    private static final ConfigDescriptionParameterGroup GROUP1 = new ConfigDescriptionParameterGroup("TEST GROUP 1",
-            null, false, "Test Group 1", null);
-    private static final ConfigDescriptionParameterGroup GROUP2 = new ConfigDescriptionParameterGroup("TEST GROUP 2",
-            null, true, "Test Group 2", null);
+    private static final ConfigDescriptionParameterGroup GROUP1 = ConfigDescriptionParameterGroupBuilder
+            .create("TEST GROUP 1").withLabel("Test Group 1").build();
+    private static final ConfigDescriptionParameterGroup GROUP2 = ConfigDescriptionParameterGroupBuilder
+            .create("TEST GROUP 2").withAdvanced(Boolean.TRUE).withLabel("Test Group 2").build();
     private ConfigDescriptionBuilder builder;
 
     @Before

@@ -26,6 +26,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  * @author Thomas Höfer - Added unit
  */
 public class ConfigDescriptionParameterBuilder {
+
     private String name;
     private Type type;
 
