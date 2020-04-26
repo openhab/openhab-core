@@ -555,5 +555,4 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         verifyNoMoreInteractions(stateProfileMock);
         verifyNoMoreInteractions(triggerProfileMock);
     }
-
 }

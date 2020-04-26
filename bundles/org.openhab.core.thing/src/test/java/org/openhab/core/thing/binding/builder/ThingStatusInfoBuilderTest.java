@@ -72,5 +72,4 @@ public class ThingStatusInfoBuilderTest {
         assertThat(thingStatusInfo2.getStatusDetail(), is(not(thingStatusInfo1.getStatusDetail())));
         assertThat(thingStatusInfo2.getDescription(), is(not(thingStatusInfo1.getDescription())));
     }
-
 }

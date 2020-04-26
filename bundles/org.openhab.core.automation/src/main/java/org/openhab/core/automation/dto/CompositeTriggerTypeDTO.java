@@ -22,5 +22,4 @@ import java.util.List;
 public class CompositeTriggerTypeDTO extends TriggerTypeDTO {
 
     public List<TriggerDTO> children;
-
 }

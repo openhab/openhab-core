@@ -90,5 +90,4 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         assertThat(ecdpdto.defaultValues, hasSize(3));
         assertThat(ecdpdto.defaultValues, is(equalTo(Arrays.asList("first value", "second value", "third value"))));
     }
-
 }

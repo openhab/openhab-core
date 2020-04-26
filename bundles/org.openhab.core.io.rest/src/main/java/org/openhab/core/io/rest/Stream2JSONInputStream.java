@@ -101,5 +101,4 @@ public class Stream2JSONInputStream extends InputStream {
     private boolean finished() {
         return !firstIteratorElement && !iterator.hasNext();
     }
-
 }

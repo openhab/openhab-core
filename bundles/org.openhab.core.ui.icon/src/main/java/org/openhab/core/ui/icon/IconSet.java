@@ -86,5 +86,4 @@ public class IconSet {
     public Set<Format> getFormats() {
         return Collections.unmodifiableSet(formats);
     }
-
 }

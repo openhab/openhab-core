@@ -29,5 +29,4 @@ class DuplicateExecutionException extends RuntimeException {
     public Invocation getCallable() {
         return callable;
     }
-
 }

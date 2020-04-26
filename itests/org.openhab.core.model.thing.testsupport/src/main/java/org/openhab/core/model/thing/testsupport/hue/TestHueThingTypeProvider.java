@@ -97,5 +97,4 @@ public class TestHueThingTypeProvider implements ThingTypeProvider {
     public ThingType getThingType(ThingTypeUID thingTypeUID, Locale locale) {
         return THING_TYPES.get(thingTypeUID);
     }
-
 }

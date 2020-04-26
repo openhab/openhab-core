@@ -110,5 +110,4 @@ public class ChannelGroupDefinition {
     public String toString() {
         return "ChannelGroupDefinition [id=" + id + ", typeUID=" + typeUID + "]";
     }
-
 }

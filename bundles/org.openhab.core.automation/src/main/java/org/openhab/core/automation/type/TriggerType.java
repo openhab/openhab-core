@@ -85,5 +85,4 @@ public class TriggerType extends ModuleType {
     public List<Output> getOutputs() {
         return outputs;
     }
-
 }

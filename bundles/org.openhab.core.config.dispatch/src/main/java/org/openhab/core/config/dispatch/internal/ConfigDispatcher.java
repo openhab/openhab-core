@@ -30,7 +30,6 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigConstants;
@@ -255,6 +254,16 @@ public class ConfigDispatcher {
         storeCurrentExclusivePIDList();
     }
 
+    private String substringBefore(String str, String separator) {
+        int index = str.indexOf(separator);
+        return index == -1 ? str : str.substring(0, index);
+    }
+
+    private String substringBeforeLast(String str, String separator) {
+        int index = str.lastIndexOf(separator);
+        return index == -1 ? str : str.substring(0, index);
+    }
+
     /**
      * The filename of a given configuration file is assumed to be the service PID. If the filename
      * without extension contains ".", we assume it is the fully qualified name.
@@ -263,7 +272,7 @@ public class ConfigDispatcher {
      * @return The PID
      */
     private String pidFromFilename(File configFile) {
-        String filenameWithoutExt = StringUtils.substringBeforeLast(configFile.getName(), ".");
+        String filenameWithoutExt = substringBeforeLast(configFile.getName(), ".");
         if (filenameWithoutExt.contains(".")) {
             // it is a fully qualified namespace
             return filenameWithoutExt;
@@ -412,9 +421,9 @@ public class ConfigDispatcher {
         }
 
         String pid = null; // no override of the pid is default
-        String key = StringUtils.substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER);
+        String key = substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER);
         if (key.contains(DEFAULT_PID_DELIMITER)) {
-            pid = StringUtils.substringBefore(key, DEFAULT_PID_DELIMITER);
+            pid = substringBefore(key, DEFAULT_PID_DELIMITER);
             trimmedLine = trimmedLine.substring(pid.length() + 1);
             pid = pid.trim();
             // PID is not fully qualified, so prefix with namespace
@@ -423,7 +432,7 @@ public class ConfigDispatcher {
             }
         }
         if (!trimmedLine.isEmpty() && trimmedLine.substring(1).contains(DEFAULT_VALUE_DELIMITER)) {
-            String property = StringUtils.substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER);
+            String property = substringBefore(trimmedLine, DEFAULT_VALUE_DELIMITER);
             String value = trimmedLine.substring(property.length() + 1).trim();
             if (value.startsWith(DEFAULT_LIST_STARTING_CHARACTER) && value.endsWith(DEFAULT_LIST_ENDING_CHARACTER)) {
                 logger.debug("Found list in value '{}'", value);
@@ -545,5 +554,4 @@ public class ConfigDispatcher {
             return processedPIDMapping.containsKey(pid);
         }
     }
-
 }

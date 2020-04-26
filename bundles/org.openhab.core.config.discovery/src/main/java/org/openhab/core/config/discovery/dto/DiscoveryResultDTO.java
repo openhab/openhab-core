@@ -48,5 +48,4 @@ public class DiscoveryResultDTO {
         this.properties = properties;
         this.representationProperty = representationProperty;
     }
-
 }

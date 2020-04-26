@@ -39,5 +39,4 @@ public interface AuthenticationProvider {
      * @return True if credentials of given type can be used for authentication attempt with provider.
      */
     boolean supports(Class<? extends Credentials> type);
-
 }

@@ -35,7 +35,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.BooleanUtils;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.http.servlet.SmartHomeServlet;
 import org.openhab.core.items.ItemNotFoundException;
@@ -297,7 +296,7 @@ public class ChartServlet extends SmartHomeServlet {
         // Read out parameter 'legend'
         Boolean legend = null;
         if (req.getParameter("legend") != null) {
-            legend = BooleanUtils.toBoolean(req.getParameter("legend"));
+            legend = Boolean.valueOf(req.getParameter("legend"));
         }
 
         if (maxWidth > 0 && width > maxWidth) {
@@ -354,5 +353,4 @@ public class ChartServlet extends SmartHomeServlet {
     @Override
     public void destroy() {
     }
-
 }

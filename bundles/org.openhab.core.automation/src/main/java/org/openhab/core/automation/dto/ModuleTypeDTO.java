@@ -31,5 +31,4 @@ public class ModuleTypeDTO {
     public String label;
     public String description;
     public List<ConfigDescriptionParameterDTO> configDescriptions;
-
 }

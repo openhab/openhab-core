@@ -45,5 +45,4 @@ public interface TriggerHandlerCallback extends ModuleHandlerCallback {
      *            </ul>
      */
     public void triggered(Trigger trigger, Map<String, ?> context);
-
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -48,7 +49,7 @@ public interface DiscoveryResult {
      * discovered again, the same {@code Thing} ID must be created. A typical {@code Thing} ID could be the serial
      * number. It's usually <i>not</i> a product number.
      *
-     * @return the Thing ID of this result object (not null, not empty)
+     * @return the Thing ID
      */
     public ThingUID getThingUID();
 
@@ -58,7 +59,7 @@ public interface DiscoveryResult {
      * A {@code Thing} type ID could be a product number which identifies the same type of {@link Thing}s. It's usually
      * <i>not</i> a serial number.
      *
-     * @return the unique Thing type of this result object (not null, not empty)
+     * @return the unique Thing type
      */
     public ThingTypeUID getThingTypeUID();
 
@@ -67,7 +68,7 @@ public interface DiscoveryResult {
      * <p>
      * The binding ID is extracted from the unique {@code Thing} ID.
      *
-     * @return the binding ID of this result object (not null, not empty)
+     * @return the binding ID
      */
     public String getBindingId();
 
@@ -77,7 +78,7 @@ public interface DiscoveryResult {
      * <p>
      * <b>Hint:</b> The returned properties are immutable.
      *
-     * @return the properties of this result object (not null, could be empty)
+     * @return the properties (could be empty)
      */
     public Map<String, Object> getProperties();
 
@@ -89,7 +90,7 @@ public interface DiscoveryResult {
      * identifiers are typically the <code>ipAddress</code>, the <code>macAddress</code> or the
      * <code>serialNumber</code> of the discovered thing.
      *
-     * @return the representation property of this result object (could be null)
+     * @return the representation property
      */
     public @Nullable String getRepresentationProperty();
 
@@ -100,33 +101,33 @@ public interface DiscoveryResult {
      * case the result object should be regarded as known by the system so that
      * further processing should be skipped.
      *
-     * @return the flag of this result object (not null)
+     * @return the flag
      */
     public DiscoveryResultFlag getFlag();
 
     /**
      * Returns the human readable label for this result object.
      *
-     * @return the human readable label for this result object (not null, could be empty)
+     * @return the human readable label (could be empty)
      */
     public String getLabel();
 
     /**
-     * Returns the unique bridge ID of the {@link DiscoveryResult}.
+     * Returns the unique {@link Bridge} ID of this result object.
      *
-     * @return the unique bridge ID (could be null)
+     * @return the unique Bridge ID
      */
     public @Nullable ThingUID getBridgeUID();
 
     /**
-     * Get the timestamp of this {@link DiscoveryResult}.
+     * Returns the timestamp of this result object.
      *
      * @return timestamp as long
      */
     public long getTimestamp();
 
     /**
-     * Get the time to live in seconds for this entry.
+     * Returns the time to live in seconds for this entry.
      *
      * @return time to live in seconds
      */

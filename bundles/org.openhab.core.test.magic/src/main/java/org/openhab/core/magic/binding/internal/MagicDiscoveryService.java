@@ -52,5 +52,4 @@ public class MagicDiscoveryService extends AbstractDiscoveryService {
     private String createRandomSerialNumber() {
         return UUID.randomUUID().toString();
     }
-
 }

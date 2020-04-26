@@ -277,5 +277,4 @@ public class ThingEventFactory extends AbstractEventFactory {
     private static ThingDTO map(Thing thing) {
         return ThingDTOMapper.map(thing);
     }
-
 }

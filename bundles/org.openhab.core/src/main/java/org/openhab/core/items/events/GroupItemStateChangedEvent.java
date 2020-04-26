@@ -52,5 +52,4 @@ public class GroupItemStateChangedEvent extends ItemStateChangedEvent {
     public String toString() {
         return String.format("%s through %s", super.toString(), memberName);
     }
-
 }

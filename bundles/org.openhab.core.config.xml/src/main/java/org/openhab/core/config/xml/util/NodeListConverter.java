@@ -41,5 +41,4 @@ public class NodeListConverter extends GenericUnmarshaller<NodeList> {
 
         return new NodeList(nodeName, attributes, values);
     }
-
 }

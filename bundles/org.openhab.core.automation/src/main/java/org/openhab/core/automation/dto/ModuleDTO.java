@@ -26,5 +26,4 @@ public class ModuleDTO {
     public String description;
     public Map<String, Object> configuration;
     public String type;
-
 }

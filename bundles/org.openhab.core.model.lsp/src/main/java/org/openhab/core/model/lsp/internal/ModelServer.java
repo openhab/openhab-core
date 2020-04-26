@@ -143,5 +143,4 @@ public class ModelServer {
     public void unsetScriptEngine(ScriptEngine scriptEngine) {
         this.scriptEngine = null;
     }
-
 }

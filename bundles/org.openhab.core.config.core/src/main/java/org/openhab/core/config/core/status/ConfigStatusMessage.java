@@ -297,5 +297,4 @@ public final class ConfigStatusMessage {
                 + ", arguments=" + Arrays.toString(arguments) + ", message=" + message + ", statusCode=" + statusCode
                 + "]";
     }
-
 }

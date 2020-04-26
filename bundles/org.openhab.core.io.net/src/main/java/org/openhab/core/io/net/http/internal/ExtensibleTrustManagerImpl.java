@@ -232,7 +232,5 @@ public class ExtensibleTrustManagerImpl extends X509ExtendedTrustManager impleme
         public CommonNameNotFoundException(String message) {
             super(message);
         }
-
     }
-
 }

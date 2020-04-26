@@ -55,5 +55,4 @@ public class CustomSSLContextProvider implements SSLContextProvider {
             throw new ConfigurationException("ssl", e.getMessage());
         }
     }
-
 }

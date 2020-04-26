@@ -100,5 +100,4 @@ public class ThingTypeI18nLocalizationService {
 
         return builder.build();
     }
-
 }

@@ -129,8 +129,7 @@
 		<feature dependency="true">openhab.tp-jbbp</feature>
 	</feature>
 
-	<feature name="openhab-core-io-console-karaf" description="Karaf Console support for SmartHome stuff"
-		version="${project.version}">
+	<feature name="openhab-core-io-console-karaf" description="Karaf Console support for SmartHome stuff" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>shell</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console.karaf/${project.version}</bundle>
@@ -469,8 +468,7 @@
 		</config>
 	</feature>
 
-	<feature name="openhab-runtime-certificate" description="SSL Certificate Generator"
-		version="${project.version}">
+	<feature name="openhab-runtime-certificate" description="SSL Certificate Generator" version="${project.version}">
 		<bundle start-level="20">mvn:org.openhab.core.bundles/org.openhab.core.io.jetty.certificate/${project.version}</bundle>
 	</feature>
 

@@ -833,5 +833,4 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         return item;
     }
-
 }

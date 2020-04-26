@@ -59,5 +59,4 @@ public abstract class GenericUnmarshaller<T> implements Converter {
     public final void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
         throw new UnsupportedOperationException();
     }
-
 }

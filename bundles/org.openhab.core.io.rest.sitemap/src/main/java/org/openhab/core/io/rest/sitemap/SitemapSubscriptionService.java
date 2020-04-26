@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.annotation.Nullable;
@@ -318,7 +317,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
             return; // we process only sitemap modifications here
         }
 
-        String changedSitemapName = StringUtils.removeEnd(modelName, SITEMAP_SUFFIX);
+        String changedSitemapName = modelName.substring(0, modelName.length() - SITEMAP_SUFFIX.length());
 
         for (Entry<String, PageChangeListener> listenerEntry : pageChangeListeners.entrySet()) {
             String sitemapWithPage = listenerEntry.getKey();

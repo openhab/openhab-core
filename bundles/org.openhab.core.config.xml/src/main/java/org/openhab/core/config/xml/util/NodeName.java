@@ -27,5 +27,4 @@ public interface NodeName {
      * @return the name of the node this object belongs to (neither null, nor empty)
      */
     String getNodeName();
-
 }

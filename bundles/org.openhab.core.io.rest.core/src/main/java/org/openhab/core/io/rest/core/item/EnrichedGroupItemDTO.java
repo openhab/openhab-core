@@ -35,5 +35,4 @@ public class EnrichedGroupItemDTO extends EnrichedItemDTO {
     public EnrichedItemDTO[] members;
     public String groupType;
     public GroupFunctionDTO function;
-
 }

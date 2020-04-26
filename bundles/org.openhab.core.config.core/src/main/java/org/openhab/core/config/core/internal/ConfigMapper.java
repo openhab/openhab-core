@@ -13,6 +13,7 @@
 package org.openhab.core.config.core.internal;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
@@ -23,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +58,9 @@ public class ConfigMapper {
     public static <T> @Nullable T as(Map<String, Object> properties, Class<T> configurationClass) {
         T configuration = null;
         try {
-            configuration = configurationClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException ex) {
+            configuration = configurationClass.getConstructor().newInstance();
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException e) {
             return null;
         }
 
@@ -98,14 +99,20 @@ public class ConfigMapper {
                 value = objectConvert(value, type);
                 LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
                         value, fieldName, configurationClass.getName());
-                FieldUtils.writeField(configuration, fieldName, value, true);
-
-            } catch (Exception ex) {
+                writeField(configuration, fieldName, value, true);
+            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
                 LOGGER.warn("Could not set field value for field '{}': {}", fieldName, ex.getMessage(), ex);
             }
         }
 
         return configuration;
+    }
+
+    private static void writeField(Object target, String fieldName, Object value, boolean forceAccess)
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(forceAccess);
+        field.set(target, value);
     }
 
     /**
@@ -171,5 +178,4 @@ public class ConfigMapper {
         }
         return result;
     }
-
 }

@@ -70,5 +70,4 @@ public class SystemFollowProfileTest {
         verify(mockCallback).sendCommand(eq(OnOffType.ON));
         verifyNoMoreInteractions(mockCallback);
     }
-
 }

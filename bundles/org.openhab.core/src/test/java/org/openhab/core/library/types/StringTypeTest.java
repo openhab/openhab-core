@@ -56,5 +56,4 @@ public class StringTypeTest {
         assertEquals(true, new StringType("").equals(new StringType(null)));
         assertEquals(true, new StringType(null).equals(new StringType("")));
     }
-
 }

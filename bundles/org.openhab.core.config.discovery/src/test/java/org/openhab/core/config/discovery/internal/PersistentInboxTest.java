@@ -209,5 +209,4 @@ public class PersistentInboxTest {
         when(thingTypeRegistry.getThingType(THING_TYPE_UID)).thenReturn(thingType);
         when(configDescriptionRegistry.getConfigDescription(eq(configDescriptionURI))).thenReturn(configDesc);
     }
-
 }

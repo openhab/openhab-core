@@ -53,5 +53,4 @@ public class ChannelGroupTypeUID extends UID {
     protected int getMinimalNumberOfSegments() {
         return 2;
     }
-
 }

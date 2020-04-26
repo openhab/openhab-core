@@ -72,5 +72,4 @@ public enum OnOffType implements PrimitiveType, State, Command {
             return State.super.as(target);
         }
     }
-
 }

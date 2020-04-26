@@ -235,5 +235,4 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry.removeConfigDescriptionProvider(configDescriptionProviderMock);
         assertThat(configDescriptionRegistry.getConfigDescriptions().size(), is(0));
     }
-
 }

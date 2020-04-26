@@ -189,5 +189,4 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
     protected void unsetTranslationProvider(TranslationProvider translationProvider) {
         this.translationProvider = null;
     }
-
 }

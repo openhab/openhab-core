@@ -408,5 +408,4 @@ public class ChannelItemProvider implements ItemProvider {
             }
         }
     };
-
 }

@@ -175,5 +175,4 @@ public class ChannelDefinition {
     public String toString() {
         return "ChannelDefinition [id=" + id + ", type=" + channelTypeUID + ", properties=" + properties + "]";
     }
-
 }

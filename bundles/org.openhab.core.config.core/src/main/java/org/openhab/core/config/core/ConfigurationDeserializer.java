@@ -90,5 +90,4 @@ public class ConfigurationDeserializer implements JsonDeserializer<Configuration
         }
         return list;
     }
-
 }

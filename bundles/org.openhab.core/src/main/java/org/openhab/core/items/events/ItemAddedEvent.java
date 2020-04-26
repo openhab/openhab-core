@@ -47,5 +47,4 @@ public class ItemAddedEvent extends AbstractItemRegistryEvent {
     public String toString() {
         return "Item '" + getItem().name + "' has been added.";
     }
-
 }

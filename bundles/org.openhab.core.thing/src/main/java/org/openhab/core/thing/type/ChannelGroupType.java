@@ -77,5 +77,4 @@ public class ChannelGroupType extends AbstractDescriptionType {
     public String toString() {
         return super.getUID().toString();
     }
-
 }

@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.openhab.core.io.console.Console;
@@ -93,7 +92,7 @@ public class ConsoleSupportEclipse implements CommandProvider {
                 final List<String> argsList = new ArrayList<>();
                 while (true) {
                     final String narg = interpreter.nextArgument();
-                    if (!StringUtils.isEmpty(narg)) {
+                    if (narg != null && !narg.isEmpty()) {
                         argsList.add(narg);
                     } else {
                         break;
@@ -113,5 +112,4 @@ public class ConsoleSupportEclipse implements CommandProvider {
     public String getHelp() {
         return ConsoleInterpreter.getHelp(BASE, " ", getConsoleCommandExtensions());
     }
-
 }

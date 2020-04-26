@@ -45,5 +45,4 @@ public class ManagedUserProvider extends DefaultAbstractManagedProvider<User, St
     protected String keyToString(String key) {
         return key;
     }
-
 }

@@ -78,5 +78,4 @@ public class CipherTest {
         when(configurationMock.getProperties()).thenReturn(properties);
         return configurationMock;
     }
-
 }

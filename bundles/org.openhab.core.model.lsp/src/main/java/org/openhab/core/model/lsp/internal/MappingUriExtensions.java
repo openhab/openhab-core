@@ -207,5 +207,4 @@ public class MappingUriExtensions extends UriExtensions {
         // We use this method now to keep the old behavior.
         return Paths.get(uri).toUri().toString();
     }
-
 }

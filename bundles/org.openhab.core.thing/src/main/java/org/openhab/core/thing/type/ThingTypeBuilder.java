@@ -16,7 +16,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.ThingTypeUID;
@@ -109,13 +108,13 @@ public class ThingTypeBuilder {
      * @throws IllegalStateException if one of {@code bindingId}, {@code thingTypeId} or {@code label} are not given.
      */
     public ThingType build() {
-        if (StringUtils.isBlank(bindingId)) {
+        if (bindingId == null || bindingId.isBlank()) {
             throw new IllegalArgumentException("The bindingId must neither be null nor empty.");
         }
-        if (StringUtils.isBlank(thingTypeId)) {
+        if (thingTypeId == null || thingTypeId.isBlank()) {
             throw new IllegalArgumentException("The thingTypeId must neither be null nor empty.");
         }
-        if (StringUtils.isBlank(label)) {
+        if (label == null || label.isBlank()) {
             throw new IllegalArgumentException("The label must neither be null nor empty.");
         }
 
@@ -131,13 +130,13 @@ public class ThingTypeBuilder {
      * @throws IllegalStateException if one of {@code bindingId}, {@code thingTypeId} or {@code label} are not given.
      */
     public BridgeType buildBridge() {
-        if (StringUtils.isBlank(bindingId)) {
+        if (bindingId == null || bindingId.isBlank()) {
             throw new IllegalArgumentException("The bindingId must neither be null nor empty.");
         }
-        if (StringUtils.isBlank(thingTypeId)) {
+        if (thingTypeId == null || thingTypeId.isBlank()) {
             throw new IllegalArgumentException("The thingTypeId must neither be null nor empty.");
         }
-        if (StringUtils.isBlank(label)) {
+        if (label == null || label.isBlank()) {
             throw new IllegalArgumentException("The label must neither be null nor empty.");
         }
 
@@ -200,5 +199,4 @@ public class ThingTypeBuilder {
         this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs;
         return this;
     }
-
 }

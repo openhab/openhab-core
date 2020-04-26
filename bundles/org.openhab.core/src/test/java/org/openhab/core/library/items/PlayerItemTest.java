@@ -55,5 +55,4 @@ public class PlayerItemTest {
         PlayerItem item = new PlayerItem("test");
         StateUtil.testAcceptedStates(item);
     }
-
 }

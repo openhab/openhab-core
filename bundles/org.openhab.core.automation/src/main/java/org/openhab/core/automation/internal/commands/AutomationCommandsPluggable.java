@@ -17,8 +17,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -179,7 +179,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     @Override
     public void execute(String[] args, Console console) {
         if (args.length == 0) {
-            console.println(StringUtils.join(getUsages(), "\n"));
+            console.println(getUsages().stream().collect(Collectors.joining("\n")));
             return;
         }
 
@@ -425,5 +425,4 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     public void setEnabled(String uid, boolean isEnabled) {
         ruleManager.setEnabled(uid, isEnabled);
     }
-
 }

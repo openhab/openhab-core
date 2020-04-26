@@ -132,5 +132,4 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
     protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
         this.itemChannelLinkRegistry = null;
     }
-
 }

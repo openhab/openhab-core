@@ -130,5 +130,4 @@ public class RootResource {
     protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = null;
     }
-
 }

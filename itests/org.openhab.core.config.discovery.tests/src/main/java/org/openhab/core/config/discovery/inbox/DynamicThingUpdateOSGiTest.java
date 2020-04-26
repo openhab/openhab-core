@@ -16,16 +16,14 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Collections;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryService;
-import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
@@ -137,8 +135,9 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
         });
         callback.statusUpdated(thing, ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build());
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(THING_TYPE_UID, THING_UID, null,
-                Collections.singletonMap(cfgIpAddressKey, cfgIpAddressValue), "DummyRepr", "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(THING_UID).withThingType(THING_TYPE_UID)
+                .withProperty(cfgIpAddressKey, cfgIpAddressValue).withRepresentationProperty("DummyRepr")
+                .withLabel("DummyLabel1").withTTL(DEFAULT_TTL).build();
 
         inbox.add(discoveryResult);
 
@@ -156,8 +155,8 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
     public void assertNotNUpdatedWithSameConfig() {
         managedThingProvider.add(ThingBuilder.create(THING_TYPE_UID, THING_ID).build());
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(THING_TYPE_UID, THING_UID, null,
-                Collections.emptyMap(), null, "DummyLabel", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(THING_UID).withThingType(THING_TYPE_UID)
+                .withLabel("DummyLabel").withTTL(DEFAULT_TTL).build();
 
         inbox.add(discoveryResult);
 
@@ -169,8 +168,8 @@ public class DynamicThingUpdateOSGiTest extends JavaOSGiTest {
     public void assertAdded() {
         managedThingProvider.add(ThingBuilder.create(THING_TYPE_UID, THING_ID).build());
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(THING_TYPE_UID, THING_UID2, null,
-                Collections.emptyMap(), null, "DummyLabel", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(THING_UID2).withThingType(THING_TYPE_UID)
+                .withLabel("DummyLabel").withTTL(DEFAULT_TTL).build();
 
         inbox.add(discoveryResult);
 

@@ -154,5 +154,4 @@ public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExte
     protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = null;
     }
-
 }

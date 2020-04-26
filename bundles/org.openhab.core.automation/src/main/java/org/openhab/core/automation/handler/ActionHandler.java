@@ -41,5 +41,4 @@ public interface ActionHandler extends ModuleHandler {
      */
     @Nullable
     Map<String, Object> execute(Map<String, Object> context);
-
 }

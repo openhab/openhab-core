@@ -14,7 +14,6 @@ package org.openhab.core.io.transport.mqtt.internal;
 
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
@@ -75,7 +74,7 @@ public class MqttBrokerConnectionServiceInstance {
         try {
             // Compute brokerID and make sure it is not empty
             String brokerID = config.getBrokerID();
-            if (StringUtils.isBlank(brokerID)) {
+            if (brokerID == null || brokerID.isBlank()) {
                 logger.warn("Ignore invalid broker connection configuration: {}", config);
                 return;
             }
@@ -108,5 +107,4 @@ public class MqttBrokerConnectionServiceInstance {
         }
         connection = null;
     }
-
 }

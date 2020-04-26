@@ -89,5 +89,4 @@ public class CompositeConditionType extends ConditionType {
     public List<Condition> getChildren() {
         return children;
     }
-
 }

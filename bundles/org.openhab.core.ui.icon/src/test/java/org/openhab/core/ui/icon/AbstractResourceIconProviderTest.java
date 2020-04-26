@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.ui.icon.IconSet.Format;
@@ -53,10 +52,21 @@ public class AbstractResourceIconProviderTest {
                 }
             }
 
+            private String substringAfterLast(String str, String separator) {
+                int index = str.lastIndexOf(separator);
+                return index == -1 || index == str.length() - separator.length() ? ""
+                        : str.substring(index + separator.length());
+            }
+
+            private String substringBeforeLast(String str, String separator) {
+                int index = str.lastIndexOf(separator);
+                return index == -1 ? str : str.substring(0, index);
+            }
+
             @Override
             protected boolean hasResource(String iconset, String resourceName) {
-                String state = StringUtils.substringAfterLast(resourceName, "-");
-                state = StringUtils.substringBeforeLast(state, ".");
+                String state = substringAfterLast(resourceName, "-");
+                state = substringBeforeLast(state, ".");
                 return "30".equals(state) || "y z".equals(state);
             };
 

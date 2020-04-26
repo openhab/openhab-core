@@ -57,5 +57,4 @@ public class BridgeTypeXmlResult extends ThingTypeXmlResult {
                 + ", properties=" + properties + ", configDescriptionURI=" + configDescriptionURI
                 + ", configDescription=" + configDescription + "]";
     }
-
 }

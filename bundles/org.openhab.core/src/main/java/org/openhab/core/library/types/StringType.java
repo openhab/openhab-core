@@ -80,5 +80,4 @@ public class StringType implements PrimitiveType, State, Command {
         StringType other = (StringType) obj;
         return Objects.equals(this.value, other.value);
     }
-
 }

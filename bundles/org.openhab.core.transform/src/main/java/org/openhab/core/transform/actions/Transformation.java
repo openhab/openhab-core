@@ -77,5 +77,4 @@ public class Transformation {
             throws TransformationException {
         return trans(type, function, value);
     }
-
 }

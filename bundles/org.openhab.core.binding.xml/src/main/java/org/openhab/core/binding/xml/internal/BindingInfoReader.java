@@ -79,5 +79,4 @@ public class BindingInfoReader extends XmlDocumentReader<BindingInfoXmlResult> {
         xstream.alias("filter", List.class);
         xstream.alias("criteria", FilterCriteria.class);
     }
-
 }

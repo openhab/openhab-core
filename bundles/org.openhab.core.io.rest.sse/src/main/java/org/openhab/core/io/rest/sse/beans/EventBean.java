@@ -25,5 +25,4 @@ public class EventBean {
     public String payload;
 
     public String type;
-
 }

@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.config.core.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +54,7 @@ public class InstanceUUID {
                     writeFile(file, uuid);
                 } else {
                     uuid = readFirstLine(file);
-                    if (StringUtils.isNotEmpty(uuid)) {
+                    if (uuid != null && !uuid.isEmpty()) {
                         LOGGER.debug("UUID '{}' has been restored from file '{}'", file.getAbsolutePath(), uuid);
                     } else {
                         uuid = java.util.UUID.randomUUID().toString();
@@ -90,5 +89,4 @@ public class InstanceUUID {
         }
         return lines == null || lines.isEmpty() ? "" : lines.get(0);
     }
-
 }

@@ -30,7 +30,6 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.eclipse.emf.ecore.EObject;
 import org.junit.After;
 import org.junit.Before;
@@ -68,6 +67,7 @@ import org.osgi.service.component.ComponentContext;
  */
 public class FolderObserverTest extends JavaOSGiTest {
 
+    private static final boolean IS_OS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
     private static final File WATCHED_DIRECTORY = new File("watcheddir");
     private static final File UNWATCHED_DIRECTORY = new File("unwatcheddir");
     private static final String EXISTING_SUBDIR_NAME = "existingsubdir";
@@ -164,7 +164,7 @@ public class FolderObserverTest extends JavaOSGiTest {
          * In some OS, like MacOS, creating an empty file is not related to sending an ENTRY_CREATE event.
          * So, it's necessary to put some initial content in that file.
          */
-        if (!SystemUtils.IS_OS_WINDOWS) {
+        if (!IS_OS_WINDOWS) {
             FileUtils.writeStringToFile(file, INITIAL_FILE_CONTENT);
         }
 
@@ -205,7 +205,7 @@ public class FolderObserverTest extends JavaOSGiTest {
          * In some OS, like MacOS, creating an empty file is not related to sending an ENTRY_CREATE event. So, it's
          * necessary to put some initial content in that file.
          */
-        if (!SystemUtils.IS_OS_WINDOWS) {
+        if (!IS_OS_WINDOWS) {
             FileUtils.writeStringToFile(file, INITIAL_FILE_CONTENT, true);
         }
 
@@ -223,7 +223,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         waitForAssert(() -> assertThat(modelRepo.calledFileName, is(file.getName())));
 
         String finalFileContent;
-        if (!SystemUtils.IS_OS_WINDOWS) {
+        if (!IS_OS_WINDOWS) {
             finalFileContent = INITIAL_FILE_CONTENT + text;
         } else {
             finalFileContent = text;
@@ -350,7 +350,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         File mockFileWithValidExt = new File(EXISTING_SUBDIR_PATH, "MockFileForModification." + validExtension);
         mockFileWithValidExt.createNewFile();
-        if (!SystemUtils.IS_OS_WINDOWS) {
+        if (!IS_OS_WINDOWS) {
             FileUtils.writeStringToFile(mockFileWithValidExt, INITIAL_FILE_CONTENT);
         }
 
@@ -380,7 +380,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         String filename = ".HiddenNewlyCreatedMockFile." + validExtension;
 
-        if (!SystemUtils.IS_OS_WINDOWS) {
+        if (!IS_OS_WINDOWS) {
             /*
              * In some OS, like MacOS, creating an empty file is not related to sending an ENTRY_CREATE event.
              * So, it's necessary to put some initial content in that file.
@@ -476,5 +476,4 @@ public class FolderObserverTest extends JavaOSGiTest {
             return null;
         }
     }
-
 }

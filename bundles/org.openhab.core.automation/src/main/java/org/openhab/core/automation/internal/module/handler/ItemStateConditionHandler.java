@@ -131,5 +131,4 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
         }
         return false;
     }
-
 }

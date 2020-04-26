@@ -47,5 +47,4 @@ public interface StateDescriptionFragmentProvider {
      * @return an integer value
      */
     Integer getRank();
-
 }

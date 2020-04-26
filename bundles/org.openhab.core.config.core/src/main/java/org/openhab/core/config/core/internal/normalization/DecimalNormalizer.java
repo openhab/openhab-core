@@ -64,5 +64,4 @@ final class DecimalNormalizer extends AbstractNormalizer {
         }
         return ret;
     }
-
 }

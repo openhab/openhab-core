@@ -192,5 +192,4 @@ public class LanguageResourceBundleManager {
 
         return null;
     }
-
 }

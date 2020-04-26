@@ -564,7 +564,6 @@ public class ItemResource implements RESTResource {
             metadataRegistry.update(md);
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         }
-
     }
 
     @DELETE

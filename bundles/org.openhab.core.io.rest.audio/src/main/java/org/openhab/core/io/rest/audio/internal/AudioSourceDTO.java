@@ -30,5 +30,4 @@ public class AudioSourceDTO {
         this.id = id;
         this.label = label;
     }
-
 }

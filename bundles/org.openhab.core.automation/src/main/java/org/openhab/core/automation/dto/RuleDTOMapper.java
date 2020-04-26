@@ -54,5 +54,4 @@ public class RuleDTOMapper {
         to.visibility = from.getVisibility();
         to.description = from.getDescription();
     }
-
 }

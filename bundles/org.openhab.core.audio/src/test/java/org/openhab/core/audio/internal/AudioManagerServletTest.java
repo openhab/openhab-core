@@ -87,5 +87,4 @@ public class AudioManagerServletTest extends AbstractAudioServletTest {
 
         return new ByteArrayAudioStream(testByteArray, audioFormat);
     }
-
 }

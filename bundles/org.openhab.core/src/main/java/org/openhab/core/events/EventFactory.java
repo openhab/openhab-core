@@ -48,5 +48,4 @@ public interface EventFactory {
      * @return the supported event types (not null)
      */
     Set<String> getSupportedEventTypes();
-
 }

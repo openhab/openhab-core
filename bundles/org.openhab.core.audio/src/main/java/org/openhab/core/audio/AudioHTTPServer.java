@@ -49,5 +49,4 @@ public interface AudioHTTPServer {
      * @return the relative URL to access the stream starting with a '/'
      */
     String serve(FixedLengthAudioStream stream, int seconds);
-
 }

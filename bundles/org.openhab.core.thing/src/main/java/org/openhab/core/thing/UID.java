@@ -113,5 +113,4 @@ public abstract class UID extends AbstractUID {
     public boolean equals(@Nullable Object obj) {
         return super.equals(obj);
     }
-
 }

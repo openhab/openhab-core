@@ -117,5 +117,4 @@ public class OSGiEventManager implements EventHandler {
     public void handleEvent(org.osgi.service.event.Event osgiEvent) {
         eventHandler.handleEvent(osgiEvent);
     }
-
 }

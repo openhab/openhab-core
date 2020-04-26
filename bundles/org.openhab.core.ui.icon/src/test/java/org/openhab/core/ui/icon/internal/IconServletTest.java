@@ -69,7 +69,6 @@ public class IconServletTest {
         public void reset() {
             outputStream.reset();
         }
-
     };
 
     private IconServlet servlet;
@@ -304,5 +303,4 @@ public class IconServletTest {
         verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
         verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
     }
-
 }

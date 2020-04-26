@@ -51,5 +51,4 @@ public interface ProfileCallback {
      * @param state
      */
     void sendUpdate(State state);
-
 }

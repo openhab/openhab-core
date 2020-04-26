@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.openhab.core.extension.Extension;
@@ -163,14 +162,24 @@ public class KarafExtensionService implements ExtensionService {
         return null;
     }
 
+    private String substringAfter(String str, String separator) {
+        int index = str.indexOf(separator);
+        return index == -1 ? "" : str.substring(index + separator.length());
+    }
+
+    private String substringBefore(String str, String separator) {
+        int index = str.indexOf(separator);
+        return index == -1 ? str : str.substring(0, index);
+    }
+
     private String getType(String name) {
-        return StringUtils.substringBefore(
+        return substringBefore(
                 name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name,
                 "-");
     }
 
     private String getName(String name) {
-        return StringUtils.substringAfter(
+        return substringAfter(
                 name.startsWith(FeatureInstaller.PREFIX) ? name.substring(FeatureInstaller.PREFIX.length()) : name,
                 "-");
     }

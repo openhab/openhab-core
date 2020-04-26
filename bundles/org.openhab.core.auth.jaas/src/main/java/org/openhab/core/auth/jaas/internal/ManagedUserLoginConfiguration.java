@@ -30,5 +30,4 @@ public class ManagedUserLoginConfiguration extends Configuration {
         return new AppConfigurationEntry[] { new AppConfigurationEntry(ManagedUserLoginModule.class.getCanonicalName(),
                 LoginModuleControlFlag.SUFFICIENT, new HashMap<String, Object>()) };
     }
-
 }

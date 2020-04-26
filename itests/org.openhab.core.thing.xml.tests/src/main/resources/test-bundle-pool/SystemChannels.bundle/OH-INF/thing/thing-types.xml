@@ -14,8 +14,8 @@
 				<label>My special Signal Strength</label>
 				<description>My special description for Signal Strength</description>
 			</channel>
-			<channel id="test" typeId="system.my-channel" />
-			<channel id="lowbat" typeId="system.low-battery" />
+			<channel id="test" typeId="system.my-channel"/>
+			<channel id="lowbat" typeId="system.low-battery"/>
 		</channels>
 
 	</thing-type>
@@ -31,7 +31,7 @@
 			</tag>
 		</tags>
 		<config-description>
-			<parameter name="range" type="integer" readOnly="true" min="0" max="4" step="1" />
+			<parameter name="range" type="integer" readOnly="true" min="0" max="4" step="1"/>
 		</config-description>
 	</channel-type>
 

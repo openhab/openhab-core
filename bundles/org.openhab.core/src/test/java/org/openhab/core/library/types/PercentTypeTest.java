@@ -97,5 +97,4 @@ public class PercentTypeTest {
         assertEquals(new HSBType("0,0,100"), new PercentType("100.0").as(HSBType.class));
         assertEquals(new HSBType("0,0,50"), new PercentType("50.0").as(HSBType.class));
     }
-
 }

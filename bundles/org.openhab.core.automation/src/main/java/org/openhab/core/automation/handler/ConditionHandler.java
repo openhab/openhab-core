@@ -38,5 +38,4 @@ public interface ConditionHandler extends ModuleHandler {
      * @return {@code true} if {@link Condition} is satisfied, {@code false} otherwise.
      */
     public boolean isSatisfied(Map<String, Object> context);
-
 }

@@ -91,5 +91,4 @@ public class ScriptThingActions {
         ThingActionsScope scopeAnnotation = actions.getClass().getAnnotation(ThingActionsScope.class);
         return scopeAnnotation.name();
     }
-
 }

@@ -314,5 +314,4 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
     protected void unsetThingManager(ThingManager thingManager) {
         this.thingManager = null;
     }
-
 }

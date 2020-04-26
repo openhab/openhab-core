@@ -88,5 +88,4 @@ public interface ModelRepository {
      * @param listener the listener to remove
      */
     public void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
-
 }

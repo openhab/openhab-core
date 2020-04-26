@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.knowm.xchart.Chart;
 import org.knowm.xchart.ChartBuilder;
 import org.knowm.xchart.Series;
@@ -400,7 +399,7 @@ public class DefaultChartProvider implements ChartProvider {
         }
         String chartThemeName = name;
         // no theme name -> default theme
-        if (StringUtils.isBlank(name)) {
+        if (name == null || name.isBlank()) {
             chartThemeName = CHART_THEME_DEFAULT_NAME;
         }
         ChartTheme chartTheme = chartThemes.get(chartThemeName);
@@ -410,5 +409,4 @@ public class DefaultChartProvider implements ChartProvider {
         }
         return chartTheme;
     }
-
 }

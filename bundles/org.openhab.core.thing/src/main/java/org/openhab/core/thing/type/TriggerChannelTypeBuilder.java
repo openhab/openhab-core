@@ -30,5 +30,4 @@ public interface TriggerChannelTypeBuilder extends ChannelTypeBuilder<TriggerCha
      * @return this Builder
      */
     TriggerChannelTypeBuilder withEventDescription(EventDescription eventDescription);
-
 }

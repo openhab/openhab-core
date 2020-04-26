@@ -44,5 +44,4 @@ public abstract class AbstractRuleRegistryEvent extends AbstractEvent {
     public RuleDTO getRule() {
         return this.rule;
     }
-
 }

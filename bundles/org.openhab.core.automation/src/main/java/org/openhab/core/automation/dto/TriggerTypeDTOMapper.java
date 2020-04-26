@@ -71,5 +71,4 @@ public class TriggerTypeDTOMapper extends ModuleTypeDTOMapper {
         triggerTypeDto.outputs = triggerType.getOutputs();
         return triggerTypeDto;
     }
-
 }

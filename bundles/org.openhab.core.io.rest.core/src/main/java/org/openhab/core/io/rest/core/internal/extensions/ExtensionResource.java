@@ -35,7 +35,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
@@ -255,12 +254,11 @@ public class ExtensionResource implements RESTResource {
     private String getExtensionId(URI extensionURI) {
         for (ExtensionService extensionService : extensionServices) {
             String extensionId = extensionService.getExtensionId(extensionURI);
-            if (StringUtils.isNotBlank(extensionId)) {
+            if (extensionId != null && !extensionId.isBlank()) {
                 return extensionId;
             }
         }
 
         throw new IllegalArgumentException("No extension service registered for URI " + extensionURI);
     }
-
 }

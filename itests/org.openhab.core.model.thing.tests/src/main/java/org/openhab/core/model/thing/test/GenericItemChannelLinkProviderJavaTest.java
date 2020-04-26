@@ -235,5 +235,4 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
         assertEquals(new BigDecimal(2), itemChannelLinkRegistry.get("Light3Color -> hue:LCT001:huebridge:bulb4:color")
                 .getConfiguration().get("value"));
     }
-
 }

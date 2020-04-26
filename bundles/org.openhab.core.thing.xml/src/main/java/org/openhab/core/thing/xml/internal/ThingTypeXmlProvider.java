@@ -153,5 +153,4 @@ public class ThingTypeXmlProvider implements XmlDocumentProvider<List<?>> {
         channelTypeProvider.removeAll(bundle);
         configDescriptionProvider.removeAll(bundle);
     }
-
 }

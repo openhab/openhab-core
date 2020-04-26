@@ -31,8 +31,6 @@ Import-Package: \
  org.openhab.core.model.script.engine.action,\
  com.google.common.base;version="14",\
  javax.measure,\
- org.apache.commons.io,\
- org.apache.commons.lang,\
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.eclipse.xtext.xbase.lib,\
  org.osgi.*,\

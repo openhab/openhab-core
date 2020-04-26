@@ -208,5 +208,4 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         assertThat(text, is(notNullValue()));
         assertThat(text, is(equalTo("Hallo rule, Hallo thing, Hallo esh!")));
     }
-
 }

@@ -72,5 +72,4 @@ public class NashornScriptEngineFactory extends AbstractScriptEngineFactory {
             logger.error("ScriptException while importing scope: {}", ex.getMessage());
         }
     }
-
 }

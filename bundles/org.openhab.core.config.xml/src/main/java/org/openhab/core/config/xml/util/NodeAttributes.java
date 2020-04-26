@@ -80,5 +80,4 @@ public class NodeAttributes implements NodeName {
     public String toString() {
         return "NodeAttributes [nodeName=" + nodeName + ", attributes=" + attributes + "]";
     }
-
 }

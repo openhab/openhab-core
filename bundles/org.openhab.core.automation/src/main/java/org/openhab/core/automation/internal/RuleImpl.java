@@ -290,5 +290,4 @@ public class RuleImpl implements Rule {
         }
         return true;
     }
-
 }

@@ -58,5 +58,4 @@ public interface AudioSource {
      * @throws AudioException If problem occurs obtaining the stream
      */
     AudioStream getInputStream(AudioFormat format) throws AudioException;
-
 }

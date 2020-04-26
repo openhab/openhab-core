@@ -36,5 +36,4 @@ public class TopicEventFilter implements EventFilter {
     public boolean apply(Event event) {
         return event.getTopic().matches(topicRegex);
     }
-
 }

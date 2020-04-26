@@ -66,7 +66,6 @@ public class AudioManagerTest {
         audioSource = mock(AudioSource.class);
         when(audioSource.getId()).thenReturn("audioSourceId");
         when(audioSource.getLabel(any(Locale.class))).thenReturn("audioSourceLabel");
-
     }
 
     @After
@@ -315,5 +314,4 @@ public class AudioManagerTest {
 
         return new ByteArrayAudioStream(testByteArray, audioFormat);
     }
-
 }

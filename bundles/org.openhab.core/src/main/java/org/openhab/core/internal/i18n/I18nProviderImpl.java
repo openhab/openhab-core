@@ -34,7 +34,6 @@ import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 import javax.measure.spi.SystemOfUnits;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.LocaleProvider;
@@ -178,7 +177,7 @@ public class I18nProviderImpl
     private void setLocale(@Nullable String language, @Nullable String script, @Nullable String region,
             @Nullable String variant) {
         Locale oldLocale = this.locale;
-        if (StringUtils.isEmpty(language)) {
+        if (language == null || language.isEmpty()) {
             // at least the language must be defined otherwise the system default locale is used
             logger.debug("No language set, setting locale to 'null'.");
             locale = null;
@@ -251,7 +250,7 @@ public class I18nProviderImpl
 
     private void setTimeZone(final @Nullable String zoneId) {
         ZoneId oldTimeZone = this.timeZone;
-        if (StringUtils.isBlank(zoneId)) {
+        if (zoneId == null || zoneId.isBlank()) {
             timeZone = null;
         } else {
             try {
@@ -380,5 +379,4 @@ public class I18nProviderImpl
         angleMap.put(ImperialUnits.getInstance(), SmartHomeUnits.DEGREE_ANGLE);
         dimensionMap.put(Angle.class, angleMap);
     }
-
 }

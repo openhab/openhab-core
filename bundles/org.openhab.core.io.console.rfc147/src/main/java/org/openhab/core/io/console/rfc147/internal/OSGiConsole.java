@@ -49,5 +49,4 @@ public class OSGiConsole implements Console {
     public void printUsage(final String s) {
         System.out.println(String.format("Usage: %s %s", base, s));
     }
-
 }

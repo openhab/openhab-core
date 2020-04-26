@@ -32,5 +32,4 @@ public interface Normalizer {
      * @return the well-defined type or the given object, if it was not possible to convert it
      */
     public Object normalize(Object value);
-
 }

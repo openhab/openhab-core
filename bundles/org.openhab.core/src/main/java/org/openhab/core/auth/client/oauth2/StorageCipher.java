@@ -54,5 +54,4 @@ public interface StorageCipher {
      */
     @Nullable
     String decrypt(@Nullable String base64CipherText) throws GeneralSecurityException;
-
 }

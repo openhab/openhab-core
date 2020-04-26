@@ -16,7 +16,6 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.TrustManagerFactory;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection.ConnectionCallback;
@@ -93,7 +92,7 @@ public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
             connectMessageBuilder.willPublish(willPublish);
         }
 
-        if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password) && password != null) {
+        if (username != null && !username.isBlank() && password != null && !password.isBlank()) {
             connectMessageBuilder.simpleAuth().username(username).password(password.getBytes()).applySimpleAuth();
         }
 
@@ -104,5 +103,4 @@ public class Mqtt3AsyncClientWrapper extends MqttAsyncClientWrapper {
     public CompletableFuture<Void> disconnect() {
         return client.disconnect();
     }
-
 }

@@ -56,5 +56,4 @@ public abstract class AbstractEvent implements Event {
     public @Nullable String getSource() {
         return source;
     }
-
 }

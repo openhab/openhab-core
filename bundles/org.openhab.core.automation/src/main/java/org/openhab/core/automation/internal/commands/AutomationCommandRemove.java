@@ -164,5 +164,4 @@ public class AutomationCommandRemove extends AutomationCommand {
         }
         return SUCCESS;
     }
-
 }

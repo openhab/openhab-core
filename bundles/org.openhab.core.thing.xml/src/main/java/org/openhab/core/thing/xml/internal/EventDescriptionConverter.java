@@ -94,5 +94,4 @@ public class EventDescriptionConverter extends GenericUnmarshaller<EventDescript
 
         return eventDescription;
     }
-
 }

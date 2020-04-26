@@ -57,5 +57,4 @@ public class ChannelTypeXmlResult {
     public String toString() {
         return "ChannelTypeXmlResult [channelType=" + channelType + ", configDescription=" + configDescription + "]";
     }
-
 }

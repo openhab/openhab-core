@@ -85,5 +85,4 @@ public enum ThingStatusDetail {
         public ThingStatusDetail DUTY_CYCLE = ThingStatusDetail.DUTY_CYCLE;
         public ThingStatusDetail GONE = ThingStatusDetail.GONE;
     };
-
 }

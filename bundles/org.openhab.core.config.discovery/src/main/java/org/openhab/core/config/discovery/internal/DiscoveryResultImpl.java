@@ -14,11 +14,14 @@ package org.openhab.core.config.discovery.internal;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
+import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
@@ -26,16 +29,17 @@ import org.openhab.core.thing.ThingUID;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class DiscoveryResultImpl implements DiscoveryResult {
 
-    private ThingUID bridgeUID;
-    private ThingUID thingUID;
-    private ThingTypeUID thingTypeUID;
+    private @Nullable ThingUID bridgeUID;
+    private @NonNullByDefault({}) ThingUID thingUID;
+    private @Nullable ThingTypeUID thingTypeUID;
 
-    private Map<String, Object> properties;
-    private String representationProperty;
-    private DiscoveryResultFlag flag;
-    private String label;
+    private Map<String, Object> properties = Collections.emptyMap();
+    private @Nullable String representationProperty;
+    private @NonNullByDefault({}) DiscoveryResultFlag flag;
+    private @NonNullByDefault({}) String label;
     private long timestamp;
     private long timeToLive = TTL_UNLIMITED;
 
@@ -48,47 +52,23 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @param thingUID
-     *            the Thing UID to be set (must not be null). If a {@code Thing} disappears and is discovered again, the
-     *            same {@code Thing} ID
-     *            must be created. A typical {@code Thing} ID could be the
-     *            serial number. It's usually <i>not</i> a product name.
-     * @param properties the properties to be set (could be null or empty)
-     * @param representationProperty the representationProperty to be set (could be null or empty)
-     * @param label the human readable label to set (could be null or empty)
-     * @param bridgeUID the unique bridge ID to be set
+     * @param thingTypeUID the {@link ThingTypeUID}
+     * @param thingUID the {@link ThingUID} to be set. If a {@code Thing} disappears and is discovered again, the same
+     *            {@code Thing} ID must be created. A typical {@code Thing} ID could be the serial number. It's usually
+     *            <i>not</i> a product name.
+     * @param bridgeUID the unique {@link Bridge} ID to be set
+     * @param properties the properties to be set
+     * @param representationProperty the representationProperty to be set
+     * @param label the human readable label to set
      * @param timeToLive time to live in seconds
      *
-     * @throws IllegalArgumentException
-     *             if the Thing type UID or the Thing UID is null
-     * @deprecated use {@link #DiscoveryResultImpl(ThingUID, ThingTypeUID, ThingUID, Map, String, String, long)}
-     *             instead.
+     * @throws IllegalArgumentException if the {@link ThingUID} is null or the time to live is less than 1
+     * @deprecated use {@link DiscoveryResultBuilder} instead.
      */
     @Deprecated
-    public DiscoveryResultImpl(ThingUID thingUID, ThingUID bridgeUID, Map<String, Object> properties,
-            String representationProperty, String label, long timeToLive) throws IllegalArgumentException {
-        this(thingUID.getThingTypeUID(), thingUID, bridgeUID, properties, representationProperty, label, timeToLive);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @param thingTypeUID the {@link ThingTypeUID}
-     * @param thingUID the Thing UID to be set (must not be null). If a {@code Thing} disappears and is discovered
-     *            again, the same {@code Thing} ID must be created. A typical {@code Thing} ID could be the serial
-     *            number. It's usually <i>not</i> a product name.
-     * @param properties the properties to be set (could be null or empty)
-     * @param representationProperty the representationProperty to be set (could be null or empty)
-     * @param label the human readable label to set (could be null or empty)
-     * @param bridgeUID the unique bridge ID to be set
-     * @param timeToLive time to live in seconds
-     *
-     * @throws IllegalArgumentException
-     *             if the Thing type UID or the Thing UID is null
-     */
-    public DiscoveryResultImpl(ThingTypeUID thingTypeUID, ThingUID thingUID, ThingUID bridgeUID,
-            Map<String, Object> properties, String representationProperty, String label, long timeToLive)
-            throws IllegalArgumentException {
+    public DiscoveryResultImpl(@Nullable ThingTypeUID thingTypeUID, ThingUID thingUID, @Nullable ThingUID bridgeUID,
+            @Nullable Map<String, Object> properties, @Nullable String representationProperty, @Nullable String label,
+            long timeToLive) throws IllegalArgumentException {
         if (thingUID == null) {
             throw new IllegalArgumentException("The thing UID must not be null!");
         }
@@ -99,8 +79,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
         this.thingUID = thingUID;
         this.thingTypeUID = thingTypeUID;
         this.bridgeUID = bridgeUID;
-        this.properties = Collections
-                .unmodifiableMap((properties != null) ? new HashMap<>(properties) : new HashMap<>());
+        this.properties = properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
         this.representationProperty = representationProperty;
         this.label = label == null ? "" : label;
 
@@ -117,45 +96,42 @@ public class DiscoveryResultImpl implements DiscoveryResult {
 
     @Override
     public ThingTypeUID getThingTypeUID() {
-        if (this.thingTypeUID != null) {
-            return this.thingTypeUID;
+        ThingTypeUID localThingTypeUID = thingTypeUID;
+        if (localThingTypeUID != null) {
+            return localThingTypeUID;
         } else {
             // fallback for discovery result which were created before the thingTypeUID field was added
-            return this.thingUID.getThingTypeUID();
+            return thingUID.getThingTypeUID();
         }
     }
 
     @Override
     public String getBindingId() {
-        ThingUID thingId = this.thingUID;
-        if (thingId != null) {
-            return thingId.getBindingId();
-        }
-        return "";
+        return thingUID.getBindingId();
     }
 
     @Override
     public Map<String, Object> getProperties() {
-        return this.properties;
+        return properties;
     }
 
     @Override
-    public String getRepresentationProperty() {
-        return this.representationProperty;
+    public @Nullable String getRepresentationProperty() {
+        return representationProperty;
     }
 
     @Override
     public DiscoveryResultFlag getFlag() {
-        return this.flag;
+        return flag;
     }
 
     @Override
     public String getLabel() {
-        return this.label;
+        return label;
     }
 
     @Override
-    public ThingUID getBridgeUID() {
+    public @Nullable ThingUID getBridgeUID() {
         return bridgeUID;
     }
 
@@ -169,8 +145,8 @@ public class DiscoveryResultImpl implements DiscoveryResult {
      *
      * @param sourceResult the discovery result which is used as source for the merge
      */
-    public void synchronize(DiscoveryResult sourceResult) {
-        if ((sourceResult != null) && (sourceResult.getThingUID().equals(this.thingUID))) {
+    public void synchronize(@Nullable DiscoveryResult sourceResult) {
+        if (sourceResult != null && thingUID.equals(sourceResult.getThingUID())) {
             this.properties = sourceResult.getProperties();
             this.representationProperty = sourceResult.getRepresentationProperty();
             this.label = sourceResult.getLabel();
@@ -188,29 +164,23 @@ public class DiscoveryResultImpl implements DiscoveryResult {
      * <p>
      * If the specified flag is {@code null}, {@link DiscoveryResultFlag.NEW} is set by default.
      *
-     * @param flag the flag of this result object to be set (could be null)
+     * @param flag the flag of this result object to be set
      */
-    public void setFlag(DiscoveryResultFlag flag) {
-        this.flag = (flag == null) ? DiscoveryResultFlag.NEW : flag;
+    public void setFlag(@Nullable DiscoveryResultFlag flag) {
+        this.flag = flag == null ? DiscoveryResultFlag.NEW : flag;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((thingUID == null) ? 0 : thingUID.hashCode());
-        return result;
+        return 31 + thingUID.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         DiscoveryResultImpl other = (DiscoveryResultImpl) obj;

@@ -105,5 +105,4 @@ public class ChartThemeBright implements ChartTheme {
     public int getLegendSeriesLineLength(int dpi) {
         return (int) Math.max(10, Math.round(dpi / 12.0));
     }
-
 }

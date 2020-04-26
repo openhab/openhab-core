@@ -103,5 +103,4 @@ public class HostFragmentMappingUtil {
         }
         return pkgAdmin.getBundleType(bundle) == PackageAdmin.BUNDLE_TYPE_FRAGMENT;
     }
-
 }

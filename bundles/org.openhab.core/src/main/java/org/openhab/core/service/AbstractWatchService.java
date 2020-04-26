@@ -19,7 +19,7 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
-import org.apache.commons.lang.StringUtils;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,11 +77,8 @@ public abstract class AbstractWatchService {
      * @return the path to be watched as a {@link String}. The returned path should be applicable for creating a
      *         {@link Path} with the {@link Paths#get(String, String...)} method.
      */
-    public Path getSourcePath() {
-        if (StringUtils.isNotBlank(pathToWatch)) {
-            return Paths.get(pathToWatch);
-        }
-        return null;
+    public @Nullable Path getSourcePath() {
+        return pathToWatch == null || pathToWatch.isBlank() ? null : Paths.get(pathToWatch);
     }
 
     /**
@@ -112,5 +109,4 @@ public abstract class AbstractWatchService {
      * @param path the path of the event (resolved to the {@link #baseWatchedDir})
      */
     protected abstract void processWatchEvent(WatchEvent<?> event, Kind<?> kind, Path path);
-
 }

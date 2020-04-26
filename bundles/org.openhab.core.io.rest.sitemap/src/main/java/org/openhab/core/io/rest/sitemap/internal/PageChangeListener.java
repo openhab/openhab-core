@@ -305,5 +305,4 @@ public class PageChangeListener implements StateChangeListener {
             callback.onEvent(aliveEvent);
         }
     }
-
 }

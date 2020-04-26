@@ -24,5 +24,4 @@ import org.openhab.core.automation.type.Output;
 public class TriggerTypeDTO extends ModuleTypeDTO {
 
     public List<Output> outputs;
-
 }

@@ -92,5 +92,4 @@ public interface ModuleHandlerCallback {
      * @param context the context that is passed to the conditions and the actions of the rule.
      */
     void runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context);
-
 }

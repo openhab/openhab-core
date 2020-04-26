@@ -76,5 +76,4 @@ public class ExtensionType {
         }
         return true;
     }
-
 }

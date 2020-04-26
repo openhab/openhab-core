@@ -167,5 +167,4 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
             }
         }
     }
-
 }

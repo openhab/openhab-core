@@ -307,5 +307,4 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         Response response = itemResource.removeMetadata(ITEM_NAME1, "namespace");
         assertEquals(409, response.getStatus());
     }
-
 }

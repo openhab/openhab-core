@@ -35,5 +35,4 @@ public class OAuthException extends Exception {
     public OAuthException(Throwable cause) {
         super(cause);
     }
-
 }

@@ -43,8 +43,7 @@
 		<bundle>mvn:org.eclipse.californium/scandium/2.0.0</bundle>
 	</feature>
 
-	<feature name="openhab.tp-commons-net" description="The Apache Commons Net library"
-		version="${project.version}">
+	<feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
 		<capability>openhab.tp;feature=commons-net;version=3.3</capability>
 		<bundle dependency="true">mvn:commons-net/commons-net/3.3</bundle>
 	</feature>
@@ -170,8 +169,7 @@
 		<bundle>mvn:de.jollyday/jollyday/0.5.8</bundle>
 	</feature>
 
-	<feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java."
-		version="${project.version}">
+	<feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
 		<capability>openhab.tp;feature=jmdns;version=3.5.5</capability>
 		<bundle>mvn:org.jmdns/jmdns/3.5.5</bundle>
 	</feature>
@@ -217,8 +215,7 @@
 		<bundle>mvn:com.neuronrobotics/nrjavaserial/3.20.0</bundle>
 	</feature>
 
-	<feature name="openhab.tp-xtext" description="Xtext - Language Engineering Made Easy"
-		version="${project.version}">
+	<feature name="openhab.tp-xtext" description="Xtext - Language Engineering Made Easy" version="${project.version}">
 		<capability>openhab.tp;feature=xtext;version=2.19.0</capability>
 
 		<bundle>mvn:org.eclipse.xtext/org.eclipse.xtext/2.19.0</bundle>
@@ -270,11 +267,9 @@
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.ide/2.19.0</bundle>
 	</feature>
 
-	<!-- <feature name="openhab.tp-swagger-annotations" description="Swagger Annotations" version="${project.version}"> <bundle
-		dependency="true">mvn:io.swagger/swagger-annotations/1.5.5</bundle> </feature> -->
+	<!-- <feature name="openhab.tp-swagger-annotations" description="Swagger Annotations" version="${project.version}"> <bundle dependency="true">mvn:io.swagger/swagger-annotations/1.5.5</bundle> </feature> -->
 
-	<feature name="openhab.tp-swagger-jax-rs-provider" description="JAX-RS provider for Swagger integration"
-		version="${project.version}">
+	<feature name="openhab.tp-swagger-jax-rs-provider" description="JAX-RS provider for Swagger integration" version="${project.version}">
 		<details>
 			This feature is currently only for external usage by products and not used by openHAB Core itself.
 		</details>

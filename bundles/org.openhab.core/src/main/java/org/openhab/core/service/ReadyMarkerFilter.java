@@ -64,5 +64,4 @@ public final class ReadyMarkerFilter {
     public ReadyMarkerFilter withIdentifier(@Nullable String identifier) {
         return new ReadyMarkerFilter(type, identifier);
     }
-
 }

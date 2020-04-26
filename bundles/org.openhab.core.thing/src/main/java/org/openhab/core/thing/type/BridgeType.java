@@ -132,5 +132,4 @@ public class BridgeType extends ThingType {
                 channelDefinitions, channelGroupDefinitions, properties, configDescriptionURI,
                 extensibleChannelTypeIds);
     }
-
 }

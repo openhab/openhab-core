@@ -67,5 +67,4 @@ public class ChannelUIDTest {
         assertEquals(GROUP_ID, channelUID.getGroupId());
         assertEquals(THING_UID, channelUID.getThingUID());
     }
-
 }

@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioException;
@@ -121,13 +120,23 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
         }
     }
 
+    private String substringAfterLast(String str, String separator) {
+        int index = str.lastIndexOf(separator);
+        return index == -1 || index == str.length() - separator.length() ? ""
+                : str.substring(index + separator.length());
+    }
+
+    private String substringBefore(String str, String separator) {
+        int index = str.indexOf(separator);
+        return index == -1 ? str : str.substring(0, index);
+    }
+
     @Override
     protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
         removeTimedOutStreams();
 
-        final String streamId = StringUtils.substringBefore(StringUtils.substringAfterLast(req.getRequestURI(), "/"),
-                ".");
+        final String streamId = substringBefore(substringAfterLast(req.getRequestURI(), "/"), ".");
 
         try (final InputStream stream = prepareInputStream(streamId, resp)) {
             if (stream == null) {
@@ -181,5 +190,4 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
     private String getRelativeURL(String streamId) {
         return SERVLET_NAME + "/" + streamId;
     }
-
 }

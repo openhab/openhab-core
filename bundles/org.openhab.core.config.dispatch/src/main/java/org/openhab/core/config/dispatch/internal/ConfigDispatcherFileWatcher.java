@@ -98,5 +98,4 @@ public class ConfigDispatcherFileWatcher extends AbstractWatchService {
             configDispatcher.fileRemoved(configFile.getAbsolutePath());
         }
     }
-
 }

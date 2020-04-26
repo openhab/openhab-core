@@ -34,7 +34,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.openhab.core.OpenHAB;
@@ -208,7 +207,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 List<String> newAddonIds = new ArrayList<>(trimmedAddonIds.size() + 1);
                 newAddonIds.addAll(trimmedAddonIds);
                 newAddonIds.add(id);
-                props.put(type, StringUtils.join(newAddonIds, ','));
+                props.put(type, newAddonIds.stream().collect(Collectors.joining(",")));
                 cfg.update(props);
                 return true;
             } else {
@@ -232,7 +231,7 @@ public class FeatureInstaller implements ConfigurationListener {
             if (trimmedAddonIds.contains(id)) {
                 List<String> newAddonIds = new ArrayList<>(trimmedAddonIds);
                 boolean success = newAddonIds.remove(id);
-                props.put(type, StringUtils.join(newAddonIds, ','));
+                props.put(type, newAddonIds.stream().collect(Collectors.joining(",")));
                 cfg.update(props);
                 return success;
             } else {
@@ -315,7 +314,7 @@ public class FeatureInstaller implements ConfigurationListener {
                     }
                 }
                 if (changed) {
-                    properties.put(PROPERTY_MVN_REPOS, StringUtils.join(repoCfg.toArray(), ","));
+                    properties.put(PROPERTY_MVN_REPOS, repoCfg.stream().collect(Collectors.joining(",")));
                     paxCfg.update(properties);
                 }
             } catch (IOException e) {
@@ -337,7 +336,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 try {
                     Feature[] features = service.listInstalledFeatures();
                     for (String addon : entries) {
-                        if (!StringUtils.isEmpty(addon)) {
+                        if (addon != null && !addon.isEmpty()) {
                             String id = PREFIX + type + "-" + addon.trim();
                             targetAddons.add(id);
                             if (!isInstalled(features, id)) {
@@ -348,7 +347,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
                     // we collect all installed addons
                     for (String addon : getAllAddonsOfType(service, type)) {
-                        if (!StringUtils.isEmpty(addon)) {
+                        if (addon != null && !addon.isEmpty()) {
                             String id = PREFIX + type + "-" + addon.trim();
                             if (isInstalled(features, id)) {
                                 currentAddons.add(id);
@@ -393,7 +392,9 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private synchronized void installFeatures(FeaturesService featuresService, Set<String> addons) {
         try {
-            logger.debug("Installing '{}'", StringUtils.join(addons, ", "));
+            if (logger.isDebugEnabled()) {
+                logger.debug("Installing '{}'", addons.stream().collect(Collectors.joining(", ")));
+            }
             featuresService.installFeatures(addons,
                     EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoFailOnFeatureNotFound));
             try {
@@ -409,11 +410,11 @@ public class FeatureInstaller implements ConfigurationListener {
                     }
                 }
 
-                if (!installed.isEmpty()) {
-                    logger.debug("Installed '{}'", StringUtils.join(installed, ", "));
+                if (!installed.isEmpty() && logger.isDebugEnabled()) {
+                    logger.debug("Installed '{}'", installed.stream().collect(Collectors.joining(", ")));
                 }
                 if (!failed.isEmpty()) {
-                    logger.error("Failed installing '{}'", StringUtils.join(failed, ", "));
+                    logger.error("Failed installing '{}'", failed.stream().collect(Collectors.joining(", ")));
                 }
 
                 for (String addon : installed) {
@@ -423,7 +424,8 @@ public class FeatureInstaller implements ConfigurationListener {
                 logger.error("Failed retrieving features: {}", e.getMessage());
             }
         } catch (Exception e) {
-            logger.error("Failed installing '{}': {}", StringUtils.join(addons, ", "), e.getMessage());
+            logger.error("Failed installing '{}': {}", addons.stream().collect(Collectors.joining(", ")),
+                    e.getMessage());
         }
     }
 

@@ -93,5 +93,4 @@ public final class ReadyMarker {
     public String toString() {
         return getType() + "=" + getIdentifier();
     }
-
 }

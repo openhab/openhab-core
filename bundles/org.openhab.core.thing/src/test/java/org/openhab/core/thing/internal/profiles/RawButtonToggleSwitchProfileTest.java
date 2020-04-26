@@ -74,5 +74,4 @@ public class RawButtonToggleSwitchProfileTest {
         profile.onTriggerFromHandler(CommonTriggerEvents.PRESSED);
         verify(mockCallback, times(1)).sendCommand(eq(expectation));
     }
-
 }

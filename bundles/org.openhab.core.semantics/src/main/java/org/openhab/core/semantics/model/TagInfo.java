@@ -34,5 +34,4 @@ public @interface TagInfo {
     String synonyms() default "";
 
     String description() default "";
-
 }

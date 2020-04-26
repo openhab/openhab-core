@@ -52,5 +52,4 @@ public class SmartHomeRestServletConfig implements ServletConfiguration {
     public void unsetHttpContext(HttpContext httpContext) {
         this.httpContext = null;
     }
-
 }

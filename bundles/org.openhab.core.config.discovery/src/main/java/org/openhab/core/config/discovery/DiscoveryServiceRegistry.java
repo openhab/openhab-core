@@ -178,5 +178,4 @@ public interface DiscoveryServiceRegistry {
      * @return the maximum amount of seconds which the discovery can take
      */
     int getMaxScanTimeout(String bindingId);
-
 }

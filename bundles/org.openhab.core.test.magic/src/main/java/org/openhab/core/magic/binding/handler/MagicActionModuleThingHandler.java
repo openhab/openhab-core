@@ -59,5 +59,4 @@ public class MagicActionModuleThingHandler extends BaseThingHandler {
     public Collection<Class<? extends ThingHandlerService>> getServices() {
         return Collections.singletonList(MagicThingActionsService.class);
     }
-
 }

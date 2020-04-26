@@ -145,5 +145,4 @@ public class ThreadFactoryBuilderTest {
 
         assertThat(testThread.getName(), is("ESH-" + testThreadName));
     }
-
 }

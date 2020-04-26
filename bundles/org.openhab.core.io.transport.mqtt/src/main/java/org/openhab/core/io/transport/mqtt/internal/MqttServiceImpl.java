@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.mqtt.MqttBrokerConnection;
@@ -90,7 +89,7 @@ public class MqttServiceImpl implements MqttService {
                 return null;
             }
             String host = config.host;
-            if (StringUtils.isNotBlank(host) && host != null) {
+            if (host != null && !host.isBlank()) {
                 connection = new MqttBrokerConnection(host, config.port, config.secure, config.clientID);
                 brokerConnections.put(brokerID, connection);
             } else {

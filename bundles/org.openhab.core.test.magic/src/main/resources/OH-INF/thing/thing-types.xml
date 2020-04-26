@@ -16,7 +16,7 @@
 		<description>A on/off light</description>
 
 		<channels>
-			<channel id="switch" typeId="switch" />
+			<channel id="switch" typeId="switch"/>
 		</channels>
 
 		<config-description>
@@ -28,7 +28,7 @@
 		<description>A dimmable light</description>
 
 		<channels>
-			<channel id="brightness" typeId="brightness" />
+			<channel id="brightness" typeId="brightness"/>
 		</channels>
 
 		<config-description>
@@ -40,8 +40,8 @@
 		<description>A dimmable light with changeable colors.</description>
 
 		<channels>
-			<channel id="color" typeId="color" />
-			<channel id="alert" typeId="alert" />
+			<channel id="color" typeId="color"/>
+			<channel id="alert" typeId="alert"/>
 		</channels>
 
 		<config-description>
@@ -53,7 +53,7 @@
 		<description>A door/window sensor indicating an open/close status.</description>
 
 		<channels>
-			<channel id="contact" typeId="contact" />
+			<channel id="contact" typeId="contact"/>
 		</channels>
 	</thing-type>
 
@@ -62,7 +62,7 @@
 		<description>A location thing providing a location channel.</description>
 
 		<channels>
-			<channel id="location" typeId="location" />
+			<channel id="location" typeId="location"/>
 		</channels>
 	</thing-type>
 
@@ -70,7 +70,7 @@
 		<label>Magic Configurable Thing</label>
 		<description>A thing that can be configured.</description>
 		<channels>
-			<channel id="switch" typeId="switch" />
+			<channel id="switch" typeId="switch"/>
 		</channels>
 
 		<representation-property>serialNumber</representation-property>
@@ -99,7 +99,7 @@
 		<description>A thing that goes online after some time.</description>
 
 		<channels>
-			<channel id="number" typeId="number" />
+			<channel id="number" typeId="number"/>
 		</channels>
 	</thing-type>
 
@@ -199,8 +199,8 @@
 		<label>Magic DynamicStateDescription Thing</label>
 		<description>A Thing with a DynamicStateDescription</description>
 		<channels>
-			<channel typeId="systemcommand" id="systemcommand" />
-			<channel typeId="system.signal-strength" id="signal-strength" />
+			<channel typeId="systemcommand" id="systemcommand"/>
+			<channel typeId="system.signal-strength" id="signal-strength"/>
 		</channels>
 		<config-description>
 			<parameter name="textParam" type="text" required="true">

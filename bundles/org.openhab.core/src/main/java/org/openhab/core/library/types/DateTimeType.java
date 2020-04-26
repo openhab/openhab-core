@@ -261,5 +261,4 @@ public class DateTimeType implements PrimitiveType, State, Command {
 
         return date;
     }
-
 }

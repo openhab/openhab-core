@@ -52,5 +52,4 @@ public enum OpenClosedType implements PrimitiveType, State, Command {
             return State.super.as(target);
         }
     }
-
 }

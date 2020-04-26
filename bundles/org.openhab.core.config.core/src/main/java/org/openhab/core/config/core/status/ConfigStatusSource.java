@@ -40,5 +40,4 @@ public abstract class ConfigStatusSource {
      * @return the topic over which the new configuration status is to be propagated
      */
     public abstract String getTopic();
-
 }

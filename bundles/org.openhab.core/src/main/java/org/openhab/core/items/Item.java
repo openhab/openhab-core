@@ -174,5 +174,4 @@ public interface Item extends Identifiable<String> {
      * @return command description (can be null)
      */
     public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale);
-
 }

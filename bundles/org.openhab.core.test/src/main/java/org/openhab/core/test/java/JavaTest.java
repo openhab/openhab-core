@@ -204,5 +204,4 @@ public class JavaTest {
             throw new IllegalStateException("We shouldn't be interrupted while testing");
         }
     }
-
 }

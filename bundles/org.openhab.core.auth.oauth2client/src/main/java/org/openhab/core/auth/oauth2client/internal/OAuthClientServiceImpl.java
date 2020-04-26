@@ -25,7 +25,6 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.UrlEncoded;
 import org.openhab.core.auth.client.oauth2.AccessTokenRefreshListener;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
@@ -302,7 +301,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
                 persistedParams.scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
 
         // The service may not return the refresh token so use the last refresh token otherwise it's not stored.
-        if (StringUtil.isBlank(accessTokenResponse.getRefreshToken())) {
+        String refreshToken = accessTokenResponse.getRefreshToken();
+        if (refreshToken == null || refreshToken.isBlank()) {
             accessTokenResponse.setRefreshToken(lastAccessToken.getRefreshToken());
         }
         // store it
@@ -395,5 +395,4 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     private String createNewState() {
         return UUID.randomUUID().toString();
     }
-
 }

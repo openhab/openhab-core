@@ -131,5 +131,4 @@ public class NodeList implements NodeName {
     public String toString() {
         return "NodeList [nodeName=" + nodeName + ", attributes=" + attributes + ", list=" + list + "]";
     }
-
 }

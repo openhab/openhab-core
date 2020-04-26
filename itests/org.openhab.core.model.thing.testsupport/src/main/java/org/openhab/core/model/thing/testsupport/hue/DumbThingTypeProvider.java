@@ -65,5 +65,4 @@ public class DumbThingTypeProvider implements ThingTypeProvider {
     public ThingType getThingType(ThingTypeUID thingTypeUID, Locale locale) {
         return THING_TYPES.get(thingTypeUID);
     }
-
 }

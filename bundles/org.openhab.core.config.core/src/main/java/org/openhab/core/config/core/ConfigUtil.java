@@ -272,5 +272,4 @@ public class ConfigUtil {
         return Constants.OBJECTCLASS.equals(name) || ComponentConstants.COMPONENT_NAME.equals(name)
                 || ComponentConstants.COMPONENT_ID.equals(name);
     }
-
 }

@@ -159,5 +159,4 @@ public class ModuleTypeResource implements RESTResource {
     public boolean isSatisfied() {
         return moduleTypeRegistry != null && localeService != null;
     }
-
 }

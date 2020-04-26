@@ -92,5 +92,4 @@ public class RollershutterItem extends GenericItem {
             logSetTypeError(state);
         }
     }
-
 }

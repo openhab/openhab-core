@@ -47,5 +47,4 @@ class DelegatingHttpContext implements HttpContext {
     public String getMimeType(String name) {
         return delegate.getMimeType(name);
     }
-
 }

@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.thing.ThingTypeUID;
@@ -65,19 +66,19 @@ public class InboxPredicatesTest {
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
     private static final Map<String, Object> PROPS2 = Collections.singletonMap(PROP2, PROP_VAL2);
 
-    private static final List<DiscoveryResultImpl> RESULTS = Arrays.asList(
-            new DiscoveryResultImpl(THING_TYPE_UID11, THING_UID11, null, PROPS1, PROP1, "label",
-                    DiscoveryResult.TTL_UNLIMITED),
-            new DiscoveryResultImpl(THING_TYPE_UID11, THING_UID12, null, PROPS1, null, "label",
-                    DiscoveryResult.TTL_UNLIMITED),
-            new DiscoveryResultImpl(THING_TYPE_UID12, THING_UID12, null, PROPS2, PROP2, "label",
-                    DiscoveryResult.TTL_UNLIMITED),
-            new DiscoveryResultImpl(THING_TYPE_UID21, THING_UID22, null, PROPS2, null, "label",
-                    DiscoveryResult.TTL_UNLIMITED));
+    private static final List<DiscoveryResult> RESULTS = Arrays.asList(
+            DiscoveryResultBuilder.create(THING_UID11).withThingType(THING_TYPE_UID11).withProperties(PROPS1)
+                    .withRepresentationProperty(PROP1).withLabel("label").build(),
+            DiscoveryResultBuilder.create(THING_UID12).withThingType(THING_TYPE_UID11).withProperties(PROPS1)
+                    .withLabel("label").build(),
+            DiscoveryResultBuilder.create(THING_UID12).withThingType(THING_TYPE_UID12).withProperties(PROPS2)
+                    .withRepresentationProperty(PROP2).withLabel("label").build(),
+            DiscoveryResultBuilder.create(THING_UID22).withThingType(THING_TYPE_UID21).withProperties(PROPS2)
+                    .withLabel("label").build());
 
     @Before
     public void setUp() throws Exception {
-        RESULTS.get(3).setFlag(DiscoveryResultFlag.IGNORED);
+        ((DiscoveryResultImpl) RESULTS.get(3)).setFlag(DiscoveryResultFlag.IGNORED);
     }
 
     @Test
@@ -167,5 +168,4 @@ public class InboxPredicatesTest {
                 RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).collect(Collectors.toList()).get(0),
                 is(equalTo(RESULTS.get(2))));
     }
-
 }

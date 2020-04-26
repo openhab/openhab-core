@@ -52,5 +52,4 @@ public interface Event {
      */
     @Nullable
     String getSource();
-
 }

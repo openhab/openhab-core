@@ -114,5 +114,4 @@ public class DiscoveryResource implements RESTResource {
     public boolean isSatisfied() {
         return discoveryServiceRegistry != null;
     }
-
 }

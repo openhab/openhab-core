@@ -26,5 +26,4 @@ public class PersistenceAllConfig extends PersistenceConfig {
     public String toString() {
         return String.format("%s []", getClass().getSimpleName());
     }
-
 }

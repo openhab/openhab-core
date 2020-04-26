@@ -241,5 +241,4 @@ public class FilterCriteria {
         this.state = state;
         return this;
     }
-
 }

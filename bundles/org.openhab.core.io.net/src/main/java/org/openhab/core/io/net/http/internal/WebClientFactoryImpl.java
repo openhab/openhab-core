@@ -348,5 +348,4 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
 
         return sslContextFactory;
     }
-
 }

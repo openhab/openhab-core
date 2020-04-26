@@ -60,5 +60,4 @@ public interface SafeCallManager {
      */
     @Nullable
     Invocation getActiveInvocation();
-
 }

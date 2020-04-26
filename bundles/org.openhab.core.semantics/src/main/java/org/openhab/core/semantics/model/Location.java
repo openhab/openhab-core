@@ -31,5 +31,4 @@ public interface Location extends Tag {
 
     @Nullable
     Location isPartOf();
-
 }

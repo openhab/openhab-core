@@ -30,5 +30,4 @@ public interface Equipment extends Tag {
 
     @Nullable
     Location hasLocation();
-
 }

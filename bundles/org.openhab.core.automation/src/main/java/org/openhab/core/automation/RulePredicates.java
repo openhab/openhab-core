@@ -179,5 +179,4 @@ public class RulePredicates {
             return hasAnyOfTags(Arrays.asList(tags));
         }
     }
-
 }

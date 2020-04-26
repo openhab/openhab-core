@@ -117,5 +117,4 @@ public class ProxyFilter implements ContainerRequestFilter {
 
         return values.get(0);
     }
-
 }

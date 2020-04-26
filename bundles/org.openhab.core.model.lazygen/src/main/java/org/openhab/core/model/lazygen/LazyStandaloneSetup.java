@@ -147,5 +147,4 @@ public class LazyStandaloneSetup extends AbstractWorkflowComponent2 {
         }
         return uri;
     }
-
 }

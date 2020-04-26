@@ -83,5 +83,4 @@ public interface ThingHandlerFactory {
      * @param thingUID thing UID of the removed object
      */
     void removeThing(ThingUID thingUID);
-
 }

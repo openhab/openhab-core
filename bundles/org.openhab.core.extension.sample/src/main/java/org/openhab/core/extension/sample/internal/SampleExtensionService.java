@@ -13,6 +13,7 @@
 package org.openhab.core.extension.sample.internal;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.extension.Extension;
@@ -71,9 +70,11 @@ public class SampleExtensionService implements ExtensionService {
             for (int i = 0; i < 10; i++) {
                 String id = type.getId() + Integer.toString(i);
                 boolean installed = Math.random() > 0.5;
-                String name = RandomStringUtils.randomAlphabetic(5);
-                String label = name + " " + StringUtils.capitalize(type.getId());
+                byte[] array = new byte[5];
+                new Random().nextBytes(array);
+                String name = new String(array, StandardCharsets.UTF_8);
                 String typeId = type.getId();
+                String label = name + " " + typeId.substring(0, 1).toUpperCase() + typeId.substring(1).toLowerCase();
                 String version = "1.0";
                 String link = (Math.random() < 0.5) ? null : "http://lmgtfy.com/?q=" + name;
                 String description = createDescription();
@@ -97,7 +98,7 @@ public class SampleExtensionService implements ExtensionService {
     }
 
     private String createDescription() {
-        int index = StringUtils.indexOf(LOREM_IPSUM, ' ', RANDOM.nextInt(LOREM_IPSUM.length()));
+        int index = LOREM_IPSUM.indexOf(" ", RANDOM.nextInt(LOREM_IPSUM.length()));
         if (index < 0) {
             index = LOREM_IPSUM.length();
         }
@@ -165,5 +166,4 @@ public class SampleExtensionService implements ExtensionService {
             eventPublisher.post(event);
         }
     }
-
 }

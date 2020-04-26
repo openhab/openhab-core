@@ -73,21 +73,21 @@
 			</filter>
 		</parameter>
 
-		<parameter name="unit" type="integer" unit="m" />
+		<parameter name="unit" type="integer" unit="m"/>
 
 		<parameter name="unit-label" type="decimal">
 			<unitLabel>Runs</unitLabel>
 		</parameter>
 
-		<parameter name="unit-ohm" type="decimal" unit="Ω" />
+		<parameter name="unit-ohm" type="decimal" unit="Ω"/>
 
-		<parameter name="unit-acceleration" type="decimal" unit="m/s2" />
+		<parameter name="unit-acceleration" type="decimal" unit="m/s2"/>
 
-		<parameter name="unit-celcius" type="decimal" unit="Cel" />
+		<parameter name="unit-celcius" type="decimal" unit="Cel"/>
 
-		<parameter name="unit-seconds" type="decimal" unit="s" />
+		<parameter name="unit-seconds" type="decimal" unit="s"/>
 
-		<parameter name="unit-kph" type="decimal" unit="kph" />
+		<parameter name="unit-kph" type="decimal" unit="kph"/>
 
 		<parameter name="unit-movements" type="decimal">
 			<unitLabel>@text/thing-type.config.dummyConfig.unit-movement.unitLabel</unitLabel>

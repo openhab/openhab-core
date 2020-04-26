@@ -259,5 +259,4 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         item.setState(state);
         return item;
     }
-
 }

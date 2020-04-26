@@ -54,5 +54,4 @@ public class SatisfiableResourceFilter implements ContainerRequestFilter {
             }
         }
     }
-
 }

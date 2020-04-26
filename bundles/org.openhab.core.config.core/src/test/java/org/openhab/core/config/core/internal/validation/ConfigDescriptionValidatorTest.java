@@ -512,5 +512,4 @@ public class ConfigDescriptionValidatorTest {
     private void failBecauseOfMissingConfigValidationException() {
         fail("A config validation exception was expected but it was not thrown");
     }
-
 }

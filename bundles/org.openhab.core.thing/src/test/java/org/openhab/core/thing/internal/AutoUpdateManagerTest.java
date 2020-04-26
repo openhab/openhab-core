@@ -344,5 +344,4 @@ public class AutoUpdateManagerTest {
         assertPredictionEvent("AFTER", null);
         assertStateEvent("AFTER", AutoUpdateManager.EVENT_SOURCE_OPTIMISTIC); // no?
     }
-
 }

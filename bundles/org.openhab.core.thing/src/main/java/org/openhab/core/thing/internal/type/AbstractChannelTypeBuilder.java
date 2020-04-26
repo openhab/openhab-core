@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.ChannelType;
@@ -46,7 +45,7 @@ abstract class AbstractChannelTypeBuilder<T extends ChannelTypeBuilder<T>> imple
             throw new IllegalArgumentException("ChannelTypeUID must be set.");
         }
 
-        if (StringUtils.isEmpty(label)) {
+        if (label == null || label.isEmpty()) {
             throw new IllegalArgumentException("Label for a ChannelType must not be empty.");
         }
 

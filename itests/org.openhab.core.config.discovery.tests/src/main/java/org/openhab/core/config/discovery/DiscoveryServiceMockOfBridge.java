@@ -14,7 +14,6 @@ package org.openhab.core.config.discovery;
 
 import java.util.Random;
 
-import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
@@ -23,21 +22,20 @@ import org.openhab.core.thing.ThingUID;
  */
 public class DiscoveryServiceMockOfBridge extends DiscoveryServiceMock {
 
-    ThingUID bridge;
+    final ThingUID bridgeUID;
 
-    public DiscoveryServiceMockOfBridge(ThingTypeUID thingType, int timeout, ThingUID bridge) {
+    public DiscoveryServiceMockOfBridge(ThingTypeUID thingType, int timeout, ThingUID bridgeUID) {
         super(thingType, timeout);
-        this.bridge = bridge;
+        this.bridgeUID = bridgeUID;
     }
 
     @Override
     public void startScan() {
-        thingDiscovered(new DiscoveryResultImpl(new ThingUID(thingType, "test" + new Random().nextInt(999999999)),
-                bridge, null, null, null, DEFAULT_TTL));
+        thingDiscovered(DiscoveryResultBuilder.create(new ThingUID(thingType, "test" + new Random().nextInt(999999999)))
+                .withBridge(bridgeUID).withTTL(DEFAULT_TTL).build());
     }
 
     public ThingUID getBridge() {
-        return bridge;
+        return bridgeUID;
     }
-
 }

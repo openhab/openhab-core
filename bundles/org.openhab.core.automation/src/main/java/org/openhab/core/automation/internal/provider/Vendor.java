@@ -147,5 +147,4 @@ public class Vendor {
         }
         return res;
     }
-
 }

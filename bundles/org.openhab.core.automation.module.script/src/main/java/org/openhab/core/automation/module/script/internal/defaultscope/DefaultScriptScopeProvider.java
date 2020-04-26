@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleRegistry;
@@ -90,7 +89,6 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
         elements.put("State", State.class);
         elements.put("Command", Command.class);
-        elements.put("StringUtils", StringUtils.class);
         elements.put("URLEncoder", URLEncoder.class);
         elements.put("FileUtils", FileUtils.class);
         elements.put("FilenameUtils", FilenameUtils.class);

@@ -36,5 +36,4 @@ public interface ModuleHandler {
      * @param callback a {@link ModuleHandlerCallback} instance
      */
     void setCallback(ModuleHandlerCallback callback);
-
 }

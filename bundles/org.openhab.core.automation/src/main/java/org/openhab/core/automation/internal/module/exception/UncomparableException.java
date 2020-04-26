@@ -20,5 +20,4 @@ package org.openhab.core.automation.internal.module.exception;
 public class UncomparableException extends Exception {
 
     private static final long serialVersionUID = 4891205711357448390L;
-
 }

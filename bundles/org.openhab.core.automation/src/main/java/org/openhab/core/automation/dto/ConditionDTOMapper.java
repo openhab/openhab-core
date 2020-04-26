@@ -61,5 +61,4 @@ public class ConditionDTOMapper extends ModuleDTOMapper {
         }
         return conditions;
     }
-
 }

@@ -17,8 +17,8 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTOMapper;
-import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.events.Event;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -36,8 +36,8 @@ public class InboxEventFactoryTest {
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding", "type");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "id");
 
-    private static final DiscoveryResult DISCOVERY_RESULT = new DiscoveryResultImpl(THING_TYPE_UID, THING_UID, null,
-            null, null, null, 60);
+    private static final DiscoveryResult DISCOVERY_RESULT = DiscoveryResultBuilder.create(THING_UID)
+            .withThingType(THING_TYPE_UID).withTTL(60).build();
 
     private static final String INBOX_ADDED_EVENT_TYPE = InboxAddedEvent.TYPE;
 

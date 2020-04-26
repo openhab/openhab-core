@@ -70,5 +70,4 @@ public class RuleGSONParser extends AbstractGSONParser<Rule> {
         }
         return Collections.emptySet();
     }
-
 }

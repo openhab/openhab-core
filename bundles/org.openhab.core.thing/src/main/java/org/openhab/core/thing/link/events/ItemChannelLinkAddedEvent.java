@@ -41,5 +41,4 @@ public class ItemChannelLinkAddedEvent extends AbstractItemChannelLinkRegistryEv
         ItemChannelLinkDTO link = getLink();
         return "Link '" + link.itemName + "-" + link.channelUID + "' has been added.";
     }
-
 }

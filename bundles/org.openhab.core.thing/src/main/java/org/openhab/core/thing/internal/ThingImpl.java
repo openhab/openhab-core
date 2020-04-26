@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
@@ -226,7 +225,7 @@ public class ThingImpl implements Thing {
 
     @Override
     public @Nullable String setProperty(String name, @Nullable String value) {
-        if (StringUtils.isEmpty(name)) {
+        if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Property name must not be null or empty");
         }
         synchronized (this) {
@@ -286,5 +285,4 @@ public class ThingImpl implements Thing {
         }
         return true;
     }
-
 }

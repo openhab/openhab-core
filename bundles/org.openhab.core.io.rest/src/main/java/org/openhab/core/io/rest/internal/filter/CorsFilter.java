@@ -25,7 +25,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.io.rest.internal.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -102,7 +101,7 @@ public class CorsFilter implements ContainerResponseFilter {
         if (ACCEPTED_HTTP_METHODS_LIST.contains(requestContext.getMethod())
                 && !HTTP_OPTIONS_METHOD.equals(requestContext.getMethod())) {
             String origin = getValue(requestContext.getHeaders(), ORIGIN_HEADER);
-            if (StringUtils.isNotBlank(origin)) {
+            if (origin != null && !origin.isBlank()) {
                 responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, origin);
             }
         }
@@ -122,7 +121,8 @@ public class CorsFilter implements ContainerResponseFilter {
             // Look for the mandatory CORS preflight request headers
             String origin = getValue(requestContext.getHeaders(), ORIGIN_HEADER);
             String realRequestMethod = getValue(requestContext.getHeaders(), ACCESS_CONTROL_REQUEST_METHOD);
-            isCorsPreflight = StringUtils.isNotBlank(origin) && StringUtils.isNotBlank(realRequestMethod);
+            isCorsPreflight = origin != null && !origin.isBlank() && realRequestMethod != null
+                    && !realRequestMethod.isBlank();
 
             if (isCorsPreflight) {
                 responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, origin);
@@ -161,7 +161,7 @@ public class CorsFilter implements ContainerResponseFilter {
      */
     private void appendVaryHeader(ContainerResponseContext responseContext) {
         String varyHeader = getValue(responseContext.getStringHeaders(), VARY_HEADER);
-        if (StringUtils.isBlank(varyHeader)) {
+        if (varyHeader == null || varyHeader.isBlank()) {
             // If the Vary header is not present, just add it.
             responseContext.getHeaders().add(VARY_HEADER, ORIGIN_HEADER);
         } else if (!VARY_HEADER_WILDCARD.equals(varyHeader)) {
@@ -181,5 +181,4 @@ public class CorsFilter implements ContainerResponseFilter {
             logger.info("enabled CORS for REST API.");
         }
     }
-
 }

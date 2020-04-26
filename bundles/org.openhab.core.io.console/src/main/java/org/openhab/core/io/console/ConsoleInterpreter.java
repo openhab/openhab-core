@@ -77,5 +77,4 @@ public class ConsoleInterpreter {
         }
         return usages;
     }
-
 }

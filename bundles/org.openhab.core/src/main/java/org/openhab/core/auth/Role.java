@@ -28,5 +28,4 @@ public interface Role {
      * Role of a regular user without any exceptional permissions or restrictions
      */
     final String USER = "user";
-
 }

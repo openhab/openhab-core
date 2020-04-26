@@ -42,5 +42,4 @@ public class VolatileStorageService implements StorageService {
     public <T> Storage<T> getStorage(String name, ClassLoader classLoader) {
         return getStorage(name);
     }
-
 }

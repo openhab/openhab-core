@@ -84,5 +84,4 @@ public class NodeValue implements NodeName {
     public String toString() {
         return "NodeValue [nodeName=" + nodeName + ", value=" + value + "]";
     }
-
 }

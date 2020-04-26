@@ -31,5 +31,4 @@ public interface StateProfileType extends ProfileType {
      * @return a collection of supported ItemType names (an empty list means ALL types are supported)
      */
     Collection<String> getSupportedItemTypesOfChannel();
-
 }

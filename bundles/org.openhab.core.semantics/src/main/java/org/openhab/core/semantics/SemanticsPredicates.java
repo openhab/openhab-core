@@ -82,5 +82,4 @@ public class SemanticsPredicates {
             return semanticProperty != null && property.isAssignableFrom(semanticProperty);
         };
     }
-
 }

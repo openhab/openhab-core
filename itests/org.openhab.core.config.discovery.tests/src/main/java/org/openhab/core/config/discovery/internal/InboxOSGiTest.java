@@ -112,17 +112,22 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
     private static final ThingUID BRIDGE_THING_UID = new ThingUID(BRIDGE_THING_TYPE_UID, "bridgeId");
 
-    private static final DiscoveryResult BRIDGE = new DiscoveryResultImpl(BRIDGE_THING_TYPE_UID, BRIDGE_THING_UID, null,
-            null, "Bridge", "bridge", DEFAULT_TTL);
-    private static final DiscoveryResult THING1_WITH_BRIDGE = new DiscoveryResultImpl(THING_TYPE_UID,
-            new ThingUID(THING_TYPE_UID, "id1"), BRIDGE_THING_UID, null, "Thing1", "thing1", DEFAULT_TTL);
-    private static final DiscoveryResult THING2_WITH_BRIDGE = new DiscoveryResultImpl(THING_TYPE_UID,
-            new ThingUID(THING_TYPE_UID, "id2"), BRIDGE_THING_UID, null, "Thing2", "thing2", DEFAULT_TTL);
-    private static final DiscoveryResult THING_WITHOUT_BRIDGE = new DiscoveryResultImpl(THING_TYPE_UID,
-            new ThingUID(THING_TYPE_UID, "id3"), null, null, "Thing3", "thing3", DEFAULT_TTL);
-    private static final DiscoveryResult THING_WITH_OTHER_BRIDGE = new DiscoveryResultImpl(THING_TYPE_UID,
-            new ThingUID(THING_TYPE_UID, "id4"), new ThingUID(THING_TYPE_UID, "id5"), null, "Thing4", "thing4",
-            DEFAULT_TTL);
+    private static final DiscoveryResult BRIDGE = DiscoveryResultBuilder.create(BRIDGE_THING_UID)
+            .withThingType(BRIDGE_THING_TYPE_UID).withRepresentationProperty("Bridge1").withLabel("bridge")
+            .withTTL(DEFAULT_TTL).build();
+    private static final DiscoveryResult THING1_WITH_BRIDGE = DiscoveryResultBuilder
+            .create(new ThingUID(THING_TYPE_UID, "id1")).withThingType(THING_TYPE_UID).withBridge(BRIDGE_THING_UID)
+            .withRepresentationProperty("Thing1").withLabel("thing1").withTTL(DEFAULT_TTL).build();
+    private static final DiscoveryResult THING2_WITH_BRIDGE = DiscoveryResultBuilder
+            .create(new ThingUID(THING_TYPE_UID, "id2")).withThingType(THING_TYPE_UID).withBridge(BRIDGE_THING_UID)
+            .withRepresentationProperty("Thing2").withLabel("thing2").withTTL(DEFAULT_TTL).build();
+    private static final DiscoveryResult THING_WITHOUT_BRIDGE = DiscoveryResultBuilder
+            .create(new ThingUID(THING_TYPE_UID, "id3")).withThingType(THING_TYPE_UID)
+            .withRepresentationProperty("Thing3").withLabel("thing3").withTTL(DEFAULT_TTL).build();
+    private static final DiscoveryResult THING_WITH_OTHER_BRIDGE = DiscoveryResultBuilder
+            .create(new ThingUID(THING_TYPE_UID, "id4")).withThingType(THING_TYPE_UID)
+            .withBridge(new ThingUID(THING_TYPE_UID, "id5")).withRepresentationProperty("Thing4").withLabel("thing4")
+            .withTTL(DEFAULT_TTL).build();
 
     private final URI testURI = createURI("http:dummy");
     private final String testThingLabel = "dummy_thing";
@@ -227,12 +232,6 @@ public class InboxOSGiTest extends JavaOSGiTest {
         // inboxListeners.add(inboxListener)
     }
 
-    private void removeInboxListener(InboxListener inboxListener) {
-        inbox.removeInboxListener(inboxListener);
-        // TODO: the test fails if this line is used
-        // inboxListeners.remove(inboxListener)
-    }
-
     @Test
     public void assertThatGetAllIncludesPreviouslyAddedDiscoveryResult() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("dummyBindingId", "dummyThingType");
@@ -245,8 +244,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property1").withLabel("DummyLabel1")
+                .withTTL(DEFAULT_TTL).build();
 
         assertTrue(addDiscoveryResult(discoveryResult));
 
@@ -277,16 +277,17 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property1").withLabel("DummyLabel1")
+                .withTTL(DEFAULT_TTL).build();
         assertTrue(addDiscoveryResult(discoveryResult));
 
         props.clear();
         props.put("property2", "property2value2");
         props.put("property3", "property3value1");
 
-        discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property3", "DummyLabel2",
-                DEFAULT_TTL);
+        discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID).withProperties(props)
+                .withRepresentationProperty("property3").withLabel("DummyLabel2").withTTL(DEFAULT_TTL).build();
 
         assertTrue(addDiscoveryResult(discoveryResult));
 
@@ -313,14 +314,14 @@ public class InboxOSGiTest extends JavaOSGiTest {
         List<DiscoveryResult> allDiscoveryResults = inbox.getAll();
         assertThat(allDiscoveryResults.size(), is(0));
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, null, null,
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withLabel("DummyLabel1").withTTL(DEFAULT_TTL).build();
 
         assertTrue(addDiscoveryResult(discoveryResult));
 
         ThingUID thingUID2 = new ThingUID(thingTypeUID, "dummyThingId2");
-        discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID2, null, null, null, "DummyLabel2",
-                DEFAULT_TTL);
+        discoveryResult = DiscoveryResultBuilder.create(thingUID2).withThingType(thingTypeUID).withLabel("DummyLabel2")
+                .withTTL(DEFAULT_TTL).build();
 
         addDiscoveryResult(discoveryResult);
 
@@ -340,8 +341,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property1").withLabel("DummyLabel1")
+                .withTTL(DEFAULT_TTL).build();
         assertTrue(addDiscoveryResult(discoveryResult));
 
         allDiscoveryResults = inbox.getAll();
@@ -365,8 +367,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property1").withLabel("DummyLabel1")
+                .withTTL(DEFAULT_TTL).build();
         assertTrue(addDiscoveryResult(discoveryResult));
 
         allDiscoveryResults = inbox.getAll();
@@ -376,8 +379,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property2", "property2value2");
         props.put("property3", "property3value1");
 
-        DiscoveryResult discoveryResultUpdate = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props,
-                "property3", "DummyLabel2", DEFAULT_TTL);
+        DiscoveryResult discoveryResultUpdate = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property3").withLabel("DummyLabel2")
+                .withTTL(DEFAULT_TTL).build();
 
         assertTrue(addDiscoveryResult(discoveryResultUpdate));
 
@@ -402,8 +406,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property1").withLabel("DummyLabel1")
+                .withTTL(DEFAULT_TTL).build();
 
         AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<>();
         AsyncResultWrapper<DiscoveryResult> updatedDiscoveryResultWrapper = new AsyncResultWrapper<>();
@@ -466,16 +471,17 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property1").withLabel("DummyLabel1")
+                .withTTL(DEFAULT_TTL).build();
         assertTrue(addDiscoveryResult(discoveryResult));
 
         props.clear();
         props.put("property2", "property2value2");
         props.put("property3", "property3value1");
 
-        discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property3", "DummyLabel2",
-                DEFAULT_TTL);
+        discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID).withProperties(props)
+                .withRepresentationProperty("property3").withLabel("DummyLabel2").withTTL(DEFAULT_TTL).build();
 
         AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<>();
         AsyncResultWrapper<DiscoveryResult> updatedDiscoveryResultWrapper = new AsyncResultWrapper<>();
@@ -537,8 +543,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property1").withLabel("DummyLabel1")
+                .withTTL(DEFAULT_TTL).build();
         assertTrue(addDiscoveryResult(discoveryResult));
 
         AsyncResultWrapper<DiscoveryResult> addedDiscoveryResultWrapper = new AsyncResultWrapper<>();
@@ -601,8 +608,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, props, "property1",
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withProperties(props).withRepresentationProperty("property1").withLabel("DummyLabel1")
+                .withTTL(DEFAULT_TTL).build();
 
         inbox.add(discoveryResult);
 
@@ -626,8 +634,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, null, null,
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withLabel("DummyLabel1").withTTL(DEFAULT_TTL).build();
 
         inbox.add(discoveryResult);
 
@@ -647,8 +655,8 @@ public class InboxOSGiTest extends JavaOSGiTest {
         props.put("property1", "property1value1");
         props.put("property2", "property2value1");
 
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, null, null,
-                "DummyLabel1", DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withLabel("DummyLabel1").withTTL(DEFAULT_TTL).build();
 
         inbox.add(discoveryResult);
 
@@ -688,15 +696,16 @@ public class InboxOSGiTest extends JavaOSGiTest {
         registerService(inboxEventSubscriber);
 
         // add discovery result
-        DiscoveryResult discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, null, null, null,
-                DEFAULT_TTL);
+        DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID)
+                .withTTL(DEFAULT_TTL).build();
         addDiscoveryResult(discoveryResult);
         waitForAssert(() -> assertThat(receivedEvent.getWrappedObject(), not(nullValue())));
         assertThat(receivedEvent.getWrappedObject(), is(instanceOf(InboxAddedEvent.class)));
         receivedEvent.reset();
 
         // update discovery result
-        discoveryResult = new DiscoveryResultImpl(thingTypeUID, thingUID, null, null, null, null, DEFAULT_TTL);
+        discoveryResult = DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID).withTTL(DEFAULT_TTL)
+                .build();
         addDiscoveryResult(discoveryResult);
         waitForAssert(() -> assertThat(receivedEvent.getWrappedObject(), not(nullValue())));
         assertThat(receivedEvent.getWrappedObject(), is(instanceOf(InboxUpdatedEvent.class)));
@@ -1004,5 +1013,4 @@ public class InboxOSGiTest extends JavaOSGiTest {
             return null;
         }
     }
-
 }

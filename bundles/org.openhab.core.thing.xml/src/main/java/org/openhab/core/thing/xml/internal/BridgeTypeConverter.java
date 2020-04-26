@@ -52,5 +52,4 @@ public class BridgeTypeConverter extends ThingTypeConverter {
 
         return bridgeTypeXmlResult;
     }
-
 }

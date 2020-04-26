@@ -51,5 +51,4 @@ public class RESTCoreActivator implements BundleActivator {
     public static BundleContext getBundleContext() {
         return context;
     }
-
 }

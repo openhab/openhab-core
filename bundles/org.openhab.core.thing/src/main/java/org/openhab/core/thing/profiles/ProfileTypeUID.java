@@ -45,5 +45,4 @@ public class ProfileTypeUID extends UID {
     public String getId() {
         return getSegment(1);
     }
-
 }

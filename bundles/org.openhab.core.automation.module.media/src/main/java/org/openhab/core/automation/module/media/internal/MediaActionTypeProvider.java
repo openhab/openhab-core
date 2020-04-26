@@ -21,7 +21,6 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioManager;
@@ -114,8 +113,10 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
         if (soundsDir.isDirectory()) {
             for (String fileName : soundsDir.list()) {
                 if (fileName.contains(".") && !fileName.startsWith(".")) {
-                    String soundName = StringUtils.capitalize(fileName.substring(0, fileName.lastIndexOf(".")));
-                    options.add(new ParameterOption(fileName, soundName));
+                    String soundName = fileName.substring(0, fileName.lastIndexOf("."));
+                    String capitalizedSoundName = soundName.substring(0, 1).toUpperCase()
+                            + soundName.substring(1).toLowerCase();
+                    options.add(new ParameterOption(fileName, capitalizedSoundName));
                 }
             }
         }

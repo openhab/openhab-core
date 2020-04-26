@@ -120,5 +120,4 @@ public class RuleTemplateRegistry extends AbstractRegistry<RuleTemplate, String,
     public Collection<RuleTemplate> getAll(@Nullable Locale locale) {
         return getByTag(null, locale);
     }
-
 }

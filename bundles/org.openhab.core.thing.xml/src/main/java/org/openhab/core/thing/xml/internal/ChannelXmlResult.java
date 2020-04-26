@@ -144,5 +144,4 @@ public class ChannelXmlResult {
             return String.format("%s:%s", bindingId, typeId);
         }
     }
-
 }

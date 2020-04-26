@@ -192,7 +192,6 @@ final class TypeIntrospections {
             }
             return true;
         }
-
     }
 
     private static final class IntegerIntrospection extends TypeIntrospection {

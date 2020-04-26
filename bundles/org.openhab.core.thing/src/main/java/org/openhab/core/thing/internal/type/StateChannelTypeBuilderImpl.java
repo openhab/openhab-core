@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.internal.type;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
@@ -42,7 +41,7 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
     public StateChannelTypeBuilderImpl(ChannelTypeUID channelTypeUID, String label, String itemType) {
         super(channelTypeUID, label);
 
-        if (StringUtils.isEmpty(itemType)) {
+        if (itemType == null || itemType.isBlank()) {
             throw new IllegalArgumentException("Supported itemType for a ChannelType must not be empty.");
         }
 

@@ -62,5 +62,4 @@ final class BooleanNormalizer extends AbstractNormalizer {
             return numeric;
         }
     }
-
 }

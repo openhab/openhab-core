@@ -72,5 +72,4 @@ public class ActionTypeDTOMapper extends ModuleTypeDTOMapper {
         actionTypeDto.outputs = actionType.getOutputs();
         return actionTypeDto;
     }
-
 }

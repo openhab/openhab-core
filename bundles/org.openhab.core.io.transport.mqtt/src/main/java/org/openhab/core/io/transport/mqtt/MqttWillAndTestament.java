@@ -14,7 +14,6 @@ package org.openhab.core.io.transport.mqtt;
 
 import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -62,7 +61,8 @@ public class MqttWillAndTestament {
         if (string != null) {
             String[] components = string.split(":");
             for (int i = 0; i < Math.min(components.length, 4); i++) {
-                String value = StringUtils.trimToEmpty(components[i]);
+                String component = components[i];
+                String value = component == null ? "" : component.trim();
                 switch (i) {
                     case 0:
                         tmpTopic = value;
@@ -117,7 +117,7 @@ public class MqttWillAndTestament {
      * @param retain true if messages shall be retained
      */
     public MqttWillAndTestament(String topic, byte @Nullable [] payload, int qos, boolean retain) {
-        if (StringUtils.isBlank(topic)) {
+        if (topic == null || topic.isBlank()) {
             throw new IllegalArgumentException("Topic must be set");
         }
         this.topic = topic;
@@ -173,5 +173,4 @@ public class MqttWillAndTestament {
         sb.append(" using qos mode ").append(qos);
         return sb.toString();
     }
-
 }

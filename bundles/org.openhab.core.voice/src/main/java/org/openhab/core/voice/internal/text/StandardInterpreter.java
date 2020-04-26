@@ -259,5 +259,4 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
     public void unsetEventPublisher(EventPublisher eventPublisher) {
         super.unsetEventPublisher(eventPublisher);
     }
-
 }

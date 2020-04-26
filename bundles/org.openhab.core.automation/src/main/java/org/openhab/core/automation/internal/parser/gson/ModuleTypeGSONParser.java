@@ -102,5 +102,4 @@ public class ModuleTypeGSONParser extends AbstractGSONParser<ModuleType> {
         map.put("actions", actions);
         return map;
     }
-
 }

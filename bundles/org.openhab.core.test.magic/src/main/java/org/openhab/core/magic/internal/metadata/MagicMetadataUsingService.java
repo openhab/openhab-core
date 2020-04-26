@@ -72,5 +72,4 @@ public class MagicMetadataUsingService {
     protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
         this.metadataRegistry = null;
     }
-
 }

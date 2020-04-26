@@ -57,5 +57,4 @@ public final class NormalizerFactory {
         Normalizer ret = NORMALIZERS.get(configDescriptionParameter.getType());
         return configDescriptionParameter.isMultiple() ? new ListNormalizer(ret) : ret;
     }
-
 }

@@ -22,5 +22,4 @@ import java.util.List;
 public class CompositeConditionTypeDTO extends ConditionTypeDTO {
 
     public List<ConditionDTO> children;
-
 }

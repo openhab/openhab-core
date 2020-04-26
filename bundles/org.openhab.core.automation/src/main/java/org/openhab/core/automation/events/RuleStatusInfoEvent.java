@@ -66,5 +66,4 @@ public class RuleStatusInfoEvent extends AbstractEvent {
     public String toString() {
         return ruleId + " updated: " + statusInfo.toString();
     }
-
 }

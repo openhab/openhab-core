@@ -28,5 +28,4 @@ public class ThingDescriptionList extends ArrayList {
     public ThingDescriptionList(Collection list) {
         super(list);
     }
-
 }

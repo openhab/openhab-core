@@ -88,5 +88,4 @@ public class SemanticTagsTest {
     public void testGetProperty() {
         assertEquals(Temperature.class, SemanticTags.getProperty(pointItem));
     }
-
 }

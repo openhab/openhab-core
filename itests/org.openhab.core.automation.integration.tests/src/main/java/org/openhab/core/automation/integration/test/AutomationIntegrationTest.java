@@ -474,7 +474,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
                     itemEvent = e;
                 }
             }
-
         };
         registerService(itemEventHandler);
 
@@ -530,7 +529,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
                     itemEvent = e;
                 }
             }
-
         };
         registerService(itemEventHandler);
 
@@ -1016,5 +1014,4 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem5/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
     }
-
 }

@@ -120,5 +120,4 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
             eventSubscriberRegistration = null;
         }
     }
-
 }

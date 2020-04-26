@@ -56,5 +56,4 @@ public interface ProfileAdvisor {
      */
     @Nullable
     ProfileTypeUID getSuggestedProfileTypeUID(ChannelType channelType, @Nullable String itemType);
-
 }

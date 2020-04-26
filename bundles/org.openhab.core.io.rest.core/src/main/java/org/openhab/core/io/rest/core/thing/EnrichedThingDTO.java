@@ -49,5 +49,4 @@ public class EnrichedThingDTO extends ThingDTO {
         this.firmwareStatus = firmwareStatus;
         this.editable = editable;
     }
-
 }

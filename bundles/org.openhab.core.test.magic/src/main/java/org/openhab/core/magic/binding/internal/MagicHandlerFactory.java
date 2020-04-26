@@ -143,5 +143,4 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
 
         return null;
     }
-
 }

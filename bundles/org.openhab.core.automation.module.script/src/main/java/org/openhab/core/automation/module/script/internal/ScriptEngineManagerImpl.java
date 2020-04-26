@@ -221,5 +221,4 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     public boolean isSupported(String scriptType) {
         return findEngineFactory(scriptType) != null;
     }
-
 }

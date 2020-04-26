@@ -14,7 +14,6 @@ package org.openhab.core.thing.type;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -45,8 +44,7 @@ public class ChannelGroupTypeBuilder {
         if (channelGroupTypeUID == null) {
             throw new IllegalArgumentException("ChannelGroupTypeUID must be set.");
         }
-
-        if (StringUtils.isEmpty(label)) {
+        if (label == null || label.isBlank()) {
             throw new IllegalArgumentException("Label for a ChannelGroupType must not be empty.");
         }
 

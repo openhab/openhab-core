@@ -52,7 +52,6 @@ public class QuantityTypeTest {
         assertTrue(dt0.getUnit().getDimension() == QuantityDimension.NONE);
         dt0 = new QuantityType<>("2rad");
         assertTrue(dt0.getUnit().getDimension() == QuantityDimension.NONE);
-
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -84,7 +84,6 @@ public class RawRockerDimmerProfile implements TriggerProfile {
                 200, TimeUnit.MILLISECONDS);
         timeoutFuture = context.getExecutorService().schedule(() -> this.cancelDimmFuture(), 10, TimeUnit.SECONDS);
         pressedTime = System.currentTimeMillis();
-
     }
 
     private synchronized void buttonReleased(Command commandToSend) {
@@ -104,5 +103,4 @@ public class RawRockerDimmerProfile implements TriggerProfile {
             dimmFuture.cancel(false);
         }
     }
-
 }

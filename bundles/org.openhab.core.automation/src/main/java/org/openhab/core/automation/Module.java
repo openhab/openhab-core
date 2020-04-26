@@ -77,5 +77,4 @@ public interface Module {
      * @return the current configuration values of the {@link Module}.
      */
     Configuration getConfiguration();
-
 }

@@ -329,5 +329,4 @@ public class AutoUpdateManager {
     protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
         this.channelTypeRegistry = null;
     }
-
 }

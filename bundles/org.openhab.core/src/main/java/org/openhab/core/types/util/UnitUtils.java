@@ -27,7 +27,6 @@ import javax.measure.Unit;
 import javax.measure.UnitConverter;
 import javax.measure.spi.SystemOfUnits;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
@@ -76,7 +75,7 @@ public class UnitUtils {
      * @throws IllegalArgumentException in case no class instance could be parsed from the given dimension.
      */
     public static @Nullable Class<? extends Quantity<?>> parseDimension(String dimension) {
-        if (StringUtils.isBlank(dimension)) {
+        if (dimension.isBlank()) {
             return null;
         }
 
@@ -144,7 +143,7 @@ public class UnitUtils {
      *
      */
     public static @Nullable Unit<?> parseUnit(@Nullable String pattern) {
-        if (StringUtils.isBlank(pattern)) {
+        if (pattern == null || pattern.isBlank()) {
             return null;
         }
 
@@ -154,7 +153,7 @@ public class UnitUtils {
             unitSymbol = pattern.substring(lastBlankIndex).trim();
         }
 
-        if (StringUtils.isNotBlank(unitSymbol) && !UNIT_PLACEHOLDER.equals(unitSymbol)) {
+        if (!UNIT_PLACEHOLDER.equals(unitSymbol)) {
             if (UNIT_PERCENT_FORMAT_STRING.equals(unitSymbol)) {
                 return SmartHomeUnits.PERCENT;
             }
@@ -199,7 +198,6 @@ public class UnitUtils {
         }
 
         return differentSystems;
-
     }
 
     private static boolean isMetricConversion(UnitConverter converter) {
@@ -217,5 +215,4 @@ public class UnitUtils {
             throws ClassNotFoundException {
         return (Class<? extends Quantity<?>>) Class.forName(prefix + name);
     }
-
 }

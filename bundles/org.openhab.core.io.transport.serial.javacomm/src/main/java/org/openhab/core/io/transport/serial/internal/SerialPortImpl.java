@@ -157,5 +157,4 @@ public class SerialPortImpl implements SerialPort {
             throw new UnsupportedCommOperationException(e);
         }
     }
-
 }

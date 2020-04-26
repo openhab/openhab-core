@@ -35,5 +35,4 @@ public class PersistenceCronStrategy extends PersistenceStrategy {
         return String.format("%s [%s, cronExpression=%s]", getClass().getSimpleName(), super.toString(),
                 cronExpression);
     }
-
 }

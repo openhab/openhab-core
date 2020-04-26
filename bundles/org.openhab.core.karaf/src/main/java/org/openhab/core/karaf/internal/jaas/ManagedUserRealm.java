@@ -56,5 +56,4 @@ public class ManagedUserRealm implements JaasRealm {
         return new AppConfigurationEntry[] {
                 new AppConfigurationEntry(MODULE_CLASS, LoginModuleControlFlag.SUFFICIENT, options) };
     }
-
 }

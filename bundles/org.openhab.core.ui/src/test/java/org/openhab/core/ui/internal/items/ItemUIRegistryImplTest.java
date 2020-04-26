@@ -865,5 +865,4 @@ public class ItemUIRegistryImplTest {
         defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Selection.class)));
     }
-
 }

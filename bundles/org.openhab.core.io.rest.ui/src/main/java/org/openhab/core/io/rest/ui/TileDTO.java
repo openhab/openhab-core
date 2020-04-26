@@ -31,5 +31,4 @@ public class TileDTO {
         this.overlay = overlay;
         this.imageUrl = imageUrl;
     }
-
 }

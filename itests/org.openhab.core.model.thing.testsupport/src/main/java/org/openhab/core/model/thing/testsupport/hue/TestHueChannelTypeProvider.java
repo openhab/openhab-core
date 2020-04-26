@@ -112,5 +112,4 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
     public Collection<ChannelGroupType> getChannelGroupTypes(Locale locale) {
         return channelGroupTypes;
     }
-
 }

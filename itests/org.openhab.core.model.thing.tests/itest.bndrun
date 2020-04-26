@@ -18,7 +18,6 @@ Fragment-Host: org.openhab.core.model.thing
 	log4j;version='[1.2.17,1.2.18)',\
 	org.antlr.runtime;version='[3.2.0,3.2.1)',\
 	org.apache.commons.io;version='[2.2.0,2.2.1)',\
-	org.apache.commons.lang;version='[2.6.0,2.6.1)',\
 	org.apache.felix.configadmin;version='[1.9.8,1.9.9)',\
 	org.apache.felix.http.servlet-api;version='[1.1.2,1.1.3)',\
 	org.apache.felix.scr;version='[2.1.10,2.1.11)',\
@@ -106,5 +105,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.thing;version='[3.0.0,3.0.1)',\
 	org.openhab.core.thing.xml;version='[3.0.0,3.0.1)',\
 	org.openhab.core.transform;version='[3.0.0,3.0.1)',\
-	org.openhab.core.voice;version='[3.0.0,3.0.1)'
+	org.openhab.core.voice;version='[3.0.0,3.0.1)',\
+	org.openhab.core.model.sitemap.runtime;version='[3.0.0,3.0.1)'
 

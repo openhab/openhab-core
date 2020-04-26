@@ -367,5 +367,4 @@ public class RuleEngineTest extends JavaOSGiTest {
         configDescriptions.add(cfgDP);
         return configDescriptions;
     }
-
 }

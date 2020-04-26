@@ -30,5 +30,4 @@ public class AudioSinkDTO {
         this.id = id;
         this.label = label;
     }
-
 }

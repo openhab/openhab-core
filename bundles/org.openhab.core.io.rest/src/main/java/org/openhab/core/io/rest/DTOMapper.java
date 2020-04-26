@@ -22,5 +22,4 @@ import java.util.stream.Stream;
 public interface DTOMapper {
 
     <T> Stream<T> limitToFields(Stream<T> itemStream, String fields);
-
 }

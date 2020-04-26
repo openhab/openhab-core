@@ -133,7 +133,6 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
             throw new ParsingException(new ParsingNestedException(ParsingNestedException.MODULE_TYPE, null,
                     new Exception("Parser " + parserType + " not available")));
         }
-
     }
 
     @SuppressWarnings("unchecked")
@@ -274,5 +273,4 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
             }
         }
     }
-
 }

@@ -110,5 +110,4 @@ public class RegistryProvider implements Provider<IResourceServiceProvider.Regis
             Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(ext, resourceFactory);
         }
     }
-
 }

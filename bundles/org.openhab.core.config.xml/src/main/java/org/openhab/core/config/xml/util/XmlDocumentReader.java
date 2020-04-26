@@ -84,5 +84,4 @@ public abstract class XmlDocumentReader<@NonNull T> {
     public @Nullable T readFromXML(URL xmlURL) throws ConversionException {
         return (@Nullable T) xstream.fromXML(xmlURL);
     }
-
 }

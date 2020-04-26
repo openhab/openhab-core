@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.client.ProxyConfiguration;
@@ -195,7 +194,7 @@ public class HttpUtil {
 
         HttpProxy proxy = null;
         // Only configure a proxy if a host is provided
-        if (StringUtils.isNotBlank(proxyHost) && proxyPort != null && shouldUseProxy(url, nonProxyHosts)) {
+        if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && shouldUseProxy(url, nonProxyHosts)) {
             AuthenticationStore authStore = httpClient.getAuthenticationStore();
             ProxyConfiguration proxyConfig = httpClient.getProxyConfiguration();
             List<Proxy> proxies = proxyConfig.getProxies();
@@ -274,7 +273,7 @@ public class HttpUtil {
         if ("true".equalsIgnoreCase(proxySet)) {
             proxyParams.proxyHost = System.getProperty("http.proxyHost");
             String proxyPortString = System.getProperty("http.proxyPort");
-            if (StringUtils.isNotBlank(proxyPortString)) {
+            if (proxyPortString != null && !proxyPortString.isBlank()) {
                 try {
                     proxyParams.proxyPort = Integer.valueOf(proxyPortString);
                 } catch (NumberFormatException e) {
@@ -299,7 +298,7 @@ public class HttpUtil {
      *         <code>nonProxyHosts</code>-list and <code>true</code> otherwise
      */
     private static boolean shouldUseProxy(String urlString, String nonProxyHosts) {
-        if (StringUtils.isNotBlank(nonProxyHosts)) {
+        if (nonProxyHosts != null && !nonProxyHosts.isBlank()) {
             String givenHost = urlString;
 
             try {
@@ -538,5 +537,4 @@ public class HttpUtil {
     protected void unsetHttpClientFactory(final HttpClientFactory httpClientFactory) {
         HttpUtil.httpClientFactory = null;
     }
-
 }

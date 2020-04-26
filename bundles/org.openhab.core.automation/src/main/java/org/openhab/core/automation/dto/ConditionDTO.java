@@ -22,5 +22,4 @@ import java.util.Map;
 public class ConditionDTO extends ModuleDTO {
 
     public Map<String, String> inputs;
-
 }

@@ -700,5 +700,4 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
         }
         return null;
     }
-
 }

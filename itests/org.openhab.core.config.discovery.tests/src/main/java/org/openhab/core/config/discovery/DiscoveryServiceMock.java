@@ -15,7 +15,6 @@ package org.openhab.core.config.discovery;
 import java.util.Collections;
 import java.util.Random;
 
-import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
@@ -52,8 +51,7 @@ public class DiscoveryServiceMock extends AbstractDiscoveryService {
         if (faulty) {
             throw new RuntimeException();
         }
-        thingDiscovered(new DiscoveryResultImpl(new ThingUID(thingType, "test" + new Random().nextInt(999999999)), null,
-                null, null, null, DEFAULT_TTL));
+        thingDiscovered(DiscoveryResultBuilder.create(new ThingUID(thingType, "test" + new Random().nextInt(999999999)))
+                .withTTL(DEFAULT_TTL).build());
     }
-
 }

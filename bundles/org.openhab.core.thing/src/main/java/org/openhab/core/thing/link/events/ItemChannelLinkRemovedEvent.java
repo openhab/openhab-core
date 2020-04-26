@@ -41,5 +41,4 @@ public class ItemChannelLinkRemovedEvent extends AbstractItemChannelLinkRegistry
         ItemChannelLinkDTO link = getLink();
         return "Link '" + link.itemName + " => " + link.channelUID + "' has been removed.";
     }
-
 }

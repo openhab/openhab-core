@@ -62,5 +62,4 @@ public class SystemDefaultProfile implements StateProfile {
     public void onStateUpdateFromItem(State state) {
         callback.handleUpdate(state);
     }
-
 }

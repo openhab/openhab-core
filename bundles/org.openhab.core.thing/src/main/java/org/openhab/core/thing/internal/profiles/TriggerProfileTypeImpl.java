@@ -60,5 +60,4 @@ public class TriggerProfileTypeImpl implements TriggerProfileType {
     public ProfileTypeUID getUID() {
         return profileTypeUID;
     }
-
 }

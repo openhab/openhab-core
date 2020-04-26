@@ -80,5 +80,4 @@ class Invocation implements Callable<Object> {
     Deque<Invocation> getInvocationStack() {
         return invocationStack;
     }
-
 }

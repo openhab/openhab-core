@@ -33,5 +33,4 @@ public interface ConfigDescriptionAliasProvider {
      */
     @Nullable
     URI getAlias(URI configDescriptionURI);
-
 }

@@ -649,7 +649,5 @@ public class SafeCallerImplTest extends JavaTest {
                 AssertingThread.this.runtimeException = e;
             }
         }
-
     }
-
 }

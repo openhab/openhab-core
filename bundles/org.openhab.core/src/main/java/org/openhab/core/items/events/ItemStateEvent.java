@@ -74,5 +74,4 @@ public class ItemStateEvent extends AbstractEvent {
     public String toString() {
         return String.format("Item '%s' updated to %s", itemName, itemState);
     }
-
 }

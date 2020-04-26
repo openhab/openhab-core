@@ -257,5 +257,4 @@ public class SchedulerImplTest {
             return counter.get();
         }
     }
-
 }

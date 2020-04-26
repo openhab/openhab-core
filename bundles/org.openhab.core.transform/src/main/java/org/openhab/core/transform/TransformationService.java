@@ -48,5 +48,4 @@ public interface TransformationService {
      */
     @Nullable
     String transform(String function, String source) throws TransformationException;
-
 }

@@ -650,5 +650,4 @@ public class NumberExtensionsTest {
 
         Assert.assertTrue(result);
     }
-
 }

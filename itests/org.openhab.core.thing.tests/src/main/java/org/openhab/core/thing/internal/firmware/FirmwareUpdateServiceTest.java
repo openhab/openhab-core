@@ -988,7 +988,6 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
                 is(FirmwareUpdateResult.ERROR));
         assertThat(firmwareUpdateResultInfoEvent.getFirmwareUpdateResultInfo().getErrorMessage(),
                 is(expectedErrorMessage));
-
     }
 
     private FirmwareUpdateHandler addHandler(Thing thing) {
@@ -1011,5 +1010,4 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         properties.put(FirmwareUpdateServiceImpl.TIME_UNIT_CONFIG_KEY, timeUnit.name());
         firmwareUpdateService.modified(properties);
     }
-
 }

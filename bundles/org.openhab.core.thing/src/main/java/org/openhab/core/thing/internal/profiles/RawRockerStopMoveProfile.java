@@ -55,5 +55,4 @@ public class RawRockerStopMoveProfile implements TriggerProfile {
             callback.sendCommand(StopMoveType.STOP);
         }
     }
-
 }

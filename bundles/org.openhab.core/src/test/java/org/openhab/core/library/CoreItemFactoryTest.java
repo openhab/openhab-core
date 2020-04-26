@@ -66,5 +66,4 @@ public class CoreItemFactoryTest {
 
         assertThat(item, is(nullValue()));
     }
-
 }

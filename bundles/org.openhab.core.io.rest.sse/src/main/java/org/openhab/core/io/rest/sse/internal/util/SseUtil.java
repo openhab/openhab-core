@@ -18,7 +18,6 @@ import java.util.StringTokenizer;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.openhab.core.events.Event;
 import org.openhab.core.io.rest.sse.beans.EventBean;
@@ -61,7 +60,7 @@ public class SseUtil {
      *
      */
     public static boolean isValidTopicFilter(String topicFilter) {
-        return StringUtils.isEmpty(topicFilter) || topicFilter.matches(TOPIC_VALIDATE_PATTERN);
+        return topicFilter == null || topicFilter.isEmpty() || topicFilter.matches(TOPIC_VALIDATE_PATTERN);
     }
 
     /**
@@ -74,7 +73,7 @@ public class SseUtil {
     public static List<String> convertToRegex(String topicFilter) {
         List<String> filters = new ArrayList<>();
 
-        if (StringUtils.isEmpty(topicFilter)) {
+        if (topicFilter == null || topicFilter.isEmpty()) {
             filters.add(".*");
         } else {
             StringTokenizer tokenizer = new StringTokenizer(topicFilter, ",");

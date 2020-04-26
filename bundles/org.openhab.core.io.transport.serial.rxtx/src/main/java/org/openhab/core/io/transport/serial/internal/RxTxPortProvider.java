@@ -38,7 +38,7 @@ import gnu.io.NoSuchPortException;
  * @author Wouter Born - Fix serial ports missing when ports are added to system property
  */
 @NonNullByDefault
-@Component
+@Component(service = SerialPortProvider.class)
 public class RxTxPortProvider implements SerialPortProvider {
 
     private final Logger logger = LoggerFactory.getLogger(RxTxPortProvider.class);

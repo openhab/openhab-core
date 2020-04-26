@@ -175,5 +175,4 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
     public void setProps(ConfigDescriptionDTO props) {
         this.props = props;
     }
-
 }

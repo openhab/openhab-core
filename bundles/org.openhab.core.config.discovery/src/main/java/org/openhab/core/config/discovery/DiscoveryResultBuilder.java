@@ -141,9 +141,9 @@ public class DiscoveryResultBuilder {
      *
      * @return the desired result
      */
+    @SuppressWarnings("deprecation")
     public DiscoveryResult build() {
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
                 ttl);
     }
-
 }

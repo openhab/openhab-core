@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractProvider;
@@ -62,7 +61,7 @@ public class UIComponentProvider extends AbstractProvider<RootUIComponent>
 
     @Override
     public void add(RootUIComponent element) {
-        if (StringUtils.isEmpty(element.getUID())) {
+        if (element.getUID().isEmpty()) {
             throw new IllegalArgumentException("Invalid UID");
         }
 
@@ -103,10 +102,9 @@ public class UIComponentProvider extends AbstractProvider<RootUIComponent>
 
     @Override
     public @Nullable RootUIComponent get(String key) {
-        if (StringUtils.isEmpty(key)) {
+        if (key.isEmpty()) {
             throw new IllegalArgumentException("Invalid UID");
         }
         return storage.get(key);
     }
-
 }

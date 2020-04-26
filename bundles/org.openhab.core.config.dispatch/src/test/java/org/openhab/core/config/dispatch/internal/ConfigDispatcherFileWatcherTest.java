@@ -106,5 +106,4 @@ public class ConfigDispatcherFileWatcherTest {
             super.processWatchEvent(event, kind, path);
         }
     }
-
 }

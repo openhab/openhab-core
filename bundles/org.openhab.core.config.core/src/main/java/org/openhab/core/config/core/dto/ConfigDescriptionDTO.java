@@ -35,5 +35,4 @@ public class ConfigDescriptionDTO {
         this.parameters = parameters;
         this.parameterGroups = parameterGroups;
     }
-
 }

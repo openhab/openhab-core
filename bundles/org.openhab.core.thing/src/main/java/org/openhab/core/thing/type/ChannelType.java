@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.types.CommandDescription;
@@ -135,7 +134,7 @@ public class ChannelType extends AbstractDescriptionType {
             throw new IllegalArgumentException("Kind must not be null!");
         }
 
-        if (kind == ChannelKind.STATE && StringUtils.isBlank(itemType)) {
+        if (kind == ChannelKind.STATE && (itemType == null || itemType.isBlank())) {
             throw new IllegalArgumentException("If the kind is 'state', the item type must be set!");
         }
         if (kind == ChannelKind.TRIGGER && itemType != null) {
@@ -259,5 +258,4 @@ public class ChannelType extends AbstractDescriptionType {
     public CommandDescription getCommandDescription() {
         return commandDescription;
     }
-
 }

@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.serial.SerialPortIdentifier;
 import org.openhab.core.io.transport.serial.SerialPortManager;
 import org.openhab.core.io.transport.serial.SerialPortProvider;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -37,24 +38,15 @@ public class SerialPortManagerImpl implements SerialPortManager {
 
     private final Logger logger = LoggerFactory.getLogger(SerialPortManagerImpl.class);
 
-    private @NonNullByDefault({}) SerialPortRegistry registry;
+    private final SerialPortRegistry registry;
 
-    @Reference
-    protected void setSerialportRegistry(SerialPortRegistry registry) {
-        this.registry = registry;
-    }
-
-    protected void unsetSerialportRegistry(SerialPortRegistry registry) {
+    @Activate
+    public SerialPortManagerImpl(final @Reference SerialPortRegistry registry) {
         this.registry = registry;
     }
 
     @Override
     public Stream<SerialPortIdentifier> getIdentifiers() {
-        if (registry == null) {
-            logger.warn("SerialPortRegistry is not set; no SerialPortIdentifier found");
-            return Stream.empty();
-        }
-
         return registry.getPortCreators().stream().flatMap(provider -> {
             try {
                 return provider.getSerialPortIdentifiers();
@@ -77,10 +69,6 @@ public class SerialPortManagerImpl implements SerialPortManager {
 
     @Override
     public @Nullable SerialPortIdentifier getIdentifier(String name) {
-        if (registry == null) {
-            logger.warn("SerialPortRegistry is not set; no SerialPortProvider found for: {}", name);
-            return null;
-        }
         final URI portUri = URI.create(name);
         for (final SerialPortProvider provider : registry.getPortProvidersForPortName(portUri)) {
             try {

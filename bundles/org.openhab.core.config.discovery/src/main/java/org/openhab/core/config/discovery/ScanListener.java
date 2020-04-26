@@ -40,5 +40,4 @@ public interface ScanListener {
      * @param exception the error which occurred (could be null)
      */
     void onErrorOccurred(@Nullable Exception exception);
-
 }

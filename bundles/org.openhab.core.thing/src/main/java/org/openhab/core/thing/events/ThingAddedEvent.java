@@ -47,5 +47,4 @@ public class ThingAddedEvent extends AbstractThingRegistryEvent {
     public String toString() {
         return "Thing '" + getThing().UID + "' has been added.";
     }
-
 }

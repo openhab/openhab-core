@@ -138,5 +138,4 @@ public class Extension {
     public String getImageLink() {
         return imageLink;
     }
-
 }

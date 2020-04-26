@@ -97,5 +97,4 @@ public class SystemChannelsInChannelGroupsTest extends JavaOSGiTest {
             assertThat(lowBat.size(), is(1));
         }
     }
-
 }

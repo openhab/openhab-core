@@ -120,5 +120,4 @@ public class HttpServiceUtilTest {
 
         return new ServiceReference[] { ref1, ref2 };
     }
-
 }

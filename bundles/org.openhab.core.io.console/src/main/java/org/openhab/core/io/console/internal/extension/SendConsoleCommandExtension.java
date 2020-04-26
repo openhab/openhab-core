@@ -101,5 +101,4 @@ public class SendConsoleCommandExtension extends AbstractConsoleCommandExtension
             printUsage(console);
         }
     }
-
 }

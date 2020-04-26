@@ -68,5 +68,4 @@ public abstract class BaseSmartHomeServlet extends HttpServlet {
     protected void deactivate(String alias) {
         httpService.unregister(alias);
     }
-
 }

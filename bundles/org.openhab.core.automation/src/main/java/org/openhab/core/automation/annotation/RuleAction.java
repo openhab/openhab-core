@@ -35,5 +35,4 @@ public @interface RuleAction {
     String[] tags() default {};
 
     Visibility visibility() default Visibility.VISIBLE;
-
 }

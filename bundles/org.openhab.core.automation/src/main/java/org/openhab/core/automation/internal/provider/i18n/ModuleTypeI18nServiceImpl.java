@@ -205,5 +205,4 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
         }
         return ltt;
     }
-
 }

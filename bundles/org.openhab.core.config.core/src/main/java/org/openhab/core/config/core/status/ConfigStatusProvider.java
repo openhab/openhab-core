@@ -53,5 +53,4 @@ public interface ConfigStatusProvider {
      * @param configStatusCallback the configuration status callback to be set
      */
     void setConfigStatusCallback(@Nullable ConfigStatusCallback configStatusCallback);
-
 }

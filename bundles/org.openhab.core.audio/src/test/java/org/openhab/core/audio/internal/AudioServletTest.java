@@ -153,5 +153,4 @@ public class AudioServletTest extends AbstractAudioServletTest {
         response = request.send();
         assertThat("The response status was not as expected", response.getStatus(), is(HttpStatus.NOT_FOUND_404));
     }
-
 }

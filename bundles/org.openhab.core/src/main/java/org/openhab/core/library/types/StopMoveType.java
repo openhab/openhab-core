@@ -39,5 +39,4 @@ public enum StopMoveType implements PrimitiveType, Command {
     public String toFullString() {
         return super.toString();
     }
-
 }

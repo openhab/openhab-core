@@ -27,7 +27,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,7 +53,7 @@ public class AbstractWatchServiceTest extends JavaTest {
     @BeforeClass
     public static void setUpBeforeClass() {
         // set the NO_EVENT_TIMEOUT_IN_SECONDS according to the operating system used
-        if (SystemUtils.IS_OS_MAC_OSX) {
+        if (System.getProperty("os.name").startsWith("Mac OS X")) {
             noEventTimeoutInSeconds = 15;
         } else {
             noEventTimeoutInSeconds = 3;
@@ -306,7 +305,6 @@ public class AbstractWatchServiceTest extends JavaTest {
         protected boolean watchSubDirectories() {
             return watchSubDirs;
         }
-
     }
 
     private static class FullEvent {

@@ -62,5 +62,4 @@ public class EventLogger implements EventSubscriber {
         }
         return logger;
     }
-
 }

@@ -49,5 +49,4 @@ public class UUIDResource implements RESTResource {
     public Response getInstanceUUID() {
         return Response.ok(InstanceUUID.get()).build();
     }
-
 }

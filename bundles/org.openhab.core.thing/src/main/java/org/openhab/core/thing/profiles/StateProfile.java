@@ -44,5 +44,4 @@ public interface StateProfile extends Profile {
      * @param state
      */
     void onStateUpdateFromHandler(State state);
-
 }

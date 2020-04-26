@@ -36,5 +36,4 @@ public interface Keyword {
     String CODE = "code"; // https://tools.ietf.org/html/rfc6749#section-4.1
 
     String STATE = "state"; // https://tools.ietf.org/html/rfc6749#section-4.1
-
 }

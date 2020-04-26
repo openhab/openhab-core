@@ -120,5 +120,4 @@ public class ItemStateConverterImplTest {
 
         assertThat(convertedState.getUnit(), is(originalState.getUnit()));
     }
-
 }

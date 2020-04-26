@@ -50,5 +50,4 @@ public class ChannelDefinitionDTO {
         this.advanced = advanced;
         this.properties = properties;
     }
-
 }

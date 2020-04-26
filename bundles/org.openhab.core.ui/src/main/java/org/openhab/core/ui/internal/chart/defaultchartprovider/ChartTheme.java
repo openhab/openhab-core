@@ -136,5 +136,4 @@ public interface ChartTheme {
      * @return length of the line markers in the legend, in px
      */
     public int getLegendSeriesLineLength(int dpi);
-
 }

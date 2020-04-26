@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
-import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.i18n.I18nUtil;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
@@ -268,9 +267,11 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
             String label = this.i18nProvider.getText(bundle, key, defaultLabel, this.localeProvider.getLocale());
 
-            discoveryResultNew = new DiscoveryResultImpl(discoveryResult.getThingTypeUID(),
-                    discoveryResult.getThingUID(), discoveryResult.getBridgeUID(), discoveryResult.getProperties(),
-                    discoveryResult.getRepresentationProperty(), label, discoveryResult.getTimeToLive());
+            discoveryResultNew = DiscoveryResultBuilder.create(discoveryResult.getThingUID())
+                    .withThingType(discoveryResult.getThingTypeUID()).withBridge(discoveryResult.getBridgeUID())
+                    .withProperties(discoveryResult.getProperties())
+                    .withRepresentationProperty(discoveryResult.getRepresentationProperty()).withLabel(label)
+                    .withTTL(discoveryResult.getTimeToLive()).build();
         } else {
             discoveryResultNew = discoveryResult;
         }
@@ -469,5 +470,4 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {
         return "discovery." + discoveryResult.getThingUID().getAsString().replaceAll(":", ".") + "." + lastSegment;
     }
-
 }

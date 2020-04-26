@@ -41,5 +41,4 @@ public class BaseModuleHandler<T extends Module> implements ModuleHandler {
     public void dispose() {
         this.callback = null;
     }
-
 }

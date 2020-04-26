@@ -43,5 +43,4 @@ public class SerialPortEventImpl implements SerialPortEvent {
     public boolean getNewValue() {
         return event.getNewValue();
     }
-
 }

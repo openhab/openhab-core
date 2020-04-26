@@ -319,7 +319,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
                     itemEvent = e;
                 }
             }
-
         };
 
         registerService(itemEventHandler);
@@ -378,5 +377,4 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
         });
     }
-
 }

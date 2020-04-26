@@ -35,5 +35,4 @@ public class ItemChannelLinkDTO extends AbstractLinkDTO {
         this.channelUID = channelUID;
         this.configuration = configuration;
     }
-
 }

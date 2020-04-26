@@ -95,7 +95,6 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
             @Override
             public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
             }
-
         };
         registerService(itemProvider);
         registerService(volatileStorageService);

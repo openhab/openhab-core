@@ -94,5 +94,4 @@ public interface TemplateRegistry<E extends Template> extends Registry<E, String
      * @return a collection of localized templates, corresponding to the parameterized type.
      */
     public Collection<E> getAll(@Nullable Locale locale);
-
 }

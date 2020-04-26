@@ -74,5 +74,4 @@ public abstract class ConfigStatusBridgeHandler extends BaseBridgeHandler implem
             configStatusCallback.configUpdated(new ThingConfigStatusSource(getThing().getUID().getAsString()));
         }
     }
-
 }

@@ -66,5 +66,4 @@ public interface TranslationProvider {
     @Nullable
     String getText(@Nullable Bundle bundle, @Nullable String key, @Nullable String defaultText, @Nullable Locale locale,
             @Nullable Object @Nullable... arguments);
-
 }

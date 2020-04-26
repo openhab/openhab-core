@@ -160,5 +160,4 @@ public class AutomationCommandImport extends AutomationCommand {
         }
         return SUCCESS;
     }
-
 }
