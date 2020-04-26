@@ -140,5 +140,4 @@ public class ConfigStatusInfoTest {
 
         assertThat(info.getConfigStatusMessages("unknown").size(), is(0));
     }
-
 }

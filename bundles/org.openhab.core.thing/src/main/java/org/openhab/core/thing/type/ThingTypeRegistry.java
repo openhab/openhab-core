@@ -172,5 +172,4 @@ public class ThingTypeRegistry {
     protected void removeThingTypeProvider(ThingTypeProvider thingTypeProvider) {
         this.thingTypeProviders.remove(thingTypeProvider);
     }
-
 }

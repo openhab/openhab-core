@@ -132,7 +132,5 @@ public class PointTypeTest {
         // Ensure that constructor and toString are consistent
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=467612#c17
         assertTrue(point3.equals(PointType.valueOf(point3.toString())));
-
     }
-
 }

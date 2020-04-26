@@ -2,24 +2,24 @@
 <tns:Configuration hierarchy="fr" description="France" xmlns:tns="http://www.example.org/Holiday"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/Holiday /Holiday.xsd">
 	<tns:Holidays>
-		<tns:Fixed month="DECEMBER" day="29" descriptionPropertiesKey="Innocents" />
+		<tns:Fixed month="DECEMBER" day="29" descriptionPropertiesKey="Innocents"/>
 		<tns:FixedWeekday which="THIRD" weekday="SUNDAY" month="JUNE"
-			descriptionPropertiesKey="Fête des pères" />
+			descriptionPropertiesKey="Fête des pères"/>
 		<tns:FixedWeekday which="FIRST" weekday="SUNDAY" month="MARCH"
-			descriptionPropertiesKey="Fête des grands-mères" />
+			descriptionPropertiesKey="Fête des grands-mères"/>
 		<tns:FixedWeekday which="FIRST" weekday="SUNDAY" month="OCTOBER"
-			descriptionPropertiesKey="Fête des grands-pères" />
-		<tns:FixedWeekday which="LAST" weekday="SUNDAY" month="MAY" descriptionPropertiesKey="Fête des mères" />
+			descriptionPropertiesKey="Fête des grands-pères"/>
+		<tns:FixedWeekday which="LAST" weekday="SUNDAY" month="MAY" descriptionPropertiesKey="Fête des mères"/>
 		<tns:FixedWeekday which="LAST" weekday="SUNDAY" month="MARCH"
-			descriptionPropertiesKey="Passage heure d'été" />
+			descriptionPropertiesKey="Passage heure d'été"/>
 		<tns:FixedWeekday which="LAST" weekday="SUNDAY" month="OCTOBER"
-			descriptionPropertiesKey="Passage heure d'hiver" />
+			descriptionPropertiesKey="Passage heure d'hiver"/>
 		<tns:FixedWeekday which="THIRD" weekday="THURSDAY" month="NOVEMBER"
-			descriptionPropertiesKey="Beaujolais Nouveau" />
-		<tns:Fixed month="JUNE" day="21" descriptionPropertiesKey="Fête de la musique" />
-		<tns:Fixed month="APRIL" day="1" descriptionPropertiesKey="Poisson d'avril" />
-		<tns:Fixed month="MAY" day="1" descriptionPropertiesKey="Fête du muguet" />
-		<tns:Fixed month="OCTOBER" day="31" descriptionPropertiesKey="Halloween" />
-		<tns:Fixed month="FEBRUARY" day="2" descriptionPropertiesKey="Chandeleur" />
+			descriptionPropertiesKey="Beaujolais Nouveau"/>
+		<tns:Fixed month="JUNE" day="21" descriptionPropertiesKey="Fête de la musique"/>
+		<tns:Fixed month="APRIL" day="1" descriptionPropertiesKey="Poisson d'avril"/>
+		<tns:Fixed month="MAY" day="1" descriptionPropertiesKey="Fête du muguet"/>
+		<tns:Fixed month="OCTOBER" day="31" descriptionPropertiesKey="Halloween"/>
+		<tns:Fixed month="FEBRUARY" day="2" descriptionPropertiesKey="Chandeleur"/>
 	</tns:Holidays>
 </tns:Configuration>

@@ -85,5 +85,4 @@ public class StorageEntryMapDeserializer implements JsonDeserializer<Map<String,
         }
         return map;
     }
-
 }

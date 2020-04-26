@@ -222,5 +222,4 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
             toLinkLock.readLock().unlock();
         }
     }
-
 }

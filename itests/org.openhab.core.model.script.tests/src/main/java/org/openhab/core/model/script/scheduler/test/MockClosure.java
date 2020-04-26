@@ -80,6 +80,5 @@ public class MockClosure {
             assertThat(arg, is(sameInstance(expectedArgument)));
             apply();
         }
-
     }
 }

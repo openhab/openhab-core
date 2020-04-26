@@ -73,5 +73,4 @@ public abstract class AbstractReconnectStrategy {
      * It must be possible to restart a reconnect strategy again after it has been stopped.
      */
     public abstract void stop();
-
 }

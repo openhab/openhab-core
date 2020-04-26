@@ -118,5 +118,4 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @param hook
      */
     void removeRegistryHook(RegistryHook<Item> hook);
-
 }

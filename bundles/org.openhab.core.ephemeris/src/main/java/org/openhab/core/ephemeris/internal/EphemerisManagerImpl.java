@@ -403,5 +403,4 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     public @Nullable String getHolidayDescription(@Nullable String holiday) {
         return holiday != null ? resourceUtil.getHolidayDescription(localeProvider.getLocale(), holiday) : null;
     }
-
 }

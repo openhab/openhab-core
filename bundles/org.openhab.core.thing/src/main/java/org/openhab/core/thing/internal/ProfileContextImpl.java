@@ -43,5 +43,4 @@ public class ProfileContextImpl implements ProfileContext {
     public ScheduledExecutorService getExecutorService() {
         return ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME);
     }
-
 }

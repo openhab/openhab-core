@@ -321,5 +321,4 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     protected void removeAudioSink(AudioSink audioSink) {
         this.audioSinks.remove(audioSink.getId());
     }
-
 }

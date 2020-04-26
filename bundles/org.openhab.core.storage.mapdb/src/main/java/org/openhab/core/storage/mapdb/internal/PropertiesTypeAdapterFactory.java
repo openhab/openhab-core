@@ -41,5 +41,4 @@ public class PropertiesTypeAdapterFactory implements TypeAdapterFactory {
 
         return (TypeAdapter<T>) new PropertiesTypeAdapter(gson);
     }
-
 }

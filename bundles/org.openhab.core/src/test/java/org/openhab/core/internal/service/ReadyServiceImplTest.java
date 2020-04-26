@@ -82,5 +82,4 @@ public class ReadyServiceImplTest {
         verify(tracker).onReadyMarkerRemoved(isA(ReadyMarker.class));
         verifyNoMoreInteractions(tracker);
     }
-
 }

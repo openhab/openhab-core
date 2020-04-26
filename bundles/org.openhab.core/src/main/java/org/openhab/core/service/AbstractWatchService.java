@@ -109,5 +109,4 @@ public abstract class AbstractWatchService {
      * @param path the path of the event (resolved to the {@link #baseWatchedDir})
      */
     protected abstract void processWatchEvent(WatchEvent<?> event, Kind<?> kind, Path path);
-
 }

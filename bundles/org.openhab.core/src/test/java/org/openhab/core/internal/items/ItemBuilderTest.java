@@ -171,5 +171,4 @@ public class ItemBuilderTest {
         Item mockItem = mock(Item.class);
         itemBuilderFactory.newItemBuilder("String", "test").withBaseItem(mockItem);
     }
-
 }

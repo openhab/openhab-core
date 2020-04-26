@@ -60,5 +60,4 @@ public class VolatileStorage<T> implements Storage<T> {
     public Collection<@Nullable T> getValues() {
         return storage.values();
     }
-
 }

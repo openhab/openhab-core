@@ -25,5 +25,4 @@ class CustomUnits extends AbstractSystemOfUnits {
     public String getName() {
         return getClass().getSimpleName();
     }
-
 }

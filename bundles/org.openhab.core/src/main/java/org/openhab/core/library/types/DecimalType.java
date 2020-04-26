@@ -175,5 +175,4 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
             return defaultConversion(target);
         }
     }
-
 }

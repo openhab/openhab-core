@@ -31,5 +31,4 @@ public interface ComplexType extends Type {
      * @return all constituents with their names
      */
     public SortedMap<String, PrimitiveType> getConstituents();
-
 }

@@ -56,5 +56,4 @@ public class RedirectHandler implements Handler {
     public void handleError(HttpServletRequest request, HttpServletResponse response, HandlerContext context) {
         context.execute(request, response);
     }
-
 }

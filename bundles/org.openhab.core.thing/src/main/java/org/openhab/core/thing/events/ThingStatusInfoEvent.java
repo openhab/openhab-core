@@ -74,5 +74,4 @@ public class ThingStatusInfoEvent extends AbstractEvent {
     public String toString() {
         return String.format("Thing '%s' updated: %s", thingUID, thingStatusInfo);
     }
-
 }

@@ -101,5 +101,4 @@ public class ExtensionEventFactory extends AbstractEventFactory {
     static String buildTopic(String topic, String id) {
         return topic.replace("{id}", id);
     }
-
 }

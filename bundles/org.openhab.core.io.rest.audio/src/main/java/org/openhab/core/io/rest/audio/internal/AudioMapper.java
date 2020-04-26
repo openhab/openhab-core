@@ -49,5 +49,4 @@ public class AudioMapper {
     public static AudioSinkDTO map(AudioSink sink, Locale locale) {
         return new AudioSinkDTO(sink.getId(), sink.getLabel(locale));
     }
-
 }

@@ -123,5 +123,4 @@ public class StringListType implements Command, State {
         StringListType other = (StringListType) obj;
         return typeDetails.equals(other.typeDetails);
     }
-
 }

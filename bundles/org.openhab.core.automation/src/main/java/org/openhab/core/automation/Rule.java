@@ -154,5 +154,4 @@ public interface Rule extends Identifiable<String> {
         }
         return null;
     }
-
 }

@@ -26,5 +26,4 @@ import org.openhab.core.auth.Credentials;
 public interface CredentialsExtractor<C> {
 
     Optional<Credentials> retrieveCredentials(C requestContext);
-
 }

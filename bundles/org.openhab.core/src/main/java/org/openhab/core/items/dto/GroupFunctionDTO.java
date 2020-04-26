@@ -21,5 +21,4 @@ public class GroupFunctionDTO {
 
     public String name;
     public String[] params;
-
 }

@@ -136,5 +136,4 @@ public class GroupFunctionHelper {
 
         return new GroupFunction.Equality();
     }
-
 }

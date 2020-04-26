@@ -28,5 +28,4 @@ public class ModuleDTOMapper {
         to.configuration = from.getConfiguration().getProperties();
         to.type = from.getTypeUID();
     }
-
 }

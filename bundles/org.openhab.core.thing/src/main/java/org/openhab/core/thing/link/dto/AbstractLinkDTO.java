@@ -30,5 +30,4 @@ public abstract class AbstractLinkDTO {
     public AbstractLinkDTO(String itemName) {
         this.itemName = itemName;
     }
-
 }

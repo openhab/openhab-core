@@ -744,5 +744,4 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
                 ArgumentMatchers.nullable(Locale.class))).thenReturn(configDescription);
         registerService(configDescriptionProvider);
     }
-
 }

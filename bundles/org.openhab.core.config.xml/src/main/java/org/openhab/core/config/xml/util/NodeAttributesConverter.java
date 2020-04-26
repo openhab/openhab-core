@@ -39,5 +39,4 @@ public class NodeAttributesConverter extends GenericUnmarshaller<NodeAttributes>
 
         return new NodeAttributes(nodeName, attributes);
     }
-
 }

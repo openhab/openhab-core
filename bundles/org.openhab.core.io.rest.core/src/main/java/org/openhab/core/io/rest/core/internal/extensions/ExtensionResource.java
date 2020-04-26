@@ -261,5 +261,4 @@ public class ExtensionResource implements RESTResource {
 
         throw new IllegalArgumentException("No extension service registered for URI " + extensionURI);
     }
-
 }

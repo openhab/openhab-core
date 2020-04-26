@@ -262,5 +262,4 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
     private void assertThatThingHasFirmwareStatus(ThingUID thingUID, FirmwareStatus firmwareStatus) {
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(thingUID).getFirmwareStatus(), is(firmwareStatus));
     }
-
 }

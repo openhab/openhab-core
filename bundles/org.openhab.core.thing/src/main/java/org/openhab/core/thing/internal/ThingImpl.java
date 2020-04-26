@@ -285,5 +285,4 @@ public class ThingImpl implements Thing {
         }
         return true;
     }
-
 }

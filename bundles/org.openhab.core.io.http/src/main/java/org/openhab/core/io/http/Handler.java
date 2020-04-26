@@ -63,5 +63,4 @@ public interface Handler {
      * @param context Handler execution context.
      */
     void handleError(HttpServletRequest request, HttpServletResponse response, HandlerContext context);
-
 }

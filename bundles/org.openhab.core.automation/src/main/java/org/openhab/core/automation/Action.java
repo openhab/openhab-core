@@ -48,5 +48,4 @@ public interface Action extends Module {
      * @return a map with the input references of this action.
      */
     Map<String, String> getInputs();
-
 }

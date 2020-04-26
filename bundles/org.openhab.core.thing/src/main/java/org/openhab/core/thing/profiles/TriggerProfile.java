@@ -34,5 +34,4 @@ public interface TriggerProfile extends Profile {
      * @param event the event payload
      */
     void onTriggerFromHandler(String event);
-
 }

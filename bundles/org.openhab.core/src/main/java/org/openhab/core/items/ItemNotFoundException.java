@@ -25,5 +25,4 @@ public class ItemNotFoundException extends ItemLookupException {
     }
 
     private static final long serialVersionUID = -3720784568250902711L;
-
 }

@@ -264,5 +264,4 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
             }
         }
     }
-
 }

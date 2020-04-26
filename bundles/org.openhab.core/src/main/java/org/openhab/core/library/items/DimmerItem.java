@@ -86,5 +86,4 @@ public class DimmerItem extends SwitchItem {
             logSetTypeError(state);
         }
     }
-
 }

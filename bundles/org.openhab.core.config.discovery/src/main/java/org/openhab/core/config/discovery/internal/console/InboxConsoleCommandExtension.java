@@ -205,5 +205,4 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
     protected void unsetInbox(Inbox inbox) {
         this.inbox = null;
     }
-
 }

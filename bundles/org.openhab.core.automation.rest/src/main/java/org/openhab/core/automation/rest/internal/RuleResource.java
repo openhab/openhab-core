@@ -482,5 +482,4 @@ public class RuleResource implements RESTResource {
     public boolean isSatisfied() {
         return ruleRegistry != null && ruleManager != null;
     }
-
 }

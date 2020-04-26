@@ -66,5 +66,4 @@ public interface ManagedProvider<@NonNull E extends Identifiable<K>, @NonNull K>
      */
     @Nullable
     E get(K key);
-
 }

@@ -128,5 +128,4 @@ public interface DiscoveryService {
      * @param listener the listener to be removed (could be null)
      */
     void removeDiscoveryListener(@Nullable DiscoveryListener listener);
-
 }

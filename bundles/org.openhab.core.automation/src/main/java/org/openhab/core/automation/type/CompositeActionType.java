@@ -91,5 +91,4 @@ public class CompositeActionType extends ActionType {
     public List<Action> getChildren() {
         return children;
     }
-
 }

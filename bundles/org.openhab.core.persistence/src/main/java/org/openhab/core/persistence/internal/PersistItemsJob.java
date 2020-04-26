@@ -89,5 +89,4 @@ public class PersistItemsJob implements SchedulerRunnable {
         }
         return false;
     }
-
 }

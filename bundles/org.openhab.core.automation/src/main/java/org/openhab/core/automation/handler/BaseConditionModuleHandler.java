@@ -26,5 +26,4 @@ public abstract class BaseConditionModuleHandler extends BaseModuleHandler<Condi
     public BaseConditionModuleHandler(Condition module) {
         super(module);
     }
-
 }

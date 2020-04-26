@@ -40,5 +40,4 @@ public interface SafeCaller {
      * @return a safe call builder instance.
      */
     <T> SafeCallerBuilder<T> create(T target, Class<T> interfaceType);
-
 }

@@ -126,5 +126,4 @@ public abstract class AutomationCommand {
      *         parsing the parameters and options.
      */
     protected abstract String parseOptionsAndParameters(String[] parameterValues);
-
 }

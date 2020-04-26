@@ -127,5 +127,4 @@ public class TransformationHelper {
             throw new TransformationException("Cannot format state '" + state + "' to format '" + format + "'", e);
         }
     }
-
 }

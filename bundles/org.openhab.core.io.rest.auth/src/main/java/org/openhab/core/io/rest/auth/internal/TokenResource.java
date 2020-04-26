@@ -341,5 +341,4 @@ public class TokenResource implements RESTResource {
 
         return refreshResponse.build();
     }
-
 }

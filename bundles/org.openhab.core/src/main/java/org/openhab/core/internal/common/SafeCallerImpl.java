@@ -73,5 +73,4 @@ public class SafeCallerImpl implements SafeCaller {
     protected ExecutorService getScheduler() {
         return ThreadPoolManager.getPool(SAFE_CALL_POOL_NAME);
     }
-
 }

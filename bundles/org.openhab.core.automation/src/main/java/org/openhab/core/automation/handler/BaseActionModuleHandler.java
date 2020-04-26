@@ -26,5 +26,4 @@ public abstract class BaseActionModuleHandler extends BaseModuleHandler<Action> 
     public BaseActionModuleHandler(Action module) {
         super(module);
     }
-
 }

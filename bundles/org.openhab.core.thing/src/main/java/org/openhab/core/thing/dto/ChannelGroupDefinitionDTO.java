@@ -35,5 +35,4 @@ public class ChannelGroupDefinitionDTO {
         this.description = description;
         this.channels = channels;
     }
-
 }

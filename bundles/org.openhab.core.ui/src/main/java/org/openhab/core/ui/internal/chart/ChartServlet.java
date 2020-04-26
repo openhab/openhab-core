@@ -353,5 +353,4 @@ public class ChartServlet extends SmartHomeServlet {
     @Override
     public void destroy() {
     }
-
 }

@@ -47,5 +47,4 @@ public interface ConfigDescriptionProvider {
      */
     @Nullable
     ConfigDescription getConfigDescription(URI uri, @Nullable Locale locale);
-
 }

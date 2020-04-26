@@ -52,5 +52,4 @@ public class LocationItemTest {
         DateTimeItem item = new DateTimeItem("test");
         StateUtil.testAcceptedStates(item);
     }
-
 }

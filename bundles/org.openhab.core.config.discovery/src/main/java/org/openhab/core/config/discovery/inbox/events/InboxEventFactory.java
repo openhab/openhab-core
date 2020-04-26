@@ -128,5 +128,4 @@ public class InboxEventFactory extends AbstractEventFactory {
     private static DiscoveryResultDTO map(DiscoveryResult discoveryResult) {
         return DiscoveryResultDTOMapper.map(discoveryResult);
     }
-
 }

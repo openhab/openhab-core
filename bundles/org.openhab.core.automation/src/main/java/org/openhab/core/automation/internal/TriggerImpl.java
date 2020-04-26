@@ -29,5 +29,4 @@ public class TriggerImpl extends ModuleImpl implements Trigger {
             @Nullable String description) {
         super(id, typeUID, configuration, label, description);
     }
-
 }

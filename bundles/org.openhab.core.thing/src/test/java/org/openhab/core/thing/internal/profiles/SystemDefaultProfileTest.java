@@ -72,5 +72,4 @@ public class SystemDefaultProfileTest {
         verify(mockCallback).sendCommand(eq(OnOffType.ON));
         verifyNoMoreInteractions(mockCallback);
     }
-
 }

@@ -103,5 +103,4 @@ public class AutomationCommandEnableRule extends AutomationCommand {
             hasEnable = false;
         }
     }
-
 }

@@ -60,5 +60,4 @@ public class AutomationWatchService extends AbstractWatchService {
             }
         }
     }
-
 }

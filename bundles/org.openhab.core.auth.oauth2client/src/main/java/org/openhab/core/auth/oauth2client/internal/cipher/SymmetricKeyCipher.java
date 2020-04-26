@@ -167,5 +167,4 @@ public class SymmetricKeyCipher implements StorageCipher {
     public void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
-
 }

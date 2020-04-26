@@ -64,7 +64,6 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
             return item instanceof NumberItem && dimension.equals(((NumberItem) item).getDimension());
         }
-
     }
 
     /**
@@ -107,7 +106,6 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
             return UnDefType.UNDEF;
         }
-
     }
 
     /**
@@ -142,7 +140,6 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
             return sum != null ? sum : UnDefType.UNDEF;
         }
-
     }
 
     /**
@@ -176,7 +173,6 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
             return min != null ? min : UnDefType.UNDEF;
         }
-
     }
 
     /**
@@ -210,6 +206,5 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
             return max != null ? max : UnDefType.UNDEF;
         }
-
     }
 }

@@ -25,5 +25,4 @@ public interface ModelParser {
      * @return file extension of model files
      */
     String getExtension();
-
 }

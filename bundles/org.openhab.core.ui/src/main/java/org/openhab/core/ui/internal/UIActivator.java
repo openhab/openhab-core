@@ -43,5 +43,4 @@ public final class UIActivator implements BundleActivator {
     public static BundleContext getContext() {
         return context;
     }
-
 }

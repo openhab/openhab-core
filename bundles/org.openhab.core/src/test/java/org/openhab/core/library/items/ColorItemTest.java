@@ -70,5 +70,4 @@ public class ColorItemTest {
         item.setState(new PercentType(50));
         assertEquals(new HSBType(new DecimalType(75), new PercentType(75), new PercentType(50)), item.getState());
     }
-
 }

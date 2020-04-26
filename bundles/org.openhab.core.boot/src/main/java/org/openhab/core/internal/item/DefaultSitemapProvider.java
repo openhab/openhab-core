@@ -115,5 +115,4 @@ public class DefaultSitemapProvider implements SitemapProvider {
     @Override
     public void removeModelChangeListener(ModelRepositoryChangeListener listener) {
     }
-
 }

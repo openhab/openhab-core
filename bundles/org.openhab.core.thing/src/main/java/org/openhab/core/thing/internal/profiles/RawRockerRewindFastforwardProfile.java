@@ -55,5 +55,4 @@ public class RawRockerRewindFastforwardProfile implements TriggerProfile {
             callback.sendCommand(RewindFastforwardType.REWIND);
         }
     }
-
 }

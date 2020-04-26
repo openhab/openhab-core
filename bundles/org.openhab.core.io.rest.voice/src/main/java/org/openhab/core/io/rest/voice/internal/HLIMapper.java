@@ -46,5 +46,4 @@ public class HLIMapper {
         }
         return dto;
     }
-
 }

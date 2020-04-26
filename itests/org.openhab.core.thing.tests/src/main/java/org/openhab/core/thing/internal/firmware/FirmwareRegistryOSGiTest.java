@@ -104,7 +104,6 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         public @Nullable Set<Firmware> getFirmwares(Thing thing) {
             return getFirmwares(thing, null);
         }
-
     };
 
     @NonNullByDefault

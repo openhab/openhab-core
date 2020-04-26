@@ -106,5 +106,4 @@ public final class ConfigValidationException extends RuntimeException {
         }
         return Collections.unmodifiableMap(ret);
     }
-
 }

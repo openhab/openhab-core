@@ -190,5 +190,4 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
     private String getRelativeURL(String streamId) {
         return SERVLET_NAME + "/" + streamId;
     }
-
 }

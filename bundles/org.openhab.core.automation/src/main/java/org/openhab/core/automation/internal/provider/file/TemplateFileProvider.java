@@ -59,5 +59,4 @@ public abstract class TemplateFileProvider extends AbstractFileProvider<RuleTemp
         }
         return new LinkedList<>(values);
     }
-
 }

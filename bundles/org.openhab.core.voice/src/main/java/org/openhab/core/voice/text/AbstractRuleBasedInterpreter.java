@@ -835,7 +835,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             String grammar = builder.toString();
             return grammar;
         }
-
     }
 
     @Override
@@ -872,5 +871,4 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             this.eventPublisher = null;
         }
     }
-
 }

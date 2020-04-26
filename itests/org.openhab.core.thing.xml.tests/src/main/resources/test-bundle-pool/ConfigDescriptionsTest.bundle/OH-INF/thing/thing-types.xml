@@ -41,15 +41,15 @@
 	<!-- HUE Lamp -->
 	<thing-type id="lamp">
 		<supported-bridge-type-refs>
-			<bridge-type-ref id="bridge" />
+			<bridge-type-ref id="bridge"/>
 		</supported-bridge-type-refs>
 
 		<label>HUE Lamp</label>
 		<description>My own great HUE Lamp.</description>
 
 		<channels>
-			<channel id="color" typeId="color" />
-			<channel id="color_temperature" typeId="color_temperature" />
+			<channel id="color" typeId="color"/>
+			<channel id="color_temperature" typeId="color_temperature"/>
 		</channels>
 	</thing-type>
 
@@ -59,7 +59,7 @@
 		<label>Dummy thing</label>
 
 		<channels>
-			<channel id="color" typeId="color" />
+			<channel id="color" typeId="color"/>
 		</channels>
 
 		<config-description>
@@ -100,7 +100,7 @@
 		</description>
 
 		<config-description>
-			<parameter name="lastDimValue" type="boolean" />
+			<parameter name="lastDimValue" type="boolean"/>
 		</config-description>
 	</channel-type>
 

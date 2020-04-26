@@ -131,5 +131,4 @@ public interface Inbox {
      */
     @Nullable
     Thing approve(ThingUID thingUID, @Nullable String label);
-
 }

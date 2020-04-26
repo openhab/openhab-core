@@ -1256,5 +1256,4 @@ public class ThingManagerImpl
     void setBundleResolver(BundleResolver bundleResolver) {
         this.bundleResolver = bundleResolver;
     }
-
 }

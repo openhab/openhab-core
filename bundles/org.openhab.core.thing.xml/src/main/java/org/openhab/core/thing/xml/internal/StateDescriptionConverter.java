@@ -128,5 +128,4 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
 
         return stateDescriptionFragmentBuilder.build().toStateDescription();
     }
-
 }

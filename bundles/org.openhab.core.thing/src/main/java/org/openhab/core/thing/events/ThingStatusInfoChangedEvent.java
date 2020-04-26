@@ -88,5 +88,4 @@ public class ThingStatusInfoChangedEvent extends AbstractEvent {
     public String toString() {
         return String.format("Thing '%s' changed from %s to %s", thingUID, oldStatusInfo, thingStatusInfo);
     }
-
 }

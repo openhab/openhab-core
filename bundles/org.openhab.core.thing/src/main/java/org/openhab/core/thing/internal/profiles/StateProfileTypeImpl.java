@@ -59,5 +59,4 @@ public class StateProfileTypeImpl implements StateProfileType {
     public Collection<String> getSupportedItemTypesOfChannel() {
         return supportedItemTypesOfChannel;
     }
-
 }

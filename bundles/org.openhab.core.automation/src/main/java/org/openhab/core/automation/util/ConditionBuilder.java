@@ -57,5 +57,4 @@ public class ConditionBuilder extends ModuleBuilder<ConditionBuilder, Condition>
     public Condition build() {
         return new ConditionImpl(getId(), getTypeUID(), configuration, label, description, inputs);
     }
-
 }

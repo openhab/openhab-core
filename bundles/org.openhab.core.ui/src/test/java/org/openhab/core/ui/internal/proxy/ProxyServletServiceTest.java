@@ -275,5 +275,4 @@ public class ProxyServletServiceTest {
         assertNotNull(uri);
         assertEquals(uri.toString(), ITEM_VALID_VIDEO_URL);
     }
-
 }

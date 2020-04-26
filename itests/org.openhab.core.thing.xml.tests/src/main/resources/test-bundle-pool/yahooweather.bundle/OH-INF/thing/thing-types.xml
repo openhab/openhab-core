@@ -10,7 +10,7 @@
 		<description>@text/CUSTOM_KEY</description>
 
 		<channels>
-			<channel id="temperature" typeId="temperature" />
+			<channel id="temperature" typeId="temperature"/>
 			<channel id="minTemperature" typeId="temperature">
 				<label>Min. Temperature</label>
 				<description>Minimum temperature in degrees celsius (metric) or fahrenheit (imperial).</description>
@@ -39,7 +39,7 @@
 		<label>Weather information group</label>
 		<description>Weather information group description.</description>
 		<channels>
-			<channel id="temperature" typeId="temperature" />
+			<channel id="temperature" typeId="temperature"/>
 			<channel id="minTemperature" typeId="temperature">
 				<label>Min. Temperature</label>
 				<description>Minimum forecasted temperature in degrees celsius (metric) or fahrenheit (imperial).</description>

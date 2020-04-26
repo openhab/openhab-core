@@ -290,5 +290,4 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
             return sysfsPath;
         }
     }
-
 }

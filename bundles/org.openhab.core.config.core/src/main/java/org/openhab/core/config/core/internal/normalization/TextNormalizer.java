@@ -33,5 +33,4 @@ final class TextNormalizer extends AbstractNormalizer {
         }
         return value.toString();
     }
-
 }

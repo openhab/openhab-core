@@ -409,5 +409,4 @@ public class DefaultChartProvider implements ChartProvider {
         }
         return chartTheme;
     }
-
 }

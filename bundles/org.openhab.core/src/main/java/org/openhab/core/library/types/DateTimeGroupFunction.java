@@ -115,5 +115,4 @@ public interface DateTimeGroupFunction extends GroupFunction {
             return new State[0];
         }
     }
-
 }

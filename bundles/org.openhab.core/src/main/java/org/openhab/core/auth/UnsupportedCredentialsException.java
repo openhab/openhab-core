@@ -49,5 +49,4 @@ public class UnsupportedCredentialsException extends AuthenticationException {
     public UnsupportedCredentialsException(String message, Throwable cause) {
         super(message, cause);
     }
-
 }

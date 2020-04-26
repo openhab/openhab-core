@@ -86,5 +86,4 @@ public class VolumetricFlowRateTest {
                 new Object[] { SmartHomeUnits.CUBICMETRE_PER_HOUR, "m³/h", 100.0, 100.0 },
                 new Object[] { SmartHomeUnits.CUBICMETRE_PER_DAY, "m³/d", 100.0, 4.166666666666667 } };
     }
-
 }

@@ -70,5 +70,4 @@ public class TimestampChangeProfile implements StateProfile {
     public void onCommandFromHandler(Command command) {
         // no-op
     }
-
 }

@@ -76,5 +76,4 @@ public class ConfigDescriptionReader extends XmlDocumentReader<List<ConfigDescri
         xstream.alias("filter", List.class);
         xstream.alias("criteria", FilterCriteria.class);
     }
-
 }

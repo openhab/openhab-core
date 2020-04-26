@@ -45,5 +45,4 @@ public interface TestAgent {
     void close();
 
     void delete(String handle);
-
 }

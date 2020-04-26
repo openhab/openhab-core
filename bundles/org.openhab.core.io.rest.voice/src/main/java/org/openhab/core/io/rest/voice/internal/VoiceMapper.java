@@ -35,5 +35,4 @@ public class VoiceMapper {
         dto.locale = voice.getLocale().toString();
         return dto;
     }
-
 }

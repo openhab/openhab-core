@@ -83,5 +83,4 @@ public class ConfigDescriptionParameterDTO {
         this.unitLabel = unitLabel;
         this.verify = verify;
     }
-
 }

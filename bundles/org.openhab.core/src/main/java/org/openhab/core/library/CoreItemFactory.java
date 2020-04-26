@@ -97,5 +97,4 @@ public class CoreItemFactory implements ItemFactory {
         return new String[] { SWITCH, ROLLERSHUTTER, CONTACT, STRING, NUMBER, DIMMER, DATETIME, COLOR, IMAGE, PLAYER,
                 LOCATION, CALL };
     }
-
 }

@@ -135,5 +135,4 @@ public class ProfileCallbackImpl implements ProfileCallback {
         eventPublisher.post(
                 ItemEventFactory.createStateEvent(link.getItemName(), acceptedState, link.getLinkedUID().toString()));
     }
-
 }

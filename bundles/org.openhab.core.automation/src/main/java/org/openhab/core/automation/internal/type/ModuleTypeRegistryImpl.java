@@ -236,5 +236,4 @@ public class ModuleTypeRegistryImpl extends AbstractRegistry<ModuleType, String,
         }
         return result;
     }
-
 }

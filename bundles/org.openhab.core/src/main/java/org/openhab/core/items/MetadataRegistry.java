@@ -42,5 +42,4 @@ public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
      * @param itemname the name of the item for which the metadata is to be removed.
      */
     void removeItemMetadata(String name);
-
 }

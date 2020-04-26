@@ -198,7 +198,6 @@ public class UnitUtils {
         }
 
         return differentSystems;
-
     }
 
     private static boolean isMetricConversion(UnitConverter converter) {
@@ -216,5 +215,4 @@ public class UnitUtils {
             throws ClassNotFoundException {
         return (Class<? extends Quantity<?>>) Class.forName(prefix + name);
     }
-
 }

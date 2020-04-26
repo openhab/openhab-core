@@ -81,5 +81,4 @@ public class CustomTrustManagerFactory extends SimpleTrustManagerFactory {
     protected TrustManager[] engineGetTrustManagers() {
         return trustManagers;
     }
-
 }

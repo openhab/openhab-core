@@ -288,5 +288,4 @@ public final class SmartHomeUnits extends CustomUnits {
         INSTANCE.quantityToUnit.put(type, unit);
         return unit;
     }
-
 }

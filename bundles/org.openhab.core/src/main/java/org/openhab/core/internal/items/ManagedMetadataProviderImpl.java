@@ -76,5 +76,4 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
         logger.debug("Removing all metadata for item {}", name);
         getAll().stream().filter(MetadataPredicates.ofItem(name)).map(Metadata::getUID).forEach(this::remove);
     }
-
 }

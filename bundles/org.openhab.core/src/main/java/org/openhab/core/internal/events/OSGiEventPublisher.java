@@ -101,5 +101,4 @@ public class OSGiEventPublisher implements EventPublisher {
             throw new IllegalStateException("The event bus module is not available!");
         }
     }
-
 }

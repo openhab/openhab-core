@@ -48,5 +48,4 @@ public class ThingDTO {
         this.properties = properties;
         this.location = location;
     }
-
 }

@@ -132,5 +132,4 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         super.notifyListenersAboutUpdatedElement(oldElement, element);
         // it is not needed to send an event, because links can not be updated
     }
-
 }

@@ -520,5 +520,4 @@ public abstract class AutomationCommands {
         }
         return String.format("Command \"%s\" is not supported!", command);
     }
-
 }

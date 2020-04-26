@@ -151,5 +151,4 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     public boolean supports(Class<? extends Credentials> type) {
         return (UsernamePasswordCredentials.class.isAssignableFrom(type));
     }
-
 }

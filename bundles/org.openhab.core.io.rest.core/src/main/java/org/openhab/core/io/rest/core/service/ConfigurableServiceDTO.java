@@ -34,5 +34,4 @@ public class ConfigurableServiceDTO {
         this.configDescriptionURI = configDescriptionURI;
         this.multiple = multiple;
     }
-
 }

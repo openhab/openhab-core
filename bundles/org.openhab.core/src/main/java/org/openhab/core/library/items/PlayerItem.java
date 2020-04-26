@@ -87,5 +87,4 @@ public class PlayerItem extends GenericItem {
             logSetTypeError(state);
         }
     }
-
 }

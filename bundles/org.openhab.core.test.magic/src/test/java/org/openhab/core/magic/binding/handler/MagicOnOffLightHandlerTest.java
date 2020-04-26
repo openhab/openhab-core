@@ -61,5 +61,4 @@ public class MagicOnOffLightHandlerTest {
         ThingStatusInfo thingStatusInfo = statusInfoCaptor.getValue();
         Assert.assertThat(thingStatusInfo.getStatus(), is(equalTo(ThingStatus.ONLINE)));
     }
-
 }

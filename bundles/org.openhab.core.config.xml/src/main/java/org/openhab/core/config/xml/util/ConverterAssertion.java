@@ -66,5 +66,4 @@ public class ConverterAssertion {
             throw new ConversionException("The parameter '" + reader.getNodeName() + "' uses unknown attributes!");
         }
     }
-
 }

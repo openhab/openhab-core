@@ -186,5 +186,4 @@ public abstract class AbstractXmlBasedProvider<@NonNull T_ID, @NonNull T_OBJECT 
     private LocalizedKey getLocalizedKey(T_OBJECT object, @Nullable Locale locale) {
         return new LocalizedKey(object.getUID(), locale != null ? locale.toLanguageTag() : null);
     }
-
 }

@@ -64,7 +64,6 @@ public class LinkEventOSGiTest extends JavaOSGiTest {
         public Event getLastReceivedEvent() {
             return lastReceivedEvent;
         }
-
     }
 
     @Before

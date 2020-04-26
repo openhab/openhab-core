@@ -49,5 +49,4 @@ public interface Condition extends Module {
      * @return a map that contains the input references of this condition.
      */
     Map<String, String> getInputs();
-
 }

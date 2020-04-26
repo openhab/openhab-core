@@ -44,5 +44,4 @@ public interface UsbSerialScanner {
      * @return <code>true</code> if able to perform scans, and <code>false</code> otherwise.
      */
     boolean canPerformScans();
-
 }

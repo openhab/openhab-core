@@ -66,5 +66,4 @@ public class AudioStreamUtils {
     public static boolean isExtension(String filename, String extension) {
         return !extension.isEmpty() && getExtension(filename).equals(extension);
     }
-
 }

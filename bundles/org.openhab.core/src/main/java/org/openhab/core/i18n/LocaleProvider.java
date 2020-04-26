@@ -32,5 +32,4 @@ public interface LocaleProvider {
      * @return a locale (non-null)
      */
     Locale getLocale();
-
 }

@@ -227,5 +227,4 @@ public class Channel {
     public @Nullable AutoUpdatePolicy getAutoUpdatePolicy() {
         return autoUpdatePolicy;
     }
-
 }

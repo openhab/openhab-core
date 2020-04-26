@@ -230,5 +230,4 @@ public class ChannelTypeResource implements RESTResource {
         return channelTypeRegistry != null && configDescriptionRegistry != null && profileTypeRegistry != null
                 && localeService != null;
     }
-
 }

@@ -39,5 +39,4 @@ public class ItemNotUniqueException extends ItemLookupException {
     public Collection<Item> getMatchingItems() {
         return matchingItems;
     }
-
 }

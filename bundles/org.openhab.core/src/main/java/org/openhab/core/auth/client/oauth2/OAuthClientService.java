@@ -286,5 +286,4 @@ public interface OAuthClientService extends AutoCloseable {
      * @param listener the listener to remove
      */
     boolean removeAccessTokenRefreshListener(AccessTokenRefreshListener listener);
-
 }

@@ -65,5 +65,4 @@ public class Authentication {
     public Set<String> getRoles() {
         return roles;
     }
-
 }

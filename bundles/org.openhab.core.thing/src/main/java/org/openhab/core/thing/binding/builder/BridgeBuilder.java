@@ -108,5 +108,4 @@ public class BridgeBuilder extends ThingBuilder {
     public BridgeBuilder withLocation(@Nullable String location) {
         return (BridgeBuilder) super.withLocation(location);
     }
-
 }

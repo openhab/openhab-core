@@ -300,5 +300,4 @@ public class ThingType extends AbstractDescriptionType {
     public List<String> getExtensibleChannelTypeIds() {
         return extensibleChannelTypeIds;
     }
-
 }

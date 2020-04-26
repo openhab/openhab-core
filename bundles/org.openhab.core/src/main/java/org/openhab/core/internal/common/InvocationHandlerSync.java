@@ -72,5 +72,4 @@ public class InvocationHandlerSync<T> extends AbstractInvocationHandler<T> imple
         }
         return null;
     }
-
 }

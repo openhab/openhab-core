@@ -28,5 +28,4 @@ public class LogConstants {
     public static final String FRONTEND_LOG_PATTERN = "Frontend Log ({}): {}";
 
     public static final int LOG_BUFFER_LIMIT = 500;
-
 }

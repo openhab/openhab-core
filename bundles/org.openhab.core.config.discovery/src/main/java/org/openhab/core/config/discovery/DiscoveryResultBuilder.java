@@ -146,5 +146,4 @@ public class DiscoveryResultBuilder {
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
                 ttl);
     }
-
 }

@@ -49,5 +49,4 @@ public class EnrichedItemDTO extends ItemDTO {
         this.stateDescription = stateDescription;
         this.commandDescription = commandDescription;
     }
-
 }

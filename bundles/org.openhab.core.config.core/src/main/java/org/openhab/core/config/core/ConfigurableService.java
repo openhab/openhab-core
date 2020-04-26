@@ -52,5 +52,4 @@ public interface ConfigurableService {
      * Marker for multiple configurations for this service ("true" = multiple configurations possible)
      */
     public static final String SERVICE_PROPERTY_FACTORY_SERVICE = "esh.factoryservice";
-
 }

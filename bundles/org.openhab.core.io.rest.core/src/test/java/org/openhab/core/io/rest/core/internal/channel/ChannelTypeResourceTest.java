@@ -95,5 +95,4 @@ public class ChannelTypeResourceTest {
         return new ChannelType(new ChannelTypeUID("binding", channelId), false, null, ChannelKind.TRIGGER, "Label",
                 null, null, null, null, null, null);
     }
-
 }

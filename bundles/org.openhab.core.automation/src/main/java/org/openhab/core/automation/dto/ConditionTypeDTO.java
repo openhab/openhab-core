@@ -24,5 +24,4 @@ import org.openhab.core.automation.type.Input;
 public class ConditionTypeDTO extends ModuleTypeDTO {
 
     public List<Input> inputs;
-
 }

@@ -54,5 +54,4 @@ public interface HandlerContext {
      * @return True if an exception occurred while handling request.
      */
     boolean hasError();
-
 }

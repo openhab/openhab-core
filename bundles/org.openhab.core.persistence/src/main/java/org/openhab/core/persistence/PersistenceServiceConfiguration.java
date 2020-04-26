@@ -64,5 +64,4 @@ public class PersistenceServiceConfiguration {
     public List<PersistenceStrategy> getStrategies() {
         return strategies;
     }
-
 }

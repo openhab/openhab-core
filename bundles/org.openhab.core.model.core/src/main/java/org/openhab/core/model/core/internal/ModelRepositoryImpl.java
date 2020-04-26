@@ -310,5 +310,4 @@ public class ModelRepositoryImpl implements ModelRepository {
             listener.modelChanged(name, type);
         }
     }
-
 }

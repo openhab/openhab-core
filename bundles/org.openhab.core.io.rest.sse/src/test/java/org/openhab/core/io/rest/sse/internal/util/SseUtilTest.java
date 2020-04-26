@@ -112,5 +112,4 @@ public class SseUtilTest {
         assertThat("smarthome/items/anyitem/added".matches(regexes.get(0)), is(true));
         assertThat("smarthome/items/anyitem/removed".matches(regexes.get(0)), is(false));
     }
-
 }

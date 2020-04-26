@@ -29,5 +29,4 @@ public class EnrichedRuleDTOMapper extends RuleDTOMapper {
         enrichedRuleDto.status = ruleEngine.getStatusInfo(rule.getUID());
         return enrichedRuleDto;
     }
-
 }

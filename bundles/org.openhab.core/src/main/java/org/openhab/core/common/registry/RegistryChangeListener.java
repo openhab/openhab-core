@@ -46,5 +46,4 @@ public interface RegistryChangeListener<E> {
      * @param oldElement the element that has been updated
      */
     void updated(E oldElement, E element);
-
 }

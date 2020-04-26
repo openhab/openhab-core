@@ -50,5 +50,4 @@ public class I18nUtil {
             return supplier.get();
         }
     }
-
 }

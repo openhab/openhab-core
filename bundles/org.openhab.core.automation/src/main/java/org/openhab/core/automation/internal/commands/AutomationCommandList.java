@@ -400,5 +400,4 @@ public class AutomationCommandList extends AutomationCommand {
             }
         }
     }
-
 }

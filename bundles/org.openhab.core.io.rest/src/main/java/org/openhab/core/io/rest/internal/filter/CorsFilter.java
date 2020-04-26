@@ -181,5 +181,4 @@ public class CorsFilter implements ContainerResponseFilter {
             logger.info("enabled CORS for REST API.");
         }
     }
-
 }

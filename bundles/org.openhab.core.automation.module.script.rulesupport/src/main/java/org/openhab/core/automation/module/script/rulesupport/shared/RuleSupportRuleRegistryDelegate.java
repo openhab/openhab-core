@@ -122,5 +122,4 @@ public class RuleSupportRuleRegistryDelegate implements RuleRegistry {
     public Collection<Rule> getByTags(String... tags) {
         return ruleRegistry.getByTags(tags);
     }
-
 }

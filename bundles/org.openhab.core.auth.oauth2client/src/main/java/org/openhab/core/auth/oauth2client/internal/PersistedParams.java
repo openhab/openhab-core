@@ -163,5 +163,4 @@ class PersistedParams {
         }
         return true;
     }
-
 }

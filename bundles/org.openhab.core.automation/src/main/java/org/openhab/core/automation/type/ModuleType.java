@@ -198,5 +198,4 @@ public abstract class ModuleType implements Identifiable<String> {
         }
         return true;
     }
-
 }

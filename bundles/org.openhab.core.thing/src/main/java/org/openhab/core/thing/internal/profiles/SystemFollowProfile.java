@@ -74,5 +74,4 @@ public class SystemFollowProfile implements StateProfile {
     public void onStateUpdateFromHandler(State state) {
         // no-op
     }
-
 }

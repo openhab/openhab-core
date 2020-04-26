@@ -27,7 +27,7 @@
 		<command>
 			<options>
 				<option value="ALARM">Alarm</option>
-				<option value="LONG_ALARM" />
+				<option value="LONG_ALARM"/>
 			</options>
 		</command>
 	</channel-type>

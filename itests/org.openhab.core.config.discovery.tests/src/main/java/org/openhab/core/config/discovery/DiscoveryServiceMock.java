@@ -54,5 +54,4 @@ public class DiscoveryServiceMock extends AbstractDiscoveryService {
         thingDiscovered(DiscoveryResultBuilder.create(new ThingUID(thingType, "test" + new Random().nextInt(999999999)))
                 .withTTL(DEFAULT_TTL).build());
     }
-
 }

@@ -191,5 +191,4 @@ public class UsbSerialDeviceInformation {
                 vendorId, productId, serialNumber, manufacturer, product, interfaceNumber, interfaceDescription,
                 serialPort);
     }
-
 }

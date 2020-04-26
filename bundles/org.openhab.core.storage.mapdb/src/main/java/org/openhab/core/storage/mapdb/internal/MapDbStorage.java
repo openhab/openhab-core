@@ -186,5 +186,4 @@ public class MapDbStorage<T> implements DeletableStorage<T> {
 
         return value;
     }
-
 }

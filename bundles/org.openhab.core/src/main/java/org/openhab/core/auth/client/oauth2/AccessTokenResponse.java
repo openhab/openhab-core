@@ -204,7 +204,6 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
                 && Objects.equals(this.expiresIn, that.expiresIn)
                 && Objects.equals(this.refreshToken, that.refreshToken) && Objects.equals(this.scope, that.scope)
                 && Objects.equals(this.state, that.state) && Objects.equals(this.createdOn, that.createdOn);
-
     }
 
     @Override
@@ -213,5 +212,4 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
                 + expiresIn + ", refreshToken=" + refreshToken + ", scope=" + scope + ", state=" + state
                 + ", createdOn=" + createdOn + "]";
     }
-
 }

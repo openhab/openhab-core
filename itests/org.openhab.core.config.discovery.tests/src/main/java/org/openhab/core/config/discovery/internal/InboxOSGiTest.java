@@ -1013,5 +1013,4 @@ public class InboxOSGiTest extends JavaOSGiTest {
             return null;
         }
     }
-
 }

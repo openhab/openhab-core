@@ -166,5 +166,4 @@ public class ThingTypeXmlResult {
                 + ", properties=" + properties + ", configDescriptionURI=" + configDescriptionURI
                 + ", configDescription=" + configDescription + "]";
     }
-
 }

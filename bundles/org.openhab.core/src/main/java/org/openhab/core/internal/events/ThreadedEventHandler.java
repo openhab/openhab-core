@@ -74,7 +74,6 @@ public class ThreadedEventHandler implements Closeable {
                 }
             }
         }, "OH-OSGiEventManager");
-
     }
 
     void open() {

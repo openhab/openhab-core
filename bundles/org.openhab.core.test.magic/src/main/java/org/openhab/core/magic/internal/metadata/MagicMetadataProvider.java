@@ -77,5 +77,4 @@ public class MagicMetadataProvider implements MetadataConfigDescriptionProvider 
         }
         return null;
     }
-
 }

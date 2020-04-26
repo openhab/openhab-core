@@ -37,5 +37,4 @@ public class NodeValueConverter extends GenericUnmarshaller<NodeValue> {
 
         return new NodeValue(reader.getNodeName(), attributes, reader.getValue());
     }
-
 }

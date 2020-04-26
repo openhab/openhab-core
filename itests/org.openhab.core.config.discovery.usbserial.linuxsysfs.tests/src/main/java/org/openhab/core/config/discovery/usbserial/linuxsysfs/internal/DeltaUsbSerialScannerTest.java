@@ -98,5 +98,4 @@ public class DeltaUsbSerialScannerTest {
         assertThat(delta.getRemoved(), contains(usb1));
         assertThat(delta.getUnchanged(), contains(usb2));
     }
-
 }

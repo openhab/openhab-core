@@ -476,5 +476,4 @@ public class FolderObserverTest extends JavaOSGiTest {
             return null;
         }
     }
-
 }

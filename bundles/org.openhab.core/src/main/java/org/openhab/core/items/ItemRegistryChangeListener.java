@@ -32,5 +32,4 @@ public interface ItemRegistryChangeListener extends RegistryChangeListener<Item>
      * @param oldItemNames a collection of all previous item names, so that references can be removed
      */
     void allItemsChanged(Collection<String> oldItemNames);
-
 }

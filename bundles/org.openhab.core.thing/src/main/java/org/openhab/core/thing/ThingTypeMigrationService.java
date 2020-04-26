@@ -34,5 +34,4 @@ public interface ThingTypeMigrationService {
      * @throws RuntimeException, if the new thing type is not registered in the registry
      */
     void migrateThingType(Thing thing, ThingTypeUID thingTypeUID, @Nullable Configuration configuration);
-
 }

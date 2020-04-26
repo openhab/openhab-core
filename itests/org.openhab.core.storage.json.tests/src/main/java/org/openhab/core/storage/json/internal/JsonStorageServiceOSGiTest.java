@@ -171,7 +171,5 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
             this.groupNames = groupNames;
             this.baseItemType = baseItemType;
         }
-
     }
-
 }

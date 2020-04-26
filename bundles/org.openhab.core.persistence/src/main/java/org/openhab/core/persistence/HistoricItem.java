@@ -51,5 +51,4 @@ public interface HistoricItem {
      * @return the name of the item
      */
     String getName();
-
 }

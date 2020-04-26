@@ -42,5 +42,4 @@ public enum UnDefType implements PrimitiveType, State {
     public String toFullString() {
         return super.toString();
     }
-
 }

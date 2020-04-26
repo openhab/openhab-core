@@ -27,5 +27,4 @@ import java.lang.annotation.Target;
 public @interface ThingActionsScope {
 
     String name();
-
 }

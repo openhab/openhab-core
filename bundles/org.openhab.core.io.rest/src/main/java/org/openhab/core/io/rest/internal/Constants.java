@@ -26,5 +26,4 @@ public class Constants {
     public static final String CORS_PROPERTY = "enable";
 
     public static final String JAXRS_CONNECTOR_CORS_PROPERTY_ENABLE_VALUE = "enable";
-
 }

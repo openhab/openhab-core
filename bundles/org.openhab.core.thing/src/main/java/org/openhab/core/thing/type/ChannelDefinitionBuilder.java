@@ -108,5 +108,4 @@ public class ChannelDefinitionBuilder {
     public ChannelDefinition build() {
         return new ChannelDefinition(id, channelTypeUID, label, description, properties, autoUpdatePolicy);
     }
-
 }

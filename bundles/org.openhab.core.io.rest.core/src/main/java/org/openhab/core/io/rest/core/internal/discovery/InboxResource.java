@@ -159,5 +159,4 @@ public class InboxResource implements RESTResource {
     public boolean isSatisfied() {
         return inbox != null;
     }
-
 }

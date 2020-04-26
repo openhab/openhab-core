@@ -85,5 +85,4 @@ public class DimmerItemTest {
         DimmerItem item = new DimmerItem("test");
         StateUtil.testAcceptedStates(item);
     }
-
 }

@@ -55,5 +55,4 @@ public class EnrichedThingDTOMapper extends ThingDTOMapper {
 
         return new EnrichedThingDTO(thingDTO, channels, thingStatusInfo, firmwareStatus, editable);
     }
-
 }

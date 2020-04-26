@@ -157,5 +157,4 @@ abstract class AbstractInvocationHandler<T> {
             manager.recordCallEnd(invocation);
         }
     }
-
 }

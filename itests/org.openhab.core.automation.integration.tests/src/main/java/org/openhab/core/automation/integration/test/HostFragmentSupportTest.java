@@ -417,5 +417,4 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
             assertThat(registry.get(action1), is(nullValue()));
         }, 3000, 200);
     }
-
 }

@@ -118,5 +118,4 @@ public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
         xstream.alias("command-options", NodeList.class);
         xstream.alias("autoUpdatePolicy", NodeValue.class);
     }
-
 }

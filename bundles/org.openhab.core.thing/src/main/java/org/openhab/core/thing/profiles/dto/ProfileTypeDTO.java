@@ -35,5 +35,4 @@ public class ProfileTypeDTO {
         this.kind = kind;
         this.supportedItemTypes = supportedItemTypes;
     }
-
 }

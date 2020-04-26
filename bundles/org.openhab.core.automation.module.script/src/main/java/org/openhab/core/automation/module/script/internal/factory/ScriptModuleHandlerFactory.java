@@ -86,5 +86,4 @@ public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory {
     public void unsetScriptEngineManager(ScriptEngineManager scriptEngineManager) {
         this.scriptEngineManager = null;
     }
-
 }

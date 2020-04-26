@@ -30,5 +30,4 @@ public class UsbSerialDeviceInformationGenerator {
         return new UsbSerialDeviceInformation(i, i, "serialNumber-" + i, "manufacturer-" + i, "product-" + i, i,
                 "interface-" + i, "ttyUSB" + i);
     }
-
 }

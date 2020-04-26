@@ -379,5 +379,4 @@ public class I18nProviderImpl
         angleMap.put(ImperialUnits.getInstance(), SmartHomeUnits.DEGREE_ANGLE);
         dimensionMap.put(Angle.class, angleMap);
     }
-
 }

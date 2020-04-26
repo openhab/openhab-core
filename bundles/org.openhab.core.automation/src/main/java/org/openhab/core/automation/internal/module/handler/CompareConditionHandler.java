@@ -190,5 +190,4 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
             }
         }
     }
-
 }

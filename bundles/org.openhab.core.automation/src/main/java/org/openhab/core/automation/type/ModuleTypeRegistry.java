@@ -152,5 +152,4 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      *         parameter.
      */
     public Collection<ActionType> getActions(@Nullable Locale locale, String... tags);
-
 }

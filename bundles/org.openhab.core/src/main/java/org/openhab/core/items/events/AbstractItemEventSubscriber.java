@@ -74,5 +74,4 @@ public abstract class AbstractItemEventSubscriber implements EventSubscriber {
         // Default implementation: do nothing.
         // Can be implemented by subclass in order to handle item updates.
     }
-
 }

@@ -60,5 +60,4 @@ public class ThingUpdatedEvent extends AbstractThingRegistryEvent {
     public String toString() {
         return "Thing '" + getThing().UID + "' has been updated.";
     }
-
 }

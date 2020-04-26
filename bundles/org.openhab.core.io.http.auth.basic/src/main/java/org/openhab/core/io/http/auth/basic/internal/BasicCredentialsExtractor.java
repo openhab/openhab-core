@@ -56,5 +56,4 @@ public class BasicCredentialsExtractor implements CredentialsExtractor<HttpServl
 
         return Optional.empty();
     }
-
 }

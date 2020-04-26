@@ -239,5 +239,4 @@ public class NumberExtensionsTest {
         assertTrue(NumberExtensions.operator_greaterEqualsThan(Q_ONE_1, DECIMAL1));
         assertTrue(NumberExtensions.operator_greaterEqualsThan((Number) DECIMAL1, Q_ONE_1));
     }
-
 }

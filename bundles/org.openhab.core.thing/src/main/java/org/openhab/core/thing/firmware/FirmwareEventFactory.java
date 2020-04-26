@@ -132,5 +132,4 @@ public final class FirmwareEventFactory extends AbstractEventFactory {
         FirmwareUpdateResultInfo firmwareUpdateResultInfo = deserializePayload(payload, FirmwareUpdateResultInfo.class);
         return new FirmwareUpdateResultInfoEvent(topic, payload, firmwareUpdateResultInfo);
     }
-
 }

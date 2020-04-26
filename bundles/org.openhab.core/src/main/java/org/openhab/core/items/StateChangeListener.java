@@ -43,5 +43,4 @@ public interface StateChangeListener {
      * @param state the current state, same before and after the update
      */
     public void stateUpdated(Item item, State state);
-
 }

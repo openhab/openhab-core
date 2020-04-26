@@ -50,5 +50,4 @@ public class MagicMetadataProvider2 implements MetadataConfigDescriptionProvider
     public @Nullable List<ConfigDescriptionParameter> getParameters(String value, @Nullable Locale locale) {
         return null;
     }
-
 }

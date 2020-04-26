@@ -60,5 +60,4 @@ class PeriodicAdjuster implements SchedulerTemporalAdjuster {
         timeDone = nextTime;
         return nextTime;
     }
-
 }

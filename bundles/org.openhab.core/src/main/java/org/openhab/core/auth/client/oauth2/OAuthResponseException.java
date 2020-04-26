@@ -80,5 +80,4 @@ public class OAuthResponseException extends Exception {
         return "OAuthResponseException [error=" + error + ", errorDescription=" + errorDescription + ", errorUri="
                 + errorUri + ", state=" + state + "]";
     }
-
 }

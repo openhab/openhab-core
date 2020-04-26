@@ -21,5 +21,4 @@ public class RESTConstants {
 
     // URI path used for the REST API
     public static final String REST_URI = "/rest";
-
 }

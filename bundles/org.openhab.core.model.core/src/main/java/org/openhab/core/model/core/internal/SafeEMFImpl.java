@@ -34,5 +34,4 @@ public class SafeEMFImpl implements SafeEMF {
     public synchronized void call(Runnable func) {
         func.run();
     }
-
 }

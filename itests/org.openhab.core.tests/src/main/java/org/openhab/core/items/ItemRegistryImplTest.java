@@ -403,5 +403,4 @@ public class ItemRegistryImplTest extends JavaTest {
         ((ItemRegistryImpl) itemRegistry).unsetCommandDescriptionService(commandDescriptionService);
         verify(item).setCommandDescriptionService(null);
     }
-
 }

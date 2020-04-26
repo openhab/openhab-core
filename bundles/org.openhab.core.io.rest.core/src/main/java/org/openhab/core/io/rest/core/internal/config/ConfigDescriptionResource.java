@@ -124,5 +124,4 @@ public class ConfigDescriptionResource implements RESTResource {
     public boolean isSatisfied() {
         return configDescriptionRegistry != null && localeService != null;
     }
-
 }

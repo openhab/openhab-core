@@ -66,7 +66,6 @@ public class MetadataRegistryImplTest {
         verify(bundleContext).addServiceListener(captor.capture(), any());
         providerTracker = captor.getValue();
         providerTracker.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, managedProviderRef));
-
     }
 
     @Test
@@ -102,5 +101,4 @@ public class MetadataRegistryImplTest {
         verify(managedProvider).removeItemMetadata(captor.capture());
         assertEquals("itemName", captor.getValue());
     }
-
 }

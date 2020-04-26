@@ -84,5 +84,4 @@ public class ThingDTOMapper {
         }
         return configurationMap;
     }
-
 }

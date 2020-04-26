@@ -57,5 +57,4 @@ public class SerialConfigOptionProvider implements ConfigOptionProvider {
     public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
         return null;
     }
-
 }

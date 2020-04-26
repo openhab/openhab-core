@@ -37,5 +37,4 @@ public abstract class AudioStream extends InputStream {
      * @return The supported audio format
      */
     public abstract AudioFormat getFormat();
-
 }

@@ -194,5 +194,4 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
         }
         return mapModuleToHandler;
     }
-
 }

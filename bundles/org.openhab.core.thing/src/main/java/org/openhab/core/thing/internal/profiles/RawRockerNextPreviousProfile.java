@@ -55,5 +55,4 @@ public class RawRockerNextPreviousProfile implements TriggerProfile {
             callback.sendCommand(NextPreviousType.PREVIOUS);
         }
     }
-
 }

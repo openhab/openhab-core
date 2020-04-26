@@ -40,5 +40,4 @@ public interface ConfigDescriptionValidator {
      * @throws NullPointerException if given config description URI or configuration parameters are null
      */
     void validate(Map<String, Object> configurationParameters, URI configDescriptionURI);
-
 }

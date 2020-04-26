@@ -64,5 +64,4 @@ public class DefaultLocaleSetter {
 
         config.update(properties);
     }
-
 }

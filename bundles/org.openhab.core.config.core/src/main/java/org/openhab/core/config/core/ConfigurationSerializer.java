@@ -67,5 +67,4 @@ public class ConfigurationSerializer implements JsonSerializer<Configuration> {
         }
         return null;
     }
-
 }

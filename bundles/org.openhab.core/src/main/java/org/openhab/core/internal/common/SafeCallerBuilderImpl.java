@@ -101,5 +101,4 @@ public class SafeCallerBuilderImpl<T> implements SafeCallerBuilder<T> {
         this.async = true;
         return this;
     }
-
 }

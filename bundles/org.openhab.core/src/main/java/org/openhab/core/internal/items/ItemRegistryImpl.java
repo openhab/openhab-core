@@ -484,5 +484,4 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     protected void unsetManagedProvider(ManagedItemProvider provider) {
         super.unsetManagedProvider(provider);
     }
-
 }

@@ -46,5 +46,4 @@ public class HttpContextFactoryServiceImpl implements HttpContextFactoryService 
     public void unsetHttpContext(WrappingHttpContext httpContext) {
         this.httpContext = null;
     }
-
 }

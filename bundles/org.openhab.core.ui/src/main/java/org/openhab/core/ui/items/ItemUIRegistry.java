@@ -196,5 +196,4 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      */
     @Nullable
     State convertState(Widget widget, Item item, State state);
-
 }

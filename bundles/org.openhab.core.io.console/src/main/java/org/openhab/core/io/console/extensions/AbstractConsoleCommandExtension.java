@@ -82,5 +82,4 @@ public abstract class AbstractConsoleCommandExtension implements ConsoleCommandE
             console.printUsage(usage);
         }
     }
-
 }

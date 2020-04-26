@@ -354,5 +354,4 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
     private <T> T runScript(String script) throws ScriptExecutionException, ScriptParsingException {
         return (T) scriptEngine.newScriptFromString(script).execute();
     }
-
 }

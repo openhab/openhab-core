@@ -299,5 +299,4 @@ public class ConfigDescriptionParameterBuilder {
                 context, defaultValue, label, description, options, filterCriteria, groupName, advanced, limitToOptions,
                 multipleLimit, unit, unitLabel, verify);
     }
-
 }

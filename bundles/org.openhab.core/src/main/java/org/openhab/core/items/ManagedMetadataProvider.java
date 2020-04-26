@@ -32,5 +32,4 @@ public interface ManagedMetadataProvider extends ManagedProvider<Metadata, Metad
      * @param itemname the name of the item for which the metadata is to be removed.
      */
     void removeItemMetadata(String name);
-
 }

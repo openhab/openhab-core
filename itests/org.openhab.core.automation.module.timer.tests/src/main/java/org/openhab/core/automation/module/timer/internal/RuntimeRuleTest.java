@@ -226,5 +226,4 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
         }
     }
-
 }

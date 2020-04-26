@@ -41,5 +41,4 @@ public final class MDNSActivator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
         logger.debug("mDNS service has been stopped.");
     }
-
 }

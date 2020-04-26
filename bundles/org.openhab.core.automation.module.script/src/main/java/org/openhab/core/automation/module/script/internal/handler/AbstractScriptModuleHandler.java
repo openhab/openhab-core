@@ -130,5 +130,4 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             executionContext.setAttribute(key, value, ScriptContext.ENGINE_SCOPE);
         }
     }
-
 }

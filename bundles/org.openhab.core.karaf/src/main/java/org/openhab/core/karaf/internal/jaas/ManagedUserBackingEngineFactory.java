@@ -48,5 +48,4 @@ public class ManagedUserBackingEngineFactory implements BackingEngineFactory {
     public BackingEngine build(Map<String, ?> options) {
         return new ManagedUserBackingEngine(userRegistry);
     }
-
 }

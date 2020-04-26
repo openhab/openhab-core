@@ -37,5 +37,4 @@ public interface ProfileType extends Identifiable<ProfileTypeUID> {
      * @return the label
      */
     String getLabel();
-
 }

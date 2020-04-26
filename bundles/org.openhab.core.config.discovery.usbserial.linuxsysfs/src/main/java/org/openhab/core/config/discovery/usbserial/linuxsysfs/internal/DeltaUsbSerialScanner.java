@@ -99,5 +99,4 @@ public class DeltaUsbSerialScanner {
             return unchanged;
         }
     }
-
 }

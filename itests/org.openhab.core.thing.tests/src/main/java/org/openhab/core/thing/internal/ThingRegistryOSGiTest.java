@@ -169,7 +169,6 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
             @Override
             public void removeProviderChangeListener(ProviderChangeListener<Thing> listener) {
             }
-
         };
         registerService(thingProvider);
 
@@ -255,5 +254,4 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
             thingHandlerFactoryServiceReg = null;
         }
     }
-
 }

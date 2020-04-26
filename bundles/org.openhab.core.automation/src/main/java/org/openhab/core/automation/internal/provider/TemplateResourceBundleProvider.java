@@ -188,5 +188,4 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
     protected String getUID(RuleTemplate parsedObject) {
         return parsedObject.getUID();
     }
-
 }

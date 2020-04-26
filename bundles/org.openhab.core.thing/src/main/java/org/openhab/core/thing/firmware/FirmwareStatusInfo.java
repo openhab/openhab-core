@@ -169,5 +169,4 @@ public final class FirmwareStatusInfo {
         return "FirmwareStatusInfo [firmwareStatus=" + firmwareStatus + ", firmwareVersion=" + firmwareVersion
                 + ", thingUID=" + thingUID + "]";
     }
-
 }

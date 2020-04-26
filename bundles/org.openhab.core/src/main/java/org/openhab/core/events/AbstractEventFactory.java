@@ -123,5 +123,4 @@ public abstract class AbstractEventFactory implements EventFactory {
             throw new IllegalArgumentException("The argument '" + argumentName + "' must not be null or empty.");
         }
     }
-
 }

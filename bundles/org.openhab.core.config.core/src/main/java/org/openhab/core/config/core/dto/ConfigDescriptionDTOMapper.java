@@ -160,5 +160,4 @@ public class ConfigDescriptionDTOMapper {
         }
         return result;
     }
-
 }

@@ -190,5 +190,4 @@ public class AudioConsoleTest extends AbstractAudioServletTest {
         waitForAssert(() -> assertThat("The listed source was not as expected", consoleOutput,
                 is(String.format("* %s (%s)", audioSource.getLabel(Locale.getDefault()), audioSource.getId()))));
     }
-
 }

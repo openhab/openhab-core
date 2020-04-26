@@ -60,5 +60,4 @@ public class ByteArrayAudioStream extends FixedLengthAudioStream {
     public InputStream getClonedStream() {
         return new ByteArrayAudioStream(bytes, format);
     }
-
 }

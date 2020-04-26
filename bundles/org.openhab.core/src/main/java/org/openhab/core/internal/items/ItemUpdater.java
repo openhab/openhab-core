@@ -94,5 +94,4 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
             logger.debug("Received command for non-existing item: {}", e.getMessage());
         }
     }
-
 }

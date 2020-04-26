@@ -57,5 +57,4 @@ public class BindingInstaller {
         waitForAssert.accept(
                 () -> assertThat(bindingInfoRegistry.getBindingInfos().size(), is(initialNumberOfBindingInfos)));
     }
-
 }

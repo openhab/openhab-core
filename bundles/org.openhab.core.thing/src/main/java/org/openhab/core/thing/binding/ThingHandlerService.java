@@ -50,5 +50,4 @@ public interface ThingHandlerService {
      */
     default void deactivate() {
     }
-
 }

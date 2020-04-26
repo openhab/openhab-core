@@ -64,5 +64,4 @@ public abstract class AbstractTypedEventSubscriber<T extends Event> implements E
      * @param event the received event
      */
     protected abstract void receiveTypedEvent(T event);
-
 }

@@ -198,5 +198,4 @@ public class ConfigUtilTest {
                         Arrays.asList(configDescriptionString, configDescriptionInteger)).get("foo"),
                 is(instanceOf(String.class)));
     }
-
 }

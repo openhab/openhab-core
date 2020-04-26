@@ -31,5 +31,4 @@ public interface UsbSerialDiscoveryListener {
      * Called when a serial port provided by a USB device has been removed.
      */
     void usbSerialDeviceRemoved(UsbSerialDeviceInformation usbSerialDeviceInformation);
-
 }

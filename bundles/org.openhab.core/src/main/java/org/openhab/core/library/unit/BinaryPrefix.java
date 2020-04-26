@@ -173,5 +173,4 @@ public enum BinaryPrefix implements SymbolSupplier, UnitConverterSupplier {
     public static <Q extends Quantity<Q>> Unit<Q> KIBI(Unit<Q> unit) {
         return unit.transform(KIBI.getConverter());
     }
-
 }

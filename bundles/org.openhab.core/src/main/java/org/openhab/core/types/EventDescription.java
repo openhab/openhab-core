@@ -50,5 +50,4 @@ public class EventDescription {
     public String toString() {
         return "EventDescription [options=" + options + "]";
     }
-
 }

@@ -46,5 +46,4 @@ public abstract class AbstractInboxEvent extends AbstractEvent {
     public DiscoveryResultDTO getDiscoveryResult() {
         return discoveryResult;
     }
-
 }

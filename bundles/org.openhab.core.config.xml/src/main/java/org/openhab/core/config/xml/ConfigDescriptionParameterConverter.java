@@ -158,5 +158,4 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
         }
         return null;
     }
-
 }

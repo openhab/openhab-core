@@ -43,5 +43,4 @@ abstract class AbstractNormalizer implements Normalizer {
      * @return the normalized value or the given value, if it was not possible to normalize it
      */
     abstract Object doNormalize(Object value);
-
 }

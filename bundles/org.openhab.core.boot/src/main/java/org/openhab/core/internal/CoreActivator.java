@@ -54,5 +54,4 @@ public class CoreActivator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
     }
-
 }

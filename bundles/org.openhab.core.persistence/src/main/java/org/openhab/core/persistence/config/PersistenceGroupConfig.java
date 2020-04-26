@@ -36,5 +36,4 @@ public class PersistenceGroupConfig extends PersistenceConfig {
     public String toString() {
         return String.format("%s [group=%s]", getClass().getSimpleName(), group);
     }
-
 }

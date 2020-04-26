@@ -77,5 +77,4 @@ public class TimestampProfileTest extends JavaTest {
         DateTimeType updatedResult = (DateTimeType) result;
         assertTrue(updatedResult.getZonedDateTime().isAfter(changeResult.getZonedDateTime()));
     }
-
 }

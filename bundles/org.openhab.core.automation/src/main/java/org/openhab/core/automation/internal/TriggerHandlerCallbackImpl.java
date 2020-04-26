@@ -131,5 +131,4 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     public void runNow(String uid, boolean considerConditions, Map<String, Object> context) {
         re.runNow(uid, considerConditions, context);
     }
-
 }

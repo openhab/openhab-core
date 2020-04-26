@@ -20,5 +20,4 @@ package org.openhab.core.io.http;
 public interface HandlerPriorities {
 
     int AUTHENTICATION = 100;
-
 }

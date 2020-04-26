@@ -119,5 +119,4 @@ public class ItemRegistryDelegate implements Map<String, State> {
         }
         return entries;
     }
-
 }

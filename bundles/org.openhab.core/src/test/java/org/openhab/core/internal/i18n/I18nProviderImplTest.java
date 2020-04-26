@@ -183,5 +183,4 @@ public class I18nProviderImplTest {
         conf.put(VARIANT, VARIANT_RU);
         return conf;
     }
-
 }

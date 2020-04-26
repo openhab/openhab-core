@@ -88,7 +88,6 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
         public void removedService(@Nullable ServiceReference<LocaleProvider> reference, LocaleProvider service) {
             localeProvider = null;
         }
-
     }
 
     protected void activate(final BundleContext context) {
@@ -284,5 +283,4 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
         return ConfigConstants.getConfigFolder() + File.separator + TransformationService.TRANSFORM_FOLDER_NAME
                 + File.separator;
     }
-
 }

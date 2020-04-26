@@ -111,5 +111,4 @@ public class PersistenceServiceRegistryImpl implements ConfigOptionProvider, Per
         }
         return null;
     }
-
 }

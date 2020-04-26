@@ -60,5 +60,4 @@ public class RawButtonToggleRollershutterProfile implements TriggerProfile {
     public void onStateUpdateFromItem(State state) {
         previousState = state.as(UpDownType.class);
     }
-
 }

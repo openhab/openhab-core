@@ -217,5 +217,4 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
             }
         }
     }
-
 }

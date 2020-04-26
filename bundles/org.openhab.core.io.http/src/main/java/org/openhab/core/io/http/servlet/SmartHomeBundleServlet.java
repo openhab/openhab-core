@@ -45,5 +45,4 @@ public abstract class SmartHomeBundleServlet extends BaseSmartHomeServlet {
     protected final HttpContext createHttpContext(Bundle bundle) {
         return httpContextFactoryService.createDefaultHttpContext(bundle);
     }
-
 }

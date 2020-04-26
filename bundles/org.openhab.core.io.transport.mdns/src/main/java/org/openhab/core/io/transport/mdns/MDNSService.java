@@ -34,5 +34,4 @@ public interface MDNSService {
      * @param serviceDescription the {@link ServiceDescription} instance with all details to identify the service
      */
     public void unregisterService(ServiceDescription description);
-
 }

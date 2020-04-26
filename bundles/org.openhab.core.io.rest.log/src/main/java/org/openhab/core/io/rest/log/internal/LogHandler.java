@@ -174,5 +174,4 @@ public class LogHandler implements RESTResource {
         result.put("debug", logger.isDebugEnabled());
         return result;
     }
-
 }

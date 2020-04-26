@@ -658,5 +658,4 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             // no-op
         }
     }
-
 }

@@ -43,7 +43,6 @@ public class WrappedRule {
             coll.add(impl);
             return impl;
         }).collect(Collectors.toList()));
-
     }
 
     private final Rule rule;
@@ -95,5 +94,4 @@ public class WrappedRule {
     public List<WrappedModule<Module, ModuleHandler>> getModules() {
         return modules;
     }
-
 }

@@ -203,5 +203,4 @@ public class NodeIterator implements Iterator<Object> {
 
         return null;
     }
-
 }

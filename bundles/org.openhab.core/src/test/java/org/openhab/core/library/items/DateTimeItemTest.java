@@ -42,5 +42,4 @@ public class DateTimeItemTest {
         DateTimeItem item = new DateTimeItem("test");
         StateUtil.testAcceptedStates(item);
     }
-
 }

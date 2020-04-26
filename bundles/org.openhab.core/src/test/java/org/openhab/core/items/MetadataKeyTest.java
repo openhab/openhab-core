@@ -30,5 +30,4 @@ public class MetadataKeyTest {
     public void testGetItemName() {
         assertEquals("itemName", new MetadataKey("namespace", "itemName").getItemName());
     }
-
 }

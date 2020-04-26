@@ -71,5 +71,4 @@ public class CidrAddress {
     public InetAddress getAddress() {
         return address;
     }
-
 }

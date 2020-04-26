@@ -62,5 +62,4 @@ public class CommandDescriptionServiceImpl implements CommandDescriptionService 
     protected void removeCommandDescriptionProvider(CommandDescriptionProvider commandDescriptionProvider) {
         commandDescriptionProviders.remove(commandDescriptionProvider);
     }
-
 }

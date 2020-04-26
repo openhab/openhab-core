@@ -103,5 +103,4 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
 
         return configDescription;
     }
-
 }

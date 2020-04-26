@@ -121,5 +121,4 @@ public class FirmwareUpdateServicePrerequisiteVersionTest extends JavaOSGiTest {
         when(firmwareUpdateHandler.isUpdateExecutable()).thenReturn(true);
         return firmwareUpdateHandler;
     }
-
 }

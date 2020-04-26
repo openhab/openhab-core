@@ -72,5 +72,4 @@ public interface MetadataConfigDescriptionProvider {
      */
     @Nullable
     List<ConfigDescriptionParameter> getParameters(String value, @Nullable Locale locale);
-
 }

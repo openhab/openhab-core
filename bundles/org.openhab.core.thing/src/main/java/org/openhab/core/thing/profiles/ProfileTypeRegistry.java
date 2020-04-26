@@ -41,5 +41,4 @@ public interface ProfileTypeRegistry {
      * @return all profile types
      */
     public List<ProfileType> getProfileTypes(@Nullable Locale locale);
-
 }

@@ -115,5 +115,4 @@ public class StateDescriptionFragmentBuilderTest {
         assertThat(fragment1.isReadOnly(), is(not(fragment2.isReadOnly())));
         assertThat(fragment1.getOptions(), is(not(fragment2.getOptions())));
     }
-
 }

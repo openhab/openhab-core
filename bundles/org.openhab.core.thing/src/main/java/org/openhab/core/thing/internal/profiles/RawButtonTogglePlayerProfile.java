@@ -61,5 +61,4 @@ public class RawButtonTogglePlayerProfile implements TriggerProfile {
     public void onStateUpdateFromItem(State state) {
         previousState = state.as(PlayPauseType.class);
     }
-
 }

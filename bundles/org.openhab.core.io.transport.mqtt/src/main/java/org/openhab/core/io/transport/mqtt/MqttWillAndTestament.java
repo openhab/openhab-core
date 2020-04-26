@@ -173,5 +173,4 @@ public class MqttWillAndTestament {
         sb.append(" using qos mode ").append(qos);
         return sb.toString();
     }
-
 }

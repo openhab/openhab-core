@@ -316,5 +316,4 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         String result = ephemerisManager.getBankHolidayName(theDay, url);
         assertEquals("Halloween", result);
     }
-
 }

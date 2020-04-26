@@ -101,7 +101,5 @@ public interface ReadyService {
          * @param readyMarker
          */
         void onReadyMarkerRemoved(ReadyMarker readyMarker);
-
     }
-
 }

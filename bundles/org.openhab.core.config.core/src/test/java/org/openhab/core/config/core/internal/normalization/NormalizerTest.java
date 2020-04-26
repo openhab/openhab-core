@@ -166,5 +166,4 @@ public class NormalizerTest {
         assertThat(normalizer.normalize(Stream.of(true, "false", true).collect(toList())), is(equalTo(expectedList)));
         assertThat(normalizer.normalize(Stream.of(true, 0, "true").collect(toList())), is(equalTo(expectedList)));
     }
-
 }
