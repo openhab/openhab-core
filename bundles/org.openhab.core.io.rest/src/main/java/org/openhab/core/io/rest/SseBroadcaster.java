@@ -20,10 +20,14 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.ws.rs.sse.OutboundSseEvent;
 import javax.ws.rs.sse.SseEventSink;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +39,8 @@ import org.slf4j.LoggerFactory;
  *
  * @param <I> the type of the SSE event sink specific information
  */
-public class SseBroadcaster<I> implements Closeable {
+@NonNullByDefault
+public class SseBroadcaster<@NonNull I> implements Closeable {
 
     public interface Listener<I> {
         void sseEventSinkRemoved(final SseEventSink sink, I info);
@@ -54,12 +59,20 @@ public class SseBroadcaster<I> implements Closeable {
         listeners.remove(listener);
     }
 
-    public I add(final SseEventSink sink, final I info) {
+    public @Nullable I add(final SseEventSink sink, final I info) {
         return sinks.put(sink, info);
     }
 
-    public I remove(final SseEventSink sink) {
+    public @Nullable I remove(final SseEventSink sink) {
         return sinks.remove(sink);
+    }
+
+    public @Nullable I getInfo(final SseEventSink sink) {
+        return sinks.get(sink);
+    }
+
+    public Stream<I> getInfoIf(Predicate<I> predicate) {
+        return sinks.values().stream().filter(predicate);
     }
 
     @Override

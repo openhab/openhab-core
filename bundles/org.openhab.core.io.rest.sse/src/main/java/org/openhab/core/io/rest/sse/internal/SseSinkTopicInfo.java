@@ -13,25 +13,26 @@
 package org.openhab.core.io.rest.sse.internal;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.sse.internal.util.SseUtil;
 
 /**
- * The specific information we need to hold for a SSE sink.
+ * The specific information we need to hold for a SSE sink which subscribes to event topics.
  *
  * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
-public class SseSinkInfo {
+public class SseSinkTopicInfo {
 
     private final List<String> regexFilters;
 
-    public SseSinkInfo(String topicFilter) {
+    public SseSinkTopicInfo(String topicFilter) {
         this.regexFilters = SseUtil.convertToRegex(topicFilter);
     }
 
-    public boolean matchesTopic(final String topic) {
-        return regexFilters.stream().filter(topic::matches).findAny().isPresent();
+    public static Predicate<SseSinkTopicInfo> matchesTopic(final String topic) {
+        return info -> info.regexFilters.stream().anyMatch(topic::matches);
     }
 }

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.sse.internal;
+package org.openhab.core.io.rest.sse.internal.dto;
 
 /**
  * A DTO class holding the state of an item, and its version suitable for display.

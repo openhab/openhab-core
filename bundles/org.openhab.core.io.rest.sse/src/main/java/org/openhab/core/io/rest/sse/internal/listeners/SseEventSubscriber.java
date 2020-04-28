@@ -20,7 +20,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.io.rest.sse.internal.ItemStatesSseBroadcaster;
 import org.openhab.core.io.rest.sse.internal.SsePublisher;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -31,7 +30,7 @@ import org.osgi.service.component.annotations.Reference;
  * to currently listening SSE clients.
  *
  * @author Stefan Bußweiler - Initial contribution
- * @author Yannick Schaus - Broadcast state events to the specialized {@link ItemStatesSseBroadcaster}
+ * @author Yannick Schaus - Broadcast state events to the specialized ItemStatesSseBroadcaster
  */
 @Component
 @NonNullByDefault

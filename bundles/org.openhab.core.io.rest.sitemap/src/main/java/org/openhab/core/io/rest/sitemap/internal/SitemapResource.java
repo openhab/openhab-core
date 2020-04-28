@@ -52,6 +52,7 @@ import javax.ws.rs.sse.SseEventSink;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
@@ -141,7 +142,7 @@ public class SitemapResource
 
     private @NonNullByDefault({}) Builder eventBuilder;
 
-    private SseBroadcaster<SseSinkInfo> broadcaster;
+    private SseBroadcaster<@NonNull SseSinkInfo> broadcaster;
 
     @Context
     UriInfo uriInfo;

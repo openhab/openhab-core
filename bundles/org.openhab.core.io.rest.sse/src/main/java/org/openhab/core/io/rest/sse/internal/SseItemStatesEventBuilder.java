@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.rest.sse.internal;
 
-import java.io.IOException;
 import java.time.DateTimeException;
 import java.util.HashMap;
 import java.util.Locale;
@@ -21,10 +20,12 @@ import java.util.Set;
 
 import javax.measure.Unit;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.sse.OutboundSseEvent;
+import javax.ws.rs.sse.OutboundSseEvent.Builder;
 
-import org.glassfish.jersey.media.sse.OutboundEvent;
-import org.glassfish.jersey.media.sse.SseBroadcaster;
-import org.glassfish.jersey.server.ChunkedOutput;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.rest.sse.internal.dto.StateDTO;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -37,123 +38,61 @@ import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This {@link SseBroadcaster} keeps track of the {@link SseStateEventOutput} listeners to state changes and tracks them
- * by their connectionId.
+ * The {@link SseItemStatesEventBuilder} builds {@link OutboundSseEvent}s for connections that listen to item state
+ * changes.
  *
- * @author Yannick Schaus - initial contribution
+ * @author Yannick Schaus - Initial contribution
+ * @author Wouter Born - Rework SSE item state sinks for dropping Glassfish
  */
-public class ItemStatesSseBroadcaster extends SseBroadcaster {
+@Component(service = SseItemStatesEventBuilder.class)
+@NonNullByDefault
+public class SseItemStatesEventBuilder {
 
-    private final Logger logger = LoggerFactory.getLogger(ItemStatesSseBroadcaster.class);
+    private final Logger logger = LoggerFactory.getLogger(SseItemStatesEventBuilder.class);
 
-    private Map<String, SseStateEventOutput> eventOutputs = new HashMap<>();
+    private final BundleContext bundleContext;
+    private final ItemRegistry itemRegistry;
 
-    private ItemRegistry itemRegistry;
-
-    public ItemStatesSseBroadcaster(ItemRegistry itemRegistry) {
-        super();
+    @Activate
+    public SseItemStatesEventBuilder(final BundleContext bundleContext, final @Reference ItemRegistry itemRegistry) {
+        this.bundleContext = bundleContext;
         this.itemRegistry = itemRegistry;
     }
 
-    @Override
-    public <OUT extends ChunkedOutput<OutboundEvent>> boolean add(OUT chunkedOutput) {
-        if (chunkedOutput instanceof SseStateEventOutput) {
-            SseStateEventOutput eventOutput = (SseStateEventOutput) chunkedOutput;
-            OutboundEvent.Builder builder = new OutboundEvent.Builder();
-            String connectionId = eventOutput.getConnectionId();
-            try {
-                eventOutputs.put(connectionId, eventOutput);
-                eventOutput.writeDirect(builder.id("0").name("ready").data(connectionId).build());
-            } catch (IOException e) {
-                logger.error("Cannot write initial ready event to {}, discarding connection", connectionId);
-                return false;
-            }
-        }
-
-        return super.add(chunkedOutput);
-    }
-
-    @Override
-    public <OUT extends ChunkedOutput<OutboundEvent>> boolean remove(OUT chunkedOutput) {
-        eventOutputs.values().remove(chunkedOutput);
-        return super.remove(chunkedOutput);
-    }
-
-    @Override
-    public void onClose(ChunkedOutput<OutboundEvent> chunkedOutput) {
-        remove(chunkedOutput);
-    }
-
-    @Override
-    public void onException(ChunkedOutput<OutboundEvent> chunkedOutput, Exception exception) {
-        remove(chunkedOutput);
-    }
-
-    /**
-     * Updates the list of tracked items for a connection
-     *
-     * @param connectionId the connection id
-     * @param newTrackedItems the list of items and their current state to send to the client
-     */
-    public void updateTrackedItems(String connectionId, Set<String> newTrackedItems) {
-        SseStateEventOutput eventOutput = eventOutputs.get(connectionId);
-
-        if (eventOutput == null) {
-            throw new IllegalArgumentException("ConnectionId not found");
-        }
-
-        eventOutput.setTrackedItems(newTrackedItems);
-
-        try {
-            if (!eventOutput.isClosed()) {
-                OutboundEvent event = buildStateEvent(newTrackedItems);
-                if (event != null) {
-                    eventOutput.writeDirect(event);
-                }
-            }
-            if (eventOutput.isClosed()) {
-                onClose(eventOutput);
-            }
-        } catch (IOException e) {
-            onException(eventOutput, e);
-        }
-    }
-
-    public OutboundEvent buildStateEvent(Set<String> itemNames) {
-        Map<String, StateDTO> payload = new HashMap<>();
+    public @Nullable OutboundSseEvent buildEvent(Builder eventBuilder, Set<String> itemNames) {
+        Map<String, StateDTO> payload = new HashMap<>(itemNames.size());
         for (String itemName : itemNames) {
             try {
-                // Check that the item is tracked by at least one connection
-                if (eventOutputs.values().stream().anyMatch(c -> c.getTrackedItems().contains(itemName))) {
-                    Item item = itemRegistry.getItem(itemName);
-                    StateDTO stateDto = new StateDTO();
-                    stateDto.state = item.getState().toString();
-                    String displayState = getDisplayState(item, Locale.getDefault());
-                    // Only include the display state if it's different than the raw state
-                    if (stateDto.state != null && !stateDto.state.equals(displayState)) {
-                        stateDto.displayState = displayState;
-                    }
-                    payload.put(itemName, stateDto);
+                Item item = itemRegistry.getItem(itemName);
+                StateDTO stateDto = new StateDTO();
+                stateDto.state = item.getState().toString();
+                String displayState = getDisplayState(item, Locale.getDefault());
+                // Only include the display state if it's different than the raw state
+                if (stateDto.state != null && !stateDto.state.equals(displayState)) {
+                    stateDto.displayState = displayState;
                 }
+                payload.put(itemName, stateDto);
             } catch (ItemNotFoundException e) {
                 logger.warn("Attempting to send a state update of an item which doesn't exist: {}", itemName);
             }
         }
 
         if (!payload.isEmpty()) {
-            OutboundEvent.Builder builder = new OutboundEvent.Builder();
-            OutboundEvent event = builder.mediaType(MediaType.APPLICATION_JSON_TYPE).data(payload).build();
-            return event;
+            return eventBuilder.mediaType(MediaType.APPLICATION_JSON_TYPE).data(payload).build();
         }
 
         return null;
     }
 
-    protected String getDisplayState(Item item, Locale locale) {
+    private @Nullable String getDisplayState(Item item, Locale locale) {
         StateDescription stateDescription = item.getStateDescription(locale);
         State state = item.getState();
         String displayState = state.toString();
@@ -174,8 +113,7 @@ public class ItemStatesSseBroadcaster extends SseBroadcaster {
                     if (pattern != null) {
                         if (TransformationHelper.isTransform(pattern)) {
                             try {
-                                displayState = TransformationHelper.transform(SseActivator.getContext(), pattern,
-                                        state.toString());
+                                displayState = TransformationHelper.transform(bundleContext, pattern, state.toString());
                             } catch (NoClassDefFoundError ex) {
                                 // TransformationHelper is optional dependency, so ignore if class not found
                                 // return state as it is without transformation

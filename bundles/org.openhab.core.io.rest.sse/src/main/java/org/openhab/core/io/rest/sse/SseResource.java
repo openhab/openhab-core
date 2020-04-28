@@ -12,7 +12,11 @@
  */
 package org.openhab.core.io.rest.sse;
 
+import static org.openhab.core.io.rest.sse.internal.SseSinkItemInfo.*;
+import static org.openhab.core.io.rest.sse.internal.SseSinkTopicInfo.matchesTopic;
+
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,13 +45,12 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.events.Event;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.SseBroadcaster;
-import org.openhab.core.io.rest.sse.internal.ItemStatesSseBroadcaster;
+import org.openhab.core.io.rest.sse.internal.SseItemStatesEventBuilder;
 import org.openhab.core.io.rest.sse.internal.SsePublisher;
-import org.openhab.core.io.rest.sse.internal.SseSinkInfo;
-import org.openhab.core.io.rest.sse.internal.SseStateEventOutput;
+import org.openhab.core.io.rest.sse.internal.SseSinkItemInfo;
+import org.openhab.core.io.rest.sse.internal.SseSinkTopicInfo;
 import org.openhab.core.io.rest.sse.internal.dto.EventDTO;
 import org.openhab.core.io.rest.sse.internal.util.SseUtil;
-import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -73,6 +76,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Yordan Zhelev - Added Swagger annotations
  * @author Yannick Schaus - Add endpoints to track item state updates
  * @author Markus Rathgeb - Drop Glassfish dependency and use API only
+ * @author Wouter Born - Rework SSE item state sinks for dropping Glassfish
  */
 @Component(service = SsePublisher.class/* , scope = ServiceScope.PROTOTYPE */)
 @JaxrsResource
@@ -82,6 +86,7 @@ import io.swagger.annotations.ApiResponses;
 @Path("/events")
 @RolesAllowed({ Role.USER })
 @Singleton
+@NonNullByDefault
 public class SseResource implements SsePublisher {
 
     private static final String X_ACCEL_BUFFERING_HEADER = "X-Accel-Buffering";
@@ -90,9 +95,9 @@ public class SseResource implements SsePublisher {
 
     private @NonNullByDefault({}) Builder eventBuilder;
 
-    private final SseBroadcaster<SseSinkInfo> broadcaster = new SseBroadcaster<>();
-
-    private final ItemStatesSseBroadcaster statesBroadcaster;
+    private final SseBroadcaster<SseSinkItemInfo> itemStatesBroadcaster = new SseBroadcaster<>();
+    private final SseItemStatesEventBuilder itemStatesEventBuilder;
+    private final SseBroadcaster<SseSinkTopicInfo> topicBroadcaster = new SseBroadcaster<>();
 
     private ExecutorService executorService;
 
@@ -101,35 +106,30 @@ public class SseResource implements SsePublisher {
         this.eventBuilder = sse.newEventBuilder();
     }
 
-    @Reference
-    private ItemRegistry itemRegistry;
-
     @Activate
-    public SseResource() {
+    public SseResource(@Reference SseItemStatesEventBuilder itemStatesEventBuilder) {
         this.executorService = Executors.newSingleThreadExecutor();
-        this.statesBroadcaster = new ItemStatesSseBroadcaster(itemRegistry);
+        this.itemStatesEventBuilder = itemStatesEventBuilder;
     }
 
     @Deactivate
     public void deactivate() {
-        broadcaster.close();
+        itemStatesBroadcaster.close();
+        topicBroadcaster.close();
         executorService.shutdown();
     }
 
-    @GET
-    @Produces(MediaType.SERVER_SENT_EVENTS)
-    @ApiOperation(value = "Get all events.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 400, message = "Topic is empty or contains invalid characters") })
-    public void listen(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
-            @QueryParam("topics") @ApiParam(value = "topics") String eventFilter) {
-        if (!SseUtil.isValidTopicFilter(eventFilter)) {
-            response.setStatus(Status.BAD_REQUEST.getStatusCode());
-            return;
-        }
+    @Override
+    public void broadcast(Event event) {
+        executorService.execute(() -> {
+            handleEventBroadcastTopic(event);
+            if (event instanceof ItemStateChangedEvent) {
+                handleEventBroadcastItemState((ItemStateChangedEvent) event);
+            }
+        });
+    }
 
-        broadcaster.add(sseEventSink, new SseSinkInfo(eventFilter));
-
+    private void addCommonResponseHeaders(final HttpServletResponse response) {
         // Disables proxy buffering when using an nginx http server proxy for this response.
         // This allows you to not disable proxy buffering in nginx and still have working sse
         response.addHeader(X_ACCEL_BUFFERING_HEADER, "no");
@@ -145,7 +145,24 @@ public class SseResource implements SsePublisher {
         }
     }
 
-    private void handleEventBroadcast(Event event) {
+    @GET
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @ApiOperation(value = "Get all events.")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 400, message = "Topic is empty or contains invalid characters") })
+    public void listen(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
+            @QueryParam("topics") @ApiParam(value = "topics") String eventFilter) {
+        if (!SseUtil.isValidTopicFilter(eventFilter)) {
+            response.setStatus(Status.BAD_REQUEST.getStatusCode());
+            return;
+        }
+
+        topicBroadcaster.add(sseEventSink, new SseSinkTopicInfo(eventFilter));
+
+        addCommonResponseHeaders(response);
+    }
+
+    private void handleEventBroadcastTopic(Event event) {
         final Builder eventBuilder = this.eventBuilder;
         if (eventBuilder == null) {
             logger.trace("broadcast skipped, event builder unknown (no one listened since activation)");
@@ -155,44 +172,29 @@ public class SseResource implements SsePublisher {
         final EventDTO eventDTO = SseUtil.buildDTO(event);
         final OutboundSseEvent sseEvent = SseUtil.buildEvent(eventBuilder, eventDTO);
 
-        broadcaster.sendIf(sseEvent, info -> info.matchesTopic(eventDTO.topic));
-    }
-
-    @Override
-    public void broadcast(Event event) {
-        if (event instanceof ItemStateChangedEvent) {
-            executorService.execute(() -> broadcastStateEvent((ItemStateChangedEvent) event));
-        } else {
-            executorService.execute(() -> handleEventBroadcast(event));
-        }
+        topicBroadcaster.sendIf(sseEvent, matchesTopic(eventDTO.topic));
     }
 
     /**
      * Subscribes the connecting client for state updates. It will initially only send a "ready" event with an unique
      * connectionId that the client can use to dynamically alter the list of tracked items.
      *
-     * @return {@link EventOutput} object associated with the incoming
-     *         connection.
-     * @throws IOException
-     * @throws InterruptedException
+     * @return {@link EventOutput} object associated with the incoming connection.
      */
     @GET
     @Path("/states")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @ApiOperation(value = "Initiates a new item state tracker connection")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public void getStateEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response)
-            throws IOException, InterruptedException {
-        final SseStateEventOutput eventOutput = new SseStateEventOutput();
-        statesBroadcaster.add(eventOutput);
+    public void getStateEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response) {
+        final SseSinkItemInfo sinkItemInfo = new SseSinkItemInfo();
+        itemStatesBroadcaster.add(sseEventSink, sinkItemInfo);
 
-        // Disables proxy buffering when using an nginx http server proxy for this response.
-        // This allows you to not disable proxy buffering in nginx and still have working sse
-        response.addHeader(X_ACCEL_BUFFERING_HEADER, "no");
+        addCommonResponseHeaders(response);
 
-        // We want to make sure that the response is not compressed and buffered so that the client receives server sent
-        // events at the moment of sending them.
-        response.addHeader(HttpHeaders.CONTENT_ENCODING, "identity");
+        String connectionId = sinkItemInfo.getConnectionId();
+        OutboundSseEvent readyEvent = eventBuilder.id("0").name("ready").data(connectionId).build();
+        itemStatesBroadcaster.sendIf(readyEvent, hasConnectionId(connectionId));
     }
 
     /**
@@ -208,10 +210,17 @@ public class SseResource implements SsePublisher {
             @ApiResponse(code = 404, message = "Unknown connectionId") })
     public Object updateTrackedItems(@PathParam("connectionId") String connectionId,
             @ApiParam("items") Set<String> itemNames) {
-        try {
-            statesBroadcaster.updateTrackedItems(connectionId, itemNames);
-        } catch (IllegalArgumentException e) {
+        Optional<SseSinkItemInfo> itemStateInfo = itemStatesBroadcaster.getInfoIf(hasConnectionId(connectionId))
+                .findFirst();
+        if (!itemStateInfo.isPresent()) {
             return Response.status(Status.NOT_FOUND).build();
+        }
+
+        itemStateInfo.get().updateTrackedItems(itemNames);
+
+        OutboundSseEvent itemStateEvent = itemStatesEventBuilder.buildEvent(eventBuilder, itemNames);
+        if (itemStateEvent != null) {
+            itemStatesBroadcaster.sendIf(itemStateEvent, hasConnectionId(connectionId));
         }
 
         return Response.ok().build();
@@ -222,12 +231,14 @@ public class SseResource implements SsePublisher {
      *
      * @param stateChangeEvent the {@link ItemStateChangedEvent} containing the new state
      */
-    public void broadcastStateEvent(final ItemStateChangedEvent stateChangeEvent) {
-        executorService.execute(() -> {
-            OutboundEvent event = statesBroadcaster.buildStateEvent(Set.of(stateChangeEvent.getItemName()));
+    public void handleEventBroadcastItemState(final ItemStateChangedEvent stateChangeEvent) {
+        String itemName = stateChangeEvent.getItemName();
+        boolean isTracked = itemStatesBroadcaster.getInfoIf(info -> true).anyMatch(tracksItem(itemName));
+        if (isTracked) {
+            OutboundSseEvent event = itemStatesEventBuilder.buildEvent(eventBuilder, Set.of(itemName));
             if (event != null) {
-                statesBroadcaster.broadcast(event);
+                itemStatesBroadcaster.sendIf(event, tracksItem(itemName));
             }
-        });
+        }
     }
 }
