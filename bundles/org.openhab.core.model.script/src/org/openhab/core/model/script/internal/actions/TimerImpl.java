@@ -102,6 +102,11 @@ public class TimerImpl implements Timer {
     }
 
     @Override
+    public boolean isActive() {
+        return !terminated && !cancelled; 
+    }
+
+    @Override
     public boolean isRunning() {
         try {
             for (JobExecutionContext context : scheduler.getCurrentlyExecutingJobs()) {
