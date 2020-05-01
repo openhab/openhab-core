@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.handler.ConditionHandler;
-import org.openhab.core.config.core.Configuration;
+import org.openhab.core.automation.internal.module.config.EphemerisConditionConfig;
 import org.openhab.core.ephemeris.EphemerisManager;
 
 /**
@@ -36,9 +36,6 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
     public static final String WEEKDAY_MODULE_TYPE_ID = "ephemeris.WeekdayCondition";
     public static final String DAYSET_MODULE_TYPE_ID = "ephemeris.DaysetCondition";
 
-    private static final String DAYSET = "dayset";
-    private static final String OFFSET = "offset";
-
     private final EphemerisManager ephemerisManager;
     private final @Nullable String dayset;
     private final ZonedDateTime target;
@@ -47,30 +44,19 @@ public class EphemerisConditionHandler extends BaseModuleHandler<Condition> impl
         super(condition);
         this.ephemerisManager = ephemerisManager;
 
-        this.dayset = DAYSET_MODULE_TYPE_ID.equals(module.getTypeUID())
-                ? getValidStringConfigParameter(DAYSET, module.getConfiguration(), module.getId())
+        EphemerisConditionConfig config = getConfigAs(EphemerisConditionConfig.class);
+        dayset = DAYSET_MODULE_TYPE_ID.equals(module.getTypeUID())
+                ? getValidStringConfigParameter(config.dayset, module.getId())
                 : null;
-        int offset = getValidIntegerConfigParameter(OFFSET, module.getConfiguration(), module.getId());
-        target = ZonedDateTime.now().plusDays(offset);
+        target = ZonedDateTime.now().plusDays(config.offset);
     }
 
-    private static int getValidIntegerConfigParameter(String parameter, Configuration config, String moduleId) {
-        Object value = config.get(parameter);
-        if (value != null && value instanceof Integer) {
-            return (Integer) value;
+    private static String getValidStringConfigParameter(@Nullable String value, String moduleId) {
+        if (value != null && !value.trim().isEmpty()) {
+            return value;
         } else {
-            throw new IllegalStateException(String.format(
-                    "Config parameter '%s' is missing in the configuration of module '%s'.", parameter, moduleId));
-        }
-    }
-
-    private static String getValidStringConfigParameter(String parameter, Configuration config, String moduleId) {
-        Object value = config.get(parameter);
-        if (value != null && value instanceof String && !((String) value).trim().isEmpty()) {
-            return (String) value;
-        } else {
-            throw new IllegalStateException(String.format(
-                    "Config parameter '%s' is missing in the configuration of module '%s'.", parameter, moduleId));
+            throw new IllegalArgumentException(String
+                    .format("Config parameter 'dayset' is missing in the configuration of module '%s'.", moduleId));
         }
     }
 
