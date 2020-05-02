@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.ModuleHandlerCallback;
+import org.openhab.core.config.core.Configuration;
 
 /**
  * This is a base class that can be used by any ModuleHandler implementation
@@ -26,6 +27,7 @@ import org.openhab.core.automation.ModuleHandlerCallback;
 public class BaseModuleHandler<T extends Module> implements ModuleHandler {
 
     protected T module;
+
     protected @Nullable ModuleHandlerCallback callback;
 
     public BaseModuleHandler(T module) {
@@ -40,5 +42,24 @@ public class BaseModuleHandler<T extends Module> implements ModuleHandler {
     @Override
     public void dispose() {
         this.callback = null;
+    }
+
+    /**
+     * Returns the configuration of the module.
+     *
+     * @return configuration of the module
+     */
+    protected Configuration getConfig() {
+        return module.getConfiguration();
+    }
+
+    /**
+     * Returns the configuration of the module and transforms it to the given class.
+     *
+     * @param configurationClass configuration class
+     * @return configuration of module in form of the given class
+     */
+    protected <C> C getConfigAs(Class<C> configurationClass) {
+        return getConfig().as(configurationClass);
     }
 }
