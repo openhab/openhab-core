@@ -45,21 +45,12 @@ public class BaseModuleHandler<T extends Module> implements ModuleHandler {
     }
 
     /**
-     * Returns the {@link Module}, which belongs to the handler.
-     *
-     * @return {@link Module}, which belongs to the handler
-     */
-    public T getModule() {
-        return module;
-    }
-
-    /**
      * Returns the configuration of the module.
      *
      * @return configuration of the module
      */
     protected Configuration getConfig() {
-        return getModule().getConfiguration();
+        return module.getConfiguration();
     }
 
     /**
