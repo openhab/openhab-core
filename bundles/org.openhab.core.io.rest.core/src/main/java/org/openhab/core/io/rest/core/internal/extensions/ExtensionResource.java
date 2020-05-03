@@ -205,6 +205,7 @@ public class ExtensionResource implements RESTResource {
 
     @POST
     @Path("/{extensionId: [a-zA-Z_0-9-:]+}/uninstall")
+    @ApiOperation(value = "Uninstalls the extension with the given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response uninstallExtension(
             final @PathParam("extensionId") @ApiParam(value = "extension ID", required = true) String extensionId) {

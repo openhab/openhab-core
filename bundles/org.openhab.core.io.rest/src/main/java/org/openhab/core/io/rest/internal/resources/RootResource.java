@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -36,9 +37,15 @@ import org.osgi.service.jaxrs.runtime.dto.RuntimeDTO;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * <p>
@@ -56,11 +63,16 @@ import org.slf4j.LoggerFactory;
 @Component(service = RootResource.class, configurationPid = "org.openhab.restroot" // , scope = ServiceScope.PROTOTYPE
 )
 @JaxrsResource
+@JaxrsName(RootResource.RESOURCE_NAME)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Produces(MediaType.APPLICATION_JSON)
 @NonNullByDefault
+@Path("/")
+@Api(RootResource.RESOURCE_NAME)
 public class RootResource {
+
+    public static final String RESOURCE_NAME = "root";
 
     private final Logger logger = LoggerFactory.getLogger(RootResource.class);
     private final JaxrsServiceRuntime runtime;
@@ -71,6 +83,8 @@ public class RootResource {
     }
 
     @GET
+    @ApiOperation(value = "Gets the API version and links to resources.")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Object getRoot(@Context UriInfo uriInfo) {
         // key: path, value: name (this way we could ensure that ever path is added only once).
         final Map<String, String> collectedLinks = new HashMap<>();
