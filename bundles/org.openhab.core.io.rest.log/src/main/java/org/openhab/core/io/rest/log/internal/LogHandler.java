@@ -59,7 +59,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(LogHandler.PATH_LOG)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + LogHandler.PATH_LOG)
+@Path(LogHandler.PATH_LOG)
 @Api(LogHandler.PATH_LOG)
 @Produces(MediaType.APPLICATION_JSON)
 public class LogHandler implements RESTResource {

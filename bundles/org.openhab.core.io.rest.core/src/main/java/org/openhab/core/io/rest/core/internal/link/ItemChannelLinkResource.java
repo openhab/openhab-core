@@ -73,7 +73,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ItemChannelLinkResource.PATH_LINKS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ItemChannelLinkResource.PATH_LINKS)
+@Path(ItemChannelLinkResource.PATH_LINKS)
 @RolesAllowed({ Role.ADMIN })
 @Api(ItemChannelLinkResource.PATH_LINKS)
 public class ItemChannelLinkResource implements RESTResource {

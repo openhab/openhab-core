@@ -65,7 +65,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(DiscoveryResource.PATH_DISCOVERY)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + DiscoveryResource.PATH_DISCOVERY)
+@Path(DiscoveryResource.PATH_DISCOVERY)
 @RolesAllowed({ Role.ADMIN })
 @Api(DiscoveryResource.PATH_DISCOVERY)
 public class DiscoveryResource implements RESTResource {

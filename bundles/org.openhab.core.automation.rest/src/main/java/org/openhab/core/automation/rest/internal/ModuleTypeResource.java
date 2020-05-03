@@ -74,7 +74,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ModuleTypeResource.PATH_MODULE_TYPES)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ModuleTypeResource.PATH_MODULE_TYPES)
+@Path(ModuleTypeResource.PATH_MODULE_TYPES)
 @Api(ModuleTypeResource.PATH_MODULE_TYPES)
 @NonNullByDefault
 public class ModuleTypeResource implements RESTResource {

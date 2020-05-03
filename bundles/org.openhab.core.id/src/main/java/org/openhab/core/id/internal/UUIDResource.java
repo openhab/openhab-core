@@ -44,7 +44,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsResource
 @JaxrsName(UUIDResource.PATH_UUID)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
-@Path("/" + UUIDResource.PATH_UUID)
+@Path(UUIDResource.PATH_UUID)
 @Api(UUIDResource.PATH_UUID)
 @RolesAllowed({ Role.ADMIN })
 public class UUIDResource implements RESTResource {

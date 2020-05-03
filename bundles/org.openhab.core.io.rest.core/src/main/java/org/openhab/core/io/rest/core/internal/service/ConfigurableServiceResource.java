@@ -84,7 +84,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ConfigurableServiceResource.PATH_SERVICES)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ConfigurableServiceResource.PATH_SERVICES)
+@Path(ConfigurableServiceResource.PATH_SERVICES)
 @RolesAllowed({ Role.ADMIN })
 @Api(ConfigurableServiceResource.PATH_SERVICES)
 public class ConfigurableServiceResource implements RESTResource {

@@ -81,7 +81,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ChannelTypeResource.PATH_CHANNEL_TYPES)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ChannelTypeResource.PATH_CHANNEL_TYPES)
+@Path(ChannelTypeResource.PATH_CHANNEL_TYPES)
 @RolesAllowed({ Role.ADMIN })
 @Api(ChannelTypeResource.PATH_CHANNEL_TYPES)
 public class ChannelTypeResource implements RESTResource {

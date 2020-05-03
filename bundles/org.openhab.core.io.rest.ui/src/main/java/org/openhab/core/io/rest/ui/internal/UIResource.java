@@ -65,7 +65,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(UIResource.PATH_UI)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + UIResource.PATH_UI)
+@Path(UIResource.PATH_UI)
 @Api(UIResource.PATH_UI)
 public class UIResource implements RESTResource {
 

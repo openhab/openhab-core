@@ -75,7 +75,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(InboxResource.PATH_INBOX)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + InboxResource.PATH_INBOX)
+@Path(InboxResource.PATH_INBOX)
 @RolesAllowed({ Role.ADMIN })
 @Api(InboxResource.PATH_INBOX)
 public class InboxResource implements RESTResource {

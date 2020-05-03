@@ -70,7 +70,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(VoiceResource.PATH_VOICE)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + VoiceResource.PATH_VOICE)
+@Path(VoiceResource.PATH_VOICE)
 @RolesAllowed({ Role.USER, Role.ADMIN })
 @Api(VoiceResource.PATH_VOICE)
 public class VoiceResource implements RESTResource {

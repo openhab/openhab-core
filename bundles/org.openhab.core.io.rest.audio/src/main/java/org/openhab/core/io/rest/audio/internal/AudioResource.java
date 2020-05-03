@@ -64,7 +64,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(AudioResource.PATH_AUDIO)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + AudioResource.PATH_AUDIO)
+@Path(AudioResource.PATH_AUDIO)
 @RolesAllowed({ Role.USER, Role.ADMIN })
 @Api(AudioResource.PATH_AUDIO)
 @NonNullByDefault

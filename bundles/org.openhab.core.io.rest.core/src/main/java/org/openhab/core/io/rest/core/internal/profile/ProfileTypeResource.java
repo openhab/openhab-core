@@ -72,7 +72,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ProfileTypeResource.PATH_PROFILE_TYPES)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ProfileTypeResource.PATH_PROFILE_TYPES)
+@Path(ProfileTypeResource.PATH_PROFILE_TYPES)
 @RolesAllowed({ Role.ADMIN })
 @Api(ProfileTypeResource.PATH_PROFILE_TYPES)
 public class ProfileTypeResource implements RESTResource {

@@ -80,7 +80,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(BindingResource.PATH_BINDINGS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + BindingResource.PATH_BINDINGS)
+@Path(BindingResource.PATH_BINDINGS)
 @RolesAllowed({ Role.ADMIN })
 @Api(BindingResource.PATH_BINDINGS)
 public class BindingResource implements RESTResource {

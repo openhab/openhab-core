@@ -95,7 +95,7 @@ import io.swagger.annotations.ResponseHeader;
 @JaxrsName(RuleResource.PATH_RULES)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + RuleResource.PATH_RULES)
+@Path(RuleResource.PATH_RULES)
 @Api(RuleResource.PATH_RULES)
 @RolesAllowed({ Role.ADMIN })
 public class RuleResource implements RESTResource {

@@ -126,7 +126,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(SitemapResource.PATH_SITEMAPS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + SitemapResource.PATH_SITEMAPS)
+@Path(SitemapResource.PATH_SITEMAPS)
 @RolesAllowed({ Role.USER, Role.ADMIN })
 @Api(SitemapResource.PATH_SITEMAPS)
 public class SitemapResource

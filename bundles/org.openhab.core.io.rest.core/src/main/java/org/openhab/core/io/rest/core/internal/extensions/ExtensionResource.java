@@ -78,7 +78,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ExtensionResource.PATH_EXTENSIONS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ExtensionResource.PATH_EXTENSIONS)
+@Path(ExtensionResource.PATH_EXTENSIONS)
 @RolesAllowed({ Role.ADMIN })
 @Api(ExtensionResource.PATH_EXTENSIONS)
 public class ExtensionResource implements RESTResource {

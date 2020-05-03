@@ -92,7 +92,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ThingTypeResource.PATH_THINGS_TYPES)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ThingTypeResource.PATH_THINGS_TYPES)
+@Path(ThingTypeResource.PATH_THINGS_TYPES)
 @Api(ThingTypeResource.PATH_THINGS_TYPES)
 public class ThingTypeResource implements RESTResource {
 

@@ -126,7 +126,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ItemResource.PATH_ITEMS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ItemResource.PATH_ITEMS)
+@Path(ItemResource.PATH_ITEMS)
 @Api(ItemResource.PATH_ITEMS)
 @NonNullByDefault
 public class ItemResource implements RESTResource {

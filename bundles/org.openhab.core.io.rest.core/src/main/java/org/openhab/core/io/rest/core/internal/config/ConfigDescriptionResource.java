@@ -69,7 +69,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS)
+@Path(ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS)
 @RolesAllowed({ Role.ADMIN })
 @Api(ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS)
 @NonNullByDefault

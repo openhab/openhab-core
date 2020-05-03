@@ -64,7 +64,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(TemplateResource.PATH_TEMPLATES)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + TemplateResource.PATH_TEMPLATES)
+@Path(TemplateResource.PATH_TEMPLATES)
 @Api(TemplateResource.PATH_TEMPLATES)
 @NonNullByDefault
 public class TemplateResource implements RESTResource {

@@ -92,7 +92,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(PersistenceResource.PATH)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/" + PersistenceResource.PATH)
+@Path(PersistenceResource.PATH)
 @Api(PersistenceResource.PATH)
 public class PersistenceResource implements RESTResource {
 
