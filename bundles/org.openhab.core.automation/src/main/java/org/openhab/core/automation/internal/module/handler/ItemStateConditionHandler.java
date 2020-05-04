@@ -92,6 +92,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
             Item item = itemRegistry.getItem(itemName);
             State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
             State itemState = item.getState();
+            DecimalType decimalState = itemState.as(DecimalType.class);
             logger.debug("ItemStateCondition '{}'checking if {} (State={}) {} {}", module.getId(), itemName, itemState,
                     operator, compareState);
             switch (operator) {
@@ -101,25 +102,26 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
                 case "!=":
                     return !itemState.equals(compareState);
                 case "<":
-                    if (itemState instanceof DecimalType && compareState instanceof DecimalType) {
-                        return ((DecimalType) itemState).compareTo((DecimalType) compareState) < 0;
+                    if (null != decimalState && compareState instanceof DecimalType) {
+                        return decimalState.compareTo((DecimalType) compareState) < 0;
                     }
+
                     break;
                 case "<=":
                 case "=<":
-                    if (itemState instanceof DecimalType && compareState instanceof DecimalType) {
-                        return ((DecimalType) itemState).compareTo((DecimalType) compareState) <= 0;
+                    if (null != decimalState && compareState instanceof DecimalType) {
+                        return decimalState.compareTo((DecimalType) compareState) <= 0;
                     }
                     break;
                 case ">":
-                    if (itemState instanceof DecimalType && compareState instanceof DecimalType) {
-                        return ((DecimalType) itemState).compareTo((DecimalType) compareState) > 0;
+                    if (null != decimalState && compareState instanceof DecimalType) {
+                        return decimalState.compareTo((DecimalType) compareState) > 0;
                     }
                     break;
                 case ">=":
                 case "=>":
-                    if (itemState instanceof DecimalType && compareState instanceof DecimalType) {
-                        return ((DecimalType) itemState).compareTo((DecimalType) compareState) >= 0;
+                    if (null != decimalState && compareState instanceof DecimalType) {
+                        return decimalState.compareTo((DecimalType) compareState) >= 0;
                     }
                     break;
                 default:
