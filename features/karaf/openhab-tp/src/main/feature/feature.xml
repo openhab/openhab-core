@@ -92,7 +92,7 @@
 	</feature>
 
 	<feature name="openhab.tp-jax-rs-whiteboard" version="${project.version}">
-		<capability>openhab.tp;feature=jax-rs-whiteboard;version=1.0.5</capability>
+		<capability>openhab.tp;feature=jax-rs-whiteboard;version=1.0.8</capability>
 
 		<!-- BEG: https://issues.apache.org/jira/browse/KARAF-6536 -->
 		<!-- Add it here, so we do not use to rely on a feature that is using version ranges. -->
@@ -104,12 +104,10 @@
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.jaxrs/1.0.0</bundle>
 		<bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.annotation-api-1.3/1.3_1</bundle>
 		<bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxws-api-2.2/2.9.0</bundle>
-		<bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.whiteboard/1.0.5</bundle>
+		<bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.whiteboard/1.0.8</bundle>
 		<!-- END: https://issues.apache.org/jira/browse/KARAF-6536 -->
 
 		<config name="org.apache.aries.jax.rs.whiteboard.default">
-			default.web=false
-			default.application.base=/jax-rs-whiteboard-default
 			replace.loopback.address.with.localhost=false
 		</config>
 	</feature>
