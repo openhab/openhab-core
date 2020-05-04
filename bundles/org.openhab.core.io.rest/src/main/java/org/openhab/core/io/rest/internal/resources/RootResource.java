@@ -96,7 +96,7 @@ public class RootResource {
                 // We are using the JAX-RS name per convention for the link type.
                 // Let's skip names that begin with a dot (e.g. the generated ones) and empty ones.
                 final String name = resourceDTO.name;
-                if (name == null || name.isEmpty() || name.startsWith(".")) {
+                if (name == null || name.isEmpty() || name.startsWith(".") || RESOURCE_NAME.equals(name)) {
                     continue;
                 }
 
