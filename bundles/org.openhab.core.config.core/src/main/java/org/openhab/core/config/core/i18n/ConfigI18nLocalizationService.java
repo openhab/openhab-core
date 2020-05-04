@@ -23,6 +23,7 @@ import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
+import org.openhab.core.config.core.ConfigDescriptionParameterGroupBuilder;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.config.core.internal.i18n.ConfigDescriptionGroupI18nUtil;
 import org.openhab.core.config.core.internal.i18n.ConfigDescriptionI18nUtil;
@@ -181,8 +182,9 @@ public class ConfigI18nLocalizationService {
         final String description = configDescriptionGroupI18nUtil.getGroupDescription(bundle, configDescriptionURI,
                 name, group.getDescription(), locale);
 
-        return new ConfigDescriptionParameterGroup(name, group.getContext(), group.isAdvanced(),
-                label == null ? group.getLabel() : label, description == null ? group.getDescription() : description);
+        return ConfigDescriptionParameterGroupBuilder.create(name).withContext(group.getContext())
+                .withAdvanced(group.isAdvanced()).withLabel(label != null ? label : group.getLabel())
+                .withDescription(description != null ? description : group.getDescription()).build();
     }
 
     /**

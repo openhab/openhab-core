@@ -13,6 +13,7 @@
 package org.openhab.core.config.xml;
 
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
+import org.openhab.core.config.core.ConfigDescriptionParameterGroupBuilder;
 import org.openhab.core.config.xml.util.ConverterValueMap;
 import org.openhab.core.config.xml.util.GenericUnmarshaller;
 
@@ -44,6 +45,11 @@ public class ConfigDescriptionParameterGroupConverter extends GenericUnmarshalle
         String label = valueMap.getString("label");
         Boolean advanced = valueMap.getBoolean("advanced", false);
 
-        return new ConfigDescriptionParameterGroup(name, context, advanced, label, description);
+        return ConfigDescriptionParameterGroupBuilder.create(name) //
+                .withContext(context) //
+                .withAdvanced(advanced) //
+                .withLabel(label) //
+                .withDescription(description) //
+                .build();
     }
 }
