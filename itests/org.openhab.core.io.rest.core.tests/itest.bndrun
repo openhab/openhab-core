@@ -44,7 +44,7 @@ Fragment-Host: org.openhab.core.io.rest.core
 	org.eclipse.jetty.servlet;version='[9.4.20,9.4.21)',\
 	org.eclipse.jetty.util;version='[9.4.20,9.4.21)',\
 	org.apache.aries.javax.jax.rs-api;version='[1.0.0,1.0.1)',\
-	org.apache.aries.jax.rs.whiteboard;version='[1.0.5,1.0.6)',\
+	org.apache.aries.jax.rs.whiteboard;version='[1.0.8,1.0.9)',\
 	org.apache.xbean.bundleutils;version='[4.12.0,4.12.1)',\
 	org.apache.xbean.finder;version='[4.12.0,4.12.1)',\
 	org.eclipse.jetty.xml;version='[9.4.20,9.4.21)',\

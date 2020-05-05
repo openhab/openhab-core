@@ -70,6 +70,7 @@ import io.swagger.annotations.ApiResponses;
  * This class is used to issue JWT tokens to clients.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Wouter Born - Migrated to JAX-RS Whiteboard Specification
  */
 @Component(service = { RESTResource.class, TokenResource.class })
 @JaxrsResource
