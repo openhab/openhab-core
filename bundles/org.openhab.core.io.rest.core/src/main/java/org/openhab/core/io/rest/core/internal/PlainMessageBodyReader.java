@@ -48,7 +48,7 @@ public class PlainMessageBodyReader<T> implements MessageBodyReader<T> {
             final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
             throws IOException, WebApplicationException {
         final byte[] data = data(entityStream);
-        logger.info("Received: type={}, genericType={}, annotations={}, mediaType={}, httpHeaders={}", type,
+        logger.debug("Received: type={}, genericType={}, annotations={}, mediaType={}, httpHeaders={}", type,
                 genericType, annotations, mediaType, httpHeaders);
         if (type.equals(String.class) || genericType.equals(String.class)) {
             return (T) new String(data, StandardCharsets.UTF_8);
