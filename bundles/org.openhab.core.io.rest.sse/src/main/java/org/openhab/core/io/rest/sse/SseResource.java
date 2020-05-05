@@ -36,7 +36,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.sse.OutboundSseEvent;
-import javax.ws.rs.sse.OutboundSseEvent.Builder;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
@@ -93,7 +92,7 @@ public class SseResource implements SsePublisher {
 
     private final Logger logger = LoggerFactory.getLogger(SseResource.class);
 
-    private @NonNullByDefault({}) Builder eventBuilder;
+    private @NonNullByDefault({}) Sse sse;
 
     private final SseBroadcaster<SseSinkItemInfo> itemStatesBroadcaster = new SseBroadcaster<>();
     private final SseItemStatesEventBuilder itemStatesEventBuilder;
@@ -103,7 +102,7 @@ public class SseResource implements SsePublisher {
 
     @Context
     public void setSse(final Sse sse) {
-        this.eventBuilder = sse.newEventBuilder();
+        this.sse = sse;
     }
 
     @Activate
@@ -121,6 +120,11 @@ public class SseResource implements SsePublisher {
 
     @Override
     public void broadcast(Event event) {
+        if (sse == null) {
+            logger.trace("broadcast skipped (no one listened since activation)");
+            return;
+        }
+
         executorService.execute(() -> {
             handleEventBroadcastTopic(event);
             if (event instanceof ItemStateChangedEvent) {
@@ -163,14 +167,8 @@ public class SseResource implements SsePublisher {
     }
 
     private void handleEventBroadcastTopic(Event event) {
-        final Builder eventBuilder = this.eventBuilder;
-        if (eventBuilder == null) {
-            logger.trace("broadcast skipped, event builder unknown (no one listened since activation)");
-            return;
-        }
-
         final EventDTO eventDTO = SseUtil.buildDTO(event);
-        final OutboundSseEvent sseEvent = SseUtil.buildEvent(eventBuilder, eventDTO);
+        final OutboundSseEvent sseEvent = SseUtil.buildEvent(sse.newEventBuilder(), eventDTO);
 
         topicBroadcaster.sendIf(sseEvent, matchesTopic(eventDTO.topic));
     }
@@ -193,7 +191,7 @@ public class SseResource implements SsePublisher {
         addCommonResponseHeaders(response);
 
         String connectionId = sinkItemInfo.getConnectionId();
-        OutboundSseEvent readyEvent = eventBuilder.id("0").name("ready").data(connectionId).build();
+        OutboundSseEvent readyEvent = sse.newEventBuilder().id("0").name("ready").data(connectionId).build();
         itemStatesBroadcaster.sendIf(readyEvent, hasConnectionId(connectionId));
     }
 
@@ -218,7 +216,7 @@ public class SseResource implements SsePublisher {
 
         itemStateInfo.get().updateTrackedItems(itemNames);
 
-        OutboundSseEvent itemStateEvent = itemStatesEventBuilder.buildEvent(eventBuilder, itemNames);
+        OutboundSseEvent itemStateEvent = itemStatesEventBuilder.buildEvent(sse.newEventBuilder(), itemNames);
         if (itemStateEvent != null) {
             itemStatesBroadcaster.sendIf(itemStateEvent, hasConnectionId(connectionId));
         }
@@ -235,7 +233,7 @@ public class SseResource implements SsePublisher {
         String itemName = stateChangeEvent.getItemName();
         boolean isTracked = itemStatesBroadcaster.getInfoIf(info -> true).anyMatch(tracksItem(itemName));
         if (isTracked) {
-            OutboundSseEvent event = itemStatesEventBuilder.buildEvent(eventBuilder, Set.of(itemName));
+            OutboundSseEvent event = itemStatesEventBuilder.buildEvent(sse.newEventBuilder(), Set.of(itemName));
             if (event != null) {
                 itemStatesBroadcaster.sendIf(event, tracksItem(itemName));
             }

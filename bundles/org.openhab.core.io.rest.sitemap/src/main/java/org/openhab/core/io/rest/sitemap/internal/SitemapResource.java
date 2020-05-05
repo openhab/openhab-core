@@ -46,7 +46,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.sse.OutboundSseEvent;
-import javax.ws.rs.sse.OutboundSseEvent.Builder;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
@@ -140,7 +139,7 @@ public class SitemapResource
 
     private static final long TIMEOUT_IN_MS = 30000;
 
-    private @NonNullByDefault({}) Builder eventBuilder;
+    private @NonNullByDefault({}) Sse sse;
 
     private SseBroadcaster<@NonNull SseSinkInfo> broadcaster;
 
@@ -198,7 +197,7 @@ public class SitemapResource
 
     @Context
     public void setSse(final Sse sse) {
-        this.eventBuilder = sse.newEventBuilder();
+        this.sse = sse;
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
@@ -825,14 +824,14 @@ public class SitemapResource
 
     @Override
     public void onEvent(SitemapEvent event) {
-        final Builder eventBuilder = this.eventBuilder;
-        if (eventBuilder == null) {
-            logger.trace("broadcast skipped, event builder unknown (no one listened since activation)");
+        final Sse sse = this.sse;
+        if (sse == null) {
+            logger.trace("broadcast skipped (no one listened since activation)");
             return;
         }
 
-        final OutboundSseEvent outboundSseEvent = eventBuilder.name("event").mediaType(MediaType.APPLICATION_JSON_TYPE)
-                .data(event).build();
+        final OutboundSseEvent outboundSseEvent = sse.newEventBuilder().name("event")
+                .mediaType(MediaType.APPLICATION_JSON_TYPE).data(event).build();
         broadcaster.sendIf(outboundSseEvent, info -> {
             String sitemapName = event.sitemapName;
             String pageId = event.pageId;
