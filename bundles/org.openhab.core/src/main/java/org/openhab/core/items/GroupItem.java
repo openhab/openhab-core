@@ -44,10 +44,8 @@ public class GroupItem extends GenericItem implements StateChangeListener {
     private final Logger logger = LoggerFactory.getLogger(GroupItem.class);
 
     protected @Nullable final Item baseItem;
-
-    protected final CopyOnWriteArrayList<Item> members;
-
     protected @Nullable GroupFunction function;
+    protected final CopyOnWriteArrayList<Item> members;
 
     /**
      * Creates a plain GroupItem
@@ -78,8 +76,8 @@ public class GroupItem extends GenericItem implements StateChangeListener {
             this.baseItem = null;
             this.function = null;
         } else {
-            this.function = function;
             this.baseItem = baseItem;
+            this.function = function;
         }
 
         members = new CopyOnWriteArrayList<>();
