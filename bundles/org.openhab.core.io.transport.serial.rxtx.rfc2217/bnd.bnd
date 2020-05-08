@@ -1,0 +1,5 @@
+Bundle-SymbolicName: ${project.artifactId}
+Import-Package: \
+  gnu.io;version="[3.12,6)",\
+  gnu.io.rfc2217;version="[3.12,6)",\
+  *
