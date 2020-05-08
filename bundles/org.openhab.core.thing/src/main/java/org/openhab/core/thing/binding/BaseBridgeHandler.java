@@ -12,8 +12,6 @@
  */
 package org.openhab.core.thing.binding;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Bridge;
@@ -42,23 +40,11 @@ public abstract class BaseBridgeHandler extends BaseThingHandler implements Brid
     }
 
     /**
-     * Finds and returns a child thing for a given UID of this bridge.
-     *
-     * @param uid uid of the child thing
-     * @return child thing with the given uid or null if thing was not found
+     * @deprecated Use {@link Bridge#getThing(ThingUID)} instead.
      */
+    @Deprecated
     public @Nullable Thing getThingByUID(ThingUID uid) {
-        Bridge bridge = getThing();
-
-        List<Thing> things = bridge.getThings();
-
-        for (Thing thing : things) {
-            if (thing.getUID().equals(uid)) {
-                return thing;
-            }
-        }
-
-        return null;
+        return getThing().getThing(uid);
     }
 
     @Override
@@ -70,14 +56,13 @@ public abstract class BaseBridgeHandler extends BaseThingHandler implements Brid
      * Creates a bridge builder, which allows to modify the bridge. The method
      * {@link BaseThingHandler#updateThing(Thing)} must be called to persist the changes.
      *
-     * @return {@link BridgeBuilder} which builds an exact copy of the bridge (not null)
+     * @return {@link BridgeBuilder} which builds an exact copy of the bridge
      */
     @Override
     protected BridgeBuilder editThing() {
-        return BridgeBuilder.create(this.thing.getThingTypeUID(), this.thing.getUID())
-                .withBridge(this.thing.getBridgeUID()).withChannels(this.thing.getChannels())
-                .withConfiguration(this.thing.getConfiguration()).withLabel(this.thing.getLabel())
-                .withLocation(this.thing.getLocation()).withProperties(this.thing.getProperties());
+        return BridgeBuilder.create(thing.getThingTypeUID(), thing.getUID()).withBridge(thing.getBridgeUID())
+                .withChannels(thing.getChannels()).withConfiguration(thing.getConfiguration())
+                .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties());
     }
 
     @Override
