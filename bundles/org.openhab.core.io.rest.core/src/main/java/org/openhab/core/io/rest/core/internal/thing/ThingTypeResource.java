@@ -89,15 +89,15 @@ import io.swagger.annotations.ApiResponses;
  */
 @Component
 @JaxrsResource
-@JaxrsName(ThingTypeResource.PATH_THINGS_TYPES)
+@JaxrsName(ThingTypeResource.PATH_THING_TYPES)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path(ThingTypeResource.PATH_THINGS_TYPES)
-@Api(ThingTypeResource.PATH_THINGS_TYPES)
+@Path(ThingTypeResource.PATH_THING_TYPES)
+@Api(ThingTypeResource.PATH_THING_TYPES)
 public class ThingTypeResource implements RESTResource {
 
     /** The URI path to this resource */
-    public static final String PATH_THINGS_TYPES = "thing-types";
+    public static final String PATH_THING_TYPES = "thing-types";
 
     private final Logger logger = LoggerFactory.getLogger(ThingTypeResource.class);
 

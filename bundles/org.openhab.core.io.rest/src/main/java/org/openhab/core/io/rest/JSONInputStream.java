@@ -12,11 +12,14 @@
  */
 package org.openhab.core.io.rest;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Marker interface for an input stream that provides a JSON string.
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public interface JSONInputStream {
 
 }

@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.internal;
 
 import javax.ws.rs.core.Application;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationBase;
@@ -31,5 +32,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 })
 @JaxrsName(RESTConstants.JAX_RS_NAME)
 @JaxrsApplicationBase("rest")
+@NonNullByDefault
 public class RESTApplicationImpl extends Application {
 }

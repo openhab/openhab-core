@@ -15,6 +15,8 @@ package org.openhab.core.io.rest.core.internal;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
@@ -30,7 +32,8 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
 @Component
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
-public class JSONResponseExceptionMapper implements ExceptionMapper<Exception> {
+@NonNullByDefault
+public class JSONResponseExceptionMapper implements ExceptionMapper<@NonNull Exception> {
 
     private final ExceptionMapper<Exception> delegate = new JSONResponse.ExceptionMapper();
 

@@ -79,14 +79,17 @@ import io.swagger.annotations.ApiResponses;
  */
 @Component(service = SsePublisher.class/* , scope = ServiceScope.PROTOTYPE */)
 @JaxrsResource
-@JaxrsName("events")
+@JaxrsName(SseResource.PATH_EVENTS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/events")
+@Path(SseResource.PATH_EVENTS)
 @RolesAllowed({ Role.USER })
 @Singleton
 @NonNullByDefault
 public class SseResource implements SsePublisher {
+
+    // The URI path to this resource
+    public static final String PATH_EVENTS = "events";
 
     private static final String X_ACCEL_BUFFERING_HEADER = "X-Accel-Buffering";
 

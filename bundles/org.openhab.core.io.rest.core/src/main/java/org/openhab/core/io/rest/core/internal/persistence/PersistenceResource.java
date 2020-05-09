@@ -89,11 +89,11 @@ import io.swagger.annotations.ApiResponses;
  */
 @Component
 @JaxrsResource
-@JaxrsName(PersistenceResource.PATH)
+@JaxrsName(PersistenceResource.PATH_PERSISTENCE)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path(PersistenceResource.PATH)
-@Api(PersistenceResource.PATH)
+@Path(PersistenceResource.PATH_PERSISTENCE)
+@Api(PersistenceResource.PATH_PERSISTENCE)
 public class PersistenceResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceResource.class);
@@ -103,7 +103,7 @@ public class PersistenceResource implements RESTResource {
     private static final String STANDARD = "Standard";
 
     // The URI path to this resource
-    public static final String PATH = "persistence";
+    public static final String PATH_PERSISTENCE = "persistence";
 
     private ItemRegistry itemRegistry;
     private PersistenceServiceRegistry persistenceServiceRegistry;
