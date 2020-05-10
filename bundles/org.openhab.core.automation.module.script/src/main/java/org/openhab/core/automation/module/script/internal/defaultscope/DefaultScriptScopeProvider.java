@@ -63,7 +63,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * This is a default scope provider for stuff that is of general interest in an ESH-based solution.
+ * This is a default scope provider for stuff that is of general interest in an OH-based solution.
  * Nonetheless, solutions are free to remove it and have more specific scope providers for their own purposes.
  *
  * @author Kai Kreuzer - Initial contribution
@@ -94,7 +94,7 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         elements.put("FilenameUtils", FilenameUtils.class);
         elements.put("File", File.class);
 
-        // ESH types
+        // types
         elements.put("IncreaseDecreaseType", IncreaseDecreaseType.class);
         elements.put("DECREASE", IncreaseDecreaseType.DECREASE);
         elements.put("INCREASE", IncreaseDecreaseType.INCREASE);

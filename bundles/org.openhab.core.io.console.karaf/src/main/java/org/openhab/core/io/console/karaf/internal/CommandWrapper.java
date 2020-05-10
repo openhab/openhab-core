@@ -29,7 +29,7 @@ import org.openhab.core.io.console.ConsoleInterpreter;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 
 /**
- * This class wraps ESH ConsoleCommandExtensions to commands for Apache Karaf
+ * This class wraps OH ConsoleCommandExtensions to commands for Apache Karaf
  *
  * @author Markus Rathgeb - Initial contribution
  * @author Henning Treu - implement help command
