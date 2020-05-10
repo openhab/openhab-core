@@ -86,8 +86,7 @@ public class EventHandler implements AutoCloseable {
             }
         } else {
             logger.error(
-                    "The handled OSGi event is invalid. Expect properties as string named 'type', 'payload' and 'topic'. "
-                            + "Received event properties are: {}",
+                    "The handled OSGi event is invalid. Expect properties as string named 'type', 'payload' and 'topic'. Received event properties are: {}",
                     Arrays.toString(osgiEvent.getPropertyNames()));
         }
     }
@@ -105,12 +104,12 @@ public class EventHandler implements AutoCloseable {
             return;
         }
 
-        final Event eshEvent = createESHEvent(eventFactory, type, payload, topic, source);
-        if (eshEvent == null) {
+        final Event event = createEvent(eventFactory, type, payload, topic, source);
+        if (event == null) {
             return;
         }
 
-        dispatchESHEvent(eventSubscribers, eshEvent);
+        dispatchEvent(eventSubscribers, event);
     }
 
     private Set<EventSubscriber> getEventSubscribers(String eventType) {
@@ -127,21 +126,20 @@ public class EventHandler implements AutoCloseable {
         return subscribers;
     }
 
-    private @Nullable Event createESHEvent(final EventFactory eventFactory, final String type, final String payload,
+    private @Nullable Event createEvent(final EventFactory eventFactory, final String type, final String payload,
             final String topic, final @Nullable String source) {
-        Event eshEvent = null;
+        Event event = null;
         try {
-            eshEvent = eventFactory.createEvent(type, topic, payload, source);
+            event = eventFactory.createEvent(type, topic, payload, source);
         } catch (Exception e) {
             logger.error(
-                    "Creation of ESH-Event failed, "
-                            + "because one of the registered event factories has thrown an exception: {}",
+                    "Creation of Event failed, because one of the registered event factories has thrown an exception: {}",
                     e.getMessage(), e);
         }
-        return eshEvent;
+        return event;
     }
 
-    private synchronized void dispatchESHEvent(final Set<EventSubscriber> eventSubscribers, final Event event) {
+    private synchronized void dispatchEvent(final Set<EventSubscriber> eventSubscribers, final Event event) {
         for (final EventSubscriber eventSubscriber : eventSubscribers) {
             EventFilter filter = eventSubscriber.getEventFilter();
             if (filter == null || filter.apply(event)) {

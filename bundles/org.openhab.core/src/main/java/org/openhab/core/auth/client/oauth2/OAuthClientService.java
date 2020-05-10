@@ -54,7 +54,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * <li>Method {@code #refreshToken}
  * </ul>
  *
- * Use case 4 - Client Credentials. This is used to get the AccessToken by purely the client credential (ESH).
+ * Use case 4 - Client Credentials. This is used to get the AccessToken by purely the client credential.
  * <ul>
  * <li>Method {@code #getAccessTokenByClientCredentials(String)}
  * </ul>
@@ -156,7 +156,7 @@ public interface OAuthClientService extends AutoCloseable {
 
     /**
      * Use case 2 - Resource Owner Password Credentials
-     * This is for when the username and password of the actual resource owner (user) is known to the client (ESH).
+     * This is for when the username and password of the actual resource owner (user) is known to the client.
      *
      * @param username of the user
      * @param password of the user
