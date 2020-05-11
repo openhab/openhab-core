@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 import static org.openhab.core.library.unit.MetricPrefix.CENTI;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormatSymbols;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
@@ -24,6 +25,7 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
+import javax.measure.quantity.Time;
 
 import org.junit.Test;
 import org.openhab.core.library.dimension.DataAmount;
@@ -33,6 +35,7 @@ import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.SmartHomeUnits;
+import org.openhab.core.types.util.UnitUtils;
 
 import tec.uom.se.quantity.QuantityDimension;
 import tec.uom.se.unit.Units;
@@ -40,8 +43,11 @@ import tec.uom.se.unit.Units;
 /**
  * @author Gaël L'hopital - Initial contribution
  */
-@SuppressWarnings({ "rawtypes", "unchecked", "null" })
+@SuppressWarnings("null")
 public class QuantityTypeTest {
+
+    // we need to get the decimal separator of the default locale for our tests
+    private static final char SEP = new DecimalFormatSymbols().getDecimalSeparator();
 
     @Test
     public void testDimensionless() {
@@ -80,6 +86,7 @@ public class QuantityTypeTest {
         QuantityType.class.newInstance();
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testUnits() {
         QuantityType<Length> dt2 = new QuantityType<>("2 m");
@@ -110,6 +117,23 @@ public class QuantityTypeTest {
         } catch (Exception e) {
             // That's what we expect.
         }
+    }
+
+    @Test
+    public void testFormats() {
+        QuantityType<Time> seconds = new QuantityType<>(80, SmartHomeUnits.SECOND);
+        QuantityType<Time> millis = seconds.toUnit(MetricPrefix.MILLI(SmartHomeUnits.SECOND));
+        QuantityType<Time> minutes = seconds.toUnit(SmartHomeUnits.MINUTE);
+
+        assertThat(seconds.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80" + SEP + "0 s"));
+        assertThat(millis.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80000" + SEP + "0 ms"));
+        assertThat(minutes.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("1" + SEP + "3 min"));
+
+        assertThat(seconds.format("%.1f"), is("80" + SEP + "0"));
+        assertThat(minutes.format("%.1f"), is("1" + SEP + "3"));
+
+        assertThat(seconds.format("%1$tH:%1$tM:%1$tS"), is("00:01:20"));
+        assertThat(millis.format("%1$tHh %1$tMm %1$tSs"), is("00h 01m 20s"));
     }
 
     @Test
