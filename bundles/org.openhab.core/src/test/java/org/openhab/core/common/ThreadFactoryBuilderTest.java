@@ -54,9 +54,9 @@ public class ThreadFactoryBuilderTest {
     public void testWithDefaultNamePrefix() {
         ThreadFactory threadFactory = ThreadFactoryBuilder.create().withName("hello").build();
 
-        assertThat(threadFactory.newThread(TEST_RUNNABLE).getName(), is("ESH-hello-1"));
-        assertThat(threadFactory.newThread(TEST_RUNNABLE).getName(), is("ESH-hello-2"));
-        assertThat(threadFactory.newThread(TEST_RUNNABLE).getName(), is("ESH-hello-3"));
+        assertThat(threadFactory.newThread(TEST_RUNNABLE).getName(), is("OH-hello-1"));
+        assertThat(threadFactory.newThread(TEST_RUNNABLE).getName(), is("OH-hello-2"));
+        assertThat(threadFactory.newThread(TEST_RUNNABLE).getName(), is("OH-hello-3"));
     }
 
     @Test
@@ -143,6 +143,6 @@ public class ThreadFactoryBuilderTest {
                 .build();
         Thread testThread = threadFactory.newThread(TEST_RUNNABLE);
 
-        assertThat(testThread.getName(), is("ESH-" + testThreadName));
+        assertThat(testThread.getName(), is("OH-" + testThreadName));
     }
 }

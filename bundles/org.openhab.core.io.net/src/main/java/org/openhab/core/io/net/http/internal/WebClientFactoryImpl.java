@@ -312,7 +312,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     private QueuedThreadPool createThreadPool(String consumerName, int minThreads, int maxThreads,
             int keepAliveTimeout) {
         QueuedThreadPool queuedThreadPool = new QueuedThreadPool(maxThreads, minThreads, keepAliveTimeout * 1000);
-        queuedThreadPool.setName("ESH-httpClient-" + consumerName);
+        queuedThreadPool.setName("OH-httpClient-" + consumerName);
         queuedThreadPool.setDaemon(true);
         return queuedThreadPool;
     }

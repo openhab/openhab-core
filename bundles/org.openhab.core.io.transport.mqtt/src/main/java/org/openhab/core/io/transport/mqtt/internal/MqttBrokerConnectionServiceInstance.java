@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The user can configure multiple system Mqtt broker connections. This is realized via the OSGI service factory
  * pattern.
- * ESH requires a factory marker service, implemented in {@link MqttBrokerConnectionServiceInstanceMarker}.
+ * The framework requires a factory marker service, implemented in {@link MqttBrokerConnectionServiceInstanceMarker}.
  * This service represents an instance of that factory and will initialize one MQTT broker connection with the given
  * configuration and register it to the {@link MqttService}.
  *

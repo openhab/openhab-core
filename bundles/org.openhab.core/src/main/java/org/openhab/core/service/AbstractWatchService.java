@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractWatchService {
 
     /**
-     * Default logger for ESH Watch Services
+     * Default logger for Watch Services
      */
     protected final Logger logger = LoggerFactory.getLogger(AbstractWatchService.class);
 

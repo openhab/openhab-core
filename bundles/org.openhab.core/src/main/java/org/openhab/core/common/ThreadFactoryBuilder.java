@@ -35,7 +35,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class ThreadFactoryBuilder {
 
-    private static final String DEFAULT_NAME_PREFIX = "ESH";
+    private static final String DEFAULT_NAME_PREFIX = "OH";
 
     private @Nullable ThreadFactory wrappedThreadFactory;
     private @Nullable String name;
@@ -97,7 +97,7 @@ public class ThreadFactoryBuilder {
      * The threads created by the {@link ThreadFactory} are named 'namePrefix-name-i', where i is an integer
      * incremented with each new thread, initialized to 1. If set to null, threads are named 'name-i'.
      * <p>
-     * Defaults to the name prefix 'ESH'. Setting a name prefix different than the default one is intended to be used by
+     * Defaults to the name prefix 'OH'. Setting a name prefix different than the default one is intended to be used by
      * solutions integrating openHAB.
      *
      * @param namePrefix The name prefix (can be null)

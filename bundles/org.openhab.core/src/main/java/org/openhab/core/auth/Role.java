@@ -13,7 +13,7 @@
 package org.openhab.core.auth;
 
 /**
- * Interface defining constants for roles within ESH.
+ * Interface defining constants for roles within the framework.
  *
  * @author Kai Kreuzer - Initial contribution
  */

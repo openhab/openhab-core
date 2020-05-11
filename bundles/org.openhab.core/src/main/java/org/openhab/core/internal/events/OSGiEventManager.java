@@ -34,7 +34,7 @@ import org.osgi.service.event.EventHandler;
  * The {@link OSGiEventManager} provides an OSGi based default implementation of the openHAB event bus.
  *
  * The OSGiEventHandler tracks {@link EventSubscriber}s and {@link EventFactory}s, receives OSGi events (by
- * implementing the OSGi {@link EventHandler} interface) and dispatches the received OSGi events as ESH {@link Event}s
+ * implementing the OSGi {@link EventHandler} interface) and dispatches the received OSGi events as OH {@link Event}s
  * to the {@link EventSubscriber}s if the provided filter applies.
  *
  * @author Stefan Bußweiler - Initial contribution
