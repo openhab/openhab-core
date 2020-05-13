@@ -41,9 +41,12 @@ public interface SerialPortManager {
     }
 
     /**
-     * Gets the serial port identifiers.
+     * Gets the discovered serial port identifiers.
      *
-     * @return stream of serial port identifiers
+     * {@link SerialPortProvider}s may not be able to discover any or all identifiers.
+     * When the port name is known, the preferred way to get an identifier is by using {@link #getIdentifier(String)}.
+     *
+     * @return stream of discovered serial port identifiers
      */
     Stream<SerialPortIdentifier> getIdentifiers();
 }
