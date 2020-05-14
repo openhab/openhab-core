@@ -25,7 +25,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.MessageBodyWriter;
 
-import org.apache.commons.io.IOUtils;
 import org.openhab.core.io.rest.JSONInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +79,7 @@ public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
         }
 
         if (object instanceof InputStream && object instanceof JSONInputStream) {
-            IOUtils.copy((InputStream) object, entityStream);
+            ((InputStream) object).transferTo(entityStream);
         } else {
             entityStream.write(gson.toJson(object).getBytes(StandardCharsets.UTF_8));
         }

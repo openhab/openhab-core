@@ -77,7 +77,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Markus Rathgeb - Drop Glassfish dependency and use API only
  * @author Wouter Born - Rework SSE item state sinks for dropping Glassfish
  */
-@Component(service = SsePublisher.class/* , scope = ServiceScope.PROTOTYPE */)
+@Component(service = SsePublisher.class)
 @JaxrsResource
 @JaxrsName(SseResource.PATH_EVENTS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
