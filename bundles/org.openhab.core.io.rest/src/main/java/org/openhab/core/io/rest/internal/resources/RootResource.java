@@ -60,8 +60,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
-@Component(service = RootResource.class, configurationPid = "org.openhab.restroot" // , scope = ServiceScope.PROTOTYPE
-)
+@Component(service = RootResource.class, configurationPid = "org.openhab.restroot")
 @JaxrsResource
 @JaxrsName(RootResource.RESOURCE_NAME)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")

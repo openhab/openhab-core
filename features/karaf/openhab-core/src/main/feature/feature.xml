@@ -170,11 +170,11 @@
 		<feature dependency="true">openhab-core-model-sitemap</feature>
 	</feature>
 
-	<feature name="openhab-core-io-rest-swagger1" version="${project.version}">
+	<feature name="openhab-core-io-rest-swagger" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.swagger1/${project.version}</bundle>
-		<requirement>openhab.tp;filter:="(feature=jaxrswb-swagger1-gen)"</requirement>
-		<feature dependency="true">openhab.tp-jaxrswb-swagger1-gen</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.swagger/${project.version}</bundle>
+		<requirement>openhab.tp;filter:="(feature=jaxrswb-swagger-gen)"</requirement>
+		<feature dependency="true">openhab.tp-jaxrswb-swagger-gen</feature>
 	</feature>
 
 	<feature name="openhab-core-io-rest-audio" version="${project.version}">

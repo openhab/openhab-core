@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.swagger1.impl;
+package org.openhab.core.io.rest.swagger.impl;
 
 import java.io.IOException;
 import java.util.Map;
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 import de.maggu2810.jaxrswb.swagger1.gen.JaxRsWhiteboardSwaggerGenerator;
 
 /**
- * An endpoint to generate and provide an Swagger 1 description.
+ * An endpoint to generate and provide a Swagger 1 description.
  *
  * @author Markus Rathgeb - Initial contribution
  */
@@ -65,7 +65,7 @@ public class RESTResource {
     /**
      * Gets the current JAX-RS Whiteboard provided endpoint information by Swagger 1.
      *
-     * @return an Swagger 1 description of the endpoints
+     * @return a Swagger 1 description of the endpoints
      */
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
