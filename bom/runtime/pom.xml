@@ -16,8 +16,10 @@
   <name>openHAB Core :: BOM :: Runtime</name>
 
   <properties>
-    <pax.web.version>7.2.11</pax.web.version>
+    <jackson.version>2.10.3</jackson.version>
     <jetty.version>9.4.20.v20190813</jetty.version>
+    <pax.web.version>7.2.11</pax.web.version>
+    <swagger.version>1.6.1</swagger.version>
   </properties>
 
   <dependencies>
@@ -113,8 +115,18 @@
     <dependency>
       <groupId>org.apache.aries.jax.rs</groupId>
       <artifactId>org.apache.aries.jax.rs.whiteboard</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.8</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-annotation_1.3_spec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-jaxrs_2.1_spec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- JAX-RS 2.1 API with contract -->
@@ -138,12 +150,19 @@
       <version>2.2.11_1</version>
     </dependency>
 
-    <!-- Java-Activation 1.1 API -->
+    <!-- Activation 1.1 API -->
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
       <version>2.9.0</version>
       <scope>compile</scope>
+    </dependency>
+
+    <!-- Annotation API -->
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.annotation-api-1.3</artifactId>
+      <version>1.3_1</version>
     </dependency>
 
     <!-- Stax 1.2 API -->
@@ -256,6 +275,13 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- OSGi ServiceLoader -->
+    <dependency>
+      <groupId>org.apache.aries.spifly</groupId>
+      <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+
     <!-- Several implementations need to log using SLF4J -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -342,7 +368,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.logback</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.2</version>
       <scope>compile</scope>
     </dependency>
     <!-- END: logging -->
@@ -868,14 +894,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- ... -->
-    <dependency>
-      <groupId>com.eclipsesource.jaxrs</groupId>
-      <artifactId>publisher</artifactId>
-      <version>5.3.1</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- jollyday -->
     <dependency>
       <groupId>de.jollyday</groupId>
@@ -891,6 +909,102 @@
       <groupId>org.bitbucket.b_c</groupId>
       <artifactId>jose4j</artifactId>
       <version>0.7.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Jackson -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-xml</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-joda</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-base</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Swagger -->
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-annotations</artifactId>
+      <version>${swagger.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-core</artifactId>
+      <version>${swagger.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-jaxrs</artifactId>
+      <version>${swagger.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-models</artifactId>
+      <version>${swagger.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- JAX-RS Whiteboard Swagger 1 generator -->
+    <dependency>
+      <groupId>de.maggu2810.jaxrswb.bundles</groupId>
+      <artifactId>jaxrswb-swagger1-gen</artifactId>
+      <version>0.0.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>de.maggu2810.thirdparty.modified.org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.10.v20160429-1435</version>
       <scope>compile</scope>
     </dependency>
 

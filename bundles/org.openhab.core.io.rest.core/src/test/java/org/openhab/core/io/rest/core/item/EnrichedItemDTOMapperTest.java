@@ -15,8 +15,6 @@ package org.openhab.core.io.rest.core.item;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.net.URI;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.openhab.core.items.GenericItem;
@@ -51,32 +49,31 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
             subGroup.addMember(stringItem);
         }
 
-        EnrichedGroupItemDTO dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, false, null, URI.create(""),
-                null);
+        EnrichedGroupItemDTO dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, false, null, null, null);
         assertThat(dto.members.length, is(0));
 
-        dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true, null, URI.create(""), null);
+        dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true, null, null, null);
         assertThat(dto.members.length, is(3));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(1));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> CoreItemFactory.NUMBER.equals(i.getType()), URI.create(""), null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()), null, null);
         assertThat(dto.members.length, is(1));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, URI.create(""), null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, null, null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(0));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, URI.create(""), null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, null, null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(0));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
                 i -> CoreItemFactory.NUMBER.equals(i.getType()) || i.getType().equals(CoreItemFactory.STRING)
                         || i instanceof GroupItem,
-                URI.create(""), null);
+                null, null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(1));
     }

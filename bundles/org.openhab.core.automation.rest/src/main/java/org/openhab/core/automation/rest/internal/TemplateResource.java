@@ -35,11 +35,17 @@ import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.template.TemplateRegistry;
 import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,12 +57,20 @@ import io.swagger.annotations.ApiResponses;
  * This class acts as a REST resource for templates and is registered with the Jersey servlet.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
-@Path("templates")
-@Api("templates")
-@NonNullByDefault
 @Component
+@JaxrsResource
+@JaxrsName(TemplateResource.PATH_TEMPLATES)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Path(TemplateResource.PATH_TEMPLATES)
+@Api(TemplateResource.PATH_TEMPLATES)
+@NonNullByDefault
 public class TemplateResource implements RESTResource {
+
+    /** The URI path to this resource */
+    public static final String PATH_TEMPLATES = "templates";
 
     private @NonNullByDefault({}) TemplateRegistry<@NonNull RuleTemplate> templateRegistry;
     private @NonNullByDefault({}) LocaleService localeService;

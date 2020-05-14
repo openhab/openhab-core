@@ -16,18 +16,22 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.IOUtils;
@@ -71,6 +75,9 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     @Mock
     private ItemProvider itemProvider;
 
+    private UriInfo uriInfo;
+    private HttpHeaders httpHeaders;
+
     private ItemResource itemResource;
     private ManagedItemProvider managedItemProvider;
 
@@ -80,8 +87,6 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         itemResource = getService(RESTResource.class, ItemResource.class);
         assertNotNull(itemResource);
-
-        itemResource.uriInfo = mock(UriInfo.class);
 
         registerVolatileStorageService();
         managedItemProvider = getService(ManagedItemProvider.class);
@@ -93,13 +98,21 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         when(itemProvider.getAll()).thenReturn(Arrays.asList(item1, item2, item3, item4));
         registerService(itemProvider);
+
+        UriBuilder uriBuilder = mock(UriBuilder.class);
+        when(uriBuilder.build(any())).thenReturn(URI.create(""));
+        uriInfo = mock(UriInfo.class);
+        when(uriInfo.getAbsolutePathBuilder()).thenReturn(uriBuilder);
+        when(uriInfo.getPath()).thenReturn("");
+        httpHeaders = mock(HttpHeaders.class);
+        when(httpHeaders.getHeaderString(anyString())).thenReturn(null);
     }
 
     @Test
     public void shouldReturnUnicodeItems() throws IOException {
         item4.setLabel(ITEM_LABEL4);
 
-        Response response = itemResource.getItems(null, null, null, null, false, null);
+        Response response = itemResource.getItems(uriInfo, httpHeaders, null, null, null, null, false, null);
         assertThat(readItemLabelsFromResponse(response), hasItems(ITEM_LABEL4));
     }
 
@@ -107,7 +120,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     public void shouldReturnUnicodeItem() throws IOException {
         item4.setLabel(ITEM_LABEL4);
 
-        Response response = itemResource.getItemData(null, null, ITEM_NAME4);
+        Response response = itemResource.getItemData(uriInfo, httpHeaders, null, null, ITEM_NAME4);
         assertThat(readItemLabelsFromResponse(response), hasItems(ITEM_LABEL4));
     }
 
@@ -119,25 +132,25 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         item3.addTag("Tag2");
         item4.addTag("Tag4");
 
-        Response response = itemResource.getItems(null, null, "Tag1", null, false, null);
+        Response response = itemResource.getItems(uriInfo, httpHeaders, null, null, "Tag1", null, false, null);
         assertThat(readItemNamesFromResponse(response), hasItems(ITEM_NAME1, ITEM_NAME2));
 
-        response = itemResource.getItems(null, null, "Tag2", null, false, null);
+        response = itemResource.getItems(uriInfo, httpHeaders, null, null, "Tag2", null, false, null);
         assertThat(readItemNamesFromResponse(response), hasItems(ITEM_NAME2, ITEM_NAME3));
 
-        response = itemResource.getItems(null, null, "NotExistingTag", null, false, null);
+        response = itemResource.getItems(uriInfo, httpHeaders, null, null, "NotExistingTag", null, false, null);
         assertThat(readItemNamesFromResponse(response), hasSize(0));
     }
 
     @Test
     public void shouldFilterItemsByType() throws Exception {
-        Response response = itemResource.getItems(null, "Switch", null, null, false, null);
+        Response response = itemResource.getItems(uriInfo, httpHeaders, null, "Switch", null, null, false, null);
         assertThat(readItemNamesFromResponse(response), hasItems(ITEM_NAME1, ITEM_NAME2));
 
-        response = itemResource.getItems(null, "Dimmer", null, null, false, null);
+        response = itemResource.getItems(uriInfo, httpHeaders, null, "Dimmer", null, null, false, null);
         assertThat(readItemNamesFromResponse(response), hasItems(ITEM_NAME3));
 
-        response = itemResource.getItems(null, "Color", null, null, false, null);
+        response = itemResource.getItems(uriInfo, httpHeaders, null, "Color", null, null, false, null);
         assertThat(readItemNamesFromResponse(response), hasSize(0));
     }
 
@@ -145,15 +158,15 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     public void shouldAddAndRemoveTags() throws Exception {
         managedItemProvider.add(new SwitchItem("Switch"));
 
-        Response response = itemResource.getItems(null, null, "MyTag", null, false, null);
+        Response response = itemResource.getItems(uriInfo, httpHeaders, null, null, "MyTag", null, false, null);
         assertThat(readItemNamesFromResponse(response), hasSize(0));
 
         itemResource.addTag("Switch", "MyTag");
-        response = itemResource.getItems(null, null, "MyTag", null, false, null);
+        response = itemResource.getItems(uriInfo, httpHeaders, null, null, "MyTag", null, false, null);
         assertThat(readItemNamesFromResponse(response), hasSize(1));
 
         itemResource.removeTag("Switch", "MyTag");
-        response = itemResource.getItems(null, null, "MyTag", null, false, null);
+        response = itemResource.getItems(uriInfo, httpHeaders, null, null, "MyTag", null, false, null);
         assertThat(readItemNamesFromResponse(response), hasSize(0));
     }
 
@@ -162,7 +175,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         JsonParser parser = new JsonParser();
         managedItemProvider.add(new SwitchItem("Switch"));
         itemResource.addTag("Switch", "MyTag");
-        Response response = itemResource.getItems(null, null, "MyTag", null, false, "type,name");
+        Response response = itemResource.getItems(uriInfo, httpHeaders, null, null, "MyTag", null, false, "type,name");
 
         JsonElement result = parser.parse(IOUtils.toString((InputStream) response.getEntity()));
         JsonElement expected = parser.parse("[{type: \"Switch\", name: \"Switch\"}]");

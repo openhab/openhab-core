@@ -35,11 +35,17 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,15 +57,20 @@ import io.swagger.annotations.ApiResponses;
  * This class acts as a REST resource for audio features.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
 @Component
-@Path(AudioResource.PATH_SITEMAPS)
+@JaxrsResource
+@JaxrsName(AudioResource.PATH_AUDIO)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Path(AudioResource.PATH_AUDIO)
 @RolesAllowed({ Role.USER, Role.ADMIN })
-@Api(value = AudioResource.PATH_SITEMAPS)
+@Api(AudioResource.PATH_AUDIO)
 @NonNullByDefault
 public class AudioResource implements RESTResource {
 
-    static final String PATH_SITEMAPS = "audio";
+    static final String PATH_AUDIO = "audio";
 
     private @Nullable AudioManager audioManager;
     private @Nullable LocaleService localeService;

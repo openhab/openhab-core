@@ -24,7 +24,7 @@ import org.osgi.framework.ServiceRegistration;
 public class Activator implements BundleActivator {
     private static Activator instance;
 
-    private ServiceRegistration rolesAllowedDynamicFeatureRegistration;
+    private ServiceRegistration<?> rolesAllowedDynamicFeatureRegistration;
 
     public static Activator getInstance() {
         return instance;

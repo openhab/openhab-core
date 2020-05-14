@@ -43,11 +43,17 @@ import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.TriggerType;
 import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -61,12 +67,20 @@ import io.swagger.annotations.ApiResponses;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Use DTOs
  * @author Ana Dimova - extends Module type DTOs with composites
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
-@Path("module-types")
-@Api("module-types")
-@NonNullByDefault
 @Component
+@JaxrsResource
+@JaxrsName(ModuleTypeResource.PATH_MODULE_TYPES)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Path(ModuleTypeResource.PATH_MODULE_TYPES)
+@Api(ModuleTypeResource.PATH_MODULE_TYPES)
+@NonNullByDefault
 public class ModuleTypeResource implements RESTResource {
+
+    /** The URI path to this resource */
+    public static final String PATH_MODULE_TYPES = "module-types";
 
     private @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
     private @NonNullByDefault({}) LocaleService localeService;

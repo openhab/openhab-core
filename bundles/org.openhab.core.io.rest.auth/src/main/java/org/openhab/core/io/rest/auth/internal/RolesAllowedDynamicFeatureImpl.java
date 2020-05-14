@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -31,8 +32,6 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 
-import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
-import org.glassfish.jersey.server.model.AnnotatedMethod;
 import org.openhab.core.auth.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,7 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
 
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext configuration) {
-        final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
+        final Method am = resourceInfo.getResourceMethod();
         try {
             // DenyAll on the method take precedence over RolesAllowed and PermitAll
             if (am.isAnnotationPresent(DenyAll.class)) {

@@ -88,14 +88,6 @@
       <version>2.0.0</version>
     </dependency>
 
-    <!-- EclipseSource JAX RS -->
-    <dependency>
-      <groupId>com.eclipsesource.jaxrs</groupId>
-      <artifactId>publisher</artifactId>
-      <version>5.3.1</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- Gson -->
     <dependency>
       <groupId>org.eclipse.orbit.bundles</groupId>
@@ -236,11 +228,17 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Servlet API -->
+    <!-- Servlet and JAX-RS API -->
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.http.servlet-api</artifactId>
+      <version>1.1.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.aries.spec</groupId>
+      <artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
+      <version>1.0.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -251,13 +249,10 @@
       <version>1.5.5</version>
       <scope>compile</scope>
     </dependency>
-
-    <!-- WR RS API -->
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>2.0.1</version>
-      <scope>compile</scope>
+      <groupId>de.maggu2810.jaxrswb.bundles</groupId>
+      <artifactId>jaxrswb-swagger1-gen</artifactId>
+      <version>0.0.4</version>
     </dependency>
 
     <!-- XStream -->

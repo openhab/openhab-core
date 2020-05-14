@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.ui.TileDTO;
@@ -42,8 +43,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,11 +60,14 @@ import io.swagger.annotations.ApiResponses;
  *
  * @author Yannick Schaus - Initial contribution
  */
-@Path(UIResource.PATH_UI)
-@Api(value = UIResource.PATH_UI)
 @Component(service = { RESTResource.class, UIResource.class })
+@JaxrsResource
+@JaxrsName(UIResource.PATH_UI)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Path(UIResource.PATH_UI)
+@Api(UIResource.PATH_UI)
 public class UIResource implements RESTResource {
-    private final Logger logger = LoggerFactory.getLogger(UIResource.class);
 
     /** The URI path to this resource */
     public static final String PATH_UI = "ui";

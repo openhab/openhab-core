@@ -39,7 +39,6 @@ feature.openhab-config: \
 	org.apache.servicemix.bundles.xstream;version='[1.4.7,1.4.8)',\
 	org.apache.felix.configadmin;version='[1.9.8,1.9.9)',\
 	org.apache.felix.log;version='[1.2.0,1.2.1)',\
-	org.apache.felix.logback;version='[1.0.0,1.0.1)',\
 	tec.uom.lib.uom-lib-common;version='[1.0.3,1.0.4)',\
 	tec.uom.se;version='[1.0.10,1.0.11)',\
 	jollyday;version='[0.5.8,0.5.9)',\
@@ -55,4 +54,5 @@ feature.openhab-config: \
 	org.openhab.core.config.xml;version='[3.0.0,3.0.1)',\
 	org.openhab.core.ephemeris;version='[3.0.0,3.0.1)',\
 	org.openhab.core.ephemeris.tests;version='[3.0.0,3.0.1)',\
-	org.openhab.core.test;version='[3.0.0,3.0.1)'
+	org.openhab.core.test;version='[3.0.0,3.0.1)',\
+	org.apache.felix.logback;version='[1.0.2,1.0.3)'

@@ -36,6 +36,7 @@ import javax.ws.rs.core.UriInfo;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
@@ -45,6 +46,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -57,14 +63,19 @@ import io.swagger.annotations.ApiResponses;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - add TTS feature to the REST API
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
 @Component
-@Path(VoiceResource.PATH_SITEMAPS)
+@JaxrsResource
+@JaxrsName(VoiceResource.PATH_VOICE)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Path(VoiceResource.PATH_VOICE)
 @RolesAllowed({ Role.USER, Role.ADMIN })
-@Api(value = VoiceResource.PATH_SITEMAPS)
+@Api(VoiceResource.PATH_VOICE)
 public class VoiceResource implements RESTResource {
 
-    static final String PATH_SITEMAPS = "voice";
+    static final String PATH_VOICE = "voice";
 
     @Context
     UriInfo uriInfo;

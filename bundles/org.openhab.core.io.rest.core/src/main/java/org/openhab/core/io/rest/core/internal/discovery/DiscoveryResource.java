@@ -29,11 +29,17 @@ import javax.ws.rs.core.UriInfo;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.config.discovery.ScanListener;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +58,16 @@ import io.swagger.annotations.ApiResponses;
  * @author Yordan Zhelev - Added Swagger annotations
  * @author Ivaylo Ivanov - Added payload to the response of <code>scan</code>
  * @author Franck Dechavanne - Added DTOs to ApiResponses
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
+@Component(service = { RESTResource.class, DiscoveryResource.class })
+@JaxrsResource
+@JaxrsName(DiscoveryResource.PATH_DISCOVERY)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
 @Path(DiscoveryResource.PATH_DISCOVERY)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = DiscoveryResource.PATH_DISCOVERY)
-@Component(service = { RESTResource.class, DiscoveryResource.class })
+@Api(DiscoveryResource.PATH_DISCOVERY)
 public class DiscoveryResource implements RESTResource {
 
     /** The URI path to this resource */

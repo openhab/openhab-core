@@ -45,20 +45,21 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.sse.OutboundSseEvent;
+import javax.ws.rs.sse.Sse;
+import javax.ws.rs.sse.SseEventSink;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
-import org.glassfish.jersey.media.sse.EventOutput;
-import org.glassfish.jersey.media.sse.OutboundEvent;
-import org.glassfish.jersey.media.sse.SseBroadcaster;
-import org.glassfish.jersey.media.sse.SseFeature;
-import org.glassfish.jersey.server.BroadcasterListener;
-import org.glassfish.jersey.server.ChunkedOutput;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.SseBroadcaster;
 import org.openhab.core.io.rest.core.item.EnrichedItemDTOMapper;
 import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService;
 import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
@@ -93,6 +94,11 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,12 +118,18 @@ import io.swagger.annotations.ApiResponses;
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
  * @author Yordan Zhelev - Added Swagger annotations
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
 @Component(service = RESTResource.class)
+@JaxrsResource
+@JaxrsName(SitemapResource.PATH_SITEMAPS)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
 @Path(SitemapResource.PATH_SITEMAPS)
 @RolesAllowed({ Role.USER, Role.ADMIN })
-@Api(value = SitemapResource.PATH_SITEMAPS)
-public class SitemapResource implements RESTResource, SitemapSubscriptionCallback, BroadcasterListener<OutboundEvent> {
+@Api(SitemapResource.PATH_SITEMAPS)
+public class SitemapResource
+        implements RESTResource, SitemapSubscriptionCallback, SseBroadcaster.Listener<SseSinkInfo> {
 
     private final Logger logger = LoggerFactory.getLogger(SitemapResource.class);
 
@@ -127,7 +139,9 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
 
     private static final long TIMEOUT_IN_MS = 30000;
 
-    private SseBroadcaster broadcaster;
+    private @NonNullByDefault({}) Sse sse;
+
+    private SseBroadcaster<@NonNull SseSinkInfo> broadcaster;
 
     @Context
     UriInfo uriInfo;
@@ -146,7 +160,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
 
     private final java.util.List<SitemapProvider> sitemapProviders = new ArrayList<>();
 
-    private final Map<String, EventOutput> eventOutputs = new MapMaker().weakValues().makeMap();
+    private final Map<String, SseSinkInfo> knownSubscriptions = new MapMaker().weakValues().makeMap();
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
@@ -155,8 +169,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
 
     @Activate
     protected void activate() {
-        broadcaster = new SseBroadcaster();
-        broadcaster.add(this);
+        broadcaster = new SseBroadcaster<>();
 
         // The clean SSE subscriptions job sends an ALIVE event to all subscribers. This will trigger
         // an exception when the subscriber is dead, leading to the release of the SSE subscription
@@ -179,8 +192,12 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
             cleanSubscriptionsJob.cancel(true);
             cleanSubscriptionsJob = null;
         }
-        broadcaster.remove(this);
-        broadcaster = null;
+        broadcaster.close();
+    }
+
+    @Context
+    public void setSse(final Sse sse) {
+        this.sse = sse;
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
@@ -292,6 +309,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      */
     @POST
     @Path(SEGMENT_EVENTS + "/subscribe")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Creates a sitemap event subscription.")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Subscription created."),
             @ApiResponse(code = 503, message = "Subscriptions limit reached.") })
@@ -301,13 +319,15 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
             return JSONResponse.createResponse(Status.SERVICE_UNAVAILABLE, null,
                     "Max number of subscriptions is reached.");
         }
-        final EventOutput eventOutput = new SitemapEventOutput(subscriptions, subscriptionId);
-        broadcaster.add(eventOutput);
-        eventOutputs.put(subscriptionId, eventOutput);
+        final SseSinkInfo sinkInfo = new SseSinkInfo(subscriptionId, subscriptions);
+        knownSubscriptions.put(subscriptionId, sinkInfo);
         URI uri = uriInfo.getBaseUriBuilder().path(PATH_SITEMAPS).path(SEGMENT_EVENTS).path(subscriptionId).build();
         logger.debug("Client from IP {} requested new subscription => got id {}.", request.getRemoteAddr(),
                 subscriptionId);
-        return Response.created(uri);
+
+        // See https://github.com/openhab/openhab-core/issues/1216
+        // return Response.created(uri).build();
+        return JerseyResponseBuilderUtils.created(uri.toASCIIString());
     }
 
     /**
@@ -317,28 +337,31 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
      *         connection.
      */
     @GET
-    @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}/")
-    @Produces(SseFeature.SERVER_SENT_EVENTS)
-    @ApiOperation(value = "Get sitemap events.", response = EventOutput.class)
+    @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}")
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @ApiOperation(value = "Get sitemap events.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "Page not linked to the subscription."),
             @ApiResponse(code = 404, message = "Subscription not found.") })
-    public Object getSitemapEvents(
+    public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @PathParam("subscriptionid") @ApiParam(value = "subscription id") String subscriptionId,
             @QueryParam("sitemap") @ApiParam(value = "sitemap name", required = false) String sitemapname,
             @QueryParam("pageid") @ApiParam(value = "page id", required = false) String pageId) {
-        EventOutput eventOutput = eventOutputs.get(subscriptionId);
-        if (!subscriptions.exists(subscriptionId) || eventOutput == null) {
-            return JSONResponse.createResponse(Status.NOT_FOUND, null,
-                    "Subscription id " + subscriptionId + " does not exist.");
+        final SseSinkInfo sinkInfo = knownSubscriptions.get(subscriptionId);
+        if (sinkInfo == null) {
+            logger.debug("Subscription id {} does not exist.", subscriptionId);
+            response.setStatus(Status.NOT_FOUND.getStatusCode());
+            return;
         }
         if (sitemapname != null && pageId != null) {
             subscriptions.setPageId(subscriptionId, sitemapname, pageId);
         }
         if (subscriptions.getSitemapName(subscriptionId) == null || subscriptions.getPageId(subscriptionId) == null) {
-            return JSONResponse.createResponse(Status.BAD_REQUEST, null,
-                    "Subscription id " + subscriptionId + " is not yet linked to a sitemap/page.");
+            logger.debug("Subscription id {} is not yet linked to a sitemap/page.", subscriptionId);
+            response.setStatus(Status.BAD_REQUEST.getStatusCode());
+            return;
         }
+
         logger.debug("Client from IP {} requested sitemap event stream for subscription {}.", request.getRemoteAddr(),
                 subscriptionId);
 
@@ -346,7 +369,7 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
         // This allows you to not disable proxy buffering in nginx and still have working sse
         response.addHeader(X_ACCEL_BUFFERING_HEADER, "no");
 
-        return eventOutput;
+        broadcaster.add(sseEventSink, sinkInfo);
     }
 
     private PageDTO getPageBean(String sitemapName, String pageId, URI uri, Locale locale, boolean timeout,
@@ -491,8 +514,8 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
                         .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
                 boolean isMapview = "mapview".equalsIgnoreCase(widgetTypeName);
                 Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
-                bean.item = EnrichedItemDTOMapper.map(item, isMapview, itemFilter, UriBuilder.fromUri(uri).build(),
-                        locale);
+                bean.item = EnrichedItemDTOMapper.map(item, isMapview, itemFilter,
+                        UriBuilder.fromUri(uri).path("{itemName}"), locale);
                 bean.state = itemUIRegistry.getState(widget).toFullString();
                 // In case the widget state is identical to the item state, its value is set to null.
                 if (bean.state != null && bean.state.equals(bean.item.state)) {
@@ -801,42 +824,49 @@ public class SitemapResource implements RESTResource, SitemapSubscriptionCallbac
 
     @Override
     public void onEvent(SitemapEvent event) {
-        OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
-        OutboundEvent outboundEvent = eventBuilder.name("event").mediaType(MediaType.APPLICATION_JSON_TYPE).data(event)
-                .build();
-        broadcaster.broadcast(outboundEvent);
+        final Sse sse = this.sse;
+        if (sse == null) {
+            logger.trace("broadcast skipped (no one listened since activation)");
+            return;
+        }
+
+        final OutboundSseEvent outboundSseEvent = sse.newEventBuilder().name("event")
+                .mediaType(MediaType.APPLICATION_JSON_TYPE).data(event).build();
+        broadcaster.sendIf(outboundSseEvent, info -> {
+            String sitemapName = event.sitemapName;
+            String pageId = event.pageId;
+            if (sitemapName != null && sitemapName.equals(subscriptions.getSitemapName(info.subscriptionId))
+                    && pageId != null && pageId.equals(subscriptions.getPageId(info.subscriptionId))) {
+                if (logger.isDebugEnabled()) {
+                    if (event instanceof SitemapWidgetEvent) {
+                        logger.debug("Sent sitemap event for widget {} to subscription {}.",
+                                ((SitemapWidgetEvent) event).widgetId, info.subscriptionId);
+                    } else if (event instanceof ServerAliveEvent) {
+                        logger.debug("Sent alive event to subscription {}.", info.subscriptionId);
+                    }
+                }
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
     public void onRelease(String subscriptionId) {
         logger.debug("SSE connection for subscription {} has been released.", subscriptionId);
-        EventOutput eventOutput = eventOutputs.remove(subscriptionId);
-        if (eventOutput != null) {
-            broadcaster.remove(eventOutput);
-        }
-    }
-
-    @Override
-    public void onClose(ChunkedOutput<OutboundEvent> event) {
-        if (event instanceof SitemapEventOutput) {
-            SitemapEventOutput sitemapEvent = (SitemapEventOutput) event;
-            logger.debug("SSE connection for subscription {} has been closed.", sitemapEvent.getSubscriptionId());
-            subscriptions.removeSubscription(sitemapEvent.getSubscriptionId());
-            EventOutput eventOutput = eventOutputs.remove(sitemapEvent.getSubscriptionId());
-            if (eventOutput != null) {
-                broadcaster.remove(eventOutput);
-            }
-        }
-    }
-
-    @Override
-    public void onException(ChunkedOutput<OutboundEvent> event, Exception e) {
-        // the exception is usually "null" and onClose() is automatically called afterwards
-        // - so let's don't do anything in this method.
+        broadcaster.closeAndRemoveIf(info -> info.subscriptionId.equals(subscriptionId));
+        knownSubscriptions.remove(subscriptionId);
     }
 
     @Override
     public boolean isSatisfied() {
         return itemUIRegistry != null && subscriptions != null && localeService != null;
+    }
+
+    @Override
+    public void sseEventSinkRemoved(SseEventSink sink, SseSinkInfo info) {
+        logger.debug("SSE connection for subscription {} has been closed.", info.subscriptionId);
+        subscriptions.removeSubscription(info.subscriptionId);
+        knownSubscriptions.remove(info.subscriptionId);
     }
 }

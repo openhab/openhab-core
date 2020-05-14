@@ -42,19 +42,26 @@ import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.config.ConfigurationService;
-import org.openhab.core.io.rest.core.internal.RESTCoreActivator;
 import org.openhab.core.io.rest.core.service.ConfigurableServiceDTO;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,11 +77,16 @@ import io.swagger.annotations.ApiResponses;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Franck Dechavanne - Added DTOs to ApiResponses
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
+@Component(service = { RESTResource.class, ConfigurableServiceResource.class })
+@JaxrsResource
+@JaxrsName(ConfigurableServiceResource.PATH_SERVICES)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
 @Path(ConfigurableServiceResource.PATH_SERVICES)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = ConfigurableServiceResource.PATH_SERVICES)
-@Component(service = { RESTResource.class, ConfigurableServiceResource.class })
+@Api(ConfigurableServiceResource.PATH_SERVICES)
 public class ConfigurableServiceResource implements RESTResource {
 
     /** The URI path to this resource */
@@ -91,8 +103,15 @@ public class ConfigurableServiceResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(ConfigurableServiceResource.class);
 
+    private final BundleContext bundleContext;
+
     private ConfigurationService configurationService;
     private ConfigDescriptionRegistry configDescRegistry;
+
+    @Activate
+    public ConfigurableServiceResource(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -250,7 +269,7 @@ public class ConfigurableServiceResource implements RESTResource {
         List<ConfigurableServiceDTO> services = new ArrayList<>();
         ServiceReference<?>[] serviceReferences = null;
         try {
-            serviceReferences = RESTCoreActivator.getBundleContext().getServiceReferences((String) null, filter);
+            serviceReferences = bundleContext.getServiceReferences((String) null, filter);
         } catch (InvalidSyntaxException ex) {
             logger.error("Cannot get service references because the syntax of the filter '{}' is invalid.", filter);
         }
@@ -287,8 +306,7 @@ public class ConfigurableServiceResource implements RESTResource {
         String filter = "(" + Constants.SERVICE_PID + "=" + factoryPid + ")";
 
         try {
-            ServiceReference<?>[] refs = RESTCoreActivator.getBundleContext().getServiceReferences((String) null,
-                    filter);
+            ServiceReference<?>[] refs = bundleContext.getServiceReferences((String) null, filter);
 
             if (refs != null && refs.length > 0) {
                 configDescriptionURI = (String) refs[0]

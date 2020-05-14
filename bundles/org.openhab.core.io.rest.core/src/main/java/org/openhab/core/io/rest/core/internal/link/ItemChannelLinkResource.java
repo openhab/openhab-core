@@ -34,6 +34,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.thing.ChannelUID;
@@ -45,6 +46,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,10 +66,16 @@ import io.swagger.annotations.ApiResponses;
  * @author Kai Kreuzer - Removed Thing links and added auto link url
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Yannick Schaus - Added filters to getAll
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
-@Path(ItemChannelLinkResource.PATH_LINKS)
-@Api(value = ItemChannelLinkResource.PATH_LINKS)
 @Component(service = { RESTResource.class, ItemChannelLinkResource.class })
+@JaxrsResource
+@JaxrsName(ItemChannelLinkResource.PATH_LINKS)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Path(ItemChannelLinkResource.PATH_LINKS)
+@RolesAllowed({ Role.ADMIN })
+@Api(ItemChannelLinkResource.PATH_LINKS)
 public class ItemChannelLinkResource implements RESTResource {
 
     /** The URI path to this resource */

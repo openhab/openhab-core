@@ -46,12 +46,18 @@ import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UserSession;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.auth.internal.TokenEndpointException.ErrorType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,10 +70,15 @@ import io.swagger.annotations.ApiResponses;
  * This class is used to issue JWT tokens to clients.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Wouter Born - Migrated to JAX-RS Whiteboard Specification
  */
-@Path(TokenResource.PATH_AUTH)
-@Api(value = TokenResource.PATH_AUTH)
 @Component(service = { RESTResource.class, TokenResource.class })
+@JaxrsResource
+@JaxrsName(TokenResource.PATH_AUTH)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Path(TokenResource.PATH_AUTH)
+@Api(TokenResource.PATH_AUTH)
 public class TokenResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(TokenResource.class);
 

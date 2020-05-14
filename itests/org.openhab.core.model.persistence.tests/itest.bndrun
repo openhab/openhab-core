@@ -111,4 +111,4 @@ Fragment-Host: org.openhab.core.model.persistence
 	org.openhab.core.thing;version='[3.0.0,3.0.1)',\
 	org.openhab.core.transform;version='[3.0.0,3.0.1)',\
 	org.openhab.core.voice;version='[3.0.0,3.0.1)',\
-	org.openhab.core.model.rule.runtime;version='[3.0.0,3.0.1)'
+	org.openhab.core.model.item.runtime;version='[3.0.0,3.0.1)'

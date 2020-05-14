@@ -62,11 +62,17 @@ import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,12 +88,20 @@ import io.swagger.annotations.ResponseHeader;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Use DTOs
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
-@Path("rules")
-@Api("rules")
 @Component
+@JaxrsResource
+@JaxrsName(RuleResource.PATH_RULES)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Path(RuleResource.PATH_RULES)
+@Api(RuleResource.PATH_RULES)
 @RolesAllowed({ Role.ADMIN })
 public class RuleResource implements RESTResource {
+
+    /** The URI path to this resource */
+    public static final String PATH_RULES = "rules";
 
     private final Logger logger = LoggerFactory.getLogger(RuleResource.class);
 

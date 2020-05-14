@@ -12,34 +12,40 @@
  */
 package org.openhab.core.io.rest.internal.resources;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.List;
-import java.util.Properties;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
-import org.openhab.core.io.rest.RESTResource;
-import org.openhab.core.io.rest.internal.Constants;
 import org.openhab.core.io.rest.internal.resources.beans.RootBean;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
+import org.openhab.core.io.rest.internal.resources.beans.RootBean.Links;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.jaxrs.runtime.JaxrsServiceRuntime;
+import org.osgi.service.jaxrs.runtime.dto.ApplicationDTO;
+import org.osgi.service.jaxrs.runtime.dto.ResourceDTO;
+import org.osgi.service.jaxrs.runtime.dto.RuntimeDTO;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * <p>
@@ -52,82 +58,61 @@ import org.slf4j.LoggerFactory;
  * The result is returned as JSON
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  */
-@Path("/")
 @Component(service = RootResource.class, configurationPid = "org.openhab.restroot")
+@JaxrsResource
+@JaxrsName(RootResource.RESOURCE_NAME)
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
+@JSONRequired
+@Produces(MediaType.APPLICATION_JSON)
+@NonNullByDefault
+@Path("/")
+@Api(RootResource.RESOURCE_NAME)
 public class RootResource {
 
-    private final transient Logger logger = LoggerFactory.getLogger(RootResource.class);
+    public static final String RESOURCE_NAME = "root";
 
-    private final List<RESTResource> restResources = new ArrayList<>();
+    private final Logger logger = LoggerFactory.getLogger(RootResource.class);
+    private final JaxrsServiceRuntime runtime;
 
-    private ConfigurationAdmin configurationAdmin;
-
-    @Context
-    UriInfo uriInfo;
+    @Activate
+    public RootResource(final @Reference JaxrsServiceRuntime runtime) {
+        this.runtime = runtime;
+    }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getRoot(@Context HttpHeaders headers) {
-        return Response.ok(getRootBean()).build();
-    }
+    @ApiOperation(value = "Gets the API version and links to resources.")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    public Object getRoot(@Context UriInfo uriInfo) {
+        // key: path, value: name (this way we could ensure that ever path is added only once).
+        final Map<String, String> collectedLinks = new HashMap<>();
 
-    private RootBean getRootBean() {
-        RootBean bean = new RootBean();
+        final RuntimeDTO runtimeDTO = runtime.getRuntimeDTO();
+        final RootBean bean = new RootBean();
+        for (final ApplicationDTO applicationDTO : runtimeDTO.applicationDTOs) {
+            for (final ResourceDTO resourceDTO : applicationDTO.resourceDTOs) {
+                // We are using the JAX-RS name per convention for the link type.
+                // Let's skip names that begin with a dot (e.g. the generated ones) and empty ones.
+                final String name = resourceDTO.name;
+                if (name == null || name.isEmpty() || name.startsWith(".") || RESOURCE_NAME.equals(name)) {
+                    continue;
+                }
 
-        for (RESTResource resource : restResources) {
-            // we will include all RESTResources that are currently satisfied
-            if (resource.isSatisfied()) {
-                String path = resource.getClass().getAnnotation(Path.class).value();
-                bean.links
-                        .add(new RootBean.Links(path, uriInfo.getBaseUriBuilder().path(path).build().toASCIIString()));
+                // The path is provided for every resource method by the respective info DTO.
+                // We don't want to add every REST endpoint but just the "parent" one.
+                // Per convention the name is similar to the path (without the leading "/") for openHAB REST
+                // implementations.
+
+                final URI uri = uriInfo.getBaseUriBuilder().path("/" + name).build();
+                if (collectedLinks.put(uri.toASCIIString(), name) != null) {
+                    logger.warn("Duplicate entry: {}", name);
+                }
             }
         }
-
+        collectedLinks.forEach((path, name) -> {
+            bean.links.add(new Links(name, path));
+        });
         return bean;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addRESTResource(RESTResource resource) {
-        restResources.add(resource);
-    }
-
-    public void removeRESTResource(RESTResource resource) {
-        restResources.remove(resource);
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Activate
-    public void activate() {
-        Configuration configuration;
-        try {
-            configuration = configurationAdmin.getConfiguration(Constants.JAXRS_CONNECTOR_CONFIG, null);
-
-            if (configuration != null) {
-                Dictionary properties = configuration.getProperties();
-
-                if (properties == null) {
-                    properties = new Properties();
-                }
-
-                String rootAlias = (String) properties.get(Constants.JAXRS_CONNECTOR_ROOT_PROPERTY);
-                if (!RESTConstants.REST_URI.equals(rootAlias)) {
-                    properties.put(Constants.JAXRS_CONNECTOR_ROOT_PROPERTY, RESTConstants.REST_URI);
-
-                    configuration.update(properties);
-                }
-            }
-        } catch (IOException e) {
-            logger.error("Could not set REST configuration properties!", e);
-        }
-    }
-
-    @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = null;
     }
 }
