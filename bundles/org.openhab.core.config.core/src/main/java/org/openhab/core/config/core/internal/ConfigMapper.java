@@ -98,33 +98,13 @@ public class ConfigMapper {
                 value = objectConvert(value, type);
                 LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
                         value, fieldName, configurationClass.getName());
-                writeField(configuration, fieldName, value, true);
+                field.setAccessible(true);
+                field.set(configuration, value);
             } catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
                 LOGGER.warn("Could not set field value for field '{}': {}", fieldName, ex.getMessage(), ex);
             }
         }
         return configuration;
-    }
-
-    /**
-     * Writes a field. Superclasses will be considered.
-     *
-     * @param target the object to reflect
-     * @param fieldName the field name to obtain
-     * @param value to set
-     * @param forceAccess whether to break scope restrictions using the <code>setAccessible</code> method.
-     */
-    private static void writeField(Object target, String fieldName, Object value, boolean forceAccess)
-            throws SecurityException, IllegalArgumentException, IllegalAccessException {
-        for (Class<?> superclazz = target.getClass(); superclazz != null; superclazz = superclazz.getSuperclass()) {
-            try {
-                Field field = superclazz.getDeclaredField(fieldName);
-                field.setAccessible(forceAccess);
-                field.set(target, value);
-            } catch (NoSuchFieldException e) {
-                // ignore
-            }
-        }
     }
 
     /**
