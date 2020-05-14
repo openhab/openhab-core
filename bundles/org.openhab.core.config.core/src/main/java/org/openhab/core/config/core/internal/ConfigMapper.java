@@ -75,7 +75,6 @@ public class ConfigMapper {
             Class<?> type = field.getType();
 
             Object value = properties.get(configKey);
-
             // Consider RequiredField annotations
             if (value == null) {
                 LOGGER.trace("Skipping field '{}', because config has no entry for {}", fieldName, configKey);
@@ -104,10 +103,17 @@ public class ConfigMapper {
                 LOGGER.warn("Could not set field value for field '{}': {}", fieldName, ex.getMessage(), ex);
             }
         }
-
         return configuration;
     }
 
+    /**
+     * Writes a field. Superclasses will be considered.
+     *
+     * @param target the object to reflect
+     * @param fieldName the field name to obtain
+     * @param value to set
+     * @param forceAccess whether to break scope restrictions using the <code>setAccessible</code> method.
+     */
     private static void writeField(Object target, String fieldName, Object value, boolean forceAccess)
             throws SecurityException, IllegalArgumentException, IllegalAccessException {
         for (Class<?> superclazz = target.getClass(); superclazz != null; superclazz = superclazz.getSuperclass()) {
@@ -129,13 +135,9 @@ public class ConfigMapper {
      */
     private static List<Field> getAllFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
-
-        Class<?> currentClass = clazz;
-        while (currentClass != null) {
-            fields.addAll(Arrays.asList(currentClass.getDeclaredFields()));
-            currentClass = currentClass.getSuperclass();
+        for (Class<?> superclazz = clazz; superclazz != null; superclazz = superclazz.getSuperclass()) {
+            fields.addAll(Arrays.asList(superclazz.getDeclaredFields()));
         }
-
         return fields;
     }
 
