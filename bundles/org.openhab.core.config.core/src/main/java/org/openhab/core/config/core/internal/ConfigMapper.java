@@ -100,7 +100,7 @@ public class ConfigMapper {
                 LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
                         value, fieldName, configurationClass.getName());
                 writeField(configuration, fieldName, value, true);
-            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            } catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
                 LOGGER.warn("Could not set field value for field '{}': {}", fieldName, ex.getMessage(), ex);
             }
         }
@@ -109,10 +109,16 @@ public class ConfigMapper {
     }
 
     private static void writeField(Object target, String fieldName, Object value, boolean forceAccess)
-            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-        Field field = target.getClass().getDeclaredField(fieldName);
-        field.setAccessible(forceAccess);
-        field.set(target, value);
+            throws SecurityException, IllegalArgumentException, IllegalAccessException {
+        for (Class<?> superclazz = target.getClass(); superclazz != null; superclazz = superclazz.getSuperclass()) {
+            try {
+                Field field = superclazz.getDeclaredField(fieldName);
+                field.setAccessible(forceAccess);
+                field.set(target, value);
+            } catch (NoSuchFieldException e) {
+                // ignore
+            }
+        }
     }
 
     /**
