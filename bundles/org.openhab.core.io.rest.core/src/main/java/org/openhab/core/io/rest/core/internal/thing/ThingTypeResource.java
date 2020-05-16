@@ -202,6 +202,10 @@ public class ThingTypeResource implements RESTResource {
             String id = channelGroupDefinition.getId();
             ChannelGroupType channelGroupType = channelGroupTypeRegistry
                     .getChannelGroupType(channelGroupDefinition.getTypeUID(), locale);
+            if (channelGroupType == null) {
+                logger.warn("Cannot find channel group type: {}", channelGroupDefinition.getTypeUID());
+                return null;
+            }
 
             // Default to the channelGroupDefinition label/description to override the channelGroupType
             String label = channelGroupDefinition.getLabel();
