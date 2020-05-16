@@ -37,10 +37,9 @@ import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -70,27 +69,18 @@ import io.swagger.annotations.ApiResponses;
 @NonNullByDefault
 public class AudioResource implements RESTResource {
 
-    static final String PATH_AUDIO = "audio";
+    /** The URI path to this resource */
+    public static final String PATH_AUDIO = "audio";
 
-    private @Nullable AudioManager audioManager;
-    private @Nullable LocaleService localeService;
+    private final AudioManager audioManager;
+    private final LocaleService localeService;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setAudioManager(AudioManager audioManager) {
+    @Activate
+    public AudioResource( //
+            final @Reference AudioManager audioManager, //
+            final @Reference LocaleService localeService) {
         this.audioManager = audioManager;
-    }
-
-    public void unsetAudioManager(AudioManager audioManager) {
-        this.audioManager = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
         this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
     }
 
     @GET
@@ -157,10 +147,5 @@ public class AudioResource implements RESTResource {
         } else {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Sink not found");
         }
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return audioManager != null && localeService != null;
     }
 }

@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
@@ -62,6 +63,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(service = { SitemapSubscriptionService.class,
         EventSubscriber.class }, configurationPid = "org.openhab.sitemapsubscription")
+@NonNullByDefault
 public class SitemapSubscriptionService implements ModelRepositoryChangeListener, EventSubscriber {
 
     private static final String SITEMAP_PAGE_SEPARATOR = "#";
@@ -77,7 +79,8 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         void onRelease(String subscriptionId);
     }
 
-    private ItemUIRegistry itemUIRegistry;
+    private final ItemUIRegistry itemUIRegistry;
+
     private final List<SitemapProvider> sitemapProviders = new ArrayList<>();
 
     /* subscription id -> sitemap+page */
@@ -95,12 +98,10 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     /* Max number of subscriptions at the same time */
     private int maxSubscriptions = DEFAULT_MAX_SUBSCRIPTIONS;
 
-    public SitemapSubscriptionService() {
-    }
-
     @Activate
-    protected void activate(Map<String, Object> config) {
+    public SitemapSubscriptionService(Map<String, Object> config, final @Reference ItemUIRegistry itemUIRegistry) {
         applyConfig(config);
+        this.itemUIRegistry = itemUIRegistry;
     }
 
     @Deactivate
@@ -132,15 +133,6 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         }
     }
 
-    @Reference
-    protected void setItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = itemUIRegistry;
-    }
-
-    protected void unsetItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = null;
-    }
-
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSitemapProvider(SitemapProvider provider) {
         sitemapProviders.add(provider);
@@ -158,7 +150,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
      * @param callback an instance that should receive the events
      * @returns a unique id that identifies the subscription or null if the limit of subscriptions is already reached
      */
-    public String createSubscription(SitemapSubscriptionCallback callback) {
+    public @Nullable String createSubscription(SitemapSubscriptionCallback callback) {
         if (maxSubscriptions >= 0 && callbacks.size() >= maxSubscriptions) {
             logger.debug("No new subscription delivered as limit ({}) is already reached", maxSubscriptions);
             return null;
@@ -206,7 +198,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
      * @param subscriptionId the subscription to get the page id for
      * @return the id of the currently active page or null if no page is currently set for the subscription
      */
-    public String getPageId(String subscriptionId) {
+    public @Nullable String getPageId(String subscriptionId) {
         String sitemapWithPageId = pageOfSubscription.get(subscriptionId);
         return (sitemapWithPageId == null) ? null : extractPageId(sitemapWithPageId);
     }
@@ -217,7 +209,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
      * @param subscriptionId the subscription to get the sitemap name for
      * @return the name of the current sitemap or null if no sitemap is currently set for the subscription
      */
-    public String getSitemapName(String subscriptionId) {
+    public @Nullable String getSitemapName(String subscriptionId) {
         String sitemapWithPageId = pageOfSubscription.get(subscriptionId);
         return (sitemapWithPageId == null) ? null : extractSitemapName(sitemapWithPageId);
     }
@@ -260,8 +252,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
             // there is no listener for this page yet, so let's try to create one
             listener = new PageChangeListener(sitemapName, pageId, itemUIRegistry, collectWidgets(sitemapName, pageId));
             pageChangeListeners.put(getValue(sitemapName, pageId), listener);
-        }
-        if (listener != null) {
+        } else {
             listener.addCallback(callback);
         }
     }
@@ -301,7 +292,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         return sitemapName + SITEMAP_PAGE_SEPARATOR + pageId;
     }
 
-    private Sitemap getSitemap(String sitemapName) {
+    private @Nullable Sitemap getSitemap(String sitemapName) {
         for (SitemapProvider provider : sitemapProviders) {
             Sitemap sitemap = provider.getSitemap(sitemapName);
             if (sitemap != null) {

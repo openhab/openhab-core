@@ -61,7 +61,7 @@ public class Configuration {
      *
      * @param properties the properties the configuration should be filled. If null, an empty configuration is created.
      */
-    public Configuration(Map<String, Object> properties) {
+    public Configuration(@Nullable Map<String, Object> properties) {
         this(properties == null ? emptyMap() : properties, false);
     }
 
@@ -103,7 +103,7 @@ public class Configuration {
         return properties.get(key);
     }
 
-    public Object put(String key, Object value) {
+    public Object put(String key, @Nullable Object value) {
         return properties.put(key, ConfigUtil.normalizeType(value, null));
     }
 
@@ -150,7 +150,7 @@ public class Configuration {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         return (obj instanceof Configuration) && this.properties.equals(((Configuration) obj).properties);
     }
 

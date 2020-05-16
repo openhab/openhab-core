@@ -95,18 +95,13 @@ public class SseResource implements SsePublisher {
 
     private final Logger logger = LoggerFactory.getLogger(SseResource.class);
 
-    private @NonNullByDefault({}) Sse sse;
+    private @Context @NonNullByDefault({}) Sse sse;
 
     private final SseBroadcaster<SseSinkItemInfo> itemStatesBroadcaster = new SseBroadcaster<>();
     private final SseItemStatesEventBuilder itemStatesEventBuilder;
     private final SseBroadcaster<SseSinkTopicInfo> topicBroadcaster = new SseBroadcaster<>();
 
     private ExecutorService executorService;
-
-    @Context
-    public void setSse(final Sse sse) {
-        this.sse = sse;
-    }
 
     @Activate
     public SseResource(@Reference SseItemStatesEventBuilder itemStatesEventBuilder) {

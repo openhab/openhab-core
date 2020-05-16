@@ -51,6 +51,7 @@ import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.test.java.JavaOSGiTest;
+import org.openhab.core.test.storage.VolatileStorageService;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -72,8 +73,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private GenericItem item3;
     private GenericItem item4;
 
-    @Mock
-    private ItemProvider itemProvider;
+    private @Mock ItemProvider itemProvider;
 
     private UriInfo uriInfo;
     private HttpHeaders httpHeaders;
@@ -84,6 +84,8 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     @Before
     public void setup() {
         initMocks(this);
+
+        registerService(new VolatileStorageService());
 
         itemResource = getService(RESTResource.class, ItemResource.class);
         assertNotNull(itemResource);

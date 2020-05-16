@@ -21,20 +21,19 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.config.discovery.ScanListener;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -68,6 +67,7 @@ import io.swagger.annotations.ApiResponses;
 @Path(DiscoveryResource.PATH_DISCOVERY)
 @RolesAllowed({ Role.ADMIN })
 @Api(DiscoveryResource.PATH_DISCOVERY)
+@NonNullByDefault
 public class DiscoveryResource implements RESTResource {
 
     /** The URI path to this resource */
@@ -75,19 +75,12 @@ public class DiscoveryResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(DiscoveryResource.class);
 
-    private DiscoveryServiceRegistry discoveryServiceRegistry;
+    private final DiscoveryServiceRegistry discoveryServiceRegistry;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setDiscoveryServiceRegistry(DiscoveryServiceRegistry discoveryServiceRegistry) {
+    @Activate
+    public DiscoveryResource(final @Reference DiscoveryServiceRegistry discoveryServiceRegistry) {
         this.discoveryServiceRegistry = discoveryServiceRegistry;
     }
-
-    protected void unsetDiscoveryServiceRegistry(DiscoveryServiceRegistry discoveryServiceRegistry) {
-        this.discoveryServiceRegistry = null;
-    }
-
-    @Context
-    private UriInfo uriInfo;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -107,9 +100,8 @@ public class DiscoveryResource implements RESTResource {
     public Response scan(@PathParam("bindingId") @ApiParam(value = "bindingId") final String bindingId) {
         discoveryServiceRegistry.startScan(bindingId, new ScanListener() {
             @Override
-            public void onErrorOccurred(Exception exception) {
-                logger.error("Error occurred while scanning for binding '{}': {}", bindingId, exception.getMessage(),
-                        exception);
+            public void onErrorOccurred(@Nullable Exception exception) {
+                logger.error("Error occurred while scanning for binding '{}'", bindingId, exception);
             }
 
             @Override
@@ -119,10 +111,5 @@ public class DiscoveryResource implements RESTResource {
         });
 
         return Response.ok(discoveryServiceRegistry.getMaxScanTimeout(bindingId)).build();
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return discoveryServiceRegistry != null;
     }
 }

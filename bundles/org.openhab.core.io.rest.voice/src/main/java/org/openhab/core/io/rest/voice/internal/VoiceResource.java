@@ -12,10 +12,9 @@
  */
 package org.openhab.core.io.rest.voice.internal;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -26,13 +25,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
@@ -42,10 +41,9 @@ import org.openhab.core.voice.Voice;
 import org.openhab.core.voice.VoiceManager;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -73,32 +71,21 @@ import io.swagger.annotations.ApiResponses;
 @Path(VoiceResource.PATH_VOICE)
 @RolesAllowed({ Role.USER, Role.ADMIN })
 @Api(VoiceResource.PATH_VOICE)
+@NonNullByDefault
 public class VoiceResource implements RESTResource {
 
-    static final String PATH_VOICE = "voice";
+    /** The URI path to this resource */
+    public static final String PATH_VOICE = "voice";
 
-    @Context
-    UriInfo uriInfo;
+    private final LocaleService localeService;
+    private final VoiceManager voiceManager;
 
-    private VoiceManager voiceManager;
-    private LocaleService localeService;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setVoiceManager(VoiceManager voiceManager) {
-        this.voiceManager = voiceManager;
-    }
-
-    public void unsetVoiceManager(VoiceManager voiceManager) {
-        this.voiceManager = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
+    @Activate
+    public VoiceResource( //
+            final @Reference LocaleService localeService, //
+            final @Reference VoiceManager voiceManager) {
         this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
+        this.voiceManager = voiceManager;
     }
 
     @GET
@@ -107,13 +94,10 @@ public class VoiceResource implements RESTResource {
     @ApiOperation(value = "Get the list of all interpreters.", response = HumanLanguageInterpreterDTO.class, responseContainer = "List")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response getInterpreters(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
-        Collection<HumanLanguageInterpreter> hlis = voiceManager.getHLIs();
-        List<HumanLanguageInterpreterDTO> dtos = new ArrayList<>(hlis.size());
-        for (HumanLanguageInterpreter hli : hlis) {
-            dtos.add(HLIMapper.map(hli, locale));
-        }
+        List<HumanLanguageInterpreterDTO> dtos = voiceManager.getHLIs().stream().map(hli -> HLIMapper.map(hli, locale))
+                .collect(Collectors.toList());
         return Response.ok(dtos).build();
     }
 
@@ -124,16 +108,16 @@ public class VoiceResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Interpreter not found") })
     public Response getInterpreter(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
-            @PathParam("id") @ApiParam(value = "interpreter id", required = true) String id) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
+            @PathParam("id") @ApiParam(value = "interpreter id") String id) {
         final Locale locale = localeService.getLocale(language);
         HumanLanguageInterpreter hli = voiceManager.getHLI(id);
-        if (hli != null) {
-            HumanLanguageInterpreterDTO dto = HLIMapper.map(hli, locale);
-            return Response.ok(dto).build();
-        } else {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
+        if (hli == null) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
         }
+
+        HumanLanguageInterpreterDTO dto = HLIMapper.map(hli, locale);
+        return Response.ok(dto).build();
     }
 
     @POST
@@ -143,20 +127,21 @@ public class VoiceResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "No human language interpreter was found."),
             @ApiResponse(code = 400, message = "interpretation exception occurs") })
-    public Response interpret(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public Response interpret(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @ApiParam(value = "text to interpret", required = true) String text,
-            @PathParam("id") @ApiParam(value = "interpreter id", required = true) String id) {
+            @PathParam("id") @ApiParam(value = "interpreter id") String id) {
         final Locale locale = localeService.getLocale(language);
         HumanLanguageInterpreter hli = voiceManager.getHLI(id);
-        if (hli != null) {
-            try {
-                hli.interpret(locale, text);
-                return Response.ok(null, MediaType.TEXT_PLAIN).build();
-            } catch (InterpretationException e) {
-                return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
-            }
-        } else {
-            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Interpreter not found");
+        if (hli == null) {
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+        }
+
+        try {
+            hli.interpret(locale, text);
+            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        } catch (InterpretationException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -167,19 +152,20 @@ public class VoiceResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "No human language interpreter was found."),
             @ApiResponse(code = 400, message = "interpretation exception occurs") })
-    public Response interpret(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public Response interpret(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @ApiParam(value = "text to interpret", required = true) String text) {
         final Locale locale = localeService.getLocale(language);
         HumanLanguageInterpreter hli = voiceManager.getHLI();
-        if (hli != null) {
-            try {
-                hli.interpret(locale, text);
-                return Response.ok(null, MediaType.TEXT_PLAIN).build();
-            } catch (InterpretationException e) {
-                return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
-            }
-        } else {
+        if (hli == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "No interpreter found");
+        }
+
+        try {
+            hli.interpret(locale, text);
+            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        } catch (InterpretationException e) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -189,11 +175,7 @@ public class VoiceResource implements RESTResource {
     @ApiOperation(value = "Get the list of all voices.", response = VoiceDTO.class, responseContainer = "List")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response getVoices() {
-        Collection<Voice> voices = voiceManager.getAllVoices();
-        List<VoiceDTO> dtos = new ArrayList<>(voices.size());
-        for (Voice voice : voices) {
-            dtos.add(VoiceMapper.map(voice));
-        }
+        List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).collect(Collectors.toList());
         return Response.ok(dtos).build();
     }
 
@@ -205,12 +187,12 @@ public class VoiceResource implements RESTResource {
             @ApiResponse(code = 404, message = "No default voice was found.") })
     public Response getDefaultVoice() {
         Voice voice = voiceManager.getDefaultVoice();
-        if (voice != null) {
-            VoiceDTO dto = VoiceMapper.map(voice);
-            return Response.ok(dto).build();
-        } else {
+        if (voice == null) {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Default voice not found");
         }
+
+        VoiceDTO dto = VoiceMapper.map(voice);
+        return Response.ok(dto).build();
     }
 
     @POST
@@ -219,14 +201,9 @@ public class VoiceResource implements RESTResource {
     @ApiOperation(value = "Speaks a given text with a given voice through the given audio sink.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response say(@ApiParam(value = "text to speak", required = true) String text,
-            @ApiParam(value = "voice id", required = false) @QueryParam("voiceid") String voiceId,
-            @ApiParam(value = "audio sink id", required = false) @QueryParam("sinkid") String sinkId) {
+            @QueryParam("voiceid") @ApiParam(value = "voice id") @Nullable String voiceId,
+            @QueryParam("sinkid") @ApiParam(value = "audio sink id") @Nullable String sinkId) {
         voiceManager.say(text, voiceId, sinkId);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return voiceManager != null && localeService != null;
     }
 }

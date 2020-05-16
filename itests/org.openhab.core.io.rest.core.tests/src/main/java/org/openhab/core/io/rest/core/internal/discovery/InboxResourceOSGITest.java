@@ -14,13 +14,15 @@ package org.openhab.core.io.rest.core.internal.discovery;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -41,32 +43,32 @@ public class InboxResourceOSGITest extends JavaOSGiTest {
     private final Thing testThing = ThingBuilder.create(testTypeUID, testUID).build();
     private final String testThingLabel = "dummy_thing";
 
+    private @Mock Inbox inbox;
+
     @Before
     public void setup() throws Exception {
-        ConfigDescriptionRegistry configDescRegistry = getService(ConfigDescriptionRegistry.class);
-        assertFalse(configDescRegistry == null);
+        initMocks(this);
 
-        registerService(new InboxResource(), InboxResource.class.getName());
+        ConfigDescriptionRegistry configDescRegistry = getService(ConfigDescriptionRegistry.class);
+        assertNotNull(configDescRegistry);
+
+        registerService(new InboxResource(inbox), InboxResource.class.getName());
         resource = getService(InboxResource.class);
-        assertFalse(resource == null);
+        assertNotNull(resource);
     }
 
     @Test
     public void assertThatApproveApprovesThingsWhichAreInTheInbox() {
-        Inbox inbox = mock(Inbox.class);
         when(inbox.approve(any(), any())).thenReturn(testThing);
 
-        resource.setInbox(inbox);
         Response reponse = resource.approve(null, testThing.getUID().toString(), testThingLabel);
         assertTrue(reponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode());
     }
 
     @Test
     public void assertThatApproveDoesntApproveThingsWhichAreNotInTheInbox() {
-        Inbox inbox = mock(Inbox.class);
         when(inbox.approve(any(), any())).thenThrow(new IllegalArgumentException());
 
-        resource.setInbox(inbox);
         Response reponse = resource.approve(null, testThing.getUID().toString(), testThingLabel);
         assertTrue(reponse.getStatusInfo().getStatusCode() == Status.NOT_FOUND.getStatusCode());
     }

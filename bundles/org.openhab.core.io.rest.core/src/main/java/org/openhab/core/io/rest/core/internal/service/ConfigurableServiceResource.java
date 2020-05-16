@@ -35,6 +35,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigDescription;
@@ -55,8 +57,6 @@ import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -87,6 +87,7 @@ import io.swagger.annotations.ApiResponses;
 @Path(ConfigurableServiceResource.PATH_SERVICES)
 @RolesAllowed({ Role.ADMIN })
 @Api(ConfigurableServiceResource.PATH_SERVICES)
+@NonNullByDefault
 public class ConfigurableServiceResource implements RESTResource {
 
     /** The URI path to this resource */
@@ -104,13 +105,17 @@ public class ConfigurableServiceResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(ConfigurableServiceResource.class);
 
     private final BundleContext bundleContext;
-
-    private ConfigurationService configurationService;
-    private ConfigDescriptionRegistry configDescRegistry;
+    private final ConfigDescriptionRegistry configDescRegistry;
+    private final ConfigurationService configurationService;
 
     @Activate
-    public ConfigurableServiceResource(final BundleContext bundleContext) {
+    public ConfigurableServiceResource( //
+            final BundleContext bundleContext, //
+            final @Reference ConfigurationService configurationService,
+            final @Reference ConfigDescriptionRegistry configDescRegistry) {
         this.bundleContext = bundleContext;
+        this.configDescRegistry = configDescRegistry;
+        this.configurationService = configurationService;
     }
 
     @GET
@@ -129,7 +134,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @ApiOperation(value = "Get configurable service for given service ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ConfigurableServiceDTO.class),
             @ApiResponse(code = 404, message = "Not found") })
-    public Response getById(@PathParam("serviceId") @ApiParam(value = "service ID", required = true) String serviceId) {
+    public Response getById(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
         ConfigurableServiceDTO configurableService = getServiceById(serviceId);
         if (configurableService != null) {
             return Response.ok(configurableService).build();
@@ -138,7 +143,7 @@ public class ConfigurableServiceResource implements RESTResource {
         }
     }
 
-    private ConfigurableServiceDTO getServiceById(String serviceId) {
+    private @Nullable ConfigurableServiceDTO getServiceById(String serviceId) {
         ConfigurableServiceDTO multiService = getMultiConfigServiceById(serviceId);
         if (multiService != null) {
             return multiService;
@@ -153,7 +158,7 @@ public class ConfigurableServiceResource implements RESTResource {
         return null;
     }
 
-    private ConfigurableServiceDTO getMultiConfigServiceById(String serviceId) {
+    private @Nullable ConfigurableServiceDTO getMultiConfigServiceById(String serviceId) {
         String filter = "(&(" + Constants.SERVICE_PID + "=" + serviceId + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID
                 + "=*))";
         List<ConfigurableServiceDTO> services = getServicesByFilter(filter);
@@ -170,7 +175,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ConfigurableServiceDTO.class, responseContainer = "List") })
     public List<ConfigurableServiceDTO> getMultiConfigServicesByFactoryPid(
-            @PathParam("serviceId") @ApiParam(value = "service ID", required = true) String serviceId) {
+            @PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
         List<ConfigurableServiceDTO> services = collectServicesById(serviceId);
         return services;
     }
@@ -186,8 +191,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @ApiOperation(value = "Get service configuration for given service ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Configuration can not be read due to internal error") })
-    public Response getConfiguration(
-            @PathParam("serviceId") @ApiParam(value = "service ID", required = true) String serviceId) {
+    public Response getConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
         try {
             Configuration configuration = configurationService.get(serviceId);
             return configuration != null ? Response.ok(configuration.getProperties()).build()
@@ -206,9 +210,8 @@ public class ConfigurableServiceResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 204, message = "No old configuration"),
             @ApiResponse(code = 500, message = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(
-            @PathParam("serviceId") @ApiParam(value = "service ID", required = true) String serviceId,
-            Map<String, Object> configuration) {
+    public Response updateConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId,
+            @Nullable Map<String, Object> configuration) {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
             configurationService.update(serviceId, new Configuration(normalizeConfiguration(configuration, serviceId)));
@@ -220,7 +223,8 @@ public class ConfigurableServiceResource implements RESTResource {
         }
     }
 
-    private Map<String, Object> normalizeConfiguration(Map<String, Object> properties, String serviceId) {
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            String serviceId) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -253,8 +257,7 @@ public class ConfigurableServiceResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 204, message = "No old configuration"),
             @ApiResponse(code = 500, message = "Configuration can not be deleted due to internal error") })
-    public Response deleteConfiguration(
-            @PathParam("serviceId") @ApiParam(value = "service ID", required = true) String serviceId) {
+    public Response deleteConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
             configurationService.delete(serviceId);
@@ -300,7 +303,7 @@ public class ConfigurableServiceResource implements RESTResource {
         return services;
     }
 
-    private String getConfigDescriptionByFactoryPid(String factoryPid) {
+    private @Nullable String getConfigDescriptionByFactoryPid(String factoryPid) {
         String configDescriptionURI = null;
 
         String filter = "(" + Constants.SERVICE_PID + "=" + factoryPid + ")";
@@ -378,28 +381,5 @@ public class ConfigurableServiceResource implements RESTResource {
                 }
                 return first;
         }
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    protected void unsetConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = null;
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return configurationService != null && configDescRegistry != null;
     }
 }

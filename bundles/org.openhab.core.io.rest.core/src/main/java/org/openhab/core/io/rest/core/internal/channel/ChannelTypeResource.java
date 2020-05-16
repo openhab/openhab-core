@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigDescription;
@@ -52,10 +53,9 @@ import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -84,52 +84,27 @@ import io.swagger.annotations.ApiResponses;
 @Path(ChannelTypeResource.PATH_CHANNEL_TYPES)
 @RolesAllowed({ Role.ADMIN })
 @Api(ChannelTypeResource.PATH_CHANNEL_TYPES)
+@NonNullByDefault
 public class ChannelTypeResource implements RESTResource {
 
     /** The URI path to this resource */
     public static final String PATH_CHANNEL_TYPES = "channel-types";
 
-    private ChannelTypeRegistry channelTypeRegistry;
-    private ConfigDescriptionRegistry configDescriptionRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
+    private final LocaleService localeService;
+    private final ProfileTypeRegistry profileTypeRegistry;
 
-    private ProfileTypeRegistry profileTypeRegistry;
-
-    private LocaleService localeService;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
+    @Activate
+    public ChannelTypeResource( //
+            final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference LocaleService localeService, //
+            final @Reference ProfileTypeRegistry profileTypeRegistry) {
         this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
         this.configDescriptionRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setProfileTypeRegistry(ProfileTypeRegistry profileTypeRegistry) {
-        this.profileTypeRegistry = profileTypeRegistry;
-    }
-
-    protected void unsetProfileTypeRegistry(ProfileTypeRegistry profileTypeRegistry) {
-        this.profileTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
         this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
+        this.profileTypeRegistry = profileTypeRegistry;
     }
 
     @GET
@@ -137,8 +112,8 @@ public class ChannelTypeResource implements RESTResource {
     @ApiOperation(value = "Gets all available channel types.", response = ChannelTypeDTO.class, responseContainer = "Set")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ChannelTypeDTO.class, responseContainer = "Set"))
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language,
-            @QueryParam("prefixes") @ApiParam(value = "filter UIDs by prefix (multiple comma-separated prefixes allowed, for example: 'system,mqtt')", required = false) @Nullable String prefixes) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
+            @QueryParam("prefixes") @ApiParam(value = "filter UIDs by prefix (multiple comma-separated prefixes allowed, for example: 'system,mqtt')") @Nullable String prefixes) {
         Locale locale = localeService.getLocale(language);
 
         Stream<ChannelTypeDTO> channelStream = channelTypeRegistry.getChannelTypes(locale).stream()
@@ -163,7 +138,7 @@ public class ChannelTypeResource implements RESTResource {
             @ApiResponse(code = 200, message = "Channel type with provided channelTypeUID does not exist.", response = ChannelTypeDTO.class),
             @ApiResponse(code = 404, message = "No content") })
     public Response getByUID(@PathParam("channelTypeUID") @ApiParam(value = "channelTypeUID") String channelTypeUID,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         ChannelType channelType = channelTypeRegistry.getChannelType(new ChannelTypeUID(channelTypeUID), locale);
         if (channelType != null) {
@@ -234,11 +209,5 @@ public class ChannelTypeResource implements RESTResource {
                 channelType.getCategory(), channelType.getItemType(), channelType.getKind(), parameters,
                 parameterGroups, channelType.getState(), channelType.getTags(), channelType.isAdvanced(),
                 channelType.getCommandDescription());
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return channelTypeRegistry != null && configDescriptionRegistry != null && profileTypeRegistry != null
-                && localeService != null;
     }
 }

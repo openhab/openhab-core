@@ -24,12 +24,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.Configuration;
@@ -42,10 +41,9 @@ import org.openhab.core.thing.link.AbstractLink;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -76,15 +74,18 @@ import io.swagger.annotations.ApiResponses;
 @Path(ItemChannelLinkResource.PATH_LINKS)
 @RolesAllowed({ Role.ADMIN })
 @Api(ItemChannelLinkResource.PATH_LINKS)
+@NonNullByDefault
 public class ItemChannelLinkResource implements RESTResource {
 
     /** The URI path to this resource */
     public static final String PATH_LINKS = "links";
 
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
 
-    @Context
-    UriInfo uriInfo;
+    @Activate
+    public ItemChannelLinkResource(final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry) {
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -92,8 +93,8 @@ public class ItemChannelLinkResource implements RESTResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ItemChannelLinkDTO.class, responseContainer = "Collection") })
     public Response getAll(
-            @QueryParam("channelUID") @ApiParam(value = "filter by channel UID", required = false) @Nullable String channelUID,
-            @QueryParam("itemName") @ApiParam(value = "filter by item name", required = false) @Nullable String itemName) {
+            @QueryParam("channelUID") @ApiParam(value = "filter by channel UID") @Nullable String channelUID,
+            @QueryParam("itemName") @ApiParam(value = "filter by item name") @Nullable String itemName) {
         Stream<ItemChannelLinkDTO> linkStream = itemChannelLinkRegistry.getAll().stream().map(this::toBeans);
 
         if (channelUID != null) {
@@ -134,7 +135,7 @@ public class ItemChannelLinkResource implements RESTResource {
             @ApiResponse(code = 405, message = "Link is not editable") })
     public Response link(@PathParam("itemName") @ApiParam(value = "itemName") String itemName,
             @PathParam("channelUID") @ApiParam(value = "channelUID") String channelUid,
-            @ApiParam(value = "link data", required = false) ItemChannelLinkDTO bean) {
+            @ApiParam(value = "link data") @Nullable ItemChannelLinkDTO bean) {
         ItemChannelLink link;
         if (bean == null) {
             link = new ItemChannelLink(itemName, new ChannelUID(channelUid), new Configuration());
@@ -182,22 +183,8 @@ public class ItemChannelLinkResource implements RESTResource {
         }
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
     private ItemChannelLinkDTO toBeans(ItemChannelLink link) {
         return new ItemChannelLinkDTO(link.getItemName(), link.getLinkedUID().toString(),
                 link.getConfiguration().getProperties());
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return itemChannelLinkRegistry != null;
     }
 }

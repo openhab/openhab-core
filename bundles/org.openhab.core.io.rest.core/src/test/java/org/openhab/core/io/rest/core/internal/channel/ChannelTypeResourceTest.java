@@ -14,7 +14,6 @@ package org.openhab.core.io.rest.core.internal.channel;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -30,6 +29,7 @@ import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.io.rest.LocaleServiceImpl;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
@@ -46,25 +46,23 @@ public class ChannelTypeResourceTest {
 
     private ChannelTypeResource channelTypeResource;
 
-    @Mock
-    private ChannelTypeRegistry channelTypeRegistry;
-
-    @Mock
-    private ProfileTypeRegistry profileTypeRegistry;
+    private @Mock ChannelTypeRegistry channelTypeRegistry;
+    private @Mock ConfigDescriptionRegistry configDescriptionRegistry;
+    private @Mock LocaleServiceImpl localeService;
+    private @Mock ProfileTypeRegistry profileTypeRegistry;
 
     @Before
     public void setup() {
         initMocks(this);
-        channelTypeResource = new ChannelTypeResource();
-        channelTypeResource.setLocaleService(new LocaleServiceImpl());
-        channelTypeResource.setChannelTypeRegistry(channelTypeRegistry);
-        channelTypeResource.setProfileTypeRegistry(profileTypeRegistry);
+        channelTypeResource = new ChannelTypeResource(channelTypeRegistry, configDescriptionRegistry, localeService,
+                profileTypeRegistry);
     }
 
     @Test
     public void getAllShouldRetrieveAllChannelTypes() throws Exception {
+        when(localeService.getLocale(null)).thenReturn(Locale.ENGLISH);
         channelTypeResource.getAll(null, null);
-        verify(channelTypeRegistry).getChannelTypes(any(Locale.class));
+        verify(channelTypeRegistry).getChannelTypes(Locale.ENGLISH);
     }
 
     @SuppressWarnings("unchecked")

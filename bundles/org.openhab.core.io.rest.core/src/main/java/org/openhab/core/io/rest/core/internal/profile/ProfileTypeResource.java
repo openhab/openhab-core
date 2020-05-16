@@ -27,6 +27,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.LocaleService;
@@ -43,17 +44,14 @@ import org.openhab.core.thing.profiles.dto.ProfileTypeDTOMapper;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -75,16 +73,25 @@ import io.swagger.annotations.ApiResponses;
 @Path(ProfileTypeResource.PATH_PROFILE_TYPES)
 @RolesAllowed({ Role.ADMIN })
 @Api(ProfileTypeResource.PATH_PROFILE_TYPES)
+@NonNullByDefault
 public class ProfileTypeResource implements RESTResource {
 
     /** The URI path to this resource */
     public static final String PATH_PROFILE_TYPES = "profile-types";
 
-    private final Logger logger = LoggerFactory.getLogger(ProfileTypeResource.class);
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final LocaleService localeService;
+    private final ProfileTypeRegistry profileTypeRegistry;
 
-    private ProfileTypeRegistry profileTypeRegistry;
-    private ChannelTypeRegistry channelTypeRegistry;
-    private LocaleService localeService;
+    @Activate
+    public ProfileTypeResource( //
+            final @Reference ChannelTypeRegistry channelTypeRegistry, //
+            final @Reference LocaleService localeService, //
+            final @Reference ProfileTypeRegistry profileTypeRegistry) {
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.localeService = localeService;
+        this.profileTypeRegistry = profileTypeRegistry;
+    }
 
     @GET
     @RolesAllowed({ Role.USER })
@@ -92,19 +99,20 @@ public class ProfileTypeResource implements RESTResource {
     @ApiOperation(value = "Gets all available profile types.", response = ProfileTypeDTO.class, responseContainer = "Set")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ProfileTypeDTO.class, responseContainer = "Set"))
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language,
-            @QueryParam("channelTypeUID") @ApiParam(value = "channel type filter", required = false) @Nullable String channelTypeUID,
-            @QueryParam("itemType") @ApiParam(value = "item type filter", required = false) @Nullable String itemType) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
+            @QueryParam("channelTypeUID") @ApiParam(value = "channel type filter") @Nullable String channelTypeUID,
+            @QueryParam("itemType") @ApiParam(value = "item type filter") @Nullable String itemType) {
         Locale locale = localeService.getLocale(language);
         return Response.ok(new Stream2JSONInputStream(getProfileTypes(locale, channelTypeUID, itemType))).build();
     }
 
-    protected Stream<ProfileTypeDTO> getProfileTypes(Locale locale, String channelTypeUID, String itemType) {
+    protected Stream<ProfileTypeDTO> getProfileTypes(@Nullable Locale locale, @Nullable String channelTypeUID,
+            @Nullable String itemType) {
         return profileTypeRegistry.getProfileTypes(locale).stream().filter(matchesChannelUID(channelTypeUID, locale))
-                .filter(matchesItemType(itemType)).map(t -> convertToProfileTypeDTO(t, locale));
+                .filter(matchesItemType(itemType)).map(profileType -> ProfileTypeDTOMapper.map(profileType));
     }
 
-    private Predicate<ProfileType> matchesChannelUID(String channelTypeUID, Locale locale) {
+    private Predicate<ProfileType> matchesChannelUID(@Nullable String channelTypeUID, @Nullable Locale locale) {
         if (channelTypeUID == null) {
             return t -> true;
         }
@@ -122,7 +130,7 @@ public class ProfileTypeResource implements RESTResource {
         return t -> false;
     }
 
-    private Predicate<ProfileType> matchesItemType(String itemType) {
+    private Predicate<ProfileType> matchesItemType(@Nullable String itemType) {
         if (itemType == null) {
             return t -> true;
         }
@@ -170,48 +178,5 @@ public class ProfileTypeResource implements RESTResource {
             }
         }
         return false;
-    }
-
-    private ProfileTypeDTO convertToProfileTypeDTO(ProfileType profileType, Locale locale) {
-        final ProfileTypeDTO profileTypeDTO = ProfileTypeDTOMapper.map(profileType);
-        if (profileTypeDTO != null) {
-            return profileTypeDTO;
-        } else {
-            logger.warn("Cannot create DTO for profileType '{}'. Skipping it.", profileTypeDTO);
-        }
-
-        return null;
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return (this.profileTypeRegistry != null && channelTypeRegistry != null);
-    }
-
-    @Reference
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setProfileTypeRegistry(ProfileTypeRegistry registry) {
-        this.profileTypeRegistry = registry;
-    }
-
-    protected void unsetProfileTypeRegistry(ProfileTypeRegistry registry) {
-        this.profileTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setChannelTypeRegistry(ChannelTypeRegistry registry) {
-        this.channelTypeRegistry = registry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry registry) {
-        this.channelTypeRegistry = null;
     }
 }

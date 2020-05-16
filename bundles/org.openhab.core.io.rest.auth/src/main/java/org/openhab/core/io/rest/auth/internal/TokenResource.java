@@ -40,6 +40,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jose4j.base64url.Base64Url;
 import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.PendingToken;
@@ -79,6 +80,7 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(TokenResource.PATH_AUTH)
 @Api(TokenResource.PATH_AUTH)
+@NonNullByDefault
 public class TokenResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(TokenResource.class);
 
@@ -91,11 +93,10 @@ public class TokenResource implements RESTResource {
     /** The default lifetime of tokens in minutes before they expire */
     public static final int TOKEN_LIFETIME = 60;
 
-    @Context
-    private UriInfo uriInfo;
+    private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
-    private UserRegistry userRegistry;
-    private JwtHelper jwtHelper;
+    private final UserRegistry userRegistry;
+    private final JwtHelper jwtHelper;
 
     @Activate
     public TokenResource(final @Reference UserRegistry userRegistry, final @Reference JwtHelper jwtHelper) {

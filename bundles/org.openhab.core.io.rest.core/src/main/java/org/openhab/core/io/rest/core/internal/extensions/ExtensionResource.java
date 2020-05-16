@@ -35,6 +35,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
@@ -48,6 +50,7 @@ import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -81,6 +84,7 @@ import io.swagger.annotations.ApiResponses;
 @Path(ExtensionResource.PATH_EXTENSIONS)
 @RolesAllowed({ Role.ADMIN })
 @Api(ExtensionResource.PATH_EXTENSIONS)
+@NonNullByDefault
 public class ExtensionResource implements RESTResource {
 
     private static final String THREAD_POOL_NAME = "extensionService";
@@ -88,12 +92,18 @@ public class ExtensionResource implements RESTResource {
     public static final String PATH_EXTENSIONS = "extensions";
 
     private final Logger logger = LoggerFactory.getLogger(ExtensionResource.class);
-
     private final Set<ExtensionService> extensionServices = new CopyOnWriteArraySet<>();
+    private final EventPublisher eventPublisher;
+    private final LocaleService localeService;
 
-    private EventPublisher eventPublisher;
+    private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
-    private LocaleService localeService;
+    @Activate
+    public ExtensionResource(final @Reference EventPublisher eventPublisher,
+            final @Reference LocaleService localeService) {
+        this.eventPublisher = eventPublisher;
+        this.localeService = localeService;
+    }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addExtensionService(ExtensionService featureService) {
@@ -104,32 +114,12 @@ public class ExtensionResource implements RESTResource {
         this.extensionServices.remove(featureService);
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
-
-    @Context
-    UriInfo uriInfo;
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all extensions.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
-    public Response getExtensions(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language) {
+    public Response getExtensions(
+            @HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
         return Response.ok(new Stream2JSONInputStream(getAllExtensions(locale))).build();
@@ -140,7 +130,7 @@ public class ExtensionResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all extension types.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
-    public Response getTypes(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language) {
+    public Response getTypes(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
         Stream<ExtensionType> extensionTypeStream = getAllExtensionTypes(locale).stream().distinct();
@@ -153,8 +143,8 @@ public class ExtensionResource implements RESTResource {
     @ApiOperation(value = "Get extension with given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Not found") })
-    public Response getById(@HeaderParam("Accept-Language") @ApiParam(value = "language") String language,
-            @PathParam("extensionId") @ApiParam(value = "extension ID", required = true) String extensionId) {
+    public Response getById(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
+            @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
         logger.debug("Received HTTP GET request at '{}'.", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
         ExtensionService extensionService = getExtensionService(extensionId);
@@ -171,7 +161,7 @@ public class ExtensionResource implements RESTResource {
     @ApiOperation(value = "Installs the extension with the given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response installExtension(
-            final @PathParam("extensionId") @ApiParam(value = "extension ID", required = true) String extensionId) {
+            final @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
                 ExtensionService extensionService = getExtensionService(extensionId);
@@ -190,7 +180,7 @@ public class ExtensionResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "The given URL is malformed or not valid.") })
     public Response installExtensionByURL(
-            final @PathParam("url") @ApiParam(value = "extension install URL", required = true) String url) {
+            final @PathParam("url") @ApiParam(value = "extension install URL") String url) {
         try {
             URI extensionURI = new URI(url);
             String extensionId = getExtensionId(extensionURI);
@@ -208,7 +198,7 @@ public class ExtensionResource implements RESTResource {
     @ApiOperation(value = "Uninstalls the extension with the given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response uninstallExtension(
-            final @PathParam("extensionId") @ApiParam(value = "extension ID", required = true) String extensionId) {
+            final @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
                 ExtensionService extensionService = getExtensionService(extensionId);
@@ -222,15 +212,8 @@ public class ExtensionResource implements RESTResource {
     }
 
     private void postFailureEvent(String extensionId, String msg) {
-        if (eventPublisher != null) {
-            Event event = ExtensionEventFactory.createExtensionFailureEvent(extensionId, msg);
-            eventPublisher.post(event);
-        }
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return !extensionServices.isEmpty() && localeService != null;
+        Event event = ExtensionEventFactory.createExtensionFailureEvent(extensionId, msg);
+        eventPublisher.post(event);
     }
 
     private Stream<Extension> getAllExtensions(Locale locale) {

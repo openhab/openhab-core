@@ -19,6 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.Role;
 import org.openhab.core.id.InstanceUUID;
 import org.openhab.core.io.rest.RESTConstants;
@@ -47,6 +48,7 @@ import io.swagger.annotations.ApiResponses;
 @Path(UUIDResource.PATH_UUID)
 @Api(UUIDResource.PATH_UUID)
 @RolesAllowed({ Role.ADMIN })
+@NonNullByDefault
 public class UUIDResource implements RESTResource {
 
     public static final String PATH_UUID = "uuid";

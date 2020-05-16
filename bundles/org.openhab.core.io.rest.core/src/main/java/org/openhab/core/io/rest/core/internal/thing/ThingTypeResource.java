@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.core.internal.thing;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -28,6 +29,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigDescription;
@@ -55,10 +57,9 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -94,6 +95,7 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ThingTypeResource.PATH_THING_TYPES)
 @Api(ThingTypeResource.PATH_THING_TYPES)
+@NonNullByDefault
 public class ThingTypeResource implements RESTResource {
 
     /** The URI path to this resource */
@@ -101,56 +103,24 @@ public class ThingTypeResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(ThingTypeResource.class);
 
-    private ThingTypeRegistry thingTypeRegistry;
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-    private ChannelTypeRegistry channelTypeRegistry;
-    private ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
+    private final LocaleService localeService;
+    private final ThingTypeRegistry thingTypeRegistry;
 
-    private LocaleService localeService;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = thingTypeRegistry;
-    }
-
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
+    @Activate
+    public ThingTypeResource( //
+            final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference ChannelGroupTypeRegistry channelGroupTypeRegistry,
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference LocaleService localeService, //
+            final @Reference ThingTypeRegistry thingTypeRegistry) {
         this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
         this.channelGroupTypeRegistry = channelGroupTypeRegistry;
-    }
-
-    protected void unsetChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
+        this.configDescriptionRegistry = configDescriptionRegistry;
         this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
+        this.thingTypeRegistry = thingTypeRegistry;
     }
 
     @GET
@@ -159,11 +129,11 @@ public class ThingTypeResource implements RESTResource {
     @ApiOperation(value = "Gets all available thing types without config description, channels and properties.", response = StrippedThingTypeDTO.class, responseContainer = "Set")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = StrippedThingTypeDTO.class, responseContainer = "Set"))
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language,
-            @QueryParam("bindingId") @ApiParam(value = "filter by binding Id", required = false) @Nullable String bindingId) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
+            @QueryParam("bindingId") @ApiParam(value = "filter by binding Id") @Nullable String bindingId) {
         Locale locale = localeService.getLocale(language);
         Stream<StrippedThingTypeDTO> typeStream = thingTypeRegistry.getThingTypes(locale).stream()
-                .map(t -> convertToStrippedThingTypeDTO(t, locale));
+                .map(thingType -> StrippedThingTypeDTOMapper.map(thingType, locale));
 
         if (bindingId != null) {
             typeStream = typeStream.filter(type -> type.UID.startsWith(bindingId + ':'));
@@ -181,7 +151,7 @@ public class ThingTypeResource implements RESTResource {
             @ApiResponse(code = 200, message = "Thing type with provided thingTypeUID does not exist.", response = ThingTypeDTO.class),
             @ApiResponse(code = 404, message = "No content") })
     public Response getByUID(@PathParam("thingTypeUID") @ApiParam(value = "thingTypeUID") String thingTypeUID,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         ThingType thingType = thingTypeRegistry.getThingType(new ThingTypeUID(thingTypeUID), locale);
         if (thingType != null) {
@@ -191,7 +161,7 @@ public class ThingTypeResource implements RESTResource {
         }
     }
 
-    private ThingTypeDTO convertToThingTypeDTO(ThingType thingType, Locale locale) {
+    private @Nullable ThingTypeDTO convertToThingTypeDTO(ThingType thingType, Locale locale) {
         final ConfigDescription configDescription;
         if (thingType.getConfigDescriptionURI() != null) {
             configDescription = this.configDescriptionRegistry.getConfigDescription(thingType.getConfigDescriptionURI(),
@@ -233,21 +203,21 @@ public class ThingTypeResource implements RESTResource {
             ChannelGroupType channelGroupType = channelGroupTypeRegistry
                     .getChannelGroupType(channelGroupDefinition.getTypeUID(), locale);
 
-            // Default to the channelGroupDefinition label to override the
-            // channelGroupType
+            // Default to the channelGroupDefinition label/description to override the channelGroupType
             String label = channelGroupDefinition.getLabel();
-            if (label == null) {
-                label = channelGroupType.getLabel();
-            }
-
-            // Default to the channelGroupDefinition description to override the
-            // channelGroupType
             String description = channelGroupDefinition.getDescription();
-            if (description == null) {
-                description = channelGroupType.getDescription();
+            List<ChannelDefinition> channelDefinitions = Collections.emptyList();
+
+            if (channelGroupType != null) {
+                if (label == null) {
+                    label = channelGroupType.getLabel();
+                }
+                if (description == null) {
+                    description = channelGroupType.getDescription();
+                }
+                channelDefinitions = channelGroupType.getChannelDefinitions();
             }
 
-            List<ChannelDefinition> channelDefinitions = channelGroupType.getChannelDefinitions();
             List<ChannelDefinitionDTO> channelDefinitionDTOs = convertToChannelDefinitionDTOs(channelDefinitions,
                     locale);
 
@@ -257,8 +227,8 @@ public class ThingTypeResource implements RESTResource {
         return channelGroupDefinitionDTOs;
     }
 
-    private List<ChannelDefinitionDTO> convertToChannelDefinitionDTOs(List<ChannelDefinition> channelDefinitions,
-            Locale locale) {
+    private @Nullable List<ChannelDefinitionDTO> convertToChannelDefinitionDTOs(
+            List<ChannelDefinition> channelDefinitions, Locale locale) {
         List<ChannelDefinitionDTO> channelDefinitionDTOs = new ArrayList<>();
         for (ChannelDefinition channelDefinition : channelDefinitions) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID(), locale);
@@ -288,22 +258,5 @@ public class ThingTypeResource implements RESTResource {
             channelDefinitionDTOs.add(channelDefinitionDTO);
         }
         return channelDefinitionDTOs;
-    }
-
-    private StrippedThingTypeDTO convertToStrippedThingTypeDTO(ThingType thingType, Locale locale) {
-        final StrippedThingTypeDTO strippedThingTypeDTO = StrippedThingTypeDTOMapper.map(thingType, locale);
-        if (strippedThingTypeDTO != null) {
-            return strippedThingTypeDTO;
-        } else {
-            logger.warn("Cannot create DTO for thingType '{}'. Skip it.", thingType);
-        }
-
-        return null;
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return thingTypeRegistry != null && configDescriptionRegistry != null && channelTypeRegistry != null
-                && channelGroupTypeRegistry != null && localeService != null;
     }
 }
