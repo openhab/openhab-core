@@ -15,6 +15,7 @@ package org.openhab.core.model.core.internal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -121,7 +122,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                         if (resource != null) {
                             logger.info("Loading model '{}'", name);
                             Map<String, String> options = new HashMap<>();
-                            options.put(XtextResource.OPTION_ENCODING, "UTF-8");
+                            options.put(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name());
                             if (inputStream == null) {
                                 logger.warn(
                                         "Resource '{}' not found. You have to pass an inputStream to create the resource.",

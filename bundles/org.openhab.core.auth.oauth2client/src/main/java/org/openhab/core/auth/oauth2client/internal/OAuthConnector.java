@@ -249,7 +249,7 @@ public class OAuthConnector {
     private Request getMethod(HttpClient httpClient, String tokenUrl) {
         Request request = httpClient.newRequest(tokenUrl).method(HttpMethod.POST);
         request.header(HttpHeader.ACCEPT, "application/json");
-        request.header(HttpHeader.ACCEPT_CHARSET, "UTF-8");
+        request.header(HttpHeader.ACCEPT_CHARSET, StandardCharsets.UTF_8.name());
         return request;
     }
 
