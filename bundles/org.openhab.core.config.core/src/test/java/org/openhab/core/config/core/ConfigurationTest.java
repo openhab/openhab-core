@@ -52,6 +52,7 @@ public class ConfigurationTest {
 
     public static class ExtendedConfigClass extends ConfigClass {
         public int additionalIntField;
+        public String listField;
     }
 
     @Test
@@ -78,11 +79,14 @@ public class ConfigurationTest {
         Configuration configuration = new Configuration();
         configuration.put("intField", 1);
         configuration.put("additionalIntField", 5);
+        configuration.put("listField", "one, two, three");
 
         ExtendedConfigClass extendedConfigClass = configuration.as(ExtendedConfigClass.class);
 
         assertThat(extendedConfigClass.intField, is(1));
+        assertThat(extendedConfigClass.stringField, is("somedefault"));
         assertThat(extendedConfigClass.additionalIntField, is(5));
+        assertThat(extendedConfigClass.listField, is("one, two, three"));
     }
 
     @Test
