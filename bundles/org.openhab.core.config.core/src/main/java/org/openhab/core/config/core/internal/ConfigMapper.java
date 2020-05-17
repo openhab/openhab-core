@@ -75,7 +75,6 @@ public class ConfigMapper {
             Class<?> type = field.getType();
 
             Object value = properties.get(configKey);
-
             // Consider RequiredField annotations
             if (value == null) {
                 LOGGER.trace("Skipping field '{}', because config has no entry for {}", fieldName, configKey);
@@ -99,20 +98,13 @@ public class ConfigMapper {
                 value = objectConvert(value, type);
                 LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
                         value, fieldName, configurationClass.getName());
-                writeField(configuration, fieldName, value, true);
-            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+                field.setAccessible(true);
+                field.set(configuration, value);
+            } catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
                 LOGGER.warn("Could not set field value for field '{}': {}", fieldName, ex.getMessage(), ex);
             }
         }
-
         return configuration;
-    }
-
-    private static void writeField(Object target, String fieldName, Object value, boolean forceAccess)
-            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-        Field field = target.getClass().getDeclaredField(fieldName);
-        field.setAccessible(forceAccess);
-        field.set(target, value);
     }
 
     /**
@@ -123,13 +115,9 @@ public class ConfigMapper {
      */
     private static List<Field> getAllFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
-
-        Class<?> currentClass = clazz;
-        while (currentClass != null) {
-            fields.addAll(Arrays.asList(currentClass.getDeclaredFields()));
-            currentClass = currentClass.getSuperclass();
+        for (Class<?> superclazz = clazz; superclazz != null; superclazz = superclazz.getSuperclass()) {
+            fields.addAll(Arrays.asList(superclazz.getDeclaredFields()));
         }
-
         return fields;
     }
 

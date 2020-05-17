@@ -34,7 +34,7 @@ import org.junit.Test;
  */
 public class ConfigurationTest {
 
-    public static final class ConfigClass {
+    public static class ConfigClass {
         public enum MyEnum {
             ON,
             OFF,
@@ -48,6 +48,11 @@ public class ConfigurationTest {
         public List<String> listField;
         @SuppressWarnings("unused")
         private static final String CONSTANT = "SOME_CONSTANT";
+    }
+
+    public static class ExtendedConfigClass extends ConfigClass {
+        public int additionalIntField;
+        public String listField;
     }
 
     @Test
@@ -67,6 +72,21 @@ public class ConfigurationTest {
         assertThat(configClass.stringField, is("test"));
         assertThat(configClass.enumField, is(ConfigClass.MyEnum.ON));
         assertThat(configClass.listField, is(hasItems("one", "two", "three")));
+    }
+
+    @Test
+    public void assertGetConfigAsWorksWithSuperclass() {
+        Configuration configuration = new Configuration();
+        configuration.put("intField", 1);
+        configuration.put("additionalIntField", 5);
+        configuration.put("listField", "one, two, three");
+
+        ExtendedConfigClass extendedConfigClass = configuration.as(ExtendedConfigClass.class);
+
+        assertThat(extendedConfigClass.intField, is(1));
+        assertThat(extendedConfigClass.stringField, is("somedefault"));
+        assertThat(extendedConfigClass.additionalIntField, is(5));
+        assertThat(extendedConfigClass.listField, is("one, two, three"));
     }
 
     @Test
