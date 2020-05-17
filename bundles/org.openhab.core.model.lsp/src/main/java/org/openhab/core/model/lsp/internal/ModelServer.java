@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -48,6 +50,7 @@ import com.google.inject.Injector;
         Constants.SERVICE_PID + "=org.openhab.lsp", ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=misc:lsp",
         ConfigurableService.SERVICE_PROPERTY_LABEL + "=Language Server (LSP)",
         ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=misc" })
+@NonNullByDefault
 public class ModelServer {
 
     public static final String CONFIGURATION_PID = "org.openhab.lsp";
@@ -56,11 +59,16 @@ public class ModelServer {
     private final ExecutorService pool = ThreadPoolManager.getPool("lsp");
 
     private final Logger logger = LoggerFactory.getLogger(ModelServer.class);
-    private ServerSocket socket;
 
-    private ScriptServiceUtil scriptServiceUtil;
-    private ScriptEngine scriptEngine;
-    private Injector injector;
+    private @Nullable ServerSocket socket;
+
+    private final Injector injector;
+
+    @Activate
+    public ModelServer(final @Reference ScriptServiceUtil scriptServiceUtil,
+            final @Reference ScriptEngine scriptEngine) {
+        this.injector = Guice.createInjector(new RuntimeServerModule(scriptServiceUtil, scriptEngine));
+    }
 
     @Activate
     public void activate(Map<String, Object> config) {
@@ -72,7 +80,6 @@ public class ModelServer {
                     config.get(KEY_PORT), DEFAULT_PORT);
         }
         final int serverPort = port;
-        injector = Guice.createInjector(new RuntimeServerModule(scriptServiceUtil, scriptEngine));
         pool.submit(() -> listen(serverPort));
     }
 
@@ -124,23 +131,5 @@ public class ModelServer {
             logger.error("Error running the Language Server", e);
         }
         logger.debug("Client {} disconnected", client.getRemoteSocketAddress());
-    }
-
-    @Reference
-    public void setScriptServiceUtil(ScriptServiceUtil scriptServiceUtil) {
-        this.scriptServiceUtil = scriptServiceUtil;
-    }
-
-    public void unsetScriptServiceUtil(ScriptServiceUtil scriptServiceUtil) {
-        this.scriptServiceUtil = null;
-    }
-
-    @Reference
-    public void setScriptEngine(ScriptEngine scriptEngine) {
-        this.scriptEngine = scriptEngine;
-    }
-
-    public void unsetScriptEngine(ScriptEngine scriptEngine) {
-        this.scriptEngine = null;
     }
 }
