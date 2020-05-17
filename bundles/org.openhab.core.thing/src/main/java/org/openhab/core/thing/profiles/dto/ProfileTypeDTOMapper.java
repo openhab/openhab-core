@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.profiles.dto;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.TriggerProfileType;
 
@@ -21,6 +22,7 @@ import org.openhab.core.thing.profiles.TriggerProfileType;
  *
  * @author Stefan Triller - Initial contribution
  */
+@NonNullByDefault
 public class ProfileTypeDTOMapper {
 
     /**

@@ -32,6 +32,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Component;
@@ -62,6 +64,7 @@ import io.swagger.annotations.ApiResponses;
 @Path(LogHandler.PATH_LOG)
 @Api(LogHandler.PATH_LOG)
 @Produces(MediaType.APPLICATION_JSON)
+@NonNullByDefault
 public class LogHandler implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(LogHandler.class);
@@ -80,9 +83,9 @@ public class LogHandler implements RESTResource {
      */
     public class LogMessage {
         public long timestamp;
-        public String severity;
-        public URL url;
-        public String message;
+        public @Nullable String severity;
+        public @Nullable URL url;
+        public @Nullable String message;
     }
 
     @GET
@@ -96,7 +99,8 @@ public class LogHandler implements RESTResource {
     @ApiOperation(value = "Returns the last logged frontend messages. The amount is limited to the "
             + LogConstants.LOG_BUFFER_LIMIT + " last entries.")
     @ApiParam(name = "limit", allowableValues = "range[1, " + LogConstants.LOG_BUFFER_LIMIT + "]")
-    public Response getLastLogs(@DefaultValue(LogConstants.LOG_BUFFER_LIMIT + "") @QueryParam("limit") Integer limit) {
+    public Response getLastLogs(
+            @DefaultValue(LogConstants.LOG_BUFFER_LIMIT + "") @QueryParam("limit") @Nullable Integer limit) {
         if (logBuffer.isEmpty()) {
             return Response.ok("[]").build();
         }
@@ -127,7 +131,7 @@ public class LogHandler implements RESTResource {
     @ApiParam(name = "logMessage", value = "Severity is required and can be one of error, warn, info or debug, depending on activated severities which you can GET at /logLevels.", example = "{\"severity\": \"error\", \"url\": \"http://example.org\", \"message\": \"Error message\"}")
     @ApiResponses({ @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 403, message = LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED) })
-    public Response log(final LogMessage logMessage) {
+    public Response log(final @Nullable LogMessage logMessage) {
         if (logMessage == null) {
             logger.debug("Received null log message model!");
             return Response.status(500)
@@ -155,7 +159,9 @@ public class LogHandler implements RESTResource {
      * @return Falls if severity is not supported, true if successfully logged.
      */
     private boolean doLog(LogMessage logMessage) {
-        switch (logMessage.severity.toLowerCase()) {
+        String severity = logMessage.severity;
+        severity = severity != null ? severity.toLowerCase() : "";
+        switch (severity) {
             case "error":
                 logger.error(LogConstants.FRONTEND_LOG_PATTERN, logMessage.url, logMessage.message);
                 break;

@@ -22,11 +22,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -45,10 +43,9 @@ import org.openhab.core.automation.type.TriggerType;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -82,28 +79,15 @@ public class ModuleTypeResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_MODULE_TYPES = "module-types";
 
-    private @NonNullByDefault({}) ModuleTypeRegistry moduleTypeRegistry;
-    private @NonNullByDefault({}) LocaleService localeService;
+    private final LocaleService localeService;
+    private final ModuleTypeRegistry moduleTypeRegistry;
 
-    @Context
-    private @NonNullByDefault({}) UriInfo uriInfo;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        this.moduleTypeRegistry = moduleTypeRegistry;
-    }
-
-    protected void unsetModuleTypeRegistry(ModuleTypeRegistry moduleTypeRegistry) {
-        this.moduleTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
+    @Activate
+    public ModuleTypeResource( //
+            final @Reference LocaleService localeService, //
+            final @Reference ModuleTypeRegistry moduleTypeRegistry) {
         this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
+        this.moduleTypeRegistry = moduleTypeRegistry;
     }
 
     @GET
@@ -112,8 +96,8 @@ public class ModuleTypeResource implements RESTResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ModuleTypeDTO.class, responseContainer = "List") })
     public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
-            @QueryParam("tags") @ApiParam(value = "tags for filtering", required = false) @Nullable String tagList,
-            @QueryParam("type") @ApiParam(value = "filtering by action, condition or trigger", required = false) @Nullable String type) {
+            @QueryParam("tags") @ApiParam(value = "tags for filtering") @Nullable String tagList,
+            @QueryParam("type") @ApiParam(value = "filtering by action, condition or trigger") @Nullable String type) {
         final Locale locale = localeService.getLocale(language);
         final String[] tags = tagList != null ? tagList.split(",") : new String[0];
         final List<ModuleTypeDTO> modules = new ArrayList<>();
@@ -137,7 +121,7 @@ public class ModuleTypeResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ModuleTypeDTO.class),
             @ApiResponse(code = 404, message = "Module Type corresponding to the given UID does not found.") })
     public Response getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
-            @PathParam("moduleTypeUID") @ApiParam(value = "moduleTypeUID", required = true) String moduleTypeUID) {
+            @PathParam("moduleTypeUID") @ApiParam(value = "moduleTypeUID") String moduleTypeUID) {
         Locale locale = localeService.getLocale(language);
         final ModuleType moduleType = moduleTypeRegistry.get(moduleTypeUID, locale);
         if (moduleType != null) {
@@ -167,10 +151,5 @@ public class ModuleTypeResource implements RESTResource {
             throw new IllegalArgumentException(
                     String.format("Cannot handle given module type class (%s)", moduleType.getClass()));
         }
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return moduleTypeRegistry != null && localeService != null;
     }
 }

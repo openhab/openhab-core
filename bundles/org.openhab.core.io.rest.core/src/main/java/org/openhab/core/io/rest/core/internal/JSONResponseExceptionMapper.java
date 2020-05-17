@@ -27,7 +27,7 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
 /**
  * Trap exceptions.
  *
- * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Markus Rathgeb - Initial contribution
  */
 @Component
 @JaxrsExtension

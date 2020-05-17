@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.core.internal.persistence;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +24,10 @@ import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
@@ -44,9 +48,16 @@ public class PersistenceResourceTest {
     private PersistenceResource pResource;
     private List<HistoricItem> items;
 
+    private @Mock ItemRegistry itemRegistry;
+    private @Mock LocaleService localeService;
+    private @Mock PersistenceServiceRegistry persistenceServiceRegistry;
+    private @Mock TimeZoneProvider timeZoneProvider;
+
     @Before
     public void setup() {
-        pResource = new PersistenceResource();
+        initMocks(this);
+
+        pResource = new PersistenceResource(itemRegistry, localeService, persistenceServiceRegistry, timeZoneProvider);
 
         int startValue = 2016;
         int endValue = 2018;
@@ -78,20 +89,12 @@ public class PersistenceResourceTest {
         QueryablePersistenceService pService = mock(QueryablePersistenceService.class);
         when(pService.query(any())).thenReturn(items);
 
-        TimeZoneProvider timeZoneProvider = mock(TimeZoneProvider.class);
+        when(persistenceServiceRegistry.get(PERSISTENCE_SERVICE_ID)).thenReturn(pService);
         when(timeZoneProvider.getTimeZone()).thenReturn(TimeZone.getDefault().toZoneId());
-
-        PersistenceServiceRegistry pServiceRegistry = mock(PersistenceServiceRegistry.class);
-        when(pServiceRegistry.get(PERSISTENCE_SERVICE_ID)).thenReturn(pService);
-
-        pResource.setPersistenceServiceRegistry(pServiceRegistry);
-        pResource.setTimeZoneProvider(timeZoneProvider);
     }
 
     @Test
     public void testGetPersistenceItemData() {
-        // pResource.httpGetPersistenceItemData(headers, serviceId, itemName, startTime, endTime, pageNumber,
-        // pageLength, boundary)
         ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 5, false);
 
         assertEquals(5, Integer.parseInt(dto.datapoints));

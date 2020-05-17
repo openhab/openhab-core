@@ -46,6 +46,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -94,10 +96,9 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.openhab.core.thing.util.ThingHelper;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -136,6 +137,7 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ThingResource.PATH_THINGS)
 @Api(ThingResource.PATH_THINGS)
+@NonNullByDefault
 public class ThingResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(ThingResource.class);
@@ -143,34 +145,59 @@ public class ThingResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_THINGS = "things";
 
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ItemFactory itemFactory;
-    private ItemRegistry itemRegistry;
-    private ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
-    private ManagedItemProvider managedItemProvider;
-    private ManagedThingProvider managedThingProvider;
-    private ThingRegistry thingRegistry;
-    private ConfigStatusService configStatusService;
-    private ConfigDescriptionRegistry configDescRegistry;
-    private ThingTypeRegistry thingTypeRegistry;
-    private ChannelTypeRegistry channelTypeRegistry;
-    private ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
-    private FirmwareUpdateService firmwareUpdateService;
-    private FirmwareRegistry firmwareRegistry;
-    private ThingManager thingManager;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final ConfigStatusService configStatusService;
+    private final ConfigDescriptionRegistry configDescRegistry;
+    private final FirmwareRegistry firmwareRegistry;
+    private final FirmwareUpdateService firmwareUpdateService;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ItemFactory itemFactory;
+    private final ItemRegistry itemRegistry;
+    private final LocaleService localeService;
+    private final ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
+    private final ManagedItemProvider managedItemProvider;
+    private final ManagedThingProvider managedThingProvider;
+    private final ThingManager thingManager;
+    private final ThingRegistry thingRegistry;
+    private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
+    private final ThingTypeRegistry thingTypeRegistry;
 
-    private LocaleService localeService;
+    private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
-    @Context
-    private UriInfo uriInfo;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
+    @Activate
+    public ThingResource( //
+            final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference ConfigStatusService configStatusService,
+            final @Reference ConfigDescriptionRegistry configDescRegistry,
+            final @Reference FirmwareRegistry firmwareRegistry,
+            final @Reference FirmwareUpdateService firmwareUpdateService,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry, //
+            final @Reference ItemFactory itemFactory, //
+            final @Reference ItemRegistry itemRegistry, //
+            final @Reference LocaleService localeService,
+            final @Reference ManagedItemChannelLinkProvider managedItemChannelLinkProvider,
+            final @Reference ManagedItemProvider managedItemProvider,
+            final @Reference ManagedThingProvider managedThingProvider, //
+            final @Reference ThingManager thingManager, //
+            final @Reference ThingRegistry thingRegistry,
+            final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
+            final @Reference ThingTypeRegistry thingTypeRegistry) {
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.configStatusService = configStatusService;
+        this.configDescRegistry = configDescRegistry;
+        this.firmwareRegistry = firmwareRegistry;
+        this.firmwareUpdateService = firmwareUpdateService;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.itemFactory = itemFactory;
+        this.itemRegistry = itemRegistry;
         this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
+        this.managedItemChannelLinkProvider = managedItemChannelLinkProvider;
+        this.managedItemProvider = managedItemProvider;
+        this.managedThingProvider = managedThingProvider;
+        this.thingManager = thingManager;
+        this.thingRegistry = thingRegistry;
+        this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
+        this.thingTypeRegistry = thingTypeRegistry;
     }
 
     /**
@@ -186,7 +213,8 @@ public class ThingResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Created", response = String.class),
             @ApiResponse(code = 400, message = "A uid must be provided, if no binding can create a thing of this type."),
             @ApiResponse(code = 409, message = "A thing with the same uid already exists.") })
-    public Response create(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public Response create(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @ApiParam(value = "thing data", required = true) ThingDTO thingBean) {
         final Locale locale = localeService.getLocale(language);
 
@@ -212,7 +240,9 @@ public class ThingResource implements RESTResource {
         // turn the ThingDTO's configuration into a Configuration
         Configuration configuration = new Configuration(
                 normalizeConfiguration(thingBean.configuration, thingTypeUID, thingUID));
-        normalizeChannels(thingBean, thingUID);
+        if (thingUID != null) {
+            normalizeChannels(thingBean, thingUID);
+        }
 
         Thing thing = thingRegistry.createThingOfType(thingTypeUID, thingUID, bridgeUID, thingBean.label,
                 configuration);
@@ -254,7 +284,8 @@ public class ThingResource implements RESTResource {
     @ApiOperation(value = "Get all available things.", response = EnrichedThingDTO.class, responseContainer = "Set")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = EnrichedThingDTO.class, responseContainer = "Set") })
-    public Response getAll(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language) {
+    public Response getAll(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
 
         Stream<EnrichedThingDTO> thingStream = thingRegistry.stream().map(t -> convertToEnrichedThingDTO(t, locale))
@@ -269,7 +300,8 @@ public class ThingResource implements RESTResource {
     @ApiOperation(value = "Gets thing by UID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ThingDTO.class),
             @ApiResponse(code = 404, message = "Thing not found.") })
-    public Response getByUID(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public Response getByUID(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID) {
         final Locale locale = localeService.getLocale(language);
 
@@ -300,7 +332,8 @@ public class ThingResource implements RESTResource {
             @ApiResponse(code = 202, message = "ACCEPTED for asynchronous deletion."),
             @ApiResponse(code = 404, message = "Thing not found."),
             @ApiResponse(code = 409, message = "Thing could not be deleted because it's not editable.") })
-    public Response remove(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public Response remove(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID,
             @DefaultValue("false") @QueryParam("force") @ApiParam(value = "force") boolean force) {
         final Locale locale = localeService.getLocale(language);
@@ -318,7 +351,7 @@ public class ThingResource implements RESTResource {
         // ask whether the Thing exists as a managed thing, so it can get
         // updated, 409 otherwise
         Thing managed = managedThingProvider.get(thingUIDObject);
-        if (null == managed) {
+        if (managed == null) {
             logger.info("Received HTTP DELETE request for update at '{}' for an unmanaged thing '{}'.",
                     uriInfo.getPath(), thingUID);
             return getThingResponse(Status.CONFLICT, thing, locale,
@@ -327,12 +360,12 @@ public class ThingResource implements RESTResource {
 
         // only move on if Thing is known to be managed, so it can get updated
         if (force) {
-            if (null == thingRegistry.forceRemove(thingUIDObject)) {
+            if (thingRegistry.forceRemove(thingUIDObject) == null) {
                 return getThingResponse(Status.INTERNAL_SERVER_ERROR, thing, locale,
                         "Cannot delete Thing " + thingUID + " for unknown reasons.");
             }
         } else {
-            if (null != thingRegistry.remove(thingUIDObject)) {
+            if (thingRegistry.remove(thingUIDObject) != null) {
                 return getThingResponse(Status.ACCEPTED, thing, locale, null);
             }
         }
@@ -356,7 +389,8 @@ public class ThingResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ThingDTO.class),
             @ApiResponse(code = 404, message = "Thing not found."),
             @ApiResponse(code = 409, message = "Thing could not be updated as it is not editable.") })
-    public Response update(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+    public Response update(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID,
             @ApiParam(value = "thing", required = true) ThingDTO thingBean) throws IOException {
         final Locale locale = localeService.getLocale(language);
@@ -365,7 +399,7 @@ public class ThingResource implements RESTResource {
 
         // ask whether the Thing exists at all, 404 otherwise
         Thing thing = thingRegistry.get(thingUIDObject);
-        if (null == thing) {
+        if (thing == null) {
             logger.info("Received HTTP PUT request for update at '{}' for the unknown thing '{}'.", uriInfo.getPath(),
                     thingUID);
             return getThingNotFoundResponse(thingUID);
@@ -374,7 +408,7 @@ public class ThingResource implements RESTResource {
         // ask whether the Thing exists as a managed thing, so it can get
         // updated, 409 otherwise
         Thing managed = managedThingProvider.get(thingUIDObject);
-        if (null == managed) {
+        if (managed == null) {
             logger.info("Received HTTP PUT request for update at '{}' for an unmanaged thing '{}'.", uriInfo.getPath(),
                     thingUID);
             return getThingResponse(Status.CONFLICT, thing, locale,
@@ -390,7 +424,7 @@ public class ThingResource implements RESTResource {
 
         // update, returns null in case Thing cannot be found
         Thing oldthing = managedThingProvider.update(thing);
-        if (null == oldthing) {
+        if (oldthing == null) {
             return getThingNotFoundResponse(thingUID);
         }
 
@@ -415,9 +449,10 @@ public class ThingResource implements RESTResource {
             @ApiResponse(code = 400, message = "Configuration of the thing is not valid."),
             @ApiResponse(code = 404, message = "Thing not found"),
             @ApiResponse(code = 409, message = "Thing could not be updated as it is not editable.") })
-    public Response updateConfiguration(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) String language,
+    public Response updateConfiguration(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thing") String thingUID,
-            @ApiParam(value = "configuration parameters") Map<String, Object> configurationParameters)
+            @ApiParam(value = "configuration parameters") @Nullable Map<String, Object> configurationParameters)
             throws IOException {
         final Locale locale = localeService.getLocale(language);
 
@@ -425,7 +460,7 @@ public class ThingResource implements RESTResource {
 
         // ask whether the Thing exists at all, 404 otherwise
         Thing thing = thingRegistry.get(thingUIDObject);
-        if (null == thing) {
+        if (thing == null) {
             logger.info("Received HTTP PUT request for update configuration at '{}' for the unknown thing '{}'.",
                     uriInfo.getPath(), thingUID);
             return getThingNotFoundResponse(thingUID);
@@ -434,7 +469,7 @@ public class ThingResource implements RESTResource {
         // ask whether the Thing exists as a managed thing, so it can get
         // updated, 409 otherwise
         Thing managed = managedThingProvider.get(thingUIDObject);
-        if (null == managed) {
+        if (managed == null) {
             logger.info("Received HTTP PUT request for update configuration at '{}' for an unmanaged thing '{}'.",
                     uriInfo.getPath(), thingUID);
             return getThingResponse(Status.CONFLICT, thing, locale,
@@ -468,13 +503,14 @@ public class ThingResource implements RESTResource {
     @ApiOperation(value = "Gets thing's status.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Thing not found.") })
-    public Response getStatus(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) String language,
+    public Response getStatus(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thing") String thingUID) throws IOException {
         ThingUID thingUIDObject = new ThingUID(thingUID);
 
         // Check if the Thing exists, 404 if not
         Thing thing = thingRegistry.get(thingUIDObject);
-        if (null == thing) {
+        if (thing == null) {
             logger.info("Received HTTP GET request for thing config status at '{}' for the unknown thing '{}'.",
                     uriInfo.getPath(), thingUID);
             return getThingNotFoundResponse(thingUID);
@@ -491,7 +527,8 @@ public class ThingResource implements RESTResource {
     @ApiOperation(value = "Sets the thing enabled status.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Thing not found.") })
-    public Response setEnabled(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) String language,
+    public Response setEnabled(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thing") String thingUID,
             @ApiParam(value = "enabled") String enabled) throws IOException {
         final Locale locale = localeService.getLocale(language);
@@ -500,7 +537,7 @@ public class ThingResource implements RESTResource {
 
         // Check if the Thing exists, 404 if not
         Thing thing = thingRegistry.get(thingUIDObject);
-        if (null == thing) {
+        if (thing == null) {
             logger.info("Received HTTP PUT request for set enabled at '{}' for the unknown thing '{}'.",
                     uriInfo.getPath(), thingUID);
             return getThingNotFoundResponse(thingUID);
@@ -519,13 +556,14 @@ public class ThingResource implements RESTResource {
     @ApiOperation(value = "Gets thing's config status.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Thing not found.") })
-    public Response getConfigStatus(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) String language,
+    public Response getConfigStatus(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
             @PathParam("thingUID") @ApiParam(value = "thing") String thingUID) throws IOException {
         ThingUID thingUIDObject = new ThingUID(thingUID);
 
         // Check if the Thing exists, 404 if not
         Thing thing = thingRegistry.get(thingUIDObject);
-        if (null == thing) {
+        if (thing == null) {
             logger.info("Received HTTP GET request for thing config status at '{}' for the unknown thing '{}'.",
                     uriInfo.getPath(), thingUID);
             return getThingNotFoundResponse(thingUID);
@@ -546,7 +584,7 @@ public class ThingResource implements RESTResource {
             @ApiResponse(code = 400, message = "Firmware update preconditions not satisfied."),
             @ApiResponse(code = 404, message = "Thing not found.") })
     public Response updateFirmware(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thing") String thingUID,
             @PathParam("firmwareVersion") @ApiParam(value = "version") String firmwareVersion) throws IOException {
         Thing thing = thingRegistry.get(new ThingUID(thingUID));
@@ -556,16 +594,15 @@ public class ThingResource implements RESTResource {
             return getThingNotFoundResponse(thingUID);
         }
 
-        if (firmwareVersion == null || firmwareVersion.isEmpty()) {
+        if (firmwareVersion.isEmpty()) {
             logger.info(
                     "Received HTTP PUT request for firmware update at '{}' for thing '{}' with unknown firmware version '{}'.",
                     uriInfo.getPath(), thingUID, firmwareVersion);
             return JSONResponse.createResponse(Status.BAD_REQUEST, null, "Firmware version is empty");
         }
 
-        ThingUID uid = thing.getUID();
         try {
-            firmwareUpdateService.updateFirmware(uid, firmwareVersion, localeService.getLocale(language));
+            firmwareUpdateService.updateFirmware(thing.getUID(), firmwareVersion, localeService.getLocale(language));
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return JSONResponse.createResponse(Status.BAD_REQUEST, null,
                     "Firmware update preconditions not satisfied.");
@@ -579,7 +616,8 @@ public class ThingResource implements RESTResource {
     @ApiOperation(value = "Gets thing's firmware status.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 204, message = "No firmware status provided by this Thing.") })
-    public Response getFirmwareStatus(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) String language,
+    public Response getFirmwareStatus(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("thingUID") @ApiParam(value = "thing") String thingUID) throws IOException {
         ThingUID thingUIDObject = new ThingUID(thingUID);
         FirmwareStatusDTO firmwareStatusDto = getThingFirmwareStatusInfo(thingUIDObject);
@@ -597,10 +635,10 @@ public class ThingResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 204, message = "No firmwares found.") })
     public Response getFirmwares(@PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
         ThingUID aThingUID = new ThingUID(thingUID);
         Thing thing = thingRegistry.get(aThingUID);
-        if (null == thing) {
+        if (thing == null) {
             logger.info(
                     "Received HTTP GET request for listing available firmwares at {} for unknown thing with UID '{}'",
                     uriInfo.getPath(), thingUID);
@@ -622,7 +660,7 @@ public class ThingResource implements RESTResource {
                 firmware.getPrerequisiteVersion(), firmware.getChangelog());
     }
 
-    private FirmwareStatusDTO getThingFirmwareStatusInfo(ThingUID thingUID) {
+    private @Nullable FirmwareStatusDTO getThingFirmwareStatusInfo(ThingUID thingUID) {
         FirmwareStatusInfo info = firmwareUpdateService.getFirmwareStatusInfo(thingUID);
         if (info != null) {
             return buildFirmwareStatusDTO(info);
@@ -654,99 +692,17 @@ public class ThingResource implements RESTResource {
      * @param errormessage an optional error message (may be null), ignored if the status family is successful
      * @return Response
      */
-    private Response getThingResponse(Status status, Thing thing, Locale locale, String errormessage) {
+    private Response getThingResponse(Status status, @Nullable Thing thing, Locale locale,
+            @Nullable String errormessage) {
         ThingStatusInfo thingStatusInfo = thingStatusInfoI18nLocalizationService.getLocalizedThingStatusInfo(thing,
                 locale);
-        boolean managed = managedThingProvider.get(thing.getUID()) != null;
+        boolean managed = thing != null && managedThingProvider.get(thing.getUID()) != null;
         EnrichedThingDTO enrichedThingDTO = thing != null
                 ? EnrichedThingDTOMapper.map(thing, thingStatusInfo, this.getThingFirmwareStatusInfo(thing.getUID()),
                         getLinkedItemsMap(thing), managed)
                 : null;
 
         return JSONResponse.createResponse(status, enrichedThingDTO, errormessage);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setItemFactory(ItemFactory itemFactory) {
-        this.itemFactory = itemFactory;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedItemChannelLinkProvider(ManagedItemChannelLinkProvider managedItemChannelLinkProvider) {
-        this.managedItemChannelLinkProvider = managedItemChannelLinkProvider;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedItemProvider(ManagedItemProvider managedItemProvider) {
-        this.managedItemProvider = managedItemProvider;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedThingProvider(ManagedThingProvider managedThingProvider) {
-        this.managedThingProvider = managedThingProvider;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
-    protected void unsetItemFactory(ItemFactory itemFactory) {
-        this.itemFactory = null;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    protected void unsetManagedItemChannelLinkProvider(ManagedItemChannelLinkProvider managedItemChannelLinkProvider) {
-        this.managedItemChannelLinkProvider = null;
-    }
-
-    protected void unsetManagedItemProvider(ManagedItemProvider managedItemProvider) {
-        this.managedItemProvider = null;
-    }
-
-    protected void unsetManagedThingProvider(ManagedThingProvider managedThingProvider) {
-        this.managedThingProvider = null;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigStatusService(ConfigStatusService configStatusService) {
-        this.configStatusService = configStatusService;
-    }
-
-    protected void unsetConfigStatusService(ConfigStatusService configStatusService) {
-        this.configStatusService = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setThingStatusInfoI18nLocalizationService(
-            ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService) {
-        this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
-    }
-
-    protected void unsetThingStatusInfoI18nLocalizationService(
-            ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService) {
-        this.thingStatusInfoI18nLocalizationService = null;
     }
 
     private EnrichedThingDTO convertToEnrichedThingDTO(Thing thing, Locale locale) {
@@ -772,62 +728,8 @@ public class ThingResource implements RESTResource {
         }
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = thingTypeRegistry;
-    }
-
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setFirmwareUpdateService(FirmwareUpdateService firmwareUpdateService) {
-        this.firmwareUpdateService = firmwareUpdateService;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setFirmwareRegistry(FirmwareRegistry firmwareRegistry) {
-        this.firmwareRegistry = firmwareRegistry;
-    }
-
-    protected void unsetFirmwareRegistry(FirmwareRegistry firmwareRegistry) {
-        this.firmwareRegistry = null;
-    }
-
-    protected void unsetFirmwareUpdateService(FirmwareUpdateService firmwareUpdateService) {
-        this.firmwareUpdateService = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setThingManager(ThingManager thingManager) {
-        this.thingManager = thingManager;
-    }
-
-    protected void unsetThingManager(ThingManager thingManager) {
-        this.thingManager = null;
-    }
-
-    private Map<String, Object> normalizeConfiguration(Map<String, Object> properties, ThingTypeUID thingTypeUID,
-            ThingUID thingUID) {
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            ThingTypeUID thingTypeUID, @Nullable ThingUID thingUID) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -845,7 +747,7 @@ public class ThingResource implements RESTResource {
                 configDescriptions.add(typeConfigDesc);
             }
         }
-        if (getConfigDescriptionURI(thingUID) != null) {
+        if (thingUID != null) {
             ConfigDescription thingConfigDesc = configDescRegistry
                     .getConfigDescription(getConfigDescriptionURI(thingUID));
             if (thingConfigDesc != null) {
@@ -860,8 +762,8 @@ public class ThingResource implements RESTResource {
         return ConfigUtil.normalizeTypes(properties, configDescriptions);
     }
 
-    private Map<String, Object> normalizeConfiguration(Map<String, Object> properties, ChannelTypeUID channelTypeUID,
-            ChannelUID channelUID) {
+    private @Nullable Map<String, Object> normalizeConfiguration(Map<String, Object> properties,
+            ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -921,15 +823,5 @@ public class ThingResource implements RESTResource {
         } catch (URISyntaxException e) {
             throw new BadRequestException("Invalid URI syntax: " + uriString);
         }
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return itemChannelLinkRegistry != null && itemFactory != null && itemRegistry != null
-                && managedItemChannelLinkProvider != null && managedItemProvider != null && managedThingProvider != null
-                && thingRegistry != null && configStatusService != null && configDescRegistry != null
-                && thingTypeRegistry != null && channelTypeRegistry != null && firmwareUpdateService != null
-                && thingStatusInfoI18nLocalizationService != null && firmwareRegistry != null && localeService != null
-                && thingManager != null;
     }
 }

@@ -20,16 +20,17 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -42,6 +43,7 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
@@ -58,14 +60,20 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(IconSetResource.PATH_ICONSETS)
 @Api(IconSetResource.PATH_ICONSETS)
+@NonNullByDefault
 public class IconSetResource implements RESTResource {
 
     /** The URI path to this resource */
     public static final String PATH_ICONSETS = "iconsets";
 
-    private List<IconProvider> iconProviders = new ArrayList<>(5);
+    private final List<IconProvider> iconProviders = new ArrayList<>(5);
 
-    private LocaleService localeService;
+    private final LocaleService localeService;
+
+    @Activate
+    public IconSetResource(final @Reference LocaleService localeService) {
+        this.localeService = localeService;
+    }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addIconProvider(IconProvider iconProvider) {
@@ -76,23 +84,11 @@ public class IconSetResource implements RESTResource {
         this.iconProviders.remove(iconProvider);
     }
 
-    @Reference
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
-
-    @Context
-    UriInfo uriInfo;
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gets all icon sets.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response getAll(@HeaderParam("Accept-Language") String language) {
+    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
 
         List<IconSet> iconSets = new ArrayList<>(iconProviders.size());

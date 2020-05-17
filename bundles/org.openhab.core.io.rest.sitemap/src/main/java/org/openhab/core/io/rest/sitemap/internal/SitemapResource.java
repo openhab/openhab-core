@@ -53,6 +53,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.rest.JSONResponse;
@@ -128,6 +129,7 @@ import io.swagger.annotations.ApiResponses;
 @Path(SitemapResource.PATH_SITEMAPS)
 @RolesAllowed({ Role.USER, Role.ADMIN })
 @Api(SitemapResource.PATH_SITEMAPS)
+@NonNullByDefault
 public class SitemapResource
         implements RESTResource, SitemapSubscriptionCallback, SseBroadcaster.Listener<SseSinkInfo> {
 
@@ -139,24 +141,27 @@ public class SitemapResource
 
     private static final long TIMEOUT_IN_MS = 30000;
 
-    private @NonNullByDefault({}) Sse sse;
-
     private SseBroadcaster<@NonNull SseSinkInfo> broadcaster;
 
     @Context
+    @NonNullByDefault({})
     UriInfo uriInfo;
 
     @Context
+    @NonNullByDefault({})
     HttpServletRequest request;
 
     @Context
-    private HttpServletResponse response;
+    @NonNullByDefault({})
+    HttpServletResponse response;
 
-    private ItemUIRegistry itemUIRegistry;
+    @Context
+    @NonNullByDefault({})
+    Sse sse;
 
-    private SitemapSubscriptionService subscriptions;
-
-    private LocaleService localeService;
+    private final ItemUIRegistry itemUIRegistry;
+    private final SitemapSubscriptionService subscriptions;
+    private final LocaleService localeService;
 
     private final java.util.List<SitemapProvider> sitemapProviders = new ArrayList<>();
 
@@ -165,10 +170,17 @@ public class SitemapResource
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
-    private ScheduledFuture<?> cleanSubscriptionsJob;
+    private @Nullable ScheduledFuture<?> cleanSubscriptionsJob;
 
     @Activate
-    protected void activate() {
+    public SitemapResource( //
+            final @Reference ItemUIRegistry itemUIRegistry, //
+            final @Reference LocaleService localeService, //
+            final @Reference SitemapSubscriptionService subscriptions) {
+        this.itemUIRegistry = itemUIRegistry;
+        this.localeService = localeService;
+        this.subscriptions = subscriptions;
+
         broadcaster = new SseBroadcaster<>();
 
         // The clean SSE subscriptions job sends an ALIVE event to all subscribers. This will trigger
@@ -179,43 +191,19 @@ public class SitemapResource
         // The clean SSE subscriptions job is run every 5 minutes.
         cleanSubscriptionsJob = scheduler.scheduleAtFixedRate(() -> {
             logger.debug("Run clean SSE subscriptions job");
-            if (subscriptions != null) {
-                subscriptions.checkAliveClients();
-            }
+            subscriptions.checkAliveClients();
         }, 1, 5, TimeUnit.MINUTES);
     }
 
     @Deactivate
     protected void deactivate() {
-        if (cleanSubscriptionsJob != null && !cleanSubscriptionsJob.isCancelled()) {
+        ScheduledFuture<?> job = cleanSubscriptionsJob;
+        if (job != null && !job.isCancelled()) {
             logger.debug("Cancel clean SSE subscriptions job");
-            cleanSubscriptionsJob.cancel(true);
+            job.cancel(true);
             cleanSubscriptionsJob = null;
         }
         broadcaster.close();
-    }
-
-    @Context
-    public void setSse(final Sse sse) {
-        this.sse = sse;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = itemUIRegistry;
-    }
-
-    public void unsetItemUIRegistry(ItemUIRegistry itemUIRegistry) {
-        this.itemUIRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setSitemapSubscriptionService(SitemapSubscriptionService subscriptions) {
-        this.subscriptions = subscriptions;
-    }
-
-    public void unsetSitemapSubscriptionService(SitemapSubscriptionService subscriptions) {
-        this.subscriptions = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -225,15 +213,6 @@ public class SitemapResource
 
     public void removeSitemapProvider(SitemapProvider provider) {
         sitemapProviders.remove(provider);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
-        this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
     }
 
     @GET
@@ -252,10 +231,10 @@ public class SitemapResource
     @ApiOperation(value = "Get sitemap by name.", response = SitemapDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Response getSitemapData(@Context HttpHeaders headers,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("sitemapname") @ApiParam(value = "sitemap name") String sitemapname,
             @QueryParam("type") String type, @QueryParam("jsoncallback") @DefaultValue("callback") String callback,
-            @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets", required = false) boolean includeHiddenWidgets) {
+            @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets") boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}' for media type '{}'.", request.getRemoteAddr(),
                 uriInfo.getPath(), type);
@@ -272,11 +251,11 @@ public class SitemapResource
             @ApiResponse(code = 404, message = "Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget"),
             @ApiResponse(code = 400, message = "Invalid subscription id has been provided.") })
     public Response getPageData(@Context HttpHeaders headers,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
             @PathParam("sitemapname") @ApiParam(value = "sitemap name") String sitemapname,
             @PathParam("pageid") @ApiParam(value = "page id") String pageId,
-            @QueryParam("subscriptionid") @ApiParam(value = "subscriptionid", required = false) String subscriptionId,
-            @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets", required = false) boolean includeHiddenWidgets) {
+            @QueryParam("subscriptionid") @ApiParam(value = "subscriptionid") @Nullable String subscriptionId,
+            @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets") boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
 
@@ -345,8 +324,8 @@ public class SitemapResource
             @ApiResponse(code = 404, message = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @PathParam("subscriptionid") @ApiParam(value = "subscription id") String subscriptionId,
-            @QueryParam("sitemap") @ApiParam(value = "sitemap name", required = false) String sitemapname,
-            @QueryParam("pageid") @ApiParam(value = "page id", required = false) String pageId) {
+            @QueryParam("sitemap") @ApiParam(value = "sitemap name") @Nullable String sitemapname,
+            @QueryParam("pageid") @ApiParam(value = "page id") @Nullable String pageId) {
         final SseSinkInfo sinkInfo = knownSubscriptions.get(subscriptionId);
         if (sinkInfo == null) {
             logger.debug("Subscription id {} does not exist.", subscriptionId);
@@ -475,8 +454,9 @@ public class SitemapResource
         return bean;
     }
 
-    private PageDTO createPageBean(String sitemapName, String title, String icon, String pageId, EList<Widget> children,
-            boolean drillDown, boolean isLeaf, URI uri, Locale locale, boolean timeout, boolean includeHiddenWidgets) {
+    private PageDTO createPageBean(String sitemapName, @Nullable String title, @Nullable String icon, String pageId,
+            @Nullable EList<Widget> children, boolean drillDown, boolean isLeaf, URI uri, Locale locale,
+            boolean timeout, boolean includeHiddenWidgets) {
         PageDTO bean = new PageDTO();
         bean.timeout = timeout;
         bean.id = pageId;
@@ -499,8 +479,8 @@ public class SitemapResource
         return bean;
     }
 
-    private WidgetDTO createWidgetBean(String sitemapName, Widget widget, boolean drillDown, URI uri, String widgetId,
-            Locale locale, boolean evenIfHidden) {
+    private @Nullable WidgetDTO createWidgetBean(String sitemapName, Widget widget, boolean drillDown, URI uri,
+            String widgetId, Locale locale, boolean evenIfHidden) {
         // Test visibility
         if (!evenIfHidden && !itemUIRegistry.getVisiblity(widget)) {
             return null;
@@ -653,7 +633,7 @@ public class SitemapResource
         return true;
     }
 
-    private Sitemap getSitemap(String sitemapname) {
+    private @Nullable Sitemap getSitemap(String sitemapname) {
         for (SitemapProvider provider : sitemapProviders) {
             Sitemap sitemap = provider.getSitemap(sitemapname);
             if (sitemap != null) {
@@ -723,34 +703,32 @@ public class SitemapResource
      */
     private Set<GenericItem> getAllItems(EList<Widget> widgets) {
         Set<GenericItem> items = new HashSet<>();
-        if (itemUIRegistry != null) {
-            for (Widget widget : widgets) {
-                // We skip the chart widgets having a refresh argument
-                boolean skipWidget = false;
-                if (widget instanceof Chart) {
-                    Chart chartWidget = (Chart) widget;
-                    skipWidget = chartWidget.getRefresh() > 0;
-                }
-                String itemName = widget.getItem();
-                if (!skipWidget && itemName != null) {
-                    try {
-                        Item item = itemUIRegistry.getItem(itemName);
-                        if (item instanceof GenericItem) {
-                            items.add((GenericItem) item);
-                        }
-                    } catch (ItemNotFoundException e) {
-                        // ignore
-                    }
-                }
-                // Consider all items inside the frame
-                if (widget instanceof Frame) {
-                    items.addAll(getAllItems(((Frame) widget).getChildren()));
-                }
-                // Consider items involved in any visibility, labelcolor and valuecolor condition
-                items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
-                items.addAll(getItemsInColorCond(widget.getLabelColor()));
-                items.addAll(getItemsInColorCond(widget.getValueColor()));
+        for (Widget widget : widgets) {
+            // We skip the chart widgets having a refresh argument
+            boolean skipWidget = false;
+            if (widget instanceof Chart) {
+                Chart chartWidget = (Chart) widget;
+                skipWidget = chartWidget.getRefresh() > 0;
             }
+            String itemName = widget.getItem();
+            if (!skipWidget && itemName != null) {
+                try {
+                    Item item = itemUIRegistry.getItem(itemName);
+                    if (item instanceof GenericItem) {
+                        items.add((GenericItem) item);
+                    }
+                } catch (ItemNotFoundException e) {
+                    // ignore
+                }
+            }
+            // Consider all items inside the frame
+            if (widget instanceof Frame) {
+                items.addAll(getAllItems(((Frame) widget).getChildren()));
+            }
+            // Consider items involved in any visibility, labelcolor and valuecolor condition
+            items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
+            items.addAll(getItemsInColorCond(widget.getLabelColor()));
+            items.addAll(getItemsInColorCond(widget.getValueColor()));
         }
         return items;
     }
@@ -856,11 +834,6 @@ public class SitemapResource
         logger.debug("SSE connection for subscription {} has been released.", subscriptionId);
         broadcaster.closeAndRemoveIf(info -> info.subscriptionId.equals(subscriptionId));
         knownSubscriptions.remove(subscriptionId);
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return itemUIRegistry != null && subscriptions != null && localeService != null;
     }
 
     @Override

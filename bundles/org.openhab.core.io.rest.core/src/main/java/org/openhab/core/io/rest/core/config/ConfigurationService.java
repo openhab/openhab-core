@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.Configuration;
 import org.osgi.framework.Constants;
@@ -52,7 +53,7 @@ public class ConfigurationService {
      * @return config or null if no config with the given config id exists
      * @throws IOException if configuration can not be read
      */
-    public Configuration get(String configId) throws IOException {
+    public @Nullable Configuration get(String configId) throws IOException {
         org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration(configId, null);
         Dictionary<String, Object> properties = configuration.getProperties();
         return toConfiguration(properties);
@@ -161,7 +162,7 @@ public class ConfigurationService {
         return oldConfiguration;
     }
 
-    private Configuration toConfiguration(Dictionary<String, Object> dictionary) {
+    private @Nullable Configuration toConfiguration(Dictionary<String, Object> dictionary) {
         if (dictionary == null) {
             return null;
         }

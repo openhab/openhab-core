@@ -35,6 +35,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.JSONResponse;
@@ -58,10 +60,9 @@ import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceDTO;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -94,7 +95,11 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(PersistenceResource.PATH_PERSISTENCE)
 @Api(PersistenceResource.PATH_PERSISTENCE)
+@NonNullByDefault
 public class PersistenceResource implements RESTResource {
+
+    // The URI path to this resource
+    public static final String PATH_PERSISTENCE = "persistence";
 
     private final Logger logger = LoggerFactory.getLogger(PersistenceResource.class);
 
@@ -102,49 +107,21 @@ public class PersistenceResource implements RESTResource {
     private static final String QUERYABLE = "Queryable";
     private static final String STANDARD = "Standard";
 
-    // The URI path to this resource
-    public static final String PATH_PERSISTENCE = "persistence";
+    private final ItemRegistry itemRegistry;
+    private final LocaleService localeService;
+    private final PersistenceServiceRegistry persistenceServiceRegistry;
+    private final TimeZoneProvider timeZoneProvider;
 
-    private ItemRegistry itemRegistry;
-    private PersistenceServiceRegistry persistenceServiceRegistry;
-    private TimeZoneProvider timeZoneProvider;
-
-    private LocaleService localeService;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setPersistenceServiceRegistry(PersistenceServiceRegistry persistenceServiceRegistry) {
-        this.persistenceServiceRegistry = persistenceServiceRegistry;
-    }
-
-    protected void unsetPersistenceServiceRegistry(PersistenceServiceRegistry persistenceServiceRegistry) {
-        this.persistenceServiceRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setTimeZoneProvider(TimeZoneProvider timeZoneProvider) {
-        this.timeZoneProvider = timeZoneProvider;
-    }
-
-    protected void unsetTimeZoneProvider(TimeZoneProvider timeZoneProvider) {
-        this.timeZoneProvider = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
+    @Activate
+    public PersistenceResource( //
+            final @Reference ItemRegistry itemRegistry, //
+            final @Reference LocaleService localeService,
+            final @Reference PersistenceServiceRegistry persistenceServiceRegistry,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
         this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
+        this.persistenceServiceRegistry = persistenceServiceRegistry;
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @GET
@@ -153,7 +130,7 @@ public class PersistenceResource implements RESTResource {
     @ApiOperation(value = "Gets a list of persistence services.", response = String.class, responseContainer = "List")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"))
     public Response httpGetPersistenceServices(@Context HttpHeaders headers,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = HttpHeaders.ACCEPT_LANGUAGE) String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
 
         Object responseObject = getPersistenceServiceList(locale);
@@ -167,7 +144,7 @@ public class PersistenceResource implements RESTResource {
     @ApiOperation(value = "Gets a list of items available via a specific persistence service.", response = String.class, responseContainer = "List")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"))
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
-            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used", required = false) @QueryParam("serviceId") String serviceId) {
+            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId) {
         return getServiceItemList(serviceId);
     }
 
@@ -179,17 +156,16 @@ public class PersistenceResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ItemHistoryDTO.class),
             @ApiResponse(code = 404, message = "Unknown Item or persistence service") })
     public Response httpGetPersistenceItemData(@Context HttpHeaders headers,
-            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used", required = false) @QueryParam("serviceId") String serviceId,
-            @ApiParam(value = "The item name", required = true) @PathParam("itemname") String itemName,
+            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
+            @ApiParam(value = "The item name") @PathParam("itemname") String itemName,
             @ApiParam(value = "Start time of the data to return. Will default to 1 day before endtime. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
-                    + "]", required = false) @QueryParam("starttime") String startTime,
+                    + "]") @QueryParam("starttime") @Nullable String startTime,
             @ApiParam(value = "End time of the data to return. Will default to current time. ["
-                    + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
-                    + "]", required = false) @QueryParam("endtime") String endTime,
-            @ApiParam(value = "Page number of data to return. This parameter will enable paging.", required = false) @QueryParam("page") int pageNumber,
-            @ApiParam(value = "The length of each page.", required = false) @QueryParam("pagelength") int pageLength,
-            @ApiParam(value = "Gets one value before and after the requested period.", required = false) @QueryParam("boundary") boolean boundary) {
+                    + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("endtime") @Nullable String endTime,
+            @ApiParam(value = "Page number of data to return. This parameter will enable paging.") @QueryParam("page") int pageNumber,
+            @ApiParam(value = "The length of each page.") @QueryParam("pagelength") int pageLength,
+            @ApiParam(value = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary) {
         return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary);
     }
 
@@ -204,7 +180,7 @@ public class PersistenceResource implements RESTResource {
             @ApiResponse(code = 404, message = "Unknown persistence service") })
     public Response httpDeletePersistenceServiceItem(@Context HttpHeaders headers,
             @ApiParam(value = "Id of the persistence service.", required = true) @QueryParam("serviceId") String serviceId,
-            @ApiParam(value = "The item name.", required = true) @PathParam("itemname") String itemName,
+            @ApiParam(value = "The item name.") @PathParam("itemname") String itemName,
             @ApiParam(value = "Start time of the data to return. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]", required = true) @QueryParam("starttime") String startTime,
             @ApiParam(value = "End time of the data to return. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
@@ -220,8 +196,8 @@ public class PersistenceResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ItemHistoryDTO.class),
             @ApiResponse(code = 404, message = "Unknown Item or persistence service") })
     public Response httpPutPersistenceItemData(@Context HttpHeaders headers,
-            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used", required = false) @QueryParam("serviceId") String serviceId,
-            @ApiParam(value = "The item name.", required = true) @PathParam("itemname") String itemName,
+            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
+            @ApiParam(value = "The item name.") @PathParam("itemname") String itemName,
             @ApiParam(value = "Time of the data to be stored. Will default to current time. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]", required = true) @QueryParam("time") String time,
             @ApiParam(value = "The state to store.", required = true) @QueryParam("state") String value) {
@@ -233,22 +209,26 @@ public class PersistenceResource implements RESTResource {
         return dateTime.getZonedDateTime();
     }
 
-    private Response getItemHistoryDTO(String serviceId, String itemName, String timeBegin, String timeEnd,
-            int pageNumber, int pageLength, boolean boundary) {
+    private Response getItemHistoryDTO(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
+            @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary) {
         // Benchmarking timer...
         long timerStart = System.currentTimeMillis();
 
+        @Nullable
         ItemHistoryDTO dto = createDTO(serviceId, itemName, timeBegin, timeEnd, pageNumber, pageLength, boundary);
+
         if (dto == null) {
-            JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Persistence service not queryable: " + serviceId);
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Persistence service not queryable: " + serviceId);
         }
+
         logger.debug("Persistence returned {} rows in {}ms", dto.datapoints, System.currentTimeMillis() - timerStart);
 
         return JSONResponse.createResponse(Status.OK, dto, "");
     }
 
-    protected ItemHistoryDTO createDTO(String serviceId, String itemName, String timeBegin, String timeEnd,
-            int pageNumber, int pageLength, boolean boundary) {
+    protected @Nullable ItemHistoryDTO createDTO(@Nullable String serviceId, String itemName,
+            @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary) {
         // If serviceId is null, then use the default service
         PersistenceService service = null;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
@@ -315,7 +295,7 @@ public class PersistenceResource implements RESTResource {
             filter.setPageSize(1);
             filter.setOrdering(Ordering.DESCENDING);
             result = qService.query(filter);
-            if (result != null && result.iterator().hasNext()) {
+            if (result.iterator().hasNext()) {
                 dto.addData(dateTimeBegin.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
             }
@@ -334,28 +314,26 @@ public class PersistenceResource implements RESTResource {
         filter.setOrdering(Ordering.ASCENDING);
 
         result = qService.query(filter);
-        if (result != null) {
-            Iterator<HistoricItem> it = result.iterator();
+        Iterator<HistoricItem> it = result.iterator();
 
-            // Iterate through the data
-            HistoricItem lastItem = null;
-            while (it.hasNext()) {
-                HistoricItem historicItem = it.next();
-                state = historicItem.getState();
+        // Iterate through the data
+        HistoricItem lastItem = null;
+        while (it.hasNext()) {
+            HistoricItem historicItem = it.next();
+            state = historicItem.getState();
 
-                // For 'binary' states, we need to replicate the data
-                // to avoid diagonal lines
-                if (state instanceof OnOffType || state instanceof OpenClosedType) {
-                    if (lastItem != null) {
-                        dto.addData(historicItem.getTimestamp().getTime(), lastItem.getState());
-                        quantity++;
-                    }
+            // For 'binary' states, we need to replicate the data
+            // to avoid diagonal lines
+            if (state instanceof OnOffType || state instanceof OpenClosedType) {
+                if (lastItem != null) {
+                    dto.addData(historicItem.getTimestamp().getTime(), lastItem.getState());
+                    quantity++;
                 }
-
-                dto.addData(historicItem.getTimestamp().getTime(), state);
-                quantity++;
-                lastItem = historicItem;
             }
+
+            dto.addData(historicItem.getTimestamp().getTime(), state);
+            quantity++;
+            lastItem = historicItem;
         }
 
         if (boundary) {
@@ -364,7 +342,7 @@ public class PersistenceResource implements RESTResource {
             filter.setPageSize(1);
             filter.setOrdering(Ordering.ASCENDING);
             result = qService.query(filter);
-            if (result != null && result.iterator().hasNext()) {
+            if (result.iterator().hasNext()) {
                 dto.addData(dateTimeEnd.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
             }
@@ -401,7 +379,7 @@ public class PersistenceResource implements RESTResource {
         return dtoList;
     }
 
-    private Response getServiceItemList(String serviceId) {
+    private Response getServiceItemList(@Nullable String serviceId) {
         // If serviceId is null, then use the default service
         PersistenceService service = null;
         if (serviceId == null) {
@@ -426,7 +404,8 @@ public class PersistenceResource implements RESTResource {
         return JSONResponse.createResponse(Status.OK, qService.getItemInfo(), "");
     }
 
-    private Response deletePersistenceItemData(String serviceId, String itemName, String timeBegin, String timeEnd) {
+    private Response deletePersistenceItemData(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
+            @Nullable String timeEnd) {
         // For deleting, we must specify a service id - don't use the default service
         if (serviceId == null || serviceId.length() == 0) {
             logger.debug("Persistence service must be specified for delete operations.");
@@ -448,7 +427,7 @@ public class PersistenceResource implements RESTResource {
 
         ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
 
-        if (timeBegin == null | timeEnd == null) {
+        if (timeBegin == null || timeEnd == null) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "The start and end time must be set");
         }
 
@@ -476,11 +455,10 @@ public class PersistenceResource implements RESTResource {
         return Response.status(Status.OK).build();
     }
 
-    private Response putItemState(String serviceId, String itemName, String value, String time) {
+    private Response putItemState(@Nullable String serviceId, String itemName, String value, @Nullable String time) {
         // If serviceId is null, then use the default service
-        PersistenceService service = null;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
-        service = persistenceServiceRegistry.get(effectiveServiceId);
+        PersistenceService service = persistenceServiceRegistry.get(effectiveServiceId);
 
         if (service == null) {
             logger.warn("Persistence service not found '{}'.", effectiveServiceId);
@@ -490,10 +468,6 @@ public class PersistenceResource implements RESTResource {
 
         Item item;
         try {
-            if (itemRegistry == null) {
-                logger.warn("Item registry not set.");
-                return JSONResponse.createErrorResponse(Status.CONFLICT, "Item registry not set.");
-            }
             item = itemRegistry.getItem(itemName);
         } catch (ItemNotFoundException e) {
             logger.warn("Item not found '{}'.", itemName);
@@ -527,11 +501,5 @@ public class PersistenceResource implements RESTResource {
 
         mService.store(item, Date.from(dateTime.toInstant()), state);
         return Response.status(Status.OK).build();
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return itemRegistry != null && persistenceServiceRegistry != null && timeZoneProvider != null
-                && localeService != null;
     }
 }

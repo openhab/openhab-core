@@ -15,7 +15,8 @@ package org.openhab.core.io.rest.core.internal.profile;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,8 @@ import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeBuilder;
@@ -42,7 +45,7 @@ import org.openhab.core.thing.type.ChannelTypeUID;
  */
 public class ProfileTypeResourceTest extends JavaTest {
 
-    private ProfileTypeResource ressource;
+    private ProfileTypeResource resource;
 
     // UIDs for state profile types
     private final ProfileTypeUID stateProfileTypeUID1 = new ProfileTypeUID("my:stateProfile1");
@@ -67,12 +70,15 @@ public class ProfileTypeResourceTest extends JavaTest {
     private final ChannelType otherTriggerChannelType = ChannelTypeBuilder
             .trigger(otherTriggerChannelTypeUID, "channel1").build();
 
+    private @Mock ChannelTypeRegistry channelTypeRegistry;
+    private @Mock LocaleService localeService;
+    private @Mock ProfileTypeRegistry profileTypeRegistry;
+
     @Before
     public void setup() {
-        ressource = new ProfileTypeResource();
+        initMocks(this);
 
-        ChannelTypeRegistry ctRegistry = mock(ChannelTypeRegistry.class);
-        ProfileTypeRegistry ptRegistry = mock(ProfileTypeRegistry.class);
+        resource = new ProfileTypeResource(channelTypeRegistry, localeService, profileTypeRegistry);
 
         List<ProfileType> profileTypes = new ArrayList<>();
         ProfileType pt1 = ProfileTypeBuilder.newState(stateProfileTypeUID1, "profile1")
@@ -87,20 +93,17 @@ public class ProfileTypeResourceTest extends JavaTest {
         profileTypes.add(pt3);
         profileTypes.add(pt4);
 
-        when(ptRegistry.getProfileTypes(any())).thenReturn(profileTypes);
-        when(ctRegistry.getChannelType(pt1ChannelType1UID, null)).thenReturn(pt1ChannelType1);
-        when(ctRegistry.getChannelType(pt3ChannelType1UID, null)).thenReturn(pt3ChannelType1);
+        when(profileTypeRegistry.getProfileTypes(any())).thenReturn(profileTypes);
+        when(channelTypeRegistry.getChannelType(pt1ChannelType1UID, null)).thenReturn(pt1ChannelType1);
+        when(channelTypeRegistry.getChannelType(pt3ChannelType1UID, null)).thenReturn(pt3ChannelType1);
 
-        when(ctRegistry.getChannelType(otherStateChannelTypeUID, null)).thenReturn(otherStateChannelType);
-        when(ctRegistry.getChannelType(otherTriggerChannelTypeUID, null)).thenReturn(otherTriggerChannelType);
-
-        ressource.setChannelTypeRegistry(ctRegistry);
-        ressource.setProfileTypeRegistry(ptRegistry);
+        when(channelTypeRegistry.getChannelType(otherStateChannelTypeUID, null)).thenReturn(otherStateChannelType);
+        when(channelTypeRegistry.getChannelType(otherTriggerChannelTypeUID, null)).thenReturn(otherTriggerChannelType);
     }
 
     @Test
     public void testGetAll() {
-        Stream<ProfileTypeDTO> result = ressource.getProfileTypes(null, null, null);
+        Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, null, null);
 
         List<ProfileTypeDTO> list = result.collect(Collectors.toList());
         assertThat(list.size(), is(4));
@@ -108,7 +111,7 @@ public class ProfileTypeResourceTest extends JavaTest {
 
     @Test
     public void testGetProfileTypesForStateChannel1() {
-        Stream<ProfileTypeDTO> result = ressource.getProfileTypes(null, pt1ChannelType1UID.toString(), null);
+        Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, pt1ChannelType1UID.toString(), null);
         List<ProfileTypeDTO> list = result.collect(Collectors.toList());
 
         // should be both state profiles because the second state profile supports ALL item types on the channel side
@@ -121,7 +124,7 @@ public class ProfileTypeResourceTest extends JavaTest {
 
     @Test
     public void testGetProfileTypesForOtherChannel() {
-        Stream<ProfileTypeDTO> result = ressource.getProfileTypes(null, otherStateChannelTypeUID.toString(), null);
+        Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, otherStateChannelTypeUID.toString(), null);
         List<ProfileTypeDTO> list = result.collect(Collectors.toList());
 
         // should be only the second state profile because the first one is restricted to another item type on the
@@ -136,7 +139,7 @@ public class ProfileTypeResourceTest extends JavaTest {
 
     @Test
     public void testGetProfileTypesForTriggerChannel1() {
-        Stream<ProfileTypeDTO> result = ressource.getProfileTypes(null, pt3ChannelType1UID.toString(), null);
+        Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, pt3ChannelType1UID.toString(), null);
         List<ProfileTypeDTO> list = result.collect(Collectors.toList());
 
         // should be both trigger profiles because the second trigger profile supports ALL channel types
@@ -149,7 +152,7 @@ public class ProfileTypeResourceTest extends JavaTest {
 
     @Test
     public void testGetProfileTypesForTriggerChannel2() {
-        Stream<ProfileTypeDTO> result = ressource.getProfileTypes(null, otherTriggerChannelTypeUID.toString(), null);
+        Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, otherTriggerChannelTypeUID.toString(), null);
         List<ProfileTypeDTO> list = result.collect(Collectors.toList());
 
         // should be only the second trigger profile because the first one is restricted to another channel type UID

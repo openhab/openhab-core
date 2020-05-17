@@ -23,13 +23,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
@@ -41,10 +41,9 @@ import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -78,25 +77,19 @@ import io.swagger.annotations.ApiResponses;
 @Path(InboxResource.PATH_INBOX)
 @RolesAllowed({ Role.ADMIN })
 @Api(InboxResource.PATH_INBOX)
+@NonNullByDefault
 public class InboxResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(InboxResource.class);
 
     /** The URI path to this resource */
     public static final String PATH_INBOX = "inbox";
 
-    private Inbox inbox;
+    private final Inbox inbox;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setInbox(Inbox inbox) {
+    @Activate
+    public InboxResource(final @Reference Inbox inbox) {
         this.inbox = inbox;
     }
-
-    protected void unsetInbox(Inbox inbox) {
-        this.inbox = null;
-    }
-
-    @Context
-    private UriInfo uriInfo;
 
     @POST
     @Path("/{thingUID}/approve")
@@ -105,9 +98,10 @@ public class InboxResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Thing unable to be approved."),
             @ApiResponse(code = 409, message = "No binding found that supports this thing.") })
-    public Response approve(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,
-            @PathParam("thingUID") @ApiParam(value = "thingUID", required = true) String thingUID,
-            @ApiParam(value = "thing label") String label) {
+    public Response approve(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
+            @PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID,
+            @ApiParam(value = "thing label") @Nullable String label) {
         ThingUID thingUIDObject = new ThingUID(thingUID);
         String notEmptyLabel = label != null && !label.isEmpty() ? label : null;
         Thing thing = null;
@@ -131,7 +125,7 @@ public class InboxResource implements RESTResource {
     @ApiOperation(value = "Removes the discovery result from the inbox.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Discovery result not found in the inbox.") })
-    public Response delete(@PathParam("thingUID") @ApiParam(value = "thingUID", required = true) String thingUID) {
+    public Response delete(@PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID) {
         if (inbox.remove(new ThingUID(thingUID))) {
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } else {
@@ -152,7 +146,7 @@ public class InboxResource implements RESTResource {
     @Path("/{thingUID}/ignore")
     @ApiOperation(value = "Flags a discovery result as ignored for further processing.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response ignore(@PathParam("thingUID") @ApiParam(value = "thingUID", required = true) String thingUID) {
+    public Response ignore(@PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID) {
         inbox.setFlag(new ThingUID(thingUID), DiscoveryResultFlag.IGNORED);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
@@ -161,13 +155,8 @@ public class InboxResource implements RESTResource {
     @Path("/{thingUID}/unignore")
     @ApiOperation(value = "Removes ignore flag from a discovery result.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response unignore(@PathParam("thingUID") @ApiParam(value = "thingUID", required = true) String thingUID) {
+    public Response unignore(@PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID) {
         inbox.setFlag(new ThingUID(thingUID), DiscoveryResultFlag.NEW);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return inbox != null;
     }
 }

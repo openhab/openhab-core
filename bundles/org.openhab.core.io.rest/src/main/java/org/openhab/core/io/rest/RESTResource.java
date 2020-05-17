@@ -12,20 +12,15 @@
  */
 package org.openhab.core.io.rest;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is a marker interface for REST resource implementations
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Triller - Added default implementation for isSatisfied
  */
+@NonNullByDefault
 public interface RESTResource {
 
-    /**
-     * Method used to determine availability of a RESTResource
-     *
-     * @return true if this RESTResource is ready to process requests, false otherwise.
-     */
-    default boolean isSatisfied() {
-        return true;
-    }
 }

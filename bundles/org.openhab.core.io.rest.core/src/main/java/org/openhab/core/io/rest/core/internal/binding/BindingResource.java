@@ -27,13 +27,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.binding.BindingInfo;
 import org.openhab.core.binding.BindingInfoRegistry;
@@ -47,10 +47,9 @@ import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.core.config.ConfigurationService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -83,6 +82,7 @@ import io.swagger.annotations.ApiResponses;
 @Path(BindingResource.PATH_BINDINGS)
 @RolesAllowed({ Role.ADMIN })
 @Api(BindingResource.PATH_BINDINGS)
+@NonNullByDefault
 public class BindingResource implements RESTResource {
 
     /** The URI path to this resource */
@@ -90,40 +90,30 @@ public class BindingResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(BindingResource.class);
 
-    private ConfigurationService configurationService;
-    private ConfigDescriptionRegistry configDescRegistry;
+    private final BindingInfoRegistry bindingInfoRegistry;
+    private final ConfigurationService configurationService;
+    private final ConfigDescriptionRegistry configDescRegistry;
+    private final LocaleService localeService;
 
-    private BindingInfoRegistry bindingInfoRegistry;
-
-    private LocaleService localeService;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setBindingInfoRegistry(BindingInfoRegistry bindingInfoRegistry) {
+    @Activate
+    public BindingResource( //
+            final @Reference BindingInfoRegistry bindingInfoRegistry,
+            final @Reference ConfigurationService configurationService,
+            final @Reference ConfigDescriptionRegistry configDescRegistry,
+            final @Reference LocaleService localeService) {
         this.bindingInfoRegistry = bindingInfoRegistry;
-    }
-
-    protected void unsetBindingInfoRegistry(BindingInfoRegistry bindingInfoRegistry) {
-        this.bindingInfoRegistry = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
+        this.configurationService = configurationService;
+        this.configDescRegistry = configDescRegistry;
         this.localeService = localeService;
     }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
-    }
-
-    @Context
-    UriInfo uriInfo;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get all bindings.", response = BindingInfoDTO.class, responseContainer = "Set")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BindingInfoDTO.class, responseContainer = "Set") })
-    public Response getAll(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language) {
+    public Response getAll(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(locale);
 
@@ -137,8 +127,7 @@ public class BindingResource implements RESTResource {
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Binding does not exist"),
             @ApiResponse(code = 500, message = "Configuration can not be read due to internal error") })
-    public Response getConfiguration(
-            @PathParam("bindingId") @ApiParam(value = "service ID", required = true) String bindingId) {
+    public Response getConfiguration(@PathParam("bindingId") @ApiParam(value = "service ID") String bindingId) {
         try {
             String configId = getConfigId(bindingId);
             if (configId == null) {
@@ -164,9 +153,8 @@ public class BindingResource implements RESTResource {
             @ApiResponse(code = 204, message = "No old configuration"),
             @ApiResponse(code = 404, message = "Binding does not exist"),
             @ApiResponse(code = 500, message = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(
-            @PathParam("bindingId") @ApiParam(value = "service ID", required = true) String bindingId,
-            Map<String, Object> configuration) {
+    public Response updateConfiguration(@PathParam("bindingId") @ApiParam(value = "service ID") String bindingId,
+            @Nullable Map<String, Object> configuration) {
         try {
             String configId = getConfigId(bindingId);
             if (configId == null) {
@@ -184,7 +172,8 @@ public class BindingResource implements RESTResource {
         }
     }
 
-    private Map<String, Object> normalizeConfiguration(Map<String, Object> properties, String bindingId) {
+    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
+            String bindingId) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -202,7 +191,7 @@ public class BindingResource implements RESTResource {
         return ConfigUtil.normalizeTypes(properties, Collections.singletonList(configDesc));
     }
 
-    private String getConfigId(String bindingId) {
+    private @Nullable String getConfigId(String bindingId) {
         BindingInfo bindingInfo = this.bindingInfoRegistry.getBindingInfo(bindingId);
         if (bindingInfo != null) {
             return bindingInfo.getServiceId();
@@ -215,29 +204,5 @@ public class BindingResource implements RESTResource {
         URI configDescriptionURI = bindingInfo.getConfigDescriptionURI();
         return new BindingInfoDTO(bindingInfo.getUID(), bindingInfo.getName(), bindingInfo.getAuthor(),
                 bindingInfo.getDescription(), configDescriptionURI != null ? configDescriptionURI.toString() : null);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    protected void unsetConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescRegistry = null;
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return configurationService != null && configDescRegistry != null && bindingInfoRegistry != null
-                && localeService != null;
     }
 }

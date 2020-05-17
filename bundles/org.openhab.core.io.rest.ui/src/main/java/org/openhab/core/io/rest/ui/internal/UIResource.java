@@ -23,12 +23,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -39,10 +38,9 @@ import org.openhab.core.ui.components.UIComponentRegistry;
 import org.openhab.core.ui.components.UIComponentRegistryFactory;
 import org.openhab.core.ui.tiles.Tile;
 import org.openhab.core.ui.tiles.TileProvider;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -67,16 +65,22 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(UIResource.PATH_UI)
 @Api(UIResource.PATH_UI)
+@NonNullByDefault
 public class UIResource implements RESTResource {
 
     /** The URI path to this resource */
     public static final String PATH_UI = "ui";
 
-    @Context
-    private UriInfo uriInfo;
+    private final UIComponentRegistryFactory componentRegistryFactory;
+    private final TileProvider tileProvider;
 
-    private TileProvider tileProvider;
-    private UIComponentRegistryFactory componentRegistryFactory;
+    @Activate
+    public UIResource( //
+            final @Reference UIComponentRegistryFactory componentRegistryFactory,
+            final @Reference TileProvider tileProvider) {
+        this.componentRegistryFactory = componentRegistryFactory;
+        this.tileProvider = tileProvider;
+    }
 
     @GET
     @Path("/tiles")
@@ -167,29 +171,6 @@ public class UIResource implements RESTResource {
         }
         registry.remove(componentUID);
         return Response.ok().build();
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return tileProvider != null && componentRegistryFactory != null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setTileProvider(TileProvider tileProvider) {
-        this.tileProvider = tileProvider;
-    }
-
-    protected void unsetTileProvider(TileProvider tileProvider) {
-        this.tileProvider = null;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setComponentRegistryFactory(UIComponentRegistryFactory componentRegistryFactory) {
-        this.componentRegistryFactory = componentRegistryFactory;
-    }
-
-    protected void unsetComponentRegistryFactory(UIComponentRegistryFactory componentRegistryFactory) {
-        this.componentRegistryFactory = null;
     }
 
     private TileDTO toTileDTO(Tile tile) {

@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 
 /**
@@ -23,6 +24,7 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class HLIMapper {
 
     /**

@@ -40,10 +40,9 @@ import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.io.rest.core.config.EnrichedConfigDescriptionDTOMapper;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -78,26 +77,23 @@ public class ConfigDescriptionResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_CONFIG_DESCRIPTIONS = "config-descriptions";
 
-    private @NonNullByDefault({}) ConfigDescriptionRegistry configDescriptionRegistry;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
+    private final LocaleService localeService;
 
-    private @NonNullByDefault({}) LocaleService localeService;
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setLocaleService(LocaleService localeService) {
+    @Activate
+    public ConfigDescriptionResource( //
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference LocaleService localeService) {
+        this.configDescriptionRegistry = configDescriptionRegistry;
         this.localeService = localeService;
-    }
-
-    protected void unsetLocaleService(LocaleService localeService) {
-        this.localeService = null;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gets all available config descriptions.", response = ConfigDescriptionDTO.class, responseContainer = "List")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ConfigDescriptionDTO.class, responseContainer = "List"))
-    public Response getAll(
-            @HeaderParam("Accept-Language") @ApiParam(value = "Accept-Language") @Nullable String language, //
-            @QueryParam("scheme") @ApiParam(value = "scheme filter", required = false) @Nullable String scheme) {
+    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language, //
+            @QueryParam("scheme") @ApiParam(value = "scheme filter") @Nullable String scheme) {
         Locale locale = localeService.getLocale(language);
         Collection<ConfigDescription> configDescriptions = configDescriptionRegistry.getConfigDescriptions(locale);
         return Response.ok(new Stream2JSONInputStream(configDescriptions.stream().filter(configDescription -> {
@@ -111,8 +107,7 @@ public class ConfigDescriptionResource implements RESTResource {
     @ApiOperation(value = "Gets a config description by URI.", response = ConfigDescriptionDTO.class)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ConfigDescriptionDTO.class),
             @ApiResponse(code = 400, message = "Invalid URI syntax"), @ApiResponse(code = 404, message = "Not found") })
-    public Response getByURI(
-            @HeaderParam("Accept-Language") @ApiParam(value = "Accept-Language") @Nullable String language,
+    public Response getByURI(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
             @PathParam("uri") @ApiParam(value = "uri") String uri) {
         Locale locale = localeService.getLocale(language);
         URI uriObject = UriBuilder.fromPath(uri).build();
@@ -120,19 +115,5 @@ public class ConfigDescriptionResource implements RESTResource {
         return configDescription != null
                 ? Response.ok(EnrichedConfigDescriptionDTOMapper.map(configDescription)).build()
                 : JSONResponse.createErrorResponse(Status.NOT_FOUND, "Configuration not found: " + uri);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = configDescriptionRegistry;
-    }
-
-    protected void unsetConfigDescriptionRegistry(ConfigDescriptionRegistry configDescriptionRegistry) {
-        this.configDescriptionRegistry = null;
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return configDescriptionRegistry != null && localeService != null;
     }
 }
