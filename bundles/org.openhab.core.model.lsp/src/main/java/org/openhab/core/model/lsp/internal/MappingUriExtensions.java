@@ -13,15 +13,14 @@
 package org.openhab.core.model.lsp.internal;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.ide.server.UriExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,17 +35,16 @@ import org.slf4j.LoggerFactory;
  */
 public class MappingUriExtensions extends UriExtensions {
 
-    private static final Charset PATH_ENCODING = StandardCharsets.UTF_8;
-
     private final Logger logger = LoggerFactory.getLogger(MappingUriExtensions.class);
 
-    private final String serverLocation;
-    private String clientLocation = null;
     private final String rawConfigFolder;
+    private final String serverLocation;
+
+    private @Nullable String clientLocation;
 
     public MappingUriExtensions(String configFolder) {
         this.rawConfigFolder = configFolder;
-        serverLocation = calcServerLocation(configFolder);
+        this.serverLocation = calcServerLocation(configFolder);
         logger.debug("The language server is using '{}' as its workspace", serverLocation);
     }
 
@@ -79,23 +77,20 @@ public class MappingUriExtensions extends UriExtensions {
 
     @Override
     public URI toUri(String pathWithScheme) {
-        try {
-            String decodedPathWithScheme = URLDecoder.decode(pathWithScheme, PATH_ENCODING.toString());
+        String decodedPathWithScheme = URLDecoder.decode(pathWithScheme, StandardCharsets.UTF_8);
 
-            if (clientLocation != null && decodedPathWithScheme.startsWith(clientLocation)) {
-                return map(decodedPathWithScheme);
-            }
-
-            clientLocation = guessClientPath(decodedPathWithScheme);
-            if (clientLocation != null) {
-                logger.debug("Identified client workspace as '{}'", clientLocation);
-                return map(decodedPathWithScheme);
-            }
-
-            clientLocation = pathWithScheme;
-        } catch (UnsupportedEncodingException e) {
-            logger.error("Charset {} is not supported. You're seriously in trouble.", PATH_ENCODING);
+        if (clientLocation != null && decodedPathWithScheme.startsWith(clientLocation)) {
+            return map(decodedPathWithScheme);
         }
+
+        clientLocation = guessClientPath(decodedPathWithScheme);
+        if (clientLocation != null) {
+            logger.debug("Identified client workspace as '{}'", clientLocation);
+            return map(decodedPathWithScheme);
+        }
+
+        clientLocation = pathWithScheme;
+
         logger.debug("Path mapping could not be done for '{}', leaving it untouched", pathWithScheme);
         java.net.URI javaNetUri = java.net.URI.create(pathWithScheme);
         return URI.createURI(toPathAsInXtext212(javaNetUri));
@@ -139,7 +134,7 @@ public class MappingUriExtensions extends UriExtensions {
      * @param pathWithScheme the filename as coming from the client
      * @return the substring which needs to be replaced with the runtime's config folder path
      */
-    protected String guessClientPath(String pathWithScheme) {
+    protected @Nullable String guessClientPath(String pathWithScheme) {
         if (isPointingToConfigFolder(pathWithScheme)) {
             return removeTrailingSlash(pathWithScheme);
         } else if (isFolder(pathWithScheme)) {
