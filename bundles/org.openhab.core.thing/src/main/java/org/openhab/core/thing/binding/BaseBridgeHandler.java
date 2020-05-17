@@ -13,10 +13,8 @@
 package org.openhab.core.thing.binding;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.BridgeBuilder;
 
 /**
@@ -37,14 +35,6 @@ public abstract class BaseBridgeHandler extends BaseThingHandler implements Brid
      */
     public BaseBridgeHandler(Bridge bridge) {
         super(bridge);
-    }
-
-    /**
-     * @deprecated Use {@link Bridge#getThing(ThingUID)} instead.
-     */
-    @Deprecated
-    public @Nullable Thing getThingByUID(ThingUID uid) {
-        return getThing().getThing(uid);
     }
 
     @Override
