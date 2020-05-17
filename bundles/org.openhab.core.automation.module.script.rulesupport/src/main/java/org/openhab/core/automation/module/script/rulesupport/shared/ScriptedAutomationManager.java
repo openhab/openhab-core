@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -36,8 +37,6 @@ import org.openhab.core.automation.util.ActionBuilder;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.config.core.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This Registry is used for a single ScriptEngine instance. It allows the adding and removing of handlers.
@@ -45,8 +44,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Merschjohann - Initial contribution
  */
+@NonNullByDefault
 public class ScriptedAutomationManager {
-    private final Logger logger = LoggerFactory.getLogger(ScriptedAutomationManager.class);
 
     private final RuleSupportRuleRegistryDelegate ruleRegistryDelegate;
 
@@ -88,8 +87,6 @@ public class ScriptedAutomationManager {
     }
 
     public void removeAll() {
-        logger.info("removeAll added handlers");
-
         Set<String> types = new HashSet<>(modules);
         for (String moduleType : types) {
             removeModuleType(moduleType);
