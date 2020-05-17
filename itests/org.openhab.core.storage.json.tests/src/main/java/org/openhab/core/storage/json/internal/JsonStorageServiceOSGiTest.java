@@ -17,7 +17,6 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +64,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testOnlyAlphanumericCharsInFileName() throws UnsupportedEncodingException {
+    public void testOnlyAlphanumericCharsInFileName() {
         JsonStorageService st = (JsonStorageService) storageService;
 
         String escaped = st.urlEscapeUnwantedChars("Strange:File-Name~with#Chars");
