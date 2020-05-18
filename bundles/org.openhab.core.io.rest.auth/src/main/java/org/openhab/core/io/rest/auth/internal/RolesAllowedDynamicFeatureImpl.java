@@ -33,6 +33,11 @@ import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 
 import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.RESTConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +53,9 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - port to openHAB with modifications
  */
 @Provider
+@Component(immediate = false)
+@JaxrsExtension
+@JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
     private final Logger logger = LoggerFactory.getLogger(RolesAllowedDynamicFeatureImpl.class);
 

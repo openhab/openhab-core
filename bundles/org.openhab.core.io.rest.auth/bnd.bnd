@@ -1,2 +1,1 @@
 Bundle-SymbolicName: ${project.artifactId}
-Bundle-Activator: org.openhab.core.io.rest.auth.internal.Activator
