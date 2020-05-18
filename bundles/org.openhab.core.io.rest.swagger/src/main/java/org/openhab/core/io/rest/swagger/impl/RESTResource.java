@@ -33,8 +33,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.maggu2810.jaxrswb.swagger1.gen.JaxRsWhiteboardSwaggerGenerator;
-
 /**
  * An endpoint to generate and provide a Swagger 1 description.
  *
@@ -49,7 +47,7 @@ import de.maggu2810.jaxrswb.swagger1.gen.JaxRsWhiteboardSwaggerGenerator;
 public class RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(RESTResource.class);
-    private final JaxRsWhiteboardSwaggerGenerator generator;
+    private final SwaggerGenerator generator;
 
     /**
      * Creates a new instance.
@@ -57,7 +55,7 @@ public class RESTResource {
      * @param generator the generator
      */
     @Activate
-    public RESTResource(final @Reference JaxRsWhiteboardSwaggerGenerator generator) {
+    public RESTResource(final @Reference SwaggerGenerator generator) {
         this.generator = generator;
     }
 
