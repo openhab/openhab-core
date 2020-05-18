@@ -40,7 +40,7 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
  * @author Yannick Schaus - initial contribution
  */
 @PreMatching
-@Component(configurationPid = "org.openhab.rest.auth")
+@Component(configurationPid = "org.openhab.restauth")
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @Priority(Priorities.AUTHENTICATION)
