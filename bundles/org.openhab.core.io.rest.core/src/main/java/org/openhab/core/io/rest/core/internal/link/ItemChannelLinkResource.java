@@ -55,6 +55,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for links.
@@ -73,7 +75,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ItemChannelLinkResource.PATH_LINKS)
 @RolesAllowed({ Role.ADMIN })
-@Api(ItemChannelLinkResource.PATH_LINKS)
+@Api(value = ItemChannelLinkResource.PATH_LINKS, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class ItemChannelLinkResource implements RESTResource {
 
@@ -129,7 +132,8 @@ public class ItemChannelLinkResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
-    @ApiOperation(value = "Links item to a channel.")
+    @ApiOperation(value = "Links item to a channel.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "Content does not match the path"),
             @ApiResponse(code = 405, message = "Link is not editable") })
@@ -162,7 +166,8 @@ public class ItemChannelLinkResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
-    @ApiOperation(value = "Unlinks item from a channel.")
+    @ApiOperation(value = "Unlinks item from a channel.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Link not found."),
             @ApiResponse(code = 405, message = "Link not editable.") })
