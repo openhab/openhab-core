@@ -16,16 +16,17 @@ import java.io.IOException;
 
 import javax.annotation.Priority;
 import javax.security.sasl.AuthenticationException;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import org.openhab.core.auth.Authentication;
+import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -87,7 +88,7 @@ public class AuthFilter implements ContainerRequestFilter {
                 }
             }
         } catch (AuthenticationException e) {
-            throw new NotAuthorizedException("Invalid token");
+            requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid token"));
         }
     }
 }

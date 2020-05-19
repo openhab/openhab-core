@@ -22,17 +22,17 @@ import javax.annotation.Priority;
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import org.openhab.core.auth.Role;
+import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
@@ -122,7 +122,9 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
                 }
 
                 if (rolesAllowed.length > 0 && !isAuthenticated(requestContext)) {
-                    throw new NotAuthorizedException("User is not authenticated");
+                    requestContext.abortWith(
+                            JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated"));
+                    return;
                 }
 
                 for (final String role : rolesAllowed) {
@@ -132,7 +134,8 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
                 }
             }
 
-            throw new ForbiddenException("User is authenticated but doesn't have access to this resource");
+            requestContext.abortWith(JSONResponse.createErrorResponse(Status.FORBIDDEN,
+                    "User is authenticated but doesn't have access to this resource"));
         }
 
         private static boolean isAuthenticated(final ContainerRequestContext requestContext) {
