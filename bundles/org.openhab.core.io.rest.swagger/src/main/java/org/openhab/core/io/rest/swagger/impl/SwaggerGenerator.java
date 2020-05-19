@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.openhab.core.io.rest.internal.resources.beans.RootBean;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -50,7 +49,7 @@ import io.swagger.util.Json;
 public class SwaggerGenerator implements JaxRsWhiteboardSwaggerSpecialGenerator {
 
     public static final String API_TITLE = "openHAB REST API";
-    public static final String API_VERSION = new RootBean().version;
+    public static final String API_VERSION = "3";
     public static final String OAUTH_AUTHORIZE_ENDPOINT = "/auth/authorize";
     public static final String OAUTH_TOKEN_ENDPOINT = "/rest/auth/token";
 
