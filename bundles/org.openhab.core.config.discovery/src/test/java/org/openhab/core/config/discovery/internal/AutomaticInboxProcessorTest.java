@@ -118,7 +118,7 @@ public class AutomaticInboxProcessorTest {
     private ManagedThingProvider thingProvider;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
 
         when(thing.getConfiguration()).thenReturn(CONFIG);
