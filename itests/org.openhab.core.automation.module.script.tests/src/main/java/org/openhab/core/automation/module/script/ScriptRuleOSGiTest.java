@@ -56,14 +56,14 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  */
 
-public class ScriptRuleTest extends JavaOSGiTest {
+public class ScriptRuleOSGiTest extends JavaOSGiTest {
 
-    private final Logger logger = LoggerFactory.getLogger(ScriptRuleTest.class);
+    private final Logger logger = LoggerFactory.getLogger(ScriptRuleOSGiTest.class);
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
 
     private ItemCommandEvent receivedEvent;
 
-    public ScriptRuleTest() {
+    public ScriptRuleOSGiTest() {
     }
 
     @Before

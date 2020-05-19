@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.defaultscope.internal;
+package org.openhab.core.automation.module.script.internal.defaultscope;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,7 +30,7 @@ import org.openhab.core.test.java.JavaOSGiTest;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-public class ScopeTest extends JavaOSGiTest {
+public class ScriptScopeOSGiTest extends JavaOSGiTest {
 
     private ScriptEngine engine;
 
