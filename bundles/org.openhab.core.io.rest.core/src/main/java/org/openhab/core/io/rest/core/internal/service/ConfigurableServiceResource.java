@@ -70,6 +70,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * {@link ConfigurableServiceResource} provides access to configurable services. It lists the available services and
@@ -86,7 +88,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ConfigurableServiceResource.PATH_SERVICES)
 @RolesAllowed({ Role.ADMIN })
-@Api(ConfigurableServiceResource.PATH_SERVICES)
+@Api(value = ConfigurableServiceResource.PATH_SERVICES, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class ConfigurableServiceResource implements RESTResource {
 

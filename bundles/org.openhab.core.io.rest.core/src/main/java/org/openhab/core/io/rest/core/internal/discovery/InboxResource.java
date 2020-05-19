@@ -57,6 +57,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for the inbox and is registered with the
@@ -76,7 +78,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(InboxResource.PATH_INBOX)
 @RolesAllowed({ Role.ADMIN })
-@Api(InboxResource.PATH_INBOX)
+@Api(value = InboxResource.PATH_INBOX, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class InboxResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(InboxResource.class);

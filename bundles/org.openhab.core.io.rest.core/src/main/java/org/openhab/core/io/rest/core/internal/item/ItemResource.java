@@ -97,6 +97,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * <p>
@@ -353,7 +355,9 @@ public class ItemResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName: [a-zA-Z_0-9]+}/members/{memberItemName: [a-zA-Z_0-9]+}")
-    @ApiOperation(value = "Adds a new member to a group item.")
+    @ApiOperation(value = "Adds a new member to a group item.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item or member item not found or item is not of type group item."),
             @ApiResponse(code = 405, message = "Member item is not editable.") })
@@ -391,7 +395,9 @@ public class ItemResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName: [a-zA-Z_0-9]+}/members/{memberItemName: [a-zA-Z_0-9]+}")
-    @ApiOperation(value = "Removes an existing member from a group item.")
+    @ApiOperation(value = "Removes an existing member from a group item.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item or member item not found or item is not of type group item."),
             @ApiResponse(code = 405, message = "Member item is not editable.") })
@@ -429,7 +435,9 @@ public class ItemResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}")
-    @ApiOperation(value = "Removes an item from the registry.")
+    @ApiOperation(value = "Removes an item from the registry.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found or item is not editable.") })
     public Response removeItem(@PathParam("itemname") @ApiParam(value = "item name") String itemname) {
@@ -442,7 +450,8 @@ public class ItemResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/tags/{tag}")
-    @ApiOperation(value = "Adds a tag to an item.")
+    @ApiOperation(value = "Adds a tag to an item.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found."),
             @ApiResponse(code = 405, message = "Item not editable.") })
@@ -467,7 +476,8 @@ public class ItemResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/tags/{tag}")
-    @ApiOperation(value = "Removes a tag from an item.")
+    @ApiOperation(value = "Removes a tag from an item.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found."),
             @ApiResponse(code = 405, message = "Item not editable.") })
@@ -493,7 +503,8 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Adds metadata to an item.")
+    @ApiOperation(value = "Adds metadata to an item.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { //
             @ApiResponse(code = 200, message = "OK"), //
             @ApiResponse(code = 201, message = "Created"), //
@@ -528,7 +539,9 @@ public class ItemResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/metadata/{namespace}")
-    @ApiOperation(value = "Removes metadata from an item.")
+    @ApiOperation(value = "Removes metadata from an item.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Item not found."),
             @ApiResponse(code = 405, message = "Meta data not editable.") })
@@ -563,7 +576,9 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Adds a new item to the registry or updates the existing item.")
+    @ApiOperation(value = "Adds a new item to the registry or updates the existing item.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 201, message = "Item created."), @ApiResponse(code = 400, message = "Item null."),
             @ApiResponse(code = 404, message = "Item not found."),
@@ -614,7 +629,9 @@ public class ItemResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Adds a list of items to the registry or updates the existing items.")
+    @ApiOperation(value = "Adds a list of items to the registry or updates the existing items.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 400, message = "Item list is null.") })
     public Response createOrUpdateItems(

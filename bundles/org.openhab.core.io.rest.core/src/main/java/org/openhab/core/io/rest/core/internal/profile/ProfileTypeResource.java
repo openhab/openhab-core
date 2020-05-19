@@ -58,6 +58,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * REST resource to obtain profile-types
@@ -72,7 +74,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ProfileTypeResource.PATH_PROFILE_TYPES)
 @RolesAllowed({ Role.ADMIN })
-@Api(ProfileTypeResource.PATH_PROFILE_TYPES)
+@Api(value = ProfileTypeResource.PATH_PROFILE_TYPES, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class ProfileTypeResource implements RESTResource {
 

@@ -83,7 +83,8 @@ import io.swagger.annotations.AuthorizationScope;
 @JSONRequired
 @Path(BindingResource.PATH_BINDINGS)
 @RolesAllowed({ Role.ADMIN })
-@Api(BindingResource.PATH_BINDINGS)
+@Api(value = BindingResource.PATH_BINDINGS, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class BindingResource implements RESTResource {
 

@@ -68,6 +68,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for extensions and provides methods to install and uninstall them.
@@ -83,7 +85,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ExtensionResource.PATH_EXTENSIONS)
 @RolesAllowed({ Role.ADMIN })
-@Api(ExtensionResource.PATH_EXTENSIONS)
+@Api(value = ExtensionResource.PATH_EXTENSIONS, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class ExtensionResource implements RESTResource {
 
