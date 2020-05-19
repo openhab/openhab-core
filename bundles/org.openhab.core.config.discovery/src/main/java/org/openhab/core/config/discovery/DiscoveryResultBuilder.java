@@ -36,7 +36,7 @@ public class DiscoveryResultBuilder {
     private final ThingUID thingUID;
 
     private @Nullable ThingUID bridgeUID;
-    private @Nullable Map<String, Object> properties;
+    private final Map<String, Object> properties = new HashMap<>();
     private @Nullable String representationProperty;
     private @Nullable String label;
     private long ttl = DiscoveryResult.TTL_UNLIMITED;
@@ -75,7 +75,9 @@ public class DiscoveryResultBuilder {
      * @return the updated builder
      */
     public DiscoveryResultBuilder withProperties(@Nullable Map<String, Object> properties) {
-        this.properties = properties;
+        if (properties != null) {
+            this.properties.putAll(properties);
+        }
         return this;
     }
 
@@ -85,11 +87,7 @@ public class DiscoveryResultBuilder {
      * @param property of the desired result
      * @return the updated builder
      */
-    @SuppressWarnings("null")
     public DiscoveryResultBuilder withProperty(String key, Object value) {
-        if (properties == null) {
-            properties = new HashMap<>();
-        }
         properties.put(key, value);
         return this;
     }

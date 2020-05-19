@@ -58,8 +58,8 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     private static final String ANY_BINDING_ID_3 = "any2BindingId3";
     private static final String ANY_THING_TYPE_3 = "any2ThingType3";
 
-    private static final ThingUID BRIDGE_UID_1 = new ThingUID("binding:bridge:1");
-    private static final ThingUID BRIDGE_UID_2 = new ThingUID("binding:bridge:2");
+    private static final ThingUID BRIDGE_UID_1 = new ThingUID(ANY_BINDING_ID_3, "bridge", "1");
+    private static final ThingUID BRIDGE_UID_2 = new ThingUID(ANY_BINDING_ID_3, "bridge", "2");
 
     private static final String FAULTY_BINDING_ID = "faulty2BindingId";
     private static final String FAULTY_THING_TYPE = "faulty2ThingType";
@@ -131,7 +131,6 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
 
         serviceRegs.forEach(ServiceRegistration::unregister);
 
-        Inbox inbox = getService(Inbox.class);
         List<DiscoveryResult> discoveryResults = inbox.getAll();
         discoveryResults.forEach(res -> inbox.remove(res.getThingUID()));
         discoveryServiceRegistry.removeDiscoveryListener(mockDiscoveryListener);
