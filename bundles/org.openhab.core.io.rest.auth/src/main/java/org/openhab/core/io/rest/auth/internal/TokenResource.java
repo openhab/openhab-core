@@ -24,8 +24,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -47,6 +45,7 @@ import org.openhab.core.auth.PendingToken;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UserSession;
+import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
@@ -141,12 +140,12 @@ public class TokenResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getSessions(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
-            throw new NotAuthorizedException("User not authenticated");
+            return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
 
         ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
         if (user == null) {
-            throw new NotFoundException("User not found");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
         }
 
         Stream<UserSessionDTO> sessions = user.getSessions().stream().map(this::toUserSessionDTO);
@@ -161,12 +160,12 @@ public class TokenResource implements RESTResource {
     public Response deleteSession(@FormParam("refresh_token") String refreshToken, @FormParam("id") String id,
             @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
-            throw new NotAuthorizedException("User not authenticated");
+            return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
         }
 
         ManagedUser user = (ManagedUser) userRegistry.get(securityContext.getUserPrincipal().getName());
         if (user == null) {
-            throw new NotFoundException("User not found");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "User not found");
         }
 
         Optional<UserSession> session;
@@ -178,7 +177,7 @@ public class TokenResource implements RESTResource {
             throw new IllegalArgumentException("no refresh_token or id specified");
         }
         if (session.isEmpty()) {
-            throw new NotFoundException("Session not found");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Session not found");
         }
 
         ResponseBuilder response = Response.ok();

@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - port to openHAB with modifications
  */
 @Provider
-@Component(immediate = false)
+@Component
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
