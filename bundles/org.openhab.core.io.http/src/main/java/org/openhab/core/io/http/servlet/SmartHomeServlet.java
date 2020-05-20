@@ -14,6 +14,7 @@ package org.openhab.core.io.http.servlet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * Base class for HTTP servlets which share certain {@link HttpContext} instance.
@@ -28,14 +29,11 @@ public abstract class SmartHomeServlet extends BaseSmartHomeServlet {
     /**
      * Http context.
      */
-    protected @NonNullByDefault({}) HttpContext httpContext;
+    protected final HttpContext httpContext;
 
-    protected void setHttpContext(HttpContext httpContext) {
+    public SmartHomeServlet(HttpService httpService, HttpContext httpContext) {
+        super(httpService);
         this.httpContext = httpContext;
-    }
-
-    protected void unsetHttpContext(HttpContext httpContext) {
-        this.httpContext = null;
     }
 
     protected void activate(String alias) {

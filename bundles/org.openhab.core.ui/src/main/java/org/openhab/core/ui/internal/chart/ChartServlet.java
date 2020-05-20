@@ -102,8 +102,7 @@ public class ChartServlet extends SmartHomeServlet {
 
     @Activate
     public ChartServlet(final @Reference HttpService httpService, final @Reference HttpContext httpContext) {
-        super.setHttpService(httpService);
-        super.setHttpContext(httpContext);
+        super(httpService, httpContext);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

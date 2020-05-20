@@ -56,7 +56,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProvider<ModuleType>
         implements ModuleTypeProvider {
 
-    private @NonNullByDefault({}) ModuleTypeI18nService moduleTypeI18nService;
+    private final ModuleTypeI18nService moduleTypeI18nService;
 
     /**
      * This constructor is responsible for initializing the path to resources and tracking the
@@ -64,8 +64,10 @@ public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProv
      *
      * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      */
-    public ModuleTypeResourceBundleProvider() {
+    @Activate
+    public ModuleTypeResourceBundleProvider(final @Reference ModuleTypeI18nService moduleTypeI18nService) {
         super(ROOT_DIRECTORY + "/moduletypes/");
+        this.moduleTypeI18nService = moduleTypeI18nService;
     }
 
     @Override
@@ -149,14 +151,5 @@ public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProv
         Bundle bundle = getBundle(uid);
 
         return bundle != null ? moduleTypeI18nService.getModuleTypePerLocale(defModuleType, locale, bundle) : null;
-    }
-
-    @Reference
-    protected void setModuleTypeI18nService(ModuleTypeI18nService moduleTypeI18nService) {
-        this.moduleTypeI18nService = moduleTypeI18nService;
-    }
-
-    protected void unsetModuleTypeI18nService(ModuleTypeI18nService moduleTypeI18nService) {
-        this.moduleTypeI18nService = null;
     }
 }

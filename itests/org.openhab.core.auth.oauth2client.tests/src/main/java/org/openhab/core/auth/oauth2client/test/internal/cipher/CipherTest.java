@@ -38,30 +38,22 @@ public class CipherTest {
 
     private static final String PLAIN_TEXT = "hello world";
 
-    private SymmetricKeyCipher spySymmetricKeyCipher;
+    private SymmetricKeyCipher symmetricKeyCipher;
 
     @Before
     public void setUp() throws IOException, InvalidSyntaxException, NoSuchAlgorithmException {
-        spySymmetricKeyCipher = spySymmetricKeyCipher();
+        symmetricKeyCipher = new SymmetricKeyCipher(mockConfigurationAdmin());
     }
 
     @Test
     public void testEncDec() throws GeneralSecurityException {
-        String cipherText = spySymmetricKeyCipher.encrypt(PLAIN_TEXT);
+        String cipherText = symmetricKeyCipher.encrypt(PLAIN_TEXT);
         assertNotNull("Cipher text should not be null", cipherText);
         assertNotEquals("Cipher text should not be the same as plaintext", PLAIN_TEXT, cipherText);
 
-        String decryptedText = spySymmetricKeyCipher.decrypt(cipherText);
+        String decryptedText = symmetricKeyCipher.decrypt(cipherText);
         assertNotNull("Decrypted text should not be null", decryptedText);
         assertEquals("Decrypted text should be same as before", PLAIN_TEXT, decryptedText);
-    }
-
-    private SymmetricKeyCipher spySymmetricKeyCipher()
-            throws IOException, InvalidSyntaxException, NoSuchAlgorithmException {
-        spySymmetricKeyCipher = spy(SymmetricKeyCipher.class);
-        spySymmetricKeyCipher.setConfigurationAdmin(mockConfigurationAdmin());
-        spySymmetricKeyCipher.activate(); // generate encryption key
-        return spySymmetricKeyCipher;
     }
 
     private ConfigurationAdmin mockConfigurationAdmin() throws IOException {

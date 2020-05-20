@@ -72,6 +72,7 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.util.UnitUtils;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -98,15 +99,36 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 
-    private @NonNullByDefault({}) SystemProfileFactory defaultProfileFactory;
-    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
-    private @NonNullByDefault({}) ItemRegistry itemRegistry;
-    private @NonNullByDefault({}) EventPublisher eventPublisher;
-    private @NonNullByDefault({}) SafeCaller safeCaller;
-    private @NonNullByDefault({}) AutoUpdateManager autoUpdateManager;
-    private @NonNullByDefault({}) ItemStateConverter itemStateConverter;
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private final AutoUpdateManager autoUpdateManager;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final SystemProfileFactory defaultProfileFactory;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ItemRegistry itemRegistry;
+    private final ItemStateConverter itemStateConverter;
+    private final EventPublisher eventPublisher;
+    private final SafeCaller safeCaller;
+    private final ThingRegistry thingRegistry;
+
+    @Activate
+    public CommunicationManager(final @Reference AutoUpdateManager autoUpdateManager,
+            final @Reference ChannelTypeRegistry channelTypeRegistry,
+            final @Reference SystemProfileFactory defaultProfileFactory,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+            final @Reference ItemRegistry itemRegistry, //
+            final @Reference ItemStateConverter itemStateConverter, //
+            final @Reference EventPublisher eventPublisher, //
+            final @Reference SafeCaller safeCaller, //
+            final @Reference ThingRegistry thingRegistry) {
+        this.autoUpdateManager = autoUpdateManager;
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.defaultProfileFactory = defaultProfileFactory;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.itemRegistry = itemRegistry;
+        this.itemStateConverter = itemStateConverter;
+        this.eventPublisher = eventPublisher;
+        this.safeCaller = safeCaller;
+        this.thingRegistry = thingRegistry;
+    }
 
     private final Set<ItemFactory> itemFactories = new CopyOnWriteArraySet<>();
 
@@ -514,43 +536,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         cleanup(oldElement);
     }
 
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-        itemChannelLinkRegistry.addRegistryChangeListener(this);
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addProfileFactory(ProfileFactory profileFactory) {
         this.profileFactories.put(profileFactory, ConcurrentHashMap.newKeySet());
@@ -572,33 +557,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     protected void removeProfileAdvisor(ProfileAdvisor profileAdvisor) {
         profileAdvisors.remove(profileAdvisor);
-    }
-
-    @Reference
-    protected void setDefaultProfileFactory(SystemProfileFactory defaultProfileFactory) {
-        this.defaultProfileFactory = defaultProfileFactory;
-    }
-
-    protected void unsetDefaultProfileFactory(SystemProfileFactory defaultProfileFactory) {
-        this.defaultProfileFactory = null;
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
-    }
-
-    @Reference
-    public void setItemStateConverter(ItemStateConverter itemStateConverter) {
-        this.itemStateConverter = itemStateConverter;
-    }
-
-    public void unsetItemStateConverter(ItemStateConverter itemStateConverter) {
-        this.itemStateConverter = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
@@ -627,24 +585,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 }
             }
         }
-    }
-
-    @Reference
-    public void setAutoUpdateManager(AutoUpdateManager autoUpdateManager) {
-        this.autoUpdateManager = autoUpdateManager;
-    }
-
-    public void unsetAutoUpdateManager(AutoUpdateManager autoUpdateManager) {
-        this.autoUpdateManager = null;
-    }
-
-    @Reference
-    public void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    public void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
     }
 
     private static class NoOpProfile implements Profile {

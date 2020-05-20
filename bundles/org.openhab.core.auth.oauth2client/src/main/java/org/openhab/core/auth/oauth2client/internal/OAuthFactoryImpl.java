@@ -21,6 +21,7 @@ import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthFactory;
 import org.openhab.core.io.net.http.HttpClientFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -40,12 +41,19 @@ public class OAuthFactoryImpl implements OAuthFactory {
 
     private final Logger logger = LoggerFactory.getLogger(OAuthFactoryImpl.class);
 
-    private @NonNullByDefault({}) OAuthStoreHandler oAuthStoreHandler;
-    private @NonNullByDefault({}) HttpClientFactory httpClientFactory;
+    private final OAuthStoreHandler oAuthStoreHandler;
+    private final HttpClientFactory httpClientFactory;
 
     private int tokenExpiresInBuffer = OAuthClientServiceImpl.DEFAULT_TOKEN_EXPIRES_IN_BUFFER_SECOND;
 
     private final Map<String, OAuthClientService> oauthClientServiceCache = new ConcurrentHashMap<>();
+
+    @Activate
+    public OAuthFactoryImpl(final @Reference HttpClientFactory httpClientFactory,
+            final @Reference OAuthStoreHandler oAuthStoreHandler) {
+        this.httpClientFactory = httpClientFactory;
+        this.oAuthStoreHandler = oAuthStoreHandler;
+    }
 
     @Deactivate
     public void deactivate() {
@@ -121,38 +129,6 @@ public class OAuthFactoryImpl implements OAuthFactory {
             oauthClientServiceCache.remove(handle);
         }
         oAuthStoreHandler.remove(handle);
-    }
-
-    /**
-     * The Store handler is mandatory, but the actual storage service is not.
-     * OAuthStoreHandler will handle when storage service is missing.
-     *
-     * Intended static mandatory 1..1 reference
-     *
-     * @param oAuthStoreHandler
-     */
-    @Reference
-    protected void setOAuthStoreHandler(OAuthStoreHandler oAuthStoreHandler) {
-        this.oAuthStoreHandler = oAuthStoreHandler;
-    }
-
-    protected void unsetOAuthStoreHandler(OAuthStoreHandler oAuthStoreHandler) {
-        this.oAuthStoreHandler = null;
-    }
-
-    /**
-     * HttpClientFactory is mandatory, and is used as a client for
-     * all http(s) communications to the OAuth providers
-     *
-     * @param httpClientFactory
-     */
-    @Reference
-    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClientFactory = httpClientFactory;
-    }
-
-    protected void unsetHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClientFactory = null;
     }
 
     public int getTokenExpiresInBuffer() {

@@ -26,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineFactory;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -43,18 +44,14 @@ import org.slf4j.LoggerFactory;
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
-    private final Map<String, @Nullable ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private final Map<String, @Nullable ScriptEngineFactory> customSupport = new HashMap<>();
-    private final Map<String, @Nullable ScriptEngineFactory> genericSupport = new HashMap<>();
-    private @NonNullByDefault({}) ScriptExtensionManager scriptExtensionManager;
+    private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
+    private final Map<String, ScriptEngineFactory> customSupport = new HashMap<>();
+    private final Map<String, ScriptEngineFactory> genericSupport = new HashMap<>();
+    private final ScriptExtensionManager scriptExtensionManager;
 
-    @Reference
-    public void setScriptExtensionManager(ScriptExtensionManager scriptExtensionManager) {
+    @Activate
+    public ScriptEngineManagerImpl(final @Reference ScriptExtensionManager scriptExtensionManager) {
         this.scriptExtensionManager = scriptExtensionManager;
-    }
-
-    public void unsetScriptExtensionManager(ScriptExtensionManager scriptExtensionManager) {
-        this.scriptExtensionManager = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

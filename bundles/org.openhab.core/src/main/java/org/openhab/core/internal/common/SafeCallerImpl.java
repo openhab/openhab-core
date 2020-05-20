@@ -38,11 +38,11 @@ public class SafeCallerImpl implements SafeCaller {
 
     private static final String SAFE_CALL_POOL_NAME = "safeCall";
 
-    private @NonNullByDefault({}) ScheduledExecutorService watcher;
-    private @NonNullByDefault({}) SafeCallManagerImpl manager;
+    private final ScheduledExecutorService watcher;
+    private final SafeCallManagerImpl manager;
 
     @Activate
-    public void activate(@Nullable Map<String, Object> properties) {
+    public SafeCallerImpl(@Nullable Map<String, Object> properties) {
         watcher = Executors.newSingleThreadScheduledExecutor();
         manager = new SafeCallManagerImpl(watcher, getScheduler(), false);
         modified(properties);
@@ -58,11 +58,7 @@ public class SafeCallerImpl implements SafeCaller {
 
     @Deactivate
     public void deactivate() {
-        if (watcher != null) {
-            watcher.shutdownNow();
-            watcher = null;
-        }
-        manager = null;
+        watcher.shutdownNow();
     }
 
     @Override

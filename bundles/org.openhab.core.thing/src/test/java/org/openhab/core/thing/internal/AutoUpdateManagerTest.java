@@ -66,6 +66,8 @@ public class AutoUpdateManagerTest {
     private static final ChannelUID CHANNEL_UID_HANDLER_MISSING = new ChannelUID(THING_UID_HANDLER_MISSING, "channel1");
     private ItemCommandEvent event;
     private GenericItem item;
+
+    private @Mock ChannelTypeRegistry mockChannelTypeRegistry;
     private @Mock EventPublisher mockEventPublisher;
     private @Mock ItemChannelLinkRegistry mockLinkRegistry;
     private @Mock ThingRegistry mockThingRegistry;
@@ -105,12 +107,8 @@ public class AutoUpdateManagerTest {
                 .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_OFFLINE_1, "String")
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_OFFLINE_1)).build());
 
-        aum = new AutoUpdateManager();
-        aum.setItemChannelLinkRegistry(mockLinkRegistry);
-        aum.setEventPublisher(mockEventPublisher);
-        aum.setThingRegistry(mockThingRegistry);
-        aum.setMetadataRegistry(mockMetadataRegistry);
-        aum.setChannelTypeRegistry(mock(ChannelTypeRegistry.class));
+        aum = new AutoUpdateManager(new HashMap<>(), mockChannelTypeRegistry, mockEventPublisher, mockLinkRegistry,
+                mockMetadataRegistry, mockThingRegistry);
     }
 
     private void assertStateEvent(String expectedContent, String extectedSource) {

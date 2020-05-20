@@ -35,6 +35,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,21 +60,13 @@ public class IconServlet extends SmartHomeServlet {
 
     private long startupTime;
 
-    protected HttpService httpService;
-
     protected String defaultIconSetId = "classic";
 
     private List<IconProvider> iconProvider = new ArrayList<>();
 
-    @Override
-    @Reference
-    public void setHttpService(HttpService httpService) {
-        super.setHttpService(httpService);
-    }
-
-    @Override
-    public void unsetHttpService(HttpService httpService) {
-        super.unsetHttpService(httpService);
+    @Activate
+    public IconServlet(final @Reference HttpService httpService, final @Reference HttpContext httpContext) {
+        super(httpService, httpContext);
     }
 
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)

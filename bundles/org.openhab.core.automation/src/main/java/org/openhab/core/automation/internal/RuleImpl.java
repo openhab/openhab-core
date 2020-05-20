@@ -43,16 +43,16 @@ import org.openhab.core.config.core.Configuration;
 @NonNullByDefault
 public class RuleImpl implements Rule {
 
-    protected @NonNullByDefault({}) List<Trigger> triggers;
-    protected @NonNullByDefault({}) List<Condition> conditions;
-    protected @NonNullByDefault({}) List<Action> actions;
-    protected @NonNullByDefault({}) Configuration configuration;
-    protected @NonNullByDefault({}) List<ConfigDescriptionParameter> configDescriptions;
+    protected List<Trigger> triggers;
+    protected List<Condition> conditions;
+    protected List<Action> actions;
+    protected Configuration configuration;
+    protected List<ConfigDescriptionParameter> configDescriptions;
     protected @Nullable String templateUID;
-    protected @NonNullByDefault({}) String uid;
+    protected String uid;
     protected @Nullable String name;
-    protected @NonNullByDefault({}) Set<String> tags;
-    protected @NonNullByDefault({}) Visibility visibility;
+    protected Set<String> tags;
+    protected Visibility visibility;
     protected @Nullable String description;
 
     /**

@@ -57,29 +57,20 @@ public class PollingUsbSerialScanner implements UsbSerialDiscovery {
     private static final Duration DEFAULT_PAUSE_BETWEEN_SCANS = Duration.ofSeconds(15);
     private Duration pauseBetweenScans = DEFAULT_PAUSE_BETWEEN_SCANS;
 
-    private @NonNullByDefault({}) DeltaUsbSerialScanner deltaUsbSerialScanner;
-
+    private final DeltaUsbSerialScanner deltaUsbSerialScanner;
     private final Set<UsbSerialDiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
-
-    private @NonNullByDefault({}) ScheduledExecutorService scheduler;
+    private final ScheduledExecutorService scheduler;
 
     private @Nullable ScheduledFuture<?> backgroundScanningJob;
 
-    @Reference
-    protected void setUsbSerialScanner(UsbSerialScanner usbSerialScanner) {
-        deltaUsbSerialScanner = new DeltaUsbSerialScanner(usbSerialScanner);
-    }
-
-    protected void unsetUsbSerialScanner(UsbSerialScanner usbSerialScanner) {
-        deltaUsbSerialScanner = null;
-    }
-
     @Activate
-    protected void activate(Map<String, Object> config) {
+    public PollingUsbSerialScanner(Map<String, Object> config, final @Reference UsbSerialScanner usbSerialScanner) {
         if (config.containsKey(PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE)) {
             pauseBetweenScans = Duration
                     .ofSeconds(parseLong(config.get(PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE).toString()));
         }
+
+        deltaUsbSerialScanner = new DeltaUsbSerialScanner(usbSerialScanner);
 
         scheduler = Executors.newSingleThreadScheduledExecutor(
                 ThreadFactoryBuilder.create().withName(THREAD_NAME).withDaemonThreads(true).build());

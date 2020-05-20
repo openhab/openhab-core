@@ -42,14 +42,10 @@ public abstract class BaseSmartHomeServlet extends HttpServlet {
     /**
      * Http service.
      */
-    protected @NonNullByDefault({}) HttpService httpService;
+    protected final HttpService httpService;
 
-    protected void setHttpService(HttpService httpService) {
+    public BaseSmartHomeServlet(HttpService httpService) {
         this.httpService = httpService;
-    }
-
-    protected void unsetHttpService(HttpService httpService) {
-        this.httpService = null;
     }
 
     protected void activate(String alias, HttpContext httpContext) {

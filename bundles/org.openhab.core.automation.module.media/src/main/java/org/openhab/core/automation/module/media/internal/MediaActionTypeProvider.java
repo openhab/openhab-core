@@ -35,6 +35,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ParameterOption;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -49,7 +50,12 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true)
 public class MediaActionTypeProvider implements ModuleTypeProvider {
 
-    private @NonNullByDefault({}) AudioManager audioManager;
+    private final AudioManager audioManager;
+
+    @Activate
+    public MediaActionTypeProvider(final @Reference AudioManager audioManager) {
+        this.audioManager = audioManager;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -150,14 +156,5 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
     @Override
     public void removeProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
         // does nothing because this provider does not change
-    }
-
-    @Reference
-    protected void setAudioManager(AudioManager audioManager) {
-        this.audioManager = audioManager;
-    }
-
-    protected void unsetAudioManager(AudioManager audioManager) {
-        this.audioManager = null;
     }
 }

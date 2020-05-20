@@ -40,6 +40,7 @@ import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -60,7 +61,12 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
     private final Map<String, Set<ModuleInformation>> moduleInformation = new ConcurrentHashMap<>();
     private final AnnotationActionModuleTypeHelper helper = new AnnotationActionModuleTypeHelper();
 
-    private @NonNullByDefault({}) ModuleTypeI18nService moduleTypeI18nService;
+    private final ModuleTypeI18nService moduleTypeI18nService;
+
+    @Activate
+    public AnnotatedActionModuleTypeProvider(final @Reference ModuleTypeI18nService moduleTypeI18nService) {
+        this.moduleTypeI18nService = moduleTypeI18nService;
+    }
 
     @Override
     @Deactivate
@@ -219,14 +225,5 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
             }
         }
         return null;
-    }
-
-    @Reference
-    protected void setModuleTypeI18nService(ModuleTypeI18nService moduleTypeI18nService) {
-        this.moduleTypeI18nService = moduleTypeI18nService;
-    }
-
-    protected void unsetModuleTypeI18nService(ModuleTypeI18nService moduleTypeI18nService) {
-        this.moduleTypeI18nService = null;
     }
 }

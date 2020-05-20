@@ -21,6 +21,7 @@ import org.openhab.core.items.ItemBuilder;
 import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.library.CoreItemFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -36,7 +37,13 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class ItemBuilderFactoryImpl implements ItemBuilderFactory {
 
-    private final @NonNullByDefault({}) Set<ItemFactory> itemFactories = new CopyOnWriteArraySet<>();
+    private final Set<ItemFactory> itemFactories = new CopyOnWriteArraySet<>();
+
+    @Activate
+    public ItemBuilderFactoryImpl(
+            final @Reference(target = "(component.name=org.openhab.core.library.CoreItemFactory)") ItemFactory coreItemFactory) {
+        itemFactories.add(coreItemFactory);
+    }
 
     @Override
     public ItemBuilder newItemBuilder(Item item) {
@@ -55,14 +62,5 @@ public class ItemBuilderFactoryImpl implements ItemBuilderFactory {
 
     protected void removeItemFactory(ItemFactory itemFactory) {
         itemFactories.remove(itemFactory);
-    }
-
-    @Reference(target = "(component.name=org.openhab.core.library.CoreItemFactory)")
-    protected void setCoreItemFactory(ItemFactory coreItemFactory) {
-        itemFactories.add(coreItemFactory);
-    }
-
-    protected void unsetCoreItemFactory(ItemFactory coreItemFactory) {
-        itemFactories.remove(coreItemFactory);
     }
 }

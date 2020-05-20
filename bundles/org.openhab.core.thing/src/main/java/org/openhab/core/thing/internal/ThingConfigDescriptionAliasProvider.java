@@ -27,6 +27,7 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -45,35 +46,17 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class ThingConfigDescriptionAliasProvider implements ConfigDescriptionAliasProvider {
 
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
-    private @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistry;
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ThingTypeRegistry thingTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
 
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
+    @Activate
+    public ThingConfigDescriptionAliasProvider(final @Reference ThingRegistry thingRegistry,
+            final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference ChannelTypeRegistry channelTypeRegistry) {
         this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
         this.thingTypeRegistry = thingTypeRegistry;
-    }
-
-    protected void unsetThingTypeRegistry(ThingTypeRegistry thingTypeRegistry) {
-        this.thingTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
         this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
     }
 
     @Override

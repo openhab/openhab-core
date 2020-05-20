@@ -35,6 +35,8 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * Tests for {@link IconServlet}.
@@ -74,6 +76,9 @@ public class IconServletTest {
     private IconServlet servlet;
     private ByteArrayServletOutputStream responseOutputStream = new ByteArrayServletOutputStream();
 
+    private @Mock HttpContext httpContext;
+    private @Mock HttpService httpService;
+
     private @Mock HttpServletRequest request;
     private @Mock HttpServletResponse response;
 
@@ -84,7 +89,7 @@ public class IconServletTest {
 
     @Before
     public void before() throws IOException {
-        servlet = new IconServlet();
+        servlet = new IconServlet(httpService, httpContext);
         responseOutputStream.reset();
     }
 
