@@ -66,14 +66,16 @@ public class AutoUpdateManagerTest {
     private static final ChannelUID CHANNEL_UID_HANDLER_MISSING = new ChannelUID(THING_UID_HANDLER_MISSING, "channel1");
     private ItemCommandEvent event;
     private GenericItem item;
-    private @Mock EventPublisher mockEventPublisher;
-    private @Mock ItemChannelLinkRegistry mockLinkRegistry;
-    private @Mock ThingRegistry mockThingRegistry;
-    private @Mock Thing mockThingOnline;
-    private @Mock Thing mockThingOffline;
-    private @Mock Thing mockThingHandlerMissing;
-    private @Mock ThingHandler mockHandler;
-    private @Mock MetadataRegistry mockMetadataRegistry;
+
+    private @Mock ChannelTypeRegistry channelTypeRegistryMock;
+    private @Mock EventPublisher eventPublisherMock;
+    private @Mock ItemChannelLinkRegistry iclRegistryMock;
+    private @Mock ThingRegistry thingRegistryMock;
+    private @Mock Thing onlineThingMock;
+    private @Mock Thing offlineThingMock;
+    private @Mock Thing thingMissingHandlerMock;
+    private @Mock ThingHandler handlerMock;
+    private @Mock MetadataRegistry metadataRegistryMock;
 
     private final List<ItemChannelLink> links = new LinkedList<>();
     private AutoUpdateManager aum;
@@ -86,36 +88,35 @@ public class AutoUpdateManagerTest {
         item = new StringItem("test");
         item.setState(new StringType("BEFORE"));
 
-        when(mockLinkRegistry.stream()).then(answer -> links.stream());
-        when(mockLinkRegistry.getAll()).then(answer -> links);
-        when(mockThingRegistry.get(eq(THING_UID_ONLINE))).thenReturn(mockThingOnline);
-        when(mockThingRegistry.get(eq(THING_UID_OFFLINE))).thenReturn(mockThingOffline);
-        when(mockThingRegistry.get(eq(THING_UID_HANDLER_MISSING))).thenReturn(mockThingHandlerMissing);
-        when(mockThingOnline.getHandler()).thenReturn(mockHandler);
-        when(mockThingOnline.getStatus()).thenReturn(ThingStatus.ONLINE);
-        when(mockThingOnline.getChannel(eq(CHANNEL_UID_ONLINE_1.getId())))
+        when(iclRegistryMock.stream()).then(answer -> links.stream());
+        when(iclRegistryMock.getAll()).then(answer -> links);
+
+        when(thingRegistryMock.get(eq(THING_UID_ONLINE))).thenReturn(onlineThingMock);
+        when(thingRegistryMock.get(eq(THING_UID_OFFLINE))).thenReturn(offlineThingMock);
+        when(thingRegistryMock.get(eq(THING_UID_HANDLER_MISSING))).thenReturn(thingMissingHandlerMock);
+
+        when(onlineThingMock.getHandler()).thenReturn(handlerMock);
+        when(onlineThingMock.getStatus()).thenReturn(ThingStatus.ONLINE);
+        when(onlineThingMock.getChannel(eq(CHANNEL_UID_ONLINE_1.getId())))
                 .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_ONLINE_1, "String")
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_ONLINE_1)).build());
-        when(mockThingOnline.getChannel(eq(CHANNEL_UID_ONLINE_2.getId())))
+        when(onlineThingMock.getChannel(eq(CHANNEL_UID_ONLINE_2.getId())))
                 .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_ONLINE_2, "String")
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_ONLINE_2)).build());
-        when(mockThingOffline.getHandler()).thenReturn(mockHandler);
-        when(mockThingOffline.getStatus()).thenReturn(ThingStatus.OFFLINE);
-        when(mockThingOffline.getChannel(eq(CHANNEL_UID_OFFLINE_1.getId())))
+
+        when(offlineThingMock.getHandler()).thenReturn(handlerMock);
+        when(offlineThingMock.getStatus()).thenReturn(ThingStatus.OFFLINE);
+        when(offlineThingMock.getChannel(eq(CHANNEL_UID_OFFLINE_1.getId())))
                 .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_OFFLINE_1, "String")
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_OFFLINE_1)).build());
 
-        aum = new AutoUpdateManager();
-        aum.setItemChannelLinkRegistry(mockLinkRegistry);
-        aum.setEventPublisher(mockEventPublisher);
-        aum.setThingRegistry(mockThingRegistry);
-        aum.setMetadataRegistry(mockMetadataRegistry);
-        aum.setChannelTypeRegistry(mock(ChannelTypeRegistry.class));
+        aum = new AutoUpdateManager(new HashMap<>(), channelTypeRegistryMock, eventPublisherMock, iclRegistryMock,
+                metadataRegistryMock, thingRegistryMock);
     }
 
     private void assertStateEvent(String expectedContent, String extectedSource) {
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(mockEventPublisher, atLeastOnce()).post(eventCaptor.capture());
+        verify(eventPublisherMock, atLeastOnce()).post(eventCaptor.capture());
         Event event = eventCaptor.getAllValues().stream().filter(e -> e instanceof ItemStateEvent).findFirst().get();
         assertEquals(expectedContent, ((ItemStateEvent) event).getItemState().toFullString());
         assertEquals(extectedSource, event.getSource());
@@ -124,7 +125,7 @@ public class AutoUpdateManagerTest {
 
     private void assertPredictionEvent(String expectedContent, String extectedSource) {
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(mockEventPublisher, atLeastOnce()).post(eventCaptor.capture());
+        verify(eventPublisherMock, atLeastOnce()).post(eventCaptor.capture());
         Event event = eventCaptor.getAllValues().stream().filter(e -> e instanceof ItemStatePredictedEvent).findFirst()
                 .get();
         assertEquals(expectedContent, ((ItemStatePredictedEvent) event).getPredictedState().toFullString());
@@ -143,7 +144,7 @@ public class AutoUpdateManagerTest {
     }
 
     private void assertNothingHappened() {
-        verifyNoMoreInteractions(mockEventPublisher);
+        verifyNoMoreInteractions(eventPublisherMock);
     }
 
     private void setAutoUpdatePolicy(ChannelUID channelUID, AutoUpdatePolicy policy) {

@@ -40,6 +40,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
 /**
@@ -61,8 +62,8 @@ public class AudioServlet extends SmartHomeServlet implements AudioHTTPServer {
     private final Map<String, Long> streamTimeouts = new ConcurrentHashMap<>();
 
     @Activate
-    public AudioServlet(final @Reference HttpService httpService) {
-        this.httpService = httpService;
+    public AudioServlet(final @Reference HttpService httpService, final @Reference HttpContext httpContext) {
+        super(httpService, httpContext);
     }
 
     @Activate

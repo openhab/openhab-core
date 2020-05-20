@@ -76,7 +76,7 @@ public class I18nProviderImplTest {
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
         when(bundleContext.getBundles()).thenReturn(new Bundle[] { bundle });
 
-        i18nProviderImpl = new I18nProviderImpl();
+        i18nProviderImpl = new I18nProviderImpl(componentContext);
     }
 
     @SuppressWarnings("unchecked")
@@ -123,8 +123,6 @@ public class I18nProviderImplTest {
 
     @Test
     public void assertThatActivateSetsLocaleAndLocation() {
-        i18nProviderImpl.activate(componentContext);
-
         PointType location = i18nProviderImpl.getLocation();
         Locale setLocale = i18nProviderImpl.getLocale();
 
@@ -147,8 +145,6 @@ public class I18nProviderImplTest {
 
     @Test
     public void assertThatConfigurationChangeWorks() {
-        i18nProviderImpl.activate(componentContext);
-
         i18nProviderImpl.modified(buildRUConfig());
 
         PointType location = i18nProviderImpl.getLocation();

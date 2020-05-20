@@ -40,16 +40,16 @@ import org.openhab.core.config.core.Configuration;
 @NonNullByDefault
 public class RuleBuilder {
 
-    private @NonNullByDefault({}) List<Trigger> triggers;
-    private @NonNullByDefault({}) List<Condition> conditions;
-    private @NonNullByDefault({}) List<Action> actions;
-    private @NonNullByDefault({}) Configuration configuration;
-    private @NonNullByDefault({}) List<ConfigDescriptionParameter> configDescriptions;
+    private List<Trigger> triggers;
+    private List<Condition> conditions;
+    private List<Action> actions;
+    private Configuration configuration;
+    private List<ConfigDescriptionParameter> configDescriptions;
     private @Nullable String templateUID;
-    private @NonNullByDefault({}) final String uid;
+    private final String uid;
     private @Nullable String name;
-    private @NonNullByDefault({}) Set<String> tags;
-    private @NonNullByDefault({}) Visibility visibility;
+    private Set<String> tags;
+    private @Nullable Visibility visibility;
     private @Nullable String description;
 
     protected RuleBuilder(Rule rule) {

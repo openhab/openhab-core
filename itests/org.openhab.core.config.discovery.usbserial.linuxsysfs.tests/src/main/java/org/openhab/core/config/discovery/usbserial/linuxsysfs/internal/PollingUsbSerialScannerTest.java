@@ -15,6 +15,7 @@ package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.PollingUsbSerialScanner.PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
@@ -37,22 +39,20 @@ public class PollingUsbSerialScannerTest {
 
     private UsbSerialDeviceInformationGenerator usbDeviceInfoGenerator = new UsbSerialDeviceInformationGenerator();
 
-    private UsbSerialScanner usbSerialScanner;
     private PollingUsbSerialScanner pollingScanner;
-    private UsbSerialDiscoveryListener discoveryListener;
+    private @Mock UsbSerialDiscoveryListener discoveryListenerMock;
+    private @Mock UsbSerialScanner usbSerialScannerMock;
 
     @Before
     public void setup() {
-        usbSerialScanner = mock(UsbSerialScanner.class);
-        pollingScanner = new PollingUsbSerialScanner();
-        pollingScanner.setUsbSerialScanner(usbSerialScanner);
-
-        discoveryListener = mock(UsbSerialDiscoveryListener.class);
-        pollingScanner.registerDiscoveryListener(discoveryListener);
+        initMocks(this);
 
         Map<String, Object> config = new HashMap<>();
         config.put(PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE, "1");
-        pollingScanner.modified(config);
+
+        pollingScanner = new PollingUsbSerialScanner(config, usbSerialScannerMock);
+
+        pollingScanner.registerDiscoveryListener(discoveryListenerMock);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class PollingUsbSerialScannerTest {
         // Wait a little more than one second to give background scanning a chance to kick in.
         Thread.sleep(1200);
 
-        verify(usbSerialScanner, never()).scan();
+        verify(usbSerialScannerMock, never()).scan();
     }
 
     @Test
@@ -69,19 +69,19 @@ public class PollingUsbSerialScannerTest {
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb3 = usbDeviceInfoGenerator.generate();
 
-        when(usbSerialScanner.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)));
-        when(usbSerialScanner.canPerformScans()).thenReturn(true);
+        when(usbSerialScannerMock.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)));
+        when(usbSerialScannerMock.canPerformScans()).thenReturn(true);
 
         pollingScanner.doSingleScan();
 
         // Expectation: discovery listener called with newly discovered devices usb1 and usb2; not called with removed
         // devices.
 
-        verify(discoveryListener, times(1)).usbSerialDeviceDiscovered(usb1);
-        verify(discoveryListener, times(1)).usbSerialDeviceDiscovered(usb2);
-        verify(discoveryListener, never()).usbSerialDeviceDiscovered(usb3);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb1);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb2);
+        verify(discoveryListenerMock, never()).usbSerialDeviceDiscovered(usb3);
 
-        verify(discoveryListener, never()).usbSerialDeviceRemoved(any(UsbSerialDeviceInformation.class));
+        verify(discoveryListenerMock, never()).usbSerialDeviceRemoved(any(UsbSerialDeviceInformation.class));
     }
 
     @Test
@@ -90,26 +90,26 @@ public class PollingUsbSerialScannerTest {
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb3 = usbDeviceInfoGenerator.generate();
 
-        when(usbSerialScanner.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)))
+        when(usbSerialScannerMock.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)))
                 .thenReturn(new HashSet<>(asList(usb2, usb3)));
-        when(usbSerialScanner.canPerformScans()).thenReturn(true);
+        when(usbSerialScannerMock.canPerformScans()).thenReturn(true);
 
-        pollingScanner.unregisterDiscoveryListener(discoveryListener);
+        pollingScanner.unregisterDiscoveryListener(discoveryListenerMock);
         pollingScanner.doSingleScan();
 
-        pollingScanner.registerDiscoveryListener(discoveryListener);
+        pollingScanner.registerDiscoveryListener(discoveryListenerMock);
         pollingScanner.doSingleScan();
 
         // Expectation: discovery listener called once for removing usb1, and once for adding usb2/usb3 each.
 
-        verify(discoveryListener, never()).usbSerialDeviceDiscovered(usb1);
-        verify(discoveryListener, times(1)).usbSerialDeviceRemoved(usb1);
+        verify(discoveryListenerMock, never()).usbSerialDeviceDiscovered(usb1);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceRemoved(usb1);
 
-        verify(discoveryListener, times(1)).usbSerialDeviceDiscovered(usb2);
-        verify(discoveryListener, never()).usbSerialDeviceRemoved(usb2);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb2);
+        verify(discoveryListenerMock, never()).usbSerialDeviceRemoved(usb2);
 
-        verify(discoveryListener, times(1)).usbSerialDeviceDiscovered(usb3);
-        verify(discoveryListener, never()).usbSerialDeviceRemoved(usb3);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb3);
+        verify(discoveryListenerMock, never()).usbSerialDeviceRemoved(usb3);
     }
 
     @Test
@@ -118,11 +118,10 @@ public class PollingUsbSerialScannerTest {
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb3 = usbDeviceInfoGenerator.generate();
 
-        when(usbSerialScanner.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)))
+        when(usbSerialScannerMock.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)))
                 .thenReturn(new HashSet<>(asList(usb2, usb3)));
-        when(usbSerialScanner.canPerformScans()).thenReturn(true);
+        when(usbSerialScannerMock.canPerformScans()).thenReturn(true);
 
-        pollingScanner.activate(new HashMap<>());
         pollingScanner.startBackgroundScanning();
 
         Thread.sleep(1500);
@@ -131,20 +130,20 @@ public class PollingUsbSerialScannerTest {
 
         // Expectation: discovery listener called once for each discovered device, and once for removal of usb1.
 
-        verify(discoveryListener, times(1)).usbSerialDeviceDiscovered(usb1);
-        verify(discoveryListener, times(1)).usbSerialDeviceRemoved(usb1);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb1);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceRemoved(usb1);
 
-        verify(discoveryListener, times(1)).usbSerialDeviceDiscovered(usb2);
-        verify(discoveryListener, never()).usbSerialDeviceRemoved(usb2);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb2);
+        verify(discoveryListenerMock, never()).usbSerialDeviceRemoved(usb2);
 
-        verify(discoveryListener, times(1)).usbSerialDeviceDiscovered(usb3);
-        verify(discoveryListener, never()).usbSerialDeviceRemoved(usb3);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb3);
+        verify(discoveryListenerMock, never()).usbSerialDeviceRemoved(usb3);
     }
 
     @Test
     public void testNoBackgroundScanningWhenNoScansPossible() throws IOException, InterruptedException {
-        when(usbSerialScanner.scan()).thenReturn(new HashSet<>(asList(usbDeviceInfoGenerator.generate())));
-        when(usbSerialScanner.canPerformScans()).thenReturn(false);
+        when(usbSerialScannerMock.scan()).thenReturn(new HashSet<>(asList(usbDeviceInfoGenerator.generate())));
+        when(usbSerialScannerMock.canPerformScans()).thenReturn(false);
 
         pollingScanner.startBackgroundScanning();
 
@@ -154,6 +153,6 @@ public class PollingUsbSerialScannerTest {
 
         // Expectation: discovery listener never called, as usbSerialScanner indicates that no scans possible
 
-        verify(discoveryListener, never()).usbSerialDeviceDiscovered(any(UsbSerialDeviceInformation.class));
+        verify(discoveryListenerMock, never()).usbSerialDeviceDiscovered(any(UsbSerialDeviceInformation.class));
     }
 }

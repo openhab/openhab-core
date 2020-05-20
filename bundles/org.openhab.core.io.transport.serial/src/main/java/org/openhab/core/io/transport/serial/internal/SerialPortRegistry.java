@@ -38,11 +38,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 @NonNullByDefault
 public class SerialPortRegistry {
 
-    private @NonNullByDefault({}) final Collection<SerialPortProvider> portCreators;
-
-    public SerialPortRegistry() {
-        this.portCreators = new HashSet<>();
-    }
+    private final Collection<SerialPortProvider> portCreators = new HashSet<>();
 
     /**
      * Registers a {@link SerialPortProvider}.
@@ -51,14 +47,14 @@ public class SerialPortRegistry {
      */
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     protected void registerSerialPortCreator(SerialPortProvider creator) {
-        synchronized (this.portCreators) {
-            this.portCreators.add(creator);
+        synchronized (portCreators) {
+            portCreators.add(creator);
         }
     }
 
     protected void unregisterSerialPortCreator(SerialPortProvider creator) {
-        synchronized (this.portCreators) {
-            this.portCreators.remove(creator);
+        synchronized (portCreators) {
+            portCreators.remove(creator);
         }
     }
 
@@ -87,7 +83,7 @@ public class SerialPortRegistry {
     }
 
     public Collection<SerialPortProvider> getPortCreators() {
-        synchronized (this.portCreators) {
+        synchronized (portCreators) {
             return Collections.unmodifiableCollection(new HashSet<>(portCreators));
         }
     }

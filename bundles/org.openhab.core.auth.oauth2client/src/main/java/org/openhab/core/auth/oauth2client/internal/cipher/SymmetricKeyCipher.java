@@ -57,8 +57,8 @@ public class SymmetricKeyCipher implements StorageCipher {
     private static final int ENCRYPTION_KEY_SIZE_BITS = 128; // do not use high grade encryption due to export limit
     private static final int IV_BYTE_SIZE = 16;
 
-    private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
-    private @NonNullByDefault({}) SecretKey encryptionKey;
+    private final ConfigurationAdmin configurationAdmin;
+    private final SecretKey encryptionKey;
 
     private final SecureRandom random = new SecureRandom();
 
@@ -70,7 +70,9 @@ public class SymmetricKeyCipher implements StorageCipher {
      * @throws IOException if access to persistent storage fails (@code org.osgi.service.cm.ConfigurationAdmin)
      */
     @Activate
-    public void activate() throws NoSuchAlgorithmException, IOException {
+    public SymmetricKeyCipher(final @Reference ConfigurationAdmin configurationAdmin)
+            throws NoSuchAlgorithmException, IOException {
+        this.configurationAdmin = configurationAdmin;
         // load or generate the encryption key
         encryptionKey = getOrGenerateEncryptionKey();
     }
@@ -139,32 +141,22 @@ public class SymmetricKeyCipher implements StorageCipher {
         }
 
         if (properties.get(PROPERTY_KEY_ENCRYPTION_KEY_BASE64) == null) {
-            encryptionKey = generateEncryptionKey();
-            encryptionKeyInBase64 = new String(Base64.getEncoder().encode(encryptionKey.getEncoded()));
+            SecretKey secretKey = generateEncryptionKey();
+            encryptionKeyInBase64 = new String(Base64.getEncoder().encode(secretKey.getEncoded()));
 
             // Put encryption key back into config
             properties.put(PROPERTY_KEY_ENCRYPTION_KEY_BASE64, encryptionKeyInBase64);
             configuration.update(properties);
 
             logger.debug("Encryption key generated");
-        } else {
-            // encryption key already present in config
-            encryptionKeyInBase64 = (String) properties.get(PROPERTY_KEY_ENCRYPTION_KEY_BASE64);
-            byte[] encKeyBytes = Base64.getDecoder().decode(encryptionKeyInBase64);
-            // 128 bit key/ 8 bit = 16 bytes length
-            encryptionKey = new SecretKeySpec(encKeyBytes, 0, ENCRYPTION_KEY_SIZE_BITS / 8, ENCRYPTION_ALGO);
-
-            logger.debug("Encryption key loaded");
+            return secretKey;
         }
-        return encryptionKey;
-    }
 
-    @Reference
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    public void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+        // encryption key already present in config
+        encryptionKeyInBase64 = (String) properties.get(PROPERTY_KEY_ENCRYPTION_KEY_BASE64);
+        byte[] encKeyBytes = Base64.getDecoder().decode(encryptionKeyInBase64);
+        // 128 bit key/ 8 bit = 16 bytes length
+        logger.debug("Encryption key loaded");
+        return new SecretKeySpec(encKeyBytes, 0, ENCRYPTION_KEY_SIZE_BITS / 8, ENCRYPTION_ALGO);
     }
 }

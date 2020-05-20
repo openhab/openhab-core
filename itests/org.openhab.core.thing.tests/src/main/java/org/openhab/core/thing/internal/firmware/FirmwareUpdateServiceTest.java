@@ -142,31 +142,21 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         props3.put(Thing.PROPERTY_VENDOR, VENDOR2);
         thing3 = ThingBuilder.create(THING_TYPE_UID2, THING3_ID).withProperties(props3).build();
 
-        firmwareUpdateService = new FirmwareUpdateServiceImpl();
-
         SafeCaller safeCaller = getService(SafeCaller.class);
         assertNotNull(safeCaller);
 
-        firmwareUpdateService.setSafeCaller(safeCaller);
-
-        firmwareUpdateService.setFirmwareRegistry(mockFirmwareRegistry);
+        firmwareUpdateService = new FirmwareUpdateServiceImpl(bundleResolver, mockConfigDescriptionValidator,
+                mockPublisher, mockFirmwareRegistry, mockTranslationProvider, mockLocaleProvider, safeCaller);
 
         handler1 = addHandler(thing1);
         handler2 = addHandler(thing2);
         handler3 = addHandler(thing3);
 
-        firmwareUpdateService.setEventPublisher(mockPublisher);
-
         when(mockLocaleProvider.getLocale()).thenReturn(Locale.ENGLISH);
-        firmwareUpdateService.setLocaleProvider(mockLocaleProvider);
 
         initialFirmwareRegistryMocking();
 
         when(bundleResolver.resolveBundle(any())).thenReturn(mock(Bundle.class));
-        firmwareUpdateService.setBundleResolver(bundleResolver);
-
-        firmwareUpdateService.setTranslationProvider(mockTranslationProvider);
-        firmwareUpdateService.setConfigDescriptionValidator(mockConfigDescriptionValidator);
     }
 
     private void initialFirmwareRegistryMocking() {
@@ -295,8 +285,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
 
         });
 
-        mockPublisher = mock(EventPublisher.class);
-        firmwareUpdateService.setEventPublisher(mockPublisher);
+        reset(mockPublisher);
 
         // Simulate addition of extra firmware provider
         when(mockFirmwareRegistry.getFirmware(eq(thing2), eq(VALPHA))).thenReturn(null);
@@ -321,8 +310,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(1), updateExecutableInfoFw113);
         });
 
-        mockPublisher = mock(EventPublisher.class);
-        firmwareUpdateService.setEventPublisher(mockPublisher);
+        reset(mockPublisher);
 
         // Simulate removed firmware provider - get back everything as it was initially
         initialFirmwareRegistryMocking();

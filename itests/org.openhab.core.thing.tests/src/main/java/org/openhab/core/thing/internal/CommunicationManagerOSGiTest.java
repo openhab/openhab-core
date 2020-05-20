@@ -36,6 +36,7 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.CoreItemFactory;
@@ -136,6 +137,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
+    private @Mock @NonNullByDefault({}) ItemStateConverter itemStateConverterMock;
     private @Mock @NonNullByDefault({}) ProfileAdvisor profileAdvisorMock;
     private @Mock @NonNullByDefault({}) ProfileFactory profileFactoryMock;
     private @Mock @NonNullByDefault({}) StateProfile stateProfileMock;
@@ -145,6 +147,9 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) CommunicationManager manager;
     private @NonNullByDefault({}) SafeCaller safeCaller;
+
+    private ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
+            itemRegistryMock);
 
     @Before
     public void setup() {
@@ -156,10 +161,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         SystemProfileFactory profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
         assertNotNull(profileFactory);
 
-        manager = new CommunicationManager();
-        manager.setEventPublisher(eventPublisherMock);
-        manager.setDefaultProfileFactory(profileFactory);
-        manager.setSafeCaller(safeCaller);
+        manager = new CommunicationManager(autoUpdateManagerMock, channelTypeRegistryMock, profileFactory, iclRegistry,
+                itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);
 
         doAnswer(invocation -> {
             switch (((Channel) invocation.getArguments()[0]).getKind()) {
@@ -187,8 +190,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         manager.addProfileFactory(profileFactoryMock);
         manager.addProfileAdvisor(profileAdvisorMock);
 
-        ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
-                itemRegistryMock);
         iclRegistry.addProvider(new ItemChannelLinkProvider() {
             @Override
             public void addProviderChangeListener(ProviderChangeListener<ItemChannelLink> listener) {
@@ -204,26 +205,21 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
                         LINK_4_S4);
             }
         });
-        manager.setItemChannelLinkRegistry(iclRegistry);
 
         when(itemRegistryMock.get(eq(ITEM_NAME_1))).thenReturn(ITEM_1);
         when(itemRegistryMock.get(eq(ITEM_NAME_2))).thenReturn(ITEM_2);
         when(itemRegistryMock.get(eq(ITEM_NAME_3))).thenReturn(ITEM_3);
         when(itemRegistryMock.get(eq(ITEM_NAME_4))).thenReturn(ITEM_4);
-        manager.setItemRegistry(itemRegistryMock);
 
         ChannelType channelType4 = mock(ChannelType.class);
         when(channelType4.getItemType()).thenReturn("Number:Temperature");
 
         when(channelTypeRegistryMock.getChannelType(CHANNEL_TYPE_UID_4)).thenReturn(channelType4);
-        manager.setChannelTypeRegistry(channelTypeRegistryMock);
 
         THING.setHandler(thingHandlerMock);
 
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(THING);
-        manager.setThingRegistry(thingRegistryMock);
         manager.addItemFactory(new CoreItemFactory());
-        manager.setAutoUpdateManager(autoUpdateManagerMock);
 
         UnitProvider unitProvider = mock(UnitProvider.class);
         when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);

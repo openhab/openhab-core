@@ -42,6 +42,7 @@ import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.ThreadPoolManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -90,7 +91,12 @@ public class NetUtil implements NetworkAddressService {
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private @Nullable ScheduledFuture<?> networkInterfacePollFuture = null;
 
-    private @NonNullByDefault({}) SafeCaller safeCaller;
+    private final SafeCaller safeCaller;
+
+    @Activate
+    public NetUtil(final @Reference SafeCaller safeCaller) {
+        this.safeCaller = safeCaller;
+    }
 
     @Activate
     protected void activate(Map<String, Object> props) {
@@ -98,6 +104,7 @@ public class NetUtil implements NetworkAddressService {
         modified(props);
     }
 
+    @Deactivate
     protected void deactivate() {
         lastKnownInterfaceAddresses = Collections.emptyList();
         networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
@@ -602,10 +609,6 @@ public class NetUtil implements NetworkAddressService {
         // notify each listener with a timeout of 15 seconds.
         // SafeCaller prevents bad listeners running too long or throws runtime exceptions
         for (NetworkAddressChangeListener listener : networkAddressChangeListeners) {
-            if (safeCaller == null) {
-                // safeCaller null must be checked between each round, in case it is deactivated
-                break;
-            }
             NetworkAddressChangeListener safeListener = safeCaller.create(listener, NetworkAddressChangeListener.class)
                     .withTimeout(15000)
                     .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception", exception))
@@ -619,10 +622,6 @@ public class NetUtil implements NetworkAddressService {
             // notify each listener with a timeout of 15 seconds.
             // SafeCaller prevents bad listeners running too long or throws runtime exceptions
             for (NetworkAddressChangeListener listener : networkAddressChangeListeners) {
-                if (safeCaller == null) {
-                    // safeCaller null must be checked between each round, in case it is deactivated
-                    break;
-                }
                 NetworkAddressChangeListener safeListener = safeCaller
                         .create(listener, NetworkAddressChangeListener.class).withTimeout(15000)
                         .onException(exception -> LOGGER.debug("NetworkAddressChangeListener exception", exception))
@@ -648,14 +647,5 @@ public class NetUtil implements NetworkAddressService {
         } else {
             return defaultValue;
         }
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
     }
 }

@@ -65,11 +65,11 @@ public class AutoUpdateManager {
 
     private final Logger logger = LoggerFactory.getLogger(AutoUpdateManager.class);
 
-    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private @NonNullByDefault({}) ThingRegistry thingRegistry;
-    private @NonNullByDefault({}) EventPublisher eventPublisher;
-    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final EventPublisher eventPublisher;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final MetadataRegistry metadataRegistry;
+    private final ThingRegistry thingRegistry;
 
     private boolean enabled = true;
     private boolean sendOptimisticUpdates = false;
@@ -106,7 +106,18 @@ public class AutoUpdateManager {
     }
 
     @Activate
-    protected void activate(Map<String, @Nullable Object> configuration) {
+    public AutoUpdateManager(Map<String, @Nullable Object> configuration,
+            final @Reference ChannelTypeRegistry channelTypeRegistry, //
+            final @Reference EventPublisher eventPublisher,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
+            final @Reference MetadataRegistry metadataRegistry, //
+            final @Reference ThingRegistry thingRegistry) {
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.eventPublisher = eventPublisher;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.metadataRegistry = metadataRegistry;
+        this.thingRegistry = thingRegistry;
+
         modified(configuration);
     }
 
@@ -283,50 +294,5 @@ public class AutoUpdateManager {
             }
         }
         return isAccepted;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference
-    protected void setMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = metadataRegistry;
-    }
-
-    protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
     }
 }

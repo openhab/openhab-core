@@ -40,12 +40,13 @@ public class MagicMetadataUsingService {
     private final Logger logger = LoggerFactory.getLogger(MagicMetadataUsingService.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool("magic");
 
-    private @NonNullByDefault({}) MetadataRegistry metadataRegistry;
+    private final MetadataRegistry metadataRegistry;
 
     private @Nullable ScheduledFuture<?> job;
 
     @Activate
-    public void activate() {
+    public MagicMetadataUsingService(final @Reference MetadataRegistry metadataRegistry) {
+        this.metadataRegistry = metadataRegistry;
         job = scheduler.scheduleWithFixedDelay(() -> run(), 30, 30, TimeUnit.SECONDS);
     }
 
@@ -62,14 +63,5 @@ public class MagicMetadataUsingService {
             logger.info("Item {} is {} with {}", metadata.getUID().getItemName(), metadata.getValue(),
                     metadata.getConfiguration());
         });
-    }
-
-    @Reference
-    protected void setMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = metadataRegistry;
-    }
-
-    protected void unsetMetadataRegistry(MetadataRegistry metadataRegistry) {
-        this.metadataRegistry = null;
     }
 }

@@ -12,26 +12,26 @@
  */
 package org.openhab.core.io.http.servlet;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.http.HttpContextFactoryService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * Base class for servlets which host resources using framework bundles.
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public abstract class SmartHomeBundleServlet extends BaseSmartHomeServlet {
 
-    protected HttpContextFactoryService httpContextFactoryService;
+    protected final HttpContextFactoryService httpContextFactoryService;
 
-    public void setHttpContextFactoryService(HttpContextFactoryService httpContextFactoryService) {
+    public SmartHomeBundleServlet(HttpService httpService, HttpContextFactoryService httpContextFactoryService) {
+        super(httpService);
         this.httpContextFactoryService = httpContextFactoryService;
-    }
-
-    public void unsetHttpContextFactoryService(HttpContextFactoryService httpContextFactoryService) {
-        this.httpContextFactoryService = null;
     }
 
     protected void activate(String alias, Bundle bundle) {

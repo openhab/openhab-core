@@ -143,7 +143,6 @@ public class MapDbStorageServiceTest {
         System.setProperty(ConfigConstants.USERDATA_DIR_PROG_ARGUMENT, userdata.toString());
 
         storageService = new MapDbStorageService();
-        storageService.activate();
         this.storage = (MapDbStorage<Object>) storageService.getStorage("TestStorage", getClass().getClassLoader());
     }
 

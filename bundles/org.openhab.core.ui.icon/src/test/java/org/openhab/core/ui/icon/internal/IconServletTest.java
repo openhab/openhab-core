@@ -35,6 +35,8 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * Tests for {@link IconServlet}.
@@ -74,233 +76,236 @@ public class IconServletTest {
     private IconServlet servlet;
     private ByteArrayServletOutputStream responseOutputStream = new ByteArrayServletOutputStream();
 
-    private @Mock HttpServletRequest request;
-    private @Mock HttpServletResponse response;
+    private @Mock HttpContext httpContextMock;
+    private @Mock HttpService httpServiceMock;
 
-    private @Mock IconProvider provider1;
-    private @Mock IconProvider provider2;
+    private @Mock HttpServletRequest requestMock;
+    private @Mock HttpServletResponse responseMock;
+
+    private @Mock IconProvider provider1Mock;
+    private @Mock IconProvider provider2Mock;
 
     public @Rule MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Before
     public void before() throws IOException {
-        servlet = new IconServlet();
+        servlet = new IconServlet(httpServiceMock, httpContextMock);
         responseOutputStream.reset();
     }
 
     @Test
     public void testOldUrlStyle() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/y-34.png");
+        when(requestMock.getRequestURI()).thenReturn("/y-34.png");
 
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
+        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
 
-        when(provider1.hasIcon("y", "classic", Format.PNG)).thenReturn(0);
-        when(provider1.getIcon("y", "classic", "34", Format.PNG))
+        when(provider1Mock.hasIcon("y", "classic", Format.PNG)).thenReturn(0);
+        when(provider1Mock.getIcon("y", "classic", "34", Format.PNG))
                 .thenReturn(new ByteArrayInputStream("provider 1 icon: y classic 34 png".getBytes()));
 
-        servlet.addIconProvider(provider1);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 1 icon: y classic 34 png", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
+        verify(responseMock, never()).sendError(anyInt());
     }
 
     @Test
     public void testPriority() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/x");
-        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
-        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
-        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+        when(requestMock.getRequestURI()).thenReturn("/x");
+        when(requestMock.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(requestMock.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(requestMock.getParameter(PARAM_STATE)).thenReturn("34");
 
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
+        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
 
-        when(provider1.hasIcon("x", "test", Format.SVG)).thenReturn(0);
-        when(provider1.getIcon("x", "test", "34", Format.SVG))
+        when(provider1Mock.hasIcon("x", "test", Format.SVG)).thenReturn(0);
+        when(provider1Mock.getIcon("x", "test", "34", Format.SVG))
                 .thenReturn(new ByteArrayInputStream("provider 1 icon: x test 34 svg".getBytes()));
 
-        servlet.addIconProvider(provider1);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 1 icon: x test 34 svg", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
+        verify(responseMock, never()).sendError(anyInt());
 
         responseOutputStream.reset();
 
-        when(provider2.hasIcon("x", "test", Format.SVG)).thenReturn(1);
-        when(provider2.getIcon("x", "test", "34", Format.SVG))
+        when(provider2Mock.hasIcon("x", "test", Format.SVG)).thenReturn(1);
+        when(provider2Mock.getIcon("x", "test", "34", Format.SVG))
                 .thenReturn(new ByteArrayInputStream("provider 2 icon: x test 34 svg".getBytes()));
 
-        servlet.addIconProvider(provider2);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider2Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 2 icon: x test 34 svg", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
+        verify(responseMock, never()).sendError(anyInt());
     }
 
     @Test
     public void testMissingIcon() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/icon/missing_for_test.png");
+        when(requestMock.getRequestURI()).thenReturn("/icon/missing_for_test.png");
 
-        when(provider1.hasIcon(anyString(), anyString(), isA(Format.class))).thenReturn(null);
+        when(provider1Mock.hasIcon(anyString(), anyString(), isA(Format.class))).thenReturn(null);
 
-        servlet.addIconProvider(provider1);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("", responseOutputStream.getOutput());
-        verify(response).sendError(404);
+        verify(responseMock).sendError(404);
     }
 
     @Test
     public void testAnyFormatFalse() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/z");
-        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
-        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("false");
-        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
-        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+        when(requestMock.getRequestURI()).thenReturn("/z");
+        when(requestMock.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(requestMock.getParameter(PARAM_ANY_FORMAT)).thenReturn("false");
+        when(requestMock.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(requestMock.getParameter(PARAM_STATE)).thenReturn("34");
 
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
+        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
 
-        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
-        when(provider1.getIcon("z", "test", "34", Format.SVG))
+        when(provider1Mock.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+        when(provider1Mock.getIcon("z", "test", "34", Format.SVG))
                 .thenReturn(new ByteArrayInputStream("provider 1 icon: z test 34 svg".getBytes()));
 
-        servlet.addIconProvider(provider1);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 1 icon: z test 34 svg", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
-        verify(provider1, never()).hasIcon("z", "test", Format.PNG);
+        verify(responseMock, never()).sendError(anyInt());
+        verify(provider1Mock, never()).hasIcon("z", "test", Format.PNG);
     }
 
     @Test
     public void testAnyFormatSameProviders() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/z");
-        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
-        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
-        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
-        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+        when(requestMock.getRequestURI()).thenReturn("/z");
+        when(requestMock.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(requestMock.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(requestMock.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(requestMock.getParameter(PARAM_STATE)).thenReturn("34");
 
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
+        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
 
-        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(0);
-        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
-        when(provider1.getIcon("z", "test", "34", Format.SVG))
+        when(provider1Mock.hasIcon("z", "test", Format.PNG)).thenReturn(0);
+        when(provider1Mock.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+        when(provider1Mock.getIcon("z", "test", "34", Format.SVG))
                 .thenReturn(new ByteArrayInputStream("provider 1 icon: z test 34 svg".getBytes()));
 
-        servlet.addIconProvider(provider1);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 1 icon: z test 34 svg", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(responseMock, never()).sendError(anyInt());
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.SVG);
     }
 
     @Test
     public void testAnyFormatHigherPriorityOtherFormat() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/z");
-        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
-        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
-        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
-        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+        when(requestMock.getRequestURI()).thenReturn("/z");
+        when(requestMock.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(requestMock.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(requestMock.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(requestMock.getParameter(PARAM_STATE)).thenReturn("34");
 
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
+        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
 
-        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(0);
-        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+        when(provider1Mock.hasIcon("z", "test", Format.PNG)).thenReturn(0);
+        when(provider1Mock.hasIcon("z", "test", Format.SVG)).thenReturn(0);
 
-        when(provider2.hasIcon("z", "test", Format.PNG)).thenReturn(1);
-        when(provider2.hasIcon("z", "test", Format.SVG)).thenReturn(null);
-        when(provider2.getIcon("z", "test", "34", Format.PNG))
+        when(provider2Mock.hasIcon("z", "test", Format.PNG)).thenReturn(1);
+        when(provider2Mock.hasIcon("z", "test", Format.SVG)).thenReturn(null);
+        when(provider2Mock.getIcon("z", "test", "34", Format.PNG))
                 .thenReturn(new ByteArrayInputStream("provider 2 icon: z test 34 png".getBytes()));
 
-        servlet.addIconProvider(provider1);
-        servlet.addIconProvider(provider2);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.addIconProvider(provider2Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 2 icon: z test 34 png", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
-        verify(provider2, atLeastOnce()).hasIcon("z", "test", Format.PNG);
-        verify(provider2, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(responseMock, never()).sendError(anyInt());
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(provider2Mock, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider2Mock, atLeastOnce()).hasIcon("z", "test", Format.SVG);
     }
 
     @Test
     public void testAnyFormatHigherPriorityRequestedFormat() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/z");
-        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
-        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
-        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
-        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+        when(requestMock.getRequestURI()).thenReturn("/z");
+        when(requestMock.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(requestMock.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(requestMock.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(requestMock.getParameter(PARAM_STATE)).thenReturn("34");
 
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
+        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
 
-        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(0);
-        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+        when(provider1Mock.hasIcon("z", "test", Format.PNG)).thenReturn(0);
+        when(provider1Mock.hasIcon("z", "test", Format.SVG)).thenReturn(0);
 
-        when(provider2.hasIcon("z", "test", Format.PNG)).thenReturn(null);
-        when(provider2.hasIcon("z", "test", Format.SVG)).thenReturn(1);
-        when(provider2.getIcon("z", "test", "34", Format.SVG))
+        when(provider2Mock.hasIcon("z", "test", Format.PNG)).thenReturn(null);
+        when(provider2Mock.hasIcon("z", "test", Format.SVG)).thenReturn(1);
+        when(provider2Mock.getIcon("z", "test", "34", Format.SVG))
                 .thenReturn(new ByteArrayInputStream("provider 2 icon: z test 34 svg".getBytes()));
 
-        servlet.addIconProvider(provider1);
-        servlet.addIconProvider(provider2);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.addIconProvider(provider2Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 2 icon: z test 34 svg", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
-        verify(provider2, atLeastOnce()).hasIcon("z", "test", Format.PNG);
-        verify(provider2, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(responseMock, never()).sendError(anyInt());
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(provider2Mock, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider2Mock, atLeastOnce()).hasIcon("z", "test", Format.SVG);
     }
 
     @Test
     public void testAnyFormatNoOtherFormat() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/z");
-        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
-        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
-        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
-        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+        when(requestMock.getRequestURI()).thenReturn("/z");
+        when(requestMock.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(requestMock.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(requestMock.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(requestMock.getParameter(PARAM_STATE)).thenReturn("34");
 
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
+        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
 
-        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(null);
-        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(0);
-        when(provider1.getIcon("z", "test", "34", Format.SVG))
+        when(provider1Mock.hasIcon("z", "test", Format.PNG)).thenReturn(null);
+        when(provider1Mock.hasIcon("z", "test", Format.SVG)).thenReturn(0);
+        when(provider1Mock.getIcon("z", "test", "34", Format.SVG))
                 .thenReturn(new ByteArrayInputStream("provider 1 icon: z test 34 svg".getBytes()));
 
-        servlet.addIconProvider(provider1);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 1 icon: z test 34 svg", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(responseMock, never()).sendError(anyInt());
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.SVG);
     }
 
     @Test
     public void testAnyFormatNoRequestedFormat() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/z");
-        when(request.getParameter(PARAM_FORMAT)).thenReturn("svg");
-        when(request.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
-        when(request.getParameter(PARAM_ICONSET)).thenReturn("test");
-        when(request.getParameter(PARAM_STATE)).thenReturn("34");
+        when(requestMock.getRequestURI()).thenReturn("/z");
+        when(requestMock.getParameter(PARAM_FORMAT)).thenReturn("svg");
+        when(requestMock.getParameter(PARAM_ANY_FORMAT)).thenReturn("true");
+        when(requestMock.getParameter(PARAM_ICONSET)).thenReturn("test");
+        when(requestMock.getParameter(PARAM_STATE)).thenReturn("34");
 
-        when(response.getOutputStream()).thenReturn(responseOutputStream);
+        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
 
-        when(provider1.hasIcon("z", "test", Format.PNG)).thenReturn(0);
-        when(provider1.hasIcon("z", "test", Format.SVG)).thenReturn(null);
-        when(provider1.getIcon("z", "test", "34", Format.PNG))
+        when(provider1Mock.hasIcon("z", "test", Format.PNG)).thenReturn(0);
+        when(provider1Mock.hasIcon("z", "test", Format.SVG)).thenReturn(null);
+        when(provider1Mock.getIcon("z", "test", "34", Format.PNG))
                 .thenReturn(new ByteArrayInputStream("provider 1 icon: z test 34 png".getBytes()));
 
-        servlet.addIconProvider(provider1);
-        servlet.doGet(request, response);
+        servlet.addIconProvider(provider1Mock);
+        servlet.doGet(requestMock, responseMock);
 
         assertEquals("provider 1 icon: z test 34 png", responseOutputStream.getOutput());
-        verify(response, never()).sendError(anyInt());
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.PNG);
-        verify(provider1, atLeastOnce()).hasIcon("z", "test", Format.SVG);
+        verify(responseMock, never()).sendError(anyInt());
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.PNG);
+        verify(provider1Mock, atLeastOnce()).hasIcon("z", "test", Format.SVG);
     }
 }

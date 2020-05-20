@@ -29,6 +29,7 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.firmware.Firmware;
 import org.openhab.core.thing.firmware.FirmwareProvider;
 import org.openhab.core.thing.firmware.FirmwareRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -50,7 +51,12 @@ public final class FirmwareRegistryImpl implements FirmwareRegistry {
 
     private final List<FirmwareProvider> firmwareProviders = new CopyOnWriteArrayList<>();
 
-    private @NonNullByDefault({}) LocaleProvider localeProvider;
+    private final LocaleProvider localeProvider;
+
+    @Activate
+    public FirmwareRegistryImpl(final @Reference LocaleProvider localeProvider) {
+        this.localeProvider = localeProvider;
+    }
 
     @Override
     public @Nullable Firmware getFirmware(Thing thing, String firmwareVersion) {
@@ -90,13 +96,10 @@ public final class FirmwareRegistryImpl implements FirmwareRegistry {
         Locale loc = locale != null ? locale : localeProvider.getLocale();
         Collection<Firmware> firmwares = getFirmwares(thing, loc);
 
-        if (firmwares != null) {
-            Optional<Firmware> first = firmwares.stream().findFirst();
-
-            // Used as workaround for the NonNull annotation implied to .isElse()
-            if (first.isPresent()) {
-                return first.get();
-            }
+        Optional<Firmware> first = firmwares.stream().findFirst();
+        // Used as workaround for the NonNull annotation implied to .isElse()
+        if (first.isPresent()) {
+            return first.get();
         }
 
         return null;
@@ -139,14 +142,5 @@ public final class FirmwareRegistryImpl implements FirmwareRegistry {
 
     protected void removeFirmwareProvider(FirmwareProvider firmwareProvider) {
         firmwareProviders.remove(firmwareProvider);
-    }
-
-    @Reference
-    protected void setLocaleProvider(final LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(final LocaleProvider localeProvider) {
-        this.localeProvider = null;
     }
 }

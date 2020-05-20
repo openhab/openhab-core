@@ -124,20 +124,20 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     private final long scheduleReinitializationDelay;
 
-    private final @NonNullByDefault({}) Map<String, WrappedRule> managedRules = new ConcurrentHashMap<>();
+    private final Map<String, WrappedRule> managedRules = new ConcurrentHashMap<>();
 
     /**
      * {@link Map} holding all created {@link TriggerHandlerCallback} instances, corresponding to each {@link Rule}.
      * There is only one {@link TriggerHandlerCallback} instance per {@link Rule}. The relation is
      * {@link Rule}'s UID to {@link TriggerHandlerCallback} instance.
      */
-    private final @NonNullByDefault({}) Map<String, TriggerHandlerCallbackImpl> thCallbacks = new HashMap<>();
+    private final Map<String, TriggerHandlerCallbackImpl> thCallbacks = new HashMap<>();
 
     /**
      * {@link Map} holding all {@link ModuleType} UIDs that are available in some rule's module definition. The relation
      * is {@link ModuleType}'s UID to {@link Set} of {@link Rule} UIDs.
      */
-    private final @NonNullByDefault({}) Map<String, Set<String>> mapModuleTypeToRules = new HashMap<>();
+    private final Map<String, Set<String>> mapModuleTypeToRules = new HashMap<>();
 
     /**
      * {@link Map} holding all available {@link ModuleHandlerFactory}s linked with {@link ModuleType}s that they
@@ -1095,7 +1095,6 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @return copy of current context in rule engine
      */
     private Map<String, Object> getContext(String ruleUID, @Nullable Set<Connection> connections) {
-        @NonNullByDefault({})
         Map<String, Object> context = contextMap.get(ruleUID);
         if (context == null) {
             context = new HashMap<>();

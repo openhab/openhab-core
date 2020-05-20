@@ -47,13 +47,13 @@ public class MapDbStorageService implements DeletableStorageService {
     private static final String DB_FILE_NAME = "storage.mapdb";
 
     /* holds the local instance of the MapDB database */
-    private @NonNullByDefault({}) DB db;
+    private final DB db;
 
     /* the folder name to store mapdb databases ({@code mapdb} by default) */
     private String dbFolderName = "mapdb";
 
     @Activate
-    public void activate() {
+    public MapDbStorageService() {
         dbFolderName = ConfigConstants.getUserDataFolder() + File.separator + dbFolderName;
         File folder = new File(dbFolderName);
         if (!folder.exists()) {

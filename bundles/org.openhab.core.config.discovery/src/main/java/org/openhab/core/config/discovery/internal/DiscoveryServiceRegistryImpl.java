@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.discovery.DiscoveryListener;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
@@ -135,8 +134,6 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     private final AtomicBoolean active = new AtomicBoolean();
 
     private final Logger logger = LoggerFactory.getLogger(DiscoveryServiceRegistryImpl.class);
-
-    private @NonNullByDefault({}) SafeCaller safeCaller;
 
     @Activate
     protected void activate() {
@@ -463,14 +460,5 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     @Override
     public int getMaxScanTimeout(String bindingId) {
         return getMaxScanTimeout(getDiscoveryServices(bindingId));
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
     }
 }

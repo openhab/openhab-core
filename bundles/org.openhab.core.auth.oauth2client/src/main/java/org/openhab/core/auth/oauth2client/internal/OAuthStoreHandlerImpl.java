@@ -79,12 +79,17 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     private static final String STORE_KEY_INDEX_OF_HANDLES = "INDEX_HANDLES";
 
     private final Set<String> allHandles = new HashSet<>(); // must be initialized
-    private @NonNullByDefault({}) StorageFacade storageFacade;
+    private final StorageFacade storageFacade;
 
     private final Set<StorageCipher> allAvailableStorageCiphers = new LinkedHashSet<>();
     private Optional<StorageCipher> storageCipher = Optional.empty();
 
     private final Logger logger = LoggerFactory.getLogger(OAuthStoreHandlerImpl.class);
+
+    @Activate
+    public OAuthStoreHandlerImpl(final @Reference StorageService storageService) {
+        storageFacade = new StorageFacade(storageService.getStorage(STORE_NAME));
+    }
 
     @Activate
     public void activate(Map<String, Object> properties) throws GeneralSecurityException {
@@ -191,16 +196,6 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
             StorageCipher cipher = storageCipher.get();
             return cipher.encrypt(token);
         }
-    }
-
-    @Reference
-    protected synchronized void setStorageService(StorageService storageService) {
-        storageFacade = new StorageFacade(storageService.getStorage(STORE_NAME));
-    }
-
-    protected synchronized void unsetStorageService(StorageService storageService) {
-        storageFacade.close();
-        storageFacade = null;
     }
 
     /**

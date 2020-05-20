@@ -47,32 +47,22 @@ public class SitemapProviderImpl implements SitemapProvider, ModelRepositoryChan
 
     private final Logger logger = LoggerFactory.getLogger(SitemapProviderImpl.class);
 
-    private @NonNullByDefault({}) ModelRepository modelRepo;
+    private final ModelRepository modelRepo;
 
     private final Map<String, Sitemap> sitemapModelCache = new ConcurrentHashMap<>();
 
     private final Set<ModelRepositoryChangeListener> modelChangeListeners = new CopyOnWriteArraySet<>();
 
-    @Reference
-    public void setModelRepository(ModelRepository modelRepo) {
-        this.modelRepo = modelRepo;
-    }
-
-    public void unsetModelRepository(ModelRepository modelRepo) {
-        this.modelRepo = null;
-    }
-
     @Activate
-    protected void activate() {
+    public SitemapProviderImpl(final @Reference ModelRepository modelRepo) {
+        this.modelRepo = modelRepo;
         refreshSitemapModels();
         modelRepo.addModelRepositoryChangeListener(this);
     }
 
     @Deactivate
     protected void deactivate() {
-        if (modelRepo != null) {
-            modelRepo.removeModelRepositoryChangeListener(this);
-        }
+        modelRepo.removeModelRepositoryChangeListener(this);
         sitemapModelCache.clear();
     }
 
@@ -80,17 +70,17 @@ public class SitemapProviderImpl implements SitemapProvider, ModelRepositoryChan
     public @Nullable Sitemap getSitemap(String sitemapName) {
         String filename = sitemapName + SITEMAP_FILEEXT;
         Sitemap sitemap = sitemapModelCache.get(filename);
-        if (sitemap != null) {
-            if (!sitemap.getName().equals(sitemapName)) {
-                logger.warn(
-                        "Filename `{}` does not match the name `{}` of the sitemap - please fix this as you might see unexpected behavior otherwise.",
-                        filename, sitemap.getName());
-            }
-            return sitemap;
-        } else {
+        if (sitemap == null) {
             logger.trace("Sitemap {} cannot be found", sitemapName);
             return null;
         }
+
+        if (!sitemap.getName().equals(sitemapName)) {
+            logger.warn(
+                    "Filename `{}` does not match the name `{}` of the sitemap - please fix this as you might see unexpected behavior otherwise.",
+                    filename, sitemap.getName());
+        }
+        return sitemap;
     }
 
     @Override

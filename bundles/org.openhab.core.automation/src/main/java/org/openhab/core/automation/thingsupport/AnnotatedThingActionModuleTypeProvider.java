@@ -41,6 +41,7 @@ import org.openhab.core.thing.binding.ThingActionsScope;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -59,7 +60,12 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
     private final Map<String, Set<ModuleInformation>> moduleInformation = new ConcurrentHashMap<>();
     private final AnnotationActionModuleTypeHelper helper = new AnnotationActionModuleTypeHelper();
 
-    private @NonNullByDefault({}) ModuleTypeI18nService moduleTypeI18nService;
+    private final ModuleTypeI18nService moduleTypeI18nService;
+
+    @Activate
+    public AnnotatedThingActionModuleTypeProvider(final @Reference ModuleTypeI18nService moduleTypeI18nService) {
+        this.moduleTypeI18nService = moduleTypeI18nService;
+    }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     public void addAnnotatedThingActions(ThingActions annotatedThingActions) {
@@ -74,17 +80,17 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
                 mi.setThingUID(thingUID);
 
                 ModuleType oldType = null;
-                if (this.moduleInformation.containsKey(mi.getUID())) {
-                    oldType = helper.buildModuleType(mi.getUID(), this.moduleInformation);
-                    Set<ModuleInformation> availableModuleConfigs = this.moduleInformation.get(mi.getUID());
+                if (moduleInformation.containsKey(mi.getUID())) {
+                    oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
+                    Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
                     availableModuleConfigs.add(mi);
                 } else {
                     Set<ModuleInformation> configs = ConcurrentHashMap.newKeySet();
                     configs.add(mi);
-                    this.moduleInformation.put(mi.getUID(), configs);
+                    moduleInformation.put(mi.getUID(), configs);
                 }
 
-                ModuleType mt = helper.buildModuleType(mi.getUID(), this.moduleInformation);
+                ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
                 if (mt != null) {
                     for (ProviderChangeListener<ModuleType> l : changeListeners) {
                         if (oldType != null) {
@@ -107,16 +113,16 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
             mi.setThingUID(thingUID);
             ModuleType oldType = null;
 
-            Set<ModuleInformation> availableModuleConfigs = this.moduleInformation.get(mi.getUID());
+            Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
             if (availableModuleConfigs != null) {
                 if (availableModuleConfigs.size() > 1) {
-                    oldType = helper.buildModuleType(mi.getUID(), this.moduleInformation);
+                    oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
                     availableModuleConfigs.remove(mi);
                 } else {
-                    this.moduleInformation.remove(mi.getUID());
+                    moduleInformation.remove(mi.getUID());
                 }
 
-                ModuleType mt = helper.buildModuleType(mi.getUID(), this.moduleInformation);
+                ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
                 // localize moduletype -> remove from map
                 for (ProviderChangeListener<ModuleType> l : changeListeners) {
                     if (oldType != null) {
@@ -138,7 +144,7 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
     public Collection<ModuleType> getAll() {
         Collection<ModuleType> moduleTypes = new ArrayList<>();
         for (String moduleUID : moduleInformation.keySet()) {
-            ModuleType mt = helper.buildModuleType(moduleUID, this.moduleInformation);
+            ModuleType mt = helper.buildModuleType(moduleUID, moduleInformation);
             if (mt != null) {
                 moduleTypes.add(mt);
             }
@@ -199,21 +205,12 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
                         true);
 
                 if (finalMI != null) {
-                    ActionType moduleType = helper.buildModuleType(module.getTypeUID(), this.moduleInformation);
+                    ActionType moduleType = helper.buildModuleType(module.getTypeUID(), moduleInformation);
                     return new AnnotationActionHandler(actionModule, moduleType, finalMI.getMethod(),
                             finalMI.getActionProvider());
                 }
             }
         }
         return null;
-    }
-
-    @Reference
-    protected void setModuleTypeI18nService(ModuleTypeI18nService moduleTypeI18nService) {
-        this.moduleTypeI18nService = moduleTypeI18nService;
-    }
-
-    protected void unsetModuleTypeI18nService(ModuleTypeI18nService moduleTypeI18nService) {
-        this.moduleTypeI18nService = null;
     }
 }

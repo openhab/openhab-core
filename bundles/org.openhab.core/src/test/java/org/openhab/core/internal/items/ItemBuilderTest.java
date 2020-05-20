@@ -43,8 +43,7 @@ public class ItemBuilderTest {
     @Before
     public void setup() {
         initMocks(this);
-        itemBuilderFactory = new ItemBuilderFactoryImpl();
-        itemBuilderFactory.addItemFactory(mockFactory);
+        itemBuilderFactory = new ItemBuilderFactoryImpl(mockFactory);
     }
 
     @Test

@@ -96,7 +96,7 @@ public class I18nProviderImpl
     private @Nullable Locale locale;
 
     // TranslationProvider
-    private @NonNullByDefault({}) ResourceBundleTracker resourceBundleTracker;
+    private final ResourceBundleTracker resourceBundleTracker;
 
     // LocationProvider
     static final String LOCATION = "location";
@@ -113,7 +113,7 @@ public class I18nProviderImpl
 
     @Activate
     @SuppressWarnings("unchecked")
-    protected void activate(ComponentContext componentContext) {
+    public I18nProviderImpl(ComponentContext componentContext) {
         initDimensionMap();
         modified((Map<String, Object>) componentContext.getProperties());
 

@@ -101,13 +101,32 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     private final Map<ThingUID, ProgressCallbackImpl> progressCallbackMap = new ConcurrentHashMap<>();
 
     private final List<FirmwareUpdateHandler> firmwareUpdateHandlers = new CopyOnWriteArrayList<>();
-    private @NonNullByDefault({}) FirmwareRegistry firmwareRegistry;
-    private @NonNullByDefault({}) EventPublisher eventPublisher;
-    private @NonNullByDefault({}) TranslationProvider i18nProvider;
-    private @NonNullByDefault({}) LocaleProvider localeProvider;
-    private @NonNullByDefault({}) SafeCaller safeCaller;
-    private @NonNullByDefault({}) ConfigDescriptionValidator configDescriptionValidator;
-    private @NonNullByDefault({}) BundleResolver bundleResolver;
+
+    private final BundleResolver bundleResolver;
+    private final ConfigDescriptionValidator configDescriptionValidator;
+    private final EventPublisher eventPublisher;
+    private final FirmwareRegistry firmwareRegistry;
+    private final TranslationProvider i18nProvider;
+    private final LocaleProvider localeProvider;
+    private final SafeCaller safeCaller;
+
+    @Activate
+    public FirmwareUpdateServiceImpl( //
+            final @Reference BundleResolver bundleResolver,
+            final @Reference ConfigDescriptionValidator configDescriptionValidator,
+            final @Reference EventPublisher eventPublisher, //
+            final @Reference FirmwareRegistry firmwareRegistry, //
+            final @Reference TranslationProvider i18nProvider, //
+            final @Reference LocaleProvider localeProvider, //
+            final @Reference SafeCaller safeCaller) {
+        this.bundleResolver = bundleResolver;
+        this.configDescriptionValidator = configDescriptionValidator;
+        this.eventPublisher = eventPublisher;
+        this.firmwareRegistry = firmwareRegistry;
+        this.i18nProvider = i18nProvider;
+        this.localeProvider = localeProvider;
+        this.safeCaller = safeCaller;
+    }
 
     private final Runnable firmwareStatusRunnable = new Runnable() {
         @Override
@@ -470,68 +489,5 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
             cancelFirmwareUpdateStatusInfoJob();
         }
         progressCallbackMap.remove(firmwareUpdateHandler.getThing().getUID());
-    }
-
-    @Reference
-    protected void setFirmwareRegistry(FirmwareRegistry firmwareRegistry) {
-        this.firmwareRegistry = firmwareRegistry;
-    }
-
-    protected void unsetFirmwareRegistry(FirmwareRegistry firmwareRegistry) {
-        this.firmwareRegistry = null;
-    }
-
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = i18nProvider;
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = null;
-    }
-
-    @Reference
-    protected void setLocaleProvider(final LocaleProvider localeProvider) {
-        this.localeProvider = localeProvider;
-    }
-
-    protected void unsetLocaleProvider(final LocaleProvider localeProvider) {
-        this.localeProvider = null;
-    }
-
-    @Reference
-    protected void setSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = safeCaller;
-    }
-
-    protected void unsetSafeCaller(SafeCaller safeCaller) {
-        this.safeCaller = null;
-    }
-
-    @Reference
-    protected void setConfigDescriptionValidator(ConfigDescriptionValidator configDescriptionValidator) {
-        this.configDescriptionValidator = configDescriptionValidator;
-    }
-
-    protected void unsetConfigDescriptionValidator(ConfigDescriptionValidator configDescriptionValidator) {
-        this.configDescriptionValidator = null;
-    }
-
-    @Reference
-    protected void setBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
-    }
-
-    protected void unsetBundleResolver(BundleResolver bundleResolver) {
-        this.bundleResolver = bundleResolver;
     }
 }

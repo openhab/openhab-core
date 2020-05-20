@@ -95,13 +95,12 @@ public class SafeCallerImplTest extends JavaTest {
     public void setup() {
         initMocks(this);
         scheduler = QueueingThreadPoolExecutor.createInstance(name.getMethodName(), THREAD_POOL_SIZE);
-        safeCaller = new SafeCallerImpl() {
+        safeCaller = new SafeCallerImpl(null) {
             @Override
             protected ExecutorService getScheduler() {
                 return scheduler;
             }
         };
-        safeCaller.activate(null);
 
         assertTrue(BLOCK > TIMEOUT + GRACE);
         assertTrue(GRACE < TIMEOUT);
