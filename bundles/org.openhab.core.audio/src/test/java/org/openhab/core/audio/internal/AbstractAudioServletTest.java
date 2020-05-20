@@ -13,6 +13,7 @@
 package org.openhab.core.audio.internal;
 
 import static org.junit.Assert.fail;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -24,7 +25,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
@@ -59,7 +59,7 @@ public abstract class AbstractAudioServletTest extends JavaTest {
 
     @Before
     public void setupServerAndClient() {
-        MockitoAnnotations.initMocks(this);
+        initMocks(this);
 
         audioServlet = new AudioServlet(httpServiceMock, httpContextMock);
 
