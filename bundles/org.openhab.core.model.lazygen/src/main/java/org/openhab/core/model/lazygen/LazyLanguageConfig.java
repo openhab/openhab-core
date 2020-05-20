@@ -14,7 +14,6 @@ package org.openhab.core.model.lazygen;
 
 import static org.eclipse.xtext.util.Strings.equal;
 
-import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -26,6 +25,8 @@ import org.eclipse.xtext.generator.CompositeGeneratorException;
 import org.eclipse.xtext.generator.LanguageConfig;
 import org.eclipse.xtext.resource.IResourceServiceProvider;
 import org.eclipse.xtext.resource.XtextResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -33,7 +34,7 @@ import org.eclipse.xtext.resource.XtextResource;
  */
 public class LazyLanguageConfig extends LanguageConfig {
 
-    private final Logger logger = Logger.getLogger(LazyLanguageConfig.class);
+    private final Logger logger = LoggerFactory.getLogger(LazyLanguageConfig.class);
     String uri = null;
     boolean isUI = false;
 
@@ -101,9 +102,9 @@ public class LazyLanguageConfig extends LanguageConfig {
             }
             Resource res = rs.getResource(loadedResourceUri, true);
             if (res == null || res.getContents().isEmpty()) {
-                logger.error("Error loading '" + loadedResource + "'");
+                logger.error("Error loading '{}'", loadedResource);
             } else if (!res.getErrors().isEmpty()) {
-                logger.error("Error loading '" + loadedResource + "': " + res.getErrors().toString());
+                logger.error("Error loading '{}': {}", loadedResource, res.getErrors());
             }
         }
         EcoreUtil.resolveAll(rs);
@@ -112,7 +113,7 @@ public class LazyLanguageConfig extends LanguageConfig {
             throw new IllegalArgumentException("Couldn't load grammar for '" + uri + "'.");
         }
         if (!resource.getErrors().isEmpty()) {
-            logger.error(resource.getErrors());
+            logger.error("Error loading '{}': {}", uri, resource.getErrors());
             throw new IllegalStateException("Problem parsing '" + uri + "':" + resource.getErrors().toString());
         }
 
