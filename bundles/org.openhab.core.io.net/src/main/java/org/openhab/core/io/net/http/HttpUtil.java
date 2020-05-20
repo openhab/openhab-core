@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -154,7 +155,8 @@ public class HttpUtil {
             String proxyPassword, String nonProxyHosts) throws IOException {
         ContentResponse response = executeUrlAndGetReponse(httpMethod, url, httpHeaders, content, contentType, timeout,
                 proxyHost, proxyPort, proxyUser, proxyPassword, nonProxyHosts);
-        String encoding = response.getEncoding() != null ? response.getEncoding().replaceAll("\"", "").trim() : "UTF-8";
+        String encoding = response.getEncoding() != null ? response.getEncoding().replaceAll("\"", "").trim()
+                : StandardCharsets.UTF_8.name();
         String responseBody;
         try {
             responseBody = new String(response.getContent(), encoding);

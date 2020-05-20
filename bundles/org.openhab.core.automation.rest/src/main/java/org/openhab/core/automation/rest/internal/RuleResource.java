@@ -16,6 +16,7 @@ import static org.openhab.core.automation.RulePredicates.*;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -159,7 +160,7 @@ public class RuleResource implements RESTResource {
         try {
             final Rule newRule = ruleRegistry.add(RuleDTOMapper.map(rule));
             return Response.status(Status.CREATED)
-                    .header("Location", "rules/" + URLEncoder.encode(newRule.getUID(), "UTF-8")).build();
+                    .header("Location", "rules/" + URLEncoder.encode(newRule.getUID(), StandardCharsets.UTF_8)).build();
         } catch (IllegalArgumentException e) {
             String errMessage = "Creation of the rule is refused: " + e.getMessage();
             logger.warn("{}", errMessage);

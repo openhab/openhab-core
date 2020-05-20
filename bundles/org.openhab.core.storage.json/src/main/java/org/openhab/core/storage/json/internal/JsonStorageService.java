@@ -13,7 +13,6 @@
 package org.openhab.core.storage.json.internal;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -148,13 +147,7 @@ public class JsonStorageService implements StorageService {
      * @return url-encoded string or the original string if UTF-8 is not supported on the system
      */
     protected String urlEscapeUnwantedChars(String s) {
-        String result;
-        try {
-            result = URLEncoder.encode(s, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            logger.warn("Encoding UTF-8 is not supported, might generate invalid filenames.");
-            result = s;
-        }
+        String result = URLEncoder.encode(s, StandardCharsets.UTF_8);
         int length = Math.min(result.length(), MAX_FILENAME_LENGTH);
         return result.substring(0, length);
     }

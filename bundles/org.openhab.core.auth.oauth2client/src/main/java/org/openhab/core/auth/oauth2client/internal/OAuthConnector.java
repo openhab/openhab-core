@@ -15,7 +15,6 @@ package org.openhab.core.auth.oauth2client.internal;
 import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
@@ -94,23 +93,18 @@ public class OAuthConnector {
             authorizationUrl.append('&');
         }
 
-        try {
-            authorizationUrl.append("response_type=code");
-            authorizationUrl.append("&client_id=").append(URLEncoder.encode(clientId, StandardCharsets.UTF_8.name()));
-            if (state != null) {
-                authorizationUrl.append("&state=").append(URLEncoder.encode(state, StandardCharsets.UTF_8.name()));
-            }
-            if (redirectURI != null) {
-                authorizationUrl.append("&redirect_uri=")
-                        .append(URLEncoder.encode(redirectURI, StandardCharsets.UTF_8.name()));
-            }
-            if (scope != null) {
-                authorizationUrl.append("&scope=").append(URLEncoder.encode(scope, StandardCharsets.UTF_8.name()));
-            }
-        } catch (UnsupportedEncodingException e) {
-            // never happens
-            logger.error("Unknown encoding {}", e.getMessage(), e);
+        authorizationUrl.append("response_type=code");
+        authorizationUrl.append("&client_id=").append(URLEncoder.encode(clientId, StandardCharsets.UTF_8));
+        if (state != null) {
+            authorizationUrl.append("&state=").append(URLEncoder.encode(state, StandardCharsets.UTF_8));
         }
+        if (redirectURI != null) {
+            authorizationUrl.append("&redirect_uri=").append(URLEncoder.encode(redirectURI, StandardCharsets.UTF_8));
+        }
+        if (scope != null) {
+            authorizationUrl.append("&scope=").append(URLEncoder.encode(scope, StandardCharsets.UTF_8));
+        }
+
         return authorizationUrl.toString();
     }
 
@@ -255,7 +249,7 @@ public class OAuthConnector {
     private Request getMethod(HttpClient httpClient, String tokenUrl) {
         Request request = httpClient.newRequest(tokenUrl).method(HttpMethod.POST);
         request.header(HttpHeader.ACCEPT, "application/json");
-        request.header(HttpHeader.ACCEPT_CHARSET, "UTF-8");
+        request.header(HttpHeader.ACCEPT_CHARSET, StandardCharsets.UTF_8.name());
         return request;
     }
 
