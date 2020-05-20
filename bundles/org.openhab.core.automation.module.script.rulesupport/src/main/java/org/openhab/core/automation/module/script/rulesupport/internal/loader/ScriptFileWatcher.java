@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
@@ -37,11 +38,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.service.AbstractWatchService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
@@ -61,25 +65,20 @@ public class ScriptFileWatcher extends AbstractWatchService {
 
     private final long earliestStart = System.currentTimeMillis() + INITIAL_DELAY * 1000;
 
-    private ScriptEngineManager manager;
-    private ScheduledExecutorService scheduler;
+    private final ScriptEngineManager manager;
+    private @Nullable ScheduledExecutorService scheduler;
 
     private final Map<String, Set<URL>> urlsByScriptExtension = new ConcurrentHashMap<>();
     private final Set<URL> loaded = new HashSet<>();
 
-    public ScriptFileWatcher() {
+    @Activate
+    public ScriptFileWatcher(final @Reference ScriptEngineManager manager) {
         super(ConfigConstants.getConfigFolder() + File.separator + FILE_DIRECTORY);
-    }
-
-    @Reference
-    public void setScriptEngineManager(ScriptEngineManager manager) {
         this.manager = manager;
     }
 
-    public void unsetScriptEngineManager(ScriptEngineManager manager) {
-        this.manager = null;
-    }
-
+    @SuppressWarnings("null")
+    @Activate
     @Override
     public void activate() {
         super.activate();
@@ -88,10 +87,12 @@ public class ScriptFileWatcher extends AbstractWatchService {
         scheduler.scheduleWithFixedDelay(this::checkFiles, INITIAL_DELAY, RECHECK_INTERVAL, TimeUnit.SECONDS);
     }
 
+    @Deactivate
     @Override
     public void deactivate() {
-        if (scheduler != null) {
-            scheduler.shutdownNow();
+        ScheduledExecutorService localScheduler = scheduler;
+        if (localScheduler != null) {
+            localScheduler.shutdownNow();
             scheduler = null;
         }
         super.deactivate();
@@ -140,11 +141,11 @@ public class ScriptFileWatcher extends AbstractWatchService {
             try {
                 URL fileUrl = file.toURI().toURL();
                 if (ENTRY_DELETE.equals(kind)) {
-                    this.removeFile(fileUrl);
+                    removeFile(fileUrl);
                 }
 
                 if (file.canRead() && (ENTRY_CREATE.equals(kind) || ENTRY_MODIFY.equals(kind))) {
-                    this.importFile(fileUrl);
+                    importFile(fileUrl);
                 }
             } catch (MalformedURLException e) {
                 logger.error("malformed", e);
@@ -170,7 +171,8 @@ public class ScriptFileWatcher extends AbstractWatchService {
                 enqueueUrl(url, scriptType);
             } else {
                 if (manager.isSupported(scriptType)) {
-                    try (InputStreamReader reader = new InputStreamReader(new BufferedInputStream(url.openStream()))) {
+                    try (InputStreamReader reader = new InputStreamReader(new BufferedInputStream(url.openStream()),
+                            StandardCharsets.UTF_8)) {
                         logger.info("Loading script '{}'", fileName);
 
                         ScriptEngineContainer container = manager.createScriptEngine(scriptType,
@@ -208,7 +210,6 @@ public class ScriptFileWatcher extends AbstractWatchService {
 
     private void dequeueUrl(URL url) {
         String scriptType = getScriptType(url);
-
         if (scriptType != null) {
             synchronized (urlsByScriptExtension) {
                 Set<URL> set = urlsByScriptExtension.get(scriptType);
@@ -223,7 +224,7 @@ public class ScriptFileWatcher extends AbstractWatchService {
         }
     }
 
-    private String getScriptType(URL url) {
+    private @Nullable String getScriptType(URL url) {
         String fileName = url.getPath();
         int index = fileName.lastIndexOf(".");
         if (index == -1) {
