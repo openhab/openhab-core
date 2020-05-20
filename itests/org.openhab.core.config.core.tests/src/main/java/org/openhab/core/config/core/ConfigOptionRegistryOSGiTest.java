@@ -12,14 +12,16 @@
  */
 package org.openhab.core.config.core;
 
-import static java.util.Collections.singleton;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -35,24 +37,22 @@ import org.openhab.core.test.java.JavaOSGiTest;
 public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
 
     private ConfigDescriptionRegistry configDescriptionRegistry;
-    private ConfigDescription configDescription;
     private ConfigDescriptionProvider configDescriptionProviderMock;
     private ConfigOptionProvider configOptionsProviderMock;
-    private ParameterOption parameterOption;
+    private URI dummyURI;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws URISyntaxException {
         // Register config registry
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
-        ConfigDescriptionParameter parm1 = new ConfigDescriptionParameter("Parm1",
-                ConfigDescriptionParameter.Type.INTEGER);
-        List<ConfigDescriptionParameter> pList1 = new ArrayList<>();
-        pList1.add(parm1);
-        configDescription = new ConfigDescription(new URI("config:Dummy"), pList1);
+        dummyURI = new URI("config:Dummy");
+        ConfigDescriptionParameter param1 = ConfigDescriptionParameterBuilder
+                .create("Param1", ConfigDescriptionParameter.Type.INTEGER).build();
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(dummyURI).withParameter(param1).build();
 
         // Create config option list
         List<ParameterOption> oList1 = new ArrayList<>();
-        parameterOption = new ParameterOption("Option1", "Option1");
+        ParameterOption parameterOption = new ParameterOption("Option1", "Option1");
         oList1.add(parameterOption);
         parameterOption = new ParameterOption("Option2", "Option2");
         oList1.add(parameterOption);
@@ -61,31 +61,33 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         when(configOptionsProviderMock.getParameterOptions(any(), any(), any(), any())).thenReturn(oList1);
 
         configDescriptionProviderMock = mock(ConfigDescriptionProvider.class);
-        when(configDescriptionProviderMock.getConfigDescriptions(any())).thenReturn(singleton(configDescription));
+        when(configDescriptionProviderMock.getConfigDescriptions(any()))
+                .thenReturn(Collections.singleton(configDescription));
         when(configDescriptionProviderMock.getConfigDescription(any(), any())).thenReturn(configDescription);
     }
 
     @Test
-    public void assertConfigDescriptionRegistryMergesOptions() throws Exception {
-        assertThat("Registery is empty to start", configDescriptionRegistry.getConfigDescriptions().size(), is(0));
+    public void assertConfigDescriptionRegistryMergesOptions() {
+        assertThat("Registery is empty to start", configDescriptionRegistry.getConfigDescriptions(), hasSize(0));
 
         configDescriptionRegistry.addConfigDescriptionProvider(configDescriptionProviderMock);
-        assertThat("Config description added ok", configDescriptionRegistry.getConfigDescriptions().size(), is(1));
+        assertThat("Config description added ok", configDescriptionRegistry.getConfigDescriptions(), hasSize(1));
 
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMock);
 
-        ConfigDescription configDescriptions = configDescriptionRegistry.getConfigDescription(new URI("config:Dummy"));
-        assertThat("Config is found", configDescriptions.getUID(), is(equalTo(new URI("config:Dummy"))));
-
-        assertThat("Config contains parameter", configDescriptions.getParameters().size(), is(1));
-        assertThat("Config parameter found", configDescriptions.getParameters().get(0).getName(), is(equalTo("Parm1")));
-        assertThat("Config parameter contains options", configDescriptions.getParameters().get(0).getOptions().size(),
-                is(2));
+        ConfigDescription configDescriptions = configDescriptionRegistry.getConfigDescription(dummyURI);
+        assertThat(configDescriptions, is(not(nullValue())));
+        assertThat("Config is found", configDescriptions.getUID(), is(dummyURI));
+        assertThat("Config contains parameter", configDescriptions.getParameters(), hasSize(1));
+        assertThat("Config parameter found", configDescriptions.getParameters().get(0).getName(),
+                is(equalTo("Param1")));
+        assertThat("Config parameter contains options", configDescriptions.getParameters().get(0).getOptions(),
+                hasSize(2));
 
         configDescriptionRegistry.removeConfigOptionProvider(configOptionsProviderMock);
 
         configDescriptionRegistry.removeConfigDescriptionProvider(configDescriptionProviderMock);
-        assertThat("Description registery is empty to finish", configDescriptionRegistry.getConfigDescriptions().size(),
-                is(0));
+        assertThat("Description registery is empty to finish", configDescriptionRegistry.getConfigDescriptions(),
+                hasSize(0));
     }
 }

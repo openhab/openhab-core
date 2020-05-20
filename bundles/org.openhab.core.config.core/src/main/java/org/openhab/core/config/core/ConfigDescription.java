@@ -52,48 +52,16 @@ public class ConfigDescription implements Identifiable<URI> {
     private final List<ConfigDescriptionParameterGroup> parameterGroups;
 
     /**
-     * Creates a new instance of this class with the specified parameter.
-     *
-     * @deprecated Use the {@link ConfigDescriptionBuilder} instead.
+     * Creates a new instance of this class with the specified parameters.
      *
      * @param uri the URI of this description within the {@link ConfigDescriptionRegistry}
-     * @throws IllegalArgumentException if the URI is null or invalid
-     */
-    @Deprecated
-    public ConfigDescription(URI uri) throws IllegalArgumentException {
-        this(uri, null, null);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @deprecated Use the {@link ConfigDescriptionBuilder} instead.
-     *
-     * @param uri the URI of this description within the {@link ConfigDescriptionRegistry} (must neither be null nor
-     *            empty)
      * @param parameters the list of configuration parameters that belong to the given URI
-     *            (could be null or empty)
-     * @throws IllegalArgumentException if the URI is null or invalid
-     */
-    @Deprecated
-    public ConfigDescription(URI uri, List<ConfigDescriptionParameter> parameters) {
-        this(uri, parameters, null);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @deprecated Use the {@link ConfigDescriptionBuilder} instead.
-     *
-     * @param uri the URI of this description within the {@link ConfigDescriptionRegistry} (must neither be null nor
-     *            empty)
-     * @param parameters the list of configuration parameters that belong to the given URI
-     *            (could be null or empty)
      * @param groups the list of groups associated with the parameters
      * @throws IllegalArgumentException if the URI is null or invalid
+     * @deprecated Use the {@link ConfigDescriptionBuilder} instead.
      */
     @Deprecated
-    public ConfigDescription(@Nullable URI uri, @Nullable List<ConfigDescriptionParameter> parameters,
+    ConfigDescription(URI uri, @Nullable List<ConfigDescriptionParameter> parameters,
             @Nullable List<ConfigDescriptionParameterGroup> groups) {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null!");
@@ -106,25 +74,15 @@ public class ConfigDescription implements Identifiable<URI> {
         }
 
         this.uri = uri;
-
-        if (parameters != null) {
-            this.parameters = Collections.unmodifiableList(parameters);
-        } else {
-            this.parameters = Collections.emptyList();
-        }
-
-        if (groups != null) {
-            this.parameterGroups = Collections.unmodifiableList(groups);
-        } else {
-            this.parameterGroups = Collections.emptyList();
-        }
+        this.parameters = parameters == null ? Collections.emptyList() : Collections.unmodifiableList(parameters);
+        this.parameterGroups = groups == null ? Collections.emptyList() : Collections.unmodifiableList(groups);
     }
 
     /**
      * Returns the URI of this description within the {@link ConfigDescriptionRegistry}.
      * The URI follows the syntax {@code '<scheme>:<token>[:<token>]'} (e.g. {@code "binding:hue:bridge"}).
      *
-     * @return the URI of this description (not null)
+     * @return the URI of this description
      */
     @Override
     public URI getUID() {
@@ -136,7 +94,7 @@ public class ConfigDescription implements Identifiable<URI> {
      * <p>
      * The returned list is immutable.
      *
-     * @return the corresponding configuration description parameters (not null, could be empty)
+     * @return the corresponding configuration description parameters (could be empty)
      */
     public List<ConfigDescriptionParameter> getParameters() {
         return parameters;
@@ -147,7 +105,7 @@ public class ConfigDescription implements Identifiable<URI> {
      * parameter as key and the parameter as value.
      *
      * @return the unmodifiable map of configuration description parameters which uses the name as key and the parameter
-     *         as value (not null, could be empty)
+     *         as value (could be empty)
      */
     public Map<String, ConfigDescriptionParameter> toParametersMap() {
         Map<String, ConfigDescriptionParameter> map = new HashMap<>();
@@ -162,7 +120,7 @@ public class ConfigDescription implements Identifiable<URI> {
      * <p>
      * The returned list is immutable.
      *
-     * @return the list of parameter groups parameter (not null, could be empty)
+     * @return the list of parameter groups parameter (could be empty)
      */
     public List<ConfigDescriptionParameterGroup> getParameterGroups() {
         return parameterGroups;

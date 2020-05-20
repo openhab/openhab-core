@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
 import org.openhab.core.config.xml.util.ConverterAssertion;
@@ -98,9 +99,7 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
 
         ConverterAssertion.assertEndOfType(reader);
 
-        // create object
-        configDescription = new ConfigDescription(uri, configDescriptionParams, configDescriptionGroups);
-
-        return configDescription;
+        return ConfigDescriptionBuilder.create(uri).withParameters(configDescriptionParams)
+                .withParameterGroups(configDescriptionGroups).build();
     }
 }

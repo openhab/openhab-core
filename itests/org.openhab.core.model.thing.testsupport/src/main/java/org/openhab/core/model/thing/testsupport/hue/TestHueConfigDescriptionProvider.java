@@ -22,8 +22,10 @@ import java.util.Locale;
 import java.util.stream.Stream;
 
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.osgi.service.component.annotations.Component;
 
@@ -43,19 +45,12 @@ public class TestHueConfigDescriptionProvider implements ConfigDescriptionProvid
     @Override
     public ConfigDescription getConfigDescription(URI uri, Locale locale) {
         if (uri.equals(createURI("hue:LCT001:color"))) {
-            ConfigDescriptionParameter paramDefault = new ConfigDescriptionParameter("defaultConfig", Type.TEXT) {
-                @Override
-                public String getDefault() {
-                    return "defaultValue";
-                };
-            };
-            ConfigDescriptionParameter paramCustom = new ConfigDescriptionParameter("customConfig", Type.TEXT) {
-                @Override
-                public String getDefault() {
-                    return "none";
-                };
-            };
-            return new ConfigDescription(uri, Stream.of(paramDefault, paramCustom).collect(toList()));
+            ConfigDescriptionParameter paramDefault = ConfigDescriptionParameterBuilder
+                    .create("defaultConfig", Type.TEXT).withDefault("defaultValue").build();
+            ConfigDescriptionParameter paramCustom = ConfigDescriptionParameterBuilder.create("customConfig", Type.TEXT)
+                    .withDefault("none").build();
+            return ConfigDescriptionBuilder.create(uri)
+                    .withParameters(Stream.of(paramDefault, paramCustom).collect(toList())).build();
         }
         return null;
     }

@@ -295,6 +295,7 @@ public class ConfigDescriptionParameterBuilder {
      *
      * @return the desired result
      */
+    @SuppressWarnings("deprecation")
     public ConfigDescriptionParameter build() throws IllegalArgumentException {
         return new ConfigDescriptionParameter(name, type, min, max, step, pattern, required, readOnly, multiple,
                 context, defaultValue, label, description, options, filterCriteria, groupName, advanced, limitToOptions,

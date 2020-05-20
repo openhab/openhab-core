@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -138,11 +139,10 @@ public class ThingFactoryTest extends JavaOSGiTest {
                     @Override
                     public ConfigDescription answer(InvocationOnMock invocation) throws Throwable {
                         URI uri = (URI) invocation.getArgument(0);
-                        List<ConfigDescriptionParameter> parameters = singletonList(ConfigDescriptionParameterBuilder
+                        return ConfigDescriptionBuilder.create(uri).withParameter(ConfigDescriptionParameterBuilder
                                 .create("testProperty", ConfigDescriptionParameter.Type.TEXT).withContext("context")
-                                .withDefault("default").withDescription("description").withLimitToOptions(true)
-                                .build());
-                        return new ConfigDescription(uri, parameters);
+                                .withDefault("default").withDescription("description").withLimitToOptions(true).build())
+                                .build();
                     }
                 });
 
@@ -200,10 +200,8 @@ public class ThingFactoryTest extends JavaOSGiTest {
                                 .withDefault("2.3,2.4,2.5").withLabel("label").withDescription("description")
                                 .withMultiple(true).withLimitToOptions(true).build();
 
-                        List<ConfigDescriptionParameter> parameters = Stream.of(p1, p2, p3, p4, p5, p6)
-                                .collect(toList());
-
-                        return new ConfigDescription(uri, parameters);
+                        return ConfigDescriptionBuilder.create(uri)
+                                .withParameters(Stream.of(p1, p2, p3, p4, p5, p6).collect(toList())).build();
                     }
                 });
 

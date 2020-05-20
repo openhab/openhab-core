@@ -51,7 +51,7 @@ public class ConfigDescriptionParameterBuilderTest {
         String groupName = "groupName";
         boolean advanced = false;
         boolean limitToOptions = true;
-        Integer multipleLimit = new Integer(17);
+        Integer multipleLimit = Integer.valueOf(17);
 
         //@formatter:off
         ConfigDescriptionParameter param = ConfigDescriptionParameterBuilder.create(name, type)
@@ -152,8 +152,8 @@ public class ConfigDescriptionParameterBuilderTest {
         assertFalse(param.isMultiple());
         assertFalse(param.isAdvanced());
         assertTrue(param.getLimitToOptions());
-        ConfigDescriptionParameter param2 = new ConfigDescriptionParameter("Dummy", Type.BOOLEAN, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+        ConfigDescriptionParameter param2 = ConfigDescriptionParameterBuilder.create("Dummy", Type.BOOLEAN).build();
         assertFalse(param2.isRequired());
         assertFalse(param2.isReadOnly());
         assertFalse(param2.isMultiple());

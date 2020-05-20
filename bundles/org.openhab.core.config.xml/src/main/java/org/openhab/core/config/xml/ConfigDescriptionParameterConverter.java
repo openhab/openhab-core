@@ -81,7 +81,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
         if (val == null) {
             return null;
         }
-        return new Boolean(val);
+        return Boolean.valueOf(val);
     }
 
     private Boolean falseIfNull(Boolean b) {

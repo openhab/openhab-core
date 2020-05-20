@@ -108,8 +108,8 @@ public class ConfigUtilTest {
     @Test
     public void verifyApplyDefaultConfigurationReturnsNullIfNotSet() {
         Configuration configuration = new Configuration();
-        ConfigDescription configDescription = new ConfigDescription(configUri,
-                Collections.singletonList(configDescriptionParameterBuilder2.build()));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configUri)
+                .withParameter(configDescriptionParameterBuilder2.build()).build();
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
         assertThat(configuration.get("p2"), is(nullValue()));
@@ -120,8 +120,8 @@ public class ConfigUtilTest {
         configDescriptionParameterBuilder1.withDefault("2.5");
 
         Configuration configuration = new Configuration();
-        ConfigDescription configDescription = new ConfigDescription(configUri,
-                Collections.singletonList(configDescriptionParameterBuilder1.build()));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configUri)
+                .withParameter(configDescriptionParameterBuilder1.build()).build();
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
         verifyValuesOfConfiguration(configuration.get("p1"), 1, Collections.singletonList(new BigDecimal("2.5")));
@@ -132,8 +132,8 @@ public class ConfigUtilTest {
         configDescriptionParameterBuilder1.withDefault("2.3,2.4,2.5");
 
         Configuration configuration = new Configuration();
-        ConfigDescription configDescription = new ConfigDescription(configUri,
-                Collections.singletonList(configDescriptionParameterBuilder1.build()));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configUri)
+                .withParameter(configDescriptionParameterBuilder1.build()).build();
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
         verifyValuesOfConfiguration(configuration.get("p1"), 3,
@@ -145,8 +145,8 @@ public class ConfigUtilTest {
         configDescriptionParameterBuilder1.withDefault("2.3,2.4,foo,2.5");
 
         Configuration configuration = new Configuration();
-        ConfigDescription configDescription = new ConfigDescription(configUri,
-                Collections.singletonList(configDescriptionParameterBuilder1.build()));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configUri)
+                .withParameter(configDescriptionParameterBuilder1.build()).build();
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
         verifyValuesOfConfiguration(configuration.get("p1"), 3,
@@ -158,8 +158,8 @@ public class ConfigUtilTest {
         configDescriptionParameterBuilder2.withDefault("first value,  second value  ,third value,,,");
 
         Configuration configuration = new Configuration();
-        ConfigDescription configDescription = new ConfigDescription(configUri,
-                Collections.singletonList(configDescriptionParameterBuilder2.build()));
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configUri)
+                .withParameter(configDescriptionParameterBuilder2.build()).build();
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
         verifyValuesOfConfiguration(configuration.get("p2"), 3,
@@ -175,11 +175,11 @@ public class ConfigUtilTest {
 
     @Test
     public void firstDesciptionWinsForNormalization() throws URISyntaxException {
-        ConfigDescription configDescriptionInteger = new ConfigDescription(new URI("thing:fooThing"),
-                Arrays.asList(new ConfigDescriptionParameter("foo", INTEGER)));
+        ConfigDescription configDescriptionInteger = ConfigDescriptionBuilder.create(new URI("thing:fooThing"))
+                .withParameter(ConfigDescriptionParameterBuilder.create("foo", INTEGER).build()).build();
 
-        ConfigDescription configDescriptionString = new ConfigDescription(new URI("thingType:fooThing"),
-                Arrays.asList(new ConfigDescriptionParameter("foo", TEXT)));
+        ConfigDescription configDescriptionString = ConfigDescriptionBuilder.create(new URI("thingType:fooThing"))
+                .withParameter(ConfigDescriptionParameterBuilder.create("foo", TEXT).build()).build();
 
         assertThat(
                 ConfigUtil.normalizeTypes(Collections.singletonMap("foo", "1"), Arrays.asList(configDescriptionInteger))

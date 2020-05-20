@@ -20,6 +20,7 @@ import java.util.Locale;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -83,8 +84,9 @@ public class ConfigI18nLocalizationService {
                     bundle, configDescription, configDescriptionParameterGroup, locale);
             localizedConfigDescriptionGroups.add(localizedConfigDescriptionGroup);
         }
-        return new ConfigDescription(configDescription.getUID(), localizedConfigDescriptionParameters,
-                localizedConfigDescriptionGroups);
+        return ConfigDescriptionBuilder.create(configDescription.getUID())
+                .withParameters(localizedConfigDescriptionParameters)
+                .withParameterGroups(localizedConfigDescriptionGroups).build();
     }
 
     /**

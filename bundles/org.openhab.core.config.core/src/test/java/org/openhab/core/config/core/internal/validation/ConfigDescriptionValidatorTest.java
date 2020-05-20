@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
@@ -135,11 +136,13 @@ public class ConfigDescriptionValidatorTest {
         }
     }
 
-    private static final ConfigDescription CONFIG_DESCRIPTION = new ConfigDescription(CONFIG_DESCRIPTION_URI,
-            Stream.of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM, TXT_MAX_PARAM,
-                    TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, INT_PARAM, INT_REQUIRED_PARAM, INT_MIN_PARAM,
-                    INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM, DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM)
-                    .collect(toList()));
+    private static final ConfigDescription CONFIG_DESCRIPTION = ConfigDescriptionBuilder.create(CONFIG_DESCRIPTION_URI)
+            .withParameters(Stream
+                    .of(BOOL_PARAM, BOOL_REQUIRED_PARAM, TXT_PARAM, TXT_REQUIRED_PARAM, TXT_MIN_PARAM, TXT_MAX_PARAM,
+                            TXT_PATTERN_PARAM, TXT_MAX_PATTERN_PARAM, INT_PARAM, INT_REQUIRED_PARAM, INT_MIN_PARAM,
+                            INT_MAX_PARAM, DECIMAL_PARAM, DECIMAL_REQUIRED_PARAM, DECIMAL_MIN_PARAM, DECIMAL_MAX_PARAM)
+                    .collect(toList()))
+            .build();
 
     private Map<String, Object> params;
     private ConfigDescriptionValidatorImpl configDescriptionValidator;
@@ -499,6 +502,7 @@ public class ConfigDescriptionValidatorTest {
         configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
     }
 
+    @SuppressWarnings("unchecked")
     private static List<ConfigValidationMessage> getConfigValidationMessages(ConfigValidationException cve) {
         try {
             Field field = cve.getClass().getDeclaredField("configValidationMessages");
