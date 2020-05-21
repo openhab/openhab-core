@@ -68,13 +68,14 @@ import org.osgi.service.http.HttpService;
  * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
-@Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.chart", property = {
-        Constants.SERVICE_PID + "=org.openhab.core.chart", ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Charts",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + "system:chart" })
+@Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.chart", //
+        property = Constants.SERVICE_PID + "=org.openhab.core.chart")
+@ConfigurableService(category = "system", label = "Charts", description_uri = ChartServlet.CONFIG_URI)
 public class ChartServlet extends SmartHomeServlet {
 
     private static final long serialVersionUID = 7700873790924746422L;
+
+    protected static final String CONFIG_URI = "system:chart";
     private static final int CHART_HEIGHT = 240;
     private static final int CHART_WIDTH = 480;
     private static final String DATE_FORMAT = "yyyyMMddHHmm";

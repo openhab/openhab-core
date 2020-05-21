@@ -70,12 +70,9 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort TTS options
  */
-@Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, property = { //
-        Constants.SERVICE_PID + "=org.openhab.voice", //
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Voice", //
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + VoiceManagerImpl.CONFIG_URI //
-})
+@Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, //
+        property = Constants.SERVICE_PID + "=org.openhab.voice")
+@ConfigurableService(category = "system", label = "Voice", description_uri = VoiceManagerImpl.CONFIG_URI)
 public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
 
     public static final String CONFIGURATION_PID = "org.openhab.voice";

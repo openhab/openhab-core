@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
@@ -89,11 +90,17 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
         List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll();
         assertThat(configurableServices.size(), is(num + 1));
 
-        ConfigurableServiceDTO lastService = configurableServices.get(configurableServices.size() - 1);
-        assertThat(lastService.id, is(equalTo("pid")));
-        assertThat(lastService.configDescriptionURI, is(equalTo("someuri")));
-        assertThat(lastService.label, is(equalTo("label")));
-        assertThat(lastService.category, is(equalTo("category")));
+        Optional<ConfigurableServiceDTO> optionalService = configurableServices.stream()
+                .filter(configurableService -> "pid".equals(configurableService.id)).findFirst();
+        assertThat(optionalService.isPresent(), is(true));
+
+        if (optionalService.isPresent()) {
+            ConfigurableServiceDTO service = optionalService.get();
+            assertThat(service.id, is(equalTo("pid")));
+            assertThat(service.configDescriptionURI, is(equalTo("someuri")));
+            assertThat(service.label, is(equalTo("label")));
+            assertThat(service.category, is(equalTo("category")));
+        }
     }
 
     @Test
@@ -109,8 +116,15 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
         List<ConfigurableServiceDTO> configurableServices = configurableServiceResource.getAll();
         assertThat(configurableServices.size(), is(num + 1));
 
-        ConfigurableServiceDTO lastService = configurableServices.get(configurableServices.size() - 1);
-        assertThat(lastService.id, is(equalTo("component.name")));
+        Optional<ConfigurableServiceDTO> optionalService = configurableServices.stream()
+                .filter(configurableService -> "component.name".equals(configurableService.id)).findFirst();
+        assertThat(optionalService.isPresent(), is(true));
+
+        if (optionalService.isPresent()) {
+            ConfigurableServiceDTO service = optionalService.get();
+            assertThat(service.id, is(equalTo("component.name")));
+            assertThat(service.configDescriptionURI, is(equalTo("someuri")));
+        }
     }
 
     @Test

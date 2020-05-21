@@ -68,10 +68,8 @@ import de.jollyday.util.ResourceUtil;
  *
  * @author Gaël L'hopital - Initial contribution
  */
-@Component(name = "org.openhab.ephemeris", property = { Constants.SERVICE_PID + "=org.openhab.ephemeris",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Ephemeris",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + EphemerisManagerImpl.CONFIG_URI })
+@Component(name = "org.openhab.ephemeris", property = Constants.SERVICE_PID + "=org.openhab.ephemeris")
+@ConfigurableService(category = "system", label = "Ephemeris", description_uri = EphemerisManagerImpl.CONFIG_URI)
 @NonNullByDefault
 public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvider {
 

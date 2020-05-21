@@ -12,8 +12,14 @@
  */
 package org.openhab.core.config.core;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.component.annotations.ComponentPropertyType;
 
 /**
  * <p>
@@ -30,26 +36,64 @@ import org.osgi.service.component.ComponentConstants;
  * {@link ComponentConstants#COMPONENT_NAME} property will be used as fallback.
  *
  * @author Dennis Nobel - Initial contribution
+ * @author Wouter Born - Change to ComponentPropertyType
  */
-public interface ConfigurableService {
+@ComponentPropertyType
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.TYPE)
+public @interface ConfigurableService {
+
+    String PREFIX_ = "service.config.";
 
     /**
      * The config description URI for the configurable service. See also {@link ConfigDescription}.
      */
-    public static final String SERVICE_PROPERTY_DESCRIPTION_URI = "service.config.description.uri";
+    String description_uri();
 
     /**
      * The label of the service to be configured.
      */
-    public static final String SERVICE_PROPERTY_LABEL = "service.config.label";
+    String label() default "";
 
     /**
      * The category of the service to be configured (e.g. binding).
      */
-    public static final String SERVICE_PROPERTY_CATEGORY = "service.config.category";
+    String category() default "";
 
     /**
      * Marker for multiple configurations for this service ("true" = multiple configurations possible)
      */
-    public static final String SERVICE_PROPERTY_FACTORY_SERVICE = "esh.factoryservice";
+    boolean factory() default false;
+
+    /**
+     * The config description URI for the configurable service. See also {@link ConfigDescription}.
+     *
+     * @deprecated annotate classes with <code>@ConfigurableService</code> instead
+     */
+    @Deprecated
+    public static final String SERVICE_PROPERTY_DESCRIPTION_URI = PREFIX_ + "description.uri";
+
+    /**
+     * The label of the service to be configured.
+     *
+     * @deprecated annotate classes with <code>@ConfigurableService</code> instead
+     */
+    @Deprecated
+    public static final String SERVICE_PROPERTY_LABEL = PREFIX_ + "label";
+
+    /**
+     * The category of the service to be configured (e.g. binding).
+     *
+     * @deprecated annotate classes with <code>@ConfigurableService</code> instead
+     */
+    @Deprecated
+    public static final String SERVICE_PROPERTY_CATEGORY = PREFIX_ + "category";
+
+    /**
+     * Marker for multiple configurations for this service ("true" = multiple configurations possible)
+     *
+     * @deprecated annotate classes with <code>@ConfigurableService</code> instead
+     */
+    @Deprecated
+    public static final String SERVICE_PROPERTY_FACTORY_SERVICE = PREFIX_ + "factory";
 }

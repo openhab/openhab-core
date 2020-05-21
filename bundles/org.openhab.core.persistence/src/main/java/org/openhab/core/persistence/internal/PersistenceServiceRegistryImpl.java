@@ -41,10 +41,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(immediate = true, configurationPid = "org.openhab.persistence", property = {
-        Constants.SERVICE_PID + "=org.openhab.persistence", ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Persistence",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + PersistenceServiceRegistryImpl.CONFIG_URI })
+@Component(immediate = true, configurationPid = "org.openhab.persistence", //
+        property = Constants.SERVICE_PID + "=org.openhab.persistence")
+@ConfigurableService(category = "system", label = "Persistence", description_uri = PersistenceServiceRegistryImpl.CONFIG_URI)
 @NonNullByDefault
 public class PersistenceServiceRegistryImpl implements ConfigOptionProvider, PersistenceServiceRegistry {
 

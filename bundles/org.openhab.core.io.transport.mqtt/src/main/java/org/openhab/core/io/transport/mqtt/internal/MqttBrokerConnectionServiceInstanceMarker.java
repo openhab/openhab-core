@@ -23,13 +23,11 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author David Graeff - Initial contribution
  */
-@Component(immediate = true, service = MqttBrokerConnectionServiceInstanceMarker.class, property = {
-        Constants.SERVICE_PID + "=org.openhab.mqttbroker",
-        ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=true",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=MQTT system broker connection",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=MQTT",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=mqtt:systemBrokerConnectionInstance" })
+@Component(immediate = true, service = MqttBrokerConnectionServiceInstanceMarker.class, //
+        property = Constants.SERVICE_PID + "=org.openhab.mqttbroker")
+@ConfigurableService(factory = true, category = "MQTT", label = "MQTT system broker connection", description_uri = MqttBrokerConnectionServiceInstanceMarker.CONFIG_URI)
 @NonNullByDefault
 public class MqttBrokerConnectionServiceInstanceMarker {
 
+    protected static final String CONFIG_URI = "mqtt:systemBrokerConnectionInstance";
 }

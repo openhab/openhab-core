@@ -39,10 +39,8 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = "org.openhab.core.storage.json", configurationPid = "org.openhab.storage.json", property = { //
         Constants.SERVICE_PID + "=org.openhab.storage.json", //
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Json Storage", //
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=system:json_storage", //
         "storage.format=json" })
+@ConfigurableService(category = "system", label = "Json Storage", description_uri = JsonStorageService.CONFIG_URI)
 @NonNullByDefault
 public class JsonStorageService implements StorageService {
 
@@ -53,6 +51,7 @@ public class JsonStorageService implements StorageService {
     /** the folder name to store database ({@code jsondb} by default) */
     private String dbFolderName = "jsondb";
 
+    protected static final String CONFIG_URI = "system:json_storage";
     private static final String CFG_MAX_BACKUP_FILES = "backup_files";
     private static final String CFG_WRITE_DELAY = "write_delay";
     private static final String CFG_MAX_DEFER_DELAY = "max_defer_delay";
