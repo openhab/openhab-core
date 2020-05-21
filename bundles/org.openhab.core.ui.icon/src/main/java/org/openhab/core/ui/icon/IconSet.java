@@ -16,11 +16,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is a bean that provides some meta-information about available icon sets.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class IconSet {
 
     /**
@@ -31,10 +34,10 @@ public class IconSet {
         SVG
     }
 
-    private String id;
-    private String label;
-    private String description;
-    private Set<Format> formats;
+    private final String id;
+    private final String label;
+    private final String description;
+    private final Set<Format> formats;
 
     /**
      * Construct a new pojo.

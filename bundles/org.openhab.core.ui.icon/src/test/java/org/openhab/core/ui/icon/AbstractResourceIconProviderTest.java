@@ -14,6 +14,7 @@ package org.openhab.core.ui.icon;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,6 +26,8 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
 
 /**
@@ -37,9 +40,13 @@ public class AbstractResourceIconProviderTest {
 
     private IconProvider provider;
 
+    private @Mock TranslationProvider i18nProviderMock;
+
     @Before
     public void setUp() {
-        provider = new AbstractResourceIconProvider() {
+        initMocks(this);
+
+        provider = new AbstractResourceIconProvider(i18nProviderMock) {
             @Override
             protected InputStream getResource(String iconset, String resourceName) {
                 switch (resourceName) {

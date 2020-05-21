@@ -12,16 +12,20 @@
  */
 package org.openhab.core.ui.tiles;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The dashboard tile for external services.
  *
  * @author Pauli Anttila - Initial contribution
  * @author Yannick Schaus - moved into core, remove references to dashboard
  */
+@NonNullByDefault
 public class ExternalServiceTile implements Tile {
     private String name;
     private String url;
-    private String overlay;
+    private @Nullable String overlay;
     private String imageUrl;
 
     private ExternalServiceTile(TileBuilder builder) {
@@ -42,7 +46,7 @@ public class ExternalServiceTile implements Tile {
     }
 
     @Override
-    public String getOverlay() {
+    public @Nullable String getOverlay() {
         return overlay;
     }
 
@@ -56,7 +60,7 @@ public class ExternalServiceTile implements Tile {
         final int maxlen = 100;
 
         String limitedImageUrl = imageUrl;
-        if (limitedImageUrl != null && limitedImageUrl.length() > maxlen) {
+        if (limitedImageUrl.length() > maxlen) {
             limitedImageUrl = imageUrl.substring(0, maxlen) + "...";
         }
 
@@ -65,10 +69,10 @@ public class ExternalServiceTile implements Tile {
 
     public static class TileBuilder {
 
-        private String name;
-        private String url;
-        private String overlay;
-        private String imageUrl;
+        private String name = "";
+        private String url = "";
+        private @Nullable String overlay;
+        private String imageUrl = "";
 
         public TileBuilder withName(String name) {
             this.name = name;
@@ -80,7 +84,7 @@ public class ExternalServiceTile implements Tile {
             return this;
         }
 
-        public TileBuilder withOverlay(String overlay) {
+        public TileBuilder withOverlay(@Nullable String overlay) {
             this.overlay = overlay;
             return this;
         }
