@@ -15,9 +15,10 @@ package org.openhab.core.ui.icon;
 import java.io.InputStream;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,35 +38,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractResourceIconProvider implements IconProvider {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractResourceIconProvider.class);
 
-    /**
-     * The OSGi bundle context
-     */
-    protected BundleContext context;
+    protected final TranslationProvider i18nProvider;
 
-    /**
-     * An TranslationProvider service
-     */
-    protected TranslationProvider i18nProvider;
-
-    /**
-     * When activating the service, we need to keep the bundle context.
-     *
-     * @param context the bundle context provided through OSGi DS.
-     */
-    protected void activate(BundleContext context) {
-        this.context = context;
-    }
-
-    protected void setTranslationProvider(TranslationProvider i18nProvider) {
+    public AbstractResourceIconProvider(final TranslationProvider i18nProvider) {
         this.i18nProvider = i18nProvider;
-    }
-
-    protected void unsetTranslationProvider(TranslationProvider i18nProvider) {
-        this.i18nProvider = null;
     }
 
     @Override
@@ -74,13 +55,13 @@ public abstract class AbstractResourceIconProvider implements IconProvider {
     }
 
     @Override
-    public Integer hasIcon(String category, String iconSetId, Format format) {
+    public @Nullable Integer hasIcon(String category, String iconSetId, Format format) {
         return hasResource(iconSetId, category.toLowerCase() + "." + format.toString().toLowerCase()) ? getPriority()
                 : null;
     }
 
     @Override
-    public InputStream getIcon(String category, String iconSetId, String state, Format format) {
+    public @Nullable InputStream getIcon(String category, String iconSetId, @Nullable String state, Format format) {
         String resourceWithoutState = category.toLowerCase() + "." + format.toString().toLowerCase();
         if (state == null) {
             return getResource(iconSetId, resourceWithoutState);
@@ -139,7 +120,7 @@ public abstract class AbstractResourceIconProvider implements IconProvider {
      * @param resourceName the name of the resource
      * @return the content as a stream or null, if the resource does not exist
      */
-    protected abstract InputStream getResource(String iconSetId, String resourceName);
+    protected abstract @Nullable InputStream getResource(String iconSetId, String resourceName);
 
     /**
      * Checks whether a certain resource exists for a given icon set.

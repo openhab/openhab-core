@@ -14,11 +14,14 @@ package org.openhab.core.ui.tiles;
 
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Interface for a component providing UI tiles.
  *
- * @author Yannick Schaus - initial contribution
+ * @author Yannick Schaus - Initial contribution
  */
+@NonNullByDefault
 public interface TileProvider {
     public Stream<Tile> getTiles();
 }

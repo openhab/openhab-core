@@ -17,14 +17,12 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.ui.tiles.ExternalServiceTile;
 import org.openhab.core.ui.tiles.Tile;
 import org.openhab.core.ui.tiles.TileProvider;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -40,34 +38,20 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - refactor into tile service, remove dashboard components
  */
 @Component(immediate = true, name = "org.openhab.core.ui.tiles")
+@NonNullByDefault
 public class TileService implements TileProvider {
-
-    private final Logger logger = LoggerFactory.getLogger(TileService.class);
-
-    protected ConfigurationAdmin configurationAdmin;
-
-    protected Set<Tile> tiles = new CopyOnWriteArraySet<>();
 
     private static final String LINK_NAME = "link-name";
     private static final String LINK_URL = "link-url";
     private static final String LINK_IMAGEURL = "link-imageurl";
 
+    private final Logger logger = LoggerFactory.getLogger(TileService.class);
+
+    private final Set<Tile> tiles = new CopyOnWriteArraySet<>();
+
     @Activate
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    public TileService(Map<String, Object> properties) {
         addTilesForExternalServices(properties);
-    }
-
-    @Deactivate
-    protected void deactivate(ComponentContext componentContext) {
-    }
-
-    @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -98,7 +82,7 @@ public class TileService implements TileProvider {
                     Tile newTile = new ExternalServiceTile.TileBuilder().withName(name).withUrl(url)
                             .withImageUrl(imageUrl).build();
 
-                    if (name != null && url != null && !name.isEmpty() && !url.isEmpty()) {
+                    if (!name.isEmpty() && !url.isEmpty()) {
                         addTile(newTile);
                         logger.debug("Tile added: {}", newTile);
                     } else {

@@ -20,11 +20,16 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.ui.icon.AbstractResourceIconProvider;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * The custom icon provider supports custom icons in the configurations/icons
@@ -33,26 +38,27 @@ import org.osgi.service.component.annotations.Component;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true, service = { IconProvider.class })
+@NonNullByDefault
 public class CustomIconProvider extends AbstractResourceIconProvider {
 
-    private File getIconFile(String filename, String iconSetId) {
+    @Activate
+    public CustomIconProvider(final @Reference TranslationProvider i18nProvider) {
+        super(i18nProvider);
+    }
+
+    private @Nullable File getIconFile(String filename, String iconSetId) {
         File folder = new File(
                 ConfigConstants.getConfigFolder() + File.separator + "icons" + File.separator + iconSetId);
         File file = new File(folder, filename);
-        if (file.exists()) {
-            return file;
-        } else {
-            return null;
-        }
+        return file.exists() ? file : null;
     }
 
     @Override
-    protected InputStream getResource(String iconSetId, String resourceName) {
+    protected @Nullable InputStream getResource(String iconSetId, String resourceName) {
         File file = getIconFile(resourceName, iconSetId);
         if (file != null) {
             try {
-                FileInputStream is = new FileInputStream(file);
-                return is;
+                return new FileInputStream(file);
             } catch (FileNotFoundException e) {
                 return null;
             }
@@ -62,12 +68,11 @@ public class CustomIconProvider extends AbstractResourceIconProvider {
 
     @Override
     protected boolean hasResource(String iconSetId, String resourceName) {
-        File file = getIconFile(resourceName, iconSetId);
-        return file != null;
+        return getIconFile(resourceName, iconSetId) != null;
     }
 
     @Override
-    public Set<IconSet> getIconSets(Locale locale) {
+    public Set<IconSet> getIconSets(@Nullable Locale locale) {
         return Collections.emptySet();
     }
 

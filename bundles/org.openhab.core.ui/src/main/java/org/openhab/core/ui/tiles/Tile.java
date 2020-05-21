@@ -12,6 +12,9 @@
  */
 package org.openhab.core.ui.tiles;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * A tile can be registered by an UI as a service in order to appear on the main openHAB UI.
  *
@@ -19,6 +22,7 @@ package org.openhab.core.ui.tiles;
  * @author Yannick Schaus - refactored into core, remove references to dashboard
  *
  */
+@NonNullByDefault
 public interface Tile {
 
     /**
@@ -48,5 +52,6 @@ public interface Tile {
      *
      * @return the overlay to use
      */
+    @Nullable
     String getOverlay();
 }

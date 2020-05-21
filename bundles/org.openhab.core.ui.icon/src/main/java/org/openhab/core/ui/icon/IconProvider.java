@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.ui.icon.IconSet.Format;
 
 /**
@@ -30,6 +32,7 @@ import org.openhab.core.ui.icon.IconSet.Format;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface IconProvider {
 
     /**
@@ -45,7 +48,7 @@ public interface IconProvider {
      * @param locale the locale to use for the results
      * @return a set of icon sets in the requested locale
      */
-    Set<IconSet> getIconSets(Locale locale);
+    Set<IconSet> getIconSets(@Nullable Locale locale);
 
     /**
      * determines whether this provider can deliver an icon for a given name
@@ -57,6 +60,7 @@ public interface IconProvider {
      *         this provider cannot deliver an icon. Default for full icon sets should be 0, so that others have the
      *         chance to override icons.
      */
+    @Nullable
     Integer hasIcon(String category, String iconSetId, Format format);
 
     /**
@@ -68,5 +72,6 @@ public interface IconProvider {
      * @param format the format of the stream (usually either png or svg)
      * @return a byte stream of the icon in the given format or null, if no icon exists
      */
-    InputStream getIcon(String category, String iconSetId, String state, Format format);
+    @Nullable
+    InputStream getIcon(String category, String iconSetId, @Nullable String state, Format format);
 }

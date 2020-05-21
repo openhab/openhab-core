@@ -12,19 +12,23 @@
  */
 package org.openhab.core.io.rest.ui;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * This is an data transfer object for a UI tile.
  *
  * @author Yannick Schaus - Initial contribution
  */
+@NonNullByDefault
 public class TileDTO {
 
     public String name;
     public String url;
-    public String overlay;
+    public @Nullable String overlay;
     public String imageUrl;
 
-    public TileDTO(String name, String url, String overlay, String imageUrl) {
+    public TileDTO(String name, String url, @Nullable String overlay, String imageUrl) {
         super();
         this.name = name;
         this.url = url;
