@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import com.google.gson.JsonObject;
@@ -120,7 +120,7 @@ public class JSONResponseTest {
         assertThat(entity.getClass(), is(typeCompatibleWith(InputStream.class)));
 
         try (InputStream entityInStream = (InputStream) entity) {
-            String largeEntityJSON = IOUtils.toString(entityInStream);
+            String largeEntityJSON = new String(entityInStream.readAllBytes(), StandardCharsets.UTF_8);
             assertThat(largeEntityJSON, is(notNullValue()));
             assertTrue(largeEntityJSON.startsWith("{"));
             assertTrue(largeEntityJSON.endsWith("}"));

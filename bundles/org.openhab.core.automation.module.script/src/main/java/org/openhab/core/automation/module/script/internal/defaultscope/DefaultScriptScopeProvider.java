@@ -14,13 +14,14 @@ package org.openhab.core.automation.module.script.internal.defaultscope;
 
 import java.io.File;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.RuleRegistry;
@@ -90,9 +91,10 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         elements.put("State", State.class);
         elements.put("Command", Command.class);
         elements.put("URLEncoder", URLEncoder.class);
-        elements.put("FileUtils", FileUtils.class);
-        elements.put("FilenameUtils", FilenameUtils.class);
         elements.put("File", File.class);
+        elements.put("Files", Files.class);
+        elements.put("Path", Path.class);
+        elements.put("Paths", Paths.class);
 
         // types
         elements.put("IncreaseDecreaseType", IncreaseDecreaseType.class);

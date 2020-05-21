@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerUtils;
@@ -359,7 +358,7 @@ public class SyntheticBundleInstaller {
         }
         ZipEntry zipEntry = new ZipEntry(fileInBundle);
         jarOutputStream.putNextEntry(zipEntry);
-        IOUtils.copy(resource.openStream(), jarOutputStream);
+        resource.openStream().transferTo(jarOutputStream);
         jarOutputStream.closeEntry();
     }
 

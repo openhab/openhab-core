@@ -12,11 +12,12 @@
  */
 package org.openhab.core.model.script.actions;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Properties;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.HttpMethod;
 import org.openhab.core.io.net.http.HttpUtil;
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ public class HTTP {
 
     /**
      * Send out a GET-HTTP request. Errors will be logged, returned values just ignored.
-     * 
+     *
      * @param url the URL to be used for the GET request.
      * @param headers the HTTP headers to be sent in the request.
      * @param timeout timeout in ms
@@ -135,7 +136,8 @@ public class HTTP {
     static public String sendHttpPutRequest(String url, String contentType, String content, int timeout) {
         String response = null;
         try {
-            response = HttpUtil.executeUrl(HttpMethod.PUT.name(), url, IOUtils.toInputStream(content), contentType, timeout);
+            response = HttpUtil.executeUrl(HttpMethod.PUT.name(), url,
+                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), contentType, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -147,16 +149,19 @@ public class HTTP {
      *
      * @param url the URL to be used for the PUT request.
      * @param contentType the content type of the given <code>content</code>
-     * @param content the content to be send to the given <code>url</code> or <code>null</code> if no content should be sent.
+     * @param content the content to be send to the given <code>url</code> or <code>null</code> if no content should be
+     *            sent.
      * @param headers the HTTP headers to be sent in the request.
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    static public String sendHttpPutRequest(String url, String contentType, String content, Map<String, String> headers, int timeout) {
+    static public String sendHttpPutRequest(String url, String contentType, String content, Map<String, String> headers,
+            int timeout) {
         try {
             Properties headerProperties = new Properties();
             headerProperties.putAll(headers);
-            return HttpUtil.executeUrl(HttpMethod.PUT.name(), url, headerProperties, IOUtils.toInputStream(content), contentType, timeout);
+            return HttpUtil.executeUrl(HttpMethod.PUT.name(), url, headerProperties,
+                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), contentType, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -216,7 +221,8 @@ public class HTTP {
     static public String sendHttpPostRequest(String url, String contentType, String content, int timeout) {
         String response = null;
         try {
-            response = HttpUtil.executeUrl(HttpMethod.POST.name(), url, IOUtils.toInputStream(content), contentType, timeout);
+            response = HttpUtil.executeUrl(HttpMethod.POST.name(), url,
+                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), contentType, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }
@@ -225,19 +231,22 @@ public class HTTP {
 
     /**
      * Send out a POST-HTTP request. Errors will be logged, returned values just ignored.
-     * 
+     *
      * @param url the URL to be used for the GET request.
      * @param contentType the content type of the given <code>content</code>
-     * @param content the content to be send to the given <code>url</code> or <code>null</code> if no content should be sent.
+     * @param content the content to be send to the given <code>url</code> or <code>null</code> if no content should be
+     *            sent.
      * @param headers the HTTP headers to be sent in the request.
      * @param timeout timeout in ms
      * @return the response body or <code>NULL</code> when the request went wrong
      */
-    public static String sendHttpPostRequest(String url, String contentType, String content, Map<String, String> headers, int timeout) {
+    public static String sendHttpPostRequest(String url, String contentType, String content,
+            Map<String, String> headers, int timeout) {
         try {
             Properties headerProperties = new Properties();
             headerProperties.putAll(headers);
-            return HttpUtil.executeUrl(HttpMethod.POST.name(), url, headerProperties, IOUtils.toInputStream(content), contentType, timeout);
+            return HttpUtil.executeUrl(HttpMethod.POST.name(), url, headerProperties,
+                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), contentType, timeout);
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.getMessage());
         }

@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
@@ -113,7 +112,7 @@ public class BlockingProxyServlet extends HttpServlet {
             }
             // now copy/stream the body content
             try (InputStream responseContent = listener.getInputStream()) {
-                IOUtils.copy(responseContent, response.getOutputStream());
+                responseContent.transferTo(response.getOutputStream());
             }
         }
     }

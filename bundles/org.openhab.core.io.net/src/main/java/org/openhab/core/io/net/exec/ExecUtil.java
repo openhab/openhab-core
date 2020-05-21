@@ -75,7 +75,8 @@ public class ExecUtil {
                 process.waitFor(timeout, TimeUnit.MILLISECONDS);
                 int exitCode = process.exitValue();
                 final StringBuilder result = new StringBuilder();
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                try (final BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()))) {
                     String line = "";
                     while ((line = reader.readLine()) != null) {
                         result.append(line).append("\n");

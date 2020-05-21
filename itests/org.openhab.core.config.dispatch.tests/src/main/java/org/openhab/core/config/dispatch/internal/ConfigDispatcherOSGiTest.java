@@ -16,16 +16,22 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -69,14 +75,43 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws IOException {
         configBaseDirectory = tmpBaseFolder.getRoot().getAbsolutePath();
-        FileUtils.copyDirectory(new File(CONFIGURATION_BASE_DIR), new File(configBaseDirectory));
+        final Path source = Paths.get(CONFIGURATION_BASE_DIR);
+        Files.walkFileTree(source, new CopyDirectoryRecursive(source, Paths.get(configBaseDirectory)));
 
         configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
 
         cd = new ConfigDispatcher(configAdmin);
+    }
+
+    private class CopyDirectoryRecursive extends SimpleFileVisitor<Path> {
+        private final Path sourceDir;
+        private final Path targetDir;
+
+        public CopyDirectoryRecursive(Path sourceDir, Path targetDir) {
+            this.sourceDir = sourceDir;
+            this.targetDir = targetDir;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
+            try {
+                Files.copy(file, targetDir.resolve(sourceDir.relativize(file)));
+            } catch (IOException ex) {
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attributes) {
+            try {
+                Files.createDirectory(targetDir.resolve(sourceDir.relativize(dir)));
+            } catch (IOException ex) {
+            }
+            return FileVisitResult.CONTINUE;
+        }
     }
 
     @After
@@ -557,7 +592,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         // Modify this file, so that we are sure it is the last modified file in servicesDirectory.
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + lastModifiedFileName);
-        FileUtils.touch(fileToModify);
+        Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
         cd.processConfigFile(fileToModify);
 
         String value = getLastModifiedValueForPoperty(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
@@ -580,9 +615,9 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         cd.processConfigFile(new File(getAbsoluteConfigDirectory(configDirectory, servicesDirectory)));
 
         // Modify this file, so that we are sure it is the last modified file
-        File lastModified = new File(configDirectory + SEP + servicesDirectory + SEP + "global.pid.service.c.file.cfg");
-        FileUtils.touch(lastModified);
-        cd.processConfigFile(lastModified);
+        File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + "global.pid.service.c.file.cfg");
+        Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
+        cd.processConfigFile(fileToModify);
 
         /*
          * Assert that the configuration is updated only with the property=value
@@ -777,7 +812,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         // Modify this file, so that we are sure it is the last modified file in servicesDirectory.
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + lastModifiedFileName);
-        FileUtils.touch(fileToModify);
+        Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
         cd.processConfigFile(fileToModify);
 
         String value = getLastModifiedValueForPoperty(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
@@ -826,7 +861,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         // Modify this file, so that we are sure it is the last modified file in servicesDirectory.
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + lastModifiedFileName);
-        FileUtils.touch(fileToModify);
+        Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
         cd.processConfigFile(fileToModify);
 
         String value = getLastModifiedValueForPoperty(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
@@ -860,7 +895,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
         // Modify this file, so that we are sure it is the last modified file in servicesDirectory.
         File fileToModify = new File(configDirectory + SEP + servicesDirectory + SEP + lastModifiedFileName);
-        FileUtils.touch(fileToModify);
+        Files.setLastModifiedTime(fileToModify.toPath(), FileTime.from(Instant.now()));
         cd.processConfigFile(fileToModify);
 
         String value = getLastModifiedValueForPoperty(getAbsoluteConfigDirectory(configDirectory, servicesDirectory),
@@ -1028,22 +1063,22 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     private void truncateLastLine(File file) throws IOException {
-        List<String> lines = IOUtils.readLines(new FileInputStream(file));
-        IOUtils.writeLines(lines.subList(0, lines.size() - 1), "\n", new FileOutputStream(file));
+        final Path path = file.toPath();
+        List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+        Files.writeString(path, lines.subList(0, lines.size() - 1).stream().collect(Collectors.joining("\n")),
+                StandardCharsets.UTF_8);
     }
 
     private String getLastModifiedValueForPoperty(String path, String property) {
-        // This method will return null, if there are no files in the directory.
-        final String separator = property + "=";
-        String value = null;
-
         File file = getLastModifiedFileFromDir(path);
         if (file == null) {
             return null;
         }
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            List<String> lines = IOUtils.readLines(fileInputStream);
-            for (String line : lines) {
+        // This method will return null, if there are no files in the directory.
+        final String separator = property + "=";
+        String value = null;
+        try {
+            for (String line : Files.readAllLines(file.toPath(), StandardCharsets.UTF_8)) {
                 int index = line.indexOf(separator);
                 if (index != -1) {
                     value = line.substring(index + separator.length());
@@ -1053,7 +1088,6 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
             throw new IllegalArgumentException(
                     "An exception " + e + " was thrown, while reading from file " + file.getPath(), e);
         }
-
         return value;
     }
 

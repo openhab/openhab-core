@@ -15,6 +15,7 @@ package org.openhab.core.io.http.auth.internal;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -28,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.http.HttpStatus;
@@ -93,7 +93,7 @@ public class AuthorizePageServlet extends HttpServlet {
             URL resource = bundleContext.getBundle().getResource("pages/authorize.html");
             if (resource != null) {
                 try {
-                    pageTemplate = IOUtils.toString(resource.openStream());
+                    pageTemplate = new String(resource.openStream().readAllBytes(), StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }

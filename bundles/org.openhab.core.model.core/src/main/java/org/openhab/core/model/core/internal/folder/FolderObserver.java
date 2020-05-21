@@ -15,9 +15,10 @@ package org.openhab.core.model.core.internal.folder;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
@@ -33,7 +34,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
@@ -241,7 +241,7 @@ public class FolderObserver extends AbstractWatchService {
                 synchronized (FolderObserver.class) {
                     if ((kind == ENTRY_CREATE || kind == ENTRY_MODIFY)) {
                         if (parsers.contains(getExtension(file.getName()))) {
-                            try (FileInputStream inputStream = FileUtils.openInputStream(file)) {
+                            try (InputStream inputStream = Files.newInputStream(file.toPath())) {
                                 nameFileMap.put(file.getName(), file);
                                 modelRepo.addOrRefreshModel(file.getName(), inputStream);
                             } catch (IOException e) {
