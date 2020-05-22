@@ -312,13 +312,11 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.3</version>
+          <version>3.2.0</version>
           <configuration>
             <failOnError>!${quality.skip}</failOnError>
             <!-- Turn off doclint -->
-            <additionalparam>-Xdoclint:none</additionalparam>
-            <!-- Frames are deprecated and will disappear at some point -->
-            <additionalparam>--frames</additionalparam>
+            <doclint>none</doclint>
             <!-- Prevents the "undefined" module in path name, which causes a file not found when searching -->
             <additionalJOption>--no-module-directories</additionalJOption>
             <excludePackageNames>*.internal.*,nl.*</excludePackageNames>
