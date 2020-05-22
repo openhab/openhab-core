@@ -448,14 +448,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- MapDB -->
-    <dependency>
-      <groupId>org.mapdb</groupId>
-      <artifactId>mapdb</artifactId>
-      <version>1.0.9</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- Measurement -->
     <dependency>
       <groupId>javax.measure</groupId>
@@ -481,6 +473,12 @@
       <groupId>com.hivemq</groupId>
       <artifactId>hivemq-mqtt-client</artifactId>
       <version>1.1.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.osgiify</groupId>
+      <artifactId>com.google.dagger</artifactId>
+      <version>2.20</version>
       <scope>compile</scope>
     </dependency>
 
