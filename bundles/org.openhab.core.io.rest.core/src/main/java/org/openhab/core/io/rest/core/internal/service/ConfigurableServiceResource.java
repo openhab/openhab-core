@@ -294,8 +294,10 @@ public class ConfigurableServiceResource implements RESTResource {
                     configDescriptionURI = getConfigDescriptionByFactoryPid(factoryPid);
                 }
 
-                boolean multiple = Boolean.parseBoolean(
-                        (String) serviceReference.getProperty(ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE));
+                Object factoryProperty = serviceReference
+                        .getProperty(ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE);
+                boolean multiple = factoryProperty instanceof Boolean ? (Boolean) factoryProperty
+                        : Boolean.parseBoolean((String) factoryProperty);
 
                 services.add(new ConfigurableServiceDTO(id, label, category, configDescriptionURI, multiple));
             }

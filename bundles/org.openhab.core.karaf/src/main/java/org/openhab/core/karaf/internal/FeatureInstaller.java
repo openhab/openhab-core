@@ -61,11 +61,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(name = "org.openhab.addons", service = { FeatureInstaller.class, ConfigurationListener.class }, property = {
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Add-on Management",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + "system:addons" })
+@Component(name = "org.openhab.addons", service = { FeatureInstaller.class, ConfigurationListener.class })
+@ConfigurableService(category = "system", label = "Add-on Management", description_uri = FeatureInstaller.CONFIG_URI)
 public class FeatureInstaller implements ConfigurationListener {
+
+    protected static final String CONFIG_URI = "system:addons";
 
     public static final String EXTENSION_TYPE_ACTION = "action";
     public static final String EXTENSION_TYPE_BINDING = "binding";

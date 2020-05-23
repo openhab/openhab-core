@@ -63,12 +63,9 @@ import org.slf4j.LoggerFactory;
  * @author Wouter Born - Sort audio sink and source options
  */
 @NonNullByDefault
-@Component(immediate = true, configurationPid = "org.openhab.audio", property = { //
-        Constants.SERVICE_PID + "=org.openhab.audio", //
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=system", //
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=" + AudioManagerImpl.CONFIG_URI, //
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Audio" //
-})
+@Component(immediate = true, configurationPid = "org.openhab.audio", //
+        property = Constants.SERVICE_PID + "=org.openhab.audio")
+@ConfigurableService(category = "system", label = "Audio", description_uri = AudioManagerImpl.CONFIG_URI)
 public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
 
     // constants for the configuration properties
