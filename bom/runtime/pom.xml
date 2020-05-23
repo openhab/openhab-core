@@ -992,20 +992,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- JAX-RS Whiteboard Swagger 1 generator -->
-    <dependency>
-      <groupId>de.maggu2810.jaxrswb.bundles</groupId>
-      <artifactId>jaxrswb-swagger1-gen</artifactId>
-      <version>0.0.4</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>de.maggu2810.thirdparty.modified.org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>0.9.10.v20160429-1435</version>
-      <scope>compile</scope>
-    </dependency>
-
   </dependencies>
 
 </project>
