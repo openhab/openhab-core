@@ -312,16 +312,23 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.3</version>
+          <version>3.2.0</version>
           <configuration>
             <failOnError>!${quality.skip}</failOnError>
-            <!-- Turn off doclint -->
-            <additionalparam>-Xdoclint:none</additionalparam>
-            <!-- Frames are deprecated and will disappear at some point -->
-            <additionalparam>--frames</additionalparam>
-            <!-- Prevents the "undefined" module in path name, which causes a file not found when searching -->
-            <additionalJOption>--no-module-directories</additionalJOption>
-            <excludePackageNames>*.internal.*,nl.*</excludePackageNames>
+            <doclint>none</doclint>
+            <excludePackageNames>*.internal,*.internal.*</excludePackageNames>
+            <!-- The search function is broken without the workaround below -->
+            <!-- See: https://stackoverflow.com/questions/52326318/maven-javadoc-search-redirects-to-undefined-url -->
+            <additionalJOption>--allow-script-in-comments</additionalJOption>
+            <bottom>
+              <![CDATA[
+                <script>
+                if (typeof useModuleDirectories !== 'undefined') {
+                  useModuleDirectories = false;
+                }
+                </script>
+              ]]>
+            </bottom>
           </configuration>
         </plugin>
 
