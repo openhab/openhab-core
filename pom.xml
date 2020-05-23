@@ -315,11 +315,20 @@ Import-Package: \\
           <version>3.2.0</version>
           <configuration>
             <failOnError>!${quality.skip}</failOnError>
-            <!-- Turn off doclint -->
             <doclint>none</doclint>
-            <!-- Prevents the "undefined" module in path name, which causes a file not found when searching -->
-            <additionalJOption>--no-module-directories</additionalJOption>
             <excludePackageNames>*.internal,*.internal.*</excludePackageNames>
+            <!-- The search function is broken without the workaround below -->
+            <!-- See: https://stackoverflow.com/questions/52326318/maven-javadoc-search-redirects-to-undefined-url -->
+            <additionalJOption>--allow-script-in-comments</additionalJOption>
+            <bottom>
+              <![CDATA[
+                <script>
+                if (typeof useModuleDirectories !== 'undefined') {
+                  useModuleDirectories = false;
+                }
+                </script>
+              ]]>
+            </bottom>
           </configuration>
         </plugin>
 
