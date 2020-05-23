@@ -319,7 +319,7 @@ Import-Package: \\
             <doclint>none</doclint>
             <!-- Prevents the "undefined" module in path name, which causes a file not found when searching -->
             <additionalJOption>--no-module-directories</additionalJOption>
-            <excludePackageNames>*.internal,*.internal.*,nl.*,org.openhab.core.*.test,org.openhab.core.*.test.*</excludePackageNames>
+            <excludePackageNames>*.internal,*.internal.*</excludePackageNames>
           </configuration>
         </plugin>
 
