@@ -28,7 +28,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * <p>
  * The Unix Cron defines a syntax that is used by the Cron service. A user
  * should register a Cron service with the {@link CronJob#CRON} property. The
- * value is according to the {link http://en.wikipedia.org/wiki/Cron}.
+ * value is according to the <a href="https://en.wikipedia.org/wiki/Cron">Cron</a>.
  * <p>
  *
  * <pre>

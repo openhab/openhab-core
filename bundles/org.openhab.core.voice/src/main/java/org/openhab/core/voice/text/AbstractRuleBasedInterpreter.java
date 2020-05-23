@@ -422,7 +422,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     /**
      * Creates a sequence expression. Matches, if all the given expressions match. They are tested in
-     * the provided order. The resulting nodes's value will be an {link Object[]} that contains all values of the
+     * the provided order. The resulting nodes's value will be an {@code Object[]} that contains all values of the
      * matching expressions.
      *
      * @param expressions the expressions (alternatives) that have to match in sequence
@@ -445,7 +445,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     /**
      * Creates a repeating expression that will match the given expression as often as possible. Always succeeds. The
-     * resulting node's value will be an {link Object[]} that contains all values of the
+     * resulting node's value will be an {@code Object[]} that contains all values of the
      * matches.
      *
      * @param expression the repeating expression
@@ -457,7 +457,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     /**
      * Creates a repeating expression that will match the given expression as often as possible. Only succeeds, if there
-     * is at least one match. The resulting node's value will be an {link Object[]} that contains all values of the
+     * is at least one match. The resulting node's value will be an {@code Object[]} that contains all values of the
      * matches.
      *
      * @param expression the repeating expression
