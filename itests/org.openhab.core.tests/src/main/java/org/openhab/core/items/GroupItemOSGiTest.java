@@ -633,7 +633,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(groupItem.getState(), is(OnOffType.ON));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void assertThatGroupItemChangesDoNotAffectTheGroupStatusIfnoFunctionOrBaseItemAreDefined()
             throws InterruptedException {
@@ -646,7 +645,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         State oldGroupState = groupItem.getState();
 
         // State changes -> NO change event should be fired
-        member.setState(new RawType());
+        member.setState(new RawType(new byte[0], RawType.DEFAULT_MIME_TYPE));
 
         // wait to see that the event doesn't fire
         Thread.sleep(WAIT_EVENT_TO_BE_HANDLED);

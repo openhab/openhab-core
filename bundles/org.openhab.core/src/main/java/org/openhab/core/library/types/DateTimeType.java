@@ -21,10 +21,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.zone.ZoneRulesException;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -71,18 +68,6 @@ public class DateTimeType implements PrimitiveType, State, Command {
 
     private ZonedDateTime zonedDateTime;
 
-    /**
-     * @deprecated The constructor uses Calendar object hence it doesn't store time zone. A new constructor is
-     *             available. Use {@link #DateTimeType(ZonedDateTime)} instead.
-     *
-     * @param calendar The Calendar object containing the time stamp.
-     */
-    @Deprecated
-    public DateTimeType(Calendar calendar) {
-        this.zonedDateTime = ZonedDateTime.ofInstant(calendar.toInstant(), TimeZone.getDefault().toZoneId())
-                .withFixedOffsetZone();
-    }
-
     public DateTimeType() {
         this(ZonedDateTime.now());
     }
@@ -93,7 +78,6 @@ public class DateTimeType implements PrimitiveType, State, Command {
 
     public DateTimeType(String zonedValue) {
         ZonedDateTime date = null;
-
         try {
             // direct parsing (date and time)
             try {
@@ -129,14 +113,6 @@ public class DateTimeType implements PrimitiveType, State, Command {
         }
 
         zonedDateTime = date.withFixedOffsetZone();
-    }
-
-    /**
-     * @deprecated The method is deprecated. You can use {@link #getZonedDateTime()} instead.
-     */
-    @Deprecated
-    public Calendar getCalendar() {
-        return GregorianCalendar.from(zonedDateTime);
     }
 
     public ZonedDateTime getZonedDateTime() {
