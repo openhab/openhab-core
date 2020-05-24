@@ -18,7 +18,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * This is a marker interface for REST resource implementations
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Stefan Triller - Added default implementation for isSatisfied
  */
 @NonNullByDefault
 public interface RESTResource {
