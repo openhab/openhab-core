@@ -255,7 +255,8 @@
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
 		<bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
 		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.2.1</bundle>
-		<bundle dependency="true">mvn:de.maggu2810.thirdparty.modified.org.reflections/reflections/0.9.10.v20160429-1435</bundle>
+		<bundle dependency="true">mvn:org.reflections/reflections/0.9.12</bundle>
+		<bundle dependency="true">mvn:org.javassist/javassist/3.26.0-GA</bundle>
 </feature>
 
 </features>
