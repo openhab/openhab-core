@@ -178,12 +178,6 @@
 		<feature dependency="true">openhab.tp-xtext</feature>
 	</feature>
 
-	<feature name="openhab.tp-mapdb" description="MapDB" version="${project.version}">
-		<capability>openhab.tp;feature=mapdb;version=1.0.9</capability>
-
-		<bundle dependency="true">mvn:org.mapdb/mapdb/1.0.9</bundle>
-	</feature>
-
 	<feature name="openhab.tp-serial-javacomm" version="${project.version}">
 		<capability>openhab.tp;feature=serial;impl=javacomm</capability>
 		<bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm/1.2.201</bundle>
