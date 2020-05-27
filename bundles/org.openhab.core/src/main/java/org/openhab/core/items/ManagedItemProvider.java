@@ -12,7 +12,6 @@
  */
 package org.openhab.core.items;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,8 +38,6 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.InstanceCreator;
 
 /**
  * {@link ManagedItemProvider} is an OSGi service, that allows to add or remove
@@ -73,14 +70,6 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         public @Nullable String functionName;
         public @Nullable List<String> functionParams;
         public @Nullable String dimension;
-    }
-
-    public static class PersistedItemInstanceCreator implements InstanceCreator<PersistedItem> {
-
-        @Override
-        public PersistedItem createInstance(@NonNullByDefault({}) Type type) {
-            return new PersistedItem("");
-        }
     }
 
     private final Logger logger = LoggerFactory.getLogger(ManagedItemProvider.class);
