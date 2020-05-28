@@ -477,13 +477,18 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
 
         thingManager.setEnabled(thing.getUID(), false);
 
-        waitForAssert(() -> assertThat(result.getHandler(), is(not(nullValue()))));
+        waitForAssert(() -> assertThat(result.getHandler(), is(nullValue())));
         waitForAssert(() -> assertThat(result.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED)));
+
+        thingManager.setEnabled(thing.getUID(), true);
+
+        waitForAssert(() -> assertThat(result.getHandler(), is(not(nullValue()))));
+        waitForAssert(() -> assertThat(result.getStatus(), is(ThingStatus.ONLINE)));
 
         thing.setHandler(null);
 
-        waitForAssert(() -> assertThat(result.getHandler(), is(nullValue())));
-        waitForAssert(() -> assertThat(result.getStatus(), is(ThingStatus.ONLINE)));
+        Thing updatedResult = managedThingProvider.get(thingUID);
+        waitForAssert(() -> assertThat(updatedResult.getHandler(), is(nullValue())));
 
         managedThingProvider.remove(thingUID);
 

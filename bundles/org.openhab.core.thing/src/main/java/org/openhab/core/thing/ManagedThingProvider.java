@@ -12,6 +12,9 @@
  */
 package org.openhab.core.thing;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
@@ -41,12 +44,16 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
     private final ThingTypeRegistry thingTypeRegistry;
     private final ThingManager thingManager;
 
+    private final Map<String, Thing> things;
+
     @Activate
     public ManagedThingProvider(final @Reference StorageService storageService,
             final @Reference ThingTypeRegistry thingTypeRegistry, final @Reference ThingManager thingManager) {
         super(storageService);
         this.thingTypeRegistry = thingTypeRegistry;
         this.thingManager = thingManager;
+
+        this.things = new HashMap<String, Thing>();
     }
 
     @Override
@@ -61,25 +68,34 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
 
     @Override
     protected Thing toElement(String key, ThingDTO persistableElement) {
-        ThingTypeUID thingTypeUID = new ThingTypeUID(persistableElement.thingTypeUID);
-        boolean isBridge = thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType;
+        if (this.things.containsKey(key)) {
+            Thing thing;
+            thing = this.things.get(key);
+            return thing;
+        } else {
+            ThingTypeUID thingTypeUID = new ThingTypeUID(persistableElement.thingTypeUID);
+            boolean isBridge = thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType;
 
-        Thing thing = ThingDTOMapper.map(persistableElement, isBridge);
+            Thing thing = ThingDTOMapper.map(persistableElement, isBridge);
 
-        // Add the thing handler and thing status
-        ThingHandler thingHandler = thingManager.getHandler(thing.getUID());
-        ThingStatusInfo thingStatusInfo = thingManager.getStatusInfo(thing.getUID());
+            // Add the thing handler and thing status
+            ThingHandler thingHandler = thingManager.getHandler(thing.getUID());
+            ThingStatusInfo thingStatusInfo = thingManager.getStatusInfo(thing.getUID());
 
-        thing.setHandler(thingHandler);
-        if (thingStatusInfo != null) {
-            thing.setStatusInfo(thingStatusInfo);
+            thing.setHandler(thingHandler);
+            if (thingStatusInfo != null) {
+                thing.setStatusInfo(thingStatusInfo);
+            }
+
+            this.things.put(key, thing);
+
+            return thing;
         }
-
-        return thing;
     }
 
     @Override
     protected ThingDTO toPersistableElement(Thing element) {
+        this.things.put(element.getUID().getAsString(), element);
         return ThingDTOMapper.map(element);
     }
 }
