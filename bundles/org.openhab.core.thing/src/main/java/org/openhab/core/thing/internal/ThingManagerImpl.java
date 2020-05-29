@@ -1250,13 +1250,13 @@ public class ThingManagerImpl
     }
 
     @Override
-    public ThingStatusInfo getStatusInfo(ThingUID thingUID) {
+    public @Nullable ThingStatusInfo getStatusInfo(ThingUID thingUID) {
         Thing thing = getThing(thingUID);
         return thing != null ? thing.getStatusInfo() : null;
     }
 
     @Override
-    public ThingHandler getHandler(ThingUID thingUID) {
+    public @Nullable ThingHandler getHandler(ThingUID thingUID) {
         Thing thing = getThing(thingUID);
         return thing != null ? thing.getHandler() : null;
     }
