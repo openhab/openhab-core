@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.AbstractManagedProvider;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.thing.binding.ThingHandler;
@@ -67,7 +68,7 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
     }
 
     @Override
-    protected Thing toElement(String key, ThingDTO persistableElement) {
+    protected @Nullable Thing toElement(String key, ThingDTO persistableElement) {
         if (this.things.containsKey(key)) {
             Thing thing;
             thing = this.things.get(key);
