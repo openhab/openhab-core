@@ -13,6 +13,7 @@
 package org.openhab.core.thing;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.binding.ThingHandler;
 
 /**
@@ -50,7 +51,7 @@ public interface ThingManager {
      * @param thingUID UID of the {@link Thing}.
      * @return the {@link ThingStatusInfo} of the thing
      */
-    public ThingStatusInfo getStatusInfo(ThingUID thingUID);
+    public @Nullable ThingStatusInfo getStatusInfo(ThingUID thingUID);
 
     /**
      * This method returns the {@link ThingHandler}.
@@ -58,5 +59,5 @@ public interface ThingManager {
      * @param thingUID UID of the {@link Thing}.
      * @return the {@link ThingHandler} of the thing
      */
-    public ThingHandler getHandler(ThingUID thingUID);
+    public @Nullable ThingHandler getHandler(ThingUID thingUID);
 }

@@ -81,8 +81,8 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
     private static final String THING1_ID = "testThing1";
     private static final String THING2_ID = "testThing2";
 
-    private final Map<ThingTypeUID, ThingType> thingTypes = new HashMap<>();
-    private final Map<ThingTypeUID, BridgeType> bridgeTypes = new HashMap<>();
+    private final Map<ThingTypeUID, @Nullable ThingType> thingTypes = new HashMap<>();
+    private final Map<ThingTypeUID, @Nullable BridgeType> bridgeTypes = new HashMap<>();
 
     private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
     private @NonNullByDefault({}) ProviderChangeListener<@NonNull Thing> thingChangeListener;
