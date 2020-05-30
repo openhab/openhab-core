@@ -28,37 +28,37 @@ import org.openhab.core.thing.type.DynamicCommandDescriptionProvider;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
 
 /**
  * The {@link BaseDynamicCommandDescriptionProvider} provides a base implementation for the
  * {@link DynamicCommandDescriptionProvider}.
  * <p>
- * It provides localized command options. Therefore the inheriting class has to request the reference for the
- * {@link ChannelTypeI18nLocalizationService} on its own.
+ * It provides localized dynamic {@link CommandOption}s. Therefore the inheriting class has to request a reference for
+ * the {@link ChannelTypeI18nLocalizationService} on its own.
  *
  * @author Christoph Weitkamp - Initial contribution
+ * @author Christoph Weitkamp - Added ChannelStateDescriptionChangedEvent
  */
 @NonNullByDefault
-public abstract class BaseDynamicCommandDescriptionProvider implements DynamicCommandDescriptionProvider {
-
-    private @NonNullByDefault({}) BundleContext bundleContext;
-    protected @NonNullByDefault({}) ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
+public abstract class BaseDynamicCommandDescriptionProvider extends AbstractDynamicDescriptionProvider
+        implements DynamicCommandDescriptionProvider {
 
     protected final Map<ChannelUID, List<CommandOption>> channelOptionsMap = new ConcurrentHashMap<>();
 
     /**
-     * For a given channel UID, set a {@link List} of {@link CommandOption}s that should be used for the channel,
+     * For a given {@link ChannelUID}, set a {@link List} of {@link CommandOption}s that should be used for the channel,
      * instead of the one defined statically in the {@link ChannelType}.
      *
-     * @param channelUID the channel UID of the channel
+     * @param channelUID the {@link ChannelUID} of the channel
      * @param options a {@link List} of {@link CommandOption}s
      */
     public void setCommandOptions(ChannelUID channelUID, List<CommandOption> options) {
-        channelOptionsMap.put(channelUID, options);
+        List<CommandOption> oldOptions = channelOptionsMap.get(channelUID);
+        if (!options.equals(oldOptions)) {
+            channelOptionsMap.put(channelUID, options);
+            postChannelDescriptionChangedEvent("command-options", channelUID);
+        }
     }
 
     @Override
@@ -92,14 +92,10 @@ public abstract class BaseDynamicCommandDescriptionProvider implements DynamicCo
         return options;
     }
 
-    @Activate
-    protected void activate(ComponentContext componentContext) {
-        bundleContext = componentContext.getBundleContext();
-    }
-
+    @Override
     @Deactivate
     public void deactivate() {
         channelOptionsMap.clear();
-        bundleContext = null;
+        super.deactivate();
     }
 }

@@ -28,50 +28,54 @@ import org.openhab.core.thing.type.DynamicStateDescriptionProvider;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
 
 /**
  * The {@link BaseDynamicStateDescriptionProvider} provides a base implementation for the
  * {@link DynamicStateDescriptionProvider}.
  * <p>
- * It provides localized state patterns and dynamic state options while leaving other state description fields as
- * original. Therefore the inheriting class has to request the reference for the
+ * It provides localized patterns and dynamic {@link StateOption}s while leaving other {@link StateDescription} fields
+ * as original. Therefore the inheriting class has to request a reference for the
  * {@link ChannelTypeI18nLocalizationService} on its own.
  *
  * @author Christoph Weitkamp - Initial contribution
+ * @author Christoph Weitkamp - Added ChannelStateDescriptionChangedEvent
  */
 @NonNullByDefault
-public abstract class BaseDynamicStateDescriptionProvider implements DynamicStateDescriptionProvider {
-
-    private @NonNullByDefault({}) BundleContext bundleContext;
-    protected @NonNullByDefault({}) ChannelTypeI18nLocalizationService channelTypeI18nLocalizationService;
+public abstract class BaseDynamicStateDescriptionProvider extends AbstractDynamicDescriptionProvider
+        implements DynamicStateDescriptionProvider {
 
     protected final Map<ChannelUID, String> channelPatternMap = new ConcurrentHashMap<>();
     protected final Map<ChannelUID, List<StateOption>> channelOptionsMap = new ConcurrentHashMap<>();
 
     /**
-     * For a given channel UID, set a pattern that should be used for the channel, instead of the one defined statically
-     * in the {@link ChannelType}.
+     * For a given {@link ChannelUID}, set a pattern that should be used for the channel, instead of the one defined
+     * statically in the {@link ChannelType}.
      *
-     * @param channelUID the channel UID of the channel
+     * @param channelUID the {@link ChannelUID} of the channel
      * @param pattern a pattern
      */
     public void setStatePattern(ChannelUID channelUID, String pattern) {
-        channelPatternMap.put(channelUID, pattern);
+        String oldPattern = channelPatternMap.get(channelUID);
+        if (!pattern.equals(oldPattern)) {
+            channelPatternMap.put(channelUID, pattern);
+            postChannelDescriptionChangedEvent("pattern", channelUID);
+        }
     }
 
     /**
-     * For a given channel UID, set a {@link List} of {@link StateOption}s that should be used for the channel, instead
-     * of the one defined statically in the {@link ChannelType}.
+     * For a given {@link ChannelUID}, set a {@link List} of {@link StateOption}s that should be used for the channel,
+     * instead of the one defined statically in the {@link ChannelType}.
      *
-     * @param channelUID the channel UID of the channel
+     * @param channelUID the {@link ChannelUID} of the channel
      * @param options a {@link List} of {@link StateOption}s
      */
     public void setStateOptions(ChannelUID channelUID, List<StateOption> options) {
-        channelOptionsMap.put(channelUID, options);
+        List<StateOption> oldOptions = channelOptionsMap.get(channelUID);
+        if (!options.equals(oldOptions)) {
+            channelOptionsMap.put(channelUID, options);
+            postChannelDescriptionChangedEvent("state-options", channelUID);
+        }
     }
 
     @Override
@@ -139,14 +143,11 @@ public abstract class BaseDynamicStateDescriptionProvider implements DynamicStat
         return options;
     }
 
-    @Activate
-    protected void activate(ComponentContext componentContext) {
-        bundleContext = componentContext.getBundleContext();
-    }
-
+    @Override
     @Deactivate
     public void deactivate() {
+        channelPatternMap.clear();
         channelOptionsMap.clear();
-        bundleContext = null;
+        super.deactivate();
     }
 }

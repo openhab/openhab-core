@@ -14,10 +14,12 @@ package org.openhab.core.thing.events;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.thing.ChannelUID;
@@ -31,6 +33,7 @@ import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.dto.ThingDTOMapper;
+import org.openhab.core.thing.events.ThingEventFactory.ChannelDescriptionChangedEventPayloadBean;
 import org.openhab.core.thing.events.ThingEventFactory.TriggerEventPayloadBean;
 
 import com.google.gson.Gson;
@@ -39,11 +42,16 @@ import com.google.gson.Gson;
  * {@link ThingEventFactoryTests} tests the {@link ThingEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
+ * @author Christoph Weitkamp - Added ChannelStateDescriptionChangedEvent
  */
 public class ThingEventFactoryTest {
+    private static final Gson JSONCONVERTER = new Gson();
+
     private static final ThingStatusInfo THING_STATUS_INFO = ThingStatusInfoBuilder
             .create(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR).withDescription("Some description")
             .build();
+
+    private final ThingEventFactory factory = new ThingEventFactory();
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "id");
@@ -54,10 +62,15 @@ public class ThingEventFactoryTest {
     private static final String THING_ADDED_EVENT_TOPIC = ThingEventFactory.THING_ADDED_EVENT_TOPIC
             .replace("{thingUID}", THING_UID.getAsString());
 
-    private static final String THING_STATUS_EVENT_PAYLOAD = new Gson().toJson(THING_STATUS_INFO);
-    private static final String THING_ADDED_EVENT_PAYLOAD = new Gson().toJson(ThingDTOMapper.map(THING));
+    private static final String THING_STATUS_EVENT_PAYLOAD = JSONCONVERTER.toJson(THING_STATUS_INFO);
+    private static final String THING_ADDED_EVENT_PAYLOAD = JSONCONVERTER.toJson(ThingDTOMapper.map(THING));
 
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
+    private static final String CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC = ThingEventFactory.CHANNEL_DESCRIPTION_CHANGED_TOPIC
+            .replace("{channelUID}", CHANNEL_UID.getAsString());
+    private static final String CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD = JSONCONVERTER
+            .toJson(new ChannelDescriptionChangedEventPayloadBean("pattern", CHANNEL_UID.getAsString(),
+                    Set.of("item1", "item2")));
     private static final String CHANNEL_TRIGGERED_EVENT_TOPIC = ThingEventFactory.CHANNEL_TRIGGERED_EVENT_TOPIC
             .replace("{channelUID}", CHANNEL_UID.getAsString());
     private static final String CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD = new Gson()
@@ -65,23 +78,17 @@ public class ThingEventFactoryTest {
     private static final String CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD = new Gson()
             .toJson(new TriggerEventPayloadBean("", CHANNEL_UID.getAsString()));
 
-    private ThingEventFactory eventFactory;
-
-    @BeforeEach
-    public void setUp() {
-        eventFactory = new ThingEventFactory();
-    }
-
     @Test
     public void testSupportedEventTypes() {
-        assertThat(eventFactory.getSupportedEventTypes(),
+        assertThat(factory.getSupportedEventTypes(),
                 containsInAnyOrder(ThingStatusInfoEvent.TYPE, ThingStatusInfoChangedEvent.TYPE, ThingAddedEvent.TYPE,
-                        ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE));
+                        ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelDescriptionChangedEvent.TYPE,
+                        ChannelTriggeredEvent.TYPE));
     }
 
     @Test
     public void testCreateEventThingStatusInfoEvent() throws Exception {
-        Event event = eventFactory.createEvent(ThingStatusInfoEvent.TYPE, THING_STATUS_EVENT_TOPIC,
+        Event event = factory.createEvent(ThingStatusInfoEvent.TYPE, THING_STATUS_EVENT_TOPIC,
                 THING_STATUS_EVENT_PAYLOAD, null);
 
         assertThat(event, is(instanceOf(ThingStatusInfoEvent.class)));
@@ -106,7 +113,7 @@ public class ThingEventFactoryTest {
 
     @Test
     public void testCreateEventThingAddedEvent() throws Exception {
-        Event event = eventFactory.createEvent(ThingAddedEvent.TYPE, THING_ADDED_EVENT_TOPIC, THING_ADDED_EVENT_PAYLOAD,
+        Event event = factory.createEvent(ThingAddedEvent.TYPE, THING_ADDED_EVENT_TOPIC, THING_ADDED_EVENT_PAYLOAD,
                 null);
 
         assertThat(event, is(instanceOf(ThingAddedEvent.class)));
@@ -130,6 +137,34 @@ public class ThingEventFactoryTest {
     }
 
     @Test
+    public void testCreateChannelDescriptionChangedEvent() {
+        ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionChangedEvent("pattern",
+                CHANNEL_UID, Set.of("item1", "item2"));
+
+        assertEquals(ChannelDescriptionChangedEvent.TYPE, event.getType());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, event.getTopic());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD, event.getPayload());
+        assertEquals("pattern", event.getField());
+        assertEquals(CHANNEL_UID, event.getChannelUID());
+        assertThat(event.getLinkedItemNames(), hasSize(2));
+    }
+
+    @Test
+    public void testCreateEventChannelDescriptionChangedEvent() throws Exception {
+        Event event = factory.createEvent(ChannelDescriptionChangedEvent.TYPE, CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC,
+                CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD, null);
+
+        assertThat(event, is(instanceOf(ChannelDescriptionChangedEvent.class)));
+        ChannelDescriptionChangedEvent triggeredEvent = (ChannelDescriptionChangedEvent) event;
+        assertEquals(ChannelDescriptionChangedEvent.TYPE, triggeredEvent.getType());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_TOPIC, triggeredEvent.getTopic());
+        assertEquals(CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD, triggeredEvent.getPayload());
+        assertEquals("pattern", triggeredEvent.getField());
+        assertEquals(CHANNEL_UID, triggeredEvent.getChannelUID());
+        assertThat(triggeredEvent.getLinkedItemNames(), hasSize(2));
+    }
+
+    @Test
     public void testCreateTriggerPressedEvent() {
         ChannelTriggeredEvent event = ThingEventFactory.createTriggerEvent(CommonTriggerEvents.PRESSED, CHANNEL_UID);
 
@@ -138,11 +173,12 @@ public class ThingEventFactoryTest {
         assertEquals(CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, event.getPayload());
         assertNotNull(event.getEvent());
         assertEquals(CommonTriggerEvents.PRESSED, event.getEvent());
+        assertEquals(CHANNEL_UID, event.getChannel());
     }
 
     @Test
     public void testCreateEventChannelTriggeredPressedEvent() throws Exception {
-        Event event = eventFactory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
+        Event event = factory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
                 CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, null);
 
         assertThat(event, is(instanceOf(ChannelTriggeredEvent.class)));
@@ -152,6 +188,7 @@ public class ThingEventFactoryTest {
         assertEquals(CHANNEL_TRIGGERED_PRESSED_EVENT_PAYLOAD, triggeredEvent.getPayload());
         assertNotNull(triggeredEvent.getEvent());
         assertEquals(CommonTriggerEvents.PRESSED, triggeredEvent.getEvent());
+        assertEquals(CHANNEL_UID, triggeredEvent.getChannel());
     }
 
     @Test
@@ -163,11 +200,12 @@ public class ThingEventFactoryTest {
         assertEquals(CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD, event.getPayload());
         assertNotNull(event.getEvent());
         assertEquals("", event.getEvent());
+        assertEquals(CHANNEL_UID, event.getChannel());
     }
 
     @Test
     public void testCreateEventChannelTriggeredEmptyEvent() throws Exception {
-        Event event = eventFactory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
+        Event event = factory.createEvent(ChannelTriggeredEvent.TYPE, CHANNEL_TRIGGERED_EVENT_TOPIC,
                 CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD, null);
 
         assertThat(event, is(instanceOf(ChannelTriggeredEvent.class)));
@@ -177,5 +215,6 @@ public class ThingEventFactoryTest {
         assertEquals(CHANNEL_TRIGGERED_EMPTY_EVENT_PAYLOAD, triggeredEvent.getPayload());
         assertNotNull(triggeredEvent.getEvent());
         assertEquals("", triggeredEvent.getEvent());
+        assertEquals(CHANNEL_UID, triggeredEvent.getChannel());
     }
 }

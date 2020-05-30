@@ -37,6 +37,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Dennis Nobel - Added status changed event
+ * @author Christoph Weitkamp - Added ChannelDescriptionChangedEvent
  */
 @Component(immediate = true, service = EventFactory.class)
 @NonNullByDefault
@@ -51,6 +52,8 @@ public class ThingEventFactory extends AbstractEventFactory {
 
     static final String THING_UPDATED_EVENT_TOPIC = "openhab/things/{thingUID}/updated";
 
+    static final String CHANNEL_DESCRIPTION_CHANGED_TOPIC = "openhab/channels/{channelUID}/descriptionchanged";
+
     static final String CHANNEL_TRIGGERED_EVENT_TOPIC = "openhab/channels/{channelUID}/triggered";
 
     /**
@@ -58,7 +61,8 @@ public class ThingEventFactory extends AbstractEventFactory {
      */
     public ThingEventFactory() {
         super(Set.of(ThingStatusInfoEvent.TYPE, ThingStatusInfoChangedEvent.TYPE, ThingAddedEvent.TYPE,
-                ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelTriggeredEvent.TYPE));
+                ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE, ChannelDescriptionChangedEvent.TYPE,
+                ChannelTriggeredEvent.TYPE));
     }
 
     @Override
@@ -74,10 +78,55 @@ public class ThingEventFactory extends AbstractEventFactory {
             return createRemovedEvent(topic, payload);
         } else if (ThingUpdatedEvent.TYPE.equals(eventType)) {
             return createUpdatedEvent(topic, payload);
+        } else if (ChannelDescriptionChangedEvent.TYPE.equals(eventType)) {
+            return createChannelDescriptionChangedEvent(topic, payload);
         } else if (ChannelTriggeredEvent.TYPE.equals(eventType)) {
             return createTriggerEvent(topic, payload, source);
         }
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
+    }
+
+    public static class ChannelDescriptionChangedEventPayloadBean {
+        public @NonNullByDefault({}) String field;
+        public @NonNullByDefault({}) String channelUID;
+        public @NonNullByDefault({}) Set<String> linkedItemNames;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        protected ChannelDescriptionChangedEventPayloadBean() {
+        }
+
+        @SuppressWarnings("null")
+        public ChannelDescriptionChangedEventPayloadBean(String field, String channelUID, Set<String> linkedItemNames) {
+            this.field = field;
+            this.channelUID = channelUID;
+            this.linkedItemNames = linkedItemNames;
+        }
+    }
+
+    /**
+     * Creates a {@link ChannelDescriptionChangedEvent}.
+     *
+     * @param field the changed field
+     * @param channelUID the {@link ChannelUID}
+     * @param linkedItemNames a {@link Set} of linked item names
+     * @return Created {@link ChannelDescriptionChangedEvent}
+     */
+    public static ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(String field,
+            ChannelUID channelUID, Set<String> linkedItemNames) {
+        ChannelDescriptionChangedEventPayloadBean bean = new ChannelDescriptionChangedEventPayloadBean(field,
+                channelUID.getAsString(), linkedItemNames);
+        String payload = serializePayload(bean);
+        String topic = buildTopic(CHANNEL_DESCRIPTION_CHANGED_TOPIC, channelUID);
+        return new ChannelDescriptionChangedEvent(topic, payload, field, channelUID, linkedItemNames);
+    }
+
+    private ChannelDescriptionChangedEvent createChannelDescriptionChangedEvent(String topic, String payload) {
+        ChannelDescriptionChangedEventPayloadBean bean = deserializePayload(payload,
+                ChannelDescriptionChangedEventPayloadBean.class);
+        ChannelUID channelUID = new ChannelUID(bean.channelUID);
+        return new ChannelDescriptionChangedEvent(topic, payload, bean.field, channelUID, bean.linkedItemNames);
     }
 
     /**
@@ -108,11 +157,11 @@ public class ThingEventFactory extends AbstractEventFactory {
     }
 
     /**
-     * Creates a channel triggered event.
+     * Creates a {@link ChannelTriggeredEvent}
      *
-     * @param event The event
-     * @param channelUID The channel UID
-     * @return the created channel triggered event
+     * @param event the event
+     * @param channel the {@link ChannelUID}
+     * @return Created {@link ChannelTriggeredEvent}
      */
     public static ChannelTriggeredEvent createTriggerEvent(String event, ChannelUID channelUID) {
         checkNotNull(channelUID, "channelUID");

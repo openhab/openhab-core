@@ -81,6 +81,6 @@ public final class StateOption {
 
     @Override
     public String toString() {
-        return "StateOption [value=" + value + ", label=" + label + "]";
+        return String.format("StateOption [value=%s, label=%s]", value, label);
     }
 }
