@@ -48,8 +48,11 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - switched to parameterized logging
  * @author Hilbrand Bouwkamp - Made protected fields private and added new methods to give access.
  * @author Markus Rathgeb - Use separate collections to improve performance
+ * @author Chris Jackson - Ensure managed provider is only unset by current provider
  *
  * @param <E> type of the element
+ * @param <K> type of the key
+ * @param <P> type of the provider
  */
 @NonNullByDefault
 public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonNull K, @NonNull P extends Provider<E>>
@@ -530,7 +533,9 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
     }
 
     protected void unsetManagedProvider(ManagedProvider<E, K> provider) {
-        managedProvider = Optional.empty();
+        if (managedProvider.equals(provider)) {
+            managedProvider = Optional.empty();
+        }
     }
 
     /**
