@@ -71,8 +71,6 @@ import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -113,26 +111,18 @@ public class RuleResource implements RESTResource {
 
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
+    private final ManagedRuleProvider managedRuleProvider;
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
-
-    private @NonNullByDefault({}) ManagedRuleProvider managedRuleProvider;
 
     @Activate
     public RuleResource( //
             final @Reference RuleManager ruleManager, //
-            final @Reference RuleRegistry ruleRegistry) {
+            final @Reference RuleRegistry ruleRegistry, //
+            final @Reference ManagedRuleProvider managedRuleProvider) {
         this.ruleManager = ruleManager;
         this.ruleRegistry = ruleRegistry;
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedRuleProvider(ManagedRuleProvider managedRuleProvider) {
         this.managedRuleProvider = managedRuleProvider;
-    }
-
-    protected void unsetManagedRuleProvider(ManagedRuleProvider managedRuleProvider) {
-        this.managedRuleProvider = null;
     }
 
     @GET
