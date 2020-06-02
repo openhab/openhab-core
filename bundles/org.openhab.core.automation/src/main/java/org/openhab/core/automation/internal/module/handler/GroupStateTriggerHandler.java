@@ -20,6 +20,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
@@ -45,15 +47,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
     private final Logger logger = LoggerFactory.getLogger(GroupStateTriggerHandler.class);
 
     private final String groupName;
-    private final String state;
+    private final @Nullable String state;
     private final String previousState;
     private Set<String> types;
     private final BundleContext bundleContext;
-    private ItemRegistry itemRegistry;
+    private @Nullable ItemRegistry itemRegistry;
 
     public static final String UPDATE_MODULE_TYPE_ID = "core.GroupStateUpdateTrigger";
     public static final String CHANGE_MODULE_TYPE_ID = "core.GroupStateChangeTrigger";
@@ -62,8 +65,7 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
     private static final String CFG_STATE = "state";
     private static final String CFG_PREVIOUS_STATE = "previousState";
 
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public GroupStateTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
@@ -91,7 +93,7 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
     }
 
     @Override
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return this;
     }
 
@@ -104,25 +106,29 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
             Map<String, Object> values = new HashMap<>();
             if (event instanceof ItemStateEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String itemName = ((ItemStateEvent) event).getItemName();
-                Item item = itemRegistry.get(itemName);
-                if (item != null && item.getGroupNames().contains(groupName)) {
-                    State state = ((ItemStateEvent) event).getItemState();
-                    if ((this.state == null || this.state.equals(state.toFullString()))) {
-                        values.put("triggeringItem", item);
-                        values.put("state", state);
+                if (itemRegistry != null) {
+                    Item item = itemRegistry.get(itemName);
+                    if (item != null && item.getGroupNames().contains(groupName)) {
+                        State state = ((ItemStateEvent) event).getItemState();
+                        if ((this.state == null || state.toFullString().equals(this.state))) {
+                            values.put("triggeringItem", item);
+                            values.put("state", state);
+                        }
                     }
                 }
             } else if (event instanceof ItemStateChangedEvent && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String itemName = ((ItemStateChangedEvent) event).getItemName();
-                Item item = itemRegistry.get(itemName);
-                if (item != null && item.getGroupNames().contains(groupName)) {
-                    State state = ((ItemStateChangedEvent) event).getItemState();
-                    State oldState = ((ItemStateChangedEvent) event).getOldItemState();
+                if (itemRegistry != null) {
+                    Item item = itemRegistry.get(itemName);
+                    if (item != null && item.getGroupNames().contains(groupName)) {
+                        State state = ((ItemStateChangedEvent) event).getItemState();
+                        State oldState = ((ItemStateChangedEvent) event).getOldItemState();
 
-                    if (stateMatches(this.state, state) && stateMatches(this.previousState, oldState)) {
-                        values.put("triggeringItem", item);
-                        values.put("oldState", oldState);
-                        values.put("newState", state);
+                        if (stateMatches(this.state, state) && stateMatches(this.previousState, oldState)) {
+                            values.put("triggeringItem", item);
+                            values.put("oldState", oldState);
+                            values.put("newState", state);
+                        }
                     }
                 }
             }
@@ -133,7 +139,7 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
         }
     }
 
-    private boolean stateMatches(String requiredState, State state) {
+    private boolean stateMatches(@Nullable String requiredState, State state) {
         if (requiredState == null) {
             return true;
         }
@@ -148,10 +154,7 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
     @Override
     public void dispose() {
         super.dispose();
-        if (eventSubscriberRegistration != null) {
-            eventSubscriberRegistration.unregister();
-            eventSubscriberRegistration = null;
-        }
+        eventSubscriberRegistration.unregister();
     }
 
     @Override

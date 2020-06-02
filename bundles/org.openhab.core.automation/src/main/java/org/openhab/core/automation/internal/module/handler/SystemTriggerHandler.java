@@ -96,10 +96,8 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
             Integer sl = ((StartlevelEvent) event).getStartlevel();
             if (startlevel.equals(sl)) {
                 values.put(OUT_STARTLEVEL, sl);
+                thCallback.triggered(module, values);
             }
-        }
-        if (!values.isEmpty()) {
-            thCallback.triggered(module, values);
         }
     }
 

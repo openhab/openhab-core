@@ -15,7 +15,7 @@ package org.openhab.core.events.system;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
@@ -29,6 +29,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true, service = EventFactory.class)
+@NonNullByDefault
 public class SystemEventFactory extends AbstractEventFactory {
 
     static final String SYSTEM_STARTLEVEL_TOPIC = "smarthome/system/startlevel";
@@ -50,8 +51,8 @@ public class SystemEventFactory extends AbstractEventFactory {
     }
 
     @Override
-    protected @NonNull Event createEventByType(@NonNull String eventType, @NonNull String topic,
-            @NonNull String payload, @Nullable String source) throws Exception {
+    protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source)
+            throws Exception {
         return createStartlevelEvent(topic, payload, source);
     }
 
@@ -63,7 +64,7 @@ public class SystemEventFactory extends AbstractEventFactory {
      * @param payload Payload
      * @return created startlevel event
      */
-    public StartlevelEvent createStartlevelEvent(String topic, String payload, String source) {
+    public StartlevelEvent createStartlevelEvent(String topic, String payload, @Nullable String source) {
         SystemEventPayloadBean bean = deserializePayload(payload, SystemEventPayloadBean.class);
         return new StartlevelEvent(topic, payload, source, bean.getStartlevel());
     }
@@ -72,7 +73,7 @@ public class SystemEventFactory extends AbstractEventFactory {
      * This is a java bean that is used to serialize/deserialize system event payload.
      */
     public static class SystemEventPayloadBean {
-        private Integer startlevel;
+        private @NonNullByDefault({}) Integer startlevel;
 
         /**
          * Default constructor for deserialization e.g. by Gson.

@@ -19,7 +19,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-import org.openhab.core.automation.ModuleHandlerCallback;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
     private final Logger logger = LoggerFactory.getLogger(GroupCommandTriggerHandler.class);
@@ -58,9 +60,8 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     private static final String CFG_GROUPNAME = "groupName";
     private static final String CFG_COMMAND = "command";
 
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
-    private ItemRegistry itemRegistry;
+    private ServiceRegistration<?> eventSubscriberRegistration;
+    private @Nullable ItemRegistry itemRegistry;
 
     public GroupCommandTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
@@ -81,27 +82,30 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     }
 
     @Override
-    public EventFilter getEventFilter() {
+    public @Nullable EventFilter getEventFilter() {
         return this;
     }
 
     @Override
     public void receive(Event event) {
-        if (callback != null) {
-            ModuleHandlerCallback cb = callback;
+        if (callback instanceof TriggerHandlerCallback) {
+            TriggerHandlerCallback cb = (TriggerHandlerCallback) callback;
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
             Map<String, Object> values = new HashMap<>();
             if (event instanceof ItemCommandEvent) {
-                String itemName = ((ItemCommandEvent) event).getItemName();
-                Item item = itemRegistry.get(itemName);
-                if (item != null && item.getGroupNames().contains(groupName)) {
-                    Command command = ((ItemCommandEvent) event).getItemCommand();
-                    if (this.command == null || this.command.equals(command.toFullString())) {
-                        values.put("triggeringItem", item);
-                        values.put("command", command);
-                        values.put("event", event);
-                        ((TriggerHandlerCallback) cb).triggered(this.module, values);
+                ItemCommandEvent icEvent = (ItemCommandEvent) event;
+                String itemName = icEvent.getItemName();
+                if (itemRegistry != null) {
+                    Item item = itemRegistry.get(itemName);
+                    if (item != null && item.getGroupNames().contains(groupName)) {
+                        Command command = icEvent.getItemCommand();
+                        if (this.command.equals(command.toFullString())) {
+                            values.put("triggeringItem", item);
+                            values.put("command", command);
+                            values.put("event", event);
+                            cb.triggered(this.module, values);
+                        }
                     }
                 }
             }
@@ -114,10 +118,7 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     @Override
     public void dispose() {
         super.dispose();
-        if (eventSubscriberRegistration != null) {
-            eventSubscriberRegistration.unregister();
-            eventSubscriberRegistration = null;
-        }
+        eventSubscriberRegistration.unregister();
     }
 
     @Override
