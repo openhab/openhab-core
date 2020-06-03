@@ -12,6 +12,8 @@
  */
 package org.openhab.core.events.system;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEvent;
 
 /**
@@ -20,6 +22,7 @@ import org.openhab.core.events.AbstractEvent;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class StartlevelEvent extends AbstractEvent {
 
     public static final String TYPE = StartlevelEvent.class.getSimpleName();
@@ -34,7 +37,7 @@ public class StartlevelEvent extends AbstractEvent {
      * @param source the source
      * @param startlevel the system startlevel
      */
-    protected StartlevelEvent(String topic, String payload, String source, Integer startlevel) {
+    protected StartlevelEvent(String topic, String payload, @Nullable String source, Integer startlevel) {
         super(topic, payload, source);
         this.startlevel = startlevel;
     }

@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -99,42 +98,45 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
 
     @Override
     public void receive(Event event) {
-        if (callback != null) {
-            ModuleHandlerCallback cb = callback;
+        if (callback instanceof TriggerHandlerCallback) {
+            TriggerHandlerCallback cb = (TriggerHandlerCallback) callback;
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
-            Map<String, Object> values = new HashMap<>();
             if (event instanceof ItemStateEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                String itemName = ((ItemStateEvent) event).getItemName();
+                ItemStateEvent isEvent = (ItemStateEvent) event;
+                String itemName = isEvent.getItemName();
                 if (itemRegistry != null) {
                     Item item = itemRegistry.get(itemName);
                     if (item != null && item.getGroupNames().contains(groupName)) {
-                        State state = ((ItemStateEvent) event).getItemState();
+                        State state = isEvent.getItemState();
                         if ((this.state == null || state.toFullString().equals(this.state))) {
+                            Map<String, Object> values = new HashMap<>();
                             values.put("triggeringItem", item);
                             values.put("state", state);
+                            values.put("event", event);
+                            cb.triggered(this.module, values);
                         }
                     }
                 }
             } else if (event instanceof ItemStateChangedEvent && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                String itemName = ((ItemStateChangedEvent) event).getItemName();
+                ItemStateChangedEvent iscEvent = (ItemStateChangedEvent) event;
+                String itemName = iscEvent.getItemName();
                 if (itemRegistry != null) {
                     Item item = itemRegistry.get(itemName);
                     if (item != null && item.getGroupNames().contains(groupName)) {
-                        State state = ((ItemStateChangedEvent) event).getItemState();
-                        State oldState = ((ItemStateChangedEvent) event).getOldItemState();
+                        State state = iscEvent.getItemState();
+                        State oldState = iscEvent.getOldItemState();
 
                         if (stateMatches(this.state, state) && stateMatches(this.previousState, oldState)) {
+                            Map<String, Object> values = new HashMap<>();
                             values.put("triggeringItem", item);
                             values.put("oldState", oldState);
                             values.put("newState", state);
+                            values.put("event", event);
+                            cb.triggered(this.module, values);
                         }
                     }
                 }
-            }
-            if (!values.isEmpty()) {
-                values.put("event", event);
-                ((TriggerHandlerCallback) cb).triggered(this.module, values);
             }
         }
     }
