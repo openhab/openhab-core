@@ -44,6 +44,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
@@ -86,7 +87,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.ResponseHeader;
 
 /**
- * This class acts as a REST resource for rules and is registered with the Jersey servlet.
+ * This class acts as a REST resource for rules.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Use DTOs
@@ -110,15 +111,18 @@ public class RuleResource implements RESTResource {
 
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
+    private final ManagedRuleProvider managedRuleProvider;
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
     @Activate
     public RuleResource( //
             final @Reference RuleManager ruleManager, //
-            final @Reference RuleRegistry ruleRegistry) {
+            final @Reference RuleRegistry ruleRegistry, //
+            final @Reference ManagedRuleProvider managedRuleProvider) {
         this.ruleManager = ruleManager;
         this.ruleRegistry = ruleRegistry;
+        this.managedRuleProvider = managedRuleProvider;
     }
 
     @GET
@@ -142,9 +146,8 @@ public class RuleResource implements RESTResource {
         p = p.and(hasAllTags(tags));
 
         final Collection<EnrichedRuleDTO> rules = ruleRegistry.stream().filter(p) // filter according to Predicates
-                .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager)) // map matching rules
+                .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)) // map matching rules
                 .collect(Collectors.toList());
-
         return Response.ok(rules).build();
     }
 
@@ -181,7 +184,7 @@ public class RuleResource implements RESTResource {
     public Response getByUID(@PathParam("ruleUID") @ApiParam(value = "ruleUID") String ruleUID) {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule != null) {
-            return Response.ok(EnrichedRuleDTOMapper.map(rule, ruleManager)).build();
+            return Response.ok(EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)).build();
         } else {
             return Response.status(Status.NOT_FOUND).build();
         }
@@ -430,7 +433,10 @@ public class RuleResource implements RESTResource {
         return Response.status(Status.NOT_FOUND).build();
     }
 
-    protected <T extends Module> @Nullable T getModuleById(final Collection<T> coll, final String id) {
+    protected @Nullable <T extends Module> T getModuleById(final @Nullable Collection<T> coll, final String id) {
+        if (coll == null) {
+            return null;
+        }
         for (final T module : coll) {
             if (module.getId().equals(id)) {
                 return module;

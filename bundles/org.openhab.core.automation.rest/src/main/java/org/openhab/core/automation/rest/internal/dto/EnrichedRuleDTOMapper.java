@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.rest.internal.dto;
 
+import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.dto.RuleDTOMapper;
@@ -20,13 +21,16 @@ import org.openhab.core.automation.dto.RuleDTOMapper;
  * This is a utility class to convert between the respective object and its DTO.
  *
  * @author Markus Rathgeb - Initial contribution
+ * @author Kai Kreuzer - added editable field
  */
 public class EnrichedRuleDTOMapper extends RuleDTOMapper {
 
-    public static EnrichedRuleDTO map(final Rule rule, final RuleManager ruleEngine) {
+    public static EnrichedRuleDTO map(final Rule rule, final RuleManager ruleEngine,
+            final ManagedRuleProvider managedRuleProvider) {
         final EnrichedRuleDTO enrichedRuleDto = new EnrichedRuleDTO();
         fillProperties(rule, enrichedRuleDto);
         enrichedRuleDto.status = ruleEngine.getStatusInfo(rule.getUID());
+        enrichedRuleDto.editable = managedRuleProvider.get(rule.getUID()) != null;
         return enrichedRuleDto;
     }
 }
