@@ -26,12 +26,15 @@ import org.openhab.core.automation.internal.module.handler.ChannelEventTriggerHa
 import org.openhab.core.automation.internal.module.handler.CompareConditionHandler;
 import org.openhab.core.automation.internal.module.handler.GenericEventConditionHandler;
 import org.openhab.core.automation.internal.module.handler.GenericEventTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GroupCommandTriggerHandler;
+import org.openhab.core.automation.internal.module.handler.GroupStateTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ItemCommandActionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemCommandTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.RuleEnablementActionHandler;
 import org.openhab.core.automation.internal.module.handler.RunRuleActionHandler;
+import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
 import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHandler;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ItemRegistry;
@@ -56,12 +59,14 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
     private final Logger logger = LoggerFactory.getLogger(CoreModuleHandlerFactory.class);
 
     private static final Collection<String> TYPES = Arrays.asList(ItemCommandTriggerHandler.MODULE_TYPE_ID,
-            ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID, ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID,
-            ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID, ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID,
-            ItemStateConditionHandler.ITEM_STATE_CONDITION, ItemCommandActionHandler.ITEM_COMMAND_ACTION,
-            GenericEventTriggerHandler.MODULE_TYPE_ID, ChannelEventTriggerHandler.MODULE_TYPE_ID,
-            GenericEventConditionHandler.MODULETYPE_ID, GenericEventConditionHandler.MODULETYPE_ID,
-            CompareConditionHandler.MODULE_TYPE, RuleEnablementActionHandler.UID, RunRuleActionHandler.UID);
+            GroupCommandTriggerHandler.MODULE_TYPE_ID, ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID,
+            ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID, GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID,
+            GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID, ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID,
+            ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID, ItemStateConditionHandler.ITEM_STATE_CONDITION,
+            ItemCommandActionHandler.ITEM_COMMAND_ACTION, GenericEventTriggerHandler.MODULE_TYPE_ID,
+            ChannelEventTriggerHandler.MODULE_TYPE_ID, GenericEventConditionHandler.MODULETYPE_ID,
+            GenericEventConditionHandler.MODULETYPE_ID, CompareConditionHandler.MODULE_TYPE,
+            SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID, RuleEnablementActionHandler.UID, RunRuleActionHandler.UID);
 
     private ItemRegistry itemRegistry;
     private EventPublisher eventPublisher;
@@ -97,6 +102,10 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
                 ((ItemStateConditionHandler) handler).setItemRegistry(this.itemRegistry);
             } else if (handler instanceof ItemCommandActionHandler) {
                 ((ItemCommandActionHandler) handler).setItemRegistry(this.itemRegistry);
+            } else if (handler instanceof GroupCommandTriggerHandler) {
+                ((GroupCommandTriggerHandler) handler).setItemRegistry(this.itemRegistry);
+            } else if (handler instanceof GroupStateTriggerHandler) {
+                ((GroupStateTriggerHandler) handler).setItemRegistry(this.itemRegistry);
             }
         }
     }
@@ -112,6 +121,10 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
                 ((ItemStateConditionHandler) handler).unsetItemRegistry(this.itemRegistry);
             } else if (handler instanceof ItemCommandActionHandler) {
                 ((ItemCommandActionHandler) handler).unsetItemRegistry(this.itemRegistry);
+            } else if (handler instanceof GroupCommandTriggerHandler) {
+                ((GroupCommandTriggerHandler) handler).unsetItemRegistry(this.itemRegistry);
+            } else if (handler instanceof GroupStateTriggerHandler) {
+                ((GroupStateTriggerHandler) handler).unsetItemRegistry(this.itemRegistry);
             }
         }
         this.itemRegistry = null;
@@ -158,12 +171,24 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
                 return new ChannelEventTriggerHandler((Trigger) module, bundleContext);
             } else if (ItemCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ItemCommandTriggerHandler((Trigger) module, bundleContext);
+            } else if (SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(moduleTypeUID)) {
+                return new SystemTriggerHandler((Trigger) module, bundleContext);
             } else if (ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ThingStatusTriggerHandler((Trigger) module, bundleContext);
             } else if (ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ItemStateTriggerHandler((Trigger) module, bundleContext);
+            } else if (GroupCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
+                final GroupCommandTriggerHandler handler = new GroupCommandTriggerHandler((Trigger) module,
+                        bundleContext);
+                handler.setItemRegistry(itemRegistry);
+                return handler;
+            } else if (GroupStateTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
+                    || GroupStateTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
+                final GroupStateTriggerHandler handler = new GroupStateTriggerHandler((Trigger) module, bundleContext);
+                handler.setItemRegistry(itemRegistry);
+                return handler;
             }
         } else if (module instanceof Condition) {
             // Handle conditions

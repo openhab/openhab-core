@@ -231,6 +231,256 @@
 					"reference": "event"
 				}
 			]
+		},
+		{
+			"uid": "core.GroupCommandTrigger",
+			"label": "a member of an item group receives a command",
+			"description": "This triggers the rule if a member of an item group receives a command.",
+			"configDescriptions": [
+				{
+					"name": "groupName",
+					"type": "TEXT",
+					"context": "item",
+					"label": "Group",
+					"description": "the name of the item group",
+					"required": true
+				},
+				{
+					"name": "command",
+					"type": "TEXT",
+					"label": "Command",
+					"description": "the received command",
+					"required": false,
+					"limitToOptions": false,
+					"options": [
+						{
+							"label": "ON",
+							"value": "ON"
+						},
+						{
+							"label": "OFF",
+							"value": "OFF"
+						},
+						{
+							"label": "OPEN",
+							"value": "OPEN"
+						},
+						{
+							"label": "CLOSED",
+							"value": "CLOSED"
+						},
+						{
+							"label": "UP",
+							"value": "UP"
+						},
+						{
+							"label": "DOWN",
+							"value": "DOWN"
+						}
+					]
+				}
+			],
+			"outputs": [
+				{
+					"name": "triggeringItem",
+					"type": "org.openhab.core.items.Item",
+					"description": "the member of the group that received the command",
+					"label": "Triggering Item"
+				},
+				{
+					"name": "command",
+					"type": "command",
+					"description": "the received command",
+					"label": "Command"
+				},
+				{
+					"name": "event",
+					"type": "org.openhab.core.events.Event",
+					"label": "Event",
+					"description": "The event which was sent.",
+					"reference": "event"
+				}
+			]
+		},
+		{
+			"uid": "core.GroupStateUpdateTrigger",
+			"label": "the state of a member of an item group is updated",
+			"description": "This triggers the rule if the state of a member of an item group is updated (even if it does not change).",
+			"configDescriptions": [
+				{
+					"name": "groupName",
+					"type": "TEXT",
+					"context": "item",
+					"label": "Group",
+					"description": "the name of the item group",
+					"required": true
+				},
+				{
+					"name": "state",
+					"type": "TEXT",
+					"label": "State",
+					"description": "the state of the item",
+					"required": false,
+					"limitToOptions": false,
+					"options": [
+						{
+							"label": "ON",
+							"value": "ON"
+						},
+						{
+							"label": "OFF",
+							"value": "OFF"
+						},
+						{
+							"label": "OPEN",
+							"value": "OPEN"
+						},
+						{
+							"label": "CLOSED",
+							"value": "CLOSED"
+						},
+						{
+							"label": "UP",
+							"value": "UP"
+						},
+						{
+							"label": "DOWN",
+							"value": "DOWN"
+						}
+					]
+				}
+			],
+			"outputs": [
+				{
+					"name": "triggeringItem",
+					"type": "org.openhab.core.items.Item",
+					"description": "the member of the group that updated its state",
+					"label": "Triggering Item"
+				},
+				{
+					"name": "state",
+					"type": "state",
+					"description": "the item state",
+					"label": "State"
+				},
+				{
+					"name": "event",
+					"type": "org.openhab.core.events.Event",
+					"label": "Event",
+					"description": "The event which was sent.",
+					"reference": "event"
+				}
+			]
+		},
+		{
+			"uid": "core.GroupStateChangeTrigger",
+			"label": "the state of a member of an item group changes",
+			"description": "This triggers the rule if the state of a member of an item group has changed.",
+			"configDescriptions": [
+				{
+					"name": "groupName",
+					"type": "TEXT",
+					"context": "item",
+					"label": "Group",
+					"description": "the name of the item group",
+					"required": true
+				},
+				{
+					"name": "previousState",
+					"type": "TEXT",
+					"label": "Previous State",
+					"description": "the required previous state of the item",
+					"required": false,
+					"limitToOptions": false,
+					"options": [
+						{
+							"label": "ON",
+							"value": "ON"
+						},
+						{
+							"label": "OFF",
+							"value": "OFF"
+						},
+						{
+							"label": "OPEN",
+							"value": "OPEN"
+						},
+						{
+							"label": "CLOSED",
+							"value": "CLOSED"
+						},
+						{
+							"label": "UP",
+							"value": "UP"
+						},
+						{
+							"label": "DOWN",
+							"value": "DOWN"
+						}
+					]
+				},
+				{
+					"name": "state",
+					"type": "TEXT",
+					"label": "State",
+					"description": "the state of the item",
+					"required": false,
+					"limitToOptions": false,
+					"options": [
+						{
+							"label": "ON",
+							"value": "ON"
+						},
+						{
+							"label": "OFF",
+							"value": "OFF"
+						},
+						{
+							"label": "OPEN",
+							"value": "OPEN"
+						},
+						{
+							"label": "CLOSED",
+							"value": "CLOSED"
+						},
+						{
+							"label": "UP",
+							"value": "UP"
+						},
+						{
+							"label": "DOWN",
+							"value": "DOWN"
+						}
+					]
+				}
+			],
+			"outputs": [
+				{
+					"name": "triggeringItem",
+					"type": "org.openhab.core.items.Item",
+					"description": "the member of the group that changed its state",
+					"label": "Triggering Item"
+				},
+				{
+					"name": "newState",
+					"type": "state",
+					"description": "the new item state",
+					"label": "New State"
+				},
+				{
+					"name": "oldState",
+					"type": "state",
+					"description": "the old item state",
+					"label": "Old State"
+				},
+				{
+					"name": "event",
+					"type": "org.openhab.core.events.Event",
+					"label": "Event",
+					"description": "The event which was sent.",
+					"reference": "event"
+				}
+			]
 		}
 	]
 }

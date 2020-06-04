@@ -72,6 +72,10 @@ public class GenericCronTriggerHandler extends BaseTriggerModuleHandler implemen
 
     @Override
     public void run() {
-        ((TriggerHandlerCallback) callback).triggered(module, null);
+        if (callback != null) {
+            ((TriggerHandlerCallback) callback).triggered(module, null);
+        } else {
+            logger.debug("Tried to trigger, but callback isn't available!");
+        }
     }
 }
