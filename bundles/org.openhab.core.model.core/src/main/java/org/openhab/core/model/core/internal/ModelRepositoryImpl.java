@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +33,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
@@ -53,10 +54,13 @@ import org.slf4j.LoggerFactory;
  * @author Simon Kaufmann - added validation of models before loading them
  */
 @Component(immediate = true)
+@NonNullByDefault
 public class ModelRepositoryImpl implements ModelRepository {
 
     private final Logger logger = LoggerFactory.getLogger(ModelRepositoryImpl.class);
     private final ResourceSet resourceSet;
+    private final Map<String, String> resourceOptions = Collections.singletonMap(XtextResource.OPTION_ENCODING,
+            StandardCharsets.UTF_8.name());
 
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -74,7 +78,7 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     @Override
-    public EObject getModel(String name) {
+    public @Nullable EObject getModel(String name) {
         synchronized (resourceSet) {
             Resource resource = getResource(name);
             if (resource != null) {
@@ -95,8 +99,8 @@ public class ModelRepositoryImpl implements ModelRepository {
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
         Resource resource = null;
+        InputStream inputStream = null;
         try {
-            InputStream inputStream = null;
             if (originalInputStream != null) {
                 byte[] bytes = originalInputStream.readAllBytes();
                 String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
@@ -120,15 +124,13 @@ public class ModelRepositoryImpl implements ModelRepository {
                         resource = resourceSet.createResource(URI.createURI(name));
                         if (resource != null) {
                             logger.info("Loading model '{}'", name);
-                            Map<String, String> options = new HashMap<>();
-                            options.put(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name());
                             if (inputStream == null) {
                                 logger.warn(
                                         "Resource '{}' not found. You have to pass an inputStream to create the resource.",
                                         name);
                                 return false;
                             }
-                            resource.load(inputStream, options);
+                            resource.load(inputStream, resourceOptions);
                             notifyListeners(name, EventType.ADDED);
                             return true;
                         } else {
@@ -140,10 +142,10 @@ public class ModelRepositoryImpl implements ModelRepository {
                 synchronized (resourceSet) {
                     resource.unload();
                     logger.info("Refreshing model '{}'", name);
-                    if (inputStream != null) {
-                        resource.load(inputStream, Collections.EMPTY_MAP);
+                    if (inputStream == null) {
+                        resource.load(resourceOptions);
                     } else {
-                        resource.load(Collections.EMPTY_MAP);
+                        resource.load(inputStream, resourceOptions);
                     }
                     notifyListeners(name, EventType.MODIFIED);
                     return true;
@@ -153,6 +155,13 @@ public class ModelRepositoryImpl implements ModelRepository {
             logger.warn("Configuration model '{}' cannot be parsed correctly!", name, e);
             if (resource != null) {
                 resourceSet.getResources().remove(resource);
+            }
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                }
             }
         }
         return false;
@@ -239,7 +248,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         listeners.remove(listener);
     }
 
-    private Resource getResource(String name) {
+    private @Nullable Resource getResource(String name) {
         return resourceSet.getResource(URI.createURI(name), false);
     }
 
@@ -264,15 +273,15 @@ public class ModelRepositoryImpl implements ModelRepository {
      * @return error messages as a String if any syntactical error were found, <code>null</code> otherwise
      * @throws IOException if there was an error with the given {@link InputStream}, loading the resource from there
      */
-    private String validateModel(String name, InputStream inputStream) throws IOException {
+    private @Nullable String validateModel(String name, InputStream inputStream) throws IOException {
         // use another resource for validation in order to keep the original one for emergency-removal in case of errors
         Resource resource = resourceSet.createResource(URI.createURI("tmp_" + name));
         try {
-            resource.load(inputStream, Collections.EMPTY_MAP);
+            resource.load(inputStream, resourceOptions);
             StringBuilder criticalErrors = new StringBuilder();
             List<String> warnings = new LinkedList<>();
 
-            if (resource != null && !resource.getContents().isEmpty()) {
+            if (!resource.getContents().isEmpty()) {
                 // Check for syntactical errors
                 for (Diagnostic diagnostic : resource.getErrors()) {
                     criticalErrors
