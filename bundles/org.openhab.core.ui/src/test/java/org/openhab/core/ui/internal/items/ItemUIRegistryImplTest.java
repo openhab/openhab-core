@@ -12,6 +12,8 @@
  */
 package org.openhab.core.ui.internal.items;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -21,16 +23,30 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
+import org.openhab.core.library.items.ContactItem;
+import org.openhab.core.library.items.DateTimeItem;
+import org.openhab.core.library.items.DimmerItem;
+import org.openhab.core.library.items.ImageItem;
+import org.openhab.core.library.items.LocationItem;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.PlayerItem;
+import org.openhab.core.library.items.RollershutterItem;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
@@ -39,12 +55,20 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Colorpicker;
+import org.openhab.core.model.sitemap.sitemap.Group;
+import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
+import org.openhab.core.model.sitemap.sitemap.Mapview;
+import org.openhab.core.model.sitemap.sitemap.Selection;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.Slider;
 import org.openhab.core.model.sitemap.sitemap.Switch;
+import org.openhab.core.model.sitemap.sitemap.Text;
 import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.types.CommandDescriptionBuilder;
+import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
@@ -60,20 +84,17 @@ public class ItemUIRegistryImplTest {
 
     // we need to get the decimal separator of the default locale for our tests
     private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
+    private static final String ITEM_NAME = "Item";
 
     private ItemUIRegistryImpl uiRegistry;
 
-    @Mock
-    private ItemRegistry registry;
+    private @Mock ItemRegistry registry;
 
-    @Mock
-    private Widget widget;
+    private @Mock Widget widget;
 
-    @Mock
-    private Item item;
+    private @Mock Item item;
 
-    @Mock
-    private UnitProvider unitProvider;
+    private @Mock UnitProvider unitProvider;
 
     @Before
     public void setup() throws Exception {
@@ -81,8 +102,8 @@ public class ItemUIRegistryImplTest {
         uiRegistry = new ItemUIRegistryImpl();
         uiRegistry.setItemRegistry(registry);
 
-        when(widget.getItem()).thenReturn("Item");
-        when(registry.getItem("Item")).thenReturn(item);
+        when(widget.getItem()).thenReturn(ITEM_NAME);
+        when(registry.getItem(ITEM_NAME)).thenReturn(item);
 
         // Set default time zone to GMT-6
         TimeZone.setDefault(TimeZone.getTimeZone("GMT-6"));
@@ -357,8 +378,8 @@ public class ItemUIRegistryImplTest {
         Widget w = mock(Widget.class);
         Item item = mock(Item.class);
         when(w.getLabel()).thenReturn(testLabel);
-        when(w.getItem()).thenReturn("Item");
-        when(registry.getItem("Item")).thenReturn(item);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registry.getItem(ITEM_NAME)).thenReturn(item);
         when(item.getState()).thenReturn(new DateTimeType("2011-06-01T00:00:00"));
         String label = uiRegistry.getLabel(w);
         assertEquals("Label [01.06.2011]", label);
@@ -405,8 +426,8 @@ public class ItemUIRegistryImplTest {
         Widget w = mock(Widget.class);
         Item item = mock(Item.class);
         when(w.getLabel()).thenReturn(testLabel);
-        when(w.getItem()).thenReturn("Item");
-        when(registry.getItem("Item")).thenReturn(item);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registry.getItem(ITEM_NAME)).thenReturn(item);
         when(item.getState()).thenReturn(new DateTimeType("2011-06-01T15:30:59"));
         String label = uiRegistry.getLabel(w);
         assertEquals("Label [15:30:59]", label);
@@ -434,7 +455,7 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getLabelWidgetWithoutLabel() {
         String label = uiRegistry.getLabel(widget);
-        assertEquals("Item", label);
+        assertEquals(ITEM_NAME, label);
     }
 
     @Test
@@ -503,7 +524,7 @@ public class ItemUIRegistryImplTest {
 
         when(widget.getLabel()).thenReturn(testLabel);
         when(widget.eClass()).thenReturn(SitemapFactory.eINSTANCE.createText().eClass());
-        when(registry.getItem("Item")).thenThrow(new ItemNotFoundException("Item"));
+        when(registry.getItem(ITEM_NAME)).thenThrow(new ItemNotFoundException(ITEM_NAME));
         when(item.getState()).thenReturn(new StringType("State"));
         String label = uiRegistry.getLabel(widget);
         assertEquals("Label [-]", label);
@@ -702,8 +723,8 @@ public class ItemUIRegistryImplTest {
         Widget w = mock(Widget.class);
         Item item = mock(Item.class);
         when(w.getLabel()).thenReturn(testLabel);
-        when(w.getItem()).thenReturn("Item");
-        when(registry.getItem("Item")).thenReturn(item);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registry.getItem(ITEM_NAME)).thenReturn(item);
         when(item.getState()).thenReturn(new StringType("State"));
         String label = uiRegistry.getLabel(w);
         assertEquals("Memory [State]", label);
@@ -747,5 +768,101 @@ public class ItemUIRegistryImplTest {
 
         String color = uiRegistry.getLabelColor(widget);
         assertEquals("yellow", color);
+    }
+
+    @Test
+    public void getDefaultWidgets() {
+        Widget defaultWidget = uiRegistry.getDefaultWidget(GroupItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Group.class)));
+
+        defaultWidget = uiRegistry.getDefaultWidget(CallItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
+
+        defaultWidget = uiRegistry.getDefaultWidget(ColorItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Colorpicker.class)));
+
+        defaultWidget = uiRegistry.getDefaultWidget(ContactItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
+
+        defaultWidget = uiRegistry.getDefaultWidget(DateTimeItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
+
+        defaultWidget = uiRegistry.getDefaultWidget(DimmerItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Slider.class)));
+        assertThat(((Slider) defaultWidget).isSwitchEnabled(), is(true));
+
+        defaultWidget = uiRegistry.getDefaultWidget(ImageItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Image.class)));
+
+        defaultWidget = uiRegistry.getDefaultWidget(LocationItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Mapview.class)));
+
+        defaultWidget = uiRegistry.getDefaultWidget(PlayerItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
+        assertThat(((Switch) defaultWidget).getMappings(), hasSize(4));
+
+        defaultWidget = uiRegistry.getDefaultWidget(RollershutterItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
+
+        defaultWidget = uiRegistry.getDefaultWidget(SwitchItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
+    }
+
+    @Test
+    public void getDefaultWidgetsForNumberItem() {
+        // NumberItem without CommandOptions or StateOptions should return Text element
+        Widget defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
+
+        // NumberItem with one to four CommandOptions should return Switch element
+        final CommandDescriptionBuilder builder = CommandDescriptionBuilder.create()
+                .withCommandOptions(Stream
+                        .of(new CommandOption("command1", "label1"), new CommandOption("command2", "label2"),
+                                new CommandOption("command3", "label3"), new CommandOption("command4", "label4"))
+                        .collect(Collectors.toList()));
+        when(item.getCommandDescription()).thenReturn(builder.build());
+        defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
+
+        // NumberItem with more than four CommandOptions should return Selection element
+        builder.withCommandOption(new CommandOption("command5", "label5"));
+        when(item.getCommandDescription()).thenReturn(builder.build());
+        defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Selection.class)));
+
+        // NumberItem with one or more StateOptions should return Selection element
+        when(item.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create()
+                .withOption(new StateOption("value", "label")).build().toStateDescription());
+        defaultWidget = uiRegistry.getDefaultWidget(NumberItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Selection.class)));
+    }
+
+    @Test
+    public void getDefaultWidgetsForStringItem() {
+        // StringItem without CommandOptions or StateOptions should return Text element
+        Widget defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
+
+        // StringItem with one to four CommandOptions should return Switch element
+        final CommandDescriptionBuilder builder = CommandDescriptionBuilder.create()
+                .withCommandOptions(Stream
+                        .of(new CommandOption("command1", "label1"), new CommandOption("command2", "label2"),
+                                new CommandOption("command3", "label3"), new CommandOption("command4", "label4"))
+                        .collect(Collectors.toList()));
+        when(item.getCommandDescription()).thenReturn(builder.build());
+        defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
+
+        // StringItem with more than four CommandOptions should return Selection element
+        builder.withCommandOption(new CommandOption("command5", "label5"));
+        when(item.getCommandDescription()).thenReturn(builder.build());
+        defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Selection.class)));
+
+        // StringItem with one or more StateOptions should return Selection element
+        when(item.getStateDescription()).thenReturn(StateDescriptionFragmentBuilder.create()
+                .withOption(new StateOption("value", "label")).build().toStateDescription());
+        defaultWidget = uiRegistry.getDefaultWidget(StringItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Selection.class)));
     }
 }
