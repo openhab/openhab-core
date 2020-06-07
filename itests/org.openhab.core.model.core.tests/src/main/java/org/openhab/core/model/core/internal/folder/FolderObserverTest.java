@@ -44,6 +44,7 @@ import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.service.component.ComponentContext;
 
@@ -90,6 +91,9 @@ public class FolderObserverTest extends JavaOSGiTest {
     private ModelParser modelParser;
 
     @Mock
+    private ReadyService readyService;
+
+    @Mock
     private ComponentContext context;
     private Dictionary<String, Object> configProps;
 
@@ -126,6 +130,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         folderObserver = new FolderObserver(modelRepo);
         folderObserver.addModelParser(modelParser);
+        folderObserver.readyService = readyService;
     }
 
     /**
@@ -350,6 +355,7 @@ public class FolderObserverTest extends JavaOSGiTest {
         };
         FolderObserver localFolderObserver = new FolderObserver(modelRepo);
         localFolderObserver.addModelParser(modelParser);
+        localFolderObserver.readyService = readyService;
 
         String validExtension = "java";
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg," + validExtension);
