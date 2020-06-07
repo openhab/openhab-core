@@ -32,13 +32,14 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericCronTriggerHandler extends BaseTriggerModuleHandler implements SchedulerRunnable {
 
-    private final Logger logger = LoggerFactory.getLogger(GenericCronTriggerHandler.class);
-
     public static final String MODULE_TYPE_ID = "timer.GenericCronTrigger";
     public static final String CALLBACK_CONTEXT_NAME = "CALLBACK";
     public static final String MODULE_CONTEXT_NAME = "MODULE";
 
-    private static final String CFG_CRON_EXPRESSION = "cronExpression";
+    public static final String CFG_CRON_EXPRESSION = "cronExpression";
+
+    private final Logger logger = LoggerFactory.getLogger(GenericCronTriggerHandler.class);
+
     private final CronScheduler scheduler;
     private final String expression;
     private ScheduledCompletableFuture<?> schedule;

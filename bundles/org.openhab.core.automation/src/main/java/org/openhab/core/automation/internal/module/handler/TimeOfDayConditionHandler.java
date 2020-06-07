@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
  */
 public class TimeOfDayConditionHandler extends BaseConditionModuleHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(TimeOfDayConditionHandler.class);
-
     public static final String MODULE_TYPE_ID = "core.TimeOfDayCondition";
 
     /**
@@ -39,6 +37,8 @@ public class TimeOfDayConditionHandler extends BaseConditionModuleHandler {
      */
     private static final String START_TIME = "startTime";
     private static final String END_TIME = "endTime";
+    private final Logger logger = LoggerFactory.getLogger(TimeOfDayConditionHandler.class);
+
     /**
      * The start time of the user configured time span.
      */

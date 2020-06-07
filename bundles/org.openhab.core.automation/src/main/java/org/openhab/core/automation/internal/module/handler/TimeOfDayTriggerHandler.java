@@ -37,7 +37,7 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler implements
     public static final String MODULE_TYPE_ID = "timer.TimeOfDayTrigger";
     public static final String MODULE_CONTEXT_NAME = "MODULE";
 
-    private static final String CFG_TIME = "time";
+    public static final String CFG_TIME = "time";
 
     private final CronScheduler scheduler;
     private final String expression;

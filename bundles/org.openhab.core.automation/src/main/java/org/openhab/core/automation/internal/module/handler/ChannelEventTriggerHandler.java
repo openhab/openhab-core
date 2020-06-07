@@ -38,13 +38,13 @@ import org.slf4j.LoggerFactory;
  */
 public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
-    private final Logger logger = LoggerFactory.getLogger(ChannelEventTriggerHandler.class);
-
     public static final String MODULE_TYPE_ID = "core.ChannelEventTrigger";
 
-    private static final String CFG_CHANNEL_EVENT = "event";
-    private static final String CFG_CHANNEL = "channelUID";
-    private static final String TOPIC = "smarthome/channels/*/triggered";
+    public static final String CFG_CHANNEL_EVENT = "event";
+    public static final String CFG_CHANNEL = "channelUID";
+    public static final String TOPIC = "smarthome/channels/*/triggered";
+
+    private final Logger logger = LoggerFactory.getLogger(ChannelEventTriggerHandler.class);
 
     private final String eventOnChannel;
     private final String channelUID;

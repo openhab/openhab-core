@@ -46,18 +46,18 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericEventTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
+    public static final String MODULE_TYPE_ID = "core.GenericEventTrigger";
+
+    private static final String CFG_EVENT_TOPIC = "eventTopic";
+    private static final String CFG_EVENT_SOURCE = "eventSource";
+    private static final String CFG_EVENT_TYPES = "eventTypes";
+
     private final Logger logger = LoggerFactory.getLogger(GenericEventTriggerHandler.class);
 
     private final String source;
     private String topic;
     private final Set<String> types;
     private final BundleContext bundleContext;
-
-    public static final String MODULE_TYPE_ID = "core.GenericEventTrigger";
-
-    private static final String CFG_EVENT_TOPIC = "eventTopic";
-    private static final String CFG_EVENT_SOURCE = "eventSource";
-    private static final String CFG_EVENT_TYPES = "eventTypes";
 
     @SuppressWarnings("rawtypes")
     private ServiceRegistration eventSubscriberRegistration;

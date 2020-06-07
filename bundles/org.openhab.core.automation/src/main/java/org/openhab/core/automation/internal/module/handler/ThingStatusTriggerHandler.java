@@ -45,6 +45,18 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
+    public static final String UPDATE_MODULE_TYPE_ID = "core.ThingStatusUpdateTrigger";
+    public static final String CHANGE_MODULE_TYPE_ID = "core.ThingStatusChangeTrigger";
+
+    public static final String CFG_THING_UID = "thingUID";
+    public static final String CFG_STATUS = "status";
+    public static final String CFG_PREVIOUS_STATUS = "previousStatus";
+
+    public static final String OUT_STATUS = "status";
+    public static final String OUT_NEW_STATUS = "newStatus";
+    public static final String OUT_OLD_STATUS = "oldStatus";
+    public static final String OUT_EVENT = "event";
+
     private final Logger logger = LoggerFactory.getLogger(ThingStatusTriggerHandler.class);
 
     private final String thingUID;
@@ -52,18 +64,6 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
     private @Nullable final String previousStatus;
     private final Set<String> types;
     private final BundleContext bundleContext;
-
-    public static final String UPDATE_MODULE_TYPE_ID = "core.ThingStatusUpdateTrigger";
-    public static final String CHANGE_MODULE_TYPE_ID = "core.ThingStatusChangeTrigger";
-
-    private static final String CFG_THING_UID = "thingUID";
-    private static final String CFG_STATUS = "status";
-    private static final String CFG_PREVIOUS_STATUS = "previousStatus";
-
-    private static final String OUT_STATUS = "status";
-    private static final String OUT_NEW_STATUS = "newStatus";
-    private static final String OUT_OLD_STATUS = "oldStatus";
-    private static final String OUT_EVENT = "event";
 
     private final ServiceRegistration<?> eventSubscriberRegistration;
 

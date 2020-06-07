@@ -57,8 +57,8 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
 
     public static final String MODULE_TYPE_ID = "core.GroupCommandTrigger";
 
-    private static final String CFG_GROUPNAME = "groupName";
-    private static final String CFG_COMMAND = "command";
+    public static final String CFG_GROUPNAME = "groupName";
+    public static final String CFG_COMMAND = "command";
 
     private ServiceRegistration<?> eventSubscriberRegistration;
     private @Nullable ItemRegistry itemRegistry;
