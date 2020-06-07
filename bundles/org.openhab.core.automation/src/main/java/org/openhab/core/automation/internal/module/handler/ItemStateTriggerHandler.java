@@ -44,6 +44,14 @@ import org.slf4j.LoggerFactory;
  * @author Simon Merschjohann - Initial contribution
  */
 public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
+
+    public static final String UPDATE_MODULE_TYPE_ID = "core.ItemStateUpdateTrigger";
+    public static final String CHANGE_MODULE_TYPE_ID = "core.ItemStateChangeTrigger";
+
+    public static final String CFG_ITEMNAME = "itemName";
+    public static final String CFG_STATE = "state";
+    public static final String CFG_PREVIOUS_STATE = "previousState";
+
     private final Logger logger = LoggerFactory.getLogger(ItemStateTriggerHandler.class);
 
     private final String itemName;
@@ -52,15 +60,7 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
     private Set<String> types;
     private final BundleContext bundleContext;
 
-    public static final String UPDATE_MODULE_TYPE_ID = "core.ItemStateUpdateTrigger";
-    public static final String CHANGE_MODULE_TYPE_ID = "core.ItemStateChangeTrigger";
-
-    private static final String CFG_ITEMNAME = "itemName";
-    private static final String CFG_STATE = "state";
-    private static final String CFG_PREVIOUS_STATE = "previousState";
-
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public ItemStateTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);

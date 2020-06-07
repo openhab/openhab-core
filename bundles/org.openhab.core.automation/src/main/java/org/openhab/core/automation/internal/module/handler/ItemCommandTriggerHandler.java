@@ -41,6 +41,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
+    public static final String MODULE_TYPE_ID = "core.ItemCommandTrigger";
+
+    public static final String CFG_ITEMNAME = "itemName";
+    public static final String CFG_COMMAND = "command";
+
     private final Logger logger = LoggerFactory.getLogger(ItemCommandTriggerHandler.class);
 
     private final String itemName;
@@ -50,13 +55,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     private final Set<String> types;
     private final BundleContext bundleContext;
 
-    public static final String MODULE_TYPE_ID = "core.ItemCommandTrigger";
-
-    private static final String CFG_ITEMNAME = "itemName";
-    private static final String CFG_COMMAND = "command";
-
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public ItemCommandTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);

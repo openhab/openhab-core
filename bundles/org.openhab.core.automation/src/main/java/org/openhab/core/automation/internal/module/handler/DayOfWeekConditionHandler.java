@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
  */
 public class DayOfWeekConditionHandler extends BaseConditionModuleHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(DayOfWeekConditionHandler.class);
-
     public static final String MODULE_TYPE_ID = "timer.DayOfWeekCondition";
     public static final String MODULE_CONTEXT_NAME = "MODULE";
 
-    private static final String CFG_DAYS = "days";
+    public static final String CFG_DAYS = "days";
+
+    private final Logger logger = LoggerFactory.getLogger(DayOfWeekConditionHandler.class);
 
     private final Set<Integer> days;
 

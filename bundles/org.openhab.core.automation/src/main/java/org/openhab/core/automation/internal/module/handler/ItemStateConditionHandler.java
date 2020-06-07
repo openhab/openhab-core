@@ -33,12 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ItemStateConditionHandler extends BaseConditionModuleHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(ItemStateConditionHandler.class);
-
-    public static final String ITEM_STATE_CONDITION = "core.ItemStateCondition";
-
-    private ItemRegistry itemRegistry;
-
     /**
      * Constants for Config-Parameters corresponding to Definition in
      * ItemModuleTypeDefinition.json
@@ -46,6 +40,12 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler {
     private static final String ITEM_NAME = "itemName";
     private static final String OPERATOR = "operator";
     private static final String STATE = "state";
+
+    private final Logger logger = LoggerFactory.getLogger(ItemStateConditionHandler.class);
+
+    public static final String ITEM_STATE_CONDITION = "core.ItemStateCondition";
+
+    private ItemRegistry itemRegistry;
 
     public ItemStateConditionHandler(Condition condition) {
         super(condition);

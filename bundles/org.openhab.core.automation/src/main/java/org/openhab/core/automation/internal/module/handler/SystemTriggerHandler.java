@@ -43,11 +43,11 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class SystemTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
 
-    private final Logger logger = LoggerFactory.getLogger(SystemTriggerHandler.class);
-
     public static final String STARTLEVEL_MODULE_TYPE_ID = "core.SystemStartlevelTrigger";
-    private static final String CFG_STARTLEVEL = "startlevel";
-    private static final String OUT_STARTLEVEL = "startlevel";
+    public static final String CFG_STARTLEVEL = "startlevel";
+    public static final String OUT_STARTLEVEL = "startlevel";
+
+    private final Logger logger = LoggerFactory.getLogger(SystemTriggerHandler.class);
 
     private final Integer startlevel;
     private final Set<String> types;

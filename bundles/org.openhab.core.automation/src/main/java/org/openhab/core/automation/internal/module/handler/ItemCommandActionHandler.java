@@ -36,11 +36,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ItemCommandActionHandler extends BaseActionModuleHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(ItemCommandActionHandler.class);
-
     public static final String ITEM_COMMAND_ACTION = "core.ItemCommandAction";
-    private static final String ITEM_NAME = "itemName";
-    private static final String COMMAND = "command";
+    public static final String ITEM_NAME = "itemName";
+    public static final String COMMAND = "command";
+
+    private final Logger logger = LoggerFactory.getLogger(ItemCommandActionHandler.class);
 
     private ItemRegistry itemRegistry;
     private EventPublisher eventPublisher;

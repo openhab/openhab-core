@@ -48,6 +48,14 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implements EventSubscriber, EventFilter {
+
+    public static final String UPDATE_MODULE_TYPE_ID = "core.GroupStateUpdateTrigger";
+    public static final String CHANGE_MODULE_TYPE_ID = "core.GroupStateChangeTrigger";
+
+    public static final String CFG_GROUPNAME = "groupName";
+    public static final String CFG_STATE = "state";
+    public static final String CFG_PREVIOUS_STATE = "previousState";
+
     private final Logger logger = LoggerFactory.getLogger(GroupStateTriggerHandler.class);
 
     private final String groupName;
@@ -56,13 +64,6 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
     private Set<String> types;
     private final BundleContext bundleContext;
     private @Nullable ItemRegistry itemRegistry;
-
-    public static final String UPDATE_MODULE_TYPE_ID = "core.GroupStateUpdateTrigger";
-    public static final String CHANGE_MODULE_TYPE_ID = "core.GroupStateChangeTrigger";
-
-    private static final String CFG_GROUPNAME = "groupName";
-    private static final String CFG_STATE = "state";
-    private static final String CFG_PREVIOUS_STATE = "previousState";
 
     private ServiceRegistration<?> eventSubscriberRegistration;
 
