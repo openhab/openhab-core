@@ -38,6 +38,8 @@ import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.ReadyService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -60,6 +62,12 @@ public class FolderObserver extends AbstractWatchService {
 
     /* the model repository is provided as a service */
     private final ModelRepository modelRepository;
+    private static final String READYMARKER_TYPE = "dsl";
+
+    @Reference
+    /* default */ ReadyService readyService;
+
+    private boolean activated;
 
     /* map that stores a list of valid file extensions for each folder */
     private final Map<String, String[]> folderFileExtMap = new ConcurrentHashMap<>();
@@ -82,8 +90,10 @@ public class FolderObserver extends AbstractWatchService {
     protected void addModelParser(ModelParser modelParser) {
         parsers.add(modelParser.getExtension());
 
-        // if the component isn't activated yet, ignoredFiles will be empty and thus this method does nothing
-        processIgnoredFiles(modelParser.getExtension());
+        if (activated) {
+            processIgnoredFiles(modelParser.getExtension());
+            readyService.markReady(new ReadyMarker(READYMARKER_TYPE, modelParser.getExtension()));
+        }
     }
 
     protected void removeModelParser(ModelParser modelParser) {
@@ -118,13 +128,14 @@ public class FolderObserver extends AbstractWatchService {
         }
 
         addModelsToRepo();
-
         super.activate();
+        this.activated = true;
     }
 
     @Override
     @Deactivate
     public void deactivate() {
+        this.activated = false;
         super.deactivate();
         deleteModelsFromRepo();
         this.ignoredFiles.clear();
@@ -185,6 +196,9 @@ public class FolderObserver extends AbstractWatchService {
                                 checkFile(modelRepository, file, ENTRY_CREATE);
                             }
                         }
+                    }
+                    for (String ext : validExtension) {
+                        readyService.markReady(new ReadyMarker(READYMARKER_TYPE, ext));
                     }
                 }
             }
