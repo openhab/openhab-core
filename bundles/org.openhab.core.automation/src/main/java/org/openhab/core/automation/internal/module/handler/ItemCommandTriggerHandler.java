@@ -55,8 +55,7 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
     private final Set<String> types;
     private final BundleContext bundleContext;
 
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public ItemCommandTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);

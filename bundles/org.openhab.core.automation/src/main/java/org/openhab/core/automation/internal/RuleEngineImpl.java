@@ -460,7 +460,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             unregister(oldRule);
         }
 
-        if (isEnabled(rUID) == true) {
+        if (isEnabled(rUID) == Boolean.TRUE) {
             setRule(rule);
         }
     }

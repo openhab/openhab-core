@@ -60,8 +60,7 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
     private Set<String> types;
     private final BundleContext bundleContext;
 
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public ItemStateTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);

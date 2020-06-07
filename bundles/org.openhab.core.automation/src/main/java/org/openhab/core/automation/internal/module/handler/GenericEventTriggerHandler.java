@@ -59,8 +59,7 @@ public class GenericEventTriggerHandler extends BaseTriggerModuleHandler impleme
     private final Set<String> types;
     private final BundleContext bundleContext;
 
-    @SuppressWarnings("rawtypes")
-    private ServiceRegistration eventSubscriberRegistration;
+    private ServiceRegistration<?> eventSubscriberRegistration;
 
     public GenericEventTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
