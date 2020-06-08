@@ -64,8 +64,7 @@ public class FolderObserver extends AbstractWatchService {
     private final ModelRepository modelRepository;
     private static final String READYMARKER_TYPE = "dsl";
 
-    @Reference
-    /* default */ ReadyService readyService;
+    private final ReadyService readyService;
 
     private boolean activated;
 
@@ -80,10 +79,11 @@ public class FolderObserver extends AbstractWatchService {
     private final Map<String, File> nameFileMap = new HashMap<>();
 
     @Activate
-    public FolderObserver(final @Reference ModelRepository modelRepo) {
+    public FolderObserver(final @Reference ModelRepository modelRepo, final @Reference ReadyService readyService) {
         super(ConfigConstants.getConfigFolder());
 
         this.modelRepository = modelRepo;
+        this.readyService = readyService;
     }
 
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)

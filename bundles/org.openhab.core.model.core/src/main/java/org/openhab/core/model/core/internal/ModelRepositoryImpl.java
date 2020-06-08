@@ -100,16 +100,20 @@ public class ModelRepositoryImpl implements ModelRepository {
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
         logger.info("Loading model '{}'", name);
         Resource resource = null;
-        InputStream inputStream = null;
-        try {
-            byte[] bytes = originalInputStream.readAllBytes();
+        byte[] bytes = null;
+        try (InputStream inputStream = originalInputStream) {
+            bytes = inputStream.readAllBytes();
             String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
             if (validationResult != null) {
                 logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name, validationResult);
                 removeModel(name);
                 return false;
             }
-            inputStream = new ByteArrayInputStream(bytes);
+        } catch (IOException e) {
+            logger.warn("Configuration model '{}' cannot be parsed correctly!", name, e);
+            return false;
+        }
+        try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
             resource = getResource(name);
             if (resource == null) {
                 synchronized (resourceSet) {
@@ -141,13 +145,6 @@ public class ModelRepositoryImpl implements ModelRepository {
             logger.warn("Configuration model '{}' cannot be parsed correctly!", name, e);
             if (resource != null) {
                 resourceSet.getResources().remove(resource);
-            }
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                }
             }
         }
         return false;
@@ -189,17 +186,16 @@ public class ModelRepositoryImpl implements ModelRepository {
             // Make a copy to avoid ConcurrentModificationException
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
             for (Resource resource : resourceListCopy) {
-                if (resource.getURI().lastSegment().contains(".") && resource.isLoaded()) {
-                    if (modelType.equalsIgnoreCase(resource.getURI().fileExtension())
-                            && !resource.getURI().lastSegment().startsWith("tmp_")) {
-                        XtextResource xtextResource = (XtextResource) resource;
-                        // It's not sufficient to discard the derived state.
-                        // The quick & dirts solution is to reparse the whole resource.
-                        // We trigger this by dummy updating the resource.
-                        logger.debug("Refreshing resource '{}'", resource.getURI().lastSegment());
-                        xtextResource.update(1, 0, "");
-                        notifyListeners(resource.getURI().lastSegment(), EventType.MODIFIED);
-                    }
+                if (resource.getURI().lastSegment().contains(".") && resource.isLoaded()
+                        && modelType.equalsIgnoreCase(resource.getURI().fileExtension())
+                        && !resource.getURI().lastSegment().startsWith("tmp_")) {
+                    XtextResource xtextResource = (XtextResource) resource;
+                    // It's not sufficient to discard the derived state.
+                    // The quick & dirts solution is to reparse the whole resource.
+                    // We trigger this by dummy updating the resource.
+                    logger.debug("Refreshing resource '{}'", resource.getURI().lastSegment());
+                    xtextResource.update(1, 0, "");
+                    notifyListeners(resource.getURI().lastSegment(), EventType.MODIFIED);
                 }
             }
         }
@@ -212,13 +208,13 @@ public class ModelRepositoryImpl implements ModelRepository {
             // Make a copy to avoid ConcurrentModificationException
             List<Resource> resourceListCopy = new ArrayList<>(resourceSet.getResources());
             for (Resource resource : resourceListCopy) {
-                if (resource.getURI().lastSegment().contains(".") && resource.isLoaded()) {
-                    if (modelType.equalsIgnoreCase(resource.getURI().fileExtension())) {
-                        logger.debug("Removing resource '{}'", resource.getURI().lastSegment());
-                        ret.add(resource.getURI().lastSegment());
-                        resourceSet.getResources().remove(resource);
-                        notifyListeners(resource.getURI().lastSegment(), EventType.REMOVED);
-                    }
+                if (resource.getURI().lastSegment().contains(".") && resource.isLoaded()
+                        && modelType.equalsIgnoreCase(resource.getURI().fileExtension())
+                        && !resource.getURI().lastSegment().startsWith("tmp_")) {
+                    logger.debug("Removing resource '{}'", resource.getURI().lastSegment());
+                    ret.add(resource.getURI().lastSegment());
+                    resourceSet.getResources().remove(resource);
+                    notifyListeners(resource.getURI().lastSegment(), EventType.REMOVED);
                 }
             }
         }

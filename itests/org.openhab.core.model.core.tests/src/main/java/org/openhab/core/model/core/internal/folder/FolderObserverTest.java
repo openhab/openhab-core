@@ -128,9 +128,8 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         modelRepo = new ModelRepoDummy();
 
-        folderObserver = new FolderObserver(modelRepo);
+        folderObserver = new FolderObserver(modelRepo, readyService);
         folderObserver.addModelParser(modelParser);
-        folderObserver.readyService = readyService;
     }
 
     /**
@@ -353,9 +352,8 @@ public class FolderObserverTest extends JavaOSGiTest {
                 throw new RuntimeException("intentional failure.");
             }
         };
-        FolderObserver localFolderObserver = new FolderObserver(modelRepo);
+        FolderObserver localFolderObserver = new FolderObserver(modelRepo, readyService);
         localFolderObserver.addModelParser(modelParser);
-        localFolderObserver.readyService = readyService;
 
         String validExtension = "java";
         configProps.put(EXISTING_SUBDIR_NAME, "txt,jpg," + validExtension);
