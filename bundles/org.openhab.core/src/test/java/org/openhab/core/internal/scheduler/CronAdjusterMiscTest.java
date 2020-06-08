@@ -68,11 +68,6 @@ public class CronAdjusterMiscTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testRangeWeekDay() {
-        new CronAdjuster("* * * * * FRI-1");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void testRangeLeftSideError() {
         new CronAdjuster("X-3 * * * * *");
     }
