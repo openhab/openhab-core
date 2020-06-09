@@ -290,18 +290,33 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             if (range[0] == range[1]) {
                 range[1] = max;
             }
-            return temporal -> {
-                final int n = temporal.get(chronoField);
-                return n >= range[0] && n <= range[1] && ((n - range[0]) % increment) == 0;
-            };
+            if (range[0] > range[1]) {
+                return temporal -> {
+                    final int n = temporal.get(chronoField);
+                    return (n >= range[0] || n <= range[1]) && ((n - range[0]) % increment) == 0;
+                };
+            } else {
+                return temporal -> {
+                    final int n = temporal.get(chronoField);
+                    return n >= range[0] && n <= range[1] && ((n - range[0]) % increment) == 0;
+                };
+            }
         }
 
         // simple range/value check
-        return temporal -> {
-            final int n = temporal.get(chronoField);
+        if (range[0] > range[1]) {
+            return temporal -> {
+                final int n = temporal.get(chronoField);
 
-            return n >= range[0] && n <= range[1];
-        };
+                return n >= range[0] || n <= range[1];
+            };
+        } else {
+            return temporal -> {
+                final int n = temporal.get(chronoField);
+
+                return n >= range[0] && n <= range[1];
+            };
+        }
     }
 
     /**
@@ -428,14 +443,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             throw new IllegalArgumentException(String.format(
                     "Value too high in range in cron expression '%s' in field '%s': value %s, minimum: %s",
                     cronExpression, chronoField, r[1], max));
-
         }
-        if (r[0] > r[1]) {
-            throw new IllegalArgumentException(String.format(
-                    "Minimum higher than maximum range in cron expression '%s' in field '%s': min: %s, max: %s",
-                    cronExpression, chronoField, r[0], r[1]));
-        }
-
         return r;
     }
 
