@@ -44,6 +44,7 @@ import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.ReadyService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.service.component.ComponentContext;
 
@@ -90,6 +91,9 @@ public class FolderObserverTest extends JavaOSGiTest {
     private ModelParser modelParser;
 
     @Mock
+    private ReadyService readyService;
+
+    @Mock
     private ComponentContext context;
     private Dictionary<String, Object> configProps;
 
@@ -124,7 +128,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         modelRepo = new ModelRepoDummy();
 
-        folderObserver = new FolderObserver(modelRepo);
+        folderObserver = new FolderObserver(modelRepo, readyService);
         folderObserver.addModelParser(modelParser);
     }
 
@@ -348,7 +352,7 @@ public class FolderObserverTest extends JavaOSGiTest {
                 throw new RuntimeException("intentional failure.");
             }
         };
-        FolderObserver localFolderObserver = new FolderObserver(modelRepo);
+        FolderObserver localFolderObserver = new FolderObserver(modelRepo, readyService);
         localFolderObserver.addModelParser(modelParser);
 
         String validExtension = "java";

@@ -127,7 +127,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
      *
      * @param factory The {@link ItemFactory} to add.
      */
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     public void addItemFactory(ItemFactory factory) {
         itemFactorys.add(factory);
         dispatchBindingsPerItemType(null, factory.getSupportedItemTypes());
