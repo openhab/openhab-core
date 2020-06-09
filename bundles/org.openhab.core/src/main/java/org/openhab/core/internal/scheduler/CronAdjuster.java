@@ -443,7 +443,6 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             throw new IllegalArgumentException(String.format(
                     "Value too high in range in cron expression '%s' in field '%s': value %s, minimum: %s",
                     cronExpression, chronoField, r[1], max));
-
         }
         return r;
     }
