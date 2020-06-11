@@ -161,7 +161,7 @@ public class ThingTypeResource implements RESTResource {
         }
     }
 
-    private @Nullable ThingTypeDTO convertToThingTypeDTO(ThingType thingType, Locale locale) {
+    private ThingTypeDTO convertToThingTypeDTO(ThingType thingType, Locale locale) {
         final ConfigDescription configDescription;
         if (thingType.getConfigDescriptionURI() != null) {
             configDescription = this.configDescriptionRegistry.getConfigDescription(thingType.getConfigDescriptionURI(),
@@ -184,9 +184,6 @@ public class ThingTypeResource implements RESTResource {
 
         final List<ChannelDefinitionDTO> channelDefinitions = convertToChannelDefinitionDTOs(
                 thingType.getChannelDefinitions(), locale);
-        if (channelDefinitions == null) {
-            return null;
-        }
 
         return new ThingTypeDTO(thingType.getUID().toString(), thingType.getLabel(), thingType.getDescription(),
                 thingType.getCategory(), thingType.isListed(), parameters, channelDefinitions,
@@ -208,7 +205,9 @@ public class ThingTypeResource implements RESTResource {
             String description = channelGroupDefinition.getDescription();
             List<ChannelDefinition> channelDefinitions = Collections.emptyList();
 
-            if (channelGroupType != null) {
+            if (channelGroupType == null) {
+                logger.warn("Cannot find channel group type: {}", channelGroupDefinition.getTypeUID());
+            } else {
                 if (label == null) {
                     label = channelGroupType.getLabel();
                 }
@@ -227,35 +226,35 @@ public class ThingTypeResource implements RESTResource {
         return channelGroupDefinitionDTOs;
     }
 
-    private @Nullable List<ChannelDefinitionDTO> convertToChannelDefinitionDTOs(
-            List<ChannelDefinition> channelDefinitions, Locale locale) {
+    private List<ChannelDefinitionDTO> convertToChannelDefinitionDTOs(List<ChannelDefinition> channelDefinitions,
+            Locale locale) {
         List<ChannelDefinitionDTO> channelDefinitionDTOs = new ArrayList<>();
         for (ChannelDefinition channelDefinition : channelDefinitions) {
             ChannelType channelType = channelTypeRegistry.getChannelType(channelDefinition.getChannelTypeUID(), locale);
+
             if (channelType == null) {
                 logger.warn("Cannot find channel type: {}", channelDefinition.getChannelTypeUID());
-                return null;
-            }
+            } else {
+                // Default to the channelDefinition label to override the
+                // channelType
+                String label = channelDefinition.getLabel();
+                if (label == null) {
+                    label = channelType.getLabel();
+                }
 
-            // Default to the channelDefinition label to override the
-            // channelType
-            String label = channelDefinition.getLabel();
-            if (label == null) {
-                label = channelType.getLabel();
-            }
+                // Default to the channelDefinition description to override the
+                // channelType
+                String description = channelDefinition.getDescription();
+                if (description == null) {
+                    description = channelType.getDescription();
+                }
 
-            // Default to the channelDefinition description to override the
-            // channelType
-            String description = channelDefinition.getDescription();
-            if (description == null) {
-                description = channelType.getDescription();
+                ChannelDefinitionDTO channelDefinitionDTO = new ChannelDefinitionDTO(channelDefinition.getId(),
+                        channelDefinition.getChannelTypeUID().toString(), label, description, channelType.getTags(),
+                        channelType.getCategory(), channelType.getState(), channelType.isAdvanced(),
+                        channelDefinition.getProperties());
+                channelDefinitionDTOs.add(channelDefinitionDTO);
             }
-
-            ChannelDefinitionDTO channelDefinitionDTO = new ChannelDefinitionDTO(channelDefinition.getId(),
-                    channelDefinition.getChannelTypeUID().toString(), label, description, channelType.getTags(),
-                    channelType.getCategory(), channelType.getState(), channelType.isAdvanced(),
-                    channelDefinition.getProperties());
-            channelDefinitionDTOs.add(channelDefinitionDTO);
         }
         return channelDefinitionDTOs;
     }
