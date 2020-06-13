@@ -15,7 +15,6 @@ package org.openhab.core.library.types;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
-import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -256,12 +255,6 @@ public class DateTimeTypeTest {
 
     @Test
     public void serializationTest() {
-        DateTimeType dt = new DateTimeType(Calendar.getInstance());
-        assertTrue(dt.equals(new DateTimeType(dt.toString())));
-    }
-
-    @Test
-    public void serializationTestZoned() {
         ZonedDateTime zoned = ZonedDateTime.now();
         DateTimeType dt = new DateTimeType(zoned);
         DateTimeType sdt = new DateTimeType(dt.toFullString());
@@ -270,16 +263,6 @@ public class DateTimeTypeTest {
 
     @Test
     public void equalityTest() {
-        DateTimeType dt1 = new DateTimeType(Calendar.getInstance());
-        DateTimeType dt2 = DateTimeType.valueOf(dt1.toFullString());
-
-        assertTrue(dt1.toString().equals(dt2.toString()));
-        assertTrue(dt1.getCalendar().equals(dt2.getCalendar()));
-        assertTrue(dt1.equals(dt2));
-    }
-
-    @Test
-    public void equalityTestZoned() {
         ZonedDateTime zoned = ZonedDateTime.now();
         DateTimeType dt1 = new DateTimeType(zoned);
         DateTimeType dt2 = DateTimeType.valueOf(dt1.toFullString());
@@ -319,29 +302,6 @@ public class DateTimeTypeTest {
 
     @Test
     public void createDate() {
-        Map<String, Integer> inputTimeMap = parameterSet.inputTimeMap;
-        TimeZone inputTimeZone = parameterSet.inputTimeZone;
-        if (inputTimeMap == null || inputTimeZone == null) {
-            return;
-        }
-
-        // get DateTimeType from the current parameter
-        final Calendar calendar = Calendar.getInstance(inputTimeZone);
-        calendar.set(inputTimeMap.get("year"), inputTimeMap.get("month"), inputTimeMap.get("date"),
-                inputTimeMap.get("hourOfDay"), inputTimeMap.get("minute"), inputTimeMap.get("second"));
-        calendar.set(Calendar.MILLISECOND, inputTimeMap.get("milliseconds"));
-        DateTimeType dt1 = new DateTimeType(calendar);
-        DateTimeType dt2 = new DateTimeType(
-                new SimpleDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).format(calendar.getTime()));
-        // Test
-        assertEquals(dt1.toFullString(), dt1.toString());
-        assertEquals(parameterSet.expectedResultLocalTZ, dt1.toString());
-        assertEquals(parameterSet.expectedResultLocalTZ, dt2.toString());
-        assertEquals(dt1, dt2);
-    }
-
-    @Test
-    public void createZonedDate() {
         // get DateTimeType from the current parameter
         DateTimeType dt1;
         DateTimeType dt2;

@@ -35,16 +35,6 @@ public class RawType implements PrimitiveType, State {
     protected byte[] bytes;
     protected String mimeType;
 
-    @Deprecated
-    public RawType() {
-        this(new byte[0], DEFAULT_MIME_TYPE);
-    }
-
-    @Deprecated
-    public RawType(byte[] bytes) {
-        this(bytes, DEFAULT_MIME_TYPE);
-    }
-
     public RawType(byte[] bytes, String mimeType) {
         if (mimeType.isEmpty()) {
             throw new IllegalArgumentException("mimeType argument must not be blank");
