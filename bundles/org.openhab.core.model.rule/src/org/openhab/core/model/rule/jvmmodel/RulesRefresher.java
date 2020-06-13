@@ -68,20 +68,22 @@ public class RulesRefresher implements ReadyTracker {
     private ItemRegistryChangeListener itemRegistryChangeListener;
     private ThingRegistryChangeListener thingRegistryChangeListener;
 
-    @Reference
-    protected ModelRepository modelRepository;
+    private final ModelRepository modelRepository;
+    private final ItemRegistry itemRegistry;
+    private final ThingRegistry thingRegistry;
+    private final EventPublisher eventPublisher;
+    private final ReadyService readyService;
 
-    @Reference
-    protected ItemRegistry itemRegistry;
-
-    @Reference
-    protected ThingRegistry thingRegistry;
-
-    @Reference
-    protected EventPublisher eventPublisher;
-
-    @Reference
-    protected ReadyService readyService;
+    @Activate
+    public RulesRefresher(@Reference ModelRepository modelRepository, @Reference ItemRegistry itemRegistry,
+            @Reference ThingRegistry thingRegistry, @Reference EventPublisher eventPublisher,
+            @Reference ReadyService readyService) {
+        this.modelRepository = modelRepository;
+        this.itemRegistry = itemRegistry;
+        this.thingRegistry = thingRegistry;
+        this.eventPublisher = eventPublisher;
+        this.readyService = readyService;
+    }
 
     @Activate
     protected void activate() {

@@ -95,11 +95,14 @@ public class DSLRuleProvider
     private int triggerId = 0;
     private Set<String> markers = new HashSet<>();
 
-    @Reference
-    private @NonNullByDefault({}) ModelRepository modelRepository;
+    private final ModelRepository modelRepository;
+    private final ReadyService readyService;
 
-    @Reference
-    private @NonNullByDefault({}) ReadyService readyService;
+    @Activate
+    public DSLRuleProvider(@Reference ModelRepository modelRepository, @Reference ReadyService readyService) {
+        this.modelRepository = modelRepository;
+        this.readyService = readyService;
+    }
 
     @Activate
     protected void activate() {

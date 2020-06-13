@@ -38,11 +38,15 @@ public class DSLScriptEngineFactory implements ScriptEngineFactory {
 
     private @NonNullByDefault({}) DSLScriptEngine dslScriptEngine;
 
-    @Reference
-    protected @NonNullByDefault({}) ScriptEngine scriptEngine;
+    private final ScriptEngine scriptEngine;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL)
     protected @Nullable DSLScriptContextProvider contextProvider;
+
+    @Activate
+    public DSLScriptEngineFactory(@Reference ScriptEngine scriptEngine) {
+        this.scriptEngine = scriptEngine;
+    }
 
     @Activate
     protected void activate() {
