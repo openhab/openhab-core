@@ -12,7 +12,8 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Calendar;
+import java.time.DayOfWeek;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class DayOfWeekConditionHandler extends BaseConditionModuleHandler {
 
     private final Logger logger = LoggerFactory.getLogger(DayOfWeekConditionHandler.class);
 
-    private final Set<Integer> days;
+    private final Set<DayOfWeek> days;
 
     @SuppressWarnings("unchecked")
     public DayOfWeekConditionHandler(Condition module) {
@@ -46,25 +47,25 @@ public class DayOfWeekConditionHandler extends BaseConditionModuleHandler {
             for (String day : (Iterable<String>) module.getConfiguration().get(CFG_DAYS)) {
                 switch (day.toUpperCase()) {
                     case "SUN":
-                        days.add(Calendar.SUNDAY);
+                        days.add(DayOfWeek.SUNDAY);
                         break;
                     case "MON":
-                        days.add(Calendar.MONDAY);
+                        days.add(DayOfWeek.MONDAY);
                         break;
                     case "TUE":
-                        days.add(Calendar.TUESDAY);
+                        days.add(DayOfWeek.TUESDAY);
                         break;
                     case "WED":
-                        days.add(Calendar.WEDNESDAY);
+                        days.add(DayOfWeek.WEDNESDAY);
                         break;
                     case "THU":
-                        days.add(Calendar.THURSDAY);
+                        days.add(DayOfWeek.THURSDAY);
                         break;
                     case "FRI":
-                        days.add(Calendar.FRIDAY);
+                        days.add(DayOfWeek.FRIDAY);
                         break;
                     case "SAT":
-                        days.add(Calendar.SATURDAY);
+                        days.add(DayOfWeek.SATURDAY);
                         break;
                     default:
                         logger.warn("Ignoring illegal weekday '{}'", day);
@@ -78,7 +79,7 @@ public class DayOfWeekConditionHandler extends BaseConditionModuleHandler {
 
     @Override
     public boolean isSatisfied(Map<String, Object> context) {
-        int dow = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        DayOfWeek dow = ZonedDateTime.now().getDayOfWeek();
         return days.contains(dow);
     }
 }

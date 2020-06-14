@@ -16,9 +16,10 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Locale;
 
 import org.junit.Test;
@@ -39,9 +40,8 @@ import org.slf4j.LoggerFactory;
 public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
 
     private final Logger logger = LoggerFactory.getLogger(DayOfWeekConditionHandlerTest.class);
-    private Calendar cal = Calendar.getInstance();
     private SimpleDateFormat sdf = new SimpleDateFormat("EEE", Locale.ENGLISH);
-    private String dayOfWeek = sdf.format(cal.getTime()).toUpperCase();
+    private String dayOfWeek = sdf.format(Date.from(ZonedDateTime.now().toInstant())).toUpperCase();
 
     public DayOfWeekConditionHandlerTest() {
         logger.info("Today is {}", dayOfWeek);
