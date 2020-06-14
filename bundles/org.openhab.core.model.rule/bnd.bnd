@@ -12,8 +12,10 @@ Export-Package: org.openhab.core.model.rule,\
  org.openhab.core.model.rule.services,\
  org.openhab.core.model.rule.validation
 Import-Package: \
+ org.openhab.core.common,\
  org.openhab.core.common.registry,\
  org.openhab.core.events,\
+ org.openhab.core.events.system,\
  org.openhab.core.items,\
  org.openhab.core.library.items,\
  org.openhab.core.library.types,\
@@ -34,8 +36,6 @@ Import-Package: \
  org.eclipse.jdt.annotation;resolution:=optional,\
  org.eclipse.xtext.xbase.lib,\
  org.osgi.*,\
- org.quartz,\
- org.quartz.impl,\
  org.slf4j.*
 Require-Bundle: org.antlr.runtime,\
  org.eclipse.emf.common,\

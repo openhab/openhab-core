@@ -54,21 +54,6 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
 
     private final Logger logger = LoggerFactory.getLogger(RulesJvmModelInferrer)
 
-    /** Variable name for the item in a "state triggered" or "command triggered" rule */
-    public static final String VAR_TRIGGERING_ITEM = "triggeringItem";
-
-    /** Variable name for the previous state of an item in a "changed state triggered" rule */
-    public static final String VAR_PREVIOUS_STATE = "previousState";
-
-    /** Variable name for the new state of an item in a "changed state triggered" or "updated state triggered" rule */
-    public static final String VAR_NEW_STATE = "newState";
-
-    /** Variable name for the received command in a "command triggered" rule */
-    public static final String VAR_RECEIVED_COMMAND = "receivedCommand";
-
-    /** Variable name for the received event in a "trigger event" rule */
-    public static final String VAR_RECEIVED_EVENT = "receivedEvent";
-
     /**
      * conveninence API to build and initialize JvmTypes and their members.
      */

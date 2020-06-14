@@ -14,6 +14,7 @@ package org.openhab.core.scheduler;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.TemporalAdjuster;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
@@ -112,5 +113,5 @@ public interface Scheduler {
      * @param temporalAdjuster the temperalAdjuster to return the time the callable should run
      * @return A {@link ScheduledCompletableFuture}
      */
-    <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable callable, SchedulerTemporalAdjuster temporalAdjuster);
+    <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable callable, TemporalAdjuster temporalAdjuster);
 }

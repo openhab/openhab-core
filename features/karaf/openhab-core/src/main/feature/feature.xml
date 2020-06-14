@@ -23,6 +23,9 @@
 		<requirement>openhab.tp;filter:="(feature=base)"</requirement>
 		<feature dependency="true">openhab.tp-base</feature>
 
+		<requirement>openhab.tp;filter:="(feature=jollyday)"</requirement>
+		<feature dependency="true">openhab.tp-jollyday</feature>
+
 		<feature dependency="true">openhab.tp-gson</feature>
 
 		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.19.0)(!(version&gt;=2.20.0)))"</requirement>
@@ -34,6 +37,7 @@
 		<requirement>openhab.tp;filter:="(feature=httpclient)"</requirement>
 		<feature dependency="true">openhab.tp-httpclient</feature>
 
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
@@ -41,10 +45,10 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.binding.xml/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.scheduler/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
 		<bundle start-level="75">mvn:org.openhab.core.bundles/org.openhab.core.thing.xml/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
@@ -72,7 +76,6 @@
 
 	<feature name="openhab-core-automation" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature>openhab-core-ephemeris</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 	</feature>
 
@@ -112,13 +115,6 @@
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-ephemeris" version="${project.version}">
-		<requirement>openhab.tp;filter:="(feature=jollyday)"</requirement>
-		<feature dependency="true">openhab.tp-jollyday</feature>
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-io-bin2json" description="Binary to JSON converter" version="${project.version}">
@@ -340,7 +336,7 @@
 
 	<feature name="openhab-core-model-script" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature>openhab-core-ephemeris</feature>
+		<feature>openhab-core-automation-module-script</feature>
 		<feature>openhab-core-model-persistence</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.script.runtime/${project.version}</bundle>
@@ -429,7 +425,10 @@
 		<feature dependency="true">openhab.tp-commons-net</feature>
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-auth-jaas</feature>
-		<feature>openhab-core-ephemeris</feature>
+		<feature>openhab-core-automation-rest</feature>
+		<feature>openhab-core-automation-module-script</feature>
+		<feature>openhab-core-automation-module-media</feature>
+		<feature>openhab-core-automation</feature>
 		<feature>openhab-core-io-console-karaf</feature>
 		<feature>openhab-core-io-http-auth</feature>
 		<feature>openhab-core-io-rest-auth</feature>

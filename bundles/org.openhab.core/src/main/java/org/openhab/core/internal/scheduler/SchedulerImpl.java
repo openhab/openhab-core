@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjuster;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -138,8 +139,7 @@ public class SchedulerImpl implements Scheduler {
     }
 
     @Override
-    public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable,
-            SchedulerTemporalAdjuster temporalAdjuster) {
+    public <T> ScheduledCompletableFuture<T> schedule(SchedulerRunnable runnable, TemporalAdjuster temporalAdjuster) {
         final ScheduledCompletableFutureRecurring<T> schedule = new ScheduledCompletableFutureRecurring<>();
 
         schedule(schedule, runnable, temporalAdjuster);
@@ -147,16 +147,19 @@ public class SchedulerImpl implements Scheduler {
     }
 
     private <T> void schedule(ScheduledCompletableFutureRecurring<T> schedule, SchedulerRunnable runnable,
-            SchedulerTemporalAdjuster temporalAdjuster) {
+            TemporalAdjuster temporalAdjuster) {
         final Temporal newTime = ZonedDateTime.now(clock).with(temporalAdjuster);
         final ScheduledCompletableFutureOnce<T> deferred = new ScheduledCompletableFutureOnce<>();
 
         deferred.thenAccept(v -> {
-            if (temporalAdjuster.isDone(newTime)) {
-                schedule.complete(v);
-            } else {
-                schedule(schedule, runnable, temporalAdjuster);
+            if (temporalAdjuster instanceof SchedulerTemporalAdjuster) {
+                SchedulerTemporalAdjuster schedulerTemporalAdjuster = (SchedulerTemporalAdjuster) temporalAdjuster;
+                if (!schedulerTemporalAdjuster.isDone(newTime)) {
+                    schedule(schedule, runnable, temporalAdjuster);
+                    return;
+                }
             }
+            schedule.complete(v);
         });
         schedule.setScheduledPromise(deferred);
         atInternal(deferred, () -> {

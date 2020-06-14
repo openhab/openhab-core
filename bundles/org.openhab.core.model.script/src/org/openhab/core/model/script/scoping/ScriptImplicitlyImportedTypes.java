@@ -15,7 +15,6 @@ package org.openhab.core.model.script.scoping;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +107,6 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(BinaryPrefix.class);
 
         // date time static functions
-        result.add(Instant.class);
         result.add(ZonedDateTime.class);
 
         result.addAll(getActionClasses());

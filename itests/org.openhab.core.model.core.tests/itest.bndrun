@@ -90,9 +90,10 @@ Fragment-Host: org.openhab.core.model.core
 	org.openhab.core.model.sitemap;version='[3.0.0,3.0.1)',\
 	org.openhab.core.model.thing;version='[3.0.0,3.0.1)',\
 	org.openhab.core.persistence;version='[3.0.0,3.0.1)',\
-	org.openhab.core.scheduler;version='[3.0.0,3.0.1)',\
 	org.openhab.core.test;version='[3.0.0,3.0.1)',\
 	org.openhab.core.thing;version='[3.0.0,3.0.1)',\
 	org.openhab.core.transform;version='[3.0.0,3.0.1)',\
 	org.openhab.core.voice;version='[3.0.0,3.0.1)',\
-	org.openhab.core.model.item.runtime;version='[3.0.0,3.0.1)'
+	org.openhab.core.automation;version='[3.0.0,3.0.1)',\
+	org.openhab.core.automation.module.script;version='[3.0.0,3.0.1)',\
+	org.openhab.core.model.thing.runtime;version='[3.0.0,3.0.1)'
