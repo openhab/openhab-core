@@ -12,9 +12,9 @@
  */
 package org.openhab.core.persistence;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.openhab.core.types.State;
 
@@ -178,7 +178,7 @@ public class FilterCriteria {
     @Deprecated
     public FilterCriteria setBeginDate(Date beginDate) {
         if (beginDate != null) {
-            this.beginDate = ZonedDateTime.ofInstant(beginDate.toInstant(), TimeZone.getDefault().toZoneId());
+            this.beginDate = ZonedDateTime.ofInstant(beginDate.toInstant(), ZoneId.systemDefault());
         } else {
             this.beginDate = null;
         }
@@ -205,7 +205,7 @@ public class FilterCriteria {
     @Deprecated
     public FilterCriteria setEndDate(Date endDate) {
         if (endDate != null) {
-            this.endDate = ZonedDateTime.ofInstant(endDate.toInstant(), TimeZone.getDefault().toZoneId());
+            this.endDate = ZonedDateTime.ofInstant(endDate.toInstant(), ZoneId.systemDefault());
         } else {
             this.endDate = null;
         }

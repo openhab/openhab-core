@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -325,7 +326,7 @@ public class DateTimeTypeTest {
             dt2 = new DateTimeType(zonedDate);
         } else if (inputTimeString != null) {
             dt1 = new DateTimeType(inputTimeString);
-            dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(TimeZone.getDefault().toZoneId()));
+            dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(ZoneId.systemDefault()));
             dt3 = new DateTimeType(dt1.getZonedDateTime());
         } else {
             throw new DateTimeException("Invalid inputs in parameter set");
