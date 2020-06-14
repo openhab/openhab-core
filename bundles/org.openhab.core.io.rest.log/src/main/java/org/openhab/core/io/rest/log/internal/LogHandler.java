@@ -13,8 +13,8 @@
 package org.openhab.core.io.rest.log.internal;
 
 import java.net.URL;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -137,7 +137,7 @@ public class LogHandler implements RESTResource {
             return Response.status(500)
                     .entity(String.format(TEMPLATE_INTERNAL_ERROR, LogConstants.LOG_HANDLE_ERROR, "ERROR")).build();
         }
-        logMessage.timestamp = Calendar.getInstance().getTimeInMillis();
+        logMessage.timestamp = ZonedDateTime.now().toInstant().toEpochMilli();
 
         if (!doLog(logMessage)) {
             return Response.status(403).entity(String.format(TEMPLATE_INTERNAL_ERROR,

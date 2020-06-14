@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -303,7 +302,7 @@ public class PersistenceExtensions {
 
                 @Override
                 public Date getTimestamp() {
-                    return Calendar.getInstance().getTime();
+                    return Date.from(ZonedDateTime.now().toInstant());
                 }
 
                 @Override
@@ -369,7 +368,7 @@ public class PersistenceExtensions {
 
                 @Override
                 public Date getTimestamp() {
-                    return Calendar.getInstance().getTime();
+                    return Date.from(ZonedDateTime.now().toInstant());
                 }
 
                 @Override

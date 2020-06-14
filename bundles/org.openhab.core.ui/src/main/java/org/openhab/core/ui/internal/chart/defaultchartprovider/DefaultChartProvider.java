@@ -17,9 +17,9 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -328,10 +328,7 @@ public class DefaultChartProvider implements ChartProvider {
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(historicItem.getTimestamp());
-                cal.add(Calendar.MILLISECOND, -1);
-                xData.add(cal.getTime());
+                xData.add(Date.from(historicItem.getTimestamp().toInstant().minus(1, ChronoUnit.MILLIS)));
                 yData.add(convertData(state));
             }
 
