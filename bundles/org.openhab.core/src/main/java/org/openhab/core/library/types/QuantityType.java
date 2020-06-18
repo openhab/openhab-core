@@ -15,6 +15,9 @@ package org.openhab.core.library.types;
 import static org.eclipse.jdt.annotation.DefaultLocation.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.IllegalFormatConversionException;
 
@@ -29,6 +32,7 @@ import javax.measure.quantity.Dimensionless;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
+import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SmartHomeUnits;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
@@ -229,13 +233,28 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     @Override
     public String format(String pattern) {
+        boolean unitPlaceholder = pattern.contains(UnitUtils.UNIT_PLACEHOLDER);
         final String formatPattern;
 
-        if (pattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
-            String unitSymbol = SmartHomeUnits.PERCENT.equals(getUnit()) ? "%%" : getUnit().toString();
+        if (unitPlaceholder) {
+            String unitSymbol = getUnit().equals(SmartHomeUnits.PERCENT) ? "%%" : getUnit().toString();
             formatPattern = pattern.replace(UnitUtils.UNIT_PLACEHOLDER, unitSymbol);
         } else {
             formatPattern = pattern;
+        }
+
+        // The dimension could be a time value thus we want to support patterns to format datetime
+        if (quantity.getUnit().isCompatible(SmartHomeUnits.SECOND) && !unitPlaceholder) {
+            QuantityType<T> millis = toUnit(MetricPrefix.MILLI(SmartHomeUnits.SECOND));
+            if (millis != null) {
+                try {
+                    return String.format(formatPattern,
+                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis.longValue()), ZoneId.systemDefault()));
+                } catch (IllegalFormatConversionException ifce) {
+                    // The conversion is not valid for the type ZonedDateTime. This happens, if the format is like
+                    // "%.1f". Fall through to default behavior.
+                }
+            }
         }
 
         // The value could be an integer value. Try to convert to BigInteger in
