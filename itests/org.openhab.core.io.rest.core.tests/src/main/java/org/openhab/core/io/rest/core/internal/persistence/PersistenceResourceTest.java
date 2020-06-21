@@ -17,10 +17,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,7 +90,7 @@ public class PersistenceResourceTest {
         when(pService.query(any())).thenReturn(items);
 
         when(persistenceServiceRegistry.get(PERSISTENCE_SERVICE_ID)).thenReturn(pService);
-        when(timeZoneProvider.getTimeZone()).thenReturn(TimeZone.getDefault().toZoneId());
+        when(timeZoneProvider.getTimeZone()).thenReturn(ZoneId.systemDefault());
     }
 
     @Test

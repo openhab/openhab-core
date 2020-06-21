@@ -23,7 +23,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -104,7 +103,7 @@ public class I18nProviderImplTest {
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertNull(location);
-        assertThat(i18nProviderImpl.getTimeZone(), is(TimeZone.getDefault().toZoneId()));
+        assertThat(i18nProviderImpl.getTimeZone(), is(ZoneId.systemDefault()));
         assertThat(setLocale, is(Locale.getDefault()));
     }
 
@@ -140,7 +139,7 @@ public class I18nProviderImplTest {
         conf.put(TIMEZONE, "invalid");
         i18nProviderImpl.modified(conf);
 
-        assertThat(i18nProviderImpl.getTimeZone(), is(TimeZone.getDefault().toZoneId()));
+        assertThat(i18nProviderImpl.getTimeZone(), is(ZoneId.systemDefault()));
     }
 
     @Test

@@ -22,7 +22,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.TimeZone;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -278,7 +277,7 @@ public class I18nProviderImpl
     public ZoneId getTimeZone() {
         final ZoneId timeZone = this.timeZone;
         if (timeZone == null) {
-            return TimeZone.getDefault().toZoneId();
+            return ZoneId.systemDefault();
         }
         return timeZone;
     }

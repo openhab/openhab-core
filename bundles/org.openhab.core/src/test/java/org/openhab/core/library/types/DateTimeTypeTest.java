@@ -325,7 +325,7 @@ public class DateTimeTypeTest {
             dt2 = new DateTimeType(zonedDate);
         } else if (inputTimeString != null) {
             dt1 = new DateTimeType(inputTimeString);
-            dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(TimeZone.getDefault().toZoneId()));
+            dt2 = new DateTimeType(dt1.getZonedDateTime().withZoneSameInstant(ZoneId.systemDefault()));
             dt3 = new DateTimeType(dt1.getZonedDateTime());
         } else {
             throw new DateTimeException("Invalid inputs in parameter set");
