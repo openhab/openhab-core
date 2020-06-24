@@ -570,7 +570,8 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     @Test
     public void testMetadataConfigured() {
         String model = "Switch simple { namespace=\"value\" } " + //
-                "Switch configured { foo=\"bar\" [ answer=42 ] } ";
+                "Switch configured { foo=\"bar\" [ answer=42 ] } " + //
+                "Switch negative { foo=\"bar\" [ property=-42 ] }";
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Item item = itemRegistry.get("configured");
@@ -580,6 +581,11 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         assertThat(res, is(notNullValue()));
         assertThat(res.getValue(), is("bar"));
         assertThat(res.getConfiguration().get("answer"), is(new BigDecimal(42)));
+
+        res = metadataRegistry.get(new MetadataKey("foo", "negative"));
+        assertThat(res, is(notNullValue()));
+        assertThat(res.getValue(), is("bar"));
+        assertThat(res.getConfiguration().get("property"), is(new BigDecimal(-42)));
 
         Collection<Item> itemsToRemove = itemRegistry.getAll();
         List<AbstractItemRegistryEvent> removedItemEvents = new ArrayList<>();
