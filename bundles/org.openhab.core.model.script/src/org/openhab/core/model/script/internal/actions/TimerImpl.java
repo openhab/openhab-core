@@ -22,8 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is an implementation of the {@link Timer} interface using the Quartz
- * library for scheduling.
+ * This is an implementation of the {@link Timer} interface.
  *
  * @author Kai Kreuzer - Initial contribution
  */
@@ -31,18 +30,12 @@ public class TimerImpl implements Timer {
 
     private final Logger logger = LoggerFactory.getLogger(TimerImpl.class);
 
-    private ScheduledCompletableFuture<Object> future;
+    private final Scheduler scheduler;
     private final ZonedDateTime startTime;
+    private final SchedulerRunnable runnable;
+    private ScheduledCompletableFuture<Object> future;
 
-    private boolean cancelled = false;
-
-    private Scheduler scheduler;
-    private SchedulerRunnable runnable;
-
-    public TimerImpl(ScheduledCompletableFuture<Object> f, ZonedDateTime startTime) {
-        this.future = f;
-        this.startTime = startTime;
-    }
+    private boolean cancelled;
 
     public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable) {
         this.scheduler = scheduler;
@@ -61,6 +54,7 @@ public class TimerImpl implements Timer {
     @Override
     public boolean reschedule(ZonedDateTime newTime) {
         if (future.cancel(false)) {
+            cancelled = false;
             future = scheduler.schedule(runnable, newTime.toInstant());
             return true;
         } else {
@@ -76,7 +70,7 @@ public class TimerImpl implements Timer {
 
     @Override
     public boolean isRunning() {
-        return cancelled || (ZonedDateTime.now().isAfter(startTime) && !future.isDone());
+        return isActive() && ZonedDateTime.now().isAfter(startTime);
     }
 
     @Override
