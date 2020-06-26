@@ -249,7 +249,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             } else {
                 final Matcher m = WEEKDAY_PATTERN.matcher(sub);
                 if (m.matches()) {
-                    final int day = parseInt(cronExpression, chronoField, m.group("day"), min, max, names) - 1;
+                    final int day = parseDayOfWeek(cronExpression, m.group("day"), names);
                     final Checker c = temporal -> temporal.get(ChronoField.DAY_OF_WEEK) == day;
 
                     if (m.group("nr") != null) {
@@ -429,9 +429,9 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         }
 
         final String parts[] = range.split("-");
-        r[0] = r[1] = parseInt(cronExpression, chronoField, parts[0], min, max, names);
+        r[0] = r[1] = parseInt(cronExpression, chronoField, parts[0], min, names);
         if (parts.length == 2) {
-            r[1] = parseInt(cronExpression, chronoField, parts[1], min, max, names);
+            r[1] = parseInt(cronExpression, chronoField, parts[1], min, names);
         }
 
         if (r[0] < min) {
@@ -447,8 +447,36 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         return r;
     }
 
-    private int parseInt(final String cronExpression, final ChronoField chronoField, final String name, final int min, final int max,
-            final Map<String, Integer> names) {
+    /**
+     * Parses day of the week.
+     * Cron notation puts Sunday as first day of the week, while Temporal puts it as the last day of the week.
+     * This means a special conversion is needed to convert either SUN or 1 to the temporal correct index 7,
+     * and the rest of the week must become 1 index less.
+     * For weekdays the index is derived from a position in a map object,
+     * because this object is ordered for temporal index no conversion is needed here.
+     *
+     * @param cronExpression the whole cron expression
+     * @param name the cron value to parse
+     * @param names map with names of the week
+     * @return temporal index of day of the week
+     */
+    private int parseDayOfWeek(final String cronExpression, final String value, final Map<String, Integer> names) {
+        final Integer nameIndex = names.get(value);
+
+        if (nameIndex == null) {
+            final int dayOfWeek = parseInt(cronExpression, ChronoField.DAY_OF_WEEK, value) - 1;
+
+            if (dayOfWeek < 0 || dayOfWeek > 6) {
+                throw new IllegalArgumentException(String.format("Day of week in cron expression '%s' in field '%s': value %s is outside range",
+                        cronExpression, ChronoField.DAY_OF_WEEK, dayOfWeek));
+            }
+            return dayOfWeek == 0 ? 7 : dayOfWeek;
+        } else {
+            return nameIndex;
+        }
+    }
+
+    private int parseInt(final String cronExpression, final ChronoField chronoField, final String name, final int min, final Map<String, Integer> names) {
         if (name.isEmpty()) {
             return 0;
         }

@@ -48,6 +48,11 @@ public class CronAdjusterMiscTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void testIllegalDayInWeek() {
+        new CronAdjuster("* * * * * NO");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void testMonthName() {
         new CronAdjuster("* * * * FXB *");
     }
@@ -86,4 +91,10 @@ public class CronAdjusterMiscTest {
     public void testAboveMax() {
         new CronAdjuster("99 * * * * *");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAboveWeekday() {
+        new CronAdjuster("* * * * * 8");
+    }
+
 }

@@ -90,6 +90,9 @@ public class CronAdjusterTest {
                 // Fire at 12:00am on the first Monday of every month
                 { JAN_1ST_2015, "0 0 0 ? * 2#1",
                         new String[] { "2015-01-05T00:00", "2015-02-02T00:00", "2015-03-02T00:00" } },
+                // Fire at 12:00am on the first Monday of every month
+                { JAN_1ST_2015, "0 0 0 ? * 1#1",
+                        new String[] { "2015-01-04T00:00", "2015-02-01T00:00", "2015-03-01T00:00" } },
 
                 // Fire at 10:15am on the second Friday of every month
                 { JAN_1ST_2015, "0 15 10 ? * FRI#2",
@@ -146,6 +149,10 @@ public class CronAdjusterTest {
                 { JAN_1ST_2015, "0 0-2 14 * * ?",
                         new String[] { "2015-01-01T14:00", "2015-01-01T14:01", "2015-01-01T14:02",
                                 "2015-01-02T14:00" } },
+                // Fire at 5am every Monday of the week
+                { JAN_1ST_2015, "0 0 5 ? * 2", new String[] { "2015-01-05T05:00" }, },
+                // Fire at 5am every first day (SUN) of the week
+                { JAN_1ST_2015, "0 0 5 ? * 1", new String[] { "2015-01-04T05:00" }, },
                 { JAN_1ST_2015, "0 0 0 ? * SAT", new String[] { "2015-01-03T00:00" } },
                 { JAN_1ST_2015, "0 0 0 ? * SUN", new String[] { "2015-01-04T00:00" } },
                 { JAN_1ST_2015, "0 0 0 ? * SUN-MON",
