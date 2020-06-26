@@ -96,5 +96,4 @@ public class CronAdjusterMiscTest {
     public void testAboveWeekday() {
         new CronAdjuster("* * * * * 8");
     }
-
 }
