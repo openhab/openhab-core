@@ -18,7 +18,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,7 +81,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Mock
     private UnitProvider unitProvider;
 
-    private GroupFunctionHelper groupFunctionHelper;
+    private final GroupFunctionHelper groupFunctionHelper = new GroupFunctionHelper();
     private ItemStateConverter itemStateConverter;
 
     @Before
@@ -116,7 +115,6 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
         when(unitProvider.getUnit(Temperature.class)).thenReturn(Units.CELSIUS);
 
-        groupFunctionHelper = new GroupFunctionHelper();
         itemStateConverter = new ItemStateConverterImpl(unitProvider);
     }
 
@@ -774,8 +772,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         NumberItem baseItem = createNumberItem("baseItem", Temperature.class, UnDefType.NULL);
         GroupFunctionDTO gfDTO = new GroupFunctionDTO();
         gfDTO.name = "sum";
-        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, Collections.emptyList(),
-                Temperature.class);
+        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
         GroupItem groupItem = new GroupItem("number", baseItem, function);
         groupItem.setUnitProvider(unitProvider);
 
@@ -804,8 +801,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         NumberItem baseItem = createNumberItem("baseItem", Temperature.class, UnDefType.NULL);
         GroupFunctionDTO gfDTO = new GroupFunctionDTO();
         gfDTO.name = "sum";
-        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, Collections.emptyList(),
-                Temperature.class);
+        GroupFunction function = groupFunctionHelper.createGroupFunction(gfDTO, baseItem);
         GroupItem groupItem = new GroupItem("number", baseItem, function);
         groupItem.setUnitProvider(unitProvider);
         groupItem.setItemStateConverter(itemStateConverter);
