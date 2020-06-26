@@ -72,7 +72,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     /**
      * Constructs the class with a cron specification. containing variables and a cron expression at the last line.
      */
-    public CronAdjuster(String specification) {
+    public CronAdjuster(final String specification) {
         final String entries[] = specification.split("[\n\r]+");
         environmentMap = parseEnvironment(entries);
 
@@ -118,7 +118,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     }
 
     @Override
-    public boolean isDone(Temporal temporal) {
+    public boolean isDone(final Temporal temporal) {
         return checkMaxYear(temporal);
     }
 
@@ -128,7 +128,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param entries entries to parse
      * @return Map with environment variables
      */
-    private Map<String, String> parseEnvironment(String[] entries) {
+    private Map<String, String> parseEnvironment(final String[] entries) {
         final Map<String, String> map = new HashMap<>();
 
         if (entries.length > 1) {
@@ -167,7 +167,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * &#64;reboot                 Run at startup                                                               0 0 0 1 1 ? 1900
      * </pre>
      */
-    private String preDeclared(String expression) {
+    private String preDeclared(final String expression) {
         switch (expression) {
             case "@annually":
             case "@yearly":
@@ -201,7 +201,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param part the part to be parsed
      * @param chronoField the chronoField is part belongs to
      */
-    private void parseAndAdd(String cronExpression, String part, ChronoField chronoField) {
+    private void parseAndAdd(final String cronExpression, final String part, final ChronoField chronoField) {
         parse(cronExpression, part, chronoField, Collections.emptyMap());
     }
 
@@ -215,7 +215,8 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param chronoField the chronoField is part belongs to
      * @param names a map with chronoField names that can be part of the pattern and are mapped to numbers
      */
-    private void parse(String cronExpression, String part, ChronoField chronoField, Map<String, Integer> names) {
+    private void parse(final String cronExpression, final String part, final ChronoField chronoField,
+            final Map<String, Integer> names) {
         // Check wild card.
         if ("*".equals(part) || "?".equals(part)) {
             return; // No field needed all values accepted
@@ -224,7 +225,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         final List<Checker> checkers = new ArrayList<>();
         // Parse each sub expression
         final String[] split = part.split(",");
-        for (String sub : split) {
+        for (final String sub : split) {
             checkers.add(parseSub(cronExpression, chronoField, sub, names));
         }
 
@@ -238,7 +239,8 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     /*
      * Parse a sub expression.
      */
-    private Checker parseSub(String cronExpression, ChronoField chronoField, String sub, Map<String, Integer> names) {
+    private Checker parseSub(final String cronExpression, final ChronoField chronoField, final String sub,
+            final Map<String, Integer> names) {
         // Max and min for the current type
         final int min = (int) chronoField.range().getMinimum();
         final int max = (int) chronoField.range().getMaximum();
@@ -249,7 +251,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             } else {
                 final Matcher m = WEEKDAY_PATTERN.matcher(sub);
                 if (m.matches()) {
-                    final int day = parseInt(cronExpression, chronoField, m.group("day"), min, max, names) - 1;
+                    final int day = parseDayOfWeek(cronExpression, m.group("day"), names);
                     final Checker c = temporal -> temporal.get(ChronoField.DAY_OF_WEEK) == day;
 
                     if (m.group("nr") != null) {
@@ -269,7 +271,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             } else if ("LW".equals(sub) || "WL".equals(sub)) {
                 return CronAdjuster::isLastWorkingDayInMonth;
             } else if (sub.endsWith("W")) {
-                int n = parseInt(cronExpression, chronoField, sub.substring(0, sub.length() - 1));
+                final int n = parseInt(cronExpression, chronoField, sub.substring(0, sub.length() - 1));
                 return (temporal) -> isNearestWorkDay(temporal, n);
             }
             // fall through, it is a normal expression
@@ -327,7 +329,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param nDayInMonth the nth day in the current month to check
      * @return true if temporal matches nth day in month
      */
-    private static boolean isNthWeekDayInMonth(Temporal temporal, int nDayInMonth) {
+    private static boolean isNthWeekDayInMonth(final Temporal temporal, final int nDayInMonth) {
         final int day = temporal.get(ChronoField.DAY_OF_MONTH);
         final int occurrences = 1 + (day - 1) / 7;
 
@@ -338,7 +340,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param temporal temporal to check
      * @return true if temporal is the last week day in this month. I.e. the last Saturday
      */
-    private static boolean isLastOfThisWeekDayInMonth(Temporal temporal) {
+    private static boolean isLastOfThisWeekDayInMonth(final Temporal temporal) {
         final int day = temporal.get(ChronoField.DAY_OF_MONTH);
         final int max = (int) ChronoField.DAY_OF_MONTH.rangeRefinedBy(temporal).getMaximum();
 
@@ -349,7 +351,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param temporal temporal to check
      * @return true if temporal is the last day in the month
      */
-    private static boolean isLastDayInMonth(Temporal temporal) {
+    private static boolean isLastDayInMonth(final Temporal temporal) {
         final int day = temporal.get(ChronoField.DAY_OF_MONTH);
         final int max = (int) ChronoField.DAY_OF_MONTH.rangeRefinedBy(temporal).getMaximum();
 
@@ -360,7 +362,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param temporal temporal to check
      * @return true if temporal is the last working day in the month
      */
-    private static boolean isLastWorkingDayInMonth(Temporal temporal) {
+    private static boolean isLastWorkingDayInMonth(final Temporal temporal) {
         final int day = temporal.get(ChronoField.DAY_OF_MONTH);
         final DayOfWeek type = DayOfWeek.of(temporal.get(ChronoField.DAY_OF_WEEK));
         final int max = (int) ChronoField.DAY_OF_MONTH.rangeRefinedBy(temporal).getMaximum();
@@ -388,7 +390,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param temporal temporal to check
      * @return true if temporal is nearest to working day
      */
-    static boolean isNearestWorkDay(Temporal temporal, int target) {
+    static boolean isNearestWorkDay(final Temporal temporal, final int target) {
         final int day = temporal.get(ChronoField.DAY_OF_MONTH);
         final DayOfWeek type = DayOfWeek.of(temporal.get(ChronoField.DAY_OF_WEEK));
 
@@ -417,21 +419,21 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     /**
      * A check that we do not go ballistic with the year
      */
-    private static boolean checkMaxYear(Temporal temporal) {
+    private static boolean checkMaxYear(final Temporal temporal) {
         return temporal.get(ChronoField.YEAR) >= 2200;
     }
 
-    private int[] parseRange(String cronExpression, ChronoField chronoField, String range, int min, int max,
-            Map<String, Integer> names) {
+    private int[] parseRange(final String cronExpression, final ChronoField chronoField, final String range,
+            final int min, final int max, final Map<String, Integer> names) {
         final int[] r = { min, max };
         if ("*".equals(range)) {
             return r;
         }
 
         final String parts[] = range.split("-");
-        r[0] = r[1] = parseInt(cronExpression, chronoField, parts[0], min, max, names);
+        r[0] = r[1] = parseInt(cronExpression, chronoField, parts[0], min, names);
         if (parts.length == 2) {
-            r[1] = parseInt(cronExpression, chronoField, parts[1], min, max, names);
+            r[1] = parseInt(cronExpression, chronoField, parts[1], min, names);
         }
 
         if (r[0] < min) {
@@ -447,8 +449,38 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         return r;
     }
 
-    private int parseInt(String cronExpression, ChronoField chronoField, String name, int min, int max,
-            Map<String, Integer> names) {
+    /**
+     * Parses day of the week.
+     * Cron notation puts Sunday as first day of the week, while Temporal puts it as the last day of the week.
+     * This means a special conversion is needed to convert either SUN or 1 to the temporal correct index 7,
+     * and the rest of the week must become 1 index less.
+     * For weekdays the index is derived from a position in a map object,
+     * because this object is ordered for temporal index no conversion is needed here.
+     *
+     * @param cronExpression the whole cron expression
+     * @param name the cron value to parse
+     * @param names map with names of the week
+     * @return temporal index of day of the week
+     */
+    private int parseDayOfWeek(final String cronExpression, final String value, final Map<String, Integer> names) {
+        final Integer nameIndex = names.get(value);
+
+        if (nameIndex == null) {
+            final int dayOfWeek = parseInt(cronExpression, ChronoField.DAY_OF_WEEK, value) - 1;
+
+            if (dayOfWeek < 0 || dayOfWeek > 6) {
+                throw new IllegalArgumentException(
+                        String.format("Day of week in cron expression '%s' in field '%s': value %s is outside range",
+                                cronExpression, ChronoField.DAY_OF_WEEK, dayOfWeek));
+            }
+            return dayOfWeek == 0 ? 7 : dayOfWeek;
+        } else {
+            return nameIndex;
+        }
+    }
+
+    private int parseInt(final String cronExpression, final ChronoField chronoField, final String name, final int min,
+            final Map<String, Integer> names) {
         if (name.isEmpty()) {
             return 0;
         }
@@ -461,10 +493,10 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         }
     }
 
-    private int parseInt(String cronExpression, ChronoField chronoField, String value) {
+    private int parseInt(final String cronExpression, final ChronoField chronoField, final String value) {
         try {
             return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new IllegalArgumentException(
                     String.format("Value not a number in cron expression '%s' in field '%s': %s", cronExpression,
                             chronoField, e.getMessage()));
@@ -472,7 +504,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     }
 
     @Override
-    public Temporal adjustInto(@Nullable Temporal temporal) {
+    public Temporal adjustInto(@Nullable final Temporal temporal) {
         // Never match the actual time, so since our basic
         // unit is seconds, we add one second.
         Temporal ret = temporal.plus(1, ChronoUnit.SECONDS);
@@ -483,7 +515,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         // we start over with this new time.
 
         int index = 0;
-        int length = fields.size();
+        final int length = fields.size();
 
         while (index < length) {
             final Field field = fields.get(index);
@@ -505,7 +537,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     /**
      * Helper to create an or expression Checkers of a list of checkers.
      */
-    private Checker or(List<Checker> checkers) {
+    private Checker or(final List<Checker> checkers) {
         return checkers.size() > 1 //
                 ? temporal -> checkers.stream().anyMatch(c -> c.matches(temporal))
                 : checkers.get(0);
@@ -514,7 +546,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     /**
      * Helper to create an and expression of 2 checkers.
      */
-    private Checker and(Checker a, Checker b) {
+    private Checker and(final Checker a, final Checker b) {
         return temporal -> a.matches(temporal) && b.matches(temporal);
     }
 
@@ -526,13 +558,13 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
         final ChronoField type;
         final Checker checker;
 
-        public Field(ChronoField type, Checker checker) {
+        public Field(final ChronoField type, final Checker checker) {
             this.type = type;
             this.checker = checker;
         }
 
         @Nullable
-        Temporal isOk(Temporal t) {
+        Temporal isOk(final Temporal t) {
             if (checker.matches(t)) {
                 return null;
             }
