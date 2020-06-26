@@ -186,10 +186,10 @@ public class CronAdjusterTest {
 
     @Test(timeout = 1000)
     public void testCronExpression() {
-        CronAdjuster cronAdjuster = new CronAdjuster(cron);
+        final CronAdjuster cronAdjuster = new CronAdjuster(cron);
         Temporal ldt = LocalDateTime.parse(in);
 
-        for (String out : outs) {
+        for (final String out : outs) {
             ldt = ldt.with(cronAdjuster);
             assertThat("CronAdjuster did return expected next cron string for expression: " + cron, ldt.toString(),
                     equalTo(out));
