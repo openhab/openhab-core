@@ -89,7 +89,7 @@ public class GroupFunctionHelper {
 
     private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem,
             Class<? extends Quantity<?>> dimension) {
-        String functionName = function.name;
+        final String functionName = function.name;
         switch (functionName.toUpperCase()) {
             case "AVG":
                 return new QuantityTypeArithmeticGroupFunction.Avg(dimension);
@@ -105,16 +105,15 @@ public class GroupFunctionHelper {
     }
 
     private GroupFunction createDefaultGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem) {
-        String functionName = function.name;
-        List<State> args;
+        final String functionName = function.name;
+        final List<State> args;
         switch (functionName.toUpperCase()) {
             case "AND":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.And(args.get(0), args.get(1));
                 } else {
-                    LoggerFactory.getLogger(GroupFunctionHelper.class)
-                            .error("Group function 'AND' requires two arguments. Using Equality instead.");
+                    logger.error("Group function 'AND' requires two arguments. Using Equality instead.");
                 }
                 break;
             case "OR":
@@ -122,8 +121,7 @@ public class GroupFunctionHelper {
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.Or(args.get(0), args.get(1));
                 } else {
-                    LoggerFactory.getLogger(GroupFunctionHelper.class)
-                            .error("Group function 'OR' requires two arguments. Using Equality instead.");
+                    logger.error("Group function 'OR' requires two arguments. Using Equality instead.");
                 }
                 break;
             case "NAND":
@@ -131,8 +129,7 @@ public class GroupFunctionHelper {
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.NAnd(args.get(0), args.get(1));
                 } else {
-                    LoggerFactory.getLogger(GroupFunctionHelper.class)
-                            .error("Group function 'NOT AND' requires two arguments. Using Equality instead.");
+                    logger.error("Group function 'NOT AND' requires two arguments. Using Equality instead.");
                 }
                 break;
             case "NOR":
@@ -140,8 +137,7 @@ public class GroupFunctionHelper {
                 if (args.size() == 2) {
                     return new ArithmeticGroupFunction.NOr(args.get(0), args.get(1));
                 } else {
-                    LoggerFactory.getLogger(GroupFunctionHelper.class)
-                            .error("Group function 'NOT OR' requires two arguments. Using Equality instead.");
+                    logger.error("Group function 'NOT OR' requires two arguments. Using Equality instead.");
                 }
                 break;
             case "COUNT":
@@ -149,8 +145,7 @@ public class GroupFunctionHelper {
                     State countParam = new StringType(function.params[0]);
                     return new ArithmeticGroupFunction.Count(countParam);
                 } else {
-                    LoggerFactory.getLogger(GroupFunctionHelper.class)
-                            .error("Group function 'COUNT' requires one argument. Using Equality instead.");
+                    logger.error("Group function 'COUNT' requires one argument. Using Equality instead.");
                 }
                 break;
             case "AVG":
@@ -168,10 +163,8 @@ public class GroupFunctionHelper {
             case "EQUALITY":
                 return new GroupFunction.Equality();
             default:
-                LoggerFactory.getLogger(GroupFunctionHelper.class)
-                        .error("Unknown group function '{}'. Using Equality instead.", functionName);
+                logger.error("Unknown group function '{}'. Using Equality instead.", functionName);
         }
-
         return new GroupFunction.Equality();
     }
 }
