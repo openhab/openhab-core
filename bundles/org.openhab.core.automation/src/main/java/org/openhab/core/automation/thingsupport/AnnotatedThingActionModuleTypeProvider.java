@@ -43,9 +43,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ModuleTypeProvider that collects actions for {@link ThingHandler}s
@@ -55,6 +58,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @NonNullByDefault
 @Component(service = { ModuleTypeProvider.class, ModuleHandlerFactory.class })
 public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFactory implements ModuleTypeProvider {
+
+    private final Logger logger = LoggerFactory.getLogger(AnnotatedThingActionModuleTypeProvider.class);
 
     private final Collection<ProviderChangeListener<ModuleType>> changeListeners = ConcurrentHashMap.newKeySet();
     private final Map<String, Set<ModuleInformation>> moduleInformation = new ConcurrentHashMap<>();
@@ -67,77 +72,20 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
         this.moduleTypeI18nService = moduleTypeI18nService;
     }
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    public void addAnnotatedThingActions(ThingActions annotatedThingActions) {
-        if (annotatedThingActions.getClass().isAnnotationPresent(ThingActionsScope.class)) {
-            ThingActionsScope scope = annotatedThingActions.getClass().getAnnotation(ThingActionsScope.class);
-            Collection<ModuleInformation> moduleInformations = helper.parseAnnotations(scope.name(),
-                    annotatedThingActions);
-
-            String thingUID = annotatedThingActions.getThingHandler().getThing().getUID().getAsString();
-
-            for (ModuleInformation mi : moduleInformations) {
-                mi.setThingUID(thingUID);
-
-                ModuleType oldType = null;
-                if (moduleInformation.containsKey(mi.getUID())) {
-                    oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
-                    Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
-                    availableModuleConfigs.add(mi);
-                } else {
-                    Set<ModuleInformation> configs = ConcurrentHashMap.newKeySet();
-                    configs.add(mi);
-                    moduleInformation.put(mi.getUID(), configs);
-                }
-
-                ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
-                if (mt != null) {
-                    for (ProviderChangeListener<ModuleType> l : changeListeners) {
-                        if (oldType != null) {
-                            l.updated(this, oldType, mt);
-                        } else {
-                            l.added(this, mt);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public void removeAnnotatedThingActions(ThingActions annotatedThingActions, Map<String, Object> properties) {
-        Collection<ModuleInformation> moduleInformations = helper.parseAnnotations(annotatedThingActions);
-
-        String thingUID = annotatedThingActions.getThingHandler().getThing().getUID().getAsString();
-
-        for (ModuleInformation mi : moduleInformations) {
-            mi.setThingUID(thingUID);
-            ModuleType oldType = null;
-
-            Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
-            if (availableModuleConfigs != null) {
-                if (availableModuleConfigs.size() > 1) {
-                    oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
-                    availableModuleConfigs.remove(mi);
-                } else {
-                    moduleInformation.remove(mi.getUID());
-                }
-
-                ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
-                // localize moduletype -> remove from map
-                for (ProviderChangeListener<ModuleType> l : changeListeners) {
-                    if (oldType != null) {
-                        l.updated(this, oldType, mt);
-                    } else {
-                        l.removed(this, mt);
-                    }
-                }
-            }
-        }
+    @Override
+    @Deactivate
+    protected void deactivate() {
+        moduleInformation.clear();
     }
 
     @Override
     public void addProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
         changeListeners.add(listener);
+    }
+
+    @Override
+    public void removeProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
+        changeListeners.remove(listener);
     }
 
     @Override
@@ -150,16 +98,6 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
             }
         }
         return moduleTypes;
-    }
-
-    @Override
-    public void removeProviderChangeListener(ProviderChangeListener<ModuleType> listener) {
-        changeListeners.remove(listener);
-    }
-
-    @Override
-    public Collection<String> getTypes() {
-        return moduleInformation.keySet();
     }
 
     @SuppressWarnings("unchecked")
@@ -195,15 +133,107 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
         return null;
     }
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    public void addAnnotatedThingActions(ThingActions annotatedThingActions) {
+        if (annotatedThingActions.getClass().isAnnotationPresent(ThingActionsScope.class)) {
+            ThingActionsScope scope = annotatedThingActions.getClass().getAnnotation(ThingActionsScope.class);
+            Collection<ModuleInformation> moduleInformations = helper.parseAnnotations(scope.name(),
+                    annotatedThingActions);
+
+            String thingUID = getThingUID(annotatedThingActions);
+
+            for (ModuleInformation mi : moduleInformations) {
+                mi.setThingUID(thingUID);
+
+                ModuleType oldType = null;
+                if (moduleInformation.containsKey(mi.getUID())) {
+                    oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
+                    Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
+                    availableModuleConfigs.add(mi);
+                } else {
+                    Set<ModuleInformation> configs = ConcurrentHashMap.newKeySet();
+                    configs.add(mi);
+                    moduleInformation.put(mi.getUID(), configs);
+                }
+
+                ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
+                if (mt != null) {
+                    for (ProviderChangeListener<ModuleType> l : changeListeners) {
+                        if (oldType != null) {
+                            l.updated(this, oldType, mt);
+                        } else {
+                            l.added(this, mt);
+                        }
+                    }
+                }
+            }
+        } else {
+            logger.error("Missing 'ThingActionsScope' for '{}'. Please add it to your class definition.",
+                    annotatedThingActions.getClass());
+        }
+    }
+
+    public void removeAnnotatedThingActions(ThingActions annotatedThingActions) {
+        if (annotatedThingActions.getClass().isAnnotationPresent(ThingActionsScope.class)) {
+            ThingActionsScope scope = annotatedThingActions.getClass().getAnnotation(ThingActionsScope.class);
+            Collection<ModuleInformation> moduleInformations = helper.parseAnnotations(scope.name(),
+                    annotatedThingActions);
+
+            String thingUID = getThingUID(annotatedThingActions);
+
+            for (ModuleInformation mi : moduleInformations) {
+                mi.setThingUID(thingUID);
+
+                ModuleType oldType = null;
+                Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
+                if (availableModuleConfigs != null) {
+                    if (availableModuleConfigs.size() > 1) {
+                        oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
+                        availableModuleConfigs.remove(mi);
+                    } else {
+                        moduleInformation.remove(mi.getUID());
+                    }
+
+                    ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
+                    // localize moduletype -> remove from map
+                    if (mt != null) {
+                        for (ProviderChangeListener<ModuleType> l : changeListeners) {
+                            if (oldType != null) {
+                                l.updated(this, oldType, mt);
+                            } else {
+                                l.removed(this, mt);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            logger.error("Missing 'ThingActionsScope' for '{}'. Please add it to your class definition.",
+                    annotatedThingActions.getClass());
+        }
+    }
+
+    private String getThingUID(ThingActions annotatedThingActions) {
+        ThingHandler handler = annotatedThingActions.getThingHandler();
+        if (handler == null) {
+            throw new RuntimeException(
+                    String.format("ThingHandler for '%s' is missing.", annotatedThingActions.getClass()));
+        }
+        return handler.getThing().getUID().getAsString();
+    }
+
+    @Override
+    public Collection<String> getTypes() {
+        return moduleInformation.keySet();
+    }
+
     @Override
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         if (module instanceof Action) {
             Action actionModule = (Action) module;
-
             if (moduleInformation.containsKey(actionModule.getTypeUID())) {
                 ModuleInformation finalMI = helper.getModuleInformationForIdentifier(actionModule, moduleInformation,
                         true);
-
                 if (finalMI != null) {
                     ActionType moduleType = helper.buildModuleType(module.getTypeUID(), moduleInformation);
                     return new AnnotationActionHandler(actionModule, moduleType, finalMI.getMethod(),

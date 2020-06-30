@@ -169,8 +169,8 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
 
         for (ModuleInformation mi : moduleInformations) {
             mi.setConfigName(configName);
-            ModuleType oldType = null;
 
+            ModuleType oldType = null;
             Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
             if (availableModuleConfigs != null) {
                 if (availableModuleConfigs.size() > 1) {
@@ -181,11 +181,14 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
                 }
 
                 ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
-                for (ProviderChangeListener<ModuleType> l : changeListeners) {
-                    if (oldType != null) {
-                        l.updated(this, oldType, mt);
-                    } else {
-                        l.removed(this, mt);
+                // localize moduletype -> remove from map
+                if (mt != null) {
+                    for (ProviderChangeListener<ModuleType> l : changeListeners) {
+                        if (oldType != null) {
+                            l.updated(this, oldType, mt);
+                        } else {
+                            l.removed(this, mt);
+                        }
                     }
                 }
             }
@@ -201,8 +204,6 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
         return configName;
     }
 
-    // HandlerFactory:
-
     @Override
     public Collection<String> getTypes() {
         return moduleInformation.keySet();
@@ -212,11 +213,9 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         if (module instanceof Action) {
             Action actionModule = (Action) module;
-
             if (moduleInformation.containsKey(actionModule.getTypeUID())) {
                 ModuleInformation finalMI = helper.getModuleInformationForIdentifier(actionModule, moduleInformation,
                         false);
-
                 if (finalMI != null) {
                     ActionType moduleType = helper.buildModuleType(module.getTypeUID(), moduleInformation);
                     return new AnnotationActionHandler(actionModule, moduleType, finalMI.getMethod(),
