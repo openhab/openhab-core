@@ -149,8 +149,8 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
         for (final DiscoveryService discoveryService : discoveryServicesAll) {
             removeDiscoveryServiceActivated(discoveryService);
         }
-        this.listeners.clear();
-        this.cachedResults.clear();
+        listeners.clear();
+        cachedResults.clear();
     }
 
     @Override
@@ -184,7 +184,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
                 results.forEach(result -> listener.thingDiscovered(service, result));
             });
         }
-        this.listeners.add(listener);
+        listeners.add(listener);
     }
 
     @Override
@@ -224,7 +224,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     @Override
     public List<ThingTypeUID> getSupportedThingTypes() {
         List<ThingTypeUID> thingTypeUIDs = new ArrayList<>();
-        for (DiscoveryService discoveryService : this.discoveryServices) {
+        for (DiscoveryService discoveryService : discoveryServices) {
             thingTypeUIDs.addAll(discoveryService.getSupportedThingTypes());
         }
         return thingTypeUIDs;
@@ -233,7 +233,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     @Override
     public List<String> getSupportedBindings() {
         List<String> bindings = new ArrayList<>();
-        for (DiscoveryService discoveryService : this.discoveryServices) {
+        for (DiscoveryService discoveryService : discoveryServices) {
             Collection<ThingTypeUID> supportedThingTypes = discoveryService.getSupportedThingTypes();
             for (ThingTypeUID thingTypeUID : supportedThingTypes) {
                 bindings.add(thingTypeUID.getBindingId());
@@ -244,7 +244,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
 
     @Override
     public synchronized void removeDiscoveryListener(DiscoveryListener listener) throws IllegalStateException {
-        this.listeners.remove(listener);
+        listeners.remove(listener);
     }
 
     @Override
@@ -252,7 +252,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
         synchronized (cachedResults) {
             cachedResults.computeIfAbsent(source, unused -> new HashSet<>()).add(result);
         }
-        for (final DiscoveryListener listener : this.listeners) {
+        for (final DiscoveryListener listener : listeners) {
             try {
                 AccessController.doPrivileged(new PrivilegedAction<@Nullable Void>() {
                     @Override
@@ -262,7 +262,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
                     }
                 });
             } catch (Exception ex) {
-                logger.error("Cannot notify the DiscoveryListener {} on Thing discovered event!",
+                logger.error("Cannot notify the DiscoveryListener '{}' on Thing discovered event!",
                         listener.getClass().getName(), ex);
             }
         }
@@ -278,7 +278,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
                 }
             }
         }
-        for (final DiscoveryListener listener : this.listeners) {
+        for (final DiscoveryListener listener : listeners) {
             try {
                 AccessController.doPrivileged(new PrivilegedAction<@Nullable Void>() {
                     @Override
@@ -298,7 +298,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     public @Nullable Collection<ThingUID> removeOlderResults(final DiscoveryService source, final long timestamp,
             final @Nullable Collection<ThingTypeUID> thingTypeUIDs, @Nullable ThingUID bridgeUID) {
         Set<ThingUID> removedResults = new HashSet<>();
-        for (final DiscoveryListener listener : this.listeners) {
+        for (final DiscoveryListener listener : listeners) {
             try {
                 Collection<ThingUID> olderResults = AccessController
                         .doPrivileged(new PrivilegedAction<@Nullable Collection<ThingUID>>() {
@@ -422,7 +422,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
 
     private void addDiscoveryServiceActivated(final DiscoveryService discoveryService) {
         discoveryService.addDiscoveryListener(this);
-        this.discoveryServices.add(discoveryService);
+        discoveryServices.add(discoveryService);
     }
 
     protected void removeDiscoveryService(DiscoveryService discoveryService) {
@@ -433,22 +433,20 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     }
 
     private void removeDiscoveryServiceActivated(DiscoveryService discoveryService) {
-        this.discoveryServices.remove(discoveryService);
+        discoveryServices.remove(discoveryService);
         discoveryService.removeDiscoveryListener(this);
         synchronized (cachedResults) {
-            this.cachedResults.remove(discoveryService);
+            cachedResults.remove(discoveryService);
         }
     }
 
     private int getMaxScanTimeout(Set<DiscoveryService> discoveryServices) {
         int result = 0;
-
         for (DiscoveryService discoveryService : discoveryServices) {
             if (discoveryService.getScanTimeout() > result) {
                 result = discoveryService.getScanTimeout();
             }
         }
-
         return result;
     }
 
