@@ -147,7 +147,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     @Test
     public void testConfigOptionProviderDaysetDefault() {
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, "dayset-weekend",
-                null);
+                null, null);
         assertNotNull(options);
         assertEquals(7, options.size());
     }
@@ -155,7 +155,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     @Test
     public void testConfigOptionProviderDaysetUS() {
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, "dayset-weekend",
-                Locale.US);
+                null, Locale.US);
         assertNotNull(options);
         assertEquals(7, options.size());
         assertEquals(Stream.of(new ParameterOption("MONDAY", "Monday"), new ParameterOption("TUESDAY", "Tuesday"),
@@ -167,7 +167,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     @Test
     public void testConfigOptionProviderDaysetGerman() {
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, "dayset-weekend",
-                Locale.GERMAN);
+                null, Locale.GERMAN);
         assertNotNull(options);
         assertEquals(7, options.size());
         assertEquals(Stream.of(new ParameterOption("MONDAY", "Montag"), new ParameterOption("TUESDAY", "Dienstag"),
@@ -179,7 +179,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     @Test
     public void testConfigOptionProviderCountries() {
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_COUNTRY,
-                null);
+                null, null);
         assertNotNull(options);
         assertFalse(options.isEmpty());
         assertEquals(ephemerisManager.countries, options);
@@ -190,7 +190,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         ephemerisManager.modified(Collections.singletonMap(CONFIG_COUNTRY, COUNTRY_AUSTRALIA_KEY));
 
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_REGION,
-                null);
+                null, null);
         assertNotNull(options);
         assertEquals(8, options.size());
         assertEquals(ephemerisManager.regions.get(COUNTRY_AUSTRALIA_KEY), options);
@@ -199,7 +199,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     @Test
     public void testConfigOptionProviderRegionsGermany() {
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_REGION,
-                null);
+                null, null);
         assertNotNull(options);
         assertEquals(16, options.size());
         assertEquals(ephemerisManager.regions.get(Locale.GERMANY.getCountry().toLowerCase()), options);
@@ -212,7 +212,8 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
                         new SimpleEntry<>(CONFIG_REGION, REGION_NORTHRHINEWESTPHALIA_KEY))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
-        final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null);
+        final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null,
+                null);
         assertNull(options);
     }
 
@@ -223,7 +224,8 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
                         new SimpleEntry<>(CONFIG_REGION, REGION_BAVARIA_KEY))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
-        final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null);
+        final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null,
+                null);
         assertNotNull(options);
         assertFalse(options.isEmpty());
         assertEquals(ephemerisManager.cities.get(REGION_BAVARIA_KEY), options);
@@ -236,7 +238,8 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
                         new SimpleEntry<>(CONFIG_REGION, REGION_TASMANIA_KEY))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
-        final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null);
+        final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null,
+                null);
         assertNotNull(options);
         assertFalse(options.isEmpty());
         assertEquals(ephemerisManager.cities.get(REGION_TASMANIA_KEY), options);

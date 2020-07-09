@@ -174,7 +174,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
         if (CONFIG_URI.equals(uri.toString())) {
             switch (param) {
                 case CONFIG_COUNTRY:

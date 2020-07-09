@@ -667,7 +667,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider {
     }
 
     @Override
-    public Collection<ParameterOption> getParameterOptions(URI uri, String param, Locale locale) {
+    public Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
         if (CONFIG_URI.equals(uri.toString())) {
             if (CONFIG_DEFAULT_HLI.equals(param)) {
                 return humanLanguageInterpreters.values().stream()
