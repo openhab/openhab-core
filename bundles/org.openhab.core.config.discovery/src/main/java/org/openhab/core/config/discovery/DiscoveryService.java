@@ -58,14 +58,14 @@ public interface DiscoveryService {
      * @return the list of Thing types which are supported by the discovery service
      *         (not null, could be empty)
      */
-    public Collection<ThingTypeUID> getSupportedThingTypes();
+    Collection<ThingTypeUID> getSupportedThingTypes();
 
     /**
      * Returns the amount of time in seconds after which an active scan ends.
      *
      * @return the scan timeout in seconds (>= 0).
      */
-    public int getScanTimeout();
+    int getScanTimeout();
 
     /**
      * Returns {@code true} if the background discovery mode is enabled, otherwise {@code false}.

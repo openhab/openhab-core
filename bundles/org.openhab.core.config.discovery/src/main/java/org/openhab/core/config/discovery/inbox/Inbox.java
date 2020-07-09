@@ -96,7 +96,7 @@ public interface Inbox {
      *
      * @param flag the flag of the given thingUID result to be set (could be null)
      */
-    public void setFlag(ThingUID thingUID, @Nullable DiscoveryResultFlag flag);
+    void setFlag(ThingUID thingUID, @Nullable DiscoveryResultFlag flag);
 
     /**
      * Adds an {@link InboxListener} to the listeners' registry.
