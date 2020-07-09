@@ -93,15 +93,15 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
     public void sendIf(final OutboundSseEvent event, Predicate<I> predicate) {
         logger.trace("broadcast to potential {} sinks", sinks.size());
         sinks.forEach((sink, info) -> {
+            // Check if we should send at all.
+            if (!predicate.test(info)) {
+                return;
+            }
+
             if (sink.isClosed()) {
                 // We are using a concurrent collection, so we are allowed to modify the collection asynchronous (we
                 // don't know if there is currently an iteration in progress or not, but it does not matter).
                 handleRemoval(sink);
-                return;
-            }
-
-            // Check if we should send at all.
-            if (!predicate.test(info)) {
                 return;
             }
 
@@ -118,10 +118,11 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
                 if (thClass.equals("class org.eclipse.jetty.io.EofException")) {
                     // The peer terminates the connection.
                 } else if (th instanceof IllegalStateException && message != null
-                        && (message.equals("The sink is already closed, unable to queue SSE event for send")
+                        && (message.equals("The sink is already closed, unable to queue SSE event for send") //
+                                || message.equals("The sink has been already closed") //
                                 || message.equals("AsyncContext completed and/or Request lifecycle recycled"))) {
-                    // java.lang.IllegalStateException: The sink is already closed, unable to queue SSE event for
-                    // send
+                    // java.lang.IllegalStateException: The sink is already closed, unable to queue SSE event for send
+                    // java.lang.IllegalStateException: The sink has been already closed
                     // java.lang.IllegalStateException: AsyncContext completed and/or Request lifecycle recycled
                 } else {
                     logger.warn("failure", th);
