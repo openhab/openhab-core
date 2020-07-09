@@ -93,15 +93,15 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
     public void sendIf(final OutboundSseEvent event, Predicate<I> predicate) {
         logger.trace("broadcast to potential {} sinks", sinks.size());
         sinks.forEach((sink, info) -> {
+            // Check if we should send at all.
+            if (!predicate.test(info)) {
+                return;
+            }
+
             if (sink.isClosed()) {
                 // We are using a concurrent collection, so we are allowed to modify the collection asynchronous (we
                 // don't know if there is currently an iteration in progress or not, but it does not matter).
                 handleRemoval(sink);
-                return;
-            }
-
-            // Check if we should send at all.
-            if (!predicate.test(info)) {
                 return;
             }
 
