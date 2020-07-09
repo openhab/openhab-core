@@ -118,10 +118,11 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
                 if (thClass.equals("class org.eclipse.jetty.io.EofException")) {
                     // The peer terminates the connection.
                 } else if (th instanceof IllegalStateException && message != null
-                        && (message.equals("The sink is already closed, unable to queue SSE event for send")
+                        && (message.equals("The sink is already closed, unable to queue SSE event for send") //
+                                || message.equals("The sink has been already closed") //
                                 || message.equals("AsyncContext completed and/or Request lifecycle recycled"))) {
-                    // java.lang.IllegalStateException: The sink is already closed, unable to queue SSE event for
-                    // send
+                    // java.lang.IllegalStateException: The sink is already closed, unable to queue SSE event for send
+                    // java.lang.IllegalStateException: The sink has been already closed
                     // java.lang.IllegalStateException: AsyncContext completed and/or Request lifecycle recycled
                 } else {
                     logger.warn("failure", th);
