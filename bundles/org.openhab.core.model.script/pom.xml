@@ -112,9 +112,8 @@
         <groupId>org.eclipse.xtend</groupId>
         <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
-
     </plugins>
     <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>notestsources</testSourceDirectory>
+    <testSourceDirectory>src.moved/test/java</testSourceDirectory>
   </build>
 </project>
