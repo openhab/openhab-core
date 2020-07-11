@@ -44,7 +44,8 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
     private static final String POSITIVE_OFFSET_FORMAT = "(GMT+%d:%02d) %s";
 
     @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
         if ("system:i18n".equals(uri.toString())) {
             Locale translation = locale != null ? locale : Locale.getDefault();
             return processParamType(param, locale, translation);

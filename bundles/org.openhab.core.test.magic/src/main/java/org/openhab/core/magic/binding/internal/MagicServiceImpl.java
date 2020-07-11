@@ -49,7 +49,8 @@ public class MagicServiceImpl implements MagicService {
     static final String PARAMETER_BACKEND_DECIMAL = "select_decimal_limit";
 
     @Override
-    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+    public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale) {
         if (!CONFIG_URI.equals(uri)) {
             return null;
         }

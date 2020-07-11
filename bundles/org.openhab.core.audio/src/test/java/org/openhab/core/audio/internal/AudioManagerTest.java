@@ -222,7 +222,7 @@ public class AudioManagerTest {
         audioManager.addAudioSink(audioSink);
 
         Collection<ParameterOption> parameterOptions = audioManager.getParameterOptions(URI.create("wrong.uri"),
-                AudioManagerImpl.CONFIG_DEFAULT_SINK, Locale.US);
+                AudioManagerImpl.CONFIG_DEFAULT_SINK, null, Locale.US);
         assertThat("The parameter options were not as expected", parameterOptions, is(nullValue()));
     }
 
@@ -294,7 +294,7 @@ public class AudioManagerTest {
         }
 
         Collection<ParameterOption> parameterOptions = audioManager
-                .getParameterOptions(URI.create(AudioManagerImpl.CONFIG_URI), param, locale);
+                .getParameterOptions(URI.create(AudioManagerImpl.CONFIG_URI), param, null, locale);
 
         @SuppressWarnings("null")
         BiFunction<String, String, Boolean> isParameterOptionAdded = (v, l) -> parameterOptions.stream()

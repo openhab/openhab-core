@@ -46,21 +46,21 @@ public class I18nConfigOptionsProviderTest {
 
     @Test
     public void testLanguage() throws Exception {
-        assertThat(provider.getParameterOptions(uriI18N, "language", Locale.US), hasItem(expectedLangEN));
-        assertThat(provider.getParameterOptions(uriI18N, "language", Locale.FRENCH), hasItem(expectedLangFR));
-        assertThat(provider.getParameterOptions(uriI18N, "language", null), not(IsEmptyCollection.empty()));
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.US), hasItem(expectedLangEN));
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.FRENCH), hasItem(expectedLangFR));
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, null), not(IsEmptyCollection.empty()));
     }
 
     @Test
     public void testRegion() throws Exception {
-        assertThat(provider.getParameterOptions(uriI18N, "region", Locale.US), hasItem(expectedCntryEN));
-        assertThat(provider.getParameterOptions(uriI18N, "region", Locale.FRENCH),
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.US), hasItem(expectedCntryEN));
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.FRENCH),
                 anyOf(hasItem(expectedCntryFRJava8), hasItem(expectedCntryFRJava9)));
-        assertThat(provider.getParameterOptions(uriI18N, "region", null), not(IsEmptyCollection.empty()));
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, null), not(IsEmptyCollection.empty()));
     }
 
     @Test
     public void testUnknownParameter() throws Exception {
-        assertThat(provider.getParameterOptions(uriI18N, "unknown", Locale.US), nullValue());
+        assertThat(provider.getParameterOptions(uriI18N, "unknown", null, Locale.US), nullValue());
     }
 }

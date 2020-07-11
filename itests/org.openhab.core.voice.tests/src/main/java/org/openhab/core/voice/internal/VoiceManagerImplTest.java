@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.javavoicemanager;
+package org.openhab.core.voice.internal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -31,27 +31,18 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.voice.VoiceManager;
-import org.openhab.core.voice.internal.AudioManagerStub;
-import org.openhab.core.voice.internal.AudioSourceStub;
-import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
-import org.openhab.core.voice.internal.KSServiceStub;
-import org.openhab.core.voice.internal.STTServiceStub;
-import org.openhab.core.voice.internal.SinkStub;
-import org.openhab.core.voice.internal.TTSServiceStub;
-import org.openhab.core.voice.internal.VoiceManagerImpl;
-import org.openhab.core.voice.internal.VoiceStub;
 import org.openhab.core.voice.text.InterpretationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * Tests for {@link VoiceManagerImpl}
+ * Tests for {@link org.openhab.core.voice.internal.VoiceManagerImpl}
  *
  * @author Mihaela Memova - Initial contribution
  * @author Velin Yordanov - migrated tests from groovy to java
  */
-public class VoiceManagerTest extends JavaOSGiTest {
+public class VoiceManagerImplTest extends JavaOSGiTest {
     private static final String CONFIG_DEFAULT_HLI = "defaultHLI";
     private static final String CONFIG_DEFAULT_KS = "defaultKS";
     private static final String CONFIG_DEFAULT_STT = "defaultSTT";
@@ -265,7 +256,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         boolean isHliStubInTheOptions = false;
 
         Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultHLI",
-                null);
+                null, null);
 
         assertNotNull(options);
 
@@ -290,7 +281,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         boolean isKSStubInTheOptions = false;
 
         Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultKS",
-                null);
+                null, null);
 
         assertNotNull(options);
 
@@ -315,7 +306,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         boolean isSTTStubInTheOptions = false;
 
         Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultSTT",
-                null);
+                null, null);
         assertNotNull(options);
 
         for (ParameterOption option : options) {
@@ -339,7 +330,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         boolean isTTSStubInTheOptions = false;
 
         Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultTTS",
-                null);
+                null, null);
 
         assertNotNull(options);
 
@@ -366,7 +357,7 @@ public class VoiceManagerTest extends JavaOSGiTest {
         boolean isVoiceStubInTheOptions = false;
 
         Collection<ParameterOption> options = voiceManager.getParameterOptions(new URI("system:voice"), "defaultVoice",
-                null);
+                null, null);
 
         assertNotNull(options);
 

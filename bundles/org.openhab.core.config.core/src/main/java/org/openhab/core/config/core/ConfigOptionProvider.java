@@ -29,19 +29,10 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public interface ConfigOptionProvider {
 
-    /**
-     * Provides a collection of {@link ParameterOptions}s.
-     *
-     * @deprecated Use {@link getParameterOptions} with context instead.
-     *
-     * @param uri the uri of the config description
-     * @param param the parameter name for which the requested options shall be returned
-     * @param locale the locale in which the result is expected
-     * @return the configuration options provided by this provider if any or {@code null} otherwise
-     */
     @Deprecated
-    @Nullable
-    Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale);
+    default @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable Locale locale) {
+        return getParameterOptions(uri, param, null, locale);
+    }
 
     /**
      * Provides a collection of {@link ParameterOptions}s.
@@ -52,8 +43,7 @@ public interface ConfigOptionProvider {
      * @param locale the locale in which the result is expected
      * @return the configuration options provided by this provider if any or {@code null} otherwise
      */
-    default @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
-            @Nullable Locale locale) {
-        return getParameterOptions(uri, param, locale);
-    }
+    @Nullable
+    Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
+            @Nullable Locale locale);
 }
