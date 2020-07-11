@@ -37,18 +37,24 @@ import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingManager;
 import org.openhab.core.thing.ThingProvider;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.thing.binding.BaseThingHandlerFactory;
+import org.openhab.core.thing.binding.ThingFactory;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.events.ThingAddedEvent;
 import org.openhab.core.thing.events.ThingRemovedEvent;
 import org.openhab.core.thing.events.ThingUpdatedEvent;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.types.Command;
 import org.osgi.framework.ServiceRegistration;
 
@@ -62,6 +68,7 @@ import org.osgi.framework.ServiceRegistration;
 public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ThingManager thingManager;
     private @NonNullByDefault({}) ServiceRegistration<?> thingHandlerFactoryServiceReg;
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding:type");
@@ -70,6 +77,8 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
     private static final String THING1_ID = "testThing1";
     private static final String THING2_ID = "testThing2";
 
+    private final Map<ThingTypeUID, @Nullable ThingType> thingTypes = new HashMap<>();
+
     private @Nullable Map<String, Object> changedParameters = null;
     private @Nullable Event receivedEvent = null;
 
@@ -77,6 +86,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
     public void setUp() {
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);
+        thingManager = getService(ThingManager.class);
         unregisterCurrentThingHandlerFactory();
     }
 
@@ -241,6 +251,89 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         if (thing != null) {
             assertThat(thing, is(thingResultWrapper.get()));
         }
+    }
+
+    class SimpleThingHandler extends BaseThingHandler {
+
+        SimpleThingHandler(Thing thing) {
+            super(thing);
+        }
+
+        @Override
+        public void handleCommand(ChannelUID channelUID, Command command) {
+        }
+
+        @Override
+        public void initialize() {
+            updateStatus(ThingStatus.ONLINE);
+        }
+    }
+
+    class SimpleThingHandlerFactory extends BaseThingHandlerFactory {
+        private final Set<ThingHandler> handlers = new HashSet<>();
+
+        @Override
+        public boolean supportsThingType(ThingTypeUID thingTypeUID) {
+            return true;
+        }
+
+        @Override
+        protected @Nullable ThingHandler createHandler(Thing thing) {
+            ThingHandler handler = new SimpleThingHandler(thing);
+            handlers.add(handler);
+            return handler;
+        }
+
+        public Set<ThingHandler> getHandlers() {
+            return handlers;
+        }
+    }
+
+    @Test
+    public void assertCorrectThingHandlerAfterRetrieval() {
+        assertThat(managedThingProvider.getAll().size(), is(0));
+
+        ThingType thingType = ThingTypeBuilder.instance("testBinding", "testThingType", "label").build();
+        thingTypes.put(thingType.getUID(), thingType);
+
+        Configuration configuration = new Configuration();
+        Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), THING1_ID), configuration,
+                null);
+        ThingUID thingUID = thing.getUID();
+
+        ThingRegistry thingRegistry = getService(ThingRegistry.class);
+
+        SimpleThingHandlerFactory thingHandlerFactory = new SimpleThingHandlerFactory();
+        registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
+
+        managedThingProvider.add(thing);
+
+        Collection<Thing> things = thingRegistry.getAll();
+        assertThat(things.size(), is(1));
+
+        Thing result = thingRegistry.get(thingUID);
+
+        waitForAssert(() -> assertThat(result.getHandler(), is(not(nullValue()))));
+        waitForAssert(() -> assertThat(result.getStatus(), is(ThingStatus.ONLINE)));
+
+        thingManager.setEnabled(thing.getUID(), false);
+
+        waitForAssert(() -> assertThat(result.getHandler(), is(nullValue())));
+        waitForAssert(() -> assertThat(result.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED)));
+
+        thingManager.setEnabled(thing.getUID(), true);
+
+        waitForAssert(() -> assertThat(result.getHandler(), is(not(nullValue()))));
+        waitForAssert(() -> assertThat(result.getStatus(), is(ThingStatus.ONLINE)));
+
+        thing.setHandler(null);
+
+        Thing updatedResult = thingRegistry.get(thingUID);
+        waitForAssert(() -> assertThat(updatedResult.getHandler(), is(nullValue())));
+
+        managedThingProvider.remove(thingUID);
+
+        assertThat(managedThingProvider.getAll().size(), is(0));
     }
 
     private void registerThingHandlerFactory(ThingHandlerFactory thingHandlerFactory) {

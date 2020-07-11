@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -44,15 +43,9 @@ import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingManager;
-import org.openhab.core.thing.ThingStatus;
-import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.binding.BaseThingHandler;
-import org.openhab.core.thing.binding.BaseThingHandlerFactory;
 import org.openhab.core.thing.binding.ThingFactory;
-import org.openhab.core.thing.binding.ThingHandler;
-import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.binding.builder.ChannelBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
@@ -61,7 +54,6 @@ import org.openhab.core.thing.internal.ThingImpl;
 import org.openhab.core.thing.type.BridgeType;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
-import org.openhab.core.types.Command;
 
 /**
  * Tests for {@link ManagedThingProvider}.
@@ -410,87 +402,6 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         assertThat(result.getThingTypeUID(), is(equalTo(thingTypeUID)));
         assertThat(result.getConfiguration(), is(not(nullValue())));
         assertThat(result.getProperties(), is(not(nullValue())));
-
-        assertThat(managedThingProvider.getAll().size(), is(0));
-    }
-
-    class SimpleThingHandler extends BaseThingHandler {
-
-        SimpleThingHandler(Thing thing) {
-            super(thing);
-        }
-
-        @Override
-        public void handleCommand(ChannelUID channelUID, Command command) {
-        }
-
-        @Override
-        public void initialize() {
-            updateStatus(ThingStatus.ONLINE);
-        }
-    }
-
-    class SimpleThingHandlerFactory extends BaseThingHandlerFactory {
-        private final Set<ThingHandler> handlers = new HashSet<>();
-
-        @Override
-        public boolean supportsThingType(ThingTypeUID thingTypeUID) {
-            return true;
-        }
-
-        @Override
-        protected @Nullable ThingHandler createHandler(Thing thing) {
-            ThingHandler handler = new SimpleThingHandler(thing);
-            handlers.add(handler);
-            return handler;
-        }
-
-        public Set<ThingHandler> getHandlers() {
-            return handlers;
-        }
-    }
-
-    @Test
-    public void assertCorrectThingHandlerAfterRetrieval() {
-        assertThat(managedThingProvider.getAll().size(), is(0));
-
-        ThingType thingType = ThingTypeBuilder.instance(BINDIND_ID, THING_TYPE_ID, "label").build();
-        thingTypes.put(thingType.getUID(), thingType);
-
-        Configuration configuration = new Configuration();
-        Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), THING1_ID), configuration,
-                null);
-        ThingUID thingUID = thing.getUID();
-
-        SimpleThingHandlerFactory thingHandlerFactory = new SimpleThingHandlerFactory();
-        registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
-
-        managedThingProvider.add(thing);
-
-        Collection<Thing> things = managedThingProvider.getAll();
-        assertThat(things.size(), is(1));
-
-        Thing result = managedThingProvider.get(thingUID);
-
-        waitForAssert(() -> assertThat(result.getHandler(), is(not(nullValue()))));
-        waitForAssert(() -> assertThat(result.getStatus(), is(ThingStatus.ONLINE)));
-
-        thingManager.setEnabled(thing.getUID(), false);
-
-        waitForAssert(() -> assertThat(result.getHandler(), is(nullValue())));
-        waitForAssert(() -> assertThat(result.getStatusInfo().getStatusDetail(), is(ThingStatusDetail.DISABLED)));
-
-        thingManager.setEnabled(thing.getUID(), true);
-
-        waitForAssert(() -> assertThat(result.getHandler(), is(not(nullValue()))));
-        waitForAssert(() -> assertThat(result.getStatus(), is(ThingStatus.ONLINE)));
-
-        thing.setHandler(null);
-
-        Thing updatedResult = managedThingProvider.get(thingUID);
-        waitForAssert(() -> assertThat(updatedResult.getHandler(), is(nullValue())));
-
-        managedThingProvider.remove(thingUID);
 
         assertThat(managedThingProvider.getAll().size(), is(0));
     }

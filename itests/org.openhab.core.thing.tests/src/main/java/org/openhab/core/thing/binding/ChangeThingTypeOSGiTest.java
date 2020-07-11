@@ -44,6 +44,7 @@ import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -71,6 +72,7 @@ import org.osgi.service.component.ComponentContext;
 @SuppressWarnings("null")
 public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
 
+    private ThingRegistry thingRegistry;
     private ManagedThingProvider managedThingProvider;
     private SampleThingHandlerFactory thingHandlerFactory;
     private boolean selfChanging = false;
@@ -116,6 +118,9 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
     @Before
     public void setup() throws URISyntaxException {
         registerVolatileStorageService();
+        thingRegistry = getService(ThingRegistry.class);
+        assertThat(thingRegistry, is(notNullValue()));
+
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
 
@@ -337,7 +342,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
 
-        Collection<Thing> res = managedThingProvider.getAll();
+        Collection<Thing> res = thingRegistry.getAll();
         assertThat(res.size(), is(1));
 
         Thing thing = res.iterator().next();
