@@ -138,7 +138,7 @@ public class ExtensionResource implements RESTResource {
     }
 
     @GET
-    @Path("/{extensionId: [a-zA-Z_0-9-]+}")
+    @Path("/{extensionId: [a-zA-Z_0-9-:]+}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get extension with given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
