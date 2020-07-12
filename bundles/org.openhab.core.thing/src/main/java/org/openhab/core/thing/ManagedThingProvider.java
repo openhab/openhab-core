@@ -39,14 +39,12 @@ import org.osgi.service.component.annotations.Reference;
 public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUID, ThingDTO> implements ThingProvider {
 
     private final ThingTypeRegistry thingTypeRegistry;
-    private final ThingManager thingManager;
 
     @Activate
     public ManagedThingProvider(final @Reference StorageService storageService,
-            final @Reference ThingTypeRegistry thingTypeRegistry, final @Reference ThingManager thingManager) {
+            final @Reference ThingTypeRegistry thingTypeRegistry) {
         super(storageService);
         this.thingTypeRegistry = thingTypeRegistry;
-        this.thingManager = thingManager;
     }
 
     @Override

@@ -1249,18 +1249,6 @@ public class ThingManagerImpl
         return !isDisabledByStorage(thingUID);
     }
 
-    @Override
-    public @Nullable ThingStatusInfo getStatusInfo(ThingUID thingUID) {
-        Thing thing = getThing(thingUID);
-        return thing != null ? thing.getStatusInfo() : null;
-    }
-
-    @Override
-    public @Nullable ThingHandler getHandler(ThingUID thingUID) {
-        Thing thing = getThing(thingUID);
-        return thing != null ? thing.getHandler() : null;
-    }
-
     private boolean isDisabledByStorage(ThingUID thingUID) {
         return storage.containsKey(thingUID.getAsString());
     }
