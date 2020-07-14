@@ -29,16 +29,18 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * {@link LinkConsoleCommandExtension} provides console commands for listing,
- * addding and removing links.
+ * adding and removing links.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Alex Tugarev - Added support for links between items and things
  * @author Kai Kreuzer - Removed Thing link commands
+ * @author Jan N. Klug - Add orphan link handling
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
 public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension {
@@ -49,12 +51,18 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_CLEAR = "clear";
     private static final String SUBCMD_ORPHAN = "orphan";
 
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ThingRegistry thingRegistry;
-    private ItemRegistry itemRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ItemRegistry itemRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
 
-    public LinkConsoleCommandExtension() {
+    @Activate
+    public LinkConsoleCommandExtension(@Reference ThingRegistry thingRegistry, @Reference ItemRegistry itemRegistry,
+            @Reference ItemChannelLinkRegistry itemChannelLinkRegistry) {
         super("links", "Manage your links.");
+
+        this.thingRegistry = thingRegistry;
+        this.itemRegistry = itemRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
     }
 
     @Override
@@ -70,7 +78,7 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
                         orphan(console, args[1], itemChannelLinkRegistry.getAll(), thingRegistry.getAll(),
                                 itemRegistry.getAll());
                     } else {
-                        console.println("Specify 'list' or 'purge'");
+                        console.println("Specify action 'list' or 'purge' to be executed: orphan <list|purge>");
                     }
                     return;
                 case SUBCMD_CL_ADD:
@@ -162,32 +170,5 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
         } else {
             console.println("Could not remove link " + itemChannelLink.toString() + ".");
         }
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = itemRegistry;
-    }
-
-    protected void unsetItemRegistry(ItemRegistry thingRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
     }
 }
