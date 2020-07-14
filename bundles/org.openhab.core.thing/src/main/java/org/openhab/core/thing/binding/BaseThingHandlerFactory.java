@@ -12,6 +12,8 @@
  */
 package org.openhab.core.thing.binding;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,6 +104,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
         configDescriptionRegistryServiceTracker.close();
         configStatusProviders.clear();
         firmwareUpdateHandlers.clear();
+        thingHandlerServices.clear();
         bundleContext = null;
     }
 
@@ -138,13 +141,11 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
         return thingHandler;
     }
 
-    @SuppressWarnings("rawtypes")
     private void registerServices(Thing thing, ThingHandler thingHandler) {
         ThingUID thingUID = thing.getUID();
-        for (Class c : thingHandler.getServices()) {
-            Object serviceInstance;
+        for (Class<?> c : thingHandler.getServices()) {
             try {
-                serviceInstance = c.newInstance();
+                Object serviceInstance = c.getConstructor().newInstance();
 
                 ThingHandlerService ths = null;
                 if (serviceInstance instanceof ThingHandlerService) {
@@ -157,57 +158,67 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                     continue;
                 }
 
-                Class[] interfaces = c.getInterfaces();
+                Set<Class<?>> interfaces = getAllInterfaces(c);
                 List<String> serviceNames = new LinkedList<>();
-                if (interfaces != null) {
-                    for (Class i : interfaces) {
-                        String className = i.getCanonicalName();
-                        // we only add specific ThingHandlerServices, i.e. those that derive from the
-                        // ThingHandlerService interface, NOT the ThingHandlerService itself. We do this to register
-                        // them as specific OSGi services later, rather than as a generic ThingHandlerService.
-                        if (className != null && !className.equals(ThingHandlerService.class.getCanonicalName())) {
-                            serviceNames.add(className);
-                        }
+                interfaces.forEach(i -> {
+                    String className = i.getCanonicalName();
+                    // we only add specific ThingHandlerServices, i.e. those that derive from the ThingHandlerService
+                    // interface, NOT the ThingHandlerService itself. We do this to register them as specific OSGi
+                    // services later, rather than as a generic ThingHandlerService.
+                    if (className != null && !className.equals(ThingHandlerService.class.getCanonicalName())) {
+                        serviceNames.add(className);
                     }
-                }
+                });
                 if (!serviceNames.isEmpty()) {
                     String[] serviceNamesArray = serviceNames.toArray(new String[serviceNames.size()]);
-
                     ServiceRegistration<?> serviceReg = bundleContext.registerService(serviceNamesArray,
                             serviceInstance, null);
-
                     if (serviceReg != null) {
-                        Set<ServiceRegistration<?>> serviceRegs = this.thingHandlerServices.get(thingUID);
+                        Set<ServiceRegistration<?>> serviceRegs = thingHandlerServices.get(thingUID);
                         if (serviceRegs == null) {
                             Set<ServiceRegistration<?>> set = new HashSet<>();
                             set.add(serviceReg);
-                            this.thingHandlerServices.put(thingUID, set);
+                            thingHandlerServices.put(thingUID, set);
                         } else {
                             serviceRegs.add(serviceReg);
                         }
                         ths.activate();
                     }
                 }
-            } catch (InstantiationException | IllegalAccessException e) {
-                logger.warn("Could not register service for class={}", c, e);
+            } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+                    | InvocationTargetException e) {
+                logger.warn("Could not register service for class={}", c.getCanonicalName(), e);
             }
         }
     }
 
     private void unregisterServices(Thing thing) {
         ThingUID thingUID = thing.getUID();
-
-        Set<ServiceRegistration<?>> serviceRegs = this.thingHandlerServices.remove(thingUID);
+        Set<ServiceRegistration<?>> serviceRegs = thingHandlerServices.remove(thingUID);
         if (serviceRegs != null) {
-            for (ServiceRegistration<?> serviceReg : serviceRegs) {
-                ThingHandlerService service = (ThingHandlerService) getBundleContext()
+            serviceRegs.forEach(serviceReg -> {
+                ThingHandlerService ths = (ThingHandlerService) getBundleContext()
                         .getService(serviceReg.getReference());
                 serviceReg.unregister();
-                if (service != null) {
-                    service.deactivate();
+                if (ths != null) {
+                    ths.deactivate();
                 }
-            }
+            });
         }
+    }
+
+    /**
+     * Returns all interfaces of the given class as well as all super classes.
+     *
+     * @param clazz The class
+     * @return A {@link List} of interfaces
+     */
+    private Set<Class<?>> getAllInterfaces(Class<?> clazz) {
+        Set<Class<?>> interfaces = new HashSet<>();
+        for (Class<?> superclazz = clazz; superclazz != null; superclazz = superclazz.getSuperclass()) {
+            interfaces.addAll(Arrays.asList(superclazz.getInterfaces()));
+        }
+        return interfaces;
     }
 
     /**
