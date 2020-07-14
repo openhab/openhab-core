@@ -90,7 +90,7 @@ public class ConfigDescriptionResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all available config descriptions.", response = ConfigDescriptionDTO.class, responseContainer = "List")
+    @ApiOperation(nickname = "getAllConfigDescriptions", value = "Gets all available config descriptions.", response = ConfigDescriptionDTO.class, responseContainer = "List")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ConfigDescriptionDTO.class, responseContainer = "List"))
     public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language, //
             @QueryParam("scheme") @ApiParam(value = "scheme filter") @Nullable String scheme) {
