@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
@@ -43,6 +44,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Jan N. Klug - Add orphan link handling
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_LIST = "list";

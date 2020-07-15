@@ -18,6 +18,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.io.console.Console;
@@ -26,6 +27,7 @@ import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.thing.ThingTypeUID;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Dennis Nobel - Added background discovery commands
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_START = "start";
@@ -46,12 +49,15 @@ public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExte
 
     private final Logger logger = LoggerFactory.getLogger(DiscoveryConsoleCommandExtension.class);
 
-    private DiscoveryServiceRegistry discoveryServiceRegistry;
+    private final DiscoveryServiceRegistry discoveryServiceRegistry;
+    private final ConfigurationAdmin configurationAdmin;
 
-    private ConfigurationAdmin configurationAdmin;
-
-    public DiscoveryConsoleCommandExtension() {
+    @Activate
+    public DiscoveryConsoleCommandExtension(final @Reference DiscoveryServiceRegistry discoveryServiceRegistry,
+            final @Reference ConfigurationAdmin configurationAdmin) {
         super("discovery", "Control the discovery mechanism.");
+        this.discoveryServiceRegistry = discoveryServiceRegistry;
+        this.configurationAdmin = configurationAdmin;
     }
 
     @Override
@@ -135,23 +141,5 @@ public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExte
                         "enables background discovery for the discovery service with the given PID"),
                 buildCommandUsage(SUBCMD_BACKGROUND_DISCOVERY_DISABLE + " <PID>",
                         "disables background discovery for the discovery service with the given PID") });
-    }
-
-    @Reference
-    protected void setDiscoveryServiceRegistry(DiscoveryServiceRegistry discoveryServiceRegistry) {
-        this.discoveryServiceRegistry = discoveryServiceRegistry;
-    }
-
-    protected void unsetDiscoveryServiceRegistry(DiscoveryServiceRegistry discoveryServiceRegistry) {
-        this.discoveryServiceRegistry = null;
-    }
-
-    @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    protected void unsetConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = null;
     }
 }
