@@ -14,24 +14,33 @@ package org.openhab.core.thing.internal.console;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
+import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * {@link LinkConsoleCommandExtension} provides console commands for listing,
- * addding and removing links.
+ * adding and removing links.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Alex Tugarev - Added support for links between items and things
  * @author Kai Kreuzer - Removed Thing link commands
+ * @author Jan N. Klug - Add orphan link handling
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
 public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension {
@@ -40,11 +49,20 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
     private static final String SUBCMD_CL_ADD = "addChannelLink";
     private static final String SUBCMD_CL_REMOVE = "removeChannelLink";
     private static final String SUBCMD_CLEAR = "clear";
+    private static final String SUBCMD_ORPHAN = "orphan";
 
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ItemRegistry itemRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
 
-    public LinkConsoleCommandExtension() {
+    @Activate
+    public LinkConsoleCommandExtension(@Reference ThingRegistry thingRegistry, @Reference ItemRegistry itemRegistry,
+            @Reference ItemChannelLinkRegistry itemChannelLinkRegistry) {
         super("links", "Manage your links.");
+
+        this.thingRegistry = thingRegistry;
+        this.itemRegistry = itemRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
     }
 
     @Override
@@ -54,6 +72,14 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
             switch (subCommand) {
                 case SUBCMD_LIST:
                     list(console, itemChannelLinkRegistry.getAll());
+                    return;
+                case SUBCMD_ORPHAN:
+                    if (args.length == 2 && (args[1].equals("list") || args[1].equals("purge"))) {
+                        orphan(console, args[1], itemChannelLinkRegistry.getAll(), thingRegistry.getAll(),
+                                itemRegistry.getAll());
+                    } else {
+                        console.println("Specify action 'list' or 'purge' to be executed: orphan <list|purge>");
+                    }
                     return;
                 case SUBCMD_CL_ADD:
                     if (args.length > 2) {
@@ -86,12 +112,34 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
         }
     }
 
+    private void orphan(Console console, String action, Collection<ItemChannelLink> itemChannelLinks,
+            Collection<Thing> things, Collection<Item> items) {
+        Collection<ChannelUID> channelUIDS = things.stream().map(Thing::getChannels).flatMap(List::stream)
+                .map(Channel::getUID).collect(Collectors.toCollection(HashSet::new));
+        Collection<String> itemNames = items.stream().map(Item::getName).collect(Collectors.toCollection(HashSet::new));
+
+        itemChannelLinks.forEach(itemChannelLink -> {
+            if (!channelUIDS.contains(itemChannelLink.getLinkedUID())) {
+                console.println("Thing channel missing: " + itemChannelLink.toString());
+                if (action.equals("purge")) {
+                    removeChannelLink(console, itemChannelLink.getItemName(), itemChannelLink.getLinkedUID());
+                }
+            } else if (!itemNames.contains(itemChannelLink.getItemName())) {
+                console.println("Item missing: " + itemChannelLink.toString());
+                if (action.equals("purge")) {
+                    removeChannelLink(console, itemChannelLink.getItemName(), itemChannelLink.getLinkedUID());
+                }
+            }
+        });
+    }
+
     @Override
     public List<String> getUsages() {
         return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_LIST, "lists all links"),
                 buildCommandUsage(SUBCMD_CL_ADD + " <itemName> <channelUID>", "links an item with a channel"),
                 buildCommandUsage(SUBCMD_CL_REMOVE + " <itemName> <thingUID>", "unlinks an item with a channel"),
-                buildCommandUsage(SUBCMD_CLEAR, "removes all managed links") });
+                buildCommandUsage(SUBCMD_CLEAR, "removes all managed links"),
+                buildCommandUsage(SUBCMD_ORPHAN, "<list|purge> lists/purges all links with one missing element") });
     }
 
     private void clear(Console console) {
@@ -122,14 +170,5 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
         } else {
             console.println("Could not remove link " + itemChannelLink.toString() + ".");
         }
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
     }
 }
