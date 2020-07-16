@@ -28,7 +28,7 @@ import org.openhab.core.items.Item;
 public interface QueryablePersistenceService extends PersistenceService {
 
     /**
-     * Queries the {@link PersistenceService} for data with a given filter criteria
+     * Queries the {@link PersistenceService} for historic data with a given {@link FilterCriteria}.
      *
      * @param filter the filter to apply to the query
      * @return a time series of items
@@ -36,12 +36,11 @@ public interface QueryablePersistenceService extends PersistenceService {
     Iterable<HistoricItem> query(FilterCriteria filter);
 
     /**
-     * Returns a list of items that are stored in the persistence service
+     * Returns a set of {@link PersistenceItemInfo} about items that are stored in the persistence service. This allows
+     * the persistence service to return information about items that are no long available as an {@link Item} in
+     * openHAB. If it is not possible to retrieve the information an empty set should be returned.
      *
-     * This is returned as a string to allow the persistence service to return items that are no long available as an
-     * {@link Item}.
-     *
-     * @return list of strings of item names contained in the store. Not null.
+     * @return a set of information about the persisted items
      */
     Set<PersistenceItemInfo> getItemInfo();
 }
