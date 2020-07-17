@@ -12,8 +12,6 @@
  */
 package org.openhab.core.thing.internal.console;
 
-import static java.util.Arrays.asList;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
@@ -36,6 +36,7 @@ import org.openhab.core.thing.ThingStatusInfo;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.events.ThingEventFactory;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -48,6 +49,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Henning Sudbrock - Added show command
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String CMD_THINGS = "things";
@@ -59,14 +61,23 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_DISABLE = "disable";
     private static final String SUBCMD_ENABLE = "enable";
 
-    private ManagedThingProvider managedThingProvider;
-    private ThingRegistry thingRegistry;
-    private ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
-    private EventPublisher eventPublisher;
-    private ThingManager thingManager;
+    private final ManagedThingProvider managedThingProvider;
+    private final ThingRegistry thingRegistry;
+    private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
+    private final EventPublisher eventPublisher;
+    private final ThingManager thingManager;
 
-    public ThingConsoleCommandExtension() {
+    @Activate
+    public ThingConsoleCommandExtension(final @Reference ManagedThingProvider managedThingProvider,
+            final @Reference ThingRegistry thingRegistry,
+            final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
+            final @Reference EventPublisher eventPublisher, final @Reference ThingManager thingManager) {
         super(CMD_THINGS, "Access your thing registry.");
+        this.managedThingProvider = managedThingProvider;
+        this.thingRegistry = thingRegistry;
+        this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
+        this.eventPublisher = eventPublisher;
+        this.thingManager = thingManager;
     }
 
     @Override
@@ -79,7 +90,7 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     printThings(console, things);
                     return;
                 case SUBCMD_SHOW:
-                    printThingsDetails(console, asList(args).subList(1, args.length));
+                    printThingsDetails(console, Arrays.asList(args).subList(1, args.length));
                     return;
                 case SUBCMD_CLEAR:
                     removeAllThings(console, things);
@@ -119,7 +130,7 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
     }
 
-    private void triggerChannel(Console console, String channelUid, String event) {
+    private void triggerChannel(Console console, String channelUid, @Nullable String event) {
         eventPublisher.post(ThingEventFactory.createTriggerEvent(event, new ChannelUID(channelUid)));
     }
 
@@ -266,52 +277,5 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 }
             }
         }
-    }
-
-    @Reference
-    protected void setManagedThingProvider(ManagedThingProvider managedThingProvider) {
-        this.managedThingProvider = managedThingProvider;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetManagedThingProvider(ManagedThingProvider managedThingProvider) {
-        this.managedThingProvider = null;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
-    }
-
-    @Reference
-    protected void setThingStatusInfoI18nLocalizationService(
-            ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService) {
-        this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
-    }
-
-    protected void unsetThingStatusInfoI18nLocalizationService(
-            ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService) {
-        this.thingStatusInfoI18nLocalizationService = null;
-    }
-
-    @Reference
-    protected void setEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    protected void unsetEventPublisher(EventPublisher eventPublisher) {
-        this.eventPublisher = null;
-    }
-
-    @Reference
-    protected void setThingManager(ThingManager thingManager) {
-        this.thingManager = thingManager;
-    }
-
-    protected void unsetThingManager(ThingManager thingManager) {
-        this.thingManager = null;
     }
 }

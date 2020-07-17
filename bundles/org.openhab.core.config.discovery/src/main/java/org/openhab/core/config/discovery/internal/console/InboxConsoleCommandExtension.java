@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.inbox.Inbox;
@@ -29,6 +30,7 @@ import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -38,6 +40,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Initial contribution
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_APPROVE = "approve";
@@ -47,10 +50,12 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private static final String SUBCMD_CLEAR = "clear";
     private static final String SUBCMD_REMOVE = "remove";
 
-    private Inbox inbox;
+    private final Inbox inbox;
 
-    public InboxConsoleCommandExtension() {
+    @Activate
+    public InboxConsoleCommandExtension(final @Reference Inbox inbox) {
         super("inbox", "Manage your inbox.");
+        this.inbox = inbox;
     }
 
     @Override
@@ -195,14 +200,5 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_REMOVE + " [<thingUID>|<thingTypeUID>]",
                         "remove the inbox entries of a given thing id or thing type"),
                 buildCommandUsage(SUBCMD_IGNORE + " <thingUID>", "ignores an inbox entry permanently") });
-    }
-
-    @Reference
-    protected void setInbox(Inbox inbox) {
-        this.inbox = inbox;
-    }
-
-    protected void unsetInbox(Inbox inbox) {
-        this.inbox = null;
     }
 }

@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
@@ -28,6 +30,7 @@ import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
 import org.openhab.core.thing.firmware.FirmwareRegistry;
 import org.openhab.core.thing.firmware.FirmwareStatusInfo;
 import org.openhab.core.thing.firmware.FirmwareUpdateService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -41,6 +44,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Dimitar Ivanov - The listing of the firmwares is done for thing UID
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
+@NonNullByDefault
 public final class FirmwareUpdateConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_LIST = "list";
@@ -48,13 +52,18 @@ public final class FirmwareUpdateConsoleCommandExtension extends AbstractConsole
     private static final String SUBCMD_UPDATE = "update";
     private static final String SUBCMD_CANCEL = "cancel";
 
-    private FirmwareUpdateService firmwareUpdateService;
-    private FirmwareRegistry firmwareRegistry;
-    private ThingRegistry thingRegistry;
+    private final FirmwareUpdateService firmwareUpdateService;
+    private final FirmwareRegistry firmwareRegistry;
+    private final ThingRegistry thingRegistry;
     private final List<FirmwareUpdateHandler> firmwareUpdateHandlers = new CopyOnWriteArrayList<>();
 
-    public FirmwareUpdateConsoleCommandExtension() {
+    @Activate
+    public FirmwareUpdateConsoleCommandExtension(final @Reference FirmwareUpdateService firmwareUpdateService,
+            final @Reference FirmwareRegistry firmwareRegistry, final @Reference ThingRegistry thingRegistry) {
         super("firmware", "Manage your things' firmwares.");
+        this.firmwareUpdateService = firmwareUpdateService;
+        this.firmwareRegistry = firmwareRegistry;
+        this.thingRegistry = thingRegistry;
     }
 
     @Override
@@ -176,7 +185,7 @@ public final class FirmwareUpdateConsoleCommandExtension extends AbstractConsole
         console.println("Firmware update started.");
     }
 
-    private FirmwareUpdateHandler getFirmwareUpdateHandler(ThingUID thingUID) {
+    private @Nullable FirmwareUpdateHandler getFirmwareUpdateHandler(ThingUID thingUID) {
         for (FirmwareUpdateHandler firmwareUpdateHandler : firmwareUpdateHandlers) {
             if (thingUID.equals(firmwareUpdateHandler.getThing().getUID())) {
                 return firmwareUpdateHandler;
@@ -192,33 +201,6 @@ public final class FirmwareUpdateConsoleCommandExtension extends AbstractConsole
                 buildCommandUsage(SUBCMD_STATUS + " <thingUID>", "lists the firmware status for a thing"),
                 buildCommandUsage(SUBCMD_CANCEL + " <thingUID>", "cancels the update for a thing"), buildCommandUsage(
                         SUBCMD_UPDATE + " <thingUID> <firmware version>", "updates the firmware for a thing") });
-    }
-
-    @Reference
-    protected void setFirmwareUpdateService(FirmwareUpdateService firmwareUpdateService) {
-        this.firmwareUpdateService = firmwareUpdateService;
-    }
-
-    protected void unsetFirmwareUpdateService(FirmwareUpdateService firmwareUpdateService) {
-        this.firmwareUpdateService = null;
-    }
-
-    @Reference
-    protected void setFirmwareRegistry(FirmwareRegistry firmwareRegistry) {
-        this.firmwareRegistry = firmwareRegistry;
-    }
-
-    protected void unsetFirmwareRegistry(FirmwareRegistry firmwareRegistry) {
-        this.firmwareRegistry = null;
-    }
-
-    @Reference
-    protected void setThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = thingRegistry;
-    }
-
-    protected void unsetThingRegistry(ThingRegistry thingRegistry) {
-        this.thingRegistry = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
