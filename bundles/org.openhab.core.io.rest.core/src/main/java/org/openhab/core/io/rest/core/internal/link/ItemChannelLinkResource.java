@@ -89,9 +89,9 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all available links.", response = ItemChannelLinkDTO.class, responseContainer = "Collection")
+    @ApiOperation(value = "Gets all available links.", response = ItemChannelLinkDTO.class, responseContainer = "List")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ItemChannelLinkDTO.class, responseContainer = "Collection") })
+            @ApiResponse(code = 200, message = "OK", response = ItemChannelLinkDTO.class, responseContainer = "List") })
     public Response getAll(
             @QueryParam("channelUID") @ApiParam(value = "filter by channel UID") @Nullable String channelUID,
             @QueryParam("itemName") @ApiParam(value = "filter by item name") @Nullable String itemName) {
