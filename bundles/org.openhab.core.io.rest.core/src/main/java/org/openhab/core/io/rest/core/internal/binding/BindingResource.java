@@ -109,7 +109,7 @@ public class BindingResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all bindings.", response = BindingInfoDTO.class, responseContainer = "Set")
+    @ApiOperation(nickname = "getAllBindings", value = "Get all bindings.", response = BindingInfoDTO.class, responseContainer = "Set")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = BindingInfoDTO.class, responseContainer = "Set") })
     public Response getAll(
@@ -123,7 +123,7 @@ public class BindingResource implements RESTResource {
     @GET
     @Path("/{bindingId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get binding configuration for given binding ID.")
+    @ApiOperation(nickname = "getBindingConfiguration", value = "Get binding configuration for given binding ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Binding does not exist"),
             @ApiResponse(code = 500, message = "Configuration can not be read due to internal error") })
