@@ -83,9 +83,9 @@ public class TemplateResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all available templates.", response = Template.class, responseContainer = "Collection")
+    @ApiOperation(value = "Get all available templates.", response = Template.class, responseContainer = "List")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = Template.class, responseContainer = "Collection") })
+            @ApiResponse(code = 200, message = "OK", response = Template.class, responseContainer = "List") })
     public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         Collection<RuleTemplateDTO> result = templateRegistry.getAll(locale).stream()
