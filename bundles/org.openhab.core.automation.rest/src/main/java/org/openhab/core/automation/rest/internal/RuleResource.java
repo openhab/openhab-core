@@ -127,9 +127,9 @@ public class RuleResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get available rules, optionally filtered by tags and/or prefix.", response = EnrichedRuleDTO.class, responseContainer = "Collection")
+    @ApiOperation(value = "Get available rules, optionally filtered by tags and/or prefix.", response = EnrichedRuleDTO.class, responseContainer = "List")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = EnrichedRuleDTO.class, responseContainer = "Collection") })
+            @ApiResponse(code = 200, message = "OK", response = EnrichedRuleDTO.class, responseContainer = "List") })
     public Response get(@QueryParam("prefix") final @Nullable String prefix,
             @QueryParam("tags") final @Nullable List<String> tags) {
         // match all
