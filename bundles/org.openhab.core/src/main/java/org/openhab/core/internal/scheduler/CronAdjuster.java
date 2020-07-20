@@ -73,7 +73,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
      * Constructs the class with a cron specification. containing variables and a cron expression at the last line.
      */
     public CronAdjuster(final String specification) {
-        final String entries[] = specification.split("[\n\r]+");
+        final String[] entries = specification.split("[\n\r]+");
         environmentMap = parseEnvironment(entries);
 
         String cronExpression = entries[entries.length - 1].trim();
@@ -84,7 +84,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             cronExpression = preDeclared(cronExpression);
         }
 
-        final String parts[] = cronExpression.trim().toUpperCase().split("\\s+");
+        final String[] parts = cronExpression.trim().toUpperCase().split("\\s+");
 
         if (parts.length < 6 || parts.length > 7) {
             throw new IllegalArgumentException(
@@ -430,7 +430,7 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
             return r;
         }
 
-        final String parts[] = range.split("-");
+        final String[] parts = range.split("-");
         r[0] = r[1] = parseInt(cronExpression, chronoField, parts[0], min, names);
         if (parts.length == 2) {
             r[1] = parseInt(cronExpression, chronoField, parts[1], min, names);
