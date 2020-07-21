@@ -15,7 +15,6 @@ package org.openhab.core.io.http.internal;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
@@ -82,7 +81,7 @@ public class SmartHomeHttpContext implements WrappingHttpContext {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addHandler(Handler handler) {
         this.handlers.add(handler);
-        Collections.sort(handlers, Comparator.comparingInt(Handler::getPriority));
+        handlers.sort(Comparator.comparingInt(Handler::getPriority));
     }
 
     public void removeHandler(Handler handler) {
