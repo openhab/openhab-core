@@ -117,8 +117,8 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
             }
             this.configurationRoots = roots.split(",");
         }
-        for (int i = 0; i < this.configurationRoots.length; i++) {
-            initializeWatchService(this.configurationRoots[i] + File.separator + rootSubdirectory);
+        for (String configurationRoot : this.configurationRoots) {
+            initializeWatchService(configurationRoot + File.separator + rootSubdirectory);
         }
     }
 

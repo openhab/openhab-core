@@ -134,26 +134,26 @@ public class AutomationCommandRemove extends AutomationCommand {
         } else {
             getId = false;
         }
-        for (int i = 0; i < parameterValues.length; i++) {
-            if (null == parameterValues[i]) {
+        for (String parameterValue : parameterValues) {
+            if (null == parameterValue) {
                 continue;
             }
-            if (OPTION_ST.equals(parameterValues[i])) {
+            if (OPTION_ST.equals(parameterValue)) {
                 st = true;
-            } else if (parameterValues[i].charAt(0) == '-') {
-                return String.format("Unsupported option: %s", parameterValues[i]);
+            } else if (parameterValue.charAt(0) == '-') {
+                return String.format("Unsupported option: %s", parameterValue);
             } else if (getUrl) {
-                url = initURL(parameterValues[i]);
+                url = initURL(parameterValue);
                 if (url != null) {
                     getUrl = false;
                 }
             } else if (getId) {
-                id = parameterValues[i];
+                id = parameterValue;
                 if (id != null) {
                     getId = false;
                 }
             } else {
-                return String.format("Unsupported parameter: %s", parameterValues[i]);
+                return String.format("Unsupported parameter: %s", parameterValue);
             }
         }
         if (getUrl) {

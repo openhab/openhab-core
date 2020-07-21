@@ -41,8 +41,8 @@ final class ExpressionAlternatives extends Expression {
     @Override
     ASTNode parse(ResourceBundle language, TokenList list) {
         ASTNode node = new ASTNode(), cr;
-        for (int i = 0; i < subExpressions.size(); i++) {
-            cr = subExpressions.get(i).parse(language, list);
+        for (Expression subExpression : subExpressions) {
+            cr = subExpression.parse(language, list);
             if (cr.isSuccess()) {
                 node.setChildren(new ASTNode[] { cr });
                 node.setRemainingTokens(cr.getRemainingTokens());
