@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.automation.Visibility;
@@ -30,7 +31,6 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.common.registry.ProviderChangeListener;
-import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
@@ -115,7 +115,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
      */
     private List<ParameterOption> getSoundOptions() {
         List<ParameterOption> options = new ArrayList<>();
-        File soundsDir = Paths.get(ConfigConstants.getConfigFolder(), AudioManager.SOUND_DIR).toFile();
+        File soundsDir = Paths.get(OpenHAB.getConfigFolder(), AudioManager.SOUND_DIR).toFile();
         if (soundsDir.isDirectory()) {
             for (String fileName : soundsDir.list()) {
                 if (fileName.contains(".") && !fileName.startsWith(".")) {

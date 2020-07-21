@@ -19,7 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.service.AbstractWatchService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -52,9 +52,9 @@ public class ConfigDispatcherFileWatcher extends AbstractWatchService {
     private static String getPathToWatch() {
         String progArg = System.getProperty(SERVICEDIR_PROG_ARGUMENT);
         if (progArg != null) {
-            return ConfigConstants.getConfigFolder() + File.separator + progArg;
+            return OpenHAB.getConfigFolder() + File.separator + progArg;
         } else {
-            return ConfigConstants.getConfigFolder() + File.separator + SERVICES_FOLDER;
+            return OpenHAB.getConfigFolder() + File.separator + SERVICES_FOLDER;
         }
     }
 

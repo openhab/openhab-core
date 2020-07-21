@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.config.core.Configuration;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -95,7 +95,7 @@ public class ConfigurationService {
      */
     public Configuration update(String configId, Configuration newConfiguration, boolean override) throws IOException {
         org.osgi.service.cm.Configuration configuration = null;
-        if (newConfiguration.containsKey(ConfigConstants.SERVICE_CONTEXT)) {
+        if (newConfiguration.containsKey(OpenHAB.SERVICE_CONTEXT)) {
             try {
                 configuration = getConfigurationWithContext(configId);
             } catch (InvalidSyntaxException e) {

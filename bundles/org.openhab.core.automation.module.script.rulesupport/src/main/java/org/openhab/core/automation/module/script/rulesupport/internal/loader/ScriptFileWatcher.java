@@ -39,9 +39,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
-import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.service.AbstractWatchService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -73,7 +73,7 @@ public class ScriptFileWatcher extends AbstractWatchService {
 
     @Activate
     public ScriptFileWatcher(final @Reference ScriptEngineManager manager) {
-        super(ConfigConstants.getConfigFolder() + File.separator + FILE_DIRECTORY);
+        super(OpenHAB.getConfigFolder() + File.separator + FILE_DIRECTORY);
         this.manager = manager;
     }
 
