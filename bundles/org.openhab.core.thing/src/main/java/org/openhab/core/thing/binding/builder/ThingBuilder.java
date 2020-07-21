@@ -54,7 +54,7 @@ public class ThingBuilder {
     }
 
     public static ThingBuilder create(ThingTypeUID thingTypeUID, String thingId) {
-        return new ThingBuilder(thingTypeUID, new ThingUID(thingTypeUID.getBindingId(), thingTypeUID.getId(), thingId));
+        return new ThingBuilder(thingTypeUID, new ThingUID(thingTypeUID, thingId));
     }
 
     public static ThingBuilder create(ThingTypeUID thingTypeUID, ThingUID thingUID) {

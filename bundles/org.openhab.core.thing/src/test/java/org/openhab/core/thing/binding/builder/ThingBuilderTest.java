@@ -70,29 +70,29 @@ public class ThingBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithChannelDuplicates() {
-        thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
-        thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
+        thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build());
+        thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithChannelsDuplicatesCollections() {
         thingBuilder.withChannels(Arrays.asList( //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build()));
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build(), //
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithChannelsDuplicatesVararg() {
         thingBuilder.withChannels( //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build());
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build(), //
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build());
     }
 
     @Test
     public void testWithoutChannel() {
         thingBuilder.withChannels( //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build());
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build(), //
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel2")).build());
         thingBuilder.withoutChannel(new ChannelUID(THING_UID, "channel1"));
         Thing thing = thingBuilder.build();
         assertThat(thing.getChannels(), hasSize(1));
@@ -102,8 +102,8 @@ public class ThingBuilderTest {
     @Test
     public void testWithoutChannelMissing() {
         thingBuilder.withChannels( //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), "").build(), //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), "").build());
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build(), //
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel2")).build());
         thingBuilder.withoutChannel(new ChannelUID(THING_UID, "channel3"));
         assertThat(thingBuilder.build().getChannels(), hasSize(2));
     }
@@ -111,7 +111,7 @@ public class ThingBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testWithChannelWrongThing() {
         thingBuilder.withChannel(
-                ChannelBuilder.create(new ChannelUID(new ThingUID(THING_TYPE_UID, "wrong"), "channel1"), "").build());
+                ChannelBuilder.create(new ChannelUID(new ThingUID(THING_TYPE_UID, "wrong"), "channel1")).build());
     }
 
     @Test
