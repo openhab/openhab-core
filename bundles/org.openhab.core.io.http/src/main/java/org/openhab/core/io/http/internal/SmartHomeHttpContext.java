@@ -82,7 +82,7 @@ public class SmartHomeHttpContext implements WrappingHttpContext {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addHandler(Handler handler) {
         this.handlers.add(handler);
-        Collections.sort(handlers, Comparator.comparingInt(Handler::getPriority));
+        handlers.sort(Comparator.comparingInt(Handler::getPriority));
     }
 
     public void removeHandler(Handler handler) {
