@@ -48,6 +48,8 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class PersistenceExtensions {
 
+    private static final BigDecimal BIG_DECIMAL_TWO = BigDecimal.valueOf(2);
+
     private static PersistenceServiceRegistry registry;
     private static TimeZoneProvider timeZoneProvider;
 
@@ -432,9 +434,9 @@ public class PersistenceExtensions {
                 if (firstTimestamp == null || lastState == null) {
                     firstTimestamp = thisTimestamp;
                 } else {
-                    avgValue = (thisState.toBigDecimal().add(lastState.toBigDecimal())).divide(BigDecimal.valueOf(2),
+                    avgValue = thisState.toBigDecimal().add(lastState.toBigDecimal()).divide(BIG_DECIMAL_TWO,
                             MathContext.DECIMAL64);
-                    timeSpan = thisTimestamp.subtract(lastTimestamp);
+                    timeSpan = thisTimestamp.subtract(lastTimestamp, MathContext.DECIMAL64);
                     total = total.add(avgValue.multiply(timeSpan, MathContext.DECIMAL64));
                 }
                 lastTimestamp = thisTimestamp;
@@ -446,21 +448,22 @@ public class PersistenceExtensions {
             thisState = item.getStateAs(DecimalType.class);
             if (thisState != null) {
                 thisTimestamp = BigDecimal.valueOf(Instant.now().toEpochMilli());
-                avgValue = (thisState.toBigDecimal().add(lastState.toBigDecimal())).divide(BigDecimal.valueOf(2),
+                avgValue = thisState.toBigDecimal().add(lastState.toBigDecimal()).divide(BIG_DECIMAL_TWO,
                         MathContext.DECIMAL64);
-                timeSpan = thisTimestamp.subtract(lastTimestamp);
+                timeSpan = thisTimestamp.subtract(lastTimestamp, MathContext.DECIMAL64);
                 total = total.add(avgValue.multiply(timeSpan, MathContext.DECIMAL64));
             }
         }
 
         if (thisTimestamp != null) {
             timeSpan = thisTimestamp.subtract(firstTimestamp, MathContext.DECIMAL64);
-
-            BigDecimal average = total.divide(timeSpan, MathContext.DECIMAL64);
-            return new DecimalType(average);
-        } else {
-            return null;
+            // avoid ArithmeticException if timeSpan is zero
+            if (!BigDecimal.ZERO.equals(timeSpan)) {
+                BigDecimal average = total.divide(timeSpan, MathContext.DECIMAL64);
+                return new DecimalType(average);
+            }
         }
+        return null;
     }
 
     /**
