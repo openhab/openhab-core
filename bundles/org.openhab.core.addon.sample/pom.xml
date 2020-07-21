@@ -10,9 +10,9 @@
     <version>3.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.extension.sample</artifactId>
+  <artifactId>org.openhab.core.addon.sample</artifactId>
 
-  <name>openHAB Core :: Bundles :: Sample Extension Service</name>
+  <name>openHAB Core :: Bundles :: Sample Add-on Service</name>
 
   <dependencies>
     <dependency>

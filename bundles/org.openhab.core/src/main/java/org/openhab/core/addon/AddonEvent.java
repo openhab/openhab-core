@@ -10,47 +10,47 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.extension;
+package org.openhab.core.addon;
 
 import org.openhab.core.events.AbstractEvent;
 
 /**
- * This is an {@link Event} that is sent on extension operations, such as installing and uninstalling.
+ * This is an {@link Event} that is sent on add-on operations, such as installing and uninstalling.
  *
  * @author Kai Kreuzer - Initial contribution
  */
-public class ExtensionEvent extends AbstractEvent {
+public class AddonEvent extends AbstractEvent {
 
     /**
-     * The extension event type.
+     * The add-on event type.
      */
-    public static final String TYPE = ExtensionEvent.class.getSimpleName();
+    public static final String TYPE = AddonEvent.class.getSimpleName();
 
     private String msg;
     private String id;
 
     /**
-     * Constructs a new extension event object.
+     * Constructs a new add-on event object.
      *
      * @param topic the topic
      * @param payload the payload
-     * @param id the id of the extension
+     * @param id the id of the add-on
      * @param msg the message text
      */
-    public ExtensionEvent(String topic, String payload, String id, String msg) {
+    public AddonEvent(String topic, String payload, String id, String msg) {
         super(topic, payload, null);
         this.id = id;
         this.msg = msg;
     }
 
     /**
-     * Constructs a new extension event object.
+     * Constructs a new add-on event object.
      *
      * @param topic the topic
      * @param payload the payload
-     * @param id the id of the extension
+     * @param id the id of the add-on
      */
-    public ExtensionEvent(String topic, String payload, String id) {
+    public AddonEvent(String topic, String payload, String id) {
         this(topic, payload, id, null);
     }
 
@@ -61,12 +61,11 @@ public class ExtensionEvent extends AbstractEvent {
 
     @Override
     public String toString() {
-        if (getTopic()
-                .equals(ExtensionEventFactory.buildTopic(ExtensionEventFactory.EXTENSION_INSTALLED_EVENT_TOPIC, id))) {
-            return "Extension '" + id + "' has been installed.";
-        } else if (getTopic().equals(
-                ExtensionEventFactory.buildTopic(ExtensionEventFactory.EXTENSION_UNINSTALLED_EVENT_TOPIC, id))) {
-            return "Extension '" + id + "' has been uninstalled.";
+        if (getTopic().equals(AddonEventFactory.buildTopic(AddonEventFactory.ADDON_INSTALLED_EVENT_TOPIC, id))) {
+            return "Addon '" + id + "' has been installed.";
+        } else if (getTopic()
+                .equals(AddonEventFactory.buildTopic(AddonEventFactory.ADDON_UNINSTALLED_EVENT_TOPIC, id))) {
+            return "Addon '" + id + "' has been uninstalled.";
         } else {
             return id + ": " + (msg != null ? msg : "Operation failed.");
         }

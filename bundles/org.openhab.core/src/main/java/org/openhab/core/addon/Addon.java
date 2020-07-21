@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.extension;
+package org.openhab.core.addon;
 
 /**
- * This class defines an extension.
+ * This class defines an add-on.
  *
  * @author Kai Kreuzer - Initial contribution
  */
-public class Extension {
+public class Addon {
 
     private final String id;
     private final String label;
@@ -30,33 +30,33 @@ public class Extension {
     private final String imageLink;
 
     /**
-     * Creates a new Extension instance
+     * Creates a new Addon instance
      *
-     * @param id the id of the extension
-     * @param type the type id of the extension
-     * @param label the label of the extension
-     * @param version the version of the extension
-     * @param link the link to find more information about the extension (can be null)
-     * @param installed true, if the extension is installed, false otherwise
+     * @param id the id of the add-on
+     * @param type the type id of the add-on
+     * @param label the label of the add-on
+     * @param version the version of the add-on
+     * @param link the link to find more information about the add-on (can be null)
+     * @param installed true, if the add-on is installed, false otherwise
      */
-    public Extension(String id, String type, String label, String version, String link, boolean installed) {
+    public Addon(String id, String type, String label, String version, String link, boolean installed) {
         this(id, type, label, version, link, installed, null, null, null);
     }
 
     /**
-     * Creates a new Extension instance
+     * Creates a new Addon instance
      *
-     * @param id the id of the extension
-     * @param type the type id of the extension
-     * @param label the label of the extension
-     * @param version the version of the extension
-     * @param description the detailed description of the extension (may be null)
-     * @param backgroundColor for displaying the extension (may be null)
-     * @param link the link to find more information about the extension (may be null)
+     * @param id the id of the add-on
+     * @param type the type id of the add-on
+     * @param label the label of the add-on
+     * @param version the version of the add-on
+     * @param description the detailed description of the add-on (may be null)
+     * @param backgroundColor for displaying the add-on (may be null)
+     * @param link the link to find more information about the add-on (may be null)
      * @param imageLink the link to an image (png/svg) (may be null)
-     * @param installed true, if the extension is installed, false otherwise
+     * @param installed true, if the add-on is installed, false otherwise
      */
-    public Extension(String id, String type, String label, String version, String link, boolean installed,
+    public Addon(String id, String type, String label, String version, String link, boolean installed,
             String description, String backgroundColor, String imageLink) {
         this.id = id;
         this.label = label;
@@ -70,42 +70,42 @@ public class Extension {
     }
 
     /**
-     * The id of the {@ExtensionType} of the extension
+     * The id of the {@AddonType} of the add-on
      */
     public String getType() {
         return type;
     }
 
     /**
-     * The id of the extension
+     * The id of the add-on
      */
     public String getId() {
         return id;
     }
 
     /**
-     * The label of the extension
+     * The label of the add-on
      */
     public String getLabel() {
         return label;
     }
 
     /**
-     * The (optional) link to find more information about the extension
+     * The (optional) link to find more information about the add-on
      */
     public String getLink() {
         return link;
     }
 
     /**
-     * The version of the extension
+     * The version of the add-on
      */
     public String getVersion() {
         return version;
     }
 
     /**
-     * true, if the extension is installed, false otherwise
+     * true, if the add-on is installed, false otherwise
      */
     public boolean isInstalled() {
         return installed;
@@ -119,21 +119,21 @@ public class Extension {
     }
 
     /**
-     * The description of the extension
+     * The description of the add-on
      */
     public String getDescription() {
         return description;
     }
 
     /**
-     * The background color for rendering the extension
+     * The background color for rendering the add-on
      */
     public String getBackgroundColor() {
         return backgroundColor;
     }
 
     /**
-     * A link to an image (png/svg) for the extension
+     * A link to an image (png/svg) for the add-on
      */
     public String getImageLink() {
         return imageLink;

@@ -37,14 +37,14 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonEventFactory;
+import org.openhab.core.addon.AddonService;
+import org.openhab.core.addon.AddonType;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.extension.Extension;
-import org.openhab.core.extension.ExtensionEventFactory;
-import org.openhab.core.extension.ExtensionService;
-import org.openhab.core.extension.ExtensionType;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -92,7 +92,7 @@ public class ExtensionResource implements RESTResource {
     public static final String PATH_EXTENSIONS = "extensions";
 
     private final Logger logger = LoggerFactory.getLogger(ExtensionResource.class);
-    private final Set<ExtensionService> extensionServices = new CopyOnWriteArraySet<>();
+    private final Set<AddonService> extensionServices = new CopyOnWriteArraySet<>();
     private final EventPublisher eventPublisher;
     private final LocaleService localeService;
 
@@ -106,11 +106,11 @@ public class ExtensionResource implements RESTResource {
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addExtensionService(ExtensionService featureService) {
+    protected void addExtensionService(AddonService featureService) {
         this.extensionServices.add(featureService);
     }
 
-    protected void removeExtensionService(ExtensionService featureService) {
+    protected void removeExtensionService(AddonService featureService) {
         this.extensionServices.remove(featureService);
     }
 
@@ -133,7 +133,7 @@ public class ExtensionResource implements RESTResource {
     public Response getTypes(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        Stream<ExtensionType> extensionTypeStream = getAllExtensionTypes(locale).stream().distinct();
+        Stream<AddonType> extensionTypeStream = getAllExtensionTypes(locale).stream().distinct();
         return Response.ok(new Stream2JSONInputStream(extensionTypeStream)).build();
     }
 
@@ -147,8 +147,8 @@ public class ExtensionResource implements RESTResource {
             @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
         logger.debug("Received HTTP GET request at '{}'.", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        ExtensionService extensionService = getExtensionService(extensionId);
-        Extension responseObject = extensionService.getExtension(extensionId, locale);
+        AddonService extensionService = getExtensionService(extensionId);
+        Addon responseObject = extensionService.getAddon(extensionId, locale);
         if (responseObject != null) {
             return Response.ok(responseObject).build();
         }
@@ -164,7 +164,7 @@ public class ExtensionResource implements RESTResource {
             final @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
-                ExtensionService extensionService = getExtensionService(extensionId);
+                AddonService extensionService = getExtensionService(extensionId);
                 extensionService.install(extensionId);
             } catch (Exception e) {
                 logger.error("Exception while installing extension: {}", e.getMessage());
@@ -201,7 +201,7 @@ public class ExtensionResource implements RESTResource {
             final @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
-                ExtensionService extensionService = getExtensionService(extensionId);
+                AddonService extensionService = getExtensionService(extensionId);
                 extensionService.uninstall(extensionId);
             } catch (Exception e) {
                 logger.error("Exception while uninstalling extension: {}", e.getMessage());
@@ -212,32 +212,32 @@ public class ExtensionResource implements RESTResource {
     }
 
     private void postFailureEvent(String extensionId, String msg) {
-        Event event = ExtensionEventFactory.createExtensionFailureEvent(extensionId, msg);
+        Event event = AddonEventFactory.createAddonFailureEvent(extensionId, msg);
         eventPublisher.post(event);
     }
 
-    private Stream<Extension> getAllExtensions(Locale locale) {
-        return extensionServices.stream().map(s -> s.getExtensions(locale)).flatMap(l -> l.stream());
+    private Stream<Addon> getAllExtensions(Locale locale) {
+        return extensionServices.stream().map(s -> s.getAddons(locale)).flatMap(l -> l.stream());
     }
 
-    private Set<ExtensionType> getAllExtensionTypes(Locale locale) {
+    private Set<AddonType> getAllExtensionTypes(Locale locale) {
         final Collator coll = Collator.getInstance(locale);
         coll.setStrength(Collator.PRIMARY);
-        Set<ExtensionType> ret = new TreeSet<>(new Comparator<ExtensionType>() {
+        Set<AddonType> ret = new TreeSet<>(new Comparator<AddonType>() {
             @Override
-            public int compare(ExtensionType o1, ExtensionType o2) {
+            public int compare(AddonType o1, AddonType o2) {
                 return coll.compare(o1.getLabel(), o2.getLabel());
             }
         });
-        for (ExtensionService extensionService : extensionServices) {
+        for (AddonService extensionService : extensionServices) {
             ret.addAll(extensionService.getTypes(locale));
         }
         return ret;
     }
 
-    private ExtensionService getExtensionService(final String extensionId) {
-        for (ExtensionService extensionService : extensionServices) {
-            for (Extension extension : extensionService.getExtensions(Locale.getDefault())) {
+    private AddonService getExtensionService(final String extensionId) {
+        for (AddonService extensionService : extensionServices) {
+            for (Addon extension : extensionService.getAddons(Locale.getDefault())) {
                 if (extensionId.equals(extension.getId())) {
                     return extensionService;
                 }
@@ -247,8 +247,8 @@ public class ExtensionResource implements RESTResource {
     }
 
     private String getExtensionId(URI extensionURI) {
-        for (ExtensionService extensionService : extensionServices) {
-            String extensionId = extensionService.getExtensionId(extensionURI);
+        for (AddonService extensionService : extensionServices) {
+            String extensionId = extensionService.getAddonId(extensionURI);
             if (extensionId != null && !extensionId.isBlank()) {
                 return extensionId;
             }

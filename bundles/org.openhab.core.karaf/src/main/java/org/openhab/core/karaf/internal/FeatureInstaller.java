@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.openhab.core.OpenHAB;
+import org.openhab.core.addon.AddonEventFactory;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.extension.ExtensionEventFactory;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -520,7 +520,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private static void postInstalledEvent(String featureName) {
         String extensionId = featureName.substring(PREFIX.length());
         if (eventPublisher != null) {
-            Event event = ExtensionEventFactory.createExtensionInstalledEvent(extensionId);
+            Event event = AddonEventFactory.createAddonInstalledEvent(extensionId);
             eventPublisher.post(event);
         }
     }
@@ -528,7 +528,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private static void postUninstalledEvent(String featureName) {
         String extensionId = featureName.substring(PREFIX.length());
         if (eventPublisher != null) {
-            Event event = ExtensionEventFactory.createExtensionUninstalledEvent(extensionId);
+            Event event = AddonEventFactory.createAddonUninstalledEvent(extensionId);
             eventPublisher.post(event);
         }
     }

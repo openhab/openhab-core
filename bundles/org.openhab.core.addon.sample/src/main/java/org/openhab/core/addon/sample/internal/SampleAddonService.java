@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.extension.sample.internal;
+package org.openhab.core.addon.sample.internal;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -21,26 +21,26 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
+import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonEventFactory;
+import org.openhab.core.addon.AddonService;
+import org.openhab.core.addon.AddonType;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.extension.Extension;
-import org.openhab.core.extension.ExtensionEventFactory;
-import org.openhab.core.extension.ExtensionService;
-import org.openhab.core.extension.ExtensionType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This is an implementation of an {@link ExtensionService} that can be used as a dummy service for testing the
+ * This is an implementation of an {@link AddonService} that can be used as a dummy service for testing the
  * functionality.
  * It is not meant to be used anywhere productively.
  *
  * @author Kai Kreuzer - Initial contribution
  */
 @Component
-public class SampleExtensionService implements ExtensionService {
+public class SampleAddonService implements AddonService {
 
     private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.";
 
@@ -48,8 +48,8 @@ public class SampleExtensionService implements ExtensionService {
 
     private EventPublisher eventPublisher;
 
-    List<ExtensionType> types = new ArrayList<>(3);
-    Map<String, Extension> extensions = new HashMap<>(30);
+    List<AddonType> types = new ArrayList<>(3);
+    Map<String, Addon> extensions = new HashMap<>(30);
 
     @Reference
     protected void setEventPublisher(EventPublisher eventPublisher) {
@@ -62,11 +62,11 @@ public class SampleExtensionService implements ExtensionService {
 
     @Activate
     protected void activate() {
-        types.add(new ExtensionType("binding", "Bindings"));
-        types.add(new ExtensionType("ui", "User Interfaces"));
-        types.add(new ExtensionType("persistence", "Persistence Services"));
+        types.add(new AddonType("binding", "Bindings"));
+        types.add(new AddonType("ui", "User Interfaces"));
+        types.add(new AddonType("persistence", "Persistence Services"));
 
-        for (ExtensionType type : types) {
+        for (AddonType type : types) {
             for (int i = 0; i < 10; i++) {
                 String id = type.getId() + Integer.toString(i);
                 boolean installed = Math.random() > 0.5;
@@ -80,8 +80,8 @@ public class SampleExtensionService implements ExtensionService {
                 String description = createDescription();
                 String imageLink = null;
                 String backgroundColor = createRandomColor();
-                Extension extension = new Extension(id, typeId, label, version, link, installed, description,
-                        backgroundColor, imageLink);
+                Addon extension = new Addon(id, typeId, label, version, link, installed, description, backgroundColor,
+                        imageLink);
                 extensions.put(extension.getId(), extension);
             }
         }
@@ -115,7 +115,7 @@ public class SampleExtensionService implements ExtensionService {
     public void install(String id) {
         try {
             Thread.sleep((long) (Math.random() * 10000));
-            Extension extension = getExtension(id, null);
+            Addon extension = getAddon(id, null);
             extension.setInstalled(true);
             postInstalledEvent(id);
         } catch (InterruptedException e) {
@@ -126,7 +126,7 @@ public class SampleExtensionService implements ExtensionService {
     public void uninstall(String id) {
         try {
             Thread.sleep((long) (Math.random() * 5000));
-            Extension extension = getExtension(id, null);
+            Addon extension = getAddon(id, null);
             extension.setInstalled(false);
             postUninstalledEvent(id);
         } catch (InterruptedException e) {
@@ -134,35 +134,35 @@ public class SampleExtensionService implements ExtensionService {
     }
 
     @Override
-    public List<Extension> getExtensions(Locale locale) {
+    public List<Addon> getAddons(Locale locale) {
         return new ArrayList<>(extensions.values());
     }
 
     @Override
-    public Extension getExtension(String id, Locale locale) {
+    public Addon getAddon(String id, Locale locale) {
         return extensions.get(id);
     }
 
     @Override
-    public List<ExtensionType> getTypes(Locale locale) {
+    public List<AddonType> getTypes(Locale locale) {
         return types;
     }
 
     @Override
-    public String getExtensionId(URI extensionURI) {
+    public String getAddonId(URI extensionURI) {
         return null;
     }
 
     private void postInstalledEvent(String extensionId) {
         if (eventPublisher != null) {
-            Event event = ExtensionEventFactory.createExtensionInstalledEvent(extensionId);
+            Event event = AddonEventFactory.createAddonInstalledEvent(extensionId);
             eventPublisher.post(event);
         }
     }
 
     private void postUninstalledEvent(String extensionId) {
         if (eventPublisher != null) {
-            Event event = ExtensionEventFactory.createExtensionUninstalledEvent(extensionId);
+            Event event = AddonEventFactory.createAddonUninstalledEvent(extensionId);
             eventPublisher.post(event);
         }
     }
