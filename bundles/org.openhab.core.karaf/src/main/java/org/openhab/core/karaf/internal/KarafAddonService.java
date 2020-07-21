@@ -85,7 +85,7 @@ public class KarafAddonService implements AddonService {
         }
 
         // let's sort the result alphabetically
-        addons.sort(Comparator.comparing(Extension::getLabel));
+        addons.sort(Comparator.comparing(Addon::getLabel));
         return addons;
     }
 

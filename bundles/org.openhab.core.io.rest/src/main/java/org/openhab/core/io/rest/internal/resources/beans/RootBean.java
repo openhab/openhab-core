@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class RootBean {
 
-    public final String version = "3";
+    public final String version = "4";
 
     public final List<Links> links = new ArrayList<>();
 
