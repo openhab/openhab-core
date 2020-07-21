@@ -344,8 +344,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      */
     protected Expression[] exps(Object... objects) {
         List<Expression> result = new ArrayList<>();
-        for (int i = 0; i < objects.length; i++) {
-            Expression e = exp(objects[i]);
+        for (Object object : objects) {
+            Expression e = exp(object);
             if (e != null) {
                 result.add(e);
             }
@@ -594,8 +594,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         } else {
             split = text.toLowerCase(localeSafe).replaceAll("[\\']", "").replaceAll("[^\\w\\s]", " ").split("\\s");
         }
-        for (int i = 0; i < split.length; i++) {
-            String part = split[i].trim();
+        for (String s : split) {
+            String part = s.trim();
             if (part.length() > 0) {
                 parts.add(part);
             }

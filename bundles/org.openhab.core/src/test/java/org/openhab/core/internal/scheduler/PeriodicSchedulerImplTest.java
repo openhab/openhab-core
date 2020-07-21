@@ -52,8 +52,8 @@ public class PeriodicSchedulerImplTest {
         // the first time set is the offset on which we check the next values.
         long offset = times.poll();
         long[] expectedResults = { 2, 5, 8, 11, 14 };
-        for (int i = 0; i < expectedResults.length; i++) {
-            assertEquals("Expected periodic time", offset + expectedResults[i], times.poll().longValue());
+        for (long expectedResult : expectedResults) {
+            assertEquals("Expected periodic time", offset + expectedResult, times.poll().longValue());
         }
         assertFalse("No more jobs should have been scheduled", semaphore.tryAcquire(1, TimeUnit.SECONDS));
     }

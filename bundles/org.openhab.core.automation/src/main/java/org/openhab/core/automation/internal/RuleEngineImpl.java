@@ -393,8 +393,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         allModuleHandlerFactories.add(moduleHandlerFactory);
         Collection<String> moduleTypes = moduleHandlerFactory.getTypes();
         Set<String> notInitializedRules = null;
-        for (Iterator<String> it = moduleTypes.iterator(); it.hasNext();) {
-            String moduleTypeName = it.next();
+        for (String moduleTypeName : moduleTypes) {
             Set<String> rules = null;
             synchronized (this) {
                 moduleHandlerFactories.put(moduleTypeName, moduleHandlerFactory);
@@ -430,8 +429,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         allModuleHandlerFactories.remove(moduleHandlerFactory);
         Collection<String> moduleTypes = moduleHandlerFactory.getTypes();
         removeMissingModuleTypes(moduleTypes);
-        for (Iterator<String> it = moduleTypes.iterator(); it.hasNext();) {
-            String moduleTypeName = it.next();
+        for (String moduleTypeName : moduleTypes) {
             moduleHandlerFactories.remove(moduleTypeName);
         }
     }
@@ -914,8 +912,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     private void removeMissingModuleTypes(Collection<String> moduleTypes) {
         Map<String, @Nullable List<String>> mapMissingHandlers = null;
-        for (Iterator<String> it = moduleTypes.iterator(); it.hasNext();) {
-            String moduleTypeName = it.next();
+        for (String moduleTypeName : moduleTypes) {
             Set<String> rules = null;
             synchronized (this) {
                 rules = mapModuleTypeToRules.get(moduleTypeName);
@@ -1141,15 +1138,14 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         }
         final String ruleUID = rule.getUID();
         RuleStatus ruleStatus = null;
-        for (Iterator<WrappedCondition> it = conditions.iterator(); it.hasNext();) {
+        for (WrappedCondition wrappedCondition : conditions) {
             ruleStatus = getRuleStatus(ruleUID);
             if (ruleStatus != RuleStatus.RUNNING) {
                 return false;
             }
-            final WrappedCondition managedCondition = it.next();
-            final Condition condition = managedCondition.unwrap();
-            ConditionHandler tHandler = managedCondition.getModuleHandler();
-            Map<String, @Nullable Object> context = getContext(ruleUID, managedCondition.getConnections());
+            final Condition condition = wrappedCondition.unwrap();
+            ConditionHandler tHandler = wrappedCondition.getModuleHandler();
+            Map<String, @Nullable Object> context = getContext(ruleUID, wrappedCondition.getConnections());
             if (tHandler != null && !tHandler.isSatisfied(Collections.unmodifiableMap(context))) {
                 logger.debug("The condition '{}' of rule '{}' is unsatisfied.", condition.getId(), ruleUID);
                 return false;
@@ -1170,16 +1166,15 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return;
         }
         RuleStatus ruleStatus = null;
-        for (Iterator<WrappedAction> it = actions.iterator(); it.hasNext();) {
+        for (WrappedAction wrappedAction : actions) {
             ruleStatus = getRuleStatus(ruleUID);
             if (ruleStatus != RuleStatus.RUNNING) {
                 return;
             }
-            final WrappedAction managedAction = it.next();
-            final Action action = managedAction.unwrap();
-            ActionHandler aHandler = managedAction.getModuleHandler();
+            final Action action = wrappedAction.unwrap();
+            ActionHandler aHandler = wrappedAction.getModuleHandler();
             if (aHandler != null) {
-                Map<String, @Nullable Object> context = getContext(ruleUID, managedAction.getConnections());
+                Map<String, @Nullable Object> context = getContext(ruleUID, wrappedAction.getConnections());
                 try {
                     Map<String, ?> outputs = aHandler.execute(Collections.unmodifiableMap(context));
                     if (outputs != null) {
@@ -1403,8 +1398,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     private Set<Connection> copyConnections(Set<Connection> connections) {
         Set<Connection> result = new HashSet<>(connections.size());
-        for (Iterator<Connection> it = connections.iterator(); it.hasNext();) {
-            Connection c = it.next();
+        for (Connection c : connections) {
             result.add(new Connection(c.getInputName(), c.getOutputModuleId(), c.getOutputName(), c.getReference()));
         }
         return result;

@@ -109,29 +109,29 @@ public class AutomationCommandList extends AutomationCommand {
     protected String parseOptionsAndParameters(String[] parameterValues) {
         boolean getId = true;
         boolean getLocale = true;
-        for (int i = 0; i < parameterValues.length; i++) {
-            if (null == parameterValues[i]) {
+        for (String parameterValue : parameterValues) {
+            if (null == parameterValue) {
                 continue;
             }
-            if (parameterValues[i].charAt(0) == '-') {
-                if (OPTION_ST.equals(parameterValues[i])) {
+            if (parameterValue.charAt(0) == '-') {
+                if (OPTION_ST.equals(parameterValue)) {
                     st = true;
                     continue;
                 }
-                return String.format("Unsupported option: %s", parameterValues[i]);
+                return String.format("Unsupported option: %s", parameterValue);
             }
             if (getId) {
-                id = parameterValues[i];
+                id = parameterValue;
                 getId = false;
                 continue;
             }
             if (getLocale) {
-                String l = parameterValues[i];
+                String l = parameterValue;
                 locale = new Locale(l);
                 getLocale = false;
             }
             if (getId && getLocale) {
-                return String.format("Unsupported parameter: %s", parameterValues[i]);
+                return String.format("Unsupported parameter: %s", parameterValue);
             }
         }
         return SUCCESS;

@@ -60,29 +60,29 @@ public class AutomationCommandEnableRule extends AutomationCommand {
 
     @Override
     protected String parseOptionsAndParameters(String[] parameterValues) {
-        for (int i = 0; i < parameterValues.length; i++) {
-            if (null == parameterValues[i]) {
+        for (String parameterValue : parameterValues) {
+            if (null == parameterValue) {
                 continue;
             }
-            if (parameterValues[i].charAt(0) == '-') {
-                if (OPTION_ST.equals(parameterValues[i])) {
+            if (parameterValue.charAt(0) == '-') {
+                if (OPTION_ST.equals(parameterValue)) {
                     st = true;
                     continue;
                 }
-                return String.format("Unsupported option: %s", parameterValues[i]);
+                return String.format("Unsupported option: %s", parameterValue);
             }
             if (uid == null) {
-                uid = parameterValues[i];
+                uid = parameterValue;
                 continue;
             }
-            getEnable(parameterValues[i]);
+            getEnable(parameterValue);
             if (hasEnable) {
                 continue;
             }
             if (uid == null) {
                 return "Missing required parameter: Rule UID";
             }
-            return String.format("Unsupported parameter: %s", parameterValues[i]);
+            return String.format("Unsupported parameter: %s", parameterValue);
         }
         return SUCCESS;
     }
