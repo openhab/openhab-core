@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.extension;
+package org.openhab.core.addon;
 
 /**
- * This class defines an extension type.
+ * This class defines an add-on type.
  *
  * @author Kai Kreuzer - Initial contribution
  */
-public class ExtensionType {
+public class AddonType {
 
     private final String id;
     private final String label;
@@ -28,7 +28,7 @@ public class ExtensionType {
      * @param id
      * @param label
      */
-    public ExtensionType(String id, String label) {
+    public AddonType(String id, String label) {
         this.id = id;
         this.label = label;
     }
@@ -66,7 +66,7 @@ public class ExtensionType {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ExtensionType other = (ExtensionType) obj;
+        AddonType other = (AddonType) obj;
         if (id == null) {
             if (other.id != null) {
                 return false;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.extension;
+package org.openhab.core.addon;
 
 import java.net.URI;
 import java.util.List;
@@ -18,68 +18,68 @@ import java.util.Locale;
 
 /**
  * Classes implementing this interface can be registered as an OSGi service in order to provide functionality for
- * managing extensions, such as listing, installing and uninstalling them.
+ * managing add-ons, such as listing, installing and uninstalling them.
  * The REST API offers an uri that exposes this functionality.
  *
  * @author Kai Kreuzer - Initial contribution
  */
-public interface ExtensionService {
+public interface AddonService {
 
     /**
-     * Retrieves all extensions
+     * Retrieves all add-ons
      *
      * It is expected that this method is rather cheap to call and will return quickly, i.e. some caching should be
      * implemented if required.
      *
      * @param locale the locale to use for the result
-     * @return the localized extensions
+     * @return the localized add-ons
      */
-    List<Extension> getExtensions(Locale locale);
+    List<Addon> getAddons(Locale locale);
 
     /**
-     * Retrieves the extension for the given id.
+     * Retrieves the add-on for the given id.
      *
-     * @param id the id of the extension
+     * @param id the id of the add-on
      * @param locale the locale to use for the result
-     * @return the localized extension or null, if no extension exists with this id
+     * @return the localized add-on or null, if no add-on exists with this id
      */
-    Extension getExtension(String id, Locale locale);
+    Addon getAddon(String id, Locale locale);
 
     /**
-     * Retrieves all possible types of extensions.
+     * Retrieves all possible types of add-ons.
      *
      * @param locale the locale to use for the result
      * @return the localized types
      */
-    List<ExtensionType> getTypes(Locale locale);
+    List<AddonType> getTypes(Locale locale);
 
     /**
-     * Installs the given extension.
+     * Installs the given add-on.
      *
      * This can be a long running process. The framework makes sure that this is called within a separate thread and
-     * ExtensionEvents will be sent upon its completion.
+     * add-on events will be sent upon its completion.
      *
-     * @param id the id of the extension to install
+     * @param id the id of the add-on to install
      */
     void install(String id);
 
     /**
-     * Uninstalls the given extension.
+     * Uninstalls the given add-on.
      *
      * This can be a long running process. The framework makes sure that this is called within a separate thread and
-     * ExtensionEvents will be sent upon its completion.
+     * add-on events will be sent upon its completion.
      *
-     * @param id the id of the extension to uninstall
+     * @param id the id of the add-on to uninstall
      */
     void uninstall(String id);
 
     /**
-     * Parses the given URI and extracts an extension Id.
+     * Parses the given URI and extracts an add-on Id.
      *
      * This must not be a long running process but return immediately.
      *
-     * @param extensionURI the URI from which to parse the extension Id.
-     * @return the extension Id if the URI can be parsed, otherwise <code>null</code>.
+     * @param addonURI the URI from which to parse the add-on Id.
+     * @return the add-on Id if the URI can be parsed, otherwise <code>null</code>.
      */
-    String getExtensionId(URI extensionURI);
+    String getAddonId(URI addonURI);
 }

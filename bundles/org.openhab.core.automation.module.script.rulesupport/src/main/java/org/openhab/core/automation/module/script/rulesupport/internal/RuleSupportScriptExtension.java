@@ -54,7 +54,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This Script-Extension provides types and presets to support writing Rules using a ScriptEngine.
+ * This Script-Addon provides types and presets to support writing Rules using a ScriptEngine.
  * One can write and register Rules and Modules by adding them through the HandlerRegistry and/or RuleRegistry
  *
  * @author Simon Merschjohann - Initial contribution

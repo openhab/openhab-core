@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.core.internal.extensions;
+package org.openhab.core.io.rest.core.internal.addons;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,14 +37,14 @@ import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonEventFactory;
+import org.openhab.core.addon.AddonService;
+import org.openhab.core.addon.AddonType;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
-import org.openhab.core.extension.Extension;
-import org.openhab.core.extension.ExtensionEventFactory;
-import org.openhab.core.extension.ExtensionService;
-import org.openhab.core.extension.ExtensionType;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -70,7 +70,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * This class acts as a REST resource for extensions and provides methods to install and uninstall them.
+ * This class acts as a REST resource for add-ons and provides methods to install and uninstall them.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Franck Dechavanne - Added DTOs to ApiResponses
@@ -78,45 +78,44 @@ import io.swagger.annotations.ApiResponses;
  */
 @Component
 @JaxrsResource
-@JaxrsName(ExtensionResource.PATH_EXTENSIONS)
+@JaxrsName(AddonResource.PATH_ADDONS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path(ExtensionResource.PATH_EXTENSIONS)
+@Path(AddonResource.PATH_ADDONS)
 @RolesAllowed({ Role.ADMIN })
-@Api(ExtensionResource.PATH_EXTENSIONS)
+@Api(AddonResource.PATH_ADDONS)
 @NonNullByDefault
-public class ExtensionResource implements RESTResource {
+public class AddonResource implements RESTResource {
 
-    private static final String THREAD_POOL_NAME = "extensionService";
+    private static final String THREAD_POOL_NAME = "addonService";
 
-    public static final String PATH_EXTENSIONS = "extensions";
+    public static final String PATH_ADDONS = "addons";
 
-    private final Logger logger = LoggerFactory.getLogger(ExtensionResource.class);
-    private final Set<ExtensionService> extensionServices = new CopyOnWriteArraySet<>();
+    private final Logger logger = LoggerFactory.getLogger(AddonResource.class);
+    private final Set<AddonService> addonServices = new CopyOnWriteArraySet<>();
     private final EventPublisher eventPublisher;
     private final LocaleService localeService;
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
     @Activate
-    public ExtensionResource(final @Reference EventPublisher eventPublisher,
-            final @Reference LocaleService localeService) {
+    public AddonResource(final @Reference EventPublisher eventPublisher, final @Reference LocaleService localeService) {
         this.eventPublisher = eventPublisher;
         this.localeService = localeService;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addExtensionService(ExtensionService featureService) {
-        this.extensionServices.add(featureService);
+    protected void addExtensionService(AddonService featureService) {
+        this.addonServices.add(featureService);
     }
 
-    protected void removeExtensionService(ExtensionService featureService) {
-        this.extensionServices.remove(featureService);
+    protected void removeExtensionService(AddonService featureService) {
+        this.addonServices.remove(featureService);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all extensions.")
+    @ApiOperation(value = "Get all add-ons.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
     public Response getExtensions(
             @HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
@@ -128,27 +127,27 @@ public class ExtensionResource implements RESTResource {
     @GET
     @Path("/types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all extension types.")
+    @ApiOperation(value = "Get all add-on types.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
     public Response getTypes(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        Stream<ExtensionType> extensionTypeStream = getAllExtensionTypes(locale).stream().distinct();
-        return Response.ok(new Stream2JSONInputStream(extensionTypeStream)).build();
+        Stream<AddonType> addonTypeStream = getAllExtensionTypes(locale).stream().distinct();
+        return Response.ok(new Stream2JSONInputStream(addonTypeStream)).build();
     }
 
     @GET
-    @Path("/{extensionId: [a-zA-Z_0-9-:]+}")
+    @Path("/{addonId: [a-zA-Z_0-9-:]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get extension with given ID.")
+    @ApiOperation(value = "Get add-on with given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Not found") })
     public Response getById(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
-            @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
+            @PathParam("addonId") @ApiParam(value = "addon ID") String addonId) {
         logger.debug("Received HTTP GET request at '{}'.", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        ExtensionService extensionService = getExtensionService(extensionId);
-        Extension responseObject = extensionService.getExtension(extensionId, locale);
+        AddonService addonService = getAddonService(addonId);
+        Addon responseObject = addonService.getAddon(addonId, locale);
         if (responseObject != null) {
             return Response.ok(responseObject).build();
         }
@@ -157,18 +156,17 @@ public class ExtensionResource implements RESTResource {
     }
 
     @POST
-    @Path("/{extensionId: [a-zA-Z_0-9-:]+}/install")
-    @ApiOperation(value = "Installs the extension with the given ID.")
+    @Path("/{addonId: [a-zA-Z_0-9-:]+}/install")
+    @ApiOperation(value = "Installs the add-on with the given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response installExtension(
-            final @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
+    public Response installAddon(final @PathParam("addonId") @ApiParam(value = "addon ID") String addonId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
-                ExtensionService extensionService = getExtensionService(extensionId);
-                extensionService.install(extensionId);
+                AddonService addonService = getAddonService(addonId);
+                addonService.install(addonId);
             } catch (Exception e) {
-                logger.error("Exception while installing extension: {}", e.getMessage());
-                postFailureEvent(extensionId, e.getMessage());
+                logger.error("Exception while installing add-on: {}", e.getMessage());
+                postFailureEvent(addonId, e.getMessage());
             }
         });
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
@@ -176,17 +174,16 @@ public class ExtensionResource implements RESTResource {
 
     @POST
     @Path("/url/{url}/install")
-    @ApiOperation(value = "Installs the extension from the given URL.")
+    @ApiOperation(value = "Installs the add-on from the given URL.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "The given URL is malformed or not valid.") })
-    public Response installExtensionByURL(
-            final @PathParam("url") @ApiParam(value = "extension install URL") String url) {
+    public Response installExtensionByURL(final @PathParam("url") @ApiParam(value = "addon install URL") String url) {
         try {
-            URI extensionURI = new URI(url);
-            String extensionId = getExtensionId(extensionURI);
-            installExtension(extensionId);
+            URI addonURI = new URI(url);
+            String addonId = getAddonId(addonURI);
+            installAddon(addonId);
         } catch (URISyntaxException | IllegalArgumentException e) {
-            logger.error("Exception while parsing the extension URL '{}': {}", url, e.getMessage());
+            logger.error("Exception while parsing the addon URL '{}': {}", url, e.getMessage());
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "The given URL is malformed or not valid.");
         }
 
@@ -194,66 +191,65 @@ public class ExtensionResource implements RESTResource {
     }
 
     @POST
-    @Path("/{extensionId: [a-zA-Z_0-9-:]+}/uninstall")
-    @ApiOperation(value = "Uninstalls the extension with the given ID.")
+    @Path("/{addonId: [a-zA-Z_0-9-:]+}/uninstall")
+    @ApiOperation(value = "Uninstalls the add-on with the given ID.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response uninstallExtension(
-            final @PathParam("extensionId") @ApiParam(value = "extension ID") String extensionId) {
+    public Response uninstallExtension(final @PathParam("addonId") @ApiParam(value = "addon ID") String addonId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
-                ExtensionService extensionService = getExtensionService(extensionId);
-                extensionService.uninstall(extensionId);
+                AddonService addonService = getAddonService(addonId);
+                addonService.uninstall(addonId);
             } catch (Exception e) {
-                logger.error("Exception while uninstalling extension: {}", e.getMessage());
-                postFailureEvent(extensionId, e.getMessage());
+                logger.error("Exception while uninstalling add-on: {}", e.getMessage());
+                postFailureEvent(addonId, e.getMessage());
             }
         });
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
-    private void postFailureEvent(String extensionId, String msg) {
-        Event event = ExtensionEventFactory.createExtensionFailureEvent(extensionId, msg);
+    private void postFailureEvent(String addonId, String msg) {
+        Event event = AddonEventFactory.createAddonFailureEvent(addonId, msg);
         eventPublisher.post(event);
     }
 
-    private Stream<Extension> getAllExtensions(Locale locale) {
-        return extensionServices.stream().map(s -> s.getExtensions(locale)).flatMap(l -> l.stream());
+    private Stream<Addon> getAllExtensions(Locale locale) {
+        return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(l -> l.stream());
     }
 
-    private Set<ExtensionType> getAllExtensionTypes(Locale locale) {
+    private Set<AddonType> getAllExtensionTypes(Locale locale) {
         final Collator coll = Collator.getInstance(locale);
         coll.setStrength(Collator.PRIMARY);
-        Set<ExtensionType> ret = new TreeSet<>(new Comparator<ExtensionType>() {
+        Set<AddonType> ret = new TreeSet<>(new Comparator<AddonType>() {
             @Override
-            public int compare(ExtensionType o1, ExtensionType o2) {
+            public int compare(AddonType o1, AddonType o2) {
                 return coll.compare(o1.getLabel(), o2.getLabel());
             }
         });
-        for (ExtensionService extensionService : extensionServices) {
-            ret.addAll(extensionService.getTypes(locale));
+        for (AddonService addonService : addonServices) {
+            ret.addAll(addonService.getTypes(locale));
         }
         return ret;
     }
 
-    private ExtensionService getExtensionService(final String extensionId) {
-        for (ExtensionService extensionService : extensionServices) {
-            for (Extension extension : extensionService.getExtensions(Locale.getDefault())) {
-                if (extensionId.equals(extension.getId())) {
-                    return extensionService;
+    private AddonService getAddonService(final String addonId) {
+        for (AddonService addonService : addonServices) {
+            for (Addon addon : addonService.getAddons(Locale.getDefault())) {
+                if (addonId.equals(addon.getId())) {
+                    return addonService;
                 }
             }
         }
-        throw new IllegalArgumentException("No extension service registered for " + extensionId);
+        throw new IllegalArgumentException("No add-on service registered for " + addonId);
     }
 
-    private String getExtensionId(URI extensionURI) {
-        for (ExtensionService extensionService : extensionServices) {
-            String extensionId = extensionService.getExtensionId(extensionURI);
-            if (extensionId != null && !extensionId.isBlank()) {
-                return extensionId;
+    private String getAddonId(URI addonURI) {
+        for (AddonService addonService : addonServices) {
+            String addonId = addonService.getAddonId(addonURI);
+            if (addonId != null && !addonId.isBlank()) {
+                return addonId;
             }
         }
 
-        throw new IllegalArgumentException("No extension service registered for URI " + extensionURI);
+        throw new IllegalArgumentException("No add-on service registered for URI " + addonURI);
     }
 }

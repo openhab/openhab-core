@@ -23,9 +23,9 @@ import java.util.Locale;
 
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
-import org.openhab.core.extension.Extension;
-import org.openhab.core.extension.ExtensionService;
-import org.openhab.core.extension.ExtensionType;
+import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonService;
+import org.openhab.core.addon.AddonType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -33,49 +33,49 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This service is an implementation of an openHAB {@link ExtensionService} using the Karaf features service. This
+ * This service is an implementation of an openHAB {@link AddonService} using the Karaf features service. This
  * exposes all openHAB add-ons through the REST API and allows UIs to dynamically install and uninstall them.
  *
  * @author Kai Kreuzer - Initial contribution
  */
-@Component(name = "org.openhab.core.karafextension")
-public class KarafExtensionService implements ExtensionService {
+@Component(name = "org.openhab.core.karafaddons")
+public class KarafAddonService implements AddonService {
 
-    private final Logger logger = LoggerFactory.getLogger(KarafExtensionService.class);
+    private final Logger logger = LoggerFactory.getLogger(KarafAddonService.class);
 
-    private final List<ExtensionType> typeList = new ArrayList<>(FeatureInstaller.EXTENSION_TYPES.length);
+    private final List<AddonType> typeList = new ArrayList<>(FeatureInstaller.EXTENSION_TYPES.length);
 
     private final FeaturesService featuresService;
     private final FeatureInstaller featureInstaller;
 
     @Activate
-    public KarafExtensionService(final @Reference FeatureInstaller featureInstaller,
+    public KarafAddonService(final @Reference FeatureInstaller featureInstaller,
             final @Reference FeaturesService featuresService) {
         this.featureInstaller = featureInstaller;
         this.featuresService = featuresService;
-        typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_BINDING, "Bindings"));
-        typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"));
-        typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_VOICE, "Voice"));
+        typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_BINDING, "Bindings"));
+        typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"));
+        typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_VOICE, "Voice"));
         if (!FeatureInstaller.SIMPLE_PACKAGE.equals(featureInstaller.getCurrentPackage())) {
-            typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_ACTION, "Actions"));
-            typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_PERSISTENCE, "Persistence"));
-            typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION, "Transformations"));
-            typeList.add(new ExtensionType(FeatureInstaller.EXTENSION_TYPE_UI, "User Interfaces"));
+            typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_ACTION, "Actions"));
+            typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_PERSISTENCE, "Persistence"));
+            typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION, "Transformations"));
+            typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_UI, "User Interfaces"));
         }
     }
 
     @Override
-    public List<Extension> getExtensions(Locale locale) {
-        List<Extension> extensions = new LinkedList<>();
+    public List<Addon> getAddons(Locale locale) {
+        List<Addon> addons = new LinkedList<>();
         try {
             for (Feature feature : featuresService.listFeatures()) {
                 if (feature.getName().startsWith(FeatureInstaller.PREFIX)
                         && Arrays.asList(FeatureInstaller.EXTENSION_TYPES).contains(getType(feature.getName()))) {
-                    Extension extension = getExtension(feature);
+                    Addon addon = getAddon(feature);
                     // for simple packaging, we filter out all openHAB 1 add-ons as they cannot be used through the UI
                     if (!FeatureInstaller.SIMPLE_PACKAGE.equals(featureInstaller.getCurrentPackage())
-                            || !extension.getVersion().startsWith("1.")) {
-                        extensions.add(extension);
+                            || !addon.getVersion().startsWith("1.")) {
+                        addons.add(addon);
                     }
                 }
             }
@@ -85,23 +85,23 @@ public class KarafExtensionService implements ExtensionService {
         }
 
         // let's sort the result alphabetically
-        extensions.sort(Comparator.comparing(Extension::getLabel));
-        return extensions;
+        addons.sort(Comparator.comparing(Addon::getLabel));
+        return addons;
     }
 
     @Override
-    public Extension getExtension(String id, Locale locale) {
+    public Addon getAddon(String id, Locale locale) {
         Feature feature;
         try {
             feature = featuresService.getFeature(FeatureInstaller.PREFIX + id);
-            return getExtension(feature);
+            return getAddon(feature);
         } catch (Exception e) {
             logger.error("Exception while querying feature '{}'", id);
             return null;
         }
     }
 
-    private Extension getExtension(Feature feature) {
+    private Addon getAddon(Feature feature) {
         String name = getName(feature.getName());
         String type = getType(feature.getName());
         String extId = type + "-" + name;
@@ -134,11 +134,11 @@ public class KarafExtensionService implements ExtensionService {
                 break;
         }
         boolean installed = featuresService.isInstalled(feature);
-        return new Extension(extId, type, label, version, link, installed);
+        return new Addon(extId, type, label, version, link, installed);
     }
 
     @Override
-    public List<ExtensionType> getTypes(Locale locale) {
+    public List<AddonType> getTypes(Locale locale) {
         return typeList;
     }
 
@@ -153,7 +153,7 @@ public class KarafExtensionService implements ExtensionService {
     }
 
     @Override
-    public String getExtensionId(URI extensionURI) {
+    public String getAddonId(URI addonURI) {
         return null;
     }
 
