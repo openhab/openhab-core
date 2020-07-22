@@ -85,12 +85,7 @@ public class KarafExtensionService implements ExtensionService {
         }
 
         // let's sort the result alphabetically
-        Collections.sort(extensions, new Comparator<Extension>() {
-            @Override
-            public int compare(Extension ext1, Extension ext2) {
-                return ext1.getLabel().compareTo(ext2.getLabel());
-            }
-        });
+        extensions.sort(Comparator.comparing(Extension::getLabel));
         return extensions;
     }
 
