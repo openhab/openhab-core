@@ -342,7 +342,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
     public void testNoXbaseConflicts() throws ScriptParsingException, ScriptExecutionException {
         assertEquals(42, (int) runScript("(1..3).forEach[x |println(x)]; return 42;"));
         assertEquals(42, (int) runScript("92 % 50"));
-        assertEquals(true, (boolean) runScript("1 == 1 || 1 != 2"));
+        assertTrue((boolean) runScript("1 == 1 || 1 != 2"));
         assertEquals("\\", runScript("return \"\\\\\""));
     }
 

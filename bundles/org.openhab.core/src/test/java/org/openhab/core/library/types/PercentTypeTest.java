@@ -51,9 +51,10 @@ public class PercentTypeTest {
         PercentType pt3 = new PercentType(0);
         PercentType pt4 = new PercentType(0);
 
-        assertEquals(true, pt1.equals(pt2));
-        assertEquals(true, pt3.equals(pt4));
-        assertEquals(false, pt3.equals(pt1));
+        // Do not change to assertEquals(), because we want to check if .equals() works as expected!
+        assertTrue(pt1.equals(pt2));
+        assertTrue(pt3.equals(pt4));
+        assertFalse(pt3.equals(pt1));
     }
 
     @Test

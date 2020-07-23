@@ -12,7 +12,7 @@
  */
 package org.openhab.core.thing.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -123,7 +123,7 @@ public class ThingManagerImplTest {
 
         ThingManagerImpl thingManager = createThingManager();
 
-        assertEquals(thingManager.isEnabled(unknownUID), true);
+        assertTrue(thingManager.isEnabled(unknownUID));
     }
 
     @Test
@@ -135,11 +135,11 @@ public class ThingManagerImplTest {
 
         ThingManagerImpl thingManager = createThingManager();
 
-        assertEquals(thingManager.isEnabled(unknownUID), true);
+        assertTrue(thingManager.isEnabled(unknownUID));
 
         when(storageMock.containsKey(unknownUID.getAsString())).thenReturn(true);
         when(storageServiceMock.getStorage(eq("thing_status_storage"), any(ClassLoader.class))).thenReturn(storageMock);
 
-        assertEquals(thingManager.isEnabled(unknownUID), false);
+        assertFalse(thingManager.isEnabled(unknownUID));
     }
 }

@@ -35,7 +35,7 @@ public class StringTypeTest {
 
         assertEquals(expected1.hashCode(), new StringType("expected1").hashCode());
         assertEquals(expected2.hashCode(), new StringType("expected2").hashCode());
-        assertFalse(expected1.hashCode() == new StringType("expected2").hashCode());
+        assertNotEquals(expected1.hashCode(), new StringType("expected2").hashCode());
 
         assertEquals(empty, StringType.EMPTY);
         assertEquals(empty, new StringType(""));
@@ -44,16 +44,19 @@ public class StringTypeTest {
 
         assertEquals(expected1, new StringType("expected1"));
         assertEquals(expected2, new StringType("expected2"));
-        assertEquals(false, expected1.equals(new StringType("expected2")));
-        assertEquals(false, expected2.equals(new StringType("expected1")));
-        assertEquals(false, expected1.equals(StringType.EMPTY));
-        assertEquals(false, expected2.equals(StringType.EMPTY));
+        // Do not change to assertEquals(), because we want to check if .equals() works as expected!
+        assertFalse(expected1.equals(new StringType("expected2")));
+        assertFalse(expected2.equals(new StringType("expected1")));
+        assertFalse(expected1.equals(StringType.EMPTY));
+        assertFalse(expected2.equals(StringType.EMPTY));
 
-        assertEquals(true, expected1.equals("expected1"));
-        assertEquals(false, expected1.equals("expected2"));
+        // Do not change to assertEquals(), because we want to check if .equals() works as expected!
+        assertTrue(expected1.equals("expected1"));
+        assertFalse(expected1.equals("expected2"));
 
-        assertEquals(true, new StringType(null).equals(new StringType(null)));
-        assertEquals(true, new StringType("").equals(new StringType(null)));
-        assertEquals(true, new StringType(null).equals(new StringType("")));
+        // Do not change to assertEquals(), because we want to check if .equals() works as expected!
+        assertTrue(new StringType(null).equals(new StringType(null)));
+        assertTrue(new StringType("").equals(new StringType(null)));
+        assertTrue(new StringType(null).equals(new StringType("")));
     }
 }

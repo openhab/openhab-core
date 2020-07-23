@@ -31,10 +31,11 @@ public class DecimalTypeTest {
         DecimalType dt3 = new DecimalType("99.7");
         PercentType pt = new PercentType("99.7");
 
-        assertEquals(true, dt1.equals(dt2));
-        assertEquals(false, dt1.equals(dt3));
-        assertEquals(true, dt3.equals(pt));
-        assertEquals(false, dt1.equals(pt));
+        // Do not change to assertEquals(), because we want to check if .equals() works as expected!
+        assertTrue(dt1.equals(dt2));
+        assertFalse(dt1.equals(dt3));
+        assertTrue(dt3.equals(pt));
+        assertFalse(dt1.equals(pt));
     }
 
     @Test
@@ -137,6 +138,6 @@ public class DecimalTypeTest {
     @Test
     public void testConversionToPointType() {
         // should not be possible => null
-        assertEquals(null, new DecimalType("0.23").as(PointType.class));
+        assertNull(new DecimalType("0.23").as(PointType.class));
     }
 }

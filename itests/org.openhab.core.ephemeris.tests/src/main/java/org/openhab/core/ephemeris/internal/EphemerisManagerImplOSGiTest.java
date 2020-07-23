@@ -251,10 +251,10 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         ZonedDateTime sunday = ZonedDateTime.of(2019, 10, 27, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
         ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + INTERNAL_DAYSET,
                 Stream.of("Monday", "Tuesday").collect(Collectors.toList())));
-        assertEquals(true, ephemerisManager.isWeekend(sunday));
-        assertEquals(false, ephemerisManager.isWeekend(monday));
-        assertEquals(true, ephemerisManager.isInDayset(INTERNAL_DAYSET, monday));
-        assertEquals(false, ephemerisManager.isInDayset(INTERNAL_DAYSET, sunday));
+        assertTrue(ephemerisManager.isWeekend(sunday));
+        assertFalse(ephemerisManager.isWeekend(monday));
+        assertTrue(ephemerisManager.isInDayset(INTERNAL_DAYSET, monday));
+        assertFalse(ephemerisManager.isInDayset(INTERNAL_DAYSET, sunday));
     }
 
     @Test
@@ -263,10 +263,10 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         ZonedDateTime secondday = ZonedDateTime.of(2019, 01, 02, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
 
         boolean vacation = ephemerisManager.isBankHoliday(newyearsday);
-        assertEquals(true, vacation);
+        assertTrue(vacation);
 
         vacation = ephemerisManager.isBankHoliday(secondday);
-        assertEquals(false, vacation);
+        assertFalse(vacation);
     }
 
     @Test
@@ -274,7 +274,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         ZonedDateTime theDay = ZonedDateTime.of(2019, 01, 01, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
 
         boolean vacation = ephemerisManager.isBankHoliday(theDay);
-        assertEquals(true, vacation);
+        assertTrue(vacation);
 
         String code = ephemerisManager.getBankHolidayName(theDay);
         assertEquals("NEW_YEAR", code);
@@ -308,7 +308,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         ZonedDateTime theDay = ZonedDateTime.of(2019, 10, 31, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
 
         boolean vacation = ephemerisManager.isBankHoliday(theDay, url);
-        assertEquals(true, vacation);
+        assertTrue(vacation);
 
         long delay = ephemerisManager.getDaysUntil(today, "Halloween", url);
         assertEquals(3, delay);

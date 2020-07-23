@@ -220,7 +220,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         linkRegistry.add(link);
         //
         final Collection<Item> items = itemRegistry.getItems();
-        assertEquals(false, items.isEmpty());
+        assertFalse(items.isEmpty());
 
         Item item = itemRegistry.getItem("TestItem1");
         assertEquals(CoreItemFactory.NUMBER, item.getType());
@@ -283,7 +283,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         linkRegistry.add(link);
         //
         final Collection<Item> items = itemRegistry.getItems();
-        assertEquals(false, items.isEmpty());
+        assertFalse(items.isEmpty());
 
         Item item = itemRegistry.getItem("TestItem7_2");
 

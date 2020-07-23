@@ -13,6 +13,7 @@
 package org.openhab.core.library.types;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -43,7 +44,7 @@ public class OnOffTypeTest {
     @Test
     public void testConversionToPointType() {
         // should not be possible => null
-        assertEquals(null, OnOffType.ON.as(PointType.class));
-        assertEquals(null, OnOffType.OFF.as(PointType.class));
+        assertNull(OnOffType.ON.as(PointType.class));
+        assertNull(OnOffType.OFF.as(PointType.class));
     }
 }

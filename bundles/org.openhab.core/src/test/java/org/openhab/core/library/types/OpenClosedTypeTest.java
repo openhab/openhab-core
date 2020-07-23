@@ -13,6 +13,7 @@
 package org.openhab.core.library.types;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -37,7 +38,7 @@ public class OpenClosedTypeTest {
     @Test
     public void testConversionToPointType() {
         // should not be possible => null
-        assertEquals(null, OpenClosedType.CLOSED.as(PointType.class));
-        assertEquals(null, OpenClosedType.OPEN.as(PointType.class));
+        assertNull(OpenClosedType.CLOSED.as(PointType.class));
+        assertNull(OpenClosedType.OPEN.as(PointType.class));
     }
 }

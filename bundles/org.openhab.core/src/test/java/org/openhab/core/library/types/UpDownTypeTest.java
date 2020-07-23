@@ -13,6 +13,7 @@
 package org.openhab.core.library.types;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -37,7 +38,7 @@ public class UpDownTypeTest {
     @Test
     public void testConversionToPointType() {
         // should not be possible => null
-        assertEquals(null, UpDownType.UP.as(PointType.class));
-        assertEquals(null, UpDownType.DOWN.as(PointType.class));
+        assertNull(UpDownType.UP.as(PointType.class));
+        assertNull(UpDownType.DOWN.as(PointType.class));
     }
 }

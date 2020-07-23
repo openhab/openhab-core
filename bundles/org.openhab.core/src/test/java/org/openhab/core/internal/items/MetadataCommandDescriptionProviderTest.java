@@ -109,10 +109,10 @@ public class MetadataCommandDescriptionProviderTest {
         Iterator<CommandOption> it = commandDescription.getCommandOptions().iterator();
         CommandOption commandOption = it.next();
         assertEquals("OPTION1", commandOption.getCommand());
-        assertEquals(null, commandOption.getLabel());
+        assertNull(commandOption.getLabel());
         commandOption = it.next();
         assertEquals("OPTION2", commandOption.getCommand());
-        assertEquals(null, commandOption.getLabel());
+        assertNull(commandOption.getLabel());
         commandOption = it.next();
         assertEquals("3", commandOption.getCommand());
         assertEquals("Option 3", commandOption.getLabel());
