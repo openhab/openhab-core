@@ -111,10 +111,10 @@ public class MetadataStateDescriptionFragmentProviderTest {
         Iterator<StateOption> it = stateDescriptionFragment.getOptions().iterator();
         StateOption stateOption = it.next();
         assertEquals("OPTION1", stateOption.getValue());
-        assertEquals(null, stateOption.getLabel());
+        assertNull(stateOption.getLabel());
         stateOption = it.next();
         assertEquals("OPTION2", stateOption.getValue());
-        assertEquals(null, stateOption.getLabel());
+        assertNull(stateOption.getLabel());
         stateOption = it.next();
         assertEquals("3", stateOption.getValue());
         assertEquals("Option 3", stateOption.getLabel());

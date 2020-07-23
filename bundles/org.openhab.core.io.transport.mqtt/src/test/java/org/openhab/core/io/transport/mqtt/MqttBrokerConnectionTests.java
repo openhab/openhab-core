@@ -18,7 +18,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -277,9 +276,9 @@ public class MqttBrokerConnectionTests extends JavaTest {
         connection.setLastWill(MqttWillAndTestament.fromString("topic:message:1:true"));
         assertEquals("topic", connection.getLastWill().getTopic());
         assertEquals(1, connection.getLastWill().getQos());
-        assertEquals(true, connection.getLastWill().isRetain());
-        byte b[] = { 'm', 'e', 's', 's', 'a', 'g', 'e' };
-        assertTrue(Arrays.equals(connection.getLastWill().getPayload(), b));
+        assertTrue(connection.getLastWill().isRetain());
+        byte[] b = { 'm', 'e', 's', 's', 'a', 'g', 'e' };
+        assertArrayEquals(connection.getLastWill().getPayload(), b);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -299,7 +298,7 @@ public class MqttBrokerConnectionTests extends JavaTest {
                 "setterGetterTests");
         assertEquals("URL getter", connection.getHost(), "123.123.123.123");
         assertEquals("Name getter", connection.getPort(), 1883); // Check for non-secure port
-        assertEquals("Secure getter", connection.isSecure(), false);
+        assertFalse("Secure getter", connection.isSecure());
         assertEquals("ClientID getter", "setterGetterTests", connection.getClientId());
 
         connection.setCredentials("user@!", "password123@^");
