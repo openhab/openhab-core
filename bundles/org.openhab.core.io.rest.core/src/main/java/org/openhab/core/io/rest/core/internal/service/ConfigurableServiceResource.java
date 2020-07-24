@@ -37,8 +37,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.auth.Role;
-import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
@@ -283,7 +283,7 @@ public class ConfigurableServiceResource implements RESTResource {
                 String label = (String) serviceReference.getProperty(ConfigurableService.SERVICE_PROPERTY_LABEL);
                 if (label == null) { // for multi context services the label can be changed and must be read from config
                                      // admin.
-                    label = configurationService.getProperty(id, ConfigConstants.SERVICE_CONTEXT);
+                    label = configurationService.getProperty(id, OpenHAB.SERVICE_CONTEXT);
                 }
                 String category = (String) serviceReference.getProperty(ConfigurableService.SERVICE_PROPERTY_CATEGORY);
                 String configDescriptionURI = (String) serviceReference

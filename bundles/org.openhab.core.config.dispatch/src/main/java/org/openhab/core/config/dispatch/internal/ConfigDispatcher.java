@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -166,14 +166,14 @@ public class ConfigDispatcher {
 
     private Configuration getConfigurationWithContext(String pidWithContext)
             throws IOException, InvalidSyntaxException {
-        if (!pidWithContext.contains(ConfigConstants.SERVICE_CONTEXT_MARKER)) {
+        if (!pidWithContext.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
             throw new IllegalArgumentException("Given PID should be followed by a context");
         }
-        String pid = pidWithContext.split(ConfigConstants.SERVICE_CONTEXT_MARKER)[0];
-        String context = pidWithContext.split(ConfigConstants.SERVICE_CONTEXT_MARKER)[1];
+        String pid = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[0];
+        String context = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[1];
 
         Configuration[] configs = configAdmin.listConfigurations("(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "="
-                + pid + ")(" + ConfigConstants.SERVICE_CONTEXT + "=" + context + "))");
+                + pid + ")(" + OpenHAB.SERVICE_CONTEXT + "=" + context + "))");
 
         if (configs == null || configs.length == 0) {
             return null;
@@ -192,7 +192,7 @@ public class ConfigDispatcher {
         for (String orphanPID : exclusivePIDMap.getOrphanPIDs()) {
             try {
                 Configuration configuration = null;
-                if (orphanPID.contains(ConfigConstants.SERVICE_CONTEXT_MARKER)) {
+                if (orphanPID.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
                     configuration = getConfigurationWithContext(orphanPID);
                 } else {
                     configuration = configAdmin.getConfiguration(orphanPID, null);
@@ -311,10 +311,10 @@ public class ConfigDispatcher {
 
             pid = exclusivePID;
 
-            if (exclusivePID.contains(ConfigConstants.SERVICE_CONTEXT_MARKER)) {
+            if (exclusivePID.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
                 // split pid and context
-                pid = exclusivePID.split(ConfigConstants.SERVICE_CONTEXT_MARKER)[0];
-                context = exclusivePID.split(ConfigConstants.SERVICE_CONTEXT_MARKER)[1];
+                pid = exclusivePID.split(OpenHAB.SERVICE_CONTEXT_MARKER)[0];
+                context = exclusivePID.split(OpenHAB.SERVICE_CONTEXT_MARKER)[1];
             }
 
             lines = lines.subList(1, lines.size());
@@ -352,7 +352,7 @@ public class ConfigDispatcher {
             configMap.put(configuration, new Properties());
         } else if (context != null && exclusivePIDMap.contains(exclusivePID)) {
             Dictionary p = new Properties();
-            p.put(ConfigConstants.SERVICE_CONTEXT, context);
+            p.put(OpenHAB.SERVICE_CONTEXT, context);
             configMap.put(configuration, p);
         }
 

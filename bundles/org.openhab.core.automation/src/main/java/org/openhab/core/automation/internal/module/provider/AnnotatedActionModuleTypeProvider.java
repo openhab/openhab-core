@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.Module;
@@ -37,7 +38,6 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.common.registry.ProviderChangeListener;
-import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
@@ -196,7 +196,7 @@ public class AnnotatedActionModuleTypeProvider extends BaseModuleHandlerFactory 
     }
 
     private @Nullable String getConfigNameFromService(Map<String, Object> properties) {
-        Object o = properties.get(ConfigConstants.SERVICE_CONTEXT);
+        Object o = properties.get(OpenHAB.SERVICE_CONTEXT);
         String configName = null;
         if (o instanceof String) {
             configName = (String) o;

@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.ActionInput;
@@ -36,7 +37,6 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
-import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaTest;
@@ -87,7 +87,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
         AnnotatedActionModuleTypeProvider prov = new AnnotatedActionModuleTypeProvider(moduleTypeI18nService);
 
         Map<String, Object> properties1 = new HashMap<>();
-        properties1.put(ConfigConstants.SERVICE_CONTEXT, "conf1");
+        properties1.put(OpenHAB.SERVICE_CONTEXT, "conf1");
         prov.addActionProvider(actionProviderConf1, properties1);
 
         Collection<String> types = prov.getTypes();
@@ -95,7 +95,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
         assertTrue(types.contains(TEST_ACTION_TYPE_ID));
 
         Map<String, Object> properties2 = new HashMap<>();
-        properties2.put(ConfigConstants.SERVICE_CONTEXT, "conf2");
+        properties2.put(OpenHAB.SERVICE_CONTEXT, "conf2");
         prov.addActionProvider(actionProviderConf2, properties2);
 
         // we only have ONE type but TWO configurations for it

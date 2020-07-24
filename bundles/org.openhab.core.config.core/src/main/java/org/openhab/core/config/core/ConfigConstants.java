@@ -12,11 +12,16 @@
  */
 package org.openhab.core.config.core;
 
+import org.openhab.core.OpenHAB;
+
 /**
  * This class provides constants relevant for the configuration of openHAB
  *
+ * @deprecated Use {@link OpenHAB} instead.
+ *
  * @author Kai Kreuzer - Initial contribution
  */
+@Deprecated
 public class ConfigConstants {
 
     /** The program argument name for setting the user data directory path */

@@ -39,7 +39,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.model.core.ModelParser;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
@@ -113,12 +113,12 @@ public class FolderObserverTest extends JavaOSGiTest {
      * The main configuration folder's path is saved in the defaultWatchedDir variable
      * in order to be restored after all the tests are finished.
      * For the purpose of the FolderObserverTest class a new folder is created.
-     * Its path is set to the ConfigConstants.CONFIG_DIR_PROG_ARGUMENT property.
+     * Its path is set to the OpenHAB.CONFIG_DIR_PROG_ARGUMENT property.
      */
     private void setupWatchedDirectory() {
-        defaultWatchedDir = System.getProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT);
+        defaultWatchedDir = System.getProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT);
         WATCHED_DIRECTORY.mkdirs();
-        System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, WATCHED_DIRECTORY.getPath());
+        System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, WATCHED_DIRECTORY.getPath());
         EXISTING_SUBDIR_PATH.mkdirs();
     }
 
@@ -147,9 +147,9 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         modelRepo.clean();
         if (defaultWatchedDir != null) {
-            System.setProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT, defaultWatchedDir);
+            System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, defaultWatchedDir);
         } else {
-            System.clearProperty(ConfigConstants.CONFIG_DIR_PROG_ARGUMENT);
+            System.clearProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT);
         }
     }
 

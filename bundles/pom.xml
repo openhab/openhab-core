@@ -45,7 +45,6 @@
     <module>org.openhab.core.thing.xml</module>
     <module>org.openhab.core.transform</module>
     <module>org.openhab.core.voice</module>
-    <module>org.openhab.core.boot</module>
     <module>org.openhab.core.karaf</module>
     <module>org.openhab.core.io.bin2json</module>
     <module>org.openhab.core.io.console</module>

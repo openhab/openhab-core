@@ -37,9 +37,9 @@ import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.User;
-import org.openhab.core.config.core.ConfigConstants;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 public class JwtHelper {
     private final Logger logger = LoggerFactory.getLogger(JwtHelper.class);
 
-    private static final String KEY_FILE_PATH = ConfigConstants.getUserDataFolder() + File.separator + "secrets"
+    private static final String KEY_FILE_PATH = OpenHAB.getUserDataFolder() + File.separator + "secrets"
             + File.separator + "rsa_json_web_key.json";
 
     private static final String ISSUER_NAME = "openhab";
