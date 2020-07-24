@@ -23,12 +23,14 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
+import org.openhab.core.io.rest.RESTResource;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
+import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,19 +38,21 @@ import org.slf4j.LoggerFactory;
 import de.maggu2810.jaxrswb.swagger1.gen.JaxRsWhiteboardSwaggerGenerator;
 
 /**
- * An endpoint to generate and provide a Swagger 1 description.
+ * An endpoint to generate and provide a Swagger description.
  *
  * @author Markus Rathgeb - Initial contribution
+ * @author Kai Kreuzer - made it a RESTResource to register in the root bean
  */
-@Component(service = RESTResource.class)
+@Component(service = SwaggerResource.class)
 @JaxrsResource
+@JaxrsName("spec")
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
-@Path("/swagger.json")
+@Path("/spec")
 @NonNullByDefault
-public class RESTResource {
+public class SwaggerResource implements RESTResource {
 
-    private final Logger logger = LoggerFactory.getLogger(RESTResource.class);
+    private final Logger logger = LoggerFactory.getLogger(SwaggerResource.class);
     private final JaxRsWhiteboardSwaggerGenerator generator;
 
     /**
@@ -57,7 +61,7 @@ public class RESTResource {
      * @param generator the generator
      */
     @Activate
-    public RESTResource(final @Reference JaxRsWhiteboardSwaggerGenerator generator) {
+    public SwaggerResource(final @Reference JaxRsWhiteboardSwaggerGenerator generator) {
         this.generator = generator;
     }
 

@@ -435,6 +435,7 @@
 		<feature>openhab-core-io-rest-sitemap</feature>
 		<feature>openhab-core-io-rest-audio</feature>
 		<feature>openhab-core-io-rest-voice</feature>
+		<feature>openhab-core-io-rest-swagger</feature>
 		<feature>openhab-core-io-rest-mdns</feature>
 		<feature>openhab-core-model-lsp</feature>
 		<feature>openhab-core-model-item</feature>
