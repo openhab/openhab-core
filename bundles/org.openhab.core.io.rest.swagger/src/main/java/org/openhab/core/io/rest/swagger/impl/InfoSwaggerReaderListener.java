@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.swagger.impl;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
 
 import io.swagger.jaxrs.Reader;
@@ -29,17 +30,18 @@ import io.swagger.models.Swagger;
 @Component
 @NonNullByDefault
 public class InfoSwaggerReaderListener implements ReaderListener {
-    public static final String API_TITLE = "openHAB";
-    public static final String API_VERSION = "3";
-    public static final String API_URL = "https://www.openhab.org/docs/";
+    public static final String API_TITLE = "openHAB REST API";
+    public static final String CONTACT_NAME = "openHAB";
+    public static final String CONTACT_URL = "https://www.openhab.org/docs/";
 
     @Override
     public void beforeScan(@NonNullByDefault({}) Reader reader, @NonNullByDefault({}) Swagger swagger) {
         Info info = new Info();
         info.setTitle(API_TITLE);
-        info.setVersion(API_VERSION);
+        info.setVersion(RESTConstants.API_VERSION);
         Contact contact = new Contact();
-        contact.setUrl(API_URL);
+        contact.setName(CONTACT_NAME);
+        contact.setUrl(CONTACT_URL);
         info.setContact(contact);
         swagger.setInfo(info);
     }
