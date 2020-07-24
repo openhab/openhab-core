@@ -51,6 +51,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for the UI resources and is registered with the
@@ -123,7 +125,9 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Add an UI component in the specified namespace.")
+    @ApiOperation(value = "Add an UI component in the specified namespace.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class) })
     public Response addComponent(@PathParam("namespace") String namespace, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -136,7 +140,9 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a specific UI component in the specified namespace.")
+    @ApiOperation(value = "Update a specific UI component in the specified namespace.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class),
             @ApiResponse(code = 404, message = "Component not found", response = Tile.class) })
     public Response updateComponent(@PathParam("namespace") String namespace,
@@ -159,7 +165,9 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Remove a specific UI component in the specified namespace.")
+    @ApiOperation(value = "Remove a specific UI component in the specified namespace.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class),
             @ApiResponse(code = 404, message = "Component not found", response = Tile.class) })
     public Response deleteComponent(@PathParam("namespace") String namespace,

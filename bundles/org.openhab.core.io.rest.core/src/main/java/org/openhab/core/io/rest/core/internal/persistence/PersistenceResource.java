@@ -76,6 +76,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for history data and provides different methods to interact with the persistence
@@ -127,7 +129,9 @@ public class PersistenceResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Gets a list of persistence services.", response = String.class, responseContainer = "List")
+    @ApiOperation(value = "Gets a list of persistence services.", response = String.class, responseContainer = "List", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"))
     public Response httpGetPersistenceServices(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
@@ -141,7 +145,9 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Gets a list of items available via a specific persistence service.", response = String.class, responseContainer = "List")
+    @ApiOperation(value = "Gets a list of items available via a specific persistence service.", response = String.class, responseContainer = "List", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"))
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @ApiParam(value = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId) {
@@ -173,7 +179,9 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete item data from a specific persistence service.", response = String.class, responseContainer = "List")
+    @ApiOperation(value = "Delete item data from a specific persistence service.", response = String.class, responseContainer = "List", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
             @ApiResponse(code = 400, message = "Invalid filter parameters"),

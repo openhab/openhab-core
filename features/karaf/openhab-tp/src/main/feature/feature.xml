@@ -243,12 +243,8 @@
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.ide/2.19.0</bundle>
 	</feature>
 
-	<feature name="openhab.tp-jaxrswb-swagger-gen" description="JAX-RS Whiteboard Swagger 1 generator" version="${project.version}">
-		<details>
-			This feature is currently only for external usage by products and not used by openHAB Core itself.
-		</details>
-		<capability>openhab.tp;feature=jaxrswb-swagger-gen;version=0.0.4</capability>
-		<bundle>mvn:de.maggu2810.jaxrswb.bundles/jaxrswb-swagger1-gen/0.0.4</bundle>
+	<feature name="openhab.tp-swagger-jaxrs" description="JAX-RS Whiteboard Swagger Support" version="${project.version}">
+		<capability>openhab.tp;feature=swagger-jaxrs;version=1.6.1</capability>
 		<feature dependency="true">openhab.tp-jax-rs-whiteboard</feature>
 		<feature dependency="true">openhab.tp-jackson</feature>
 		<bundle dependency="true">mvn:io.swagger/swagger-jaxrs/1.6.1</bundle>
@@ -259,10 +255,8 @@
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
 		<bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
 		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.2.1</bundle>
-		<bundle dependency="true">mvn:de.maggu2810.thirdparty.modified.org.reflections/reflections/0.9.10.v20160429-1435</bundle>
-		<config name="de.maggu2810.jaxrswb.swagger1.gen">
-			info.title=openHAB REST API
-		</config>
+		<bundle dependency="true">mvn:org.reflections/reflections/0.9.12</bundle>
+		<bundle dependency="true">mvn:org.javassist/javassist/3.26.0-GA</bundle>
 	</feature>
 
 </features>

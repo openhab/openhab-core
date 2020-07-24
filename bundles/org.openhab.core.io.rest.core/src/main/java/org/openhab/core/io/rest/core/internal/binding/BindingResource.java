@@ -63,6 +63,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for bindings and is registered with the
@@ -81,7 +83,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(BindingResource.PATH_BINDINGS)
 @RolesAllowed({ Role.ADMIN })
-@Api(BindingResource.PATH_BINDINGS)
+@Api(value = BindingResource.PATH_BINDINGS, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class BindingResource implements RESTResource {
 

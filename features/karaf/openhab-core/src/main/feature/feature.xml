@@ -169,8 +169,8 @@
 	<feature name="openhab-core-io-rest-swagger" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.swagger/${project.version}</bundle>
-		<requirement>openhab.tp;filter:="(feature=jaxrswb-swagger-gen)"</requirement>
-		<feature dependency="true">openhab.tp-jaxrswb-swagger-gen</feature>
+		<requirement>openhab.tp;filter:="(feature=swagger-jaxrs)"</requirement>
+		<feature dependency="true">openhab.tp-swagger-jaxrs</feature>
 	</feature>
 
 	<feature name="openhab-core-io-rest-audio" version="${project.version}">

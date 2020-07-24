@@ -84,6 +84,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 import io.swagger.annotations.ResponseHeader;
 
 /**
@@ -99,7 +101,8 @@ import io.swagger.annotations.ResponseHeader;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(RuleResource.PATH_RULES)
-@Api(RuleResource.PATH_RULES)
+@Api(value = RuleResource.PATH_RULES, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @RolesAllowed({ Role.ADMIN })
 @NonNullByDefault
 public class RuleResource implements RESTResource {

@@ -47,6 +47,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for discovery and is registered with the
@@ -66,7 +68,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(DiscoveryResource.PATH_DISCOVERY)
 @RolesAllowed({ Role.ADMIN })
-@Api(DiscoveryResource.PATH_DISCOVERY)
+@Api(value = DiscoveryResource.PATH_DISCOVERY, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class DiscoveryResource implements RESTResource {
 

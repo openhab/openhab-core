@@ -34,6 +34,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for accessing the UUID of the instance
@@ -46,7 +48,8 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsName(UUIDResource.PATH_UUID)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @Path(UUIDResource.PATH_UUID)
-@Api(UUIDResource.PATH_UUID)
+@Api(value = UUIDResource.PATH_UUID, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @RolesAllowed({ Role.ADMIN })
 @NonNullByDefault
 public class UUIDResource implements RESTResource {

@@ -15,6 +15,8 @@ package org.openhab.core.io.rest.internal.resources.beans;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openhab.core.io.rest.RESTConstants;
+
 /**
  * This is a java bean that is used to define the root entry
  * page of the REST interface.
@@ -23,7 +25,7 @@ import java.util.List;
  */
 public class RootBean {
 
-    public final String version = "4";
+    public final String version = RESTConstants.API_VERSION;
 
     public final List<Links> links = new ArrayList<>();
 

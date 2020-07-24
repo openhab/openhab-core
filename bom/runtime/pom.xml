@@ -991,18 +991,16 @@
       <version>${swagger.version}</version>
       <scope>compile</scope>
     </dependency>
-
-    <!-- JAX-RS Whiteboard Swagger 1 generator -->
     <dependency>
-      <groupId>de.maggu2810.jaxrswb.bundles</groupId>
-      <artifactId>jaxrswb-swagger1-gen</artifactId>
-      <version>0.0.4</version>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.26.0-GA</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>de.maggu2810.thirdparty.modified.org.reflections</groupId>
+      <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
-      <version>0.9.10.v20160429-1435</version>
+      <version>0.9.12</version>
       <scope>compile</scope>
     </dependency>
 

@@ -67,6 +67,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * Provides access to ChannelType via REST.
@@ -83,7 +85,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ChannelTypeResource.PATH_CHANNEL_TYPES)
 @RolesAllowed({ Role.ADMIN })
-@Api(ChannelTypeResource.PATH_CHANNEL_TYPES)
+@Api(value = ChannelTypeResource.PATH_CHANNEL_TYPES, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class ChannelTypeResource implements RESTResource {
 

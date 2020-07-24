@@ -230,9 +230,10 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>de.maggu2810.jaxrswb.bundles</groupId>
-      <artifactId>jaxrswb-swagger1-gen</artifactId>
-      <version>0.0.4</version>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-jaxrs</artifactId>
+      <version>1.5.5</version>
+      <scope>compile</scope>
     </dependency>
 
     <!-- XStream -->

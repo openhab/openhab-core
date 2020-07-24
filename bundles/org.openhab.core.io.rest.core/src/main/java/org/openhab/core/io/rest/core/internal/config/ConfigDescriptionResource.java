@@ -54,6 +54,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * {@link ConfigDescriptionResource} provides access to {@link ConfigDescription}s via REST.
@@ -70,7 +72,9 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS)
 @RolesAllowed({ Role.ADMIN })
-@Api(ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS)
+@Api(value = ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS, authorizations = {
+        @Authorization(value = "oauth2", scopes = {
+                @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class ConfigDescriptionResource implements RESTResource {
 

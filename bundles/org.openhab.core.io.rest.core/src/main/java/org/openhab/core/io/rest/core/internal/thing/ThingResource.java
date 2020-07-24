@@ -112,6 +112,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for things and is registered with the
@@ -209,7 +211,9 @@ public class ThingResource implements RESTResource {
     @POST
     @RolesAllowed({ Role.ADMIN })
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Creates a new thing and adds it to the registry.")
+    @ApiOperation(value = "Creates a new thing and adds it to the registry.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Created", response = String.class),
             @ApiResponse(code = 400, message = "A uid must be provided, if no binding can create a thing of this type."),
             @ApiResponse(code = 409, message = "A thing with the same uid already exists.") })
@@ -297,7 +301,8 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets thing by UID.")
+    @ApiOperation(value = "Gets thing by UID.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ThingDTO.class),
             @ApiResponse(code = 404, message = "Thing not found.") })
     public Response getByUID(
@@ -327,7 +332,9 @@ public class ThingResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
-    @ApiOperation(value = "Removes a thing from the registry. Set \'force\' to __true__ if you want the thing te be removed immediately.")
+    @ApiOperation(value = "Removes a thing from the registry. Set \'force\' to __true__ if you want the thing te be removed immediately.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK, was deleted."),
             @ApiResponse(code = 202, message = "ACCEPTED for asynchronous deletion."),
             @ApiResponse(code = 404, message = "Thing not found."),
@@ -385,7 +392,8 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Updates a thing.")
+    @ApiOperation(value = "Updates a thing.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ThingDTO.class),
             @ApiResponse(code = 404, message = "Thing not found."),
             @ApiResponse(code = 409, message = "Thing could not be updated as it is not editable.") })
@@ -444,7 +452,9 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/config")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Updates thing's configuration.")
+    @ApiOperation(value = "Updates thing's configuration.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ThingDTO.class),
             @ApiResponse(code = 400, message = "Configuration of the thing is not valid."),
             @ApiResponse(code = 404, message = "Thing not found"),
@@ -500,7 +510,8 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{thingUID}/status")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets thing's status.")
+    @ApiOperation(value = "Gets thing status.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Thing not found.") })
     public Response getStatus(
@@ -522,9 +533,11 @@ public class ThingResource implements RESTResource {
     }
 
     @PUT
-    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/enable")
-    @ApiOperation(value = "Sets the thing enabled status.")
+    @ApiOperation(value = "Sets the thing enabled status.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Thing not found.") })
     public Response setEnabled(
@@ -550,10 +563,11 @@ public class ThingResource implements RESTResource {
     }
 
     @GET
-    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/config/status")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets thing's config status.")
+    @ApiOperation(value = "Gets thing config status.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Thing not found.") })
     public Response getConfigStatus(
@@ -577,9 +591,11 @@ public class ThingResource implements RESTResource {
     }
 
     @PUT
+    @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/firmware/{firmwareVersion}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Update thing firmware.")
+    @ApiOperation(value = "Update thing firmware.", authorizations = { @Authorization(value = "oauth2", scopes = {
+            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "Firmware update preconditions not satisfied."),
             @ApiResponse(code = 404, message = "Thing not found.") })
@@ -612,8 +628,11 @@ public class ThingResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/firmware/status")
-    @ApiOperation(value = "Gets thing's firmware status.")
+    @ApiOperation(value = "Gets thing's firmware status.", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 204, message = "No firmware status provided by this Thing.") })
     public Response getFirmwareStatus(
@@ -629,9 +648,12 @@ public class ThingResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/firmwares")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all available firmwares for provided thing UID", response = StrippedThingTypeDTO.class, responseContainer = "Set")
+    @ApiOperation(value = "Get all available firmwares for provided thing UID", response = StrippedThingTypeDTO.class, responseContainer = "Set", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 204, message = "No firmwares found.") })
     public Response getFirmwares(@PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID,
