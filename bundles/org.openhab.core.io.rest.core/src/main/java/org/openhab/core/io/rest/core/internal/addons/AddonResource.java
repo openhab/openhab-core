@@ -68,6 +68,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * This class acts as a REST resource for add-ons and provides methods to install and uninstall them.
@@ -83,7 +85,8 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(AddonResource.PATH_ADDONS)
 @RolesAllowed({ Role.ADMIN })
-@Api(AddonResource.PATH_ADDONS)
+@Api(value = AddonResource.PATH_ADDONS, authorizations = { @Authorization(value = "oauth2", scopes = {
+        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @NonNullByDefault
 public class AddonResource implements RESTResource {
 
