@@ -82,7 +82,7 @@ public class RootResource {
     }
 
     @GET
-    @ApiOperation(value = "Gets the API version and links to resources.")
+    @ApiOperation(value = "Gets information about the runtime, the API version and links to resources.")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
     public Object getRoot(@Context UriInfo uriInfo) {
         // key: path, value: name (this way we could ensure that ever path is added only once).

@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.internal.resources.beans;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openhab.core.OpenHAB;
 import org.openhab.core.io.rest.RESTConstants;
 
 /**
@@ -22,12 +23,22 @@ import org.openhab.core.io.rest.RESTConstants;
  * page of the REST interface.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Yannick Schaus - Add runtime info
  */
 public class RootBean {
 
     public final String version = RESTConstants.API_VERSION;
 
+    public final RuntimeInfo runtimeInfo = new RuntimeInfo();
+
     public final List<Links> links = new ArrayList<>();
+
+    public static class RuntimeInfo {
+        public final String version = OpenHAB.getVersion();
+        public final String buildString = OpenHAB.buildString();
+        public final String configFolder = OpenHAB.getConfigFolder();
+        public final String userdataFolder = OpenHAB.getUserDataFolder();
+    }
 
     public static class Links {
         public Links(String type, String url) {
