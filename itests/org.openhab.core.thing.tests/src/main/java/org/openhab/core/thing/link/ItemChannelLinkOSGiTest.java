@@ -21,6 +21,7 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
@@ -54,7 +55,7 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);
         managedThingProvider.add(ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannel(ChannelBuilder.create(CHANNEL_UID, "Color").build()).build());
+                .withChannel(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.COLOR).build()).build());
         itemChannelLinkRegistry = getService(ItemChannelLinkRegistry.class);
         managedItemChannelLinkProvider = getService(ManagedItemChannelLinkProvider.class);
         assertNotNull(managedItemChannelLinkProvider);

@@ -125,13 +125,13 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private static final ItemChannelLink LINK_1_T2 = new ItemChannelLink(ITEM_NAME_1, TRIGGER_CHANNEL_UID_2);
     private static final ItemChannelLink LINK_2_T2 = new ItemChannelLink(ITEM_NAME_2, TRIGGER_CHANNEL_UID_2);
     private static final Thing THING = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(
-            ChannelBuilder.create(STATE_CHANNEL_UID_1, "").withKind(ChannelKind.STATE).build(),
-            ChannelBuilder.create(STATE_CHANNEL_UID_2, "").withKind(ChannelKind.STATE).build(),
+            ChannelBuilder.create(STATE_CHANNEL_UID_1).withKind(ChannelKind.STATE).build(),
+            ChannelBuilder.create(STATE_CHANNEL_UID_2).withKind(ChannelKind.STATE).build(),
             ChannelBuilder.create(STATE_CHANNEL_UID_3, "Number:Temperature").withKind(ChannelKind.STATE).build(),
-            ChannelBuilder.create(STATE_CHANNEL_UID_4, "Number").withKind(ChannelKind.STATE)
+            ChannelBuilder.create(STATE_CHANNEL_UID_4, CoreItemFactory.NUMBER).withKind(ChannelKind.STATE)
                     .withType(CHANNEL_TYPE_UID_4).build(),
-            ChannelBuilder.create(TRIGGER_CHANNEL_UID_1, "").withKind(ChannelKind.TRIGGER).build(),
-            ChannelBuilder.create(TRIGGER_CHANNEL_UID_2, "").withKind(ChannelKind.TRIGGER).build()).build();
+            ChannelBuilder.create(TRIGGER_CHANNEL_UID_1).withKind(ChannelKind.TRIGGER).build(),
+            ChannelBuilder.create(TRIGGER_CHANNEL_UID_2).withKind(ChannelKind.TRIGGER).build()).build();
 
     private @Mock @NonNullByDefault({}) AutoUpdateManager autoUpdateManagerMock;
     private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
@@ -514,8 +514,9 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemCommandEventTypeDowncast() {
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannels(ChannelBuilder.create(STATE_CHANNEL_UID_2, "Dimmer").withKind(ChannelKind.STATE).build())
+        Thing thing = ThingBuilder
+                .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
+                        .create(STATE_CHANNEL_UID_2, CoreItemFactory.DIMMER).withKind(ChannelKind.STATE).build())
                 .build();
         thing.setHandler(thingHandlerMock);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
@@ -534,8 +535,9 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemStateEventTypeDowncast() {
-        Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannels(ChannelBuilder.create(STATE_CHANNEL_UID_2, "Dimmer").withKind(ChannelKind.STATE).build())
+        Thing thing = ThingBuilder
+                .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
+                        .create(STATE_CHANNEL_UID_2, CoreItemFactory.DIMMER).withKind(ChannelKind.STATE).build())
                 .build();
         thing.setHandler(thingHandlerMock);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);

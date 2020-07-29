@@ -35,6 +35,7 @@ import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemStateEvent;
 import org.openhab.core.items.events.ItemStatePredictedEvent;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.ChannelUID;
@@ -98,16 +99,16 @@ public class AutoUpdateManagerTest {
         when(onlineThingMock.getHandler()).thenReturn(handlerMock);
         when(onlineThingMock.getStatus()).thenReturn(ThingStatus.ONLINE);
         when(onlineThingMock.getChannel(eq(CHANNEL_UID_ONLINE_1.getId())))
-                .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_ONLINE_1, "String")
+                .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_ONLINE_1, CoreItemFactory.STRING)
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_ONLINE_1)).build());
         when(onlineThingMock.getChannel(eq(CHANNEL_UID_ONLINE_2.getId())))
-                .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_ONLINE_2, "String")
+                .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_ONLINE_2, CoreItemFactory.STRING)
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_ONLINE_2)).build());
 
         when(offlineThingMock.getHandler()).thenReturn(handlerMock);
         when(offlineThingMock.getStatus()).thenReturn(ThingStatus.OFFLINE);
         when(offlineThingMock.getChannel(eq(CHANNEL_UID_OFFLINE_1.getId())))
-                .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_OFFLINE_1, "String")
+                .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_OFFLINE_1, CoreItemFactory.STRING)
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_OFFLINE_1)).build());
 
         aum = new AutoUpdateManager(new HashMap<>(), channelTypeRegistryMock, eventPublisherMock, iclRegistryMock,

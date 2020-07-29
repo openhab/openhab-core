@@ -54,6 +54,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
@@ -131,8 +132,10 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     @Before
     @SuppressWarnings("null")
     public void setUp() {
-        thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder.create(CHANNEL_UID, "Switch")
-                .withKind(ChannelKind.STATE).withType(CHANNEL_TYPE_UID).build()).build();
+        thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
+                .withChannels(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).withKind(ChannelKind.STATE)
+                        .withType(CHANNEL_TYPE_UID).build())
+                .build();
 
         registerVolatileStorageService();
 
@@ -309,7 +312,8 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         registerThingTypeProvider();
 
         Thing thing2 = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannels(singletonList(ChannelBuilder.create(CHANNEL_UID, "Switch").build())).build();
+                .withChannels(singletonList(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).build()))
+                .build();
 
         class ThingHandlerState {
             boolean raceCondition;
@@ -889,7 +893,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
         receivedEvents.clear();
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannel(ChannelBuilder.create(CHANNEL_UID, "Switch").build()).build();
+                .withChannel(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).build()).build();
         managedThingProvider.update(thing);
 
         state.callback.stateUpdated(CHANNEL_UID, new StringType("Value"));

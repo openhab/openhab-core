@@ -57,6 +57,7 @@ import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
@@ -427,8 +428,8 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         @Override
         public void initialize() {
             ThingBuilder thingBuilder = editThing();
-            thingBuilder
-                    .withChannel(ChannelBuilder.create(new ChannelUID("bindingId:type:thingId:1"), "String").build());
+            thingBuilder.withChannel(
+                    ChannelBuilder.create(new ChannelUID("bindingId:type:thingId:1"), CoreItemFactory.STRING).build());
             updateThing(thingBuilder.build());
             updateStatus(ThingStatus.ONLINE);
         }
