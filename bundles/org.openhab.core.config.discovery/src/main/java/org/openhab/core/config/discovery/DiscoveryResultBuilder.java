@@ -20,6 +20,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link DiscoveryResultBuilder} helps creating a {@link DiscoveryResult} through the builder pattern.
@@ -32,6 +34,7 @@ import org.openhab.core.thing.ThingUID;
  */
 @NonNullByDefault
 public class DiscoveryResultBuilder {
+    private Logger logger = LoggerFactory.getLogger(DiscoveryResultBuilder.class);
 
     private final ThingUID thingUID;
 
@@ -144,6 +147,11 @@ public class DiscoveryResultBuilder {
      */
     @SuppressWarnings("deprecation")
     public DiscoveryResult build() {
+        if (representationProperty != null && !properties.containsKey(representationProperty)) {
+            logger.warn(
+                    "Representation property '{}' of discovery result for thing '{}' is missing in properties map. It should be added.",
+                    representationProperty, thingUID);
+        }
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
                 ttl);
     }
