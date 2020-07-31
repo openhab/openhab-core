@@ -249,7 +249,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             if (millis != null) {
                 try {
                     return String.format(formatPattern,
-                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis.longValue()), ZoneId.systemDefault()));
+                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis.longValue()), ZoneId.of("UTC")));
                 } catch (IllegalFormatConversionException ifce) {
                     // The conversion is not valid for the type ZonedDateTime. This happens, if the format is like
                     // "%.1f". Fall through to default behavior.
