@@ -16,7 +16,7 @@ import static org.eclipse.jdt.annotation.DefaultLocation.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.IllegalFormatConversionException;
@@ -249,7 +249,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             if (millis != null) {
                 try {
                     return String.format(formatPattern,
-                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis.longValue()), ZoneId.systemDefault()));
+                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis.longValue()), ZoneOffset.UTC));
                 } catch (IllegalFormatConversionException ifce) {
                     // The conversion is not valid for the type ZonedDateTime. This happens, if the format is like
                     // "%.1f". Fall through to default behavior.
