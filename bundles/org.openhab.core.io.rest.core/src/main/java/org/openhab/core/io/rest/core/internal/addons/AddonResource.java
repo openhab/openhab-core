@@ -63,13 +63,13 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for add-ons and provides methods to install and uninstall them.
@@ -77,6 +77,7 @@ import io.swagger.annotations.AuthorizationScope;
  * @author Kai Kreuzer - Initial contribution
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -85,8 +86,8 @@ import io.swagger.annotations.AuthorizationScope;
 @JSONRequired
 @Path(AddonResource.PATH_ADDONS)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = AddonResource.PATH_ADDONS, authorizations = { @Authorization(value = "oauth2", scopes = {
-        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = AddonResource.PATH_ADDONS)
 @NonNullByDefault
 public class AddonResource implements RESTResource {
 
@@ -118,10 +119,10 @@ public class AddonResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all add-ons.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
+    @Operation(summary = "Get all add-ons.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
     public Response getExtensions(
-            @HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
         return Response.ok(new Stream2JSONInputStream(getAllExtensions(locale))).build();
@@ -130,9 +131,10 @@ public class AddonResource implements RESTResource {
     @GET
     @Path("/types")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all add-on types.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
-    public Response getTypes(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
+    @Operation(summary = "Get all add-on types.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
+    public Response getTypes(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
         Stream<AddonType> addonTypeStream = getAllExtensionTypes(locale).stream().distinct();
@@ -142,11 +144,12 @@ public class AddonResource implements RESTResource {
     @GET
     @Path("/{addonId: [a-zA-Z_0-9-:]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get add-on with given ID.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 404, message = "Not found") })
-    public Response getById(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
-            @PathParam("addonId") @ApiParam(value = "addon ID") String addonId) {
+    @Operation(summary = "Get add-on with given ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "Not found") })
+    public Response getById(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
         logger.debug("Received HTTP GET request at '{}'.", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
         AddonService addonService = getAddonService(addonId);
@@ -160,9 +163,9 @@ public class AddonResource implements RESTResource {
 
     @POST
     @Path("/{addonId: [a-zA-Z_0-9-:]+}/install")
-    @ApiOperation(value = "Installs the add-on with the given ID.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response installAddon(final @PathParam("addonId") @ApiParam(value = "addon ID") String addonId) {
+    @Operation(summary = "Installs the add-on with the given ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
+    public Response installAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
                 AddonService addonService = getAddonService(addonId);
@@ -177,10 +180,11 @@ public class AddonResource implements RESTResource {
 
     @POST
     @Path("/url/{url}/install")
-    @ApiOperation(value = "Installs the add-on from the given URL.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 400, message = "The given URL is malformed or not valid.") })
-    public Response installExtensionByURL(final @PathParam("url") @ApiParam(value = "addon install URL") String url) {
+    @Operation(summary = "Installs the add-on from the given URL.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "The given URL is malformed or not valid.") })
+    public Response installExtensionByURL(
+            final @PathParam("url") @Parameter(description = "addon install URL") String url) {
         try {
             URI addonURI = new URI(url);
             String addonId = getAddonId(addonURI);
@@ -195,9 +199,10 @@ public class AddonResource implements RESTResource {
 
     @POST
     @Path("/{addonId: [a-zA-Z_0-9-:]+}/uninstall")
-    @ApiOperation(value = "Uninstalls the add-on with the given ID.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response uninstallExtension(final @PathParam("addonId") @ApiParam(value = "addon ID") String addonId) {
+    @Operation(summary = "Uninstalls the add-on with the given ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
+    public Response uninstallExtension(
+            final @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
                 AddonService addonService = getAddonService(addonId);

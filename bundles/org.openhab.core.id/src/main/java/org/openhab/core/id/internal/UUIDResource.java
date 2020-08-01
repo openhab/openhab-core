@@ -30,27 +30,28 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for accessing the UUID of the instance
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
 @JaxrsName(UUIDResource.PATH_UUID)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @Path(UUIDResource.PATH_UUID)
-@Api(value = UUIDResource.PATH_UUID, authorizations = { @Authorization(value = "oauth2", scopes = {
-        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
 @RolesAllowed({ Role.ADMIN })
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = UUIDResource.PATH_UUID)
 @NonNullByDefault
 public class UUIDResource implements RESTResource {
 
@@ -58,8 +59,8 @@ public class UUIDResource implements RESTResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "A unified unique id.", response = String.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class) })
+    @Operation(summary = "A unified unique id.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
     public Response getInstanceUUID() {
         return Response.ok(InstanceUUID.get()).build();
     }

@@ -53,19 +53,21 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * REST resource to obtain profile-types
  *
  * @author Stefan Triller - Initial contribution
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -74,8 +76,8 @@ import io.swagger.annotations.AuthorizationScope;
 @JSONRequired
 @Path(ProfileTypeResource.PATH_PROFILE_TYPES)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = ProfileTypeResource.PATH_PROFILE_TYPES, authorizations = { @Authorization(value = "oauth2", scopes = {
-        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = ProfileTypeResource.PATH_PROFILE_TYPES)
 @NonNullByDefault
 public class ProfileTypeResource implements RESTResource {
 
@@ -99,12 +101,12 @@ public class ProfileTypeResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.USER })
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all available profile types.", response = ProfileTypeDTO.class, responseContainer = "Set")
-    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ProfileTypeDTO.class, responseContainer = "Set"))
+    @Operation(summary = "Gets all available profile types.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProfileTypeDTO.class), uniqueItems = true))) })
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @QueryParam("channelTypeUID") @ApiParam(value = "channel type filter") @Nullable String channelTypeUID,
-            @QueryParam("itemType") @ApiParam(value = "item type filter") @Nullable String itemType) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("channelTypeUID") @Parameter(description = "channel type filter") @Nullable String channelTypeUID,
+            @QueryParam("itemType") @Parameter(description = "item type filter") @Nullable String itemType) {
         Locale locale = localeService.getLocale(language);
         return Response.ok(new Stream2JSONInputStream(getProfileTypes(locale, channelTypeUID, itemType))).build();
     }

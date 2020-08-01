@@ -65,13 +65,14 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * {@link ConfigurableServiceResource} provides access to configurable services. It lists the available services and
@@ -80,6 +81,7 @@ import io.swagger.annotations.AuthorizationScope;
  * @author Dennis Nobel - Initial contribution
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = { RESTResource.class, ConfigurableServiceResource.class })
 @JaxrsResource
@@ -88,8 +90,8 @@ import io.swagger.annotations.AuthorizationScope;
 @JSONRequired
 @Path(ConfigurableServiceResource.PATH_SERVICES)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = ConfigurableServiceResource.PATH_SERVICES, authorizations = { @Authorization(value = "oauth2", scopes = {
-        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = ConfigurableServiceResource.PATH_SERVICES)
 @NonNullByDefault
 public class ConfigurableServiceResource implements RESTResource {
 
@@ -123,9 +125,8 @@ public class ConfigurableServiceResource implements RESTResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get all configurable services.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ConfigurableServiceDTO.class, responseContainer = "List") })
+    @Operation(summary = "Get all configurable services.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getAll() {
         List<ConfigurableServiceDTO> services = getConfigurableServices();
         return services;
@@ -134,10 +135,10 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get configurable service for given service ID.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ConfigurableServiceDTO.class),
-            @ApiResponse(code = 404, message = "Not found") })
-    public Response getById(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
+    @Operation(summary = "Get configurable service for given service ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigurableServiceDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Not found") })
+    public Response getById(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         ConfigurableServiceDTO configurableService = getServiceById(serviceId);
         if (configurableService != null) {
             return Response.ok(configurableService).build();
@@ -174,11 +175,10 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}/contexts")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get existing multiple context service configurations for the given factory PID.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ConfigurableServiceDTO.class, responseContainer = "List") })
+    @Operation(summary = "Get existing multiple context service configurations for the given factory PID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurableServiceDTO.class)))) })
     public List<ConfigurableServiceDTO> getMultiConfigServicesByFactoryPid(
-            @PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
+            @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         List<ConfigurableServiceDTO> services = collectServicesById(serviceId);
         return services;
     }
@@ -191,10 +191,10 @@ public class ConfigurableServiceResource implements RESTResource {
     @GET
     @Path("/{serviceId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get service configuration for given service ID.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 500, message = "Configuration can not be read due to internal error") })
-    public Response getConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
+    @Operation(summary = "Get service configuration for given service ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })
+    public Response getConfiguration(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         try {
             Configuration configuration = configurationService.get(serviceId);
             return configuration != null ? Response.ok(configuration.getProperties()).build()
@@ -209,11 +209,11 @@ public class ConfigurableServiceResource implements RESTResource {
     @Path("/{serviceId}/config")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Updates a service configuration for given service ID and returns the old configuration.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 204, message = "No old configuration"),
-            @ApiResponse(code = 500, message = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId,
+    @Operation(summary = "Updates a service configuration for given service ID and returns the old configuration.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "204", description = "No old configuration"),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
+    public Response updateConfiguration(@PathParam("serviceId") @Parameter(description = "service ID") String serviceId,
             @Nullable Map<String, Object> configuration) {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
@@ -256,11 +256,12 @@ public class ConfigurableServiceResource implements RESTResource {
     @DELETE
     @Path("/{serviceId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Deletes a service configuration for given service ID and returns the old configuration.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 204, message = "No old configuration"),
-            @ApiResponse(code = 500, message = "Configuration can not be deleted due to internal error") })
-    public Response deleteConfiguration(@PathParam("serviceId") @ApiParam(value = "service ID") String serviceId) {
+    @Operation(summary = "Deletes a service configuration for given service ID and returns the old configuration.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "204", description = "No old configuration"),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be deleted due to internal error") })
+    public Response deleteConfiguration(
+            @PathParam("serviceId") @Parameter(description = "service ID") String serviceId) {
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
             configurationService.delete(serviceId);

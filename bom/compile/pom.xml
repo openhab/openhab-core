@@ -18,6 +18,7 @@
 
   <properties>
     <jetty.version>9.3.25.v20180904</jetty.version>
+    <swagger.version>2.1.0</swagger.version>
   </properties>
 
   <dependencies>
@@ -224,15 +225,15 @@
 
     <!-- Swagger -->
     <dependency>
-      <groupId>io.swagger</groupId>
+      <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-annotations</artifactId>
-      <version>1.5.5</version>
+      <version>${swagger.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-jaxrs</artifactId>
-      <version>1.5.5</version>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-jaxrs2</artifactId>
+      <version>${swagger.version}</version>
       <scope>compile</scope>
     </dependency>
 

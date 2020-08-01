@@ -52,13 +52,13 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for the inbox and is registered with the
@@ -70,6 +70,7 @@ import io.swagger.annotations.AuthorizationScope;
  * @author Chris Jackson - Updated to use JSONResponse. Fixed null response from approve. Improved error reporting.
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = { RESTResource.class, InboxResource.class })
 @JaxrsResource
@@ -78,8 +79,8 @@ import io.swagger.annotations.AuthorizationScope;
 @JSONRequired
 @Path(InboxResource.PATH_INBOX)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = InboxResource.PATH_INBOX, authorizations = { @Authorization(value = "oauth2", scopes = {
-        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = InboxResource.PATH_INBOX)
 @NonNullByDefault
 public class InboxResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(InboxResource.class);
@@ -97,14 +98,14 @@ public class InboxResource implements RESTResource {
     @POST
     @Path("/{thingUID}/approve")
     @Consumes(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Approves the discovery result by adding the thing to the registry.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Thing unable to be approved."),
-            @ApiResponse(code = 409, message = "No binding found that supports this thing.") })
+    @Operation(summary = "Approves the discovery result by adding the thing to the registry.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Thing unable to be approved."),
+            @ApiResponse(responseCode = "409", description = "No binding found that supports this thing.") })
     public Response approve(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID,
-            @ApiParam(value = "thing label") @Nullable String label) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
+            @Parameter(description = "thing label") @Nullable String label) {
         ThingUID thingUIDObject = new ThingUID(thingUID);
         String notEmptyLabel = label != null && !label.isEmpty() ? label : null;
         Thing thing = null;
@@ -125,10 +126,10 @@ public class InboxResource implements RESTResource {
 
     @DELETE
     @Path("/{thingUID}")
-    @ApiOperation(value = "Removes the discovery result from the inbox.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Discovery result not found in the inbox.") })
-    public Response delete(@PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID) {
+    @Operation(summary = "Removes the discovery result from the inbox.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox.") })
+    public Response delete(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         if (inbox.remove(new ThingUID(thingUID))) {
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } else {
@@ -138,8 +139,8 @@ public class InboxResource implements RESTResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get all discovered things.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = DiscoveryResultDTO.class) })
+    @Operation(summary = "Get all discovered things.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DiscoveryResultDTO.class))) })
     public Response getAll() {
         Stream<DiscoveryResultDTO> discoveryStream = inbox.getAll().stream().map(DiscoveryResultDTOMapper::map);
         return Response.ok(new Stream2JSONInputStream(discoveryStream)).build();
@@ -147,18 +148,18 @@ public class InboxResource implements RESTResource {
 
     @POST
     @Path("/{thingUID}/ignore")
-    @ApiOperation(value = "Flags a discovery result as ignored for further processing.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response ignore(@PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID) {
+    @Operation(summary = "Flags a discovery result as ignored for further processing.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
+    public Response ignore(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         inbox.setFlag(new ThingUID(thingUID), DiscoveryResultFlag.IGNORED);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }
 
     @POST
     @Path("/{thingUID}/unignore")
-    @ApiOperation(value = "Removes ignore flag from a discovery result.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response unignore(@PathParam("thingUID") @ApiParam(value = "thingUID") String thingUID) {
+    @Operation(summary = "Removes ignore flag from a discovery result.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
+    public Response unignore(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         inbox.setFlag(new ThingUID(thingUID), DiscoveryResultFlag.NEW);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }

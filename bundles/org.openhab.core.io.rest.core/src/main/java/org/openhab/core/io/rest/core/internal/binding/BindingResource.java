@@ -58,13 +58,14 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for bindings and is registered with the
@@ -75,6 +76,7 @@ import io.swagger.annotations.AuthorizationScope;
  * @author Yordan Zhelev - Added Swagger annotations
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -83,8 +85,8 @@ import io.swagger.annotations.AuthorizationScope;
 @JSONRequired
 @Path(BindingResource.PATH_BINDINGS)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = BindingResource.PATH_BINDINGS, authorizations = { @Authorization(value = "oauth2", scopes = {
-        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = BindingResource.PATH_BINDINGS)
 @NonNullByDefault
 public class BindingResource implements RESTResource {
 
@@ -112,11 +114,10 @@ public class BindingResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(nickname = "getAllBindings", value = "Get all bindings.", response = BindingInfoDTO.class, responseContainer = "Set")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = BindingInfoDTO.class, responseContainer = "Set") })
+    @Operation(operationId = "getAllBindings", summary = "Get all bindings.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BindingInfoDTO.class), uniqueItems = true))) })
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         Set<BindingInfo> bindingInfos = bindingInfoRegistry.getBindingInfos(locale);
 
@@ -126,11 +127,11 @@ public class BindingResource implements RESTResource {
     @GET
     @Path("/{bindingId}/config")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(nickname = "getBindingConfiguration", value = "Get binding configuration for given binding ID.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 404, message = "Binding does not exist"),
-            @ApiResponse(code = 500, message = "Configuration can not be read due to internal error") })
-    public Response getConfiguration(@PathParam("bindingId") @ApiParam(value = "service ID") String bindingId) {
+    @Operation(operationId = "getBindingConfiguration", summary = "Get binding configuration for given binding ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "Binding does not exist"),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be read due to internal error") })
+    public Response getConfiguration(@PathParam("bindingId") @Parameter(description = "service ID") String bindingId) {
         try {
             String configId = getConfigId(bindingId);
             if (configId == null) {
@@ -151,12 +152,12 @@ public class BindingResource implements RESTResource {
     @Path("/{bindingId}/config")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Updates a binding configuration for given binding ID and returns the old configuration.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 204, message = "No old configuration"),
-            @ApiResponse(code = 404, message = "Binding does not exist"),
-            @ApiResponse(code = 500, message = "Configuration can not be updated due to internal error") })
-    public Response updateConfiguration(@PathParam("bindingId") @ApiParam(value = "service ID") String bindingId,
+    @Operation(summary = "Updates a binding configuration for given binding ID and returns the old configuration.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "204", description = "No old configuration"),
+            @ApiResponse(responseCode = "404", description = "Binding does not exist"),
+            @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
+    public Response updateConfiguration(@PathParam("bindingId") @Parameter(description = "service ID") String bindingId,
             @Nullable Map<String, Object> configuration) {
         try {
             String configId = getConfigId(bindingId);

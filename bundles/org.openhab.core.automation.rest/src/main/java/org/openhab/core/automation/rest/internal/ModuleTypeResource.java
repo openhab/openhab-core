@@ -52,11 +52,13 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for module types and is registered with the Jersey servlet.
@@ -65,6 +67,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Markus Rathgeb - Use DTOs
  * @author Ana Dimova - extends Module type DTOs with composites
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -72,7 +75,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(ModuleTypeResource.PATH_MODULE_TYPES)
-@Api(ModuleTypeResource.PATH_MODULE_TYPES)
+@Tag(name = ModuleTypeResource.PATH_MODULE_TYPES)
 @NonNullByDefault
 public class ModuleTypeResource implements RESTResource {
 
@@ -92,12 +95,12 @@ public class ModuleTypeResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all available module types.", response = ModuleTypeDTO.class, responseContainer = "List")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ModuleTypeDTO.class, responseContainer = "List") })
-    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
-            @QueryParam("tags") @ApiParam(value = "tags for filtering") @Nullable String tagList,
-            @QueryParam("type") @ApiParam(value = "filtering by action, condition or trigger") @Nullable String type) {
+    @Operation(summary = "Get all available module types.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ModuleTypeDTO.class)))) })
+    public Response getAll(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @QueryParam("tags") @Parameter(description = "tags for filtering") @Nullable String tagList,
+            @QueryParam("type") @Parameter(description = "filtering by action, condition or trigger") @Nullable String type) {
         final Locale locale = localeService.getLocale(language);
         final String[] tags = tagList != null ? tagList.split(",") : new String[0];
         final List<ModuleTypeDTO> modules = new ArrayList<>();
@@ -117,11 +120,12 @@ public class ModuleTypeResource implements RESTResource {
     @GET
     @Path("/{moduleTypeUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets a module type corresponding to the given UID.", response = ModuleTypeDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ModuleTypeDTO.class),
-            @ApiResponse(code = 404, message = "Module Type corresponding to the given UID does not found.") })
-    public Response getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
-            @PathParam("moduleTypeUID") @ApiParam(value = "moduleTypeUID") String moduleTypeUID) {
+    @Operation(summary = "Gets a module type corresponding to the given UID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ModuleTypeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Module Type corresponding to the given UID does not found.") })
+    public Response getByUID(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @PathParam("moduleTypeUID") @Parameter(description = "moduleTypeUID") String moduleTypeUID) {
         Locale locale = localeService.getLocale(language);
         final ModuleType moduleType = moduleTypeRegistry.get(moduleTypeUID, locale);
         if (moduleType != null) {

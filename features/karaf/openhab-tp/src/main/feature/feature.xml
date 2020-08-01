@@ -84,7 +84,7 @@
 		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.10.3</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.10.3</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.10.3</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-joda/2.10.3</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.10.3</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.10.3</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.10.3</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.10.3</bundle>
@@ -244,19 +244,20 @@
 	</feature>
 
 	<feature name="openhab.tp-swagger-jaxrs" description="JAX-RS Whiteboard Swagger Support" version="${project.version}">
-		<capability>openhab.tp;feature=swagger-jaxrs;version=1.6.1</capability>
+		<capability>openhab.tp;feature=swagger-jaxrs;version=2.1.0</capability>
 		<feature dependency="true">openhab.tp-jax-rs-whiteboard</feature>
 		<feature dependency="true">openhab.tp-jackson</feature>
-		<bundle dependency="true">mvn:io.swagger/swagger-jaxrs/1.6.1</bundle>
-		<bundle dependency="true">mvn:io.swagger/swagger-models/1.6.1</bundle>
-		<bundle dependency="true">mvn:io.swagger/swagger-annotations/1.6.1</bundle>
-		<bundle dependency="true">mvn:io.swagger/swagger-core/1.6.1</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-annotations/2.1.0</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-core/2.1.0</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration/2.1.0</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-jaxrs2/2.1.0</bundle>
+		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models/2.1.0</bundle>
 		<bundle dependency="true">mvn:com.google.guava/guava/27.1-jre</bundle>
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
 		<bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
-		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.2.1</bundle>
-		<bundle dependency="true">mvn:org.reflections/reflections/0.9.12</bundle>
+		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.11</bundle>
 		<bundle dependency="true">mvn:org.javassist/javassist/3.26.0-GA</bundle>
+		<bundle dependency="true">mvn:org.reflections/reflections/0.9.12</bundle>
 	</feature>
 
 </features>

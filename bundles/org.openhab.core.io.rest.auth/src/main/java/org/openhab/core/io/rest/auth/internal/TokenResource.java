@@ -61,16 +61,18 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class is used to issue JWT tokens to clients.
  *
  * @author Yannick Schaus - Initial contribution
  * @author Wouter Born - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = { RESTResource.class, TokenResource.class })
 @JaxrsResource
@@ -78,7 +80,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(TokenResource.PATH_AUTH)
-@Api(TokenResource.PATH_AUTH)
+@Tag(name = TokenResource.PATH_AUTH)
 @NonNullByDefault
 public class TokenResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(TokenResource.class);
@@ -107,8 +109,8 @@ public class TokenResource implements RESTResource {
     @Path("/token")
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @ApiOperation(value = "Get access and refresh tokens.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Get access and refresh tokens.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
     public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
             @FormParam("refresh_token") String refreshToken, @FormParam("code_verifier") String codeVerifier,
@@ -135,8 +137,8 @@ public class TokenResource implements RESTResource {
 
     @GET
     @Path("/sessions")
-    @ApiOperation(value = "List the sessions associated to the authenticated user.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = UserSessionDTO.class) })
+    @Operation(summary = "List the sessions associated to the authenticated user.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserSessionDTO.class))) })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getSessions(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
@@ -155,8 +157,8 @@ public class TokenResource implements RESTResource {
     @POST
     @Path("/logout")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @ApiOperation(value = "Delete the session associated with a refresh token.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Delete the session associated with a refresh token.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
     public Response deleteSession(@FormParam("refresh_token") String refreshToken, @FormParam("id") String id,
             @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {

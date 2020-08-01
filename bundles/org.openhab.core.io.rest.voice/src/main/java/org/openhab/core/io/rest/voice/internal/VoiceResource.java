@@ -50,11 +50,13 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for voice features.
@@ -62,6 +64,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - add TTS feature to the REST API
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -70,7 +73,7 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(VoiceResource.PATH_VOICE)
 @RolesAllowed({ Role.USER, Role.ADMIN })
-@Api(VoiceResource.PATH_VOICE)
+@Tag(name = VoiceResource.PATH_VOICE)
 @NonNullByDefault
 public class VoiceResource implements RESTResource {
 
@@ -91,10 +94,10 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/interpreters")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the list of all interpreters.", response = HumanLanguageInterpreterDTO.class, responseContainer = "List")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Get the list of all interpreters.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HumanLanguageInterpreterDTO.class)))) })
     public Response getInterpreters(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         List<HumanLanguageInterpreterDTO> dtos = voiceManager.getHLIs().stream().map(hli -> HLIMapper.map(hli, locale))
                 .collect(Collectors.toList());
@@ -104,12 +107,12 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/interpreters/{id: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets a single interpreter.", response = HumanLanguageInterpreterDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Interpreter not found") })
+    @Operation(summary = "Gets a single interpreter.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HumanLanguageInterpreterDTO.class)))),
+            @ApiResponse(responseCode = "404", description = "Interpreter not found") })
     public Response getInterpreter(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @PathParam("id") @ApiParam(value = "interpreter id") String id) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("id") @Parameter(description = "interpreter id") String id) {
         final Locale locale = localeService.getLocale(language);
         HumanLanguageInterpreter hli = voiceManager.getHLI(id);
         if (hli == null) {
@@ -123,14 +126,14 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/interpreters/{id: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Sends a text to a given human language interpreter.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "No human language interpreter was found."),
-            @ApiResponse(code = 400, message = "interpretation exception occurs") })
+    @Operation(summary = "Sends a text to a given human language interpreter.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
+            @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
     public Response interpret(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @ApiParam(value = "text to interpret", required = true) String text,
-            @PathParam("id") @ApiParam(value = "interpreter id") String id) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @Parameter(description = "text to interpret", required = true) String text,
+            @PathParam("id") @Parameter(description = "interpreter id") String id) {
         final Locale locale = localeService.getLocale(language);
         HumanLanguageInterpreter hli = voiceManager.getHLI(id);
         if (hli == null) {
@@ -148,13 +151,13 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/interpreters")
     @Consumes(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Sends a text to the default human language interpreter.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "No human language interpreter was found."),
-            @ApiResponse(code = 400, message = "interpretation exception occurs") })
+    @Operation(summary = "Sends a text to the default human language interpreter.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
+            @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
     public Response interpret(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @ApiParam(value = "text to interpret", required = true) String text) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @Parameter(description = "text to interpret", required = true) String text) {
         final Locale locale = localeService.getLocale(language);
         HumanLanguageInterpreter hli = voiceManager.getHLI();
         if (hli == null) {
@@ -172,8 +175,8 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/voices")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the list of all voices.", response = VoiceDTO.class, responseContainer = "List")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Get the list of all voices.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = VoiceDTO.class)))) })
     public Response getVoices() {
         List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).collect(Collectors.toList());
         return Response.ok(dtos).build();
@@ -182,9 +185,9 @@ public class VoiceResource implements RESTResource {
     @GET
     @Path("/defaultvoice")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets the default voice.", response = VoiceDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "No default voice was found.") })
+    @Operation(summary = "Gets the default voice.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = VoiceDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No default voice was found.") })
     public Response getDefaultVoice() {
         Voice voice = voiceManager.getDefaultVoice();
         if (voice == null) {
@@ -198,11 +201,11 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/say")
     @Consumes(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Speaks a given text with a given voice through the given audio sink.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response say(@ApiParam(value = "text to speak", required = true) String text,
-            @QueryParam("voiceid") @ApiParam(value = "voice id") @Nullable String voiceId,
-            @QueryParam("sinkid") @ApiParam(value = "audio sink id") @Nullable String sinkId) {
+    @Operation(summary = "Speaks a given text with a given voice through the given audio sink.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
+    public Response say(@Parameter(description = "text to speak", required = true) String text,
+            @QueryParam("voiceid") @Parameter(description = "voice id") @Nullable String voiceId,
+            @QueryParam("sinkid") @Parameter(description = "audio sink id") @Nullable String sinkId) {
         voiceManager.say(text, voiceId, sinkId);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }

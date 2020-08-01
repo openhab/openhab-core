@@ -49,13 +49,14 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * {@link ConfigDescriptionResource} provides access to {@link ConfigDescription}s via REST.
@@ -64,6 +65,7 @@ import io.swagger.annotations.AuthorizationScope;
  * @author Chris Jackson - Modify response to use JSONResponse
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -72,9 +74,8 @@ import io.swagger.annotations.AuthorizationScope;
 @JSONRequired
 @Path(ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS, authorizations = {
-        @Authorization(value = "oauth2", scopes = {
-                @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = ConfigDescriptionResource.PATH_CONFIG_DESCRIPTIONS)
 @NonNullByDefault
 public class ConfigDescriptionResource implements RESTResource {
 
@@ -94,10 +95,11 @@ public class ConfigDescriptionResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(nickname = "getAllConfigDescriptions", value = "Gets all available config descriptions.", response = ConfigDescriptionDTO.class, responseContainer = "List")
-    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = ConfigDescriptionDTO.class, responseContainer = "List"))
-    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language, //
-            @QueryParam("scheme") @ApiParam(value = "scheme filter") @Nullable String scheme) {
+    @Operation(operationId = "getAllConfigDescriptions", summary = "Gets all available config descriptions.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigDescriptionDTO.class)))) })
+    public Response getAll(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language, //
+            @QueryParam("scheme") @Parameter(description = "scheme filter") @Nullable String scheme) {
         Locale locale = localeService.getLocale(language);
         Collection<ConfigDescription> configDescriptions = configDescriptionRegistry.getConfigDescriptions(locale);
         return Response.ok(new Stream2JSONInputStream(configDescriptions.stream().filter(configDescription -> {
@@ -108,11 +110,13 @@ public class ConfigDescriptionResource implements RESTResource {
     @GET
     @Path("/{uri}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets a config description by URI.", response = ConfigDescriptionDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ConfigDescriptionDTO.class),
-            @ApiResponse(code = 400, message = "Invalid URI syntax"), @ApiResponse(code = 404, message = "Not found") })
-    public Response getByURI(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
-            @PathParam("uri") @ApiParam(value = "uri") String uri) {
+    @Operation(summary = "Gets a config description by URI.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigDescriptionDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid URI syntax"),
+            @ApiResponse(responseCode = "404", description = "Not found") })
+    public Response getByURI(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @PathParam("uri") @Parameter(description = "uri") String uri) {
         Locale locale = localeService.getLocale(language);
         URI uriObject = UriBuilder.fromPath(uri).build();
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(uriObject, locale);

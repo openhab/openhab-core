@@ -46,17 +46,20 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for audio features.
  *
  * @author Laurent Garnier - Initial contribution
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -65,7 +68,7 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(AudioResource.PATH_AUDIO)
 @RolesAllowed({ Role.USER, Role.ADMIN })
-@Api(AudioResource.PATH_AUDIO)
+@Tag(name = AudioResource.PATH_AUDIO)
 @NonNullByDefault
 public class AudioResource implements RESTResource {
 
@@ -86,10 +89,10 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/sources")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the list of all sources.", response = AudioSourceDTO.class, responseContainer = "List")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Get the list of all sources.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AudioSourceDTO.class)))) })
     public Response getSources(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         Collection<AudioSource> sources = audioManager.getAllSources();
         List<AudioSourceDTO> dtos = new ArrayList<>(sources.size());
@@ -102,11 +105,11 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/defaultsource")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the default source if defined or the first available source.", response = AudioSourceDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Source not found") })
+    @Operation(summary = "Get the default source if defined or the first available source.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AudioSourceDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Source not found") })
     public Response getDefaultSource(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         AudioSource source = audioManager.getSource();
         if (source != null) {
@@ -119,10 +122,10 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/sinks")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the list of all sinks.", response = AudioSinkDTO.class, responseContainer = "List")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Get the list of all sinks.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AudioSinkDTO.class)))) })
     public Response getSinks(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         Collection<AudioSink> sinks = audioManager.getAllSinks();
         List<AudioSinkDTO> dtos = new ArrayList<>(sinks.size());
@@ -135,11 +138,11 @@ public class AudioResource implements RESTResource {
     @GET
     @Path("/defaultsink")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the default sink if defined or the first available sink.", response = AudioSinkDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Sink not found") })
+    @Operation(summary = "Get the default sink if defined or the first available sink.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AudioSinkDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Sink not found") })
     public Response getDefaultSink(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         AudioSink sink = audioManager.getSink();
         if (sink != null) {

@@ -71,13 +71,14 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for history data and provides different methods to interact with the persistence
@@ -89,6 +90,7 @@ import io.swagger.annotations.AuthorizationScope;
  * @author Erdoan Hadzhiyusein - Adapted the convertTime() method to work with the new DateTimeType
  * @author Lyubomir Papazov - Change java.util.Date references to be of type java.time.ZonedDateTime
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -96,7 +98,7 @@ import io.swagger.annotations.AuthorizationScope;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(PersistenceResource.PATH_PERSISTENCE)
-@Api(PersistenceResource.PATH_PERSISTENCE)
+@Tag(name = PersistenceResource.PATH_PERSISTENCE)
 @NonNullByDefault
 public class PersistenceResource implements RESTResource {
 
@@ -129,12 +131,11 @@ public class PersistenceResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Gets a list of persistence services.", response = String.class, responseContainer = "List", authorizations = {
-            @Authorization(value = "oauth2", scopes = {
-                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
-    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"))
+    @Operation(summary = "Gets a list of persistence services.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))) })
     public Response httpGetPersistenceServices(@Context HttpHeaders headers,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
 
         Object responseObject = getPersistenceServiceList(locale);
@@ -145,12 +146,11 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Gets a list of items available via a specific persistence service.", response = String.class, responseContainer = "List", authorizations = {
-            @Authorization(value = "oauth2", scopes = {
-                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
-    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"))
+    @Operation(summary = "Gets a list of items available via a specific persistence service.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))) })
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
-            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId) {
+            @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId) {
         return getServiceItemList(serviceId);
     }
 
@@ -158,20 +158,20 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Gets item persistence data from the persistence service.", response = ItemHistoryDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ItemHistoryDTO.class),
-            @ApiResponse(code = 404, message = "Unknown Item or persistence service") })
+    @Operation(summary = "Gets item persistence data from the persistence service.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpGetPersistenceItemData(@Context HttpHeaders headers,
-            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @ApiParam(value = "The item name") @PathParam("itemname") String itemName,
-            @ApiParam(value = "Start time of the data to return. Will default to 1 day before endtime. ["
+            @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
+            @Parameter(description = "The item name") @PathParam("itemname") String itemName,
+            @Parameter(description = "Start time of the data to return. Will default to 1 day before endtime. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]") @QueryParam("starttime") @Nullable String startTime,
-            @ApiParam(value = "End time of the data to return. Will default to current time. ["
+            @Parameter(description = "End time of the data to return. Will default to current time. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("endtime") @Nullable String endTime,
-            @ApiParam(value = "Page number of data to return. This parameter will enable paging.") @QueryParam("page") int pageNumber,
-            @ApiParam(value = "The length of each page.") @QueryParam("pagelength") int pageLength,
-            @ApiParam(value = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary) {
+            @Parameter(description = "Page number of data to return. This parameter will enable paging.") @QueryParam("page") int pageNumber,
+            @Parameter(description = "The length of each page.") @QueryParam("pagelength") int pageLength,
+            @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary) {
         return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary);
     }
 
@@ -179,19 +179,17 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete item data from a specific persistence service.", response = String.class, responseContainer = "List", authorizations = {
-            @Authorization(value = "oauth2", scopes = {
-                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
-            @ApiResponse(code = 400, message = "Invalid filter parameters"),
-            @ApiResponse(code = 404, message = "Unknown persistence service") })
+    @Operation(summary = "Delete item data from a specific persistence service.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))),
+                    @ApiResponse(responseCode = "400", description = "Invalid filter parameters"),
+                    @ApiResponse(responseCode = "404", description = "Unknown persistence service") })
     public Response httpDeletePersistenceServiceItem(@Context HttpHeaders headers,
-            @ApiParam(value = "Id of the persistence service.", required = true) @QueryParam("serviceId") String serviceId,
-            @ApiParam(value = "The item name.") @PathParam("itemname") String itemName,
-            @ApiParam(value = "Start time of the data to return. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
+            @Parameter(description = "Id of the persistence service.", required = true) @QueryParam("serviceId") String serviceId,
+            @Parameter(description = "The item name.") @PathParam("itemname") String itemName,
+            @Parameter(description = "Start time of the data to return. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]", required = true) @QueryParam("starttime") String startTime,
-            @ApiParam(value = "End time of the data to return. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
+            @Parameter(description = "End time of the data to return. [" + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS
                     + "]", required = true) @QueryParam("endtime") String endTime) {
         return deletePersistenceItemData(serviceId, itemName, startTime, endTime);
     }
@@ -200,15 +198,15 @@ public class PersistenceResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Stores item persistence data into the persistence service.", response = ItemHistoryDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ItemHistoryDTO.class),
-            @ApiResponse(code = 404, message = "Unknown Item or persistence service") })
+    @Operation(summary = "Stores item persistence data into the persistence service.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ItemHistoryDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Unknown Item or persistence service") })
     public Response httpPutPersistenceItemData(@Context HttpHeaders headers,
-            @ApiParam(value = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
-            @ApiParam(value = "The item name.") @PathParam("itemname") String itemName,
-            @ApiParam(value = "Time of the data to be stored. Will default to current time. ["
+            @Parameter(description = "Id of the persistence service. If not provided the default service will be used") @QueryParam("serviceId") @Nullable String serviceId,
+            @Parameter(description = "The item name.") @PathParam("itemname") String itemName,
+            @Parameter(description = "Time of the data to be stored. Will default to current time. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]", required = true) @QueryParam("time") String time,
-            @ApiParam(value = "The state to store.", required = true) @QueryParam("state") String value) {
+            @Parameter(description = "The state to store.", required = true) @QueryParam("state") String value) {
         return putItemState(serviceId, itemName, value, time);
     }
 
