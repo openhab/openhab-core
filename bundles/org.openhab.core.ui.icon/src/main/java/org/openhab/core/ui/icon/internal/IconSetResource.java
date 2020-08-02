@@ -41,17 +41,17 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This is a REST resource that provides information about available icon sets.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -59,7 +59,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(IconSetResource.PATH_ICONSETS)
-@Api(IconSetResource.PATH_ICONSETS)
+@Tag(name = IconSetResource.PATH_ICONSETS)
 @NonNullByDefault
 public class IconSetResource implements RESTResource {
 
@@ -86,9 +86,9 @@ public class IconSetResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all icon sets.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
+    @Operation(summary = "Gets all icon sets.", responses = { @ApiResponse(responseCode = "200", description = "OK") })
+    public Response getAll(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
 
         List<IconSet> iconSets = new ArrayList<>(iconProviders.size());

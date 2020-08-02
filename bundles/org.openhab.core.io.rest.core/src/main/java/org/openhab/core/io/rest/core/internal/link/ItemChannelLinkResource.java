@@ -50,13 +50,14 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for links.
@@ -67,6 +68,7 @@ import io.swagger.annotations.AuthorizationScope;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Yannick Schaus - Added filters to getAll
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = { RESTResource.class, ItemChannelLinkResource.class })
 @JaxrsResource
@@ -75,8 +77,8 @@ import io.swagger.annotations.AuthorizationScope;
 @JSONRequired
 @Path(ItemChannelLinkResource.PATH_LINKS)
 @RolesAllowed({ Role.ADMIN })
-@Api(value = ItemChannelLinkResource.PATH_LINKS, authorizations = { @Authorization(value = "oauth2", scopes = {
-        @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
+@SecurityRequirement(name = "oauth2", scopes = { "admin" })
+@Tag(name = ItemChannelLinkResource.PATH_LINKS)
 @NonNullByDefault
 public class ItemChannelLinkResource implements RESTResource {
 
@@ -92,12 +94,11 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all available links.", response = ItemChannelLinkDTO.class, responseContainer = "List")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ItemChannelLinkDTO.class, responseContainer = "List") })
+    @Operation(summary = "Gets all available links.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ItemChannelLinkDTO.class)))) })
     public Response getAll(
-            @QueryParam("channelUID") @ApiParam(value = "filter by channel UID") @Nullable String channelUID,
-            @QueryParam("itemName") @ApiParam(value = "filter by item name") @Nullable String itemName) {
+            @QueryParam("channelUID") @Parameter(description = "filter by channel UID") @Nullable String channelUID,
+            @QueryParam("itemName") @Parameter(description = "filter by item name") @Nullable String itemName) {
         Stream<ItemChannelLinkDTO> linkStream = itemChannelLinkRegistry.getAll().stream().map(this::toBeans);
 
         if (channelUID != null) {
@@ -112,11 +113,11 @@ public class ItemChannelLinkResource implements RESTResource {
 
     @GET
     @Path("/{itemName}/{channelUID}")
-    @ApiOperation(value = "Retrieves an individual link.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Content does not match the path") })
-    public Response getLink(@PathParam("itemName") @ApiParam(value = "itemName") String itemName,
-            @PathParam("channelUID") @ApiParam(value = "channelUID") String channelUid) {
+    @Operation(summary = "Retrieves an individual link.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Content does not match the path") })
+    public Response getLink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
+            @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid) {
         List<ItemChannelLinkDTO> links = itemChannelLinkRegistry.getAll().stream()
                 .filter(link -> channelUid.equals(link.getLinkedUID().getAsString()))
                 .filter(link -> itemName.equals(link.getItemName())).map(this::toBeans).collect(Collectors.toList());
@@ -132,14 +133,14 @@ public class ItemChannelLinkResource implements RESTResource {
     @PUT
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
-    @ApiOperation(value = "Links item to a channel.", authorizations = { @Authorization(value = "oauth2", scopes = {
-            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 400, message = "Content does not match the path"),
-            @ApiResponse(code = 405, message = "Link is not editable") })
-    public Response link(@PathParam("itemName") @ApiParam(value = "itemName") String itemName,
-            @PathParam("channelUID") @ApiParam(value = "channelUID") String channelUid,
-            @ApiParam(value = "link data") @Nullable ItemChannelLinkDTO bean) {
+    @Operation(summary = "Links item to a channel.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "400", description = "Content does not match the path"),
+                    @ApiResponse(responseCode = "405", description = "Link is not editable") })
+    public Response link(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
+            @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid,
+            @Parameter(description = "link data") @Nullable ItemChannelLinkDTO bean) {
         ItemChannelLink link;
         if (bean == null) {
             link = new ItemChannelLink(itemName, new ChannelUID(channelUid), new Configuration());
@@ -166,13 +167,13 @@ public class ItemChannelLinkResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemName}/{channelUID}")
-    @ApiOperation(value = "Unlinks item from a channel.", authorizations = { @Authorization(value = "oauth2", scopes = {
-            @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Link not found."),
-            @ApiResponse(code = 405, message = "Link not editable.") })
-    public Response unlink(@PathParam("itemName") @ApiParam(value = "itemName") String itemName,
-            @PathParam("channelUID") @ApiParam(value = "channelUID") String channelUid) {
+    @Operation(summary = "Unlinks item from a channel.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Link not found."),
+                    @ApiResponse(responseCode = "405", description = "Link not editable.") })
+    public Response unlink(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
+            @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid) {
         String linkId = AbstractLink.getIDFor(itemName, new ChannelUID(channelUid));
         if (itemChannelLinkRegistry.get(linkId) == null) {
             String message = "Link " + linkId + " does not exist!";

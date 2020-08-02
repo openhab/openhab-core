@@ -47,18 +47,20 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for the UI resources and is registered with the
  * Jersey servlet.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = { RESTResource.class, UIResource.class })
 @JaxrsResource
@@ -66,7 +68,7 @@ import io.swagger.annotations.AuthorizationScope;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(UIResource.PATH_UI)
-@Api(UIResource.PATH_UI)
+@Tag(name = UIResource.PATH_UI)
 @NonNullByDefault
 public class UIResource implements RESTResource {
 
@@ -87,8 +89,8 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/tiles")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get all registered UI tiles.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class) })
+    @Operation(summary = "Get all registered UI tiles.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TileDTO.class)))) })
     public Response getAll() {
         Stream<TileDTO> tiles = tileProvider.getTiles().map(this::toTileDTO);
         return Response.ok(new Stream2JSONInputStream(tiles)).build();
@@ -97,8 +99,8 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get all registered UI components in the specified namespace.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class) })
+    @Operation(summary = "Get all registered UI components in the specified namespace.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RootUIComponent.class)))) })
     public Response getAllComponents(@PathParam("namespace") String namespace) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         Stream<RootUIComponent> components = registry.getAll().stream();
@@ -108,9 +110,9 @@ public class UIResource implements RESTResource {
     @GET
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Get a specific UI component in the specified namespace.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class),
-            @ApiResponse(code = 404, message = "Component not found", response = Tile.class) })
+    @Operation(summary = "Get a specific UI component in the specified namespace.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
+            @ApiResponse(responseCode = "404", description = "Component not found") })
     public Response getComponentByUID(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -125,10 +127,9 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Add an UI component in the specified namespace.", authorizations = {
-            @Authorization(value = "oauth2", scopes = {
-                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class) })
+    @Operation(summary = "Add an UI component in the specified namespace.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))) })
     public Response addComponent(@PathParam("namespace") String namespace, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         component.updateTimestamp();
@@ -140,11 +141,10 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a specific UI component in the specified namespace.", authorizations = {
-            @Authorization(value = "oauth2", scopes = {
-                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class),
-            @ApiResponse(code = 404, message = "Component not found", response = Tile.class) })
+    @Operation(summary = "Update a specific UI component in the specified namespace.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootUIComponent.class))),
+                    @ApiResponse(responseCode = "404", description = "Component not found") })
     public Response updateComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID, RootUIComponent component) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
@@ -165,11 +165,10 @@ public class UIResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/components/{namespace}/{componentUID}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Remove a specific UI component in the specified namespace.", authorizations = {
-            @Authorization(value = "oauth2", scopes = {
-                    @AuthorizationScope(scope = "admin", description = "Admin operations") }) })
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Tile.class),
-            @ApiResponse(code = 404, message = "Component not found", response = Tile.class) })
+    @Operation(summary = "Remove a specific UI component in the specified namespace.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Component not found") })
     public Response deleteComponent(@PathParam("namespace") String namespace,
             @PathParam("componentUID") String componentUID) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);

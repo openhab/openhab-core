@@ -21,10 +21,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.rest.RESTConstants;
+import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.internal.resources.beans.RootBean;
 import org.openhab.core.io.rest.internal.resources.beans.RootBean.Links;
 import org.osgi.service.component.annotations.Activate;
@@ -42,10 +44,11 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * <p>
@@ -59,17 +62,18 @@ import io.swagger.annotations.ApiResponses;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
-@Component(service = RootResource.class, configurationPid = "org.openhab.restroot")
+@Component(configurationPid = "org.openhab.restroot")
 @JaxrsResource
 @JaxrsName(RootResource.RESOURCE_NAME)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Produces(MediaType.APPLICATION_JSON)
-@NonNullByDefault
 @Path("/")
-@Api(RootResource.RESOURCE_NAME)
-public class RootResource {
+@Tag(name = RootResource.RESOURCE_NAME)
+@NonNullByDefault
+public class RootResource implements RESTResource {
 
     public static final String RESOURCE_NAME = "root";
 
@@ -82,9 +86,11 @@ public class RootResource {
     }
 
     @GET
-    @ApiOperation(value = "Gets information about the runtime, the API version and links to resources.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
-    public Object getRoot(@Context UriInfo uriInfo) {
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Gets information about the runtime, the API version and links to resources.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RootBean.class))) })
+    public Response getRoot(@Context UriInfo uriInfo) {
         // key: path, value: name (this way we could ensure that ever path is added only once).
         final Map<String, String> collectedLinks = new HashMap<>();
 
@@ -113,6 +119,6 @@ public class RootResource {
         collectedLinks.forEach((path, name) -> {
             bean.links.add(new Links(name, path));
         });
-        return bean;
+        return Response.ok(bean).build();
     }
 }

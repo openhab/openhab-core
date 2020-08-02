@@ -105,11 +105,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.MapMaker;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * <p>
@@ -120,6 +122,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Chris Jackson - Initial contribution
  * @author Yordan Zhelev - Added Swagger annotations
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component(service = RESTResource.class)
 @JaxrsResource
@@ -128,7 +131,7 @@ import io.swagger.annotations.ApiResponses;
 @JSONRequired
 @Path(SitemapResource.PATH_SITEMAPS)
 @RolesAllowed({ Role.USER, Role.ADMIN })
-@Api(SitemapResource.PATH_SITEMAPS)
+@Tag(name = SitemapResource.PATH_SITEMAPS)
 @NonNullByDefault
 public class SitemapResource
         implements RESTResource, SitemapSubscriptionCallback, SseBroadcaster.Listener<SseSinkInfo> {
@@ -217,8 +220,8 @@ public class SitemapResource
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all available sitemaps.", response = SitemapDTO.class, responseContainer = "Collection")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Get all available sitemaps.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SitemapDTO.class)))) })
     public Response getSitemaps() {
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
         Object responseObject = getSitemapBeans(uriInfo.getAbsolutePathBuilder().build());
@@ -228,13 +231,13 @@ public class SitemapResource
     @GET
     @Path("/{sitemapname: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get sitemap by name.", response = SitemapDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Get sitemap by name.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))) })
     public Response getSitemapData(@Context HttpHeaders headers,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @PathParam("sitemapname") @ApiParam(value = "sitemap name") String sitemapname,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
             @QueryParam("type") String type, @QueryParam("jsoncallback") @DefaultValue("callback") String callback,
-            @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets") boolean includeHiddenWidgets) {
+            @QueryParam("includeHidden") @Parameter(description = "include hidden widgets") boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}' for media type '{}'.", request.getRemoteAddr(),
                 uriInfo.getPath(), type);
@@ -246,16 +249,16 @@ public class SitemapResource
     @GET
     @Path("/{sitemapname: [a-zA-Z_0-9]+}/{pageid: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Polls the data for a sitemap.", response = PageDTO.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget"),
-            @ApiResponse(code = 400, message = "Invalid subscription id has been provided.") })
+    @Operation(summary = "Polls the data for a sitemap.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PageDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget"),
+            @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
     public Response getPageData(@Context HttpHeaders headers,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @PathParam("sitemapname") @ApiParam(value = "sitemap name") String sitemapname,
-            @PathParam("pageid") @ApiParam(value = "page id") String pageId,
-            @QueryParam("subscriptionid") @ApiParam(value = "subscriptionid") @Nullable String subscriptionId,
-            @QueryParam("includeHidden") @ApiParam(value = "include hidden widgets") boolean includeHiddenWidgets) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
+            @PathParam("pageid") @Parameter(description = "page id") String pageId,
+            @QueryParam("subscriptionid") @Parameter(description = "subscriptionid") @Nullable String subscriptionId,
+            @QueryParam("includeHidden") @Parameter(description = "include hidden widgets") boolean includeHiddenWidgets) {
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
 
@@ -289,9 +292,9 @@ public class SitemapResource
     @POST
     @Path(SEGMENT_EVENTS + "/subscribe")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Creates a sitemap event subscription.")
-    @ApiResponses(value = { @ApiResponse(code = 201, message = "Subscription created."),
-            @ApiResponse(code = 503, message = "Subscriptions limit reached.") })
+    @Operation(summary = "Creates a sitemap event subscription.", responses = {
+            @ApiResponse(responseCode = "201", description = "Subscription created."),
+            @ApiResponse(responseCode = "503", description = "Subscriptions limit reached.") })
     public Object createEventSubscription() {
         String subscriptionId = subscriptions.createSubscription(this);
         if (subscriptionId == null) {
@@ -318,14 +321,13 @@ public class SitemapResource
     @GET
     @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}")
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @ApiOperation(value = "Get sitemap events.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 400, message = "Page not linked to the subscription."),
-            @ApiResponse(code = 404, message = "Subscription not found.") })
+    @Operation(summary = "Get sitemap events.", responses = { @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Page not linked to the subscription."),
+            @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
-            @PathParam("subscriptionid") @ApiParam(value = "subscription id") String subscriptionId,
-            @QueryParam("sitemap") @ApiParam(value = "sitemap name") @Nullable String sitemapname,
-            @QueryParam("pageid") @ApiParam(value = "page id") @Nullable String pageId) {
+            @PathParam("subscriptionid") @Parameter(description = "subscription id") String subscriptionId,
+            @QueryParam("sitemap") @Parameter(description = "sitemap name") @Nullable String sitemapname,
+            @QueryParam("pageid") @Parameter(description = "page id") @Nullable String pageId) {
         final SseSinkInfo sinkInfo = knownSubscriptions.get(subscriptionId);
         if (sinkInfo == null) {
             logger.debug("Subscription id {} does not exist.", subscriptionId);

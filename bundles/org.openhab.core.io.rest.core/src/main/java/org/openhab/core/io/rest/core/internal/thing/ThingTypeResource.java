@@ -68,11 +68,13 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * ThingTypeResource provides access to ThingType via REST.
@@ -87,6 +89,7 @@ import io.swagger.annotations.ApiResponses;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Yannick Schaus - Added filter to getAll
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -94,7 +97,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(ThingTypeResource.PATH_THING_TYPES)
-@Api(ThingTypeResource.PATH_THING_TYPES)
+@Tag(name = ThingTypeResource.PATH_THING_TYPES)
 @NonNullByDefault
 public class ThingTypeResource implements RESTResource {
 
@@ -126,11 +129,11 @@ public class ThingTypeResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.USER })
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets all available thing types without config description, channels and properties.", response = StrippedThingTypeDTO.class, responseContainer = "Set")
-    @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = StrippedThingTypeDTO.class, responseContainer = "Set"))
+    @Operation(summary = "Gets all available thing types without config description, channels and properties.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = StrippedThingTypeDTO.class), uniqueItems = true))) })
     public Response getAll(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language,
-            @QueryParam("bindingId") @ApiParam(value = "filter by binding Id") @Nullable String bindingId) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("bindingId") @Parameter(description = "filter by binding Id") @Nullable String bindingId) {
         Locale locale = localeService.getLocale(language);
         Stream<StrippedThingTypeDTO> typeStream = thingTypeRegistry.getThingTypes(locale).stream()
                 .map(thingType -> StrippedThingTypeDTOMapper.map(thingType, locale));
@@ -146,12 +149,11 @@ public class ThingTypeResource implements RESTResource {
     @RolesAllowed({ Role.USER })
     @Path("/{thingTypeUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets thing type by UID.", response = ThingTypeDTO.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Thing type with provided thingTypeUID does not exist.", response = ThingTypeDTO.class),
-            @ApiResponse(code = 404, message = "No content") })
-    public Response getByUID(@PathParam("thingTypeUID") @ApiParam(value = "thingTypeUID") String thingTypeUID,
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") @Nullable String language) {
+    @Operation(summary = "Gets thing type by UID.", responses = {
+            @ApiResponse(responseCode = "200", description = "Thing type with provided thingTypeUID does not exist.", content = @Content(schema = @Schema(implementation = ThingTypeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No content") })
+    public Response getByUID(@PathParam("thingTypeUID") @Parameter(description = "thingTypeUID") String thingTypeUID,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         ThingType thingType = thingTypeRegistry.getThingType(new ThingTypeUID(thingTypeUID), locale);
         if (thingType != null) {

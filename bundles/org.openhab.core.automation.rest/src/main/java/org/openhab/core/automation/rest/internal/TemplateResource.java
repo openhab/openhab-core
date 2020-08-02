@@ -45,17 +45,20 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * This class acts as a REST resource for templates and is registered with the Jersey servlet.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -63,7 +66,7 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(TemplateResource.PATH_TEMPLATES)
-@Api(TemplateResource.PATH_TEMPLATES)
+@Tag(name = TemplateResource.PATH_TEMPLATES)
 @NonNullByDefault
 public class TemplateResource implements RESTResource {
 
@@ -83,10 +86,10 @@ public class TemplateResource implements RESTResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all available templates.", response = Template.class, responseContainer = "List")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = Template.class, responseContainer = "List") })
-    public Response getAll(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language) {
+    @Operation(summary = "Get all available templates.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Template.class)))) })
+    public Response getAll(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         Collection<RuleTemplateDTO> result = templateRegistry.getAll(locale).stream()
                 .map(template -> RuleTemplateDTOMapper.map(template)).collect(Collectors.toList());
@@ -96,11 +99,12 @@ public class TemplateResource implements RESTResource {
     @GET
     @Path("/{templateUID}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets a template corresponding to the given UID.", response = Template.class)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = Template.class),
-            @ApiResponse(code = 404, message = "Template corresponding to the given UID does not found.") })
-    public Response getByUID(@HeaderParam("Accept-Language") @ApiParam(value = "language") @Nullable String language,
-            @PathParam("templateUID") @ApiParam(value = "templateUID") String templateUID) {
+    @Operation(summary = "Gets a template corresponding to the given UID.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Template.class))),
+            @ApiResponse(responseCode = "404", description = "Template corresponding to the given UID does not found.") })
+    public Response getByUID(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
+            @PathParam("templateUID") @Parameter(description = "templateUID") String templateUID) {
         Locale locale = localeService.getLocale(language);
         RuleTemplate template = templateRegistry.get(templateUID, locale);
         if (template != null) {

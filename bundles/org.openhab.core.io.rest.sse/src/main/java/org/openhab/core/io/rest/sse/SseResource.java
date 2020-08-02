@@ -43,6 +43,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.Role;
 import org.openhab.core.events.Event;
 import org.openhab.core.io.rest.RESTConstants;
+import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.SseBroadcaster;
 import org.openhab.core.io.rest.sse.internal.SseItemStatesEventBuilder;
 import org.openhab.core.io.rest.sse.internal.SsePublisher;
@@ -63,10 +64,10 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * SSE Resource for pushing events to currently listening clients.
@@ -76,17 +77,19 @@ import io.swagger.annotations.ApiResponses;
  * @author Yannick Schaus - Add endpoints to track item state updates
  * @author Markus Rathgeb - Drop Glassfish dependency and use API only
  * @author Wouter Born - Rework SSE item state sinks for dropping Glassfish
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
-@Component(service = SsePublisher.class)
+@Component(service = { RESTResource.class, SsePublisher.class })
 @JaxrsResource
 @JaxrsName(SseResource.PATH_EVENTS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(SseResource.PATH_EVENTS)
 @RolesAllowed({ Role.USER })
+@Tag(name = SseResource.PATH_EVENTS)
 @Singleton
 @NonNullByDefault
-public class SseResource implements SsePublisher {
+public class SseResource implements RESTResource, SsePublisher {
 
     // The URI path to this resource
     public static final String PATH_EVENTS = "events";
@@ -149,11 +152,10 @@ public class SseResource implements SsePublisher {
 
     @GET
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @ApiOperation(value = "Get all events.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 400, message = "Topic is empty or contains invalid characters") })
+    @Operation(summary = "Get all events.", responses = { @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Topic is empty or contains invalid characters") })
     public void listen(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
-            @QueryParam("topics") @ApiParam(value = "topics") String eventFilter) {
+            @QueryParam("topics") @Parameter(description = "topics") String eventFilter) {
         if (!SseUtil.isValidTopicFilter(eventFilter)) {
             response.setStatus(Status.BAD_REQUEST.getStatusCode());
             return;
@@ -180,8 +182,8 @@ public class SseResource implements SsePublisher {
     @GET
     @Path("/states")
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @ApiOperation(value = "Initiates a new item state tracker connection")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+    @Operation(summary = "Initiates a new item state tracker connection", responses = {
+            @ApiResponse(responseCode = "200", description = "OK") })
     public void getStateEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response) {
         final SseSinkItemInfo sinkItemInfo = new SseSinkItemInfo();
         itemStatesBroadcaster.add(sseEventSink, sinkItemInfo);
@@ -201,11 +203,11 @@ public class SseResource implements SsePublisher {
      */
     @POST
     @Path("/states/{connectionId}")
-    @ApiOperation(value = "Changes the list of items a SSE connection will receive state updates to.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "Unknown connectionId") })
+    @Operation(summary = "Changes the list of items a SSE connection will receive state updates to.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Unknown connectionId") })
     public Object updateTrackedItems(@PathParam("connectionId") String connectionId,
-            @ApiParam("items") Set<String> itemNames) {
+            @Parameter(description = "items") Set<String> itemNames) {
         Optional<SseSinkItemInfo> itemStateInfo = itemStatesBroadcaster.getInfoIf(hasConnectionId(connectionId))
                 .findFirst();
         if (!itemStateInfo.isPresent()) {

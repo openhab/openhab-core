@@ -45,16 +45,17 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  *
  * @author Sebastian Janzen - Initial contribution
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
+ * @author Wouter Born - Migrated to OpenAPI annotations
  */
 @Component
 @JaxrsResource
@@ -62,8 +63,8 @@ import io.swagger.annotations.ApiResponses;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(LogHandler.PATH_LOG)
-@Api(LogHandler.PATH_LOG)
 @Produces(MediaType.APPLICATION_JSON)
+@Tag(name = LogHandler.PATH_LOG)
 @NonNullByDefault
 public class LogHandler implements RESTResource {
 
@@ -90,17 +91,19 @@ public class LogHandler implements RESTResource {
 
     @GET
     @Path("/levels")
-    @ApiOperation(value = "Get log severities, which are logged by the current logger settings.", code = 200, notes = "This depends on the current log settings at the backend.")
+    @Operation(summary = "Get log severities, which are logged by the current logger settings.", responses = {
+            @ApiResponse(responseCode = "200", description = "This depends on the current log settings at the backend.") })
     public Response getLogLevels() {
         return Response.ok(createLogLevelsMap()).build();
     }
 
     @GET
-    @ApiOperation(value = "Returns the last logged frontend messages. The amount is limited to the "
+    @Operation(summary = "Returns the last logged frontend messages. The amount is limited to the "
             + LogConstants.LOG_BUFFER_LIMIT + " last entries.")
-    @ApiParam(name = "limit", allowableValues = "range[1, " + LogConstants.LOG_BUFFER_LIMIT + "]")
-    public Response getLastLogs(
-            @DefaultValue(LogConstants.LOG_BUFFER_LIMIT + "") @QueryParam("limit") @Nullable Integer limit) {
+
+    public Response getLastLogs(@DefaultValue(LogConstants.LOG_BUFFER_LIMIT
+            + "") @QueryParam("limit") @Parameter(name = "limit", schema = @Schema(implementation = Integer.class, minimum = "1", maximum = ""
+                    + LogConstants.LOG_BUFFER_LIMIT)) @Nullable Integer limit) {
         if (logBuffer.isEmpty()) {
             return Response.ok("[]").build();
         }
@@ -127,11 +130,11 @@ public class LogHandler implements RESTResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Log a frontend log message to the backend.")
-    @ApiParam(name = "logMessage", value = "Severity is required and can be one of error, warn, info or debug, depending on activated severities which you can GET at /logLevels.", example = "{\"severity\": \"error\", \"url\": \"http://example.org\", \"message\": \"Error message\"}")
-    @ApiResponses({ @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 403, message = LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED) })
-    public Response log(final @Nullable LogMessage logMessage) {
+    @Operation(summary = "Log a frontend log message to the backend.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "403", description = LogConstants.LOG_SEVERITY_IS_NOT_SUPPORTED) })
+    public Response log(
+            final @Parameter(name = "logMessage", description = "Severity is required and can be one of error, warn, info or debug, depending on activated severities which you can GET at /logLevels.", example = "{\"severity\": \"error\", \"url\": \"http://example.org\", \"message\": \"Error message\"}") @Nullable LogMessage logMessage) {
         if (logMessage == null) {
             logger.debug("Received null log message model!");
             return Response.status(500)
