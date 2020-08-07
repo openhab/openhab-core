@@ -13,14 +13,14 @@
 package org.openhab.core.model.script.internal.actions;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.internal.scheduler.SchedulerImpl;
 import org.openhab.core.model.script.actions.Timer;
 import org.openhab.core.scheduler.SchedulerRunnable;
@@ -41,7 +41,7 @@ public class TimerImplTest {
     private final SchedulerImpl scheduler = new SchedulerImpl();
     private @NonNullByDefault({}) Timer subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         subject = createTimer(ZonedDateTime.now().plusSeconds(DEFAULT_TIMEOUT_SECONDS), () -> {
             Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_RUNTIME_SECONDS));

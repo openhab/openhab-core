@@ -12,13 +12,13 @@
  */
 package org.openhab.core.thing;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.ThingFactory;
@@ -42,7 +42,7 @@ public class ThingPropertiesTest extends JavaOSGiTest {
     private Thing thing;
     private final String nullString = null; // trick the null-annotation tooling
 
-    @Before
+    @BeforeEach
     public void setup() {
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId", "thingTypeId"), "label")
                 .withProperties(properties).build();
@@ -85,13 +85,13 @@ public class ThingPropertiesTest extends JavaOSGiTest {
         assertEquals("value2", thing.getProperties().get("key2"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSetPropertyNullKey() {
-        thing.setProperty(nullString, "");
+        assertThrows(IllegalArgumentException.class, () -> thing.setProperty(nullString, ""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSetPropertyEmptyName() {
-        thing.setProperty("", "");
+        assertThrows(IllegalArgumentException.class, () -> thing.setProperty("", ""));
     }
 }

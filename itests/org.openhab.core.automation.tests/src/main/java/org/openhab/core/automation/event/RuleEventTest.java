@@ -13,7 +13,8 @@
 package org.openhab.core.automation.event;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +30,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
@@ -78,7 +79,7 @@ public class RuleEventTest extends JavaOSGiTest {
     public RuleEventTest() {
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         ItemProvider itemProvider = new ItemProvider() {
 

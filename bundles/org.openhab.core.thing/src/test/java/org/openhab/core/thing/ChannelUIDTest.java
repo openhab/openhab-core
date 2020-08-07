@@ -12,9 +12,9 @@
  */
 package org.openhab.core.thing;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for class {@link ChannelUID}.
@@ -31,19 +31,20 @@ public class ChannelUIDTest {
     private static final String CHANNEL_ID = "id";
     private static final ThingUID THING_UID = new ThingUID(BINDING_ID, THING_TYPE_ID, THING_ID);
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidCharacters() {
-        new ChannelUID(THING_UID, "id_with_invalidchar%");
+        assertThrows(IllegalArgumentException.class, () -> new ChannelUID(THING_UID, "id_with_invalidchar%"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNotEnoughNumberOfSegments() {
-        new ChannelUID("binding:thing-type:group#id");
+        assertThrows(IllegalArgumentException.class, () -> new ChannelUID("binding:thing-type:group#id"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMultipleChannelGroupSeparators() {
-        new ChannelUID("binding:thing-type:thing:group#id#what_ever");
+        assertThrows(IllegalArgumentException.class,
+                () -> new ChannelUID("binding:thing-type:thing:group#id#what_ever"));
     }
 
     @Test

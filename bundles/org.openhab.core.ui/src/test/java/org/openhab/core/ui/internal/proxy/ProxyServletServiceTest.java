@@ -12,7 +12,7 @@
  */
 package org.openhab.core.ui.internal.proxy;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -25,8 +25,8 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.StringUtil;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.core.ModelRepository;
@@ -73,7 +73,7 @@ public class ProxyServletServiceTest {
     private Image imageWidget;
     private Video videoWidget;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         service = new ProxyServletService();
 

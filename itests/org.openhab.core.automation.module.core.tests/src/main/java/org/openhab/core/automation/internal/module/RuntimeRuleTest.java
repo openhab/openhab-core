@@ -12,7 +12,7 @@
  */
 package org.openhab.core.automation.internal.module;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -28,10 +28,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
@@ -75,7 +74,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
     private final VolatileStorageService volatileStorageService = new VolatileStorageService();
 
-    @Before
+    @BeforeEach
     public void before() {
         registerService(new ItemProvider() {
             @Override
@@ -100,7 +99,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testPredefinedRule() throws ItemNotFoundException, InterruptedException {
         final EventPublisher eventPublisher = getService(EventPublisher.class);
         final Queue<Event> events = new LinkedList<>();
@@ -157,12 +156,12 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         ruleEngine.setEnabled(rule.getUID(), true);
 
         waitForAssert(() -> {
-            Assert.assertEquals(RuleStatus.IDLE, ruleEngine.getStatusInfo(rule.getUID()).getStatus());
+            assertEquals(RuleStatus.IDLE, ruleEngine.getStatusInfo(rule.getUID()).getStatus());
         });
 
         // Test rule
         final EventPublisher eventPublisher = getService(EventPublisher.class);
-        Assert.assertNotNull(eventPublisher);
+        assertNotNull(eventPublisher);
 
         eventPublisher.post(ItemEventFactory.createStateEvent("myPresenceItem2", OnOffType.ON));
 
@@ -200,11 +199,11 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     public void modeTypesRegistration() {
         final ModuleTypeRegistry mtr = getService(ModuleTypeRegistry.class);
         waitForAssert(() -> {
-            Assert.assertNotNull(mtr.get("core.GenericEventTrigger"));
-            Assert.assertNotNull(mtr.get("core.GenericEventCondition"));
-            Assert.assertNotNull(mtr.get("core.ItemStateChangeTrigger"));
-            Assert.assertNotNull(mtr.get("core.ItemStateUpdateTrigger"));
-            Assert.assertNotNull(mtr.get(CompareConditionHandler.MODULE_TYPE));
+            assertNotNull(mtr.get("core.GenericEventTrigger"));
+            assertNotNull(mtr.get("core.GenericEventCondition"));
+            assertNotNull(mtr.get("core.ItemStateChangeTrigger"));
+            assertNotNull(mtr.get("core.ItemStateUpdateTrigger"));
+            assertNotNull(mtr.get(CompareConditionHandler.MODULE_TYPE));
         });
     }
 
@@ -225,9 +224,9 @@ public class RuntimeRuleTest extends JavaOSGiTest {
             final @Nullable Object input) {
         final boolean is = handler.isSatisfied(Collections.singletonMap("input", input));
         if (expected) {
-            Assert.assertTrue(is);
+            assertTrue(is);
         } else {
-            Assert.assertFalse(is);
+            assertFalse(is);
         }
     }
 
@@ -311,7 +310,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         assertSatisfiedHandlerInput(handler, false, "something matches?");
         assertSatisfiedHandlerInput(handler, true, "anything matches?");
 
-        Assert.assertFalse(handler.isSatisfied(Stream.of(new SimpleEntry<>("nothing", "nothing"))
+        assertFalse(handler.isSatisfied(Stream.of(new SimpleEntry<>("nothing", "nothing"))
                 .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()))));
 
         condition = ModuleBuilder.createCondition(condition)
@@ -375,7 +374,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         // Test rule
 
         waitForAssert(() -> {
-            Assert.assertEquals(RuleStatus.IDLE, ruleEngine.getStatusInfo(rule.getUID()).getStatus());
+            assertEquals(RuleStatus.IDLE, ruleEngine.getStatusInfo(rule.getUID()).getStatus());
         });
 
         final Queue<Event> events = new LinkedList<>();
@@ -416,7 +415,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void ruleEnableHandlerWorks() throws ItemNotFoundException {
         final RuleRegistry ruleRegistry = getService(RuleRegistry.class);
         final RuleManager ruleEngine = getService(RuleManager.class);
@@ -456,11 +455,9 @@ public class RuntimeRuleTest extends JavaOSGiTest {
                     TypeParser.parseCommand(myMotionItem.getAcceptedCommandTypes(), "ON")));
 
             waitForAssert(() -> {
-                Assert.assertEquals(RuleStatusDetail.DISABLED,
-                        ruleEngine.getStatusInfo(firstRuleUID).getStatusDetail());
-                Assert.assertEquals(RuleStatusDetail.DISABLED,
-                        ruleEngine.getStatusInfo(secondRuleUID).getStatusDetail());
-                Assert.assertEquals(RuleStatus.IDLE, ruleEngine.getStatus(thirdRuleUID));
+                assertEquals(RuleStatusDetail.DISABLED, ruleEngine.getStatusInfo(firstRuleUID).getStatusDetail());
+                assertEquals(RuleStatusDetail.DISABLED, ruleEngine.getStatusInfo(secondRuleUID).getStatusDetail());
+                assertEquals(RuleStatus.IDLE, ruleEngine.getStatus(thirdRuleUID));
             });
 
             final Configuration triggerConfig2 = new Configuration(
@@ -482,10 +479,9 @@ public class RuntimeRuleTest extends JavaOSGiTest {
                     TypeParser.parseCommand(myMotionItem.getAcceptedCommandTypes(), "OFF")));
 
             waitForAssert(() -> {
-                Assert.assertEquals(RuleStatus.IDLE, ruleEngine.getStatus(firstRuleUID));
-                Assert.assertEquals(RuleStatusDetail.DISABLED,
-                        ruleEngine.getStatusInfo(secondRuleUID).getStatusDetail());
-                Assert.assertEquals(RuleStatus.IDLE, ruleEngine.getStatus(thirdRuleUID));
+                assertEquals(RuleStatus.IDLE, ruleEngine.getStatus(firstRuleUID));
+                assertEquals(RuleStatusDetail.DISABLED, ruleEngine.getStatusInfo(secondRuleUID).getStatusDetail());
+                assertEquals(RuleStatus.IDLE, ruleEngine.getStatus(thirdRuleUID));
             });
         } finally {
             ruleRegistry.remove(firstRuleUID);

@@ -13,14 +13,16 @@
 package org.openhab.core.library.dimension;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.stream.Stream;
 
 import javax.measure.Unit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.library.unit.SmartHomeUnits;
 import org.openhab.core.types.util.UnitUtils;
 
@@ -32,7 +34,7 @@ import tec.uom.se.quantity.Quantities;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
-@RunWith(Parameterized.class)
+@NonNullByDefault
 public class VolumetricFlowRateTest {
 
     /**
@@ -40,25 +42,15 @@ public class VolumetricFlowRateTest {
      */
     private static final Unit<VolumetricFlowRate> BASE_UNIT = SmartHomeUnits.CUBICMETRE_PER_HOUR;
 
-    private final Unit<VolumetricFlowRate> unit;
-    private final String symbol;
-    private final Double value;
-    private final Double valueInBaseUnit;
-
-    public VolumetricFlowRateTest(Unit<VolumetricFlowRate> unit, String symbol, Double value, Double valueInBaseUnit) {
-        this.unit = unit;
-        this.symbol = symbol;
-        this.value = value;
-        this.valueInBaseUnit = valueInBaseUnit;
-    }
-
     /**
      * An additional test which converts given test quantity into base unit and then compares it with expected value.
      *
      * This basic test confirms that values of different flow rates can be exchanged to given base unit.
      */
-    @Test
-    public void testValueConversionToM3s() {
+    @ParameterizedTest
+    @MethodSource("arguments")
+    public void testValueConversionToM3s(Unit<VolumetricFlowRate> unit, String symbol, Double value,
+            Double valueInBaseUnit) {
         ComparableQuantity<VolumetricFlowRate> quantity = Quantities.getQuantity(value, unit);
         ComparableQuantity<VolumetricFlowRate> quantityInBase = Quantities.getQuantity(valueInBaseUnit, BASE_UNIT);
 
@@ -70,20 +62,20 @@ public class VolumetricFlowRateTest {
     /**
      * Verifies that given symbol is recognized by {@link UnitUtils}.
      */
-    @Test
-    public void testSymbolLookup() {
+    @ParameterizedTest
+    @MethodSource("arguments")
+    public void testSymbolLookup(Unit<VolumetricFlowRate> unit, String symbol, Double value, Double valueInBaseUnit) {
         Unit<?> parsedUnit = UnitUtils.parseUnit(symbol);
 
         assertThat(parsedUnit, is(notNullValue()));
         assertThat(parsedUnit, is(equalTo(unit)));
     }
 
-    @Parameters
-    public static Object[] params() {
-        return new Object[] { new Object[] { SmartHomeUnits.LITRE_PER_MINUTE, "l/min", 100.0, 6.0 },
-                new Object[] { SmartHomeUnits.CUBICMETRE_PER_SECOND, "m³/s", 100.0, 360000.0 },
-                new Object[] { SmartHomeUnits.CUBICMETRE_PER_MINUTE, "m³/min", 100.0, 6000.0 },
-                new Object[] { SmartHomeUnits.CUBICMETRE_PER_HOUR, "m³/h", 100.0, 100.0 },
-                new Object[] { SmartHomeUnits.CUBICMETRE_PER_DAY, "m³/d", 100.0, 4.166666666666667 } };
+    private static Stream<Arguments> arguments() {
+        return Stream.of(Arguments.of(SmartHomeUnits.LITRE_PER_MINUTE, "l/min", 100.0, 6.0),
+                Arguments.of(SmartHomeUnits.CUBICMETRE_PER_SECOND, "m³/s", 100.0, 360000.0),
+                Arguments.of(SmartHomeUnits.CUBICMETRE_PER_MINUTE, "m³/min", 100.0, 6000.0),
+                Arguments.of(SmartHomeUnits.CUBICMETRE_PER_HOUR, "m³/h", 100.0, 100.0),
+                Arguments.of(SmartHomeUnits.CUBICMETRE_PER_DAY, "m³/d", 100.0, 4.166666666666667));
     }
 }

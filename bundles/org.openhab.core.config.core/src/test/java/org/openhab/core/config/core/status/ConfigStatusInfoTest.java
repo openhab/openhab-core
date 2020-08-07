@@ -15,12 +15,13 @@ package org.openhab.core.config.core.status;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.status.ConfigStatusMessage.Type;
 
 /**
@@ -88,16 +89,16 @@ public class ConfigStatusInfoTest {
         assertConfigStatusInfo(info);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void assertNPEisThrownIfTypesAreNull() {
         ConfigStatusInfo info = new ConfigStatusInfo();
-        info.getConfigStatusMessages(null, emptySet());
+        assertThrows(NullPointerException.class, () -> info.getConfigStatusMessages(null, emptySet()));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void assertNPEisThrownIfParameterNamesAreNull() {
         ConfigStatusInfo info = new ConfigStatusInfo();
-        info.getConfigStatusMessages(emptySet(), null);
+        assertThrows(NullPointerException.class, () -> info.getConfigStatusMessages(emptySet(), null));
     }
 
     private void assertConfigStatusInfo(ConfigStatusInfo info) {

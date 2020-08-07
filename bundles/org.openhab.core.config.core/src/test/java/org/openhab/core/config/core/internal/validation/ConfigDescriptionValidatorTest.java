@@ -14,7 +14,8 @@ package org.openhab.core.config.core.internal.validation;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -28,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.config.core.ConfigDescription;
@@ -147,7 +148,7 @@ public class ConfigDescriptionValidatorTest {
     private Map<String, Object> params;
     private ConfigDescriptionValidatorImpl configDescriptionValidator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ConfigDescriptionRegistry configDescriptionRegistry = mock(ConfigDescriptionRegistry.class);
         when(configDescriptionRegistry.getConfigDescription(any())).thenAnswer(new Answer<ConfigDescription>() {
@@ -481,14 +482,15 @@ public class ConfigDescriptionValidatorTest {
         configDescriptionValidator.validate(params, CONFIG_DESCRIPTION_URI);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void assertValidateThrowsNPEforNullParamerters() {
-        configDescriptionValidator.validate(null, CONFIG_DESCRIPTION_URI);
+        assertThrows(NullPointerException.class,
+                () -> configDescriptionValidator.validate(null, CONFIG_DESCRIPTION_URI));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void assertValidateThrowsNPEforNullConfigDescriptionUri() {
-        configDescriptionValidator.validate(params, null);
+        assertThrows(NullPointerException.class, () -> configDescriptionValidator.validate(params, null));
     }
 
     @Test

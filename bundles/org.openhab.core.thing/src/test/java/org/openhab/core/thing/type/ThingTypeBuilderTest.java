@@ -13,8 +13,9 @@
 package org.openhab.core.thing.type;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 import java.net.URI;
@@ -25,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.thing.ThingTypeUID;
 
 /**
@@ -47,30 +48,31 @@ public class ThingTypeBuilderTest {
 
     private @NonNullByDefault({}) ThingTypeBuilder builder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         // set up a valid basic ThingTypeBuilder
         builder = ThingTypeBuilder.instance(BINDING_ID, THING_TYPE_ID, LABEL);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenThingTypeIdAndBindingIdBlankShouldFail() {
-        ThingTypeBuilder.instance("", "", LABEL).build();
+        assertThrows(IllegalArgumentException.class, () -> ThingTypeBuilder.instance("", "", LABEL).build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenThingTypeIdBlankShouldFail() {
-        ThingTypeBuilder.instance(BINDING_ID, "", LABEL).build();
+        assertThrows(IllegalArgumentException.class, () -> ThingTypeBuilder.instance(BINDING_ID, "", LABEL).build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenBindingIdBlankShouldFail() {
-        ThingTypeBuilder.instance("", THING_TYPE_ID, LABEL).build();
+        assertThrows(IllegalArgumentException.class, () -> ThingTypeBuilder.instance("", THING_TYPE_ID, LABEL).build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenLabelBlankShouldFail() {
-        ThingTypeBuilder.instance(THING_TYPE_ID, BINDING_ID, "").build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ThingTypeBuilder.instance(THING_TYPE_ID, BINDING_ID, "").build());
     }
 
     @Test

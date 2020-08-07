@@ -14,7 +14,7 @@ package org.openhab.core.thing.testutil.i18n;
 
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.util.Dictionary;

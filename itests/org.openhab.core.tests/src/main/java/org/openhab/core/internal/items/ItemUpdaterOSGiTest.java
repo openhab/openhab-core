@@ -12,7 +12,7 @@
  */
 package org.openhab.core.internal.items;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.Set;
@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventPublisher;
@@ -48,7 +48,7 @@ public class ItemUpdaterOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private final ConcurrentLinkedQueue<Event> receivedEvents = new ConcurrentLinkedQueue<>();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
         eventPublisher = getService(EventPublisher.class);

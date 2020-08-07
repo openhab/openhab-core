@@ -14,7 +14,6 @@ package org.openhab.core.thing.internal;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -25,9 +24,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.items.Item;
@@ -49,6 +52,8 @@ import org.openhab.core.thing.type.ChannelTypeRegistry;
 /**
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ChannelItemProviderTest {
 
     private static final ChannelUID CHANNEL_UID = new ChannelUID("test:test:test:test");
@@ -70,10 +75,8 @@ public class ChannelItemProviderTest {
 
     private ChannelItemProvider provider;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
-
         provider = createProvider();
 
         Map<String, Object> props = new HashMap<>();

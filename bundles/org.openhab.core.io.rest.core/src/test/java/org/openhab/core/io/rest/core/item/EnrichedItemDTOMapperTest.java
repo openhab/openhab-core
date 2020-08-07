@@ -13,10 +13,10 @@
 package org.openhab.core.io.rest.core.item;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
@@ -29,7 +29,7 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
 
     private CoreItemFactory itemFactory;
 
-    @Before
+    @BeforeEach
     public void setup() {
         itemFactory = new CoreItemFactory();
     }

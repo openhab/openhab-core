@@ -13,7 +13,8 @@
 package org.openhab.core.storage.json.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,10 +28,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.CoreItemFactory;
@@ -49,18 +50,18 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     private StorageService storageService;
     private Storage<PersistedItem> storage;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         storageService = getService(StorageService.class);
         storage = storageService.getStorage(UUID.randomUUID().toString(), this.getClass().getClassLoader());
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         unregisterService(storageService);
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws IOException {
         // clean up database files ...
         final Path userData = Paths.get(ConfigConstants.getUserDataFolder());

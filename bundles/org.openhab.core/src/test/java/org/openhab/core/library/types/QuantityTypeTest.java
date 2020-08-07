@@ -13,7 +13,8 @@
 package org.openhab.core.library.types;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.CENTI;
 
 import java.math.BigDecimal;
@@ -27,7 +28,7 @@ import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 import javax.measure.quantity.Time;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
@@ -60,9 +61,9 @@ public class QuantityTypeTest {
         assertTrue(dt0.getUnit().getDimension() == QuantityDimension.NONE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testKnownInvalidConstructors() throws Exception {
-        new QuantityType<>("123 Hello World");
+    @Test
+    public void testKnownInvalidConstructors() {
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("123 Hello World"));
     }
 
     @Test
@@ -250,9 +251,9 @@ public class QuantityTypeTest {
         assertThat(new QuantityType<>("4 m").divide(new QuantityType<>("2 cm")), is(new QuantityType<>("2 m/cm")));
     }
 
-    @Test(expected = ArithmeticException.class)
+    @Test
     public void testDivideZero() {
-        new QuantityType<>("4 m").divide(QuantityType.ZERO);
+        assertThrows(ArithmeticException.class, () -> new QuantityType<>("4 m").divide(QuantityType.ZERO));
     }
 
     @Test

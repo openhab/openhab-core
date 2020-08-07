@@ -12,16 +12,17 @@
  */
 package org.openhab.core.io.rest.core.internal.discovery;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.discovery.inbox.Inbox;
@@ -43,11 +44,13 @@ public class InboxResourceOSGITest extends JavaOSGiTest {
     private final Thing testThing = ThingBuilder.create(testTypeUID, testUID).build();
     private final String testThingLabel = "dummy_thing";
 
+    private AutoCloseable mocksCloseable;
+
     private @Mock Inbox inbox;
 
-    @Before
-    public void setup() throws Exception {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        mocksCloseable = openMocks(this);
 
         ConfigDescriptionRegistry configDescRegistry = getService(ConfigDescriptionRegistry.class);
         assertNotNull(configDescRegistry);
@@ -55,6 +58,11 @@ public class InboxResourceOSGITest extends JavaOSGiTest {
         registerService(new InboxResource(inbox), InboxResource.class.getName());
         resource = getService(InboxResource.class);
         assertNotNull(resource);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test

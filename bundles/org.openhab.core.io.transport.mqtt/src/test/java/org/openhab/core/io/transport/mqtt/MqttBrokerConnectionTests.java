@@ -13,7 +13,8 @@
 package org.openhab.core.io.transport.mqtt;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper;
 import org.openhab.core.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
 import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
@@ -281,29 +282,29 @@ public class MqttBrokerConnectionTests extends JavaTest {
         assertArrayEquals(connection.getLastWill().getPayload(), b);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void lastWillAndTestamentConstructorTests() {
-        new MqttWillAndTestament("", new byte[0], 0, false);
+        assertThrows(IllegalArgumentException.class, () -> new MqttWillAndTestament("", new byte[0], 0, false));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void qosInvalid() throws ConfigurationException {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false, "qosInvalid");
-        connection.setQos(10);
+        assertThrows(IllegalArgumentException.class, () -> connection.setQos(10));
     }
 
     @Test
     public void setterGetterTests() {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false,
                 "setterGetterTests");
-        assertEquals("URL getter", connection.getHost(), "123.123.123.123");
-        assertEquals("Name getter", connection.getPort(), 1883); // Check for non-secure port
-        assertFalse("Secure getter", connection.isSecure());
-        assertEquals("ClientID getter", "setterGetterTests", connection.getClientId());
+        assertEquals(connection.getHost(), "123.123.123.123", "URL getter");
+        assertEquals(connection.getPort(), 1883, "Name getter"); // Check for non-secure port
+        assertFalse(connection.isSecure(), "Secure getter");
+        assertEquals("setterGetterTests", connection.getClientId(), "ClientID getter");
 
         connection.setCredentials("user@!", "password123@^");
-        assertEquals("User getter/setter", "user@!", connection.getUser());
-        assertEquals("Password getter/setter", "password123@^", connection.getPassword());
+        assertEquals("user@!", connection.getUser(), "User getter/setter");
+        assertEquals("password123@^", connection.getPassword(), "Password getter/setter");
 
         assertEquals(MqttBrokerConnection.DEFAULT_KEEPALIVE_INTERVAL, connection.getKeepAliveInterval());
         connection.setKeepAliveInterval(80);

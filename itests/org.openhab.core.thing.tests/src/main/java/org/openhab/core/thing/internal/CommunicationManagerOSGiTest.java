@@ -12,10 +12,10 @@
  */
 package org.openhab.core.thing.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,8 +25,9 @@ import java.util.stream.Stream;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openhab.core.common.SafeCaller;
@@ -133,6 +134,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_1).withKind(ChannelKind.TRIGGER).build(),
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_2).withKind(ChannelKind.TRIGGER).build()).build();
 
+    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
+
     private @Mock @NonNullByDefault({}) AutoUpdateManager autoUpdateManagerMock;
     private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
@@ -151,15 +154,19 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private ItemChannelLinkRegistryAdvanced iclRegistry = new ItemChannelLinkRegistryAdvanced(thingRegistryMock,
             itemRegistryMock);
 
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         safeCaller = getService(SafeCaller.class);
         assertNotNull(safeCaller);
 
         SystemProfileFactory profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
+
         assertNotNull(profileFactory);
+        if (profileFactory == null) {
+            throw new IllegalStateException("thing is null");
+        }
 
         manager = new CommunicationManager(autoUpdateManagerMock, channelTypeRegistryMock, profileFactory, iclRegistry,
                 itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);
@@ -225,6 +232,11 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         when(unitProvider.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
         ITEM_3.setUnitProvider(unitProvider);
         ITEM_4.setUnitProvider(unitProvider);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test

@@ -14,8 +14,9 @@ package org.openhab.core.model.thing.test.hue;
 
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsIterableContaining.hasItems;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -26,9 +27,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
@@ -55,7 +56,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
     private ModelRepository modelRepository;
     private ThingRegistry thingRegistry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         thingRegistry = getService(ThingRegistry.class);
         assertThat(thingRegistry, is(notNullValue()));
@@ -64,7 +65,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         modelRepository.removeModel(TESTMODEL_NAME);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         modelRepository.removeModel(TESTMODEL_NAME);
     }

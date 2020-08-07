@@ -12,7 +12,7 @@
  */
 package org.openhab.core.internal.scheduler;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -21,7 +21,8 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
 
 /**
@@ -35,7 +36,8 @@ import org.openhab.core.scheduler.ScheduledCompletableFuture;
 public class PeriodicSchedulerImplTest {
     private final PeriodicSchedulerImpl periodicScheduler = new PeriodicSchedulerImpl(new SchedulerImpl());
 
-    @Test(timeout = 5000)
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void testSchedule() throws InterruptedException, IOException {
         Queue<Long> times = new ArrayDeque<>();
         Semaphore semaphore = new Semaphore(0);
@@ -53,8 +55,8 @@ public class PeriodicSchedulerImplTest {
         long offset = times.poll();
         long[] expectedResults = { 2, 5, 8, 11, 14 };
         for (long expectedResult : expectedResults) {
-            assertEquals("Expected periodic time", offset + expectedResult, times.poll().longValue());
+            assertEquals(offset + expectedResult, times.poll().longValue(), "Expected periodic time");
         }
-        assertFalse("No more jobs should have been scheduled", semaphore.tryAcquire(1, TimeUnit.SECONDS));
+        assertFalse(semaphore.tryAcquire(1, TimeUnit.SECONDS), "No more jobs should have been scheduled");
     }
 }

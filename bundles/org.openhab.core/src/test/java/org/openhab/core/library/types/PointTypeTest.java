@@ -13,37 +13,34 @@
 package org.openhab.core.library.types;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Gaël L'hopital - Initial contribution
  */
 public class PointTypeTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorEmpty() {
-        @SuppressWarnings("unused")
-        PointType errorGenerator = new PointType("");
+        assertThrows(IllegalArgumentException.class, () -> new PointType(""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorBadlyFormated() {
-        @SuppressWarnings("unused")
-        PointType errorGenerator = new PointType("2");
+        assertThrows(IllegalArgumentException.class, () -> new PointType("2"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorBadlyFormated2() {
-        @SuppressWarnings("unused")
-        PointType errorGenerator = new PointType("2,");
+        assertThrows(IllegalArgumentException.class, () -> new PointType("2,"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorBadlyFormated3() {
-        @SuppressWarnings("unused")
-        PointType errorGenerator = new PointType("2,3,4,5");
+        assertThrows(IllegalArgumentException.class, () -> new PointType("2,3,4,5"));
     }
 
     @Test

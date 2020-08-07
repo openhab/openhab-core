@@ -13,7 +13,8 @@
 package org.openhab.core.automation.integration.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -23,9 +24,9 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Rule;
@@ -84,7 +85,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     // keep storage rules imported from json files
     public static final VolatileStorageService VOLATILE_STORAGE_SERVICE = new VolatileStorageService();
 
-    @Before
+    @BeforeEach
     public void before() {
         logger.info("@Before.begin");
 
@@ -168,7 +169,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         logger.info("@Before.finish");
     }
 
-    @After
+    @AfterEach
     public void after() {
         logger.info("@After");
     }

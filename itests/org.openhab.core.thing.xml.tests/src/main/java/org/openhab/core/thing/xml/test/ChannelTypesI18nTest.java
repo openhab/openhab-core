@@ -13,14 +13,14 @@
 package org.openhab.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.BundleCloseable;
 import org.openhab.core.test.SyntheticBundleInstaller;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -46,7 +46,7 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
     private ChannelGroupTypeProvider channelGroupTypeProvider;
     private ThingTypeProvider thingTypeProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         // get ONLY the XMLChannelTypeProvider
         channelTypeProvider = getService(ChannelTypeProvider.class,
@@ -99,7 +99,7 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
             ThingType thingType = waitForAssert(() -> {
                 Optional<ThingType> thingTypeOpt = thingTypeProvider.getThingTypes(null).stream()
                         .filter(it -> "somebinding:something".equals(it.getUID().toString())).findFirst();
-                Assert.assertTrue(thingTypeOpt.isPresent());
+                assertTrue(thingTypeOpt.isPresent());
                 final ThingType thingTypeTmp = thingTypeOpt.get();
                 // assertThat(thingTypeTmp, is(notNullValue()));
                 assertThat(thingTypeTmp.getChannelDefinitions().size(), is(2));

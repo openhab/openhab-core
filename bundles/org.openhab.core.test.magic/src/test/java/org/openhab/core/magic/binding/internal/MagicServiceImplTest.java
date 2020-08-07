@@ -12,14 +12,15 @@
  */
 package org.openhab.core.magic.binding.internal;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.net.URI;
 import java.util.Collection;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.magic.binding.MagicService;
 
@@ -34,7 +35,7 @@ public class MagicServiceImplTest {
 
     private MagicService magicService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         magicService = new MagicServiceImpl();
     }

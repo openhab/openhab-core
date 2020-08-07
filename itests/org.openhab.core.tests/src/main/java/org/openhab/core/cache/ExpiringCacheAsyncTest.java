@@ -12,14 +12,14 @@
  */
 package org.openhab.core.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaTest;
 
 /**
@@ -31,10 +31,10 @@ public class ExpiringCacheAsyncTest extends JavaTest {
 
     private double theValue = 0;
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWrongCacheTime() {
         // Fail if cache time is <= 0
-        new ExpiringCacheAsync<>(0);
+        assertThrows(IllegalArgumentException.class, () -> new ExpiringCacheAsync<>(0));
     }
 
     @Test

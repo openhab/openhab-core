@@ -13,13 +13,14 @@
 package org.openhab.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.ChannelDefinition;
@@ -45,7 +46,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
     private ChannelTypeRegistry channelTypeRegistry;
     private ChannelGroupTypeRegistry channelGroupTypeRegistry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         thingTypeProvider = getService(ThingTypeProvider.class);
         assertNotNull(thingTypeProvider);

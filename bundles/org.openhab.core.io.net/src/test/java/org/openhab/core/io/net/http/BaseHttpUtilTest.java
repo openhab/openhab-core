@@ -14,7 +14,6 @@ package org.openhab.core.io.net.http;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +22,12 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Base class for tests for the <code>HttpRequestBuilder</code> and <code>HttpUtil</code> to validate their behavior
@@ -32,25 +35,18 @@ import org.mockito.Mock;
  * @author Martin van Wingerden & Wouter Born - Initial contribution
  * @author Markus Rathgeb - Base test classes without tests needs to be abstract
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public abstract class BaseHttpUtilTest {
     static final String URL = "http://example.org/test";
 
-    @Mock
-    private HttpClientFactory clientFactoryMock;
+    protected @Mock HttpClientFactory clientFactoryMock;
+    protected @Mock HttpClient httpClientMock;
+    protected @Mock Request requestMock;
+    protected @Mock ContentResponse contentResponseMock;
 
-    @Mock
-    HttpClient httpClientMock;
-
-    @Mock
-    Request requestMock;
-
-    @Mock
-    ContentResponse contentResponseMock;
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-
         Field httpClientFactory = HttpUtil.class.getDeclaredField("httpClientFactory");
         httpClientFactory.setAccessible(true);
         httpClientFactory.set(null, clientFactoryMock);

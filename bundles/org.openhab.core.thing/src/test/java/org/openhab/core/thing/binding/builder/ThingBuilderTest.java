@@ -13,16 +13,17 @@
 package org.openhab.core.thing.binding.builder;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -51,7 +52,7 @@ public class ThingBuilderTest {
     };
     private ThingBuilder thingBuilder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         thingBuilder = ThingBuilder.create(THING_TYPE_UID, THING_UID);
     }
@@ -68,24 +69,25 @@ public class ThingBuilderTest {
         assertThat(bridgeBuilder.build(), is(instanceOf(BridgeImpl.class)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithChannelDuplicates() {
         thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build());
-        thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build());
+        assertThrows(IllegalArgumentException.class,
+                () -> thingBuilder.withChannel(ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithChannelsDuplicatesCollections() {
-        thingBuilder.withChannels(Arrays.asList( //
+        assertThrows(IllegalArgumentException.class, () -> thingBuilder.withChannels(Arrays.asList( //
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build(), //
+                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build())));
+    }
+
+    @Test
+    public void testWithChannelsDuplicatesVararg() {
+        assertThrows(IllegalArgumentException.class, () -> thingBuilder.withChannels( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testWithChannelsDuplicatesVararg() {
-        thingBuilder.withChannels( //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build(), //
-                ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build());
     }
 
     @Test
@@ -108,10 +110,10 @@ public class ThingBuilderTest {
         assertThat(thingBuilder.build().getChannels(), hasSize(2));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithChannelWrongThing() {
-        thingBuilder.withChannel(
-                ChannelBuilder.create(new ChannelUID(new ThingUID(THING_TYPE_UID, "wrong"), "channel1")).build());
+        assertThrows(IllegalArgumentException.class, () -> thingBuilder.withChannel(
+                ChannelBuilder.create(new ChannelUID(new ThingUID(THING_TYPE_UID, "wrong"), "channel1")).build()));
     }
 
     @Test

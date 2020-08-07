@@ -13,16 +13,16 @@
 package org.openhab.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.openhab.core.thing.type.BridgeType;
@@ -50,7 +50,7 @@ public class ThingTypesTest extends JavaOSGiTest {
     private ChannelTypeRegistry channelTypeRegistry;
     private ChannelGroupTypeRegistry channelGroupTypeRegistry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         thingTypeProvider = getService(ThingTypeProvider.class);
         assertThat(thingTypeProvider, is(notNullValue()));

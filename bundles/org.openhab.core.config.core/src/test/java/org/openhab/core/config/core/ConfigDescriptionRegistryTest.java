@@ -13,20 +13,23 @@
 package org.openhab.core.config.core;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.test.java.JavaTest;
 
 /**
@@ -34,6 +37,8 @@ import org.openhab.core.test.java.JavaTest;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ConfigDescriptionRegistryTest extends JavaTest {
 
     private URI uriDummy;
@@ -52,10 +57,8 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
     private @Mock ConfigOptionProvider configOptionsProviderMockAliased;
     private @Mock ConfigOptionProvider configOptionsProviderMock;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-
         uriDummy = new URI("config:Dummy");
         uriDummy1 = new URI("config:Dummy1");
         uriAliases = new URI("config:Aliased");

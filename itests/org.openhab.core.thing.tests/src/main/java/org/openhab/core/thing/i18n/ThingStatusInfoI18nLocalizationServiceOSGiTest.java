@@ -13,15 +13,16 @@
 package org.openhab.core.thing.i18n;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Locale;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.test.SyntheticBundleInstaller;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -183,9 +184,10 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
         assertThat(info, is(ThingStatusInfoBuilder.create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void nullThingIsRejected() {
-        thingStatusInfoI18nLocalizationService.getLocalizedThingStatusInfo(null, null);
+        assertThrows(IllegalArgumentException.class,
+                () -> thingStatusInfoI18nLocalizationService.getLocalizedThingStatusInfo(null, null));
     }
 
     @Test
@@ -213,7 +215,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
                 "Some test text with params: some other text - 60")));
     }
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         LocaleProvider localeProvider = getService(LocaleProvider.class);
         assertThat(localeProvider, is(notNullValue()));
@@ -248,7 +250,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
         thingStatusInfoI18nLocalizationService.setBundleResolver(new BundleResolverImpl());
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException, BundleException {
         testBundle.uninstall();
         managedThingProvider.remove(thing.getUID());

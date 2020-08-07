@@ -13,7 +13,8 @@
 package org.openhab.core.thing.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -28,9 +29,9 @@ import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
@@ -129,7 +130,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
     private @NonNullByDefault({}) URI configDescriptionThing;
     private @NonNullByDefault({}) Thing thing;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         configDescriptionChannel = new URI("test:channel");
         configDescriptionThing = new URI("test:test");
@@ -180,7 +181,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         });
     }
 
-    @After
+    @AfterEach
     public void teardown() throws Exception {
         managedThingProvider.getAll().forEach(it -> {
             managedThingProvider.remove(it.getUID());
@@ -247,11 +248,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         assertTrue(thc.get().isChannelLinked(CHANNEL_UID));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateChannelBuilderThrowsIllegalArgumentException() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = initializeThingHandlerCallback();
 
-        thc.get().createChannelBuilder(CHANNEL_UID, new ChannelTypeUID(BINDING_ID, "invalid-channel"));
+        assertThrows(IllegalArgumentException.class,
+                () -> thc.get().createChannelBuilder(CHANNEL_UID, new ChannelTypeUID(BINDING_ID, "invalid-channel")));
     }
 
     @Test
@@ -263,11 +265,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         validateChannel(channelBuilder.build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEditChannelBuilderThrowsIllegalArgumentException() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = initializeThingHandlerCallback();
 
-        thc.get().editChannel(thing, new ChannelUID(THING_UID, "invalid-channel"));
+        assertThrows(IllegalArgumentException.class,
+                () -> thc.get().editChannel(thing, new ChannelUID(THING_UID, "invalid-channel")));
     }
 
     @Test
@@ -279,12 +282,12 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         validateChannel(channelBuilder.build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateChannelGroupBuilderThrowsIllegalArgumentException() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = initializeThingHandlerCallback();
 
-        thc.get().createChannelBuilders(CHANNEL_GROUP_UID,
-                new ChannelGroupTypeUID(BINDING_ID, "invalid-channel-group"));
+        assertThrows(IllegalArgumentException.class, () -> thc.get().createChannelBuilders(CHANNEL_GROUP_UID,
+                new ChannelGroupTypeUID(BINDING_ID, "invalid-channel-group")));
     }
 
     @Test

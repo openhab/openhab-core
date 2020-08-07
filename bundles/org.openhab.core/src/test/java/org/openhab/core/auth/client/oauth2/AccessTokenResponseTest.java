@@ -12,11 +12,11 @@
  */
 package org.openhab.core.auth.client.oauth2;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Gary Tse - Initial contribution
@@ -34,7 +34,7 @@ public class AccessTokenResponseTest {
         // token only has a life time of 10 seconds
         token.setExpiresIn(10);
 
-        assertTrue("Token should have been expired", token.isExpired(LocalDateTime.now(), 0));
+        assertTrue(token.isExpired(LocalDateTime.now(), 0), "Token should have been expired");
     }
 
     @Test
@@ -48,7 +48,7 @@ public class AccessTokenResponseTest {
         // token only has a life time of 30 seconds
         token.setExpiresIn(30);
 
-        assertTrue("Token should have been expired due to buffer", token.isExpired(LocalDateTime.now(), 15));
+        assertTrue(token.isExpired(LocalDateTime.now(), 15), "Token should have been expired due to buffer");
     }
 
     @Test
@@ -60,7 +60,7 @@ public class AccessTokenResponseTest {
         // token has life time of 1 minute
         token.setExpiresIn(60);
 
-        assertFalse("Token should not be expired", token.isExpired(LocalDateTime.now(), 0));
+        assertFalse(token.isExpired(LocalDateTime.now(), 0), "Token should not be expired");
     }
 
     @Test
@@ -74,6 +74,6 @@ public class AccessTokenResponseTest {
         // token has a life time of 60 seconds
         token.setExpiresIn(60);
 
-        assertTrue("Token should have been expired due to buffer", !token.isExpired(LocalDateTime.now(), 10));
+        assertTrue(!token.isExpired(LocalDateTime.now(), 10), "Token should have been expired due to buffer");
     }
 }

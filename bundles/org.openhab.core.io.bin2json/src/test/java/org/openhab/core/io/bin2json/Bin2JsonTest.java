@@ -12,13 +12,13 @@
  */
 package org.openhab.core.io.bin2json;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.JsonObject;
 
@@ -29,9 +29,10 @@ import com.google.gson.JsonObject;
  */
 public class Bin2JsonTest {
 
-    @Test(expected = ConversionException.class)
+    @Test
     public void testParserRuleError() throws ConversionException {
-        new Bin2Json("byte a byte b ubyte c;").convert(new byte[] { 3, 34, (byte) 255 });
+        assertThrows(ConversionException.class,
+                () -> new Bin2Json("byte a byte b ubyte c;").convert(new byte[] { 3, 34, (byte) 255 }));
     }
 
     @Test
@@ -40,9 +41,9 @@ public class Bin2JsonTest {
         assertEquals("{\"a\":3,\"b\":-6,\"c\":255}", json.toString());
     }
 
-    @Test(expected = ConversionException.class)
+    @Test
     public void testHexStringDataError() throws ConversionException {
-        new Bin2Json("byte a; byte b; ubyte c;").convert("0322F");
+        assertThrows(ConversionException.class, () -> new Bin2Json("byte a; byte b; ubyte c;").convert("0322F"));
     }
 
     @Test
@@ -52,9 +53,10 @@ public class Bin2JsonTest {
         assertEquals("{\"length\":4,\"data\":[8,33,1,2]}", json.toString());
     }
 
-    @Test(expected = ConversionException.class)
+    @Test
     public void testByteArrayDataError() throws ConversionException {
-        new Bin2Json("byte a; byte b; ubyte c;").convert(new byte[] { 3, 34 });
+        assertThrows(ConversionException.class,
+                () -> new Bin2Json("byte a; byte b; ubyte c;").convert(new byte[] { 3, 34 }));
     }
 
     @Test
@@ -64,9 +66,10 @@ public class Bin2JsonTest {
         assertEquals("{\"length\":4,\"data\":[8,33,1,2]}", json.toString());
     }
 
-    @Test(expected = ConversionException.class)
+    @Test
     public void testInputStreamDataError() throws ConversionException {
         InputStream inputStream = new ByteArrayInputStream(new byte[] { 4, 8, 33 });
-        new Bin2Json("ubyte length; ubyte[length] data;").convert(inputStream);
+        assertThrows(ConversionException.class,
+                () -> new Bin2Json("ubyte length; ubyte[length] data;").convert(inputStream));
     }
 }

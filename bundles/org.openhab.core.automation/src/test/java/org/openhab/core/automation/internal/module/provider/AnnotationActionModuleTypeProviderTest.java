@@ -12,7 +12,7 @@
  */
 package org.openhab.core.automation.internal.module.provider;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.Visibility;
@@ -72,7 +72,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
     private AnnotatedActions actionProviderConf1;
     private AnnotatedActions actionProviderConf2;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         actionProviderConf1 = new TestActionProvider();
         actionProviderConf2 = new TestActionProvider();

@@ -13,7 +13,7 @@
 package org.openhab.core.automation.module.timer.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,8 +25,8 @@ import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -76,7 +76,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
      *
      * @Before-annotated methods in sub-classes.
      */
-    @Before
+    @BeforeEach
     public void beforeBase() {
         @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {

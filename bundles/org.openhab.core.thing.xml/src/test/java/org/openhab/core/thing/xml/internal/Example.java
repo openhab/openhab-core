@@ -14,7 +14,7 @@ package org.openhab.core.thing.xml.internal;
 
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * The {@link Example} test case is a usage example how the according {@code ThingType} parser

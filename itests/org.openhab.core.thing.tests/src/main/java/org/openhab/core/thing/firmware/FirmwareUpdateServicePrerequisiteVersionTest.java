@@ -13,7 +13,7 @@
 package org.openhab.core.thing.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -24,8 +24,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -50,7 +50,7 @@ public class FirmwareUpdateServicePrerequisiteVersionTest extends JavaOSGiTest {
     private Thing thingWithFirmwareV1;
     private Thing thingWithFirmwareV2;
 
-    @Before
+    @BeforeEach
     public void setup() {
         thingTypeUID = new ThingTypeUID("binding:thingtype");
 

@@ -12,7 +12,7 @@
  */
 package org.openhab.core.automation.thingsupport;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
@@ -80,7 +80,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     private ThingActions actionProviderConf1;
     private ThingActions actionProviderConf2;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mockHandler1 = mock(ThingHandler.class);
         when(mockHandler1.getThing()).thenReturn(ThingBuilder.create(TEST_THING_TYPE_UID, "test1").build());

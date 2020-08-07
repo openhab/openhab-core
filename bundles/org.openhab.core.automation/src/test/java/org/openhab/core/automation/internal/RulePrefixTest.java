@@ -12,8 +12,9 @@
  */
 package org.openhab.core.automation.internal;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.RulePredicates;
 
 /**
@@ -34,18 +35,18 @@ public class RulePrefixTest {
     @Test
     public void testEmptyPrefix() {
         final RuleImpl rule0 = new RuleImpl(null);
-        Assert.assertNotNull("Returned UID is null instead of generated one", rule0.getUID());
-        Assert.assertNull("Returned a prefix instead of null", RulePredicates.getPrefix(rule0));
+        assertNotNull(rule0.getUID(), "Returned UID is null instead of generated one");
+        assertNull(RulePredicates.getPrefix(rule0), "Returned a prefix instead of null");
 
         final String somethingWithoutSeparator = "something_without_separator";
         final RuleImpl rule1 = new RuleImpl(somethingWithoutSeparator);
-        Assert.assertEquals("Returned wrong UID", somethingWithoutSeparator, rule1.getUID());
-        Assert.assertNull("Returned a prefix instead of null", RulePredicates.getPrefix(rule1));
+        assertEquals(somethingWithoutSeparator, rule1.getUID(), "Returned wrong UID");
+        assertNull(RulePredicates.getPrefix(rule1), "Returned a prefix instead of null");
 
         final String withSeparatorButEmpty = RulePredicates.PREFIX_SEPARATOR + "with_separator_but_empty";
         final RuleImpl rule2 = new RuleImpl(withSeparatorButEmpty);
-        Assert.assertEquals("Returned wrong UID", withSeparatorButEmpty, rule2.getUID());
-        Assert.assertNull("Returned a prefix instead of null", RulePredicates.getPrefix(rule2));
+        assertEquals(withSeparatorButEmpty, rule2.getUID(), "Returned wrong UID");
+        assertNull(RulePredicates.getPrefix(rule2), "Returned a prefix instead of null");
     }
 
     /**
@@ -60,18 +61,18 @@ public class RulePrefixTest {
 
         final String someName = "someName";
         final RuleImpl rule0 = new RuleImpl(testingPrefixPrefix + someName);
-        Assert.assertEquals("Returned wrong prefix", TESTING_PREFIX, RulePredicates.getPrefix(rule0));
-        Assert.assertEquals("Returned wrong UID", testingPrefixPrefix + someName, rule0.getUID());
+        assertEquals(TESTING_PREFIX, RulePredicates.getPrefix(rule0), "Returned wrong prefix");
+        assertEquals(testingPrefixPrefix + someName, rule0.getUID(), "Returned wrong UID");
 
         final String multipleSeparatorName = RulePredicates.PREFIX_SEPARATOR + "nameBetweenSeparator"
                 + RulePredicates.PREFIX_SEPARATOR;
         final RuleImpl rule1 = new RuleImpl(testingPrefixPrefix + multipleSeparatorName);
-        Assert.assertEquals("Returned wrong prefix", TESTING_PREFIX, RulePredicates.getPrefix(rule1));
-        Assert.assertEquals("Returned wrong UID", testingPrefixPrefix + someName, rule0.getUID());
+        assertEquals(TESTING_PREFIX, RulePredicates.getPrefix(rule1), "Returned wrong prefix");
+        assertEquals(testingPrefixPrefix + someName, rule0.getUID(), "Returned wrong UID");
 
         final String emptyName = "";
         final RuleImpl rule2 = new RuleImpl(testingPrefixPrefix + emptyName);
-        Assert.assertEquals("Returned wrong prefix", TESTING_PREFIX, RulePredicates.getPrefix(rule2));
-        Assert.assertEquals("Returned wrong UID", testingPrefixPrefix + emptyName, rule2.getUID());
+        assertEquals(TESTING_PREFIX, RulePredicates.getPrefix(rule2), "Returned wrong prefix");
+        assertEquals(testingPrefixPrefix + emptyName, rule2.getUID(), "Returned wrong UID");
     }
 }

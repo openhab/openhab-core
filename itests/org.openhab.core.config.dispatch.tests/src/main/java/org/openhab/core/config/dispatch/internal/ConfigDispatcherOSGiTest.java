@@ -13,7 +13,7 @@
 package org.openhab.core.config.dispatch.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,15 +32,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.io.TempDir;
 import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.framework.InvalidSyntaxException;
@@ -50,11 +49,10 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * @author Petar Valchev - Initial contribution
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(Alphanumeric.class)
 public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
 
-    @Rule
-    public TemporaryFolder tmpBaseFolder = new TemporaryFolder();
+    public @TempDir File tmpBaseFolder;
 
     private ConfigurationAdmin configAdmin;
 
@@ -68,15 +66,15 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     private Configuration configuration;
     private static String configBaseDirectory;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         // Store the default values in order to restore them after all the tests are finished.
         defaultConfigFile = System.getProperty(ConfigDispatcher.SERVICECFG_PROG_ARGUMENT);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
-        configBaseDirectory = tmpBaseFolder.getRoot().getAbsolutePath();
+        configBaseDirectory = tmpBaseFolder.getAbsolutePath();
         final Path source = Paths.get(CONFIGURATION_BASE_DIR);
         Files.walkFileTree(source, new CopyDirectoryRecursive(source, Paths.get(configBaseDirectory)));
 
@@ -114,7 +112,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         // Clear the configuration with the current pid from the persistent store.
         if (configuration != null) {
@@ -122,7 +120,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() {
         // Set the system properties to their initial values.
         setSystemProperty(ConfigDispatcher.SERVICECFG_PROG_ARGUMENT, defaultConfigFile);

@@ -13,13 +13,14 @@
 package org.openhab.core.io.http.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.io.http.WrappingHttpContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
@@ -28,21 +29,18 @@ import org.osgi.service.http.HttpContext;
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class HttpContextFactoryServiceImplTest {
 
     private static final String RESOURCE = "resource";
 
     private HttpContextFactoryServiceImpl httpContextFactoryService;
 
-    @Mock
-    private Bundle bundle;
+    private @Mock Bundle bundle;
+    private @Mock WrappingHttpContext httpContext;
 
-    @Mock
-    private WrappingHttpContext httpContext;
-
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         httpContextFactoryService = new HttpContextFactoryServiceImpl();
         httpContextFactoryService.setHttpContext(httpContext);
 

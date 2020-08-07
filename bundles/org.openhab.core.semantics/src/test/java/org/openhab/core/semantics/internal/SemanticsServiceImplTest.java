@@ -12,18 +12,18 @@
  */
 package org.openhab.core.semantics.internal;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -36,6 +36,7 @@ import org.openhab.core.semantics.model.location.LivingRoom;
 /**
  * @author Kai Kreuzer - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class SemanticsServiceImplTest {
 
     private @Mock ItemRegistry itemRegistry;
@@ -47,10 +48,8 @@ public class SemanticsServiceImplTest {
 
     private SemanticsServiceImpl service;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
-        initMocks(this);
-
         CoreItemFactory itemFactory = new CoreItemFactory();
         locationItem = new GroupItem("TestBathRoom");
         locationItem.addTag("Bathroom");
@@ -66,7 +65,6 @@ public class SemanticsServiceImplTest {
         pointItem.addGroupName(locationItem.getName());
         locationItem.addMember(pointItem);
 
-        when(metadataRegistry.get(any())).thenReturn(null);
         when(itemRegistry.stream()).thenReturn(Stream.of(locationItem, equipmentItem, pointItem))
                 .thenReturn(Stream.of(locationItem, equipmentItem, pointItem))
                 .thenReturn(Stream.of(locationItem, equipmentItem, pointItem));

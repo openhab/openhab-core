@@ -13,10 +13,10 @@
 package org.openhab.core.audio.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
@@ -37,7 +37,7 @@ public class AudioManagerServletTest extends AbstractAudioServletTest {
 
     private AudioSinkFake audioSink;
 
-    @Before
+    @BeforeEach
     public void setup() {
         audioManager = new AudioManagerImpl();
         audioSink = new AudioSinkFake();

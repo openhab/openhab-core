@@ -13,15 +13,16 @@
 package org.openhab.core.thing.internal.profiles;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Temperature;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.types.DecimalType;
@@ -40,7 +41,7 @@ import org.openhab.core.types.State;
  */
 public class SystemOffsetProfileTest {
 
-    @Before
+    @BeforeEach
     public void setup() {
         // initialize parser with ImperialUnits, otherwise units like °F are unknown
         @SuppressWarnings("unused")

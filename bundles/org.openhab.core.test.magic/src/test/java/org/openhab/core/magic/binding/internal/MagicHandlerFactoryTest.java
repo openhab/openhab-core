@@ -13,12 +13,12 @@
 package org.openhab.core.magic.binding.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.magic.binding.MagicBindingConstants;
 import org.openhab.core.magic.binding.handler.MagicColorLightHandler;
 import org.openhab.core.magic.binding.handler.MagicDimmableLightHandler;
@@ -36,7 +36,7 @@ public class MagicHandlerFactoryTest {
 
     private @NonNullByDefault({}) MagicHandlerFactory factory;
 
-    @Before
+    @BeforeEach
     public void setup() {
         factory = new MagicHandlerFactory(mock(MagicDynamicStateDescriptionProvider.class));
     }

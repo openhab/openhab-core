@@ -13,7 +13,7 @@
 package org.openhab.core.io.rest.core.internal.service;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
@@ -27,8 +27,8 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.io.rest.core.service.ConfigurableServiceDTO;
 import org.openhab.core.test.AsyncResultWrapper;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -49,7 +49,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
     private ConfigurableServiceResource configurableServiceResource;
     private final AsyncResultWrapper<Dictionary<String, Object>> propertiesWrapper = new AsyncResultWrapper<>();
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         Configuration configuration = mock(Configuration.class);

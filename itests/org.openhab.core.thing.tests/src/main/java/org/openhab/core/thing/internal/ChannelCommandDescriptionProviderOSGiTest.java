@@ -13,8 +13,9 @@
 package org.openhab.core.thing.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,9 +26,9 @@ import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -73,7 +74,6 @@ import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentContext;
 
@@ -88,6 +88,8 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
     private static final String TEST_BUNDLE_NAME = "thingStatusInfoI18nTest.bundle";
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("hue:dynamic");
 
+    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
+
     private @Mock @NonNullByDefault({}) ComponentContext componentContextMock;
 
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
@@ -95,9 +97,9 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) Bundle testBundle;
     private @NonNullByDefault({}) ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
 
-    @Before
-    public void setup() throws Exception {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        mocksCloseable = openMocks(this);
 
         Mockito.when(componentContextMock.getBundleContext()).thenReturn(bundleContext);
 
@@ -173,8 +175,9 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         linkRegistry = getService(ItemChannelLinkRegistry.class);
     }
 
-    @After
-    public void teardown() throws BundleException {
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
         testBundle.uninstall();
         ManagedThingProvider managedThingProvider = getService(ManagedThingProvider.class);
         assertNotNull(managedThingProvider);
@@ -210,7 +213,12 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
 
         Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
                 null, "test thing", new Configuration());
+
         assertNotNull(thing);
+        if (thing == null) {
+            throw new IllegalStateException("thing is null");
+        }
+
         managedThingProvider.add(thing);
         ItemChannelLink link = new ItemChannelLink("TestItem1", getChannel(thing, "1").getUID());
         linkRegistry.add(link);
@@ -278,6 +286,10 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         Thing thing = thingRegistry.createThingOfType(new ThingTypeUID("hue:lamp"), new ThingUID("hue:lamp:lamp1"),
                 null, "test thing", new Configuration());
         assertNotNull(thing);
+        if (thing == null) {
+            throw new IllegalStateException("thing is null");
+        }
+
         managedThingProvider.add(thing);
         ItemChannelLink link = new ItemChannelLink("TestItem7_2", getChannel(thing, "7_2").getUID());
         linkRegistry.add(link);

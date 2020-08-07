@@ -13,7 +13,7 @@
 package org.openhab.core.config.core;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openhab.core.config.core.ConfigDescriptionParameter.Type.*;
 
 import java.math.BigDecimal;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Simon Kaufmann - Initial contribution

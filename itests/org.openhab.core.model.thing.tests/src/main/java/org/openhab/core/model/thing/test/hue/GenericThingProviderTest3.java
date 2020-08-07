@@ -14,7 +14,7 @@ package org.openhab.core.model.thing.test.hue;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
@@ -25,9 +25,9 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
@@ -59,7 +59,7 @@ public class GenericThingProviderTest3 extends JavaOSGiTest {
     private ModelRepository modelRepository;
     private ThingRegistry thingRegistry;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         thingRegistry = getService(ThingRegistry.class);
         assertThat(thingRegistry, is(notNullValue()));
@@ -104,7 +104,7 @@ public class GenericThingProviderTest3 extends JavaOSGiTest {
         registerService(configDescriptionProvider);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         unregisterService(dumbThingHandlerFactory);
         modelRepository.removeModel(TESTMODEL_NAME);

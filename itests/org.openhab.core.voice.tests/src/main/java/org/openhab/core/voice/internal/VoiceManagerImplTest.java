@@ -13,7 +13,8 @@
 package org.openhab.core.voice.internal;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,10 +24,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -60,10 +59,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
 
     private AudioManager audioManager;
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         voiceManager = getService(VoiceManager.class, VoiceManagerImpl.class);
         assertNotNull(voiceManager);
@@ -133,11 +129,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
     @Test
     public void interpretSomethingWithGivenHliIdEhenTheHliIsNotARegisteredService() throws InterpretationException {
         hliStub = new HumanLanguageInterpreterStub();
-        String result;
-        exception.expect(InterpretationException.class);
-        result = voiceManager.interpret("something", hliStub.getId());
 
-        assertNull(result);
+        assertThrows(InterpretationException.class, () -> voiceManager.interpret("something", hliStub.getId()));
     }
 
     @Test
@@ -164,9 +157,8 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         hliStub = new HumanLanguageInterpreterStub();
         source = new AudioSourceStub();
 
-        exception.expect(IllegalStateException.class);
-        voiceManager.startDialog(ksService, sttService, ttsService, hliStub, source, sink, Locale.getDefault(), "word",
-                null);
+        assertThrows(IllegalStateException.class, () -> voiceManager.startDialog(ksService, sttService, ttsService,
+                hliStub, source, sink, Locale.getDefault(), "word", null));
 
         assertFalse(ksService.isWordSpotted());
     }

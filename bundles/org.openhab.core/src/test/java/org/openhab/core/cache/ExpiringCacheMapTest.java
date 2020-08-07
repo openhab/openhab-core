@@ -12,7 +12,7 @@
  */
 package org.openhab.core.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -23,8 +23,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for the {@link ExpiringCacheMap} class.
@@ -51,14 +51,14 @@ public class ExpiringCacheMapTest {
 
     private ExpiringCacheMap<String, String> subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         subject = new ExpiringCacheMap<>(CACHE_EXPIRY);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPutIllegalArgumentException3() throws IllegalArgumentException {
-        subject.put(null, CACHE_ACTION);
+        assertThrows(IllegalArgumentException.class, () -> subject.put(null, CACHE_ACTION));
     }
 
     @Test
@@ -87,9 +87,9 @@ public class ExpiringCacheMapTest {
         assertNotEquals(RESPONSE_2, response);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPutValueIllegalArgumentException1() throws IllegalArgumentException {
-        subject.putValue("KEY_NOT_FOUND", "test");
+        assertThrows(IllegalArgumentException.class, () -> subject.putValue("KEY_NOT_FOUND", "test"));
     }
 
     @Test

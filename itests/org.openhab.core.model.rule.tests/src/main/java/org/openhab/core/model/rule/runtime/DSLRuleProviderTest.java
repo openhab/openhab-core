@@ -13,7 +13,8 @@
 package org.openhab.core.model.rule.runtime;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -24,9 +25,9 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.internal.module.handler.ChannelEventTriggerHandler;
@@ -61,7 +62,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
     private @NonNullByDefault({}) DSLRuleProvider dslRuleProvider;
     private @NonNullByDefault({}) ReadyService readyService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         registerVolatileStorageService();
 
@@ -84,7 +85,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         modelRepository.removeModel(TESTMODEL_NAME);
     }

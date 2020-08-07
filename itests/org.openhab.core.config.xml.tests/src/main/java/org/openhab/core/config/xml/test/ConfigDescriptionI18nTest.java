@@ -13,7 +13,8 @@
 package org.openhab.core.config.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,8 +22,8 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -43,7 +44,7 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
 
     private ConfigDescriptionProvider configDescriptionProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         configDescriptionProvider = getService(ConfigDescriptionProvider.class,
                 serviceReference -> "core.xml.config".equals(serviceReference.getProperty("esh.scope")));

@@ -13,17 +13,17 @@
 package org.openhab.core.model.thing.test.hue;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
+import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.thing.testsupport.hue.TestHueThingHandlerFactoryX;
 import org.openhab.core.model.thing.testsupport.hue.TestHueThingTypeProvider;
@@ -53,7 +53,6 @@ import org.osgi.service.component.ComponentContext;
  *
  * @author Simon Kaufmann - Initial contribution and API.
  */
-@RunWith(Parameterized.class)
 public class GenericThingProviderTest4 extends JavaOSGiTest {
     private TestHueThingTypeProvider thingTypeProvider;
     private ReadyService readyService;
@@ -62,20 +61,15 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
     private boolean finished;
     private int bridgeInitializeCounter;
     private int thingInitializeCounter;
-    final boolean slowInit;
+    boolean slowInit;
 
     private static final String TESTMODEL_NAME = "testModelX.things";
 
     ModelRepository modelRepository;
     ThingRegistry thingRegistry;
 
-    @Parameters(name = "{index}: slowInit={0}")
-    public static Object[] data() {
-        return new Object[] { false, true };
-    }
-
-    public GenericThingProviderTest4(boolean slowInit) {
-        this.slowInit = slowInit;
+    public static Stream<Arguments> data() {
+        return Stream.of(Arguments.of(false), Arguments.of(true));
     }
 
     class TestBridgeHandler extends BaseBridgeHandler {
@@ -106,7 +100,7 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
 
@@ -156,7 +150,7 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         });
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         modelRepository.removeModel(TESTMODEL_NAME);
         if (thingTypeProvider != null) {
@@ -215,8 +209,10 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         });
     }
 
-    @Test
-    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithUpdateFactoryLoaded() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithUpdateFactoryLoaded(boolean slowInit) {
+        this.slowInit = slowInit;
         assertThat(thingRegistry.getAll().size(), is(0));
         updateModel();
         assertThat(thingRegistry.getAll().size(), is(0));
@@ -227,8 +223,10 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         assertThatAllIsGood();
     }
 
-    @Test
-    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithFactoryUpdateLoaded() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithFactoryUpdateLoaded(boolean slowInit) {
+        this.slowInit = slowInit;
         assertThat(thingRegistry.getAll().size(), is(0));
         registerService(hueThingHandlerFactory, ThingHandlerFactory.class.getName());
         assertThat(thingRegistry.getAll().size(), is(0));
@@ -239,8 +237,10 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         assertThatAllIsGood();
     }
 
-    @Test
-    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithLoadedFactoryUpdate() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithLoadedFactoryUpdate(boolean slowInit) {
+        this.slowInit = slowInit;
         assertThat(thingRegistry.getAll().size(), is(0));
         registerThingTypeProvider();
         finishLoading();
@@ -251,8 +251,10 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         assertThatAllIsGood();
     }
 
-    @Test
-    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithLoadedUpdateFactory() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithLoadedUpdateFactory(boolean slowInit) {
+        this.slowInit = slowInit;
         assertThat(thingRegistry.getAll().size(), is(0));
         registerThingTypeProvider();
         finishLoading();
@@ -263,8 +265,10 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         assertThatAllIsGood();
     }
 
-    @Test
-    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithFactoryLoadedUpdate() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithFactoryLoadedUpdate(boolean slowInit) {
+        this.slowInit = slowInit;
         assertThat(thingRegistry.getAll().size(), is(0));
         registerService(hueThingHandlerFactory, ThingHandlerFactory.class.getName());
         assertThat(thingRegistry.getAll().size(), is(0));
@@ -275,8 +279,10 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         assertThatAllIsGood();
     }
 
-    @Test
-    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithUpdateLoadedFactory() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void assertThatThingsAreCreatedOnlyOnceTheBundleFinishedLoadingWithUpdateLoadedFactory(boolean slowInit) {
+        this.slowInit = slowInit;
         assertThat(thingRegistry.getAll().size(), is(0));
         updateModel();
         assertThat(thingRegistry.getAll().size(), is(0));
@@ -287,9 +293,11 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         assertThatAllIsGood();
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("data")
     @SuppressWarnings("null")
-    public void assertThatThingHandlersAreManagedCorrectlyOnUpdateWithFactoryLoaded() {
+    public void assertThatThingHandlersAreManagedCorrectlyOnUpdateWithFactoryLoaded(boolean slowInit) {
+        this.slowInit = slowInit;
         prepareThingWithShutDownBundle();
 
         bridgeInitializeCounter = 0;

@@ -13,14 +13,14 @@
 package org.openhab.core.internal.i18n;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -56,7 +56,7 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
 
     TranslationProvider translationProvider;
 
-    @Before
+    @BeforeEach
     public void setup() {
         translationProvider = getService(TranslationProvider.class);
 

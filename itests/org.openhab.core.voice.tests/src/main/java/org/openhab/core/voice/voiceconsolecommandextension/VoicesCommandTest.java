@@ -13,12 +13,12 @@
 package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.voice.internal.SinkStub;
 import org.openhab.core.voice.internal.TTSServiceStub;
 import org.openhab.core.voice.internal.VoiceStub;
@@ -36,7 +36,7 @@ public class VoicesCommandTest extends VoiceConsoleCommandExtensionTest {
     private SinkStub sink;
     private VoiceStub voice;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         BundleContext context = bundleContext;
 

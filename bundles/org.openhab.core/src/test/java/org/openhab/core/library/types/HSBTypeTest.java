@@ -13,11 +13,12 @@
 package org.openhab.core.library.types;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -126,14 +127,14 @@ public class HSBTypeTest {
         assertEquals(new HSBType("11,100,100"), hsb);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWithString1() {
-        new HSBType("");
+        assertThrows(IllegalArgumentException.class, () -> new HSBType(""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWithString2() {
-        new HSBType("1,2");
+        assertThrows(IllegalArgumentException.class, () -> new HSBType("1,2"));
     }
 
     @Test
@@ -172,23 +173,23 @@ public class HSBTypeTest {
         assertThat(hsb.getBrightness(), is(new PercentType(3)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWithIllegalHueValue() {
-        new HSBType("-13,85,51");
+        assertThrows(IllegalArgumentException.class, () -> new HSBType("-13,85,51"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWithIllegalHueValue2() {
-        new HSBType("360,85,51");
+        assertThrows(IllegalArgumentException.class, () -> new HSBType("360,85,51"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWithIllegalSaturationValue() {
-        new HSBType("5,-85,51");
+        assertThrows(IllegalArgumentException.class, () -> new HSBType("5,-85,51"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructorWithIllegalBrightnessValue() {
-        new HSBType("5,85,151");
+        assertThrows(IllegalArgumentException.class, () -> new HSBType("5,85,151"));
     }
 }

@@ -17,12 +17,14 @@ import static java.nio.file.Files.*;
 import static java.nio.file.attribute.PosixFilePermission.*;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.SysfsUsbSerialScanner.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -31,10 +33,9 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.hamcrest.Matcher;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 
 /**
@@ -44,8 +45,7 @@ import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
  */
 public class SysFsUsbSerialScannerTest {
 
-    @Rule
-    public final TemporaryFolder rootFolder = new TemporaryFolder();
+    public @TempDir File rootFolder;
 
     private static final String SYSFS_TTY_DEVICES_DIR = "sys/class/tty";
     private static final String DEV_DIR = "dev";
@@ -60,12 +60,12 @@ public class SysFsUsbSerialScannerTest {
 
     private int deviceIndexCounter = 0;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         // only run the tests on systems that support symbolic links
         assumeTrue(systemSupportsSymLinks());
 
-        rootPath = rootFolder.getRoot().toPath();
+        rootPath = rootFolder.toPath();
 
         devPath = rootPath.resolve(DEV_DIR);
         createDirectories(devPath);
@@ -84,10 +84,10 @@ public class SysFsUsbSerialScannerTest {
         scanner.modified(config);
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void testIOExceptionIfSysfsTtyDoesNotExist() throws IOException {
         delete(sysfsTtyPath);
-        scanner.scan();
+        assertThrows(IOException.class, () -> scanner.scan());
     }
 
     @Test
@@ -234,7 +234,7 @@ public class SysFsUsbSerialScannerTest {
 
     private boolean systemSupportsSymLinks() throws IOException {
         try {
-            createSymbolicLink(rootFolder.getRoot().toPath().resolve("aSymbolicLink"), rootFolder.getRoot().toPath());
+            createSymbolicLink(rootFolder.toPath().resolve("aSymbolicLink"), rootFolder.toPath());
             return true;
         } catch (UnsupportedOperationException e) {
             return false;

@@ -13,7 +13,7 @@
 package org.openhab.core.thing.binding;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -27,8 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
@@ -111,7 +111,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
     private int genericInits = 0;
     private int unregisterHandlerDelay = 0;
 
-    @Before
+    @BeforeEach
     public void setup() throws URISyntaxException {
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);

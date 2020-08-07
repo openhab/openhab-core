@@ -13,12 +13,12 @@
 package org.openhab.core.thing.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Collection;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.BundleCloseable;
 import org.openhab.core.test.SyntheticBundleInstaller;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -40,7 +40,7 @@ public class ChannelTypesTest extends JavaOSGiTest {
     private ChannelTypeProvider channelTypeProvider;
     private ChannelGroupTypeProvider channelGroupTypeProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         // get ONLY the XMLChannelTypeProvider
         channelTypeProvider = getService(ChannelTypeProvider.class,

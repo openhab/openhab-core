@@ -12,10 +12,10 @@
  */
 package org.openhab.core.internal.events;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,9 +23,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openhab.core.events.Event;
@@ -62,6 +62,8 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
 
     private EventPublisher eventPublisher;
 
+    private AutoCloseable mocksCloseable;
+
     private @Mock EventSubscriber subscriber1;
     private @Mock EventSubscriber subscriber2;
     private @Mock EventSubscriber subscriber3;
@@ -69,9 +71,10 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
     private @Mock EventFactory eventTypeFactoryAB;
     private @Mock EventFactory eventTypeFactoryC;
 
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() throws Exception {
+        mocksCloseable = openMocks(this);
+
         eventPublisher = getService(EventPublisher.class);
         assertNotNull(eventPublisher);
 
@@ -102,8 +105,9 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         internalRegisterService(ALL_EVENT_TYPES_SUBSCRIBER_4, EventSubscriber.class, subscriber4);
     }
 
-    @After
-    public void cleanUp() {
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
         for (ServiceRegistration<?> service : serviceRegistrations.values()) {
             service.unregister();
         }

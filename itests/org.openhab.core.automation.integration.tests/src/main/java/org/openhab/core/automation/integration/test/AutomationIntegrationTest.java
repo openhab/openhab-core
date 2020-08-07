@@ -14,7 +14,8 @@ package org.openhab.core.automation.integration.test;
 
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,9 +32,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.ManagedRuleProvider;
@@ -101,7 +102,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     private @Nullable Event ruleEvent;
     private @Nullable Event itemEvent;
 
-    @Before
+    @BeforeEach
     public void before() {
         logger.info("@Before.begin");
 
@@ -167,7 +168,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         logger.info("@Before.finish");
     }
 
-    @After
+    @AfterEach
     public void after() {
         logger.info("@After");
     }

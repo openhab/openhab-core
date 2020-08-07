@@ -13,16 +13,16 @@
 package org.openhab.core.model.thing.test.hue;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.model.core.ModelRepository;
@@ -47,7 +47,7 @@ public class GenericItemChannelLinkProviderTest extends JavaOSGiTest {
     private ItemChannelLinkRegistry itemChannelLinkRegistry;
     private ItemChannelLinkProvider itemChannelLinkProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
 
@@ -65,7 +65,7 @@ public class GenericItemChannelLinkProviderTest extends JavaOSGiTest {
         modelRepository.removeModel(ITEMS_TESTMODEL_NAME);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         modelRepository.removeModel(THINGS_TESTMODEL_NAME);
         modelRepository.removeModel(ITEMS_TESTMODEL_NAME);

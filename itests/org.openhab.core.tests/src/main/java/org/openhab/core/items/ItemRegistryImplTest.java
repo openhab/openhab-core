@@ -14,19 +14,21 @@ package org.openhab.core.items;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.junit.Assert.*;
+import static org.hamcrest.core.IsIterableContaining.hasItem;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -70,12 +72,13 @@ public class ItemRegistryImplTest extends JavaTest {
     private ItemRegistry itemRegistry;
     private ManagedItemProvider itemProvider;
 
-    @Mock
-    private EventPublisher eventPublisher;
+    private AutoCloseable mocksCloseable;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
+    private @Mock EventPublisher eventPublisher;
+
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         ItemFactory coreItemFactory = new CoreItemFactory();
 
@@ -113,6 +116,11 @@ public class ItemRegistryImplTest extends JavaTest {
                 setItemStateConverter(mock(ItemStateConverter.class));
             }
         };
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test

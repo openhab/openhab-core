@@ -13,7 +13,7 @@
 package org.openhab.core.automation.module.timer.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.internal.module.handler.DayOfWeekConditionHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;

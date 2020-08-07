@@ -13,10 +13,10 @@
 package org.openhab.core.thing.binding.builder;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.ThingStatusInfo;
@@ -30,7 +30,7 @@ public class ThingStatusInfoBuilderTest {
 
     private ThingStatusInfoBuilder builder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         builder = ThingStatusInfoBuilder.create(ThingStatus.ONLINE);
     }

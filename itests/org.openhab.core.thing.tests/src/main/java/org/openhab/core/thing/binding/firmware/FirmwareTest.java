@@ -13,7 +13,8 @@
 package org.openhab.core.thing.binding.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -116,11 +117,12 @@ public class FirmwareTest extends JavaOSGiTest {
         assertThat(firmware.getFirmwareRestriction(), is(restrictionFunction));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void modelRestrictedWithoutModel() {
         ThingTypeUID sampleThingTypeUID = new ThingTypeUID("binding", "sampleThingType");
         String version = "1.0.0";
-        FirmwareBuilder.create(sampleThingTypeUID, version).withModelRestricted(true).build();
+        assertThrows(IllegalArgumentException.class,
+                () -> FirmwareBuilder.create(sampleThingTypeUID, version).withModelRestricted(true).build());
     }
 
     @Test
@@ -281,12 +283,12 @@ public class FirmwareTest extends JavaOSGiTest {
         assertThat(bytes, is(notNullValue()));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatFirmwareWithInvalidMD5HashValueThrowsExceptionForGetBytes() throws IOException {
         Firmware firmware = FirmwareBuilder.create(THING_TYPE_UID, "1")
                 .withInputStream(bundleContext.getBundle().getResource(FILE_NAME).openStream())
                 .withMd5Hash("78805a221a988e79ef3f42d7c5bfd419").build();
-        firmware.getBytes();
+        assertThrows(IllegalStateException.class, () -> firmware.getBytes());
     }
 
     @Test
@@ -353,19 +355,19 @@ public class FirmwareTest extends JavaOSGiTest {
         assertThat(firmware1.hashCode(), is(firmware2.hashCode()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullThingTypeOnCreation() {
-        FirmwareBuilder.create(giveNull(), "1");
+        assertThrows(IllegalArgumentException.class, () -> FirmwareBuilder.create(giveNull(), "1"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullFirmwareVersionOnCreation() {
-        FirmwareBuilder.create(THING_TYPE_UID, giveNull());
+        assertThrows(IllegalArgumentException.class, () -> FirmwareBuilder.create(THING_TYPE_UID, giveNull()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEmptyVersionOnCreation() {
-        FirmwareBuilder.create(THING_TYPE_UID, "");
+        assertThrows(IllegalArgumentException.class, () -> FirmwareBuilder.create(THING_TYPE_UID, ""));
     }
 
     private Firmware firmwareWithVersion(String version) {

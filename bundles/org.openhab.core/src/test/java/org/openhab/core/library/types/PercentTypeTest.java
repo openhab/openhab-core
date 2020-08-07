@@ -12,9 +12,9 @@
  */
 package org.openhab.core.library.types;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.unit.SmartHomeUnits;
 
 /**
@@ -22,14 +22,14 @@ import org.openhab.core.library.unit.SmartHomeUnits;
  */
 public class PercentTypeTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void negativeNumber() {
-        new PercentType(-3);
+        assertThrows(IllegalArgumentException.class, () -> new PercentType(-3));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void moreThan100() {
-        new PercentType("100.2");
+        assertThrows(IllegalArgumentException.class, () -> new PercentType("100.2"));
     }
 
     @Test

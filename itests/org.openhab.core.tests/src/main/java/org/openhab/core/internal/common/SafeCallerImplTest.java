@@ -13,10 +13,11 @@
 package org.openhab.core.internal.common;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.lang.Thread.State;
 import java.lang.management.ManagementFactory;
@@ -36,11 +37,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.mockito.Mock;
 import org.openhab.core.common.QueueingThreadPoolExecutor;
 import org.openhab.core.test.java.JavaTest;
@@ -66,16 +66,16 @@ public class SafeCallerImplTest extends JavaTest {
 
     private final Logger logger = LoggerFactory.getLogger(SafeCallerImplTest.class);
 
-    public @Rule TestName name = new TestName();
+    private SafeCallerImpl safeCaller;
+    private QueueingThreadPoolExecutor scheduler;
+    private TestInfo testInfo;
+    private final List<AssertingThread> threads = new LinkedList<>();
+
+    private AutoCloseable mocksCloseable;
 
     private @Mock Runnable mockRunnable;
     private @Mock Runnable mockTimeoutHandler;
     private @Mock Consumer<Throwable> mockErrorHandler;
-
-    private QueueingThreadPoolExecutor scheduler;
-    private final List<AssertingThread> threads = new LinkedList<>();
-
-    private SafeCallerImpl safeCaller;
 
     public static interface ITarget {
         public String method();
@@ -91,10 +91,14 @@ public class SafeCallerImplTest extends JavaTest {
     public static class DerivedTarget extends Target implements ITarget {
     }
 
-    @Before
-    public void setup() {
-        initMocks(this);
-        scheduler = QueueingThreadPoolExecutor.createInstance(name.getMethodName(), THREAD_POOL_SIZE);
+    @BeforeEach
+    public void setup(TestInfo testInfo) {
+        this.testInfo = testInfo;
+
+        mocksCloseable = openMocks(this);
+
+        scheduler = QueueingThreadPoolExecutor.createInstance(testInfo.getTestMethod().get().getName(),
+                THREAD_POOL_SIZE);
         safeCaller = new SafeCallerImpl(null) {
             @Override
             protected ExecutorService getScheduler() {
@@ -106,8 +110,10 @@ public class SafeCallerImplTest extends JavaTest {
         assertTrue(GRACE < TIMEOUT);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
+
         // ensure all "inner" assertion errors are heard
         joinAll();
 
@@ -544,15 +550,15 @@ public class SafeCallerImplTest extends JavaTest {
             long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
             try {
                 if (low > -1) {
-                    assertTrue(MessageFormat.format("Duration should have been above {0} but was {1}", low,
-                            durationMillis), durationMillis >= low);
+                    assertTrue(durationMillis >= low, MessageFormat
+                            .format("Duration should have been above {0} but was {1}", low, durationMillis));
                 }
                 if (high > -1) {
-                    assertTrue(MessageFormat.format("Duration should have been below {0} but was {1}", high,
-                            durationMillis), durationMillis < high);
+                    assertTrue(durationMillis < high, MessageFormat
+                            .format("Duration should have been below {0} but was {1}", high, durationMillis));
                 }
             } catch (AssertionError e) {
-                logger.debug("{}", createThreadDump(name.getMethodName()));
+                logger.debug("{}", createThreadDump(testInfo.getTestMethod().get().getName()));
                 throw e;
             }
         }

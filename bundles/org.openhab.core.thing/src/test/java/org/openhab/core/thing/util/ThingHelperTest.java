@@ -14,11 +14,11 @@ package org.openhab.core.thing.util;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -124,7 +124,7 @@ public class ThingHelperTest {
         assertFalse(ThingHelper.equals(thingA, thingB));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatNoDuplicateChannelsCanBeAdded() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("test", "test");
         ThingUID thingUID = new ThingUID(thingTypeUID, "test");
@@ -134,10 +134,10 @@ public class ThingHelperTest {
                         ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build())
                 .build();
 
-        ThingHelper
-                .addChannelsToThing(thing,
+        assertThrows(IllegalArgumentException.class,
+                () -> ThingHelper.addChannelsToThing(thing,
                         Stream.of(ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build(),
                                 ChannelBuilder.create(new ChannelUID(thingUID, "channel3"), "").build())
-                                .collect(toList()));
+                                .collect(toList())));
     }
 }
