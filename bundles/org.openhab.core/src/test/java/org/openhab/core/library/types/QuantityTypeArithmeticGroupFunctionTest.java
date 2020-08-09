@@ -12,9 +12,7 @@
  */
 package org.openhab.core.library.types;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -25,9 +23,11 @@ import javax.measure.quantity.Power;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Temperature;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
@@ -37,25 +37,20 @@ import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
-import tec.uom.se.unit.Units;
-
 /**
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class QuantityTypeArithmeticGroupFunctionTest {
 
     private GroupFunction function;
     private Set<Item> items;
 
-    @Mock
-    UnitProvider unitProvider;
+    private @Mock UnitProvider unitProvider;
 
-    @Before
+    @BeforeEach
     public void init() {
-        initMocks(this);
         items = new LinkedHashSet<>();
-
-        when(unitProvider.getUnit(Temperature.class)).thenReturn(Units.CELSIUS);
     }
 
     @Test

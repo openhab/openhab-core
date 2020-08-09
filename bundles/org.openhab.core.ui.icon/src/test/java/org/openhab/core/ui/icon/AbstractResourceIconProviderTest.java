@@ -13,8 +13,8 @@
 package org.openhab.core.ui.icon;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,9 +24,11 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
 
@@ -36,16 +38,15 @@ import org.openhab.core.ui.icon.IconSet.Format;
  * @author Kai Kreuzer - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
+@ExtendWith(MockitoExtension.class)
 public class AbstractResourceIconProviderTest {
 
     private IconProvider provider;
 
     private @Mock TranslationProvider i18nProviderMock;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         provider = new AbstractResourceIconProvider(i18nProviderMock) {
             @Override
             protected InputStream getResource(String iconset, String resourceName) {

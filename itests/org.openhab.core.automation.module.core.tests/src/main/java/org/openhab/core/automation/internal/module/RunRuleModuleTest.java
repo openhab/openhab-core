@@ -12,7 +12,7 @@
  */
 package org.openhab.core.automation.internal.module;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -28,9 +28,8 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
@@ -68,7 +67,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(RunRuleModuleTest.class);
     private final VolatileStorageService volatileStorageService = new VolatileStorageService();
 
-    @Before
+    @BeforeEach
     public void before() {
         registerService(new ItemProvider() {
             @Override
@@ -138,7 +137,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
     public void sceneActivatedByRule() throws ItemNotFoundException, InterruptedException {
         final RuleRegistry ruleRegistry = getService(RuleRegistry.class);
         final RuleManager ruleEngine = getService(RuleManager.class);
-        Assert.assertNotNull(ruleRegistry);
+        assertNotNull(ruleRegistry);
 
         // Scene rule
 
@@ -148,7 +147,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         ruleRegistry.add(sceneRule);
         ruleEngine.setEnabled(sceneRule.getUID(), true);
         waitForAssert(() -> {
-            Assert.assertEquals(RuleStatus.IDLE, ruleEngine.getStatusInfo(sceneRule.getUID()).getStatus());
+            assertEquals(RuleStatus.IDLE, ruleEngine.getStatusInfo(sceneRule.getUID()).getStatus());
         });
 
         // Outer rule
@@ -159,16 +158,16 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         ruleRegistry.add(outerRule);
         ruleEngine.setEnabled(outerRule.getUID(), true);
         waitForAssert(() -> {
-            Assert.assertEquals(RuleStatus.IDLE, ruleEngine.getStatusInfo(outerRule.getUID()).getStatus());
+            assertEquals(RuleStatus.IDLE, ruleEngine.getStatusInfo(outerRule.getUID()).getStatus());
         });
 
         // Test rule
 
         final EventPublisher eventPublisher = getService(EventPublisher.class);
-        Assert.assertNotNull(eventPublisher);
+        assertNotNull(eventPublisher);
 
         final ItemRegistry itemRegistry = getService(ItemRegistry.class);
-        Assert.assertNotNull(itemRegistry);
+        assertNotNull(itemRegistry);
 
         final Queue<Event> events = new LinkedList<>();
 

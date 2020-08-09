@@ -38,7 +38,6 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonEventFactory;
-import org.openhab.core.config.core.ConfigConstants;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -247,7 +246,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private void setOnlineRepoUrl() {
         Properties prop = new Properties();
 
-        Path versionFilePath = Paths.get(ConfigConstants.getUserDataFolder(), "etc", "version.properties");
+        Path versionFilePath = Paths.get(OpenHAB.getUserDataFolder(), "etc", "version.properties");
         try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
             prop.load(fis);
         } catch (Exception e) {

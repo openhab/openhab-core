@@ -12,8 +12,9 @@
  */
 package org.openhab.core.items;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
@@ -77,22 +78,23 @@ public class GenericItemTest {
         verifyNoMoreInteractions(publisher);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddGroupNameWithNull() {
         TestItem item = new TestItem("member1");
-        item.addGroupName(toNull());
+        assertThrows(IllegalArgumentException.class, () -> item.addGroupName(toNull()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddGroupNamesWithNull() {
         TestItem item = new TestItem("member1");
-        item.addGroupNames(Arrays.asList("group-a", toNull(), "group-b"));
+        assertThrows(IllegalArgumentException.class,
+                () -> item.addGroupNames(Arrays.asList("group-a", toNull(), "group-b")));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testRemoveGroupNameWithNull() {
         TestItem item = new TestItem("member1");
-        item.removeGroupName(toNull());
+        assertThrows(IllegalArgumentException.class, () -> item.removeGroupName(toNull()));
     }
 
     @Test

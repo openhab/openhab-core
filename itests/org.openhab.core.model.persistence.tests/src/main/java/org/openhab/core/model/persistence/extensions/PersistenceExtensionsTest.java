@@ -12,7 +12,7 @@
  */
 package org.openhab.core.model.persistence.extensions;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.types.DecimalType;
@@ -82,7 +82,7 @@ public class PersistenceExtensionsTest {
     private PersistenceExtensions ext;
     private GenericItem item;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ext = new PersistenceExtensions();
         ext.setPersistenceServiceRegistry(registry);
@@ -100,7 +100,7 @@ public class PersistenceExtensionsTest {
         };
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         ext.unsetPersistenceServiceRegistry(registry);
     }

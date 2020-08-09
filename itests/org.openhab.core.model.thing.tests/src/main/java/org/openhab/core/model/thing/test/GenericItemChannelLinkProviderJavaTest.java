@@ -13,10 +13,11 @@
 package org.openhab.core.model.thing.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -24,9 +25,9 @@ import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
@@ -55,6 +56,8 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
     private static final String CHANNEL = "test:test:test:test";
     private static final String LINK = ITEM + " -> " + CHANNEL;
 
+    private @NonNullByDefault({}) AutoCloseable mocksCloseable;
+
     private @Mock @Nullable ProviderChangeListener<ItemChannelLink> listenerMock;
 
     private @NonNullByDefault({}) ModelRepository modelRepository;
@@ -63,11 +66,11 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
     private @NonNullByDefault({}) ItemChannelLinkProvider itemChannelLinkProvider;
 
-    @Before
-    public void setUp() {
-        registerVolatileStorageService();
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
-        initMocks(this);
+        registerVolatileStorageService();
 
         thingRegistry = getService(ThingRegistry.class);
         assertThat(thingRegistry, is(notNullValue()));
@@ -83,8 +86,10 @@ public class GenericItemChannelLinkProviderJavaTest extends JavaOSGiTest {
         modelRepository.removeModel(ITEMS_TESTMODEL_NAME);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
+
         modelRepository.removeModel(THINGS_TESTMODEL_NAME);
         modelRepository.removeModel(ITEMS_TESTMODEL_NAME);
 

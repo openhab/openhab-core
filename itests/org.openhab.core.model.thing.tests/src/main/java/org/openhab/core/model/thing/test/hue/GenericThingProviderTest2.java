@@ -13,15 +13,15 @@
 package org.openhab.core.model.thing.test.hue;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.thing.testsupport.hue.TestHueThingHandlerFactoryX;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -40,7 +40,7 @@ public class GenericThingProviderTest2 extends JavaOSGiTest {
     private ModelRepository modelRepository;
     private ThingRegistry thingRegistry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         thingRegistry = getService(ThingRegistry.class);
         assertThat(thingRegistry, is(notNullValue()));
@@ -49,7 +49,7 @@ public class GenericThingProviderTest2 extends JavaOSGiTest {
         modelRepository.removeModel(TESTMODEL_NAME);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         modelRepository.removeModel(TESTMODEL_NAME);
     }

@@ -12,14 +12,15 @@
  */
 package org.openhab.core.internal.types;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateOption;
@@ -33,7 +34,7 @@ public class StateDescriptionFragmentImplTest {
 
     private StateDescriptionFragmentImpl source;
 
-    @Before
+    @BeforeEach
     public void setup() {
         source = new StateDescriptionFragmentImpl();
         source.setMinimum(BigDecimal.ZERO);

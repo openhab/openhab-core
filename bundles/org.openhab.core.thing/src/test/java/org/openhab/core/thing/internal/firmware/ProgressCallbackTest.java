@@ -13,7 +13,8 @@
 package org.openhab.core.thing.internal.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -22,8 +23,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TranslationProvider;
@@ -63,7 +64,7 @@ public final class ProgressCallbackTest {
     private String cancelMessageKey = "update-canceled";
     private String usedMessagedKey;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ThingTypeUID thingType = new ThingTypeUID("thing:type");
         expectedThingUID = new ThingUID(thingType, "thingid");
@@ -103,31 +104,31 @@ public final class ProgressCallbackTest {
                 expectedThingUID, expectedFirmware, null);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatUpdateThrowsIllegalStateExceptionIfUpdateIsFinished() {
         sut.defineSequence(ProgressStep.DOWNLOADING);
         sut.next();
         sut.success();
         assertThatUpdateResultEventIsValid(postedEvents.get(1), null, FirmwareUpdateResult.SUCCESS);
-        sut.update(100);
+        assertThrows(IllegalStateException.class, () -> sut.update(100));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatDefineSequenceThrowsIllegalArguumentExceptionIfSequenceIsEmpty() {
-        sut.defineSequence();
+        assertThrows(IllegalArgumentException.class, () -> sut.defineSequence());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatSuccessThrowsIllegalStateExceptionIfProgressIsNotAt100Percent() {
         sut.update(99);
-        sut.success();
+        assertThrows(IllegalStateException.class, () -> sut.success());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatSuccessThrowsIllegalStateExceptionIfLastProgressStepIsNotReached() {
         sut.defineSequence(ProgressStep.DOWNLOADING, ProgressStep.TRANSFERRING);
         sut.next();
-        sut.success();
+        assertThrows(IllegalStateException.class, () -> sut.success());
     }
 
     @Test
@@ -138,20 +139,20 @@ public final class ProgressCallbackTest {
         sut.success();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatUpdateThrowsIllegalArgumentExceptionIfProgressSmaller0() {
-        sut.update(-1);
+        assertThrows(IllegalArgumentException.class, () -> sut.update(-1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatUpdateThrowsIllegalArgumentExceptionIfProgressGreater100() {
-        sut.update(101);
+        assertThrows(IllegalArgumentException.class, () -> sut.update(101));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatUpdateThrowsIllegalArgumentExceptionIfNewProgressIsSmallerThanOldProgress() {
         sut.update(10);
-        sut.update(9);
+        assertThrows(IllegalArgumentException.class, () -> sut.update(9));
     }
 
     @Test
@@ -239,14 +240,14 @@ public final class ProgressCallbackTest {
         assertThat(postedEvents.size(), is(8));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatCancelThrowsIllegalStateExceptionIfUpdateIsFinished() {
         sut.defineSequence(ProgressStep.DOWNLOADING, ProgressStep.TRANSFERRING);
         sut.next();
         sut.next();
         sut.success();
         assertThatUpdateResultEventIsValid(postedEvents.get(2), null, FirmwareUpdateResult.SUCCESS);
-        sut.canceled();
+        assertThrows(IllegalStateException.class, () -> sut.canceled());
     }
 
     @Test
@@ -287,9 +288,9 @@ public final class ProgressCallbackTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatPendingThrowsIllegalArgumentExceptionIfStepSequenceIsNotDefinedAndNoProgressWasSet() {
-        sut.pending();
+        assertThrows(IllegalArgumentException.class, () -> sut.pending());
     }
 
     @Test
@@ -305,40 +306,40 @@ public final class ProgressCallbackTest {
         assertThatUpdateResultEventIsValid(postedEvents.get(0), cancelMessageKey, FirmwareUpdateResult.CANCELED);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatFailedThrowsIllegalStateExceptionIfItsCalledMultipleTimes() {
         sut.failed("DummyMessageKey");
-        sut.failed("DummyMessageKey");
+        assertThrows(IllegalStateException.class, () -> sut.failed("DummyMessageKey"));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatFailedThrowsIllegalStateExceptionForSuccessfulUpdates() {
         sut.update(100);
         sut.success();
         assertThatUpdateResultEventIsValid(postedEvents.get(1), null, FirmwareUpdateResult.SUCCESS);
-        sut.failed("DummyMessageKey");
+        assertThrows(IllegalStateException.class, () -> sut.failed("DummyMessageKey"));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatSuccessThrowsIllegalStateExceptionIfItsCalledMultipleTimes() {
         sut.update(100);
         sut.success();
         assertThatUpdateResultEventIsValid(postedEvents.get(1), null, FirmwareUpdateResult.SUCCESS);
-        sut.success();
+        assertThrows(IllegalStateException.class, () -> sut.success());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatPendingThrowsIllegalStateExceptionIfUpdateFailed() {
         sut.defineSequence(ProgressStep.DOWNLOADING, ProgressStep.TRANSFERRING);
         sut.failed("DummyMessageKey");
-        sut.pending();
+        assertThrows(IllegalStateException.class, () -> sut.pending());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatNextThrowsIllegalStateExceptionIfUpdateIsNotPendingAndNoFurtherStepsAvailable() {
         sut.defineSequence(ProgressStep.DOWNLOADING);
         sut.next();
-        sut.next();
+        assertThrows(IllegalStateException.class, () -> sut.next());
     }
 
     @Test
@@ -350,13 +351,13 @@ public final class ProgressCallbackTest {
         assertThat(sut.getCurrentStep(), is(ProgressStep.DOWNLOADING));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void assertThatPendingThrowsIllegalStateExceptionIfUpdateWasSuccessful() {
         sut.defineSequence(ProgressStep.DOWNLOADING, ProgressStep.TRANSFERRING);
         sut.next();
         sut.next();
         sut.success();
-        sut.pending();
+        assertThrows(IllegalStateException.class, () -> sut.pending());
     }
 
     private void assertThatProgressInfoEventIsValid(Event event, ProgressStep expectedStep, boolean expectedPending,

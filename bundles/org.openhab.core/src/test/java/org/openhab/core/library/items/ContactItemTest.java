@@ -12,9 +12,9 @@
  */
 package org.openhab.core.library.items;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.types.OpenClosedType;
 
 /**

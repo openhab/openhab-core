@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.module.script.internal.defaultscope;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -19,8 +21,8 @@ import java.net.URL;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
 import org.openhab.core.automation.module.script.ScriptEngineManager;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -38,7 +40,7 @@ public class ScriptScopeOSGiTest extends JavaOSGiTest {
     private final String workingFile = "scopeWorking.js";
     private final String failureFile = "scopeFailure.js";
 
-    @Before
+    @BeforeEach
     public void init() {
         ScriptEngineManager scriptManager = getService(ScriptEngineManager.class);
         ScriptEngineContainer container = scriptManager.createScriptEngine("js", "myJSEngine");
@@ -51,9 +53,9 @@ public class ScriptScopeOSGiTest extends JavaOSGiTest {
         engine.eval(new InputStreamReader(url.openStream()));
     }
 
-    @Test(expected = ScriptException.class)
+    @Test
     public void testScopeDoesNotDefineFoobar() throws ScriptException, IOException {
         URL url = bundleContext.getBundle().getResource(path + failureFile);
-        engine.eval(new InputStreamReader(url.openStream()));
+        assertThrows(ScriptException.class, () -> engine.eval(new InputStreamReader(url.openStream())));
     }
 }

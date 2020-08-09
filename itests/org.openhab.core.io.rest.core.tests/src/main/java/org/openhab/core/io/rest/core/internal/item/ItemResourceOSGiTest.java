@@ -13,12 +13,13 @@
 package org.openhab.core.io.rest.core.internal.item;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.junit.Assert.*;
+import static org.hamcrest.core.IsIterableContaining.hasItems;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,8 +36,9 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.items.GenericItem;
@@ -73,6 +75,8 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private GenericItem item3;
     private GenericItem item4;
 
+    private AutoCloseable mocksCloseable;
+
     private @Mock ItemProvider itemProvider;
 
     private UriInfo uriInfo;
@@ -81,9 +85,9 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     private ItemResource itemResource;
     private ManagedItemProvider managedItemProvider;
 
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         registerService(new VolatileStorageService());
 
@@ -108,6 +112,11 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
         when(uriInfo.getPath()).thenReturn("");
         httpHeaders = mock(HttpHeaders.class);
         when(httpHeaders.getHeaderString(anyString())).thenReturn(null);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test

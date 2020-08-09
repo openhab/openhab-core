@@ -13,16 +13,19 @@
 package org.openhab.core.thing.internal.profiles;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.CoreItemFactory;
@@ -54,21 +57,24 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
     private SystemProfileFactory profileFactory;
 
-    @Mock
-    private ProfileCallback mockCallback;
+    private AutoCloseable mocksCloseable;
 
-    @Mock
-    private ProfileContext mockContext;
+    private @Mock ProfileCallback mockCallback;
+    private @Mock ProfileContext mockContext;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
+
         profileFactory = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
         assertNotNull(profileFactory);
 
-        mockCallback = mock(ProfileCallback.class);
-
-        mockContext = mock(ProfileContext.class);
         when(mockContext.getConfiguration()).thenReturn(new Configuration(properties));
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test

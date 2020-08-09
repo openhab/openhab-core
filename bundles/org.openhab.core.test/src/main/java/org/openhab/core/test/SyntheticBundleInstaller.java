@@ -12,6 +12,8 @@
  */
 package org.openhab.core.test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,7 +35,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
-import org.junit.Assert;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerUtils;
 import org.openhab.core.service.ReadyService;
@@ -292,7 +293,7 @@ public class SyntheticBundleInstaller {
         ReadyMarker expected = new ReadyMarker(marker, identifier);
         while (!readyService.isReady(expected)) {
             if (System.nanoTime() - startTime > TimeUnit.SECONDS.toNanos(WAIT_TIMOUT)) {
-                Assert.fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker, identifier));
+                fail(MessageFormat.format("Timout waiting for marker {0} at bundle {1}", marker, identifier));
             }
             try {
                 Thread.sleep(100);

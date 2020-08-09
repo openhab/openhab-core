@@ -13,7 +13,7 @@
 package org.openhab.core.automation.module.timer.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Random;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
@@ -69,7 +69,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     public RuntimeRuleTest() {
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         ItemProvider itemProvider = new TestItemProvider(Collections.singleton(new SwitchItem("myLampItem")));
         registerService(itemProvider);

@@ -12,8 +12,7 @@
  */
 package org.openhab.core.audio.internal;
 
-import static org.junit.Assert.fail;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -22,9 +21,13 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
@@ -40,6 +43,8 @@ import org.osgi.service.http.HttpService;
  *
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public abstract class AbstractAudioServletTest extends JavaTest {
 
     protected AudioServlet audioServlet;
@@ -57,10 +62,8 @@ public abstract class AbstractAudioServletTest extends JavaTest {
     private @Mock HttpService httpServiceMock;
     private @Mock HttpContext httpContextMock;
 
-    @Before
+    @BeforeEach
     public void setupServerAndClient() {
-        initMocks(this);
-
         audioServlet = new AudioServlet(httpServiceMock, httpContextMock);
 
         ServletHolder servletHolder = new ServletHolder(audioServlet);
@@ -72,7 +75,7 @@ public abstract class AbstractAudioServletTest extends JavaTest {
         httpClient = new HttpClient();
     }
 
-    @After
+    @AfterEach
     public void tearDownServerAndClient() throws Exception {
         server.stopServer();
         httpClient.stop();

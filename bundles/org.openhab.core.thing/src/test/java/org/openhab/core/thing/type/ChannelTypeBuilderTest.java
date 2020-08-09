@@ -13,8 +13,9 @@
 package org.openhab.core.thing.type;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -22,8 +23,8 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.thing.CommonTriggerEvents;
 import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.EventOption;
@@ -57,7 +58,7 @@ public class ChannelTypeBuilderTest {
     private StateChannelTypeBuilder stateBuilder;
     private TriggerChannelTypeBuilder triggerBuilder;
 
-    @Before
+    @BeforeEach
     public void setup() throws URISyntaxException {
         configDescriptionUri = new URI("config:dummy");
         // set up a valid basic ChannelTypeBuilder
@@ -65,19 +66,19 @@ public class ChannelTypeBuilderTest {
         triggerBuilder = ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, LABEL);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenLabelIsBlankForStateShouldFail() {
-        ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "", ITEM_TYPE);
+        assertThrows(IllegalArgumentException.class, () -> ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "", ITEM_TYPE));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenItemTypeIsBlankForStateShouldFail() {
-        ChannelTypeBuilder.state(CHANNEL_TYPE_UID, LABEL, "");
+        assertThrows(IllegalArgumentException.class, () -> ChannelTypeBuilder.state(CHANNEL_TYPE_UID, LABEL, ""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void whenLabelIsBlankForTriggerShouldFail() {
-        ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, "");
+        assertThrows(IllegalArgumentException.class, () -> ChannelTypeBuilder.trigger(CHANNEL_TYPE_UID, ""));
     }
 
     @Test

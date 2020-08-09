@@ -12,11 +12,11 @@
  */
 package org.openhab.core.config.discovery.internal;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -25,10 +25,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -57,38 +61,26 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
 /**
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class PersistentInboxTest {
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "test");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "test");
 
     private PersistentInbox inbox;
-
-    @Mock
-    private ThingRegistry thingRegistry;
     private Thing lastAddedThing = null;
 
-    @Mock
-    private StorageService storageService;
+    private @Mock ThingRegistry thingRegistry;
+    private @Mock StorageService storageService;
+    private @Mock Storage<Object> storage;
+    private @Mock ManagedThingProvider thingProvider;
+    private @Mock ThingTypeRegistry thingTypeRegistry;
+    private @Mock ConfigDescriptionRegistry configDescriptionRegistry;
+    private @Mock ThingHandlerFactory thingHandlerFactory;
 
-    @Mock
-    private Storage<Object> storage;
-
-    @Mock
-    private ManagedThingProvider thingProvider;
-
-    @Mock
-    private ThingTypeRegistry thingTypeRegistry;
-
-    @Mock
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-
-    @Mock
-    private ThingHandlerFactory thingHandlerFactory;
-
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         when(storageService.getStorage(any(String.class), any(ClassLoader.class))).thenReturn(storage);
         doAnswer(invocation -> lastAddedThing = (Thing) invocation.getArguments()[0]).when(thingRegistry)
                 .add(any(Thing.class));

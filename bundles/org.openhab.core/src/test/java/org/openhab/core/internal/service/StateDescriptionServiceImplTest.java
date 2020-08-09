@@ -13,7 +13,7 @@
 package org.openhab.core.internal.service;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
@@ -50,7 +50,7 @@ public class StateDescriptionServiceImplTest {
     private StateDescriptionServiceImpl stateDescriptionService;
     private NumberItem item;
 
-    @Before
+    @BeforeEach
     public void setup() {
         stateDescriptionService = new StateDescriptionServiceImpl();
 

@@ -14,7 +14,8 @@ package org.openhab.core.thing.internal;
 
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
@@ -32,9 +33,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -129,7 +130,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
     private ReadyService readyService;
     private Thing thing;
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("null")
     public void setUp() {
         thing = ThingBuilder.create(THING_TYPE_UID, THING_UID)
@@ -187,7 +188,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         thingManager.setBundleResolver(bundleResolver);
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
         ComponentContext componentContext = mock(ComponentContext.class);
@@ -215,7 +216,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         ThingTypeUID newThingTypeUID = new ThingTypeUID("binding:type2");
 
         ThingTypeMigrationService migrator = getService(ThingTypeMigrationService.class);
-        assertThat(migrator, is(not(nullValue())));
+        assertThat(migrator, is(notNullValue()));
 
         migrator.migrateThingType(thing, newThingTypeUID, thing.getConfiguration());
 
@@ -283,7 +284,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         assertThat(state.raceCondition, is(false));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     @SuppressWarnings("null")
     public void thingManagerDoesNotChangeTheThingTypeWhenNewThingTypeIsNotRegistered() {
         ThingHandler thingHandler = mock(ThingHandler.class);
@@ -302,9 +303,10 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         ThingTypeUID newThingTypeUID = new ThingTypeUID("binding:type2");
 
         ThingTypeMigrationService migrator = getService(ThingTypeMigrationService.class);
-        assertThat(migrator, is(not(null)));
+        assertThat(migrator, is(notNullValue()));
 
-        migrator.migrateThingType(thing, newThingTypeUID, thing.getConfiguration());
+        assertThrows(RuntimeException.class,
+                () -> migrator.migrateThingType(thing, newThingTypeUID, thing.getConfiguration()));
     }
 
     @Test

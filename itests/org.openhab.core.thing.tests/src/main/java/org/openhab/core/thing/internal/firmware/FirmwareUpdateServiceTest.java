@@ -13,11 +13,12 @@
 package org.openhab.core.thing.internal.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 import static org.openhab.core.thing.firmware.Constants.*;
 import static org.openhab.core.thing.firmware.FirmwareStatusInfo.*;
 
@@ -38,11 +39,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
@@ -84,45 +83,27 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     public static final ProgressStep[] SEQUENCE = new ProgressStep[] { ProgressStep.REBOOTING, ProgressStep.DOWNLOADING,
             ProgressStep.TRANSFERRING, ProgressStep.UPDATING };
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private Thing thing1;
     private Thing thing2;
     private Thing thing3;
 
     private FirmwareUpdateServiceImpl firmwareUpdateService;
 
-    @Mock
-    private FirmwareRegistry mockFirmwareRegistry;
+    private AutoCloseable mocksCloseable;
 
-    @Mock
-    private FirmwareUpdateHandler handler1;
+    private @Mock FirmwareRegistry mockFirmwareRegistry;
+    private @Mock FirmwareUpdateHandler handler1;
+    private @Mock FirmwareUpdateHandler handler2;
+    private @Mock FirmwareUpdateHandler handler3;
+    private @Mock EventPublisher mockPublisher;
+    private @Mock LocaleProvider mockLocaleProvider;
+    private @Mock TranslationProvider mockTranslationProvider;
+    private @Mock ConfigDescriptionValidator mockConfigDescriptionValidator;
+    private @Mock BundleResolver bundleResolver;
 
-    @Mock
-    private FirmwareUpdateHandler handler2;
-
-    @Mock
-    private FirmwareUpdateHandler handler3;
-
-    @Mock
-    private EventPublisher mockPublisher;
-
-    @Mock
-    private LocaleProvider mockLocaleProvider;
-
-    @Mock
-    private TranslationProvider mockTranslationProvider;
-
-    @Mock
-    private ConfigDescriptionValidator mockConfigDescriptionValidator;
-
-    @Mock
-    private BundleResolver bundleResolver;
-
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         Map<String, String> props1 = new HashMap<>();
         props1.put(Thing.PROPERTY_FIRMWARE_VERSION, V111);
@@ -143,7 +124,11 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         thing3 = ThingBuilder.create(THING_TYPE_UID2, THING3_ID).withProperties(props3).build();
 
         SafeCaller safeCaller = getService(SafeCaller.class);
+
         assertNotNull(safeCaller);
+        if (safeCaller == null) {
+            throw new IllegalStateException("safeCaller is null");
+        }
 
         firmwareUpdateService = new FirmwareUpdateServiceImpl(bundleResolver, mockConfigDescriptionValidator,
                 mockPublisher, mockFirmwareRegistry, mockTranslationProvider, mockLocaleProvider, safeCaller);
@@ -157,6 +142,11 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         initialFirmwareRegistryMocking();
 
         when(bundleResolver.resolveBundle(any())).thenReturn(mock(Bundle.class));
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     private void initialFirmwareRegistryMocking() {
@@ -188,7 +178,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         when(mockFirmwareRegistry.getFirmwares(any(Thing.class), any())).then(firmwaresAnswer);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         firmwareUpdateService.deactivate();
     }
@@ -392,19 +382,20 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         assertThat(isUpdateFinished.get(), is(false));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void cancelFirmwareUpdateNoFirmwareUpdateHandler() {
-        firmwareUpdateService.cancelFirmwareUpdate(new ThingUID("dummy:thing:withoutHandler"));
+        assertThrows(IllegalArgumentException.class,
+                () -> firmwareUpdateService.cancelFirmwareUpdate(new ThingUID("dummy:thing:withoutHandler")));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void cancelFirmwareUpdateThingIdIdNull() {
-        firmwareUpdateService.cancelFirmwareUpdate(giveNull());
+        assertThrows(IllegalArgumentException.class, () -> firmwareUpdateService.cancelFirmwareUpdate(giveNull()));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void cancelFirmwareUpdateUpdateNotStarted() {
-        firmwareUpdateService.cancelFirmwareUpdate(THING3_UID);
+        assertThrows(IllegalStateException.class, () -> firmwareUpdateService.cancelFirmwareUpdate(THING3_UID));
     }
 
     @Test
@@ -487,19 +478,21 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(1), updateExecutableInfoFw112);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGetFirmwareStatusInfoNull() {
-        firmwareUpdateService.getFirmwareStatusInfo(giveNull());
+        assertThrows(IllegalArgumentException.class, () -> firmwareUpdateService.getFirmwareStatusInfo(giveNull()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGetFirmwareStatusInfoNull2() {
-        firmwareUpdateService.updateFirmware(giveNull(), V009, null);
+        assertThrows(IllegalArgumentException.class,
+                () -> firmwareUpdateService.updateFirmware(giveNull(), V009, null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGetFirmwareStatusInfoNull3() {
-        firmwareUpdateService.updateFirmware(THING1_UID, giveNull(), null);
+        assertThrows(IllegalArgumentException.class,
+                () -> firmwareUpdateService.updateFirmware(THING1_UID, giveNull(), null));
     }
 
     @Test
@@ -509,33 +502,34 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
 
     @Test
     public void testUpdateFirmwareUnknownFirmware() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(equalTo(String.format("Firmware with version %s for thing with UID %s was not found.",
-                UNKNOWN_FIRMWARE_VERSION, THING1_UID)));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> firmwareUpdateService.updateFirmware(THING1_UID, UNKNOWN_FIRMWARE_VERSION, null));
 
-        firmwareUpdateService.updateFirmware(THING1_UID, UNKNOWN_FIRMWARE_VERSION, null);
+        assertThat(exception.getMessage(),
+                is(String.format("Firmware with version %s for thing with UID %s was not found.",
+                        UNKNOWN_FIRMWARE_VERSION, THING1_UID)));
     }
 
     @Test
     public void testUpdateFirmwareNoFirmwareUpdateHandler() {
         Thing thing4 = ThingBuilder.create(THING_TYPE_UID_WITHOUT_FW, THING5_ID).build();
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(
-                equalTo(String.format("There is no firmware update handler for thing with UID %s.", thing4.getUID())));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> firmwareUpdateService.updateFirmware(thing4.getUID(), V009, null));
 
-        firmwareUpdateService.updateFirmware(thing4.getUID(), V009, null);
+        assertThat(exception.getMessage(),
+                is(String.format("There is no firmware update handler for thing with UID %s.", thing4.getUID())));
     }
 
     @Test
     public void testUpdateFirmwareNotExecutable() {
         doReturn(false).when(handler1).isUpdateExecutable();
 
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage(
-                equalTo(String.format("The firmware update of thing with UID %s is not executable.", THING1_UID)));
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> firmwareUpdateService.updateFirmware(THING1_UID, V112, null));
 
-        firmwareUpdateService.updateFirmware(THING1_UID, V112, null);
+        assertThat(exception.getMessage(),
+                is(String.format("The firmware update of thing with UID %s is not executable.", THING1_UID)));
     }
 
     @Test
@@ -568,11 +562,10 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         final FirmwareStatusInfo updateExecutableInfoFw113 = createUpdateExecutableInfo(thing1.getUID(), V113);
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING1_UID), is(updateExecutableInfoFw113));
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(
-                equalTo(String.format("Firmware %s is not suitable for thing with UID %s.", FW113_EN, THING1_UID)));
-
-        firmwareUpdateService.updateFirmware(THING1_UID, V113, null);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> firmwareUpdateService.updateFirmware(THING1_UID, V113, null));
+        assertThat(exception.getMessage(),
+                is(String.format("Firmware %s is not suitable for thing with UID %s.", FW113_EN, THING1_UID)));
     }
 
     @Test
@@ -678,11 +671,11 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
 
         thing1.setProperties(props1);
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(equalTo(
-                String.format("Firmware with version %s for thing with UID %s was not found.", VALPHA, THING1_UID)));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> firmwareUpdateService.updateFirmware(THING1_UID, VALPHA, null));
 
-        firmwareUpdateService.updateFirmware(THING1_UID, VALPHA, null);
+        assertThat(exception.getMessage(),
+                is(String.format("Firmware with version %s for thing with UID %s was not found.", VALPHA, THING1_UID)));
     }
 
     @Test
@@ -814,11 +807,11 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         int originalDelay = firmwareUpdateService.getFirmwareStatusInfoJobDelay();
         TimeUnit originalTimeUnit = firmwareUpdateService.getFirmwareStatusInfoJobTimeUnit();
 
-        thrown.expect(IllegalArgumentException.class);
-
-        updateInvalidConfigAndAssert(0, 0, TimeUnit.SECONDS, originalPeriod, originalDelay, originalTimeUnit);
-        updateInvalidConfigAndAssert(1, -1, TimeUnit.SECONDS, originalPeriod, originalDelay, originalTimeUnit);
-        updateInvalidConfigAndAssert(1, 0, TimeUnit.NANOSECONDS, originalPeriod, originalDelay, originalTimeUnit);
+        assertThrows(IllegalArgumentException.class, () -> {
+            updateInvalidConfigAndAssert(0, 0, TimeUnit.SECONDS, originalPeriod, originalDelay, originalTimeUnit);
+            updateInvalidConfigAndAssert(1, -1, TimeUnit.SECONDS, originalPeriod, originalDelay, originalTimeUnit);
+            updateInvalidConfigAndAssert(1, 0, TimeUnit.NANOSECONDS, originalPeriod, originalDelay, originalTimeUnit);
+        });
     }
 
     private volatile AtomicBoolean updateExecutable = new AtomicBoolean(false);

@@ -13,14 +13,15 @@
 package org.openhab.core.automation.internal.module.factory;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.ModuleHandler;
@@ -39,7 +40,7 @@ public class EphemerisModuleHandlerFactoryTest {
     private @NonNullByDefault({}) EphemerisModuleHandlerFactory factory;
     private @NonNullByDefault({}) Module moduleMock;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         factory = new EphemerisModuleHandlerFactory(mock(EphemerisManager.class));
 
@@ -47,14 +48,12 @@ public class EphemerisModuleHandlerFactoryTest {
         when(moduleMock.getId()).thenReturn("My id");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFactoryFailsCreatingModuleHandlerForDaysetCondition() {
         when(moduleMock.getTypeUID()).thenReturn(EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID);
 
         when(moduleMock.getConfiguration()).thenReturn(new Configuration());
-        ModuleHandler handler = factory.internalCreate(moduleMock, "My first rule");
-        assertThat(handler, is(notNullValue()));
-        assertThat(handler, instanceOf(EphemerisConditionHandler.class));
+        assertThrows(IllegalArgumentException.class, () -> factory.internalCreate(moduleMock, "My first rule"));
     }
 
     @Test

@@ -12,15 +12,15 @@
  */
 package org.openhab.core.thing.profiles.i18n;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.thing.profiles.SystemProfiles.*;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.internal.profiles.SystemProfileFactory;
 import org.openhab.core.thing.profiles.ProfileType;
@@ -35,7 +35,7 @@ public class SystemProfileI18nOSGiTest extends JavaOSGiTest {
 
     private ProfileTypeProvider systemProfileTypeProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ProfileTypeProvider provider = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
         assertTrue(provider instanceof SystemProfileFactory);

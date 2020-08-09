@@ -13,10 +13,10 @@
 package org.openhab.core.automation.module.timer.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.internal.module.handler.TimeOfDayTriggerHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
@@ -36,7 +36,7 @@ public class TimeOfDayTriggerHandlerTest extends JavaOSGiTest {
     public TimeOfDayTriggerHandlerTest() {
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         registerService(volatileStorageService);
         waitForAssert(() -> {

@@ -12,13 +12,13 @@
  */
 package org.openhab.core.common;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class QueueingThreadPoolExecutorTest {
     /**
      * We can enable logging for all test cases.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         // enable to see logging. See below how to include slf4j-simple
         // enableLogging();
@@ -68,19 +68,19 @@ public class QueueingThreadPoolExecutorTest {
     /**
      * Tests what happens when poolName == null.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateInstanceInvalidArgsPoolNameNull() throws InterruptedException {
-        QueueingThreadPoolExecutor.createInstance(null, 1);
+        assertThrows(IllegalArgumentException.class, () -> QueueingThreadPoolExecutor.createInstance(null, 1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateInstanceInvalidArgsPoolSize0() {
-        QueueingThreadPoolExecutor.createInstance("test", 0);
+        assertThrows(IllegalArgumentException.class, () -> QueueingThreadPoolExecutor.createInstance("test", 0));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateInstanceInvalidArgsPoolSizeMinus1() {
-        QueueingThreadPoolExecutor.createInstance("test", -1);
+        assertThrows(IllegalArgumentException.class, () -> QueueingThreadPoolExecutor.createInstance("test", -1));
     }
 
     /**
@@ -107,14 +107,14 @@ public class QueueingThreadPoolExecutorTest {
         pool.shutdown();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPoolWithBlankPoolName() throws InterruptedException {
-        basicTestForPoolName(" ");
+        assertThrows(IllegalArgumentException.class, () -> basicTestForPoolName(" "));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPoolWithEmptyPoolName() throws InterruptedException {
-        basicTestForPoolName("");
+        assertThrows(IllegalArgumentException.class, () -> basicTestForPoolName(""));
     }
 
     /**
@@ -189,11 +189,11 @@ public class QueueingThreadPoolExecutorTest {
     /**
      * Tests what happens when wrong rejected execution handler will be used.
      */
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testSetInvalidRejectionHandler() throws InterruptedException {
-        String poolName = "testShutdownNoEntriesIntoQueueAnymore";
-        ThreadPoolExecutor pool = QueueingThreadPoolExecutor.createInstance(poolName, 2);
-        pool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+        ThreadPoolExecutor pool = QueueingThreadPoolExecutor.createInstance("testShutdownNoEntriesIntoQueueAnymore", 2);
+        assertThrows(UnsupportedOperationException.class,
+                () -> pool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy()));
     }
 
     // helper methods

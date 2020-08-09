@@ -13,15 +13,19 @@
 package org.openhab.core.library.items;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import javax.measure.quantity.Temperature;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
@@ -39,17 +43,16 @@ import org.openhab.core.types.util.UnitUtils;
  *
  * @author Stefan Triller - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class NumberItemTest {
 
     private static final String ITEM_NAME = "test";
 
-    @Mock
-    private StateDescriptionService stateDescriptionService;
+    private @Mock StateDescriptionService stateDescriptionService;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
-
         when(stateDescriptionService.getStateDescription(ITEM_NAME, null)).thenReturn(StateDescriptionFragmentBuilder
                 .create().withPattern("%.1f " + UnitUtils.UNIT_PLACEHOLDER).build().toStateDescription());
     }

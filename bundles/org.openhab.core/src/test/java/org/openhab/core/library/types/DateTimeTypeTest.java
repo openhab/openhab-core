@@ -13,7 +13,8 @@
 package org.openhab.core.library.types;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -30,11 +31,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution
@@ -44,7 +43,6 @@ import org.junit.runners.Parameterized.Parameters;
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
  */
 @NonNullByDefault
-@RunWith(Parameterized.class)
 public class DateTimeTypeTest {
 
     /**
@@ -176,7 +174,6 @@ public class DateTimeTypeTest {
      *
      * @return collection
      */
-    @Parameters
     public static Collection<Object[]> parameters() {
         // for simplicity we use always the same input time.
         return Arrays.asList(new Object[][] {
@@ -236,23 +233,6 @@ public class DateTimeTypeTest {
         return inputTimeMap;
     }
 
-    private final ParameterSet parameterSet;
-
-    /**
-     * setup Test class with current parameter map.
-     *
-     * @param parameterMap parameter map
-     */
-    public DateTimeTypeTest(ParameterSet parameterSet) {
-        this.parameterSet = parameterSet;
-    }
-
-    @Before
-    public void setUp() {
-        // set default time zone
-        TimeZone.setDefault(parameterSet.defaultTimeZone);
-    }
-
     @Test
     public void serializationTest() {
         ZonedDateTime zoned = ZonedDateTime.now();
@@ -300,8 +280,10 @@ public class DateTimeTypeTest {
         assertThat(epochStandard, is(zdtStandard));
     }
 
-    @Test
-    public void createDate() {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void createDate(ParameterSet parameterSet) {
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
         // get DateTimeType from the current parameter
         DateTimeType dt1;
         DateTimeType dt2;
@@ -339,9 +321,11 @@ public class DateTimeTypeTest {
         assertEquals(dt1, dt3);
     }
 
-    @Test
-    public void formattingTest() {
-        DateTimeType dt = createDateTimeType();
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void formattingTest(ParameterSet parameterSet) {
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
+        DateTimeType dt = createDateTimeType(parameterSet);
         Locale locale = parameterSet.locale;
         String pattern = parameterSet.pattern;
         if (locale != null && pattern != null) {
@@ -351,22 +335,26 @@ public class DateTimeTypeTest {
         }
     }
 
-    @Test
-    public void changingZoneTest() {
-        DateTimeType dt = createDateTimeType();
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void changingZoneTest(ParameterSet parameterSet) {
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
+        DateTimeType dt = createDateTimeType(parameterSet);
         DateTimeType dt2 = dt.toLocaleZone();
         assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
         dt2 = dt.toZone(parameterSet.defaultTimeZone.toZoneId());
         assertEquals(parameterSet.expectedResultLocalTZ, dt2.toFullString());
     }
 
-    @Test(expected = DateTimeException.class)
-    public void changingZoneThrowsExceptionTest() {
-        DateTimeType dt = createDateTimeType();
-        dt.toZone("XXX");
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void changingZoneThrowsExceptionTest(ParameterSet parameterSet) {
+        TimeZone.setDefault(parameterSet.defaultTimeZone);
+        DateTimeType dt = createDateTimeType(parameterSet);
+        assertThrows(DateTimeException.class, () -> dt.toZone("XXX"));
     }
 
-    private DateTimeType createDateTimeType() throws DateTimeException {
+    private DateTimeType createDateTimeType(ParameterSet parameterSet) throws DateTimeException {
         Map<String, Integer> inputTimeMap = parameterSet.inputTimeMap;
         TimeZone inputTimeZone = parameterSet.inputTimeZone;
         String inputTimeString = parameterSet.inputTimeString;

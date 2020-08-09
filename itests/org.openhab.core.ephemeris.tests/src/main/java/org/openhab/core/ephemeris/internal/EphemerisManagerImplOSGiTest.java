@@ -12,7 +12,8 @@
  */
 package org.openhab.core.ephemeris.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.openhab.core.ephemeris.internal.EphemerisManagerImpl.*;
 
 import java.net.URI;
@@ -31,10 +32,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.ephemeris.EphemerisManager;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -59,10 +58,10 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) EphemerisManagerImpl ephemerisManager;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         // TODO: Tests currently fail on Java 11 due to Jollyday requiring JAXB 2.3
-        Assume.assumeThat(System.getProperty("java.version"), CoreMatchers.startsWith("1.8"));
+        assumeTrue(System.getProperty("java.version").startsWith("1.8"));
 
         ephemerisManager = getService(EphemerisManager.class, EphemerisManagerImpl.class);
         assertNotNull(ephemerisManager);
@@ -83,9 +82,10 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         assertFalse(ephemerisManager.cities.isEmpty());
     }
 
-    @Test(expected = java.lang.IllegalArgumentException.class)
+    @Test
     public void testConfigurtationDaysetWeekendFailed() {
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Foo,Bar"));
+        assertThrows(IllegalArgumentException.class, () -> ephemerisManager
+                .modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Foo,Bar")));
     }
 
     @Test
@@ -106,9 +106,9 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
                 ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testParsePropertyFailed() {
-        ephemerisManager.parseProperty("", "");
+        assertThrows(IllegalArgumentException.class, () -> ephemerisManager.parseProperty("", ""));
     }
 
     @Test

@@ -13,7 +13,7 @@
 package org.openhab.core.config.discovery.inbox;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -25,8 +25,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
@@ -76,7 +76,7 @@ public class InboxPredicatesTest {
             DiscoveryResultBuilder.create(THING_UID22).withThingType(THING_TYPE_UID21).withProperties(PROPS2)
                     .withLabel("label").build());
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         ((DiscoveryResultImpl) RESULTS.get(3)).setFlag(DiscoveryResultFlag.IGNORED);
     }

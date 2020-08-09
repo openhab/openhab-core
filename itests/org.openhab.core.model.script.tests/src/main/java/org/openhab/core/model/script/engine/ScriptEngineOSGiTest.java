@@ -13,7 +13,8 @@
 package org.openhab.core.model.script.engine;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,9 +23,9 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
@@ -58,7 +59,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
     private @NonNullByDefault({}) ScriptEngine scriptEngine;
 
-    @Before
+    @BeforeEach
     public void setup() {
         registerVolatileStorageService();
 
@@ -95,7 +96,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         scriptEngine = ScriptServiceUtil.getScriptEngine();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         unregisterService(itemProvider);
     }
@@ -126,13 +127,13 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         Item numberItem = itemRegistry.get(NUMBER_ITEM_TEMPERATURE);
         ((NumberItem) numberItem).setState(new QuantityType<>("20 °C"));
 
-        assertTrue(runScript("NumberA.state > 20|°F"));
+        assertTrue((boolean) runScript("NumberA.state > 20|°F"));
     }
 
     @Test
     public void testSpacesDoNotMatter() throws ScriptExecutionException, ScriptParsingException {
-        assertTrue(runScript("20|°C == 20 | °C"));
-        assertTrue(runScript("20|\"°C\" == 20 | \"°C\""));
+        assertTrue((boolean) runScript("20|°C == 20 | °C"));
+        assertTrue((boolean) runScript("20|\"°C\" == 20 | \"°C\""));
     }
 
     @SuppressWarnings("null")
@@ -141,7 +142,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         Item numberItem = itemRegistry.get(NUMBER_ITEM_TEMPERATURE);
         ((NumberItem) numberItem).setState(new QuantityType<>("20 °C"));
 
-        assertTrue(runScript("NumberA.state >= 20|°C"));
+        assertTrue((boolean) runScript("NumberA.state >= 20|°C"));
     }
 
     @SuppressWarnings("null")
@@ -150,7 +151,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         Item numberItem = itemRegistry.get(NUMBER_ITEM_TEMPERATURE);
         ((NumberItem) numberItem).setState(new QuantityType<>("20 °F"));
 
-        assertTrue(runScript("NumberA.state < 20|°C"));
+        assertTrue((boolean) runScript("NumberA.state < 20|°C"));
     }
 
     @SuppressWarnings("null")
@@ -159,7 +160,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         Item numberItem = itemRegistry.get(NUMBER_ITEM_TEMPERATURE);
         ((NumberItem) numberItem).setState(new QuantityType<>("19 °F"));
 
-        assertTrue(runScript("NumberA.state <= 20|°F"));
+        assertTrue((boolean) runScript("NumberA.state <= 20|°F"));
     }
 
     @SuppressWarnings("null")
@@ -168,7 +169,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         Item numberItem = itemRegistry.get(NUMBER_ITEM_TEMPERATURE);
         ((NumberItem) numberItem).setState(new QuantityType<>("20 °C"));
 
-        assertTrue(runScript("NumberA.state == 20|°C"));
+        assertTrue((boolean) runScript("NumberA.state == 20|°C"));
     }
 
     @SuppressWarnings("null")
@@ -177,7 +178,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         Item numberItem = itemRegistry.get(NUMBER_ITEM_TEMPERATURE);
         ((NumberItem) numberItem).setState(new QuantityType<>("20 °C"));
 
-        assertTrue(runScript("NumberA.state != 10|°C"));
+        assertTrue((boolean) runScript("NumberA.state != 10|°C"));
     }
 
     @SuppressWarnings("null")
@@ -186,37 +187,37 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
         Item numberItem = itemRegistry.get(NUMBER_ITEM_DECIMAL);
         ((NumberItem) numberItem).setState(new DecimalType(20));
 
-        assertTrue(runScript("NumberB.state > new DecimalType(19)"));
+        assertTrue((boolean) runScript("NumberB.state > new DecimalType(19)"));
     }
 
     @Test
     public void testCompareGreaterThanQuantityType() throws ScriptParsingException, ScriptExecutionException {
-        assertTrue(runScript("20.0|°C > 20|°F"));
+        assertTrue((boolean) runScript("20.0|°C > 20|°F"));
     }
 
     @Test
     public void testCompareGreaterThanQuantityTypeFalse() throws ScriptParsingException, ScriptExecutionException {
-        assertFalse(runScript("20.0|°F > 20|°C"));
+        assertFalse((boolean) runScript("20.0|°F > 20|°C"));
     }
 
     @Test
     public void testCompareGreaterEqualsThanQuantityType() throws ScriptParsingException, ScriptExecutionException {
-        assertTrue(runScript("1|m >= 100|cm"));
+        assertTrue((boolean) runScript("1|m >= 100|cm"));
     }
 
     @Test
     public void testCompareLessThanQuantityTypeFalse() throws ScriptParsingException, ScriptExecutionException {
-        assertFalse(runScript("20.0|°C < 20|°F"));
+        assertFalse((boolean) runScript("20.0|°C < 20|°F"));
     }
 
     @Test
     public void testCompareLessThanQuantityType() throws ScriptParsingException, ScriptExecutionException {
-        assertTrue(runScript("20.0|°F < 20|°C"));
+        assertTrue((boolean) runScript("20.0|°F < 20|°C"));
     }
 
     @Test
     public void testCompareLessEqualsThanQuantityType() throws ScriptParsingException, ScriptExecutionException {
-        assertTrue(runScript("100|cm <= 1|m"));
+        assertTrue((boolean) runScript("100|cm <= 1|m"));
     }
 
     @Test
@@ -227,7 +228,8 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testAssignAndCompareQuantityType() throws ScriptParsingException, ScriptExecutionException {
-        assertFalse(runScript("NumberA.state = 20.0|°C as org.openhab.core.types.State; NumberA.state < 20|°F"));
+        assertFalse(
+                (boolean) runScript("NumberA.state = 20.0|°C as org.openhab.core.types.State; NumberA.state < 20|°F"));
     }
 
     @Test
@@ -319,23 +321,23 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testCompareQuantityTypeOneNumber() throws ScriptParsingException, ScriptExecutionException {
-        assertThat(runScript("1 == 1|one"), is(true));
-        assertThat(runScript("1|one == 1"), is(true));
+        assertThat((boolean) runScript("1 == 1|one"), is(true));
+        assertThat((boolean) runScript("1|one == 1"), is(true));
 
-        assertThat(runScript("1 != 2|one"), is(true));
-        assertThat(runScript("2|one != 1"), is(true));
+        assertThat((boolean) runScript("1 != 2|one"), is(true));
+        assertThat((boolean) runScript("2|one != 1"), is(true));
 
-        assertThat(runScript("1 < 2|one"), is(true));
-        assertThat(runScript("1|one < 2"), is(true));
+        assertThat((boolean) runScript("1 < 2|one"), is(true));
+        assertThat((boolean) runScript("1|one < 2"), is(true));
 
-        assertThat(runScript("1 <= 1|one"), is(true));
-        assertThat(runScript("1|one <= 1"), is(true));
+        assertThat((boolean) runScript("1 <= 1|one"), is(true));
+        assertThat((boolean) runScript("1|one <= 1"), is(true));
 
-        assertThat(runScript("2 > 1|one"), is(true));
-        assertThat(runScript("2|one > 1"), is(true));
+        assertThat((boolean) runScript("2 > 1|one"), is(true));
+        assertThat((boolean) runScript("2|one > 1"), is(true));
 
-        assertThat(runScript("1 >= 1|one"), is(true));
-        assertThat(runScript("1|one >= 1"), is(true));
+        assertThat((boolean) runScript("1 >= 1|one"), is(true));
+        assertThat((boolean) runScript("1|one >= 1"), is(true));
     }
 
     @Test

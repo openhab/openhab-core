@@ -13,14 +13,14 @@
 package org.openhab.core.voice.voiceconsolecommandextension;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.voice.internal.HumanLanguageInterpreterStub;
 import org.openhab.core.voice.internal.TTSServiceStub;
 import org.openhab.core.voice.internal.VoiceManagerImpl;
@@ -47,7 +47,7 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
     private VoiceStub voice;
     private TTSServiceStub ttsService;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException, InterruptedException {
         ttsService = new TTSServiceStub();
         hliStub = new HumanLanguageInterpreterStub();

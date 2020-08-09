@@ -13,11 +13,10 @@
 package org.openhab.core.config.discovery.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.withFlag;
 
 import java.util.Collections;
@@ -27,11 +26,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -58,6 +61,8 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
  * @author Andre Fuechsel - Initial contribution
  * @author Henning Sudbrock - Added tests for auto-approving inbox entries
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class AutomaticInboxProcessorTest {
 
     private static final String DEVICE_ID = "deviceId";
@@ -90,37 +95,18 @@ public class AutomaticInboxProcessorTest {
     private AutomaticInboxProcessor automaticInboxProcessor;
     private PersistentInbox inbox;
 
-    @Mock
-    private ThingRegistry thingRegistry;
+    private @Mock ThingRegistry thingRegistry;
+    private @Mock ThingTypeRegistry thingTypeRegistry;
+    private @Mock Thing thing;
+    private @Mock Thing thing2;
+    private @Mock Thing thing3;
+    private @Mock ThingStatusInfoChangedEvent thingStatusInfoChangedEvent;
+    private @Mock ConfigDescriptionRegistry configDescriptionRegistry;
+    private @Mock ThingHandlerFactory thingHandlerFactory;
+    private @Mock ManagedThingProvider thingProvider;
 
-    @Mock
-    private ThingTypeRegistry thingTypeRegistry;
-
-    @Mock
-    private Thing thing;
-
-    @Mock
-    private Thing thing2;
-
-    @Mock
-    private Thing thing3;
-
-    @Mock
-    private ThingStatusInfoChangedEvent thingStatusInfoChangedEvent;
-
-    @Mock
-    private ConfigDescriptionRegistry configDescriptionRegistry;
-
-    @Mock
-    private ThingHandlerFactory thingHandlerFactory;
-
-    @Mock
-    private ManagedThingProvider thingProvider;
-
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         when(thing.getConfiguration()).thenReturn(CONFIG);
         when(thing.getThingTypeUID()).thenReturn(THING_TYPE_UID);
         when(thing.getProperties()).thenReturn(THING_PROPERTIES);
@@ -163,7 +149,7 @@ public class AutomaticInboxProcessorTest {
         automaticInboxProcessor.activate(null);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         automaticInboxProcessor.deactivate();
     }
@@ -447,7 +433,7 @@ public class AutomaticInboxProcessorTest {
     }
 
     @Test
-    @Ignore("Should this test pass? It will fail currently, as RuntimeExceptions are not explicitly caught in AutomaticInboxProcessor#isToBeAutoApproved")
+    @Disabled("Should this test pass? It will fail currently, as RuntimeExceptions are not explicitly caught in AutomaticInboxProcessor#isToBeAutoApproved")
     public void testRogueInboxAutoApprovePredicatesDoNoHarm() {
         automaticInboxProcessor.addInboxAutoApprovePredicate(discoveryResult -> {
             throw new RuntimeException("I am an evil inboxAutoApprovePredicate");

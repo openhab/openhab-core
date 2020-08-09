@@ -15,7 +15,8 @@ package org.openhab.core.config.core.internal.validation;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -25,7 +26,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.openhab.core.config.core.validation.ConfigValidationException;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
@@ -140,10 +141,11 @@ public class ConfigValidationExceptionTest {
         assertThat(messages.get(PARAM2), is(TXT_DEFAULT2));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     @SuppressWarnings("unused")
     public void assertThatNPEisThrownForNullConfigValidationMessages() {
-        new ConfigValidationException(BUNDLE, TRANSLATION_PROVIDER, null);
+        assertThrows(NullPointerException.class,
+                () -> new ConfigValidationException(BUNDLE, TRANSLATION_PROVIDER, null));
     }
 
     static ConfigValidationMessage createMessage(String parameterName, String defaultMessage, String messageKey,

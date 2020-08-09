@@ -12,9 +12,9 @@
  */
 package org.openhab.core.thing.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;

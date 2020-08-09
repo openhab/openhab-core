@@ -12,15 +12,18 @@
  */
 package org.openhab.core.thing.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.validation.ConfigDescriptionValidator;
@@ -43,6 +46,8 @@ import org.osgi.framework.Bundle;
 /**
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 @NonNullByDefault
 public class ThingManagerImplTest {
 
@@ -66,10 +71,8 @@ public class ThingManagerImplTest {
     // This class is final so it cannot be mocked
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService = new ThingStatusInfoI18nLocalizationService();
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
-
         when(bundleMock.getSymbolicName()).thenReturn("test");
         when(bundleResolverMock.resolveBundle(any())).thenReturn(bundleMock);
         when(thingMock.getUID()).thenReturn(new ThingUID("test", "thing"));

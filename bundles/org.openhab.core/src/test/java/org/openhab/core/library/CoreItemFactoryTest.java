@@ -13,16 +13,16 @@
 package org.openhab.core.library;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
 
 import javax.measure.quantity.Temperature;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.items.NumberItem;
 
@@ -36,7 +36,7 @@ public class CoreItemFactoryTest {
 
     private List<String> itemTypeNames;
 
-    @Before
+    @BeforeEach
     public void setup() {
         coreItemFactory = new CoreItemFactory();
         itemTypeNames = Arrays.asList(coreItemFactory.getSupportedItemTypes());

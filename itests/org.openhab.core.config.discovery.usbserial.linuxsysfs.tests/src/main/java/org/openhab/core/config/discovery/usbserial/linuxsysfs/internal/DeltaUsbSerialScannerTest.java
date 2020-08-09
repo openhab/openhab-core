@@ -15,17 +15,17 @@ package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.HashSet;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.DeltaUsbSerialScanner.Delta;
 import org.openhab.core.config.discovery.usbserial.linuxsysfs.testutil.UsbSerialDeviceInformationGenerator;
@@ -42,7 +42,7 @@ public class DeltaUsbSerialScannerTest {
     private UsbSerialScanner usbSerialScanner;
     private DeltaUsbSerialScanner deltaUsbSerialScanner;
 
-    @Before
+    @BeforeEach
     public void setup() {
         usbSerialScanner = mock(UsbSerialScanner.class);
         deltaUsbSerialScanner = new DeltaUsbSerialScanner(usbSerialScanner);

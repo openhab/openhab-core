@@ -13,11 +13,11 @@
 package org.openhab.core.io.rest.sse.internal.util;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Dennis Nobel - Initial contribution

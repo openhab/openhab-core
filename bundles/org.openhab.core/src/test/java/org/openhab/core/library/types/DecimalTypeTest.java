@@ -12,11 +12,11 @@
  */
 package org.openhab.core.library.types;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.text.DecimalFormatSymbols;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution

@@ -13,14 +13,14 @@
 package org.openhab.core.types;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test the {@link CommandDescriptionBuilder}.
@@ -31,7 +31,7 @@ public class CommandDescriptionBuilderTest {
 
     private CommandDescriptionBuilder builder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         builder = CommandDescriptionBuilder.create();
     }

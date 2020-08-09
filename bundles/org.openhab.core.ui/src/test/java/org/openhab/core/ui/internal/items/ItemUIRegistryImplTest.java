@@ -13,11 +13,11 @@
 package org.openhab.core.ui.internal.items;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -27,9 +27,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.BasicEList;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -80,6 +84,8 @@ import org.openhab.core.ui.items.ItemUIProvider;
 /**
  * @author Kai Kreuzer - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ItemUIRegistryImplTest {
 
     // we need to get the decimal separator of the default locale for our tests
@@ -89,16 +95,12 @@ public class ItemUIRegistryImplTest {
     private ItemUIRegistryImpl uiRegistry;
 
     private @Mock ItemRegistry registry;
-
     private @Mock Widget widget;
-
     private @Mock Item item;
-
     private @Mock UnitProvider unitProvider;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
-        initMocks(this);
         uiRegistry = new ItemUIRegistryImpl();
         uiRegistry.setItemRegistry(registry);
 
@@ -525,7 +527,6 @@ public class ItemUIRegistryImplTest {
         when(widget.getLabel()).thenReturn(testLabel);
         when(widget.eClass()).thenReturn(SitemapFactory.eINSTANCE.createText().eClass());
         when(registry.getItem(ITEM_NAME)).thenThrow(new ItemNotFoundException(ITEM_NAME));
-        when(item.getState()).thenReturn(new StringType("State"));
         String label = uiRegistry.getLabel(widget);
         assertEquals("Label [-]", label);
     }

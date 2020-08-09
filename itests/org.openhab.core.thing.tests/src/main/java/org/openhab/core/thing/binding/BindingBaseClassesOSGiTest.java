@@ -14,9 +14,11 @@ package org.openhab.core.thing.binding;
 
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -31,16 +33,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigDescription;
@@ -99,12 +98,14 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
     private ManagedThingProvider managedThingProvider;
     private ThingRegistry thingRegistry;
 
+    private AutoCloseable mocksCloseable;
+
     private @Mock ComponentContext componentContext;
 
-    public @Rule MockitoRule rule = MockitoJUnit.rule();
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
-    @Before
-    public void setup() {
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);
         assertThat(managedThingProvider, is(notNullValue()));
@@ -113,8 +114,10 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
     }
 
-    @After
-    public void teardown() {
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
+
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
     }
 
@@ -570,7 +573,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         }
     }
 
-    @Test(expected = ConfigValidationException.class)
+    @Test
     public void assertConfigurationParametersAreValidated() {
         SimpleThingHandlerFactory thingHandlerFactory = new SimpleThingHandlerFactory();
         thingHandlerFactory.activate(componentContext);
@@ -589,7 +592,8 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         Map<String, Object> configuration = new HashMap<>();
         configuration.put("parameter", null);
 
-        thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", configuration));
+        assertThrows(ConfigValidationException.class,
+                () -> thingRegistry.updateConfiguration(thingUID, singletonMap("parameter", configuration)));
     }
 
     @Test

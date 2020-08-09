@@ -12,7 +12,7 @@
  */
 package org.openhab.core.io.net.http;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import java.nio.Buffer;
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.client.api.ContentProvider;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 

@@ -13,7 +13,8 @@
 package org.openhab.core.audio.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -25,9 +26,9 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.function.BiFunction;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSource;
@@ -57,7 +58,7 @@ public class AudioManagerTest {
     private AudioSinkFake audioSink;
     private AudioSource audioSource;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         fileHandler = new BundledSoundFileHandler();
         audioManager = new AudioManagerImpl();
@@ -68,7 +69,7 @@ public class AudioManagerTest {
         when(audioSource.getLabel(any(Locale.class))).thenReturn("audioSourceLabel");
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         fileHandler.close();
     }

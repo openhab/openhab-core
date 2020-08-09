@@ -12,21 +12,21 @@
  */
 package org.openhab.core.internal.items;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.openhab.core.items.Item;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.items.ManagedMetadataProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -40,6 +40,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * @author Yannick Schaus - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class MetadataStateDescriptionFragmentProviderTest {
 
     private static final String ITEM_NAME = "itemName";
@@ -48,24 +49,18 @@ public class MetadataStateDescriptionFragmentProviderTest {
     private @Mock ServiceReference managedProviderRef;
     private @Mock BundleContext bundleContext;
     private @Mock ManagedMetadataProvider managedProvider;
-    private @Mock Item item;
 
     private @Mock MetadataRegistryImpl metadataRegistry;
     private MetadataStateDescriptionFragmentProvider stateDescriptionFragmentProvider;
 
     private ServiceListener providerTracker;
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("unchecked")
     public void setup() throws Exception {
-        initMocks(this);
-
         when(bundleContext.getService(same(managedProviderRef))).thenReturn(managedProvider);
 
-        when(item.getName()).thenReturn(ITEM_NAME);
-
         metadataRegistry = new MetadataRegistryImpl();
-
         metadataRegistry.setManagedProvider(managedProvider);
         metadataRegistry.activate(bundleContext);
 

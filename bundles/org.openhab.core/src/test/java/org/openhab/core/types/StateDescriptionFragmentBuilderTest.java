@@ -13,15 +13,15 @@
 package org.openhab.core.types;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test the {@link StateDescriptionFragmentBuilder}.
@@ -32,7 +32,7 @@ public class StateDescriptionFragmentBuilderTest {
 
     private StateDescriptionFragmentBuilder builder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         builder = StateDescriptionFragmentBuilder.create();
     }

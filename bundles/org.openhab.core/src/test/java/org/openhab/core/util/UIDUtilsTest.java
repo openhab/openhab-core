@@ -12,11 +12,12 @@
  */
 package org.openhab.core.util;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.function.Consumer;
 
 import org.hamcrest.core.IsEqual;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.common.AbstractUID;
 
 /**
@@ -33,7 +34,7 @@ public class UIDUtilsTest {
             final String decoded = UIDUtils.decode(encoded);
             System.out.printf("in: %s%n encoded: %s%n decoded: %s%n equals: %b%n", in, encoded, decoded,
                     in.equals(decoded));
-            Assert.assertThat(decoded, IsEqual.equalTo(in));
+            assertThat(decoded, IsEqual.equalTo(in));
         };
         test.accept("test");
         test.accept("TEST");

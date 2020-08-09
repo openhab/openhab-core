@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.internal;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,10 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -52,7 +53,7 @@ public class RuleEngineTest extends JavaOSGiTest {
     private RuleEngineImpl ruleEngine;
     private RuleRegistry ruleRegistry;
 
-    @Before
+    @BeforeEach
     public void setup() {
         registerVolatileStorageService();
         ruleEngine = (RuleEngineImpl) getService(RuleManager.class);
@@ -65,47 +66,47 @@ public class RuleEngineTest extends JavaOSGiTest {
      *
      */
     @Test
-    @Ignore
+    @Disabled
     public void testAutoMapRuleConnections() {
         RuleImpl rule = createAutoMapRule();
         // check condition connections
         Map<String, String> conditionInputs = rule.getConditions().get(0).getInputs();
-        Assert.assertEquals("Number of user define condition inputs", 1, conditionInputs.size());
-        Assert.assertTrue("Check user define condition connection",
-                "triggerId.triggerOutput".equals(conditionInputs.get("conditionInput")));
+        assertEquals(1, conditionInputs.size(), "Number of user define condition inputs");
+        assertEquals("triggerId.triggerOutput", conditionInputs.get("conditionInput"),
+                "Check user define condition connection");
 
         // check action connections
         Map<String, String> actionInputs = rule.getActions().get(0).getInputs();
-        Assert.assertEquals("Number of user define action inputs", 2, actionInputs.size());
-        Assert.assertTrue("Check user define action connections for input actionInput",
-                "triggerId.triggerOutput".equals(actionInputs.get("actionInput")));
-        Assert.assertTrue("Check user define action connections for input in6",
-                "triggerId.triggerOutput".equals(actionInputs.get("in6")));
+        assertEquals(2, actionInputs.size(), "Number of user define action inputs");
+        assertEquals("triggerId.triggerOutput", actionInputs.get("actionInput"),
+                "Check user define action connections for input actionInput");
+        assertEquals("triggerId.triggerOutput", actionInputs.get("in6"),
+                "Check user define action connections for input in6");
 
         // do connections auto mapping
         ruleRegistry.add(rule);
         Rule ruleGet = ruleEngine.getRule("AutoMapRule");
-        Assert.assertEquals("Returned rule with wrong UID", "AutoMapRule", ruleGet.getUID());
+        assertEquals("AutoMapRule", ruleGet.getUID(), "Returned rule with wrong UID");
 
         // check condition connections
         conditionInputs = ruleGet.getConditions().get(0).getInputs();
-        Assert.assertEquals("Number of user define condition inputs", 2, conditionInputs.size());
-        Assert.assertEquals("Check user define condition connection", "triggerId.triggerOutput",
-                conditionInputs.get("conditionInput"));
-        Assert.assertEquals("Auto map condition input in2[tagA, tagB] to trigger output out3[tagA, tagB, tagC]",
-                "triggerId.out3", conditionInputs.get("in2"));
+        assertEquals(2, conditionInputs.size(), "Number of user define condition inputs");
+        assertEquals("triggerId.triggerOutput", conditionInputs.get("conditionInput"),
+                "Check user define condition connection");
+        assertEquals("triggerId.out3", conditionInputs.get("in2"),
+                "Auto map condition input in2[tagA, tagB] to trigger output out3[tagA, tagB, tagC]");
 
         // check action connections
         actionInputs = ruleGet.getActions().get(0).getInputs();
-        Assert.assertEquals("Number of user define action inputs", 4, actionInputs.size());
-        Assert.assertTrue("Check user define action connections for input actionInput",
-                "triggerId.triggerOutput".equals(actionInputs.get("actionInput")));
-        Assert.assertEquals("Check user define action connections for input in6 is not changed by the auto mapping",
-                "triggerId.triggerOutput", actionInputs.get("in6"));
-        Assert.assertEquals("Auto map action input in5[tagA, tagB, tagC] to trigger output out3[tagA, tagB, tagC]",
-                "triggerId.out3", actionInputs.get("in5"));
-        Assert.assertEquals("Auto map action input in5[tagD, tagE] to action output out5[tagD, tagE]", "actionId.out5",
-                actionInputs.get("in4"));
+        assertEquals(4, actionInputs.size(), "Number of user define action inputs");
+        assertEquals("triggerId.triggerOutput", actionInputs.get("actionInput"),
+                "Check user define action connections for input actionInput");
+        assertEquals("triggerId.triggerOutput", actionInputs.get("in6"),
+                "Check user define action connections for input in6 is not changed by the auto mapping");
+        assertEquals("triggerId.out3", actionInputs.get("in5"),
+                "Auto map action input in5[tagA, tagB, tagC] to trigger output out3[tagA, tagB, tagC]");
+        assertEquals("actionId.out5", actionInputs.get("in4"),
+                "Auto map action input in5[tagD, tagE] to action output out5[tagD, tagE]");
     }
 
     /**
@@ -128,14 +129,14 @@ public class RuleEngineTest extends JavaOSGiTest {
         ruleRegistry.add(rule2);
 
         Rule rule1Get = ruleEngine.getRule("ruleWithTag1");
-        Assert.assertNotNull("Cannot find rule by UID", rule1Get);
-        Assert.assertNotNull("rule.getTags is null", rule1Get.getTags());
-        Assert.assertEquals("rule.getTags is empty", 1, rule1Get.getTags().size());
+        assertNotNull(rule1Get, "Cannot find rule by UID");
+        assertNotNull(rule1Get.getTags(), "rule.getTags is null");
+        assertEquals(1, rule1Get.getTags().size(), "rule.getTags is empty");
 
         Rule rule2Get = ruleEngine.getRule("ruleWithTags12");
-        Assert.assertNotNull("Cannot find rule by UID", rule2Get);
-        Assert.assertNotNull("rule.getTags is null", rule2Get.getTags());
-        Assert.assertEquals("rule.getTags is empty", 2, rule2Get.getTags().size());
+        assertNotNull(rule2Get, "Cannot find rule by UID");
+        assertNotNull(rule2Get.getTags(), "rule.getTags is null");
+        assertEquals(2, rule2Get.getTags().size(), "rule.getTags is empty");
     }
 
     /**
@@ -148,7 +149,7 @@ public class RuleEngineTest extends JavaOSGiTest {
                 .withConditions(createConditions("typeUID")).withActions(createActions("typeUID")).build();
         ruleRegistry.add(rule3);
         Rule rule3Get = ruleEngine.getRule("rule3");
-        Assert.assertNotNull("RuleImpl configuration is null", rule3Get.getConfiguration());
+        assertNotNull(rule3Get.getConfiguration(), "RuleImpl configuration is null");
     }
 
     /**
@@ -168,19 +169,18 @@ public class RuleEngineTest extends JavaOSGiTest {
         Rule rule4Get = ruleEngine.getRule("rule4");
         Configuration rule4cfg = rule4Get.getConfiguration();
         List<ConfigDescriptionParameter> rule4cfgD = rule4Get.getConfigurationDescriptions();
-        Assert.assertNotNull("RuleImpl configuration is null", rule4cfg);
-        Assert.assertTrue("Missing config property in rule copy", rule4cfg.containsKey("config1"));
-        Assert.assertEquals("Wrong config value", new BigDecimal(5), rule4cfg.get("config1"));
+        assertNotNull(rule4cfg, "RuleImpl configuration is null");
+        assertTrue(rule4cfg.containsKey("config1"), "Missing config property in rule copy");
+        assertEquals(new BigDecimal(5), rule4cfg.get("config1"), "Wrong config value");
 
-        Assert.assertNotNull("RuleImpl configuration description is null", rule4cfgD);
-        Assert.assertEquals("Missing config description in rule copy", 1, rule4cfgD.size());
+        assertNotNull(rule4cfgD, "RuleImpl configuration description is null");
+        assertEquals(1, rule4cfgD.size(), "Missing config description in rule copy");
         ConfigDescriptionParameter rule4cfgDP = rule4cfgD.iterator().next();
-        Assert.assertEquals("Wrong default value in config description", "3", rule4cfgDP.getDefault());
-        Assert.assertEquals("Wrong context value in config description", "context1", rule4cfgDP.getContext());
-        Assert.assertNotNull("Null options in config description", rule4cfgDP.getOptions());
-        Assert.assertEquals("Wrong option value in config description", "1", rule4cfgDP.getOptions().get(0).getValue());
-        Assert.assertEquals("Wrong option label in config description", "one",
-                rule4cfgDP.getOptions().get(0).getLabel());
+        assertEquals("3", rule4cfgDP.getDefault(), "Wrong default value in config description");
+        assertEquals("context1", rule4cfgDP.getContext(), "Wrong context value in config description");
+        assertNotNull(rule4cfgDP.getOptions(), "Null options in config description");
+        assertEquals("1", rule4cfgDP.getOptions().get(0).getValue(), "Wrong option value in config description");
+        assertEquals("one", rule4cfgDP.getOptions().get(0).getLabel(), "Wrong option label in config description");
     }
 
     /**
@@ -195,27 +195,26 @@ public class RuleEngineTest extends JavaOSGiTest {
 
         Rule rule1Get = ruleEngine.getRule("rule1");
         List<Action> actionsGet = rule1Get.getActions();
-        Assert.assertNotNull("Null actions list", actionsGet);
-        Assert.assertEquals("Empty actions list", 1, actionsGet.size());
-        Assert.assertEquals("Returned actions list should not be a copy", actionsGet, rule1Get.getActions());
+        assertNotNull(actionsGet, "Null actions list");
+        assertEquals(1, actionsGet.size(), "Empty actions list");
+        assertEquals(actionsGet, rule1Get.getActions(), "Returned actions list should not be a copy");
 
         actions.add(ModuleBuilder.createAction().withId("actionId2").withTypeUID("typeUID2").build());
         rule1.setActions(actions);
         ruleEngine.addRule(rule1);
         rule1Get = ruleEngine.getRule("rule1");
         List<Action> actionsGet2 = rule1Get.getActions();
-        Assert.assertNotNull("Null actions list", actionsGet2);
-        Assert.assertEquals("Action was not added to the rule's list of actions", 2, actionsGet2.size());
-        Assert.assertNotNull("RuleImpl action with wrong id is returned", rule1Get.getModule("actionId2"));
+        assertNotNull(actionsGet2, "Null actions list");
+        assertEquals(2, actionsGet2.size(), "Action was not added to the rule's list of actions");
+        assertNotNull(rule1Get.getModule("actionId2"), "RuleImpl action with wrong id is returned");
 
         actions.add(ModuleBuilder.createAction().withId("actionId3").withTypeUID("typeUID3").build());
         ruleEngine.addRule(rule1); // ruleEngine.update will update the RuleImpl2.moduleMap with the new module
         rule1Get = ruleEngine.getRule("rule1");
         List<Action> actionsGet3 = rule1Get.getActions();
-        Assert.assertNotNull("Null actions list", actionsGet3);
-        Assert.assertEquals("Action was not added to the rule's list of actions", 3, actionsGet3.size());
-        Assert.assertNotNull("RuleImpl modules map was not updated",
-                ruleEngine.getRule("rule1").getModule("actionId3"));
+        assertNotNull(actionsGet3, "Null actions list");
+        assertEquals(3, actionsGet3.size(), "Action was not added to the rule's list of actions");
+        assertNotNull(ruleEngine.getRule("rule1").getModule("actionId3"), "RuleImpl modules map was not updated");
     }
 
     /**
@@ -229,9 +228,9 @@ public class RuleEngineTest extends JavaOSGiTest {
         ruleRegistry.add(rule1);
         Rule rule1Get = ruleEngine.getRule("rule1");
         List<Trigger> triggersGet = rule1Get.getTriggers();
-        Assert.assertNotNull("Null triggers list", triggersGet);
-        Assert.assertEquals("Empty triggers list", 1, triggersGet.size());
-        Assert.assertEquals("Returned triggers list should not be a copy", triggersGet, rule1Get.getTriggers());
+        assertNotNull(triggersGet, "Null triggers list");
+        assertEquals(1, triggersGet.size(), "Empty triggers list");
+        assertEquals(triggersGet, rule1Get.getTriggers(), "Returned triggers list should not be a copy");
 
         triggers.add(ModuleBuilder.createTrigger().withId("triggerId2").withTypeUID("typeUID2").build());
         rule1.setTriggers(triggers);
@@ -240,11 +239,10 @@ public class RuleEngineTest extends JavaOSGiTest {
                                    // module
         Rule rule2Get = ruleEngine.getRule("rule1");
         List<Trigger> triggersGet2 = rule2Get.getTriggers();
-        Assert.assertNotNull("Null triggers list", triggersGet2);
-        Assert.assertEquals("Trigger was not added to the rule's list of triggers", 2, triggersGet2.size());
-        Assert.assertEquals("Returned triggers list should not be a copy", triggersGet2, rule2Get.getTriggers());
-        Assert.assertNotNull("RuleImpl trigger with wrong id is returned: " + triggersGet2,
-                rule2Get.getModule("triggerId2"));
+        assertNotNull(triggersGet2, "Null triggers list");
+        assertEquals(2, triggersGet2.size(), "Trigger was not added to the rule's list of triggers");
+        assertEquals(triggersGet2, rule2Get.getTriggers(), "Returned triggers list should not be a copy");
+        assertNotNull(rule2Get.getModule("triggerId2"), "RuleImpl trigger with wrong id is returned: " + triggersGet2);
     }
 
     /**
@@ -257,20 +255,20 @@ public class RuleEngineTest extends JavaOSGiTest {
         ruleRegistry.add(rule1);
         Rule rule1Get = ruleEngine.getRule("rule1");
         List<Condition> conditionsGet = rule1Get.getConditions();
-        Assert.assertNotNull("Null conditions list", conditionsGet);
-        Assert.assertEquals("Empty conditions list", 1, conditionsGet.size());
-        Assert.assertEquals("Returned conditions list should not be a copy", conditionsGet, rule1Get.getConditions());
+        assertNotNull(conditionsGet, "Null conditions list");
+        assertEquals(1, conditionsGet.size(), "Empty conditions list");
+        assertEquals(conditionsGet, rule1Get.getConditions(), "Returned conditions list should not be a copy");
 
         conditions.add(ModuleBuilder.createCondition().withId("conditionId2").withTypeUID("typeUID2").build());
         rule1.setConditions(conditions);
         ruleEngine.addRule(rule1); // ruleEngine.update will update the RuleImpl2.moduleMap with the new module
         Rule rule2Get = ruleEngine.getRule("rule1");
         List<Condition> conditionsGet2 = rule2Get.getConditions();
-        Assert.assertNotNull("Null conditions list", conditionsGet2);
-        Assert.assertEquals("Condition was not added to the rule's list of conditions", 2, conditionsGet2.size());
-        Assert.assertEquals("Returned conditions list should not be a copy", conditionsGet2, rule2Get.getConditions());
-        Assert.assertNotNull("RuleImpl condition with wrong id is returned: " + conditionsGet2,
-                rule2Get.getModule("conditionId2"));
+        assertNotNull(conditionsGet2, "Null conditions list");
+        assertEquals(2, conditionsGet2.size(), "Condition was not added to the rule's list of conditions");
+        assertEquals(conditionsGet2, rule2Get.getConditions(), "Returned conditions list should not be a copy");
+        assertNotNull(rule2Get.getModule("conditionId2"),
+                "RuleImpl condition with wrong id is returned: " + conditionsGet2);
     }
 
     private RuleImpl createRule() {

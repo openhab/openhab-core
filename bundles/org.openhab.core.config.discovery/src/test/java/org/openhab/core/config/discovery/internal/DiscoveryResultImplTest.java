@@ -12,12 +12,12 @@
  */
 package org.openhab.core.config.discovery.internal;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.thing.ThingTypeUID;
@@ -36,16 +36,18 @@ public class DiscoveryResultImplTest {
     private static final int DEFAULT_TTL = 60;
 
     @SuppressWarnings("unused")
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidConstructorForThingType() {
-        new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL);
+        assertThrows(IllegalArgumentException.class,
+                () -> new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL));
     }
 
     @SuppressWarnings("unused")
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidConstructorForTTL() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
-        new DiscoveryResultImpl(thingTypeUID, new ThingUID(thingTypeUID, "thingId"), null, null, null, null, -2);
+        assertThrows(IllegalArgumentException.class, () -> new DiscoveryResultImpl(thingTypeUID,
+                new ThingUID(thingTypeUID, "thingId"), null, null, null, null, -2));
     }
 
     @Test
@@ -61,7 +63,7 @@ public class DiscoveryResultImplTest {
         assertEquals("", discoveryResult.getLabel());
         assertEquals(DiscoveryResultFlag.NEW, discoveryResult.getFlag());
 
-        assertNotNull("The properties must never be null!", discoveryResult.getProperties());
+        assertNotNull(discoveryResult.getProperties(), "The properties must never be null!");
         assertNull(discoveryResult.getRepresentationProperty());
     }
 

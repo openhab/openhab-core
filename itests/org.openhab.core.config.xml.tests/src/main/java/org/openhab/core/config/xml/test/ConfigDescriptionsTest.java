@@ -14,7 +14,7 @@ package org.openhab.core.config.xml.test;
 
 import static java.util.stream.Collectors.joining;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -51,7 +51,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     private ConfigDescriptionRegistry configDescriptionRegistry;
     private BindingInstaller bindingInstaller;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         configDescriptionRegistry = getService(ConfigDescriptionRegistry.class);
         assertThat(configDescriptionRegistry, is(notNullValue()));

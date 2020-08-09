@@ -13,9 +13,10 @@
 package org.openhab.core.internal.scheduler;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test cases for {@link CronAdjuster} to test error handling and misc cases.
@@ -32,68 +33,68 @@ public class CronAdjusterMiscTest {
                 is(equalTo(false)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testToShort() {
-        new CronAdjuster("* * * * *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * * *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testToLong() {
-        new CronAdjuster("* * * * * * * *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * * * * * *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testDayInWeek() {
-        new CronAdjuster("* * * * * FRI#X");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * * * FRI#X"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testIllegalDayInWeek() {
-        new CronAdjuster("* * * * * NO");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * * * NO"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMonthName() {
-        new CronAdjuster("* * * * FXB *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * * FXB *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWeekNumber() {
-        new CronAdjuster("* * * XW * *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * XW * *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBeforeSlash() {
-        new CronAdjuster("* * * 1/X * *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * 1/X * *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAfterSlash() {
-        new CronAdjuster("* * * X/10 * *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * X/10 * *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testRangeLeftSideError() {
-        new CronAdjuster("X-3 * * * * *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("X-3 * * * * *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testRangeRightSideError() {
-        new CronAdjuster("3-X * * * * *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("3-X * * * * *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBelowMin() {
-        new CronAdjuster("0 0 0 0 0 0");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("0 0 0 0 0 0"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAboveMax() {
-        new CronAdjuster("99 * * * * *");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("99 * * * * *"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAboveWeekday() {
-        new CronAdjuster("* * * * * 8");
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster("* * * * * 8"));
     }
 }

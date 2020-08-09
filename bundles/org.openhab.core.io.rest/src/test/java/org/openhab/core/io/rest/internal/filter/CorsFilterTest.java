@@ -14,7 +14,7 @@ package org.openhab.core.io.rest.internal.filter;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.io.rest.internal.filter.CorsFilter.*;
 
@@ -27,12 +27,13 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Test for the {@link CorsFilter} filter
@@ -40,6 +41,8 @@ import org.mockito.junit.MockitoRule;
  * @author Antoine Besnard - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java and use Mockito
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class CorsFilterTest {
 
     private static final String CONTENT_TYPE_HEADER = HttpHeaders.CONTENT_TYPE;
@@ -56,9 +59,7 @@ public class CorsFilterTest {
     private @Mock ContainerRequestContext requestContext;
     private @Mock ContainerResponseContext responseContext;
 
-    public @Rule MockitoRule mockitoRule = MockitoJUnit.rule();
-
-    @Before
+    @BeforeEach
     public void setUp() {
         filter = new CorsFilter();
         filter.activate(singletonMap("enable", "true"));

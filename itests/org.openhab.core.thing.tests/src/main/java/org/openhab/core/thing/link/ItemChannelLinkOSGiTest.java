@@ -12,15 +12,15 @@
  */
 package org.openhab.core.thing.link;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Hashtable;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.ChannelUID;
@@ -50,7 +50,7 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
     private ItemChannelLinkRegistry itemChannelLinkRegistry;
     private ManagedThingProvider managedThingProvider;
 
-    @Before
+    @BeforeEach
     public void setup() {
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);
@@ -61,7 +61,7 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
         assertNotNull(managedItemChannelLinkProvider);
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         managedItemChannelLinkProvider.getAll().forEach(it -> managedItemChannelLinkProvider.remove(it.getUID()));
         managedThingProvider.getAll().forEach(it -> managedThingProvider.remove(it.getUID()));

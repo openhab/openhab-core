@@ -13,7 +13,6 @@
 package org.openhab.core.io.net.http.internal;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.lang.reflect.Field;
 import java.net.Socket;
@@ -30,9 +29,13 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.io.net.http.TlsTrustManagerProvider;
 
 /**
@@ -40,40 +43,24 @@ import org.openhab.core.io.net.http.TlsTrustManagerProvider;
  *
  * @author Martin van Wingerden - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class ExtensibleTrustManagerImplTest {
 
+    private X509Certificate[] chain;
     private ExtensibleTrustManagerImpl subject;
 
-    @Mock
-    private TlsTrustManagerProvider trustmanagerProvider;
+    private @Mock TlsTrustManagerProvider trustmanagerProvider;
+    private @Mock TlsTrustManagerProvider trustmanagerProviderHostPort;
+    private @Mock X509ExtendedTrustManager trustmanager;
+    private @Mock X509ExtendedTrustManager trustmanager2;
+    private @Mock X509ExtendedTrustManager defaultTrustManager;
+    private @Mock SSLEngine sslEngine;
+    private @Mock X509Certificate topOfChain;
+    private @Mock X509Certificate bottomOfChain;
 
-    @Mock
-    private TlsTrustManagerProvider trustmanagerProviderHostPort;
-
-    @Mock
-    private X509ExtendedTrustManager trustmanager;
-
-    @Mock
-    private X509ExtendedTrustManager trustmanager2;
-
-    @Mock
-    private X509ExtendedTrustManager defaultTrustManager;
-
-    @Mock
-    private SSLEngine sslEngine;
-
-    @Mock
-    private X509Certificate topOfChain;
-
-    @Mock
-    private X509Certificate bottomOfChain;
-
-    private X509Certificate[] chain;
-
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
-
         when(trustmanagerProvider.getHostName()).thenReturn("example.org");
         when(trustmanagerProvider.getTrustManager()).thenReturn(trustmanager);
 

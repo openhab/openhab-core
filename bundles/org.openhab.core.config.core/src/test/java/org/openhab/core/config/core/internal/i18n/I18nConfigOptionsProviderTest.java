@@ -13,14 +13,14 @@
 package org.openhab.core.config.core.internal.i18n;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.URI;
 import java.util.Locale;
 
 import org.hamcrest.collection.IsEmptyCollection;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ParameterOption;
 
 /**
@@ -38,7 +38,7 @@ public class I18nConfigOptionsProviderTest {
     private final ParameterOption expectedCntryFRJava9 = new ParameterOption("US", "États-Unis");
     private URI uriI18N;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         provider = new I18nConfigOptionsProvider();
         uriI18N = new URI("system:i18n");

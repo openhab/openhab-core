@@ -13,17 +13,18 @@
 package org.openhab.core.config.discovery;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -80,12 +81,14 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
     private ThingRegistry thingRegistry;
     private Inbox inbox;
 
-    @Mock
-    private DiscoveryListener mockDiscoveryListener;
+    private AutoCloseable mocksCloseable;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
+    private @Mock DiscoveryListener mockDiscoveryListener;
+
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
+
         registerVolatileStorageService();
 
         thingRegistry = getService(ThingRegistry.class);
@@ -121,8 +124,10 @@ public class DiscoveryServiceRegistryOSGiTest extends JavaOSGiTest {
         discoveryServiceRegistry = getService(DiscoveryServiceRegistry.class);
     }
 
-    @After
-    public void cleanUp() {
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
+
         discoveryServiceFaultyMock.abortScan();
         discoveryServiceMockForBinding1.abortScan();
         discoveryServiceMockForBinding2.abortScan();

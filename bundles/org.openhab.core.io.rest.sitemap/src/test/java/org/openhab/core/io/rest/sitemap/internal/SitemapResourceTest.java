@@ -13,11 +13,10 @@
 package org.openhab.core.io.rest.sitemap.internal;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -34,9 +33,13 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService;
 import org.openhab.core.items.GenericItem;
@@ -59,6 +62,8 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  *
  * @author Henning Treu - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class SitemapResourceTest extends JavaTest {
 
     private static final int STATE_UPDATE_WAIT_TIME = 100;
@@ -96,10 +101,8 @@ public class SitemapResourceTest extends JavaTest {
 
     private EList<Widget> widgets;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
-        initMocks(this);
-
         sitemapResource = new SitemapResource(itemUIRegistry, localeService, subscriptions);
 
         when(uriInfo.getAbsolutePathBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));

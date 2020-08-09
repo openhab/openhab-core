@@ -13,7 +13,8 @@
 package org.openhab.core.thing.internal;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -25,9 +26,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
@@ -73,14 +74,14 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
     private @Nullable Map<String, Object> changedParameters = null;
     private @Nullable Event receivedEvent = null;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
         managedThingProvider = getService(ManagedThingProvider.class);
         unregisterCurrentThingHandlerFactory();
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         unregisterCurrentThingHandlerFactory();
         managedThingProvider.getAll().stream().forEach(it -> managedThingProvider.remove(it.getUID()));
@@ -183,13 +184,13 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         assertThat(changedParameters.entrySet(), is(equalTo(parameters.entrySet())));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatThingRegistryThrowsExceptionForConfigUpdateOfNonExistingThing() {
         ThingRegistry thingRegistry = getService(ThingRegistry.class);
-        ThingUID thingUID = new ThingUID(THING_TYPE_UID, "binding:type:thing");
+        ThingUID thingUID = new ThingUID(THING_TYPE_UID, "thing");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("param", "value1");
-        thingRegistry.updateConfiguration(thingUID, parameters);
+        assertThrows(IllegalArgumentException.class, () -> thingRegistry.updateConfiguration(thingUID, parameters));
     }
 
     @Test

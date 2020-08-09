@@ -13,7 +13,8 @@
 package org.openhab.core.test.java;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,9 +28,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.openhab.core.test.internal.java.MissingServiceAnalyzer;
 import org.openhab.core.test.storage.VolatileStorageService;
 import org.osgi.framework.Bundle;
@@ -53,7 +53,7 @@ public class JavaOSGiTest extends JavaTest {
     private final Map<String, List<ServiceRegistration<?>>> registeredServices = new HashMap<>();
     protected @NonNullByDefault({}) BundleContext bundleContext;
 
-    @Before
+    @BeforeEach
     public void bindBundleContext() {
         bundleContext = initBundleContext();
         assertThat(bundleContext, is(notNullValue()));
@@ -149,7 +149,7 @@ public class JavaOSGiTest extends JavaTest {
      */
     private <T, I extends T> @Nullable I getSingleServiceInstance(Class<T> clazz, final List<I> filteredServices) {
         if (filteredServices.size() > 1) {
-            Assert.fail("More than 1 service matching the filter is registered.");
+            fail("More than 1 service matching the filter is registered.");
         }
         if (filteredServices.isEmpty()) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
@@ -351,7 +351,7 @@ public class JavaOSGiTest extends JavaTest {
         registerService(new VolatileStorageService());
     }
 
-    @After
+    @AfterEach
     public void unregisterMocks() {
         registeredServices.forEach((interfaceName, services) -> services.forEach(service -> service.unregister()));
         registeredServices.clear();

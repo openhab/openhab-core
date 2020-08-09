@@ -12,16 +12,18 @@
  */
 package org.openhab.core.thing;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Alex Tugarev - Initial contribution
  */
 public class UIDTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidCharacters() {
-        new ThingUID("binding:type:id_with_invalidchar#");
+        assertThrows(IllegalArgumentException.class, () -> new ThingUID("binding:type:id_with_invalidchar#"));
     }
 
     @Test

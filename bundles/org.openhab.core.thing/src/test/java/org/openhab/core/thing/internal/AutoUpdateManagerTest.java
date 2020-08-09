@@ -12,10 +12,9 @@
  */
 package org.openhab.core.thing.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,10 +22,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GenericItem;
@@ -55,6 +58,8 @@ import org.openhab.core.thing.type.ChannelTypeRegistry;
  * @author Simon Kaufmann - Initial contribution
  * @author Kai Kreuzer - added tests with multiple links
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
 public class AutoUpdateManagerTest {
 
     private static final ThingUID THING_UID_ONLINE = new ThingUID("test::mock-online");
@@ -82,9 +87,8 @@ public class AutoUpdateManagerTest {
     private AutoUpdateManager aum;
     private final Map<ChannelUID, AutoUpdatePolicy> policies = new HashMap<>();
 
-    @Before
+    @BeforeEach
     public void setup() {
-        initMocks(this);
         event = ItemEventFactory.createCommandEvent("test", new StringType("AFTER"));
         item = new StringItem("test");
         item.setState(new StringType("BEFORE"));

@@ -12,15 +12,15 @@
  */
 package org.openhab.core.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for the {@link ExpiringCache} class.
@@ -37,7 +37,7 @@ public class ExpiringCacheTest {
 
     private ExpiringCache<String> subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         subject = new ExpiringCache<>(CACHE_EXPIRY, CACHE_ACTION);
     }

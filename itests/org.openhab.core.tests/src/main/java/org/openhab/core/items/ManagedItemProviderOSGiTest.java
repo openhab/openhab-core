@@ -13,15 +13,16 @@
 package org.openhab.core.items;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.items.ManagedItemProvider.PersistedItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.items.NumberItem;
@@ -51,14 +52,14 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
     private ManagedItemProvider itemProvider;
     private ItemRegistry itemRegistry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
         itemProvider = getService(ManagedItemProvider.class);
         itemRegistry = getService(ItemRegistry.class);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         for (Item item : itemProvider.getAll()) {
             itemProvider.remove(item.getName());
@@ -143,12 +144,12 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         assertThat(itemProvider.getAll().size(), is(0));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertTwoItemsWithSameNameCanNotBeAdded() {
         assertThat(itemProvider.getAll().size(), is(0));
 
         itemProvider.add(new StringItem("Item"));
-        itemProvider.add(new StringItem("Item"));
+        assertThrows(IllegalArgumentException.class, () -> itemProvider.add(new StringItem("Item")));
     }
 
     @Test

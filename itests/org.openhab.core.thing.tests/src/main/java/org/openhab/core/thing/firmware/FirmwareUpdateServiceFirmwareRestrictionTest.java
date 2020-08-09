@@ -13,7 +13,7 @@
 package org.openhab.core.thing.firmware;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -23,9 +23,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -56,12 +56,12 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     private FirmwareProvider lambdaFirmwareProvider;
 
-    @Before
+    @BeforeEach
     public void setup() {
         thingTypeUID = new ThingTypeUID("customBinding:type");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         unregisterSingleFirmwareProvider();
     }

@@ -15,7 +15,8 @@ package org.openhab.core.config.discovery.internal;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
@@ -37,9 +38,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -170,7 +171,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
     private @NonNullByDefault({}) ThingRegistry registry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         registerVolatileStorageService();
 
@@ -192,7 +193,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         inbox.addThingHandlerFactory(new DummyThingHandlerFactory(componentContextMock));
     }
 
-    @After
+    @AfterEach
     public void cleanUp() {
         discoveryResults.forEach((thingUID, discoveryResult) -> inbox.remove(thingUID));
         inboxListeners.forEach(listener -> inbox.removeInboxListener(listener));
@@ -851,9 +852,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatApproveThrowsIllegalArgumentExceptionIfNoDiscoveryResultForGivenThingUIDisAvailable() {
-        inbox.approve(new ThingUID("1234"), "label");
+        assertThrows(IllegalArgumentException.class, () -> inbox.approve(new ThingUID("1234"), "label"));
     }
 
     @Test

@@ -12,13 +12,13 @@
  */
 package org.openhab.core.thing.internal.profiles;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.thing.profiles.ProfileCallback;
 
@@ -26,15 +26,10 @@ import org.openhab.core.thing.profiles.ProfileCallback;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@ExtendWith(MockitoExtension.class)
 public class SystemDefaultProfileTest {
 
-    @Mock
-    private ProfileCallback mockCallback;
-
-    @Before
-    public void setup() {
-        initMocks(this);
-    }
+    private @Mock ProfileCallback mockCallback;
 
     @Test
     public void testOnCommand() {

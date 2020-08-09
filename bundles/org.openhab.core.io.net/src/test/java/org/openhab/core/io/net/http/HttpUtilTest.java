@@ -12,7 +12,7 @@
  */
 package org.openhab.core.io.net.http;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.concurrent.TimeUnit;
@@ -20,9 +20,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the HttpUtil
@@ -31,9 +29,6 @@ import org.junit.rules.ExpectedException;
  * @author Martin van Wingerden - Added tests based on HttpClientFactory
  */
 public class HttpUtilTest extends BaseHttpUtilTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void baseTest() throws Exception {
@@ -71,17 +66,15 @@ public class HttpUtilTest extends BaseHttpUtilTest {
 
     @Test
     public void testCreateHttpMethodForUnsupportedFake() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Given HTTP Method 'FAKE' is unknown");
-
-        HttpUtil.createHttpMethod("FAKE");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> HttpUtil.createHttpMethod("FAKE"));
+        assertEquals("Given HTTP Method 'FAKE' is unknown", exception.getMessage());
     }
 
     @Test
     public void testCreateHttpMethodForUnsupportedTrace() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Given HTTP Method 'TRACE' is unknown");
-
-        HttpUtil.createHttpMethod("TRACE");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> HttpUtil.createHttpMethod("TRACE"));
+        assertEquals("Given HTTP Method 'TRACE' is unknown", exception.getMessage());
     }
 }

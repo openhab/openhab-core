@@ -13,9 +13,9 @@
 package org.openhab.core.model.core.internal.folder;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,9 +35,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.model.core.ModelParser;
@@ -84,29 +84,30 @@ public class FolderObserverTest extends JavaOSGiTest {
 
     private static final String INITIAL_FILE_CONTENT = "Initial content";
 
+    private Dictionary<String, Object> configProps;
+    private String defaultWatchedDir;
     private FolderObserver folderObserver;
     private ModelRepoDummy modelRepo;
 
-    @Mock
-    private ModelParser modelParser;
+    private AutoCloseable mocksCloseable;
 
-    @Mock
-    private ReadyService readyService;
+    private @Mock ModelParser modelParser;
+    private @Mock ReadyService readyService;
+    private @Mock ComponentContext context;
 
-    @Mock
-    private ComponentContext context;
-    private Dictionary<String, Object> configProps;
-
-    private String defaultWatchedDir;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         configProps = new Hashtable<>();
 
         setupWatchedDirectory();
         setUpServices();
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     /**
@@ -138,7 +139,7 @@ public class FolderObserverTest extends JavaOSGiTest {
      *
      * @throws Exception
      */
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         folderObserver.deactivate();
         try (Stream<Path> walk = Files.walk(WATCHED_DIRECTORY.toPath())) {

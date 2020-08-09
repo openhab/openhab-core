@@ -13,12 +13,13 @@
 package org.openhab.core.config.core;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
 /**
@@ -163,43 +164,51 @@ public class ConfigDescriptionParameterBuilderTest {
         assertTrue(param2.getOptions().isEmpty());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatNameMustNotBeNull() {
-        ConfigDescriptionParameterBuilder.create(null, Type.BOOLEAN).build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ConfigDescriptionParameterBuilder.create(null, Type.BOOLEAN).build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatNameMustNotBeEmpty() {
-        ConfigDescriptionParameterBuilder.create("", Type.BOOLEAN).build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ConfigDescriptionParameterBuilder.create("", Type.BOOLEAN).build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatTypeMustNotBeNull() {
-        ConfigDescriptionParameterBuilder.create("Dummy", null).build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ConfigDescriptionParameterBuilder.create("Dummy", null).build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatUnitForTextParameterIsNotAllowed() {
-        ConfigDescriptionParameterBuilder.create("Dummy", Type.TEXT).withUnit("m").build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ConfigDescriptionParameterBuilder.create("Dummy", Type.TEXT).withUnit("m").build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatUnitForBooleanParameterIsNotAllowed() {
-        ConfigDescriptionParameterBuilder.create("Dummy", Type.BOOLEAN).withUnit("m").build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ConfigDescriptionParameterBuilder.create("Dummy", Type.BOOLEAN).withUnit("m").build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatUnitLabelForTextParameterIsNotAllowed() {
-        ConfigDescriptionParameterBuilder.create("Dummy", Type.TEXT).withUnitLabel("Runs").build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ConfigDescriptionParameterBuilder.create("Dummy", Type.TEXT).withUnitLabel("Runs").build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatUnitLabelForBooleanParameterIsNotAllowed() {
-        ConfigDescriptionParameterBuilder.create("Dummy", Type.BOOLEAN).withUnitLabel("Runs").build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ConfigDescriptionParameterBuilder.create("Dummy", Type.BOOLEAN).withUnitLabel("Runs").build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void assertThatAparameterWithAnInvalidUnitCannotBeCreated() {
-        ConfigDescriptionParameterBuilder.create("Dummy", Type.BOOLEAN).withUnit("invalid").build();
+        assertThrows(IllegalArgumentException.class,
+                () -> ConfigDescriptionParameterBuilder.create("Dummy", Type.BOOLEAN).withUnit("invalid").build());
     }
 }

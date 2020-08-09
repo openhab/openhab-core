@@ -12,7 +12,7 @@
  */
 package org.openhab.core.auth.oauth2client.test.internal.cipher;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -22,8 +22,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.auth.oauth2client.internal.cipher.SymmetricKeyCipher;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -40,7 +40,7 @@ public class CipherTest {
 
     private SymmetricKeyCipher symmetricKeyCipher;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException, InvalidSyntaxException, NoSuchAlgorithmException {
         symmetricKeyCipher = new SymmetricKeyCipher(mockConfigurationAdmin());
     }
@@ -48,12 +48,12 @@ public class CipherTest {
     @Test
     public void testEncDec() throws GeneralSecurityException {
         String cipherText = symmetricKeyCipher.encrypt(PLAIN_TEXT);
-        assertNotNull("Cipher text should not be null", cipherText);
-        assertNotEquals("Cipher text should not be the same as plaintext", PLAIN_TEXT, cipherText);
+        assertNotNull(cipherText, "Cipher text should not be null");
+        assertNotEquals(PLAIN_TEXT, cipherText, "Cipher text should not be the same as plaintext");
 
         String decryptedText = symmetricKeyCipher.decrypt(cipherText);
-        assertNotNull("Decrypted text should not be null", decryptedText);
-        assertEquals("Decrypted text should be same as before", PLAIN_TEXT, decryptedText);
+        assertNotNull(decryptedText, "Decrypted text should not be null");
+        assertEquals(PLAIN_TEXT, decryptedText, "Decrypted text should be same as before");
     }
 
     private ConfigurationAdmin mockConfigurationAdmin() throws IOException {

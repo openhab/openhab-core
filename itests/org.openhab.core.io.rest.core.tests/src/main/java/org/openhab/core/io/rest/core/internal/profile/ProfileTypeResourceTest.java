@@ -13,18 +13,19 @@
 package org.openhab.core.io.rest.core.internal.profile;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.test.java.JavaTest;
@@ -70,13 +71,15 @@ public class ProfileTypeResourceTest extends JavaTest {
     private final ChannelType otherTriggerChannelType = ChannelTypeBuilder
             .trigger(otherTriggerChannelTypeUID, "channel1").build();
 
+    private AutoCloseable mocksCloseable;
+
     private @Mock ChannelTypeRegistry channelTypeRegistry;
     private @Mock LocaleService localeService;
     private @Mock ProfileTypeRegistry profileTypeRegistry;
 
-    @Before
-    public void setup() {
-        initMocks(this);
+    @BeforeEach
+    public void beforeEach() {
+        mocksCloseable = openMocks(this);
 
         resource = new ProfileTypeResource(channelTypeRegistry, localeService, profileTypeRegistry);
 
@@ -99,6 +102,11 @@ public class ProfileTypeResourceTest extends JavaTest {
 
         when(channelTypeRegistry.getChannelType(otherStateChannelTypeUID, null)).thenReturn(otherStateChannelType);
         when(channelTypeRegistry.getChannelType(otherTriggerChannelTypeUID, null)).thenReturn(otherTriggerChannelType);
+    }
+
+    @AfterEach
+    public void afterEach() throws Exception {
+        mocksCloseable.close();
     }
 
     @Test

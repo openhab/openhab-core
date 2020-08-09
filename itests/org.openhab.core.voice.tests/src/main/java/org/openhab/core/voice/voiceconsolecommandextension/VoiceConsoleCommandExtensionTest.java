@@ -12,9 +12,9 @@
  */
 package org.openhab.core.voice.voiceconsolecommandextension;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -41,7 +41,7 @@ public abstract class VoiceConsoleCommandExtensionTest extends JavaOSGiTest {
     protected SinkStub sink;
     protected AudioSourceStub source;
 
-    @Before
+    @BeforeEach
     public void setup() {
         voiceManager = getService(VoiceManager.class, VoiceManagerImpl.class);
         assertNotNull(voiceManager);

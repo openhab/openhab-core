@@ -12,9 +12,9 @@
  */
 package org.openhab.core.io.net.exec;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the ExecUtil

@@ -13,7 +13,8 @@
 package org.openhab.core.io.rest;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,9 +40,9 @@ public class Stream2JSONInputStreamTest {
 
     private static final Gson GSON = new GsonBuilder().create();
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldFailForNullSource() throws IOException {
-        new Stream2JSONInputStream(null).close();
+        assertThrows(IllegalArgumentException.class, () -> new Stream2JSONInputStream(null).close());
     }
 
     @Test

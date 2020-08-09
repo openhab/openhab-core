@@ -12,7 +12,7 @@
  */
 package org.openhab.core.ui.icon.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.ui.icon.internal.IconServlet.*;
@@ -27,12 +27,11 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
 import org.osgi.service.http.HttpContext;
@@ -44,6 +43,7 @@ import org.osgi.service.http.HttpService;
  * @author Kai Kreuzer - Initial contribution
  * @author Wouter Born - Migrate tests from Groovy to Java and use Mockito
  */
+@ExtendWith(MockitoExtension.class)
 public class IconServletTest {
 
     private class ByteArrayServletOutputStream extends ServletOutputStream {
@@ -85,9 +85,7 @@ public class IconServletTest {
     private @Mock IconProvider provider1Mock;
     private @Mock IconProvider provider2Mock;
 
-    public @Rule MockitoRule mockitoRule = MockitoJUnit.rule();
-
-    @Before
+    @BeforeEach
     public void before() throws IOException {
         servlet = new IconServlet(httpServiceMock, httpContextMock);
         responseOutputStream.reset();

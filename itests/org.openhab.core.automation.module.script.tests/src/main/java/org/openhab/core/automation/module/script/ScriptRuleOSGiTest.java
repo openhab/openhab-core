@@ -13,7 +13,7 @@
 package org.openhab.core.automation.module.script;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,8 +22,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -66,7 +66,7 @@ public class ScriptRuleOSGiTest extends JavaOSGiTest {
     public ScriptRuleOSGiTest() {
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         @NonNullByDefault
         ItemProvider itemProvider = new ItemProvider() {

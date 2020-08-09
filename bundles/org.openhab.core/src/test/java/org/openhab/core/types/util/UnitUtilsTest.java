@@ -13,8 +13,9 @@
 package org.openhab.core.types.util;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.*;
 
 import javax.measure.Quantity;
@@ -24,7 +25,8 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Power;
 import javax.measure.quantity.Temperature;
 
-import org.junit.Test;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
@@ -34,6 +36,7 @@ import org.openhab.core.library.unit.SmartHomeUnits;
 /**
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public class UnitUtilsTest {
 
     @Test
@@ -107,9 +110,13 @@ public class UnitUtilsTest {
 
         Unit<?> unit = UnitUtils.parseUnit("°F");
         assertNotNull(unit);
-        assertThat(UnitUtils.getDimensionName(unit), is(Temperature.class.getSimpleName()));
+        if (unit != null) {
+            assertThat(UnitUtils.getDimensionName(unit), is(Temperature.class.getSimpleName()));
+        }
         unit = UnitUtils.parseUnit("m");
         assertNotNull(unit);
-        assertThat(UnitUtils.getDimensionName(unit), is(Length.class.getSimpleName()));
+        if (unit != null) {
+            assertThat(UnitUtils.getDimensionName(unit), is(Length.class.getSimpleName()));
+        }
     }
 }
