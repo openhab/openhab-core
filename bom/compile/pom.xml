@@ -235,6 +235,12 @@
       <artifactId>swagger-jaxrs2</artifactId>
       <version>${swagger.version}</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>jakarta.activation</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- XStream -->
