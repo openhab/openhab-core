@@ -18,8 +18,8 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -69,8 +69,8 @@ public class PersistenceResourceTest {
             final int year = i;
             items.add(new HistoricItem() {
                 @Override
-                public Date getTimestamp() {
-                    return new Date(year - 1900, 0, 1);
+                public ZonedDateTime getTimestamp() {
+                    return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
                 }
 
                 @Override
