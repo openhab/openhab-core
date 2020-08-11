@@ -66,7 +66,7 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
         }
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "smarthome/system/*");
+        properties.put("event.topics", "openhab/system/*");
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
     }

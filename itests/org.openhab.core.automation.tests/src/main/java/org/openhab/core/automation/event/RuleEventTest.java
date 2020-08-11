@@ -134,7 +134,7 @@ public class RuleEventTest extends JavaOSGiTest {
         // Creation of RULE
         Map<String, Object> triggerCfgEntries = new HashMap<>();
         triggerCfgEntries.put("eventSource", "myMotionItem2");
-        triggerCfgEntries.put("eventTopic", "smarthome/*");
+        triggerCfgEntries.put("eventTopic", "openhab/*");
         triggerCfgEntries.put("eventTypes", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(triggerCfgEntries);
 
@@ -194,14 +194,14 @@ public class RuleEventTest extends JavaOSGiTest {
         registerService(itemEventHandler);
         eventPublisher.post(ItemEventFactory.createStateEvent("myMotionItem2", OnOffType.ON));
         waitForAssert(() -> assertThat(itemEvent, is(notNullValue())));
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem2/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/myLampItem2/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
         assertThat(ruleEvents.size(), is(not(0)));
-        assertThat(ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/added".equals(e.getTopic())).findFirst()
+        assertThat(ruleEvents.stream().filter(e -> "openhab/rules/myRule21/added".equals(e.getTopic())).findFirst()
                 .isPresent(), is(true));
-        assertThat(ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/state".equals(e.getTopic())).findFirst()
+        assertThat(ruleEvents.stream().filter(e -> "openhab/rules/myRule21/state".equals(e.getTopic())).findFirst()
                 .isPresent(), is(true));
-        List<Event> stateEvents = ruleEvents.stream().filter(e -> "smarthome/rules/myRule21/state".equals(e.getTopic()))
+        List<Event> stateEvents = ruleEvents.stream().filter(e -> "openhab/rules/myRule21/state".equals(e.getTopic()))
                 .collect(Collectors.toList());
         assertThat(stateEvents, is(notNullValue()));
         Optional<Event> runningEvent = stateEvents.stream()
@@ -231,7 +231,7 @@ public class RuleEventTest extends JavaOSGiTest {
         ruleRegistry.remove("myRule21");
         waitForAssert(() -> {
             assertThat(ruleRemovedEvent, is(notNullValue()));
-            assertThat(ruleRemovedEvent.getTopic(), is(equalTo("smarthome/rules/myRule21/removed")));
+            assertThat(ruleRemovedEvent.getTopic(), is(equalTo("openhab/rules/myRule21/removed")));
         });
     }
 }

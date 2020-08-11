@@ -31,11 +31,11 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true, service = EventFactory.class)
 public class InboxEventFactory extends AbstractEventFactory {
 
-    static final String INBOX_ADDED_EVENT_TOPIC = "smarthome/inbox/{thingUID}/added";
+    static final String INBOX_ADDED_EVENT_TOPIC = "openhab/inbox/{thingUID}/added";
 
-    static final String INBOX_REMOVED_EVENT_TOPIC = "smarthome/inbox/{thingUID}/removed";
+    static final String INBOX_REMOVED_EVENT_TOPIC = "openhab/inbox/{thingUID}/removed";
 
-    static final String INBOX_UPDATED_EVENT_TOPIC = "smarthome/inbox/{thingUID}/updated";
+    static final String INBOX_UPDATED_EVENT_TOPIC = "openhab/inbox/{thingUID}/updated";
 
     /**
      * Constructs a new InboxEventFactory.

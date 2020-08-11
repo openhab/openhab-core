@@ -40,7 +40,7 @@
 				"type": "core.GenericEventTrigger",
 				"configuration": {
 					"eventSource": "${onItem}",
-					"eventTopic": "smarthome/items/*",
+					"eventTopic": "openhab/items/*",
 					"eventTypes": "ItemStateEvent"
 				}
 			}

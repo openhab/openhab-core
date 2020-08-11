@@ -82,7 +82,7 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
         }
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "smarthome/items/*");
+        properties.put("event.topics", "openhab/items/*");
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
     }
@@ -163,7 +163,7 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}:{}", event.getTopic(), groupName);
-        return event.getTopic().startsWith("smarthome/items/");
+        return event.getTopic().startsWith("openhab/items/");
     }
 
     public void setItemRegistry(ItemRegistry itemRegistry) {

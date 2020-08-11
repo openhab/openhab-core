@@ -433,7 +433,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGroupItemPostsEventsForChangesCorrectly() {
         // from ItemEventFactory.GROUPITEM_STATE_CHANGED_EVENT_TOPIC
-        String groupitemStateChangedEventTopic = "smarthome/items/{itemName}/{memberName}/statechanged";
+        String groupitemStateChangedEventTopic = "openhab/items/{itemName}/{memberName}/statechanged";
 
         events.clear();
         GroupItem groupItem = new GroupItem("root", new SwitchItem("mySwitch"), new GroupFunction.Equality());

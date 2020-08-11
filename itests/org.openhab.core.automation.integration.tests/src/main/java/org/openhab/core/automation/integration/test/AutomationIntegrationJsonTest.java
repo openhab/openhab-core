@@ -248,7 +248,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
         assertThat(trigger.get().getConfiguration().get("eventSource"), is("myMotionItem"));
-        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/*"));
+        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("openhab/items/*"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
         Optional<? extends Action> action = rule.getActions().stream()
                 .filter(a -> "ItemPostCommandActionID".equals(a.getId())).findFirst();
@@ -287,7 +287,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
                 .filter(t -> "ItemStateChangeTriggerID".equals(t.getId())).findFirst();
         assertThat(trigger.isPresent(), is(true));
         assertThat(trigger.get().getTypeUID(), is("core.GenericEventTrigger"));
-        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("smarthome/items/*"));
+        assertThat(trigger.get().getConfiguration().get("eventTopic"), is("openhab/items/*"));
         assertThat(trigger.get().getConfiguration().get("eventTypes"), is("ItemStateEvent"));
         Optional<? extends Action> action = rule.getActions().stream()
                 .filter(a -> "ItemPostCommandActionID".equals(a.getId())).findFirst();
@@ -327,7 +327,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         }, 3000, 100);
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/myLampItem/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
     }
 
@@ -365,7 +365,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
             @Override
             public void receive(Event e) {
                 logger.info("Event: {}", e.getTopic());
-                if ("smarthome/items/myLampItem/command".equals(e.getTopic())) {
+                if ("openhab/items/myLampItem/command".equals(e.getTopic())) {
                     itemEvent = e;
                 }
             }

@@ -42,7 +42,7 @@ public class ChannelEventTriggerHandler extends BaseTriggerModuleHandler impleme
 
     public static final String CFG_CHANNEL_EVENT = "event";
     public static final String CFG_CHANNEL = "channelUID";
-    public static final String TOPIC = "smarthome/channels/*/triggered";
+    public static final String TOPIC = "openhab/channels/*/triggered";
 
     private final Logger logger = LoggerFactory.getLogger(ChannelEventTriggerHandler.class);
 

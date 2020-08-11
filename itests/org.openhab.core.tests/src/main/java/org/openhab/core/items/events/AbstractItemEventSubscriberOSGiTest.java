@@ -144,7 +144,7 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
 
             @Override
             public String getTopic() {
-                return "smarthome/items";
+                return "openhab/items";
             }
 
             @Override
