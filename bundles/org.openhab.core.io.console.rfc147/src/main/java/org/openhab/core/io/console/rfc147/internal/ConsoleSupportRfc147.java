@@ -51,7 +51,7 @@ public class ConsoleSupportRfc147 implements ConsoleCommandsContainer {
     private static final String KEY_SCOPE = "osgi.command.scope";
     private static final String KEY_FUNCTION = "osgi.command.function";
 
-    private static final String SCOPE = "smarthome";
+    private static final String SCOPE = "openhab";
 
     public static final OSGiConsole CONSOLE = new OSGiConsole(SCOPE);
 
