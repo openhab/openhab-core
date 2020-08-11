@@ -88,7 +88,7 @@ public class ExecUtil {
                 logger.debug("I/O exception occurred when executing commandLine '{}'", commandLine, e);
             } catch (InterruptedException e) {
                 logger.warn("Timeout occurred when executing commandLine '{}'", commandLine);
-                logger.debug("{}", e);
+                logger.debug("{}", e.getMessage(), e);
             }
         }
         return null;
