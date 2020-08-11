@@ -12,7 +12,7 @@
  */
 package org.openhab.core.persistence;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.Item;
@@ -36,7 +36,7 @@ public interface HistoricItem {
      *
      * @return the timestamp of the item
      */
-    Date getTimestamp();
+    ZonedDateTime getTimestamp();
 
     /**
      * returns the current state of the item

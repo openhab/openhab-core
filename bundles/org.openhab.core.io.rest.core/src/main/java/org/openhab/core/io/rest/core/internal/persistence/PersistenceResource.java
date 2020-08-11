@@ -332,12 +332,12 @@ public class PersistenceResource implements RESTResource {
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
                 if (lastItem != null) {
-                    dto.addData(historicItem.getTimestamp().getTime(), lastItem.getState());
+                    dto.addData(historicItem.getTimestamp().toInstant().toEpochMilli(), lastItem.getState());
                     quantity++;
                 }
             }
 
-            dto.addData(historicItem.getTimestamp().getTime(), state);
+            dto.addData(historicItem.getTimestamp().toInstant().toEpochMilli(), state);
             quantity++;
             lastItem = historicItem;
         }

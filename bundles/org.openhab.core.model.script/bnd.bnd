@@ -28,6 +28,7 @@ Import-Package: \
  org.openhab.core.library.types,\
  org.openhab.core.library.unit,\
  org.openhab.core.persistence,\
+ org.openhab.core.persistence.extensions,\
  org.openhab.core.scheduler,\
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\
@@ -41,8 +42,6 @@ Import-Package: \
  org.openhab.core.io.net.exec,\
  org.openhab.core.io.net.http,\
  org.openhab.core.model.core,\
- org.openhab.core.model.persistence.extensions,\
- org.openhab.core.model.script.engine.action,\
  com.google.common.*;version="14",\
  javax.measure.*,\
  org.apache.*,\

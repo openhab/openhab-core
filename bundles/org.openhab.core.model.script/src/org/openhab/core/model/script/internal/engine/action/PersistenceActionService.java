@@ -12,8 +12,8 @@
  */
 package org.openhab.core.model.script.internal.engine.action;
 
-import org.openhab.core.model.persistence.extensions.PersistenceExtensions;
 import org.openhab.core.model.script.engine.action.ActionService;
+import org.openhab.core.persistence.extensions.PersistenceExtensions;
 import org.osgi.service.component.annotations.Component;
 
 /**
