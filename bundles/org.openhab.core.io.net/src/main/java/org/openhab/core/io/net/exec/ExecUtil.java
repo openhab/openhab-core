@@ -85,9 +85,10 @@ public class ExecUtil {
                 logger.debug("exit code '{}', result '{}'", exitCode, result);
                 return result.toString();
             } catch (IOException e) {
-                logger.warn("I/O exception occurred when executing commandLine '{}'", commandLine, e);
+                logger.debug("I/O exception occurred when executing commandLine '{}'", commandLine, e);
             } catch (InterruptedException e) {
-                logger.warn("Timeout occurred when executing commandLine '{}'", commandLine, e);
+                logger.warn("Timeout occurred when executing commandLine '{}'", commandLine);
+                logger.debug("{}", e.getMessage(), e);
             }
         }
         return null;
@@ -99,13 +100,13 @@ public class ExecUtil {
             if (commandLine.contains(CMD_LINE_DELIMITER)) {
                 final List<String> cmdArray = Arrays.asList(commandLine.split(CMD_LINE_DELIMITER));
                 process = new ProcessBuilder(cmdArray).start();
-                logger.info("executed commandLine '{}'", cmdArray);
+                logger.debug("executed commandLine '{}'", cmdArray);
             } else {
                 process = new ProcessBuilder(commandLine).start();
-                logger.info("executed commandLine '{}'", commandLine);
+                logger.debug("executed commandLine '{}'", commandLine);
             }
         } catch (IOException e) {
-            logger.error("couldn't execute commandLine '{}'", commandLine, e);
+            logger.debug("couldn't execute commandLine '{}'", commandLine, e);
             return null;
         }
         return process;
