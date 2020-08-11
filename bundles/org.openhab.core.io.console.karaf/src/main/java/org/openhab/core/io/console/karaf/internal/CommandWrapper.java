@@ -35,11 +35,11 @@ import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
  * @author Henning Treu - implement help command
  */
 @Service
-@org.apache.karaf.shell.api.action.Command(name = "help", scope = "smarthome", description = "Print the full usage information of the 'smarthome' commands.")
+@org.apache.karaf.shell.api.action.Command(name = "help", scope = "openhab", description = "Print the full usage information of the 'openhab' commands.")
 public class CommandWrapper implements Command, Action {
 
     // Define a scope for all commands.
-    public static final String SCOPE = "smarthome";
+    public static final String SCOPE = "openhab";
 
     private final ConsoleCommandExtension command;
 
@@ -53,8 +53,8 @@ public class CommandWrapper implements Command, Action {
     /**
      * The constructor for the "help" instance of this class. This instance will be created by
      * org.apache.karaf.shell.impl.action.command.ManagerImpl.instantiate(Class<? extends T>, Registry) and
-     * is used to print all usages from the `smarthome` scope.
-     * The wrapped command is unused here because the karaf ifrastructure will call the {@link #execute()} method.
+     * is used to print all usages from the `openhab` scope.
+     * The wrapped command is unused here because the karaf infrastructure will call the {@link #execute()} method.
      */
     public CommandWrapper() {
         this(null);

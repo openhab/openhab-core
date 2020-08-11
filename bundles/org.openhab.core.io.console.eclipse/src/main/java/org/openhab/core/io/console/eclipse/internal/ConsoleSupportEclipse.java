@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class ConsoleSupportEclipse implements CommandProvider {
 
-    private static final String BASE = "smarthome";
+    private static final String BASE = "openhab";
 
     private final SortedMap<String, ConsoleCommandExtension> consoleCommandExtensions = Collections
             .synchronizedSortedMap(new TreeMap<>());
@@ -70,14 +70,14 @@ public class ConsoleSupportEclipse implements CommandProvider {
     }
 
     /**
-     * Methods staring with "_" will be used as commands. We only define one command "smarthome" to make
+     * Methods staring with "_" will be used as commands. We only define one command "openhab" to make
      * sure we do not get into conflict with other existing commands. The different functionalities
      * can then be used by the first argument.
      *
      * @param interpreter the equinox command interpreter
      * @return null, return parameter is not used
      */
-    public Object _smarthome(final CommandInterpreter interpreter) {
+    public Object _openhab(final CommandInterpreter interpreter) {
         final Console console = new OSGiConsole(BASE, interpreter);
 
         final String cmd = interpreter.nextArgument();
