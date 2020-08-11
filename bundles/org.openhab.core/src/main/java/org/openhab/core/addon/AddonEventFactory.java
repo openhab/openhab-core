@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = EventFactory.class, immediate = true)
 public class AddonEventFactory extends AbstractEventFactory {
 
-    static final String TOPIC_PREFIX = "smarthome/addons/{id}";
+    static final String TOPIC_PREFIX = "openhab/addons/{id}";
 
     static final String ADDON_INSTALLED_EVENT_TOPIC_POSTFIX = "/installed";
     static final String ADDON_UNINSTALLED_EVENT_TOPIC_POSTFIX = "/uninstalled";

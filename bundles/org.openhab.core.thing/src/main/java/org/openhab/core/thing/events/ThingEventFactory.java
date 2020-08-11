@@ -37,17 +37,17 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(immediate = true, service = EventFactory.class)
 public class ThingEventFactory extends AbstractEventFactory {
-    static final String THING_STATUS_INFO_EVENT_TOPIC = "smarthome/things/{thingUID}/status";
+    static final String THING_STATUS_INFO_EVENT_TOPIC = "openhab/things/{thingUID}/status";
 
-    static final String THING_STATUS_INFO_CHANGED_EVENT_TOPIC = "smarthome/things/{thingUID}/statuschanged";
+    static final String THING_STATUS_INFO_CHANGED_EVENT_TOPIC = "openhab/things/{thingUID}/statuschanged";
 
-    static final String THING_ADDED_EVENT_TOPIC = "smarthome/things/{thingUID}/added";
+    static final String THING_ADDED_EVENT_TOPIC = "openhab/things/{thingUID}/added";
 
-    static final String THING_REMOVED_EVENT_TOPIC = "smarthome/things/{thingUID}/removed";
+    static final String THING_REMOVED_EVENT_TOPIC = "openhab/things/{thingUID}/removed";
 
-    static final String THING_UPDATED_EVENT_TOPIC = "smarthome/things/{thingUID}/updated";
+    static final String THING_UPDATED_EVENT_TOPIC = "openhab/things/{thingUID}/updated";
 
-    static final String CHANNEL_TRIGGERED_EVENT_TOPIC = "smarthome/channels/{channelUID}/triggered";
+    static final String CHANNEL_TRIGGERED_EVENT_TOPIC = "openhab/channels/{channelUID}/triggered";
 
     /**
      * Constructs a new ThingEventFactory.

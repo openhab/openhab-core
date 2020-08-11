@@ -70,7 +70,7 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
         this.types = Collections.singleton(ItemCommandEvent.TYPE);
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();
-        this.topic = "smarthome/items/";
+        this.topic = "openhab/items/";
         properties.put("event.topics", topic);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);

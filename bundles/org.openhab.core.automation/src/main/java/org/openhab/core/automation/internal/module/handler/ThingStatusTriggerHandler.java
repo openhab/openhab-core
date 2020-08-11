@@ -79,7 +79,7 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
         }
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("event.topics", "smarthome/things/" + thingUID + "/*");
+        properties.put("event.topics", "openhab/things/" + thingUID + "/*");
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this,
                 properties);
     }
@@ -144,6 +144,6 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
     @Override
     public boolean apply(Event event) {
         logger.trace("->FILTER: {}: {}", event.getTopic(), thingUID);
-        return event.getTopic().contains("smarthome/things/" + thingUID + "/");
+        return event.getTopic().contains("openhab/things/" + thingUID + "/");
     }
 }

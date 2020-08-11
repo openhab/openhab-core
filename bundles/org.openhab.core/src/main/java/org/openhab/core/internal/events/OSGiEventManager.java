@@ -40,7 +40,7 @@ import org.osgi.service.event.EventHandler;
  * @author Stefan Bußweiler - Initial contribution
  * @author Markus Rathgeb - Return on received events as fast as possible (handle event in another thread)
  */
-@Component(immediate = true, property = { "event.topics:String=smarthome" })
+@Component(immediate = true, property = { "event.topics:String=openhab" })
 public class OSGiEventManager implements EventHandler {
 
     /** The event subscribers indexed by the event type. */

@@ -262,7 +262,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
                 @Override
                 public boolean apply(Event event) {
                     return event.getTopic().equals(
-                            "smarthome/things/{thingUID}/config/status".replace("{thingUID}", thingUID.getAsString()));
+                            "openhab/things/{thingUID}/config/status".replace("{thingUID}", thingUID.getAsString()));
                 };
             };
         }

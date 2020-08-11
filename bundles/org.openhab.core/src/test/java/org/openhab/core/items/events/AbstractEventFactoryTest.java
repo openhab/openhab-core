@@ -27,7 +27,7 @@ public class AbstractEventFactoryTest {
 
     private static final String SOURCE = "binding:type:id:channel";
     private static final String EVENT_TYPE = "SOME_EVENT_TYPE";
-    private static final String EVENT_TOPIC = "smarthome/some/topic";
+    private static final String EVENT_TOPIC = "openhab/some/topic";
     private static final String EVENT_PAYLOAD = "{\"some\":\"payload\"}";
 
     @Test

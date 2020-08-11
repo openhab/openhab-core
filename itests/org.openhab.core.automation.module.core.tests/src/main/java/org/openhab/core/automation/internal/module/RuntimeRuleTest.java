@@ -127,7 +127,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertFalse(events.isEmpty());
             ItemCommandEvent event = (ItemCommandEvent) events.remove();
-            assertEquals("smarthome/items/myLampItem/command", event.getTopic());
+            assertEquals("openhab/items/myLampItem/command", event.getTopic());
             assertEquals(OnOffType.ON, event.getItemCommand());
         });
     }
@@ -135,7 +135,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     @Test
     public void itemStateUpdatedBySimpleRule() throws ItemNotFoundException, InterruptedException {
         final Configuration triggerConfig = new Configuration(Stream
-                .of(new SimpleEntry<>("eventSource", "myMotionItem2"), new SimpleEntry<>("eventTopic", "smarthome/*"),
+                .of(new SimpleEntry<>("eventSource", "myMotionItem2"), new SimpleEntry<>("eventTopic", "openhab/*"),
                         new SimpleEntry<>("eventTypes", "ItemStateEvent"))
                 .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
         final Configuration actionConfig = new Configuration(
@@ -190,7 +190,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertFalse(events.isEmpty());
             ItemCommandEvent event = (ItemCommandEvent) events.remove();
-            assertEquals("smarthome/items/myLampItem2/command", event.getTopic());
+            assertEquals("openhab/items/myLampItem2/command", event.getTopic());
             assertEquals(OnOffType.ON, event.getItemCommand());
         });
     }

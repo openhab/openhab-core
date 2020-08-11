@@ -28,88 +28,87 @@ public class SseUtilTest {
     @Test
     public void testValidInvalidFilters() {
         // invalid
-        assertThat(SseUtil.isValidTopicFilter("smarthome/.*"), is(false));
-        assertThat(SseUtil.isValidTopicFilter("smarthome/\\w*/"), is(false));
+        assertThat(SseUtil.isValidTopicFilter("openhab/.*"), is(false));
+        assertThat(SseUtil.isValidTopicFilter("openhab/\\w*/"), is(false));
         assertThat(SseUtil.isValidTopicFilter("sm.*/test/"), is(false));
-        assertThat(SseUtil.isValidTopicFilter("smarthome.*"), is(false));
+        assertThat(SseUtil.isValidTopicFilter("openhab.*"), is(false));
 
         // valid
-        assertThat(SseUtil.isValidTopicFilter("smarthome"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab"), is(true));
         assertThat(SseUtil.isValidTopicFilter(""), is(true));
-        assertThat(SseUtil.isValidTopicFilter(", smarthome/*"), is(true));
-        assertThat(SseUtil.isValidTopicFilter("smarthome,qivicon"), is(true));
-        assertThat(SseUtil.isValidTopicFilter("smarthome , qivicon"), is(true));
-        assertThat(SseUtil.isValidTopicFilter("smarthome,    qivicon"), is(true));
-        assertThat(SseUtil.isValidTopicFilter("smarthome/test"), is(true));
-        assertThat(SseUtil.isValidTopicFilter("smarthome/test/test/test/test/test"), is(true));
-        assertThat(
-                SseUtil.isValidTopicFilter("smarthome/test/test/test/test/test,    smarthome/test/test/test/test/test"),
+        assertThat(SseUtil.isValidTopicFilter(", openhab/*"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab,qivicon"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab , qivicon"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab,    qivicon"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab/test"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab/test/test/test/test/test"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab/test/test/test/test/test,    openhab/test/test/test/test/test"),
                 is(true));
         assertThat(
                 SseUtil.isValidTopicFilter(
-                        "smarthome/test/test/test/test/test,    smarthome/test/test/test/test/test, smarthome,qivicon"),
+                        "openhab/test/test/test/test/test,    openhab/test/test/test/test/test, openhab,qivicon"),
                 is(true));
         assertThat(SseUtil.isValidTopicFilter("////////////"), is(true));
         assertThat(SseUtil.isValidTopicFilter("*/added"), is(true));
         assertThat(SseUtil.isValidTopicFilter("*added"), is(true));
-        assertThat(SseUtil.isValidTopicFilter("smarthome/test/test:test:123/test"), is(true));
-        assertThat(SseUtil.isValidTopicFilter("smarthome/test/test-test-123-test:test:123/test"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab/test/test:test:123/test"), is(true));
+        assertThat(SseUtil.isValidTopicFilter("openhab/test/test-test-123-test:test:123/test"), is(true));
     }
 
     @Test
     public void testFilterMatchers() {
-        List<String> regexes = SseUtil.convertToRegex(
-                "smarthome/*/test/test/test/test,    smarthome/test/*/test/test/test, smarthome,qivicon");
+        List<String> regexes = SseUtil
+                .convertToRegex("openhab/*/test/test/test/test,    openhab/test/*/test/test/test, openhab,qivicon");
 
-        assertThat("smarthome/test/test/test/test/test".matches(regexes.get(0)), is(true));
-        assertThat("smarthome/asdf/test/test/test/test".matches(regexes.get(0)), is(true));
-        assertThat("smarthome/asdf/ASDF/test/test/test".matches(regexes.get(0)), is(false));
+        assertThat("openhab/test/test/test/test/test".matches(regexes.get(0)), is(true));
+        assertThat("openhab/asdf/test/test/test/test".matches(regexes.get(0)), is(true));
+        assertThat("openhab/asdf/ASDF/test/test/test".matches(regexes.get(0)), is(false));
 
-        assertThat("smarthome/test/test/test/test/test".matches(regexes.get(1)), is(true));
-        assertThat("smarthome/asdf/test/test/test/test".matches(regexes.get(1)), is(false));
-        assertThat("smarthome/asdf/ASDF/test/test/test".matches(regexes.get(1)), is(false));
+        assertThat("openhab/test/test/test/test/test".matches(regexes.get(1)), is(true));
+        assertThat("openhab/asdf/test/test/test/test".matches(regexes.get(1)), is(false));
+        assertThat("openhab/asdf/ASDF/test/test/test".matches(regexes.get(1)), is(false));
 
-        assertThat("smarthome/test/test/test/test/test".matches(regexes.get(2)), is(true));
-        assertThat("smarthome/asdf/test/test/test/test".matches(regexes.get(2)), is(true));
-        assertThat("smarthome/asdf/ASDF/test/test/test".matches(regexes.get(2)), is(true));
+        assertThat("openhab/test/test/test/test/test".matches(regexes.get(2)), is(true));
+        assertThat("openhab/asdf/test/test/test/test".matches(regexes.get(2)), is(true));
+        assertThat("openhab/asdf/ASDF/test/test/test".matches(regexes.get(2)), is(true));
 
-        assertThat("smarthome/test/test/test/test/test".matches(regexes.get(3)), is(false));
-        assertThat("smarthome/asdf/test/test/test/test".matches(regexes.get(3)), is(false));
+        assertThat("openhab/test/test/test/test/test".matches(regexes.get(3)), is(false));
+        assertThat("openhab/asdf/test/test/test/test".matches(regexes.get(3)), is(false));
         assertThat("qivicon/asdf/ASDF/test/test/test".matches(regexes.get(3)), is(true));
     }
 
     @Test
     public void testMoreFilterMatchers() {
-        List<String> regexes = SseUtil.convertToRegex(",    *, smarthome/items/*/added, smarthome/items");
+        List<String> regexes = SseUtil.convertToRegex(",    *, openhab/items/*/added, openhab/items");
 
-        assertThat("smarthome/test/test/test/test/test".matches(regexes.get(0)), is(true));
-        assertThat("smarthome/asdf/test/test/test/test".matches(regexes.get(0)), is(true));
-        assertThat("smarthome/asdf/ASDF/test/test/test".matches(regexes.get(0)), is(true));
+        assertThat("openhab/test/test/test/test/test".matches(regexes.get(0)), is(true));
+        assertThat("openhab/asdf/test/test/test/test".matches(regexes.get(0)), is(true));
+        assertThat("openhab/asdf/ASDF/test/test/test".matches(regexes.get(0)), is(true));
 
-        assertThat("smarthome/test/test/test/test/test".matches(regexes.get(1)), is(false));
-        assertThat("smarthome/items/anyitem/added".matches(regexes.get(1)), is(true));
-        assertThat("smarthome/items/anyitem/removed".matches(regexes.get(1)), is(false));
+        assertThat("openhab/test/test/test/test/test".matches(regexes.get(1)), is(false));
+        assertThat("openhab/items/anyitem/added".matches(regexes.get(1)), is(true));
+        assertThat("openhab/items/anyitem/removed".matches(regexes.get(1)), is(false));
 
-        assertThat("smarthome/items/anyitem/added".matches(regexes.get(2)), is(true));
-        assertThat("smarthome/items/anyitem/removed".matches(regexes.get(2)), is(true));
-        assertThat("smarthome/items/anyitem/updated".matches(regexes.get(2)), is(true));
-        assertThat("smarthome/things/anything/updated".matches(regexes.get(2)), is(false));
+        assertThat("openhab/items/anyitem/added".matches(regexes.get(2)), is(true));
+        assertThat("openhab/items/anyitem/removed".matches(regexes.get(2)), is(true));
+        assertThat("openhab/items/anyitem/updated".matches(regexes.get(2)), is(true));
+        assertThat("openhab/things/anything/updated".matches(regexes.get(2)), is(false));
     }
 
     @Test
     public void testEvenMoreFilterMatchers() {
         List<String> regexes = SseUtil.convertToRegex("");
 
-        assertThat("smarthome/test/test/test/test/test".matches(regexes.get(0)), is(true));
-        assertThat("smarthome/asdf/test/test/test/test".matches(regexes.get(0)), is(true));
-        assertThat("smarthome/asdf/ASDF/test/test/test".matches(regexes.get(0)), is(true));
+        assertThat("openhab/test/test/test/test/test".matches(regexes.get(0)), is(true));
+        assertThat("openhab/asdf/test/test/test/test".matches(regexes.get(0)), is(true));
+        assertThat("openhab/asdf/ASDF/test/test/test".matches(regexes.get(0)), is(true));
 
         regexes = SseUtil.convertToRegex("*/added");
-        assertThat("smarthome/items/anyitem/added".matches(regexes.get(0)), is(true));
-        assertThat("smarthome/items/anyitem/removed".matches(regexes.get(0)), is(false));
+        assertThat("openhab/items/anyitem/added".matches(regexes.get(0)), is(true));
+        assertThat("openhab/items/anyitem/removed".matches(regexes.get(0)), is(false));
 
         regexes = SseUtil.convertToRegex("*added");
-        assertThat("smarthome/items/anyitem/added".matches(regexes.get(0)), is(true));
-        assertThat("smarthome/items/anyitem/removed".matches(regexes.get(0)), is(false));
+        assertThat("openhab/items/anyitem/added".matches(regexes.get(0)), is(true));
+        assertThat("openhab/items/anyitem/removed".matches(regexes.get(0)), is(false));
     }
 }

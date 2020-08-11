@@ -45,21 +45,21 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private static final String CORE_LIBRARY_PACKAGE = "org.openhab.core.library.types.";
 
-    private static final String ITEM_COMAND_EVENT_TOPIC = "smarthome/items/{itemName}/command";
+    private static final String ITEM_COMAND_EVENT_TOPIC = "openhab/items/{itemName}/command";
 
-    private static final String ITEM_STATE_EVENT_TOPIC = "smarthome/items/{itemName}/state";
+    private static final String ITEM_STATE_EVENT_TOPIC = "openhab/items/{itemName}/state";
 
-    private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "smarthome/items/{itemName}/statepredicted";
+    private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "openhab/items/{itemName}/statepredicted";
 
-    private static final String ITEM_STATE_CHANGED_EVENT_TOPIC = "smarthome/items/{itemName}/statechanged";
+    private static final String ITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/statechanged";
 
-    private static final String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "smarthome/items/{itemName}/{memberName}/statechanged";
+    private static final String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/{memberName}/statechanged";
 
-    private static final String ITEM_ADDED_EVENT_TOPIC = "smarthome/items/{itemName}/added";
+    private static final String ITEM_ADDED_EVENT_TOPIC = "openhab/items/{itemName}/added";
 
-    private static final String ITEM_REMOVED_EVENT_TOPIC = "smarthome/items/{itemName}/removed";
+    private static final String ITEM_REMOVED_EVENT_TOPIC = "openhab/items/{itemName}/removed";
 
-    private static final String ITEM_UPDATED_EVENT_TOPIC = "smarthome/items/{itemName}/updated";
+    private static final String ITEM_UPDATED_EVENT_TOPIC = "openhab/items/{itemName}/updated";
 
     /**
      * Constructs a new ItemEventFactory.

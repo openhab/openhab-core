@@ -51,7 +51,7 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
     private static final String EVENT_TYPE_FACTORY_A_B = "EVENT_TYPE_FACTORY_A_B";
     private static final String EVENT_TYPE_FACTORY_C = "EVENT_TYPE_FACTORY_C";
 
-    private static final String TOPIC = "smarthome/some/topic";
+    private static final String TOPIC = "openhab/some/topic";
 
     private static final String TYPE_BASED_SUBSCRIBER_1 = "TYPE_BASED_SUBSCRIBER_1";
     private static final String TYPE_BASED_SUBSCRIBER_2 = "TYPE_BASED_SUBSCRIBER_2";

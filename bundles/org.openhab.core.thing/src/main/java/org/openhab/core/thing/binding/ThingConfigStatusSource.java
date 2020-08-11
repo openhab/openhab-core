@@ -24,7 +24,7 @@ import org.openhab.core.thing.Thing;
 @NonNullByDefault
 public final class ThingConfigStatusSource extends ConfigStatusSource {
 
-    private static final String TOPIC = "smarthome/things/{thingUID}/config/status";
+    private static final String TOPIC = "openhab/things/{thingUID}/config/status";
 
     /**
      * Creates a new {@link ThingConfigStatusSource} for the given thing UID.

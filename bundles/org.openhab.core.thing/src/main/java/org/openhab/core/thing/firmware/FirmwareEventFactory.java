@@ -37,9 +37,9 @@ public final class FirmwareEventFactory extends AbstractEventFactory {
 
     static final String THING_UID_TOPIC_KEY = "{thingUID}";
 
-    static final String FIRMWARE_STATUS_TOPIC = "smarthome/things/{thingUID}/firmware/status";
-    static final String FIRMWARE_UPDATE_PROGRESS_TOPIC = "smarthome/things/{thingUID}/firmware/update/progress";
-    static final String FIRMWARE_UPDATE_RESULT_TOPIC = "smarthome/things/{thingUID}/firmware/update/result";
+    static final String FIRMWARE_STATUS_TOPIC = "openhab/things/{thingUID}/firmware/status";
+    static final String FIRMWARE_UPDATE_PROGRESS_TOPIC = "openhab/things/{thingUID}/firmware/update/progress";
+    static final String FIRMWARE_UPDATE_RESULT_TOPIC = "openhab/things/{thingUID}/firmware/update/result";
 
     /**
      * Creates a new firmware event factory.

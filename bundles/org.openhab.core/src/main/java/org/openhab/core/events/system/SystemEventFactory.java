@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.Component;
 @NonNullByDefault
 public class SystemEventFactory extends AbstractEventFactory {
 
-    static final String SYSTEM_STARTLEVEL_TOPIC = "smarthome/system/startlevel";
+    static final String SYSTEM_STARTLEVEL_TOPIC = "openhab/system/startlevel";
 
     public SystemEventFactory() {
         super(Stream.of(StartlevelEvent.TYPE).collect(Collectors.toSet()));

@@ -82,11 +82,11 @@ public class LinkEventOSGiTest extends JavaOSGiTest {
         waitFor(() -> eventSubscriber.getLastReceivedEvent() != null);
         waitForAssert(
                 () -> assertThat(eventSubscriber.getLastReceivedEvent().getType(), is(ItemChannelLinkAddedEvent.TYPE)));
-        assertThat(eventSubscriber.getLastReceivedEvent().getTopic(), is("smarthome/links/item-a:b:c:d/added"));
+        assertThat(eventSubscriber.getLastReceivedEvent().getTopic(), is("openhab/links/item-a:b:c:d/added"));
 
         itemChannelLinkRegistry.remove(link.getUID());
         waitForAssert(() -> assertThat(eventSubscriber.getLastReceivedEvent().getType(),
                 is(ItemChannelLinkRemovedEvent.TYPE)));
-        assertThat(eventSubscriber.getLastReceivedEvent().getTopic(), is("smarthome/links/item-a:b:c:d/removed"));
+        assertThat(eventSubscriber.getLastReceivedEvent().getTopic(), is("openhab/links/item-a:b:c:d/removed"));
     }
 }

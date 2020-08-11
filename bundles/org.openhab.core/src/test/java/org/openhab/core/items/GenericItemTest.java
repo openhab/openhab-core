@@ -68,7 +68,7 @@ public class GenericItemTest {
         ItemStateChangedEvent change = captor.getValue();
 
         assertEquals(item.getName(), change.getItemName());
-        assertEquals("smarthome/items/member1/statechanged", change.getTopic());
+        assertEquals("openhab/items/member1/statechanged", change.getTopic());
         assertEquals(oldState, change.getOldItemState());
         assertEquals(item.getState(), change.getItemState());
         assertEquals(ItemStateChangedEvent.TYPE, change.getType());

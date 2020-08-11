@@ -252,11 +252,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         logger.info("assert that a rule with connections is executed");
         Map<String, Object> params = new HashMap<>();
         params.put("eventSource", "myMotionItem3");
-        params.put("eventTopic", "smarthome/*");
+        params.put("eventTopic", "openhab/*");
         params.put("eventTypes", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(params);
         params = new HashMap<>();
-        params.put("eventTopic", "smarthome/*");
+        params.put("eventTopic", "openhab/*");
         Configuration condition1Config = new Configuration(params);
         params = new HashMap<>();
         params.put("itemName", "myLampItem3");
@@ -320,11 +320,11 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
                 "assert that a rule with non existing moduleTypeHandler is added to the ruleRegistry in state UNINITIALIZED");
         Map<String, Object> params = new HashMap<>();
         params.put("eventSource", "myMotionItem");
-        params.put("eventTopic", "smarthome/*");
+        params.put("eventTopic", "openhab/*");
         params.put("eventTypes", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(params);
         params = new HashMap<>();
-        params.put("topic", "smarthome/*");
+        params.put("topic", "openhab/*");
         Configuration condition1Config = new Configuration(params);
         params = new HashMap<>();
         params.put("itemName", "myLampItem3");
@@ -416,7 +416,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         }, 3000, 100);
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem3/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/myLampItem3/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
     }
 
@@ -624,7 +624,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         }, 5000, 100);
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem4/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/myLampItem4/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
     }
 
@@ -634,7 +634,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         // Creation of RULE
         Map<String, Object> params = new HashMap<>();
         params.put("eventSource", "myMotionItem2");
-        params.put("eventTopic", "smarthome/*");
+        params.put("eventTopic", "openhab/*");
         params.put("eventTypes", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(params);
         params = new HashMap<>();
@@ -738,7 +738,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         });
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/templ_LampItem/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/templ_LampItem/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
     }
 
@@ -798,7 +798,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         });
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/xtempl_LampItem/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/xtempl_LampItem/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
     }
 
@@ -905,7 +905,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         Map<String, Object> configs = new HashMap<>();
         configs.put("eventSource", "myMotionItem2");
-        configs.put("eventTopic", "smarthome/*");
+        configs.put("eventTopic", "openhab/*");
         configs.put("eventTypes", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(configs);
         configs = new HashMap<>();
@@ -932,7 +932,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         // Creation of RULE
         Map<String, Object> configs = new HashMap<>();
         configs.put("eventSource", "myMotionItem5");
-        configs.put("eventTopic", "smarthome/*");
+        configs.put("eventTopic", "openhab/*");
         configs.put("eventTypes", "ItemStateEvent");
         Configuration triggerConfig = new Configuration(configs);
         configs = new HashMap<>();
@@ -1013,7 +1013,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
         }, 3000, 100);
-        assertThat(itemEvent.getTopic(), is(equalTo("smarthome/items/myLampItem5/command")));
+        assertThat(itemEvent.getTopic(), is(equalTo("openhab/items/myLampItem5/command")));
         assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
     }
 }

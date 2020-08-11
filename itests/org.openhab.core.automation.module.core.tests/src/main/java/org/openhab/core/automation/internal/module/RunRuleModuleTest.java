@@ -112,7 +112,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
 
     private Rule createOuterRule() {
         final Configuration outerRuleTriggerConfig = new Configuration(Collections.unmodifiableMap(Stream
-                .of(new SimpleEntry<>("eventSource", "ruleTrigger"), new SimpleEntry<>("eventTopic", "smarthome/*"),
+                .of(new SimpleEntry<>("eventSource", "ruleTrigger"), new SimpleEntry<>("eventTopic", "openhab/*"),
                         new SimpleEntry<>("eventTypes", "ItemStateEvent"))
                 .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue()))));
 
@@ -194,7 +194,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         waitForAssert(() -> {
             assertFalse(events.isEmpty());
             ItemCommandEvent event = (ItemCommandEvent) events.remove();
-            assertEquals("smarthome/items/switch3/command", event.getTopic());
+            assertEquals("openhab/items/switch3/command", event.getTopic());
             assertEquals(OnOffType.ON, event.getItemCommand());
         });
     }

@@ -9,7 +9,7 @@
 				"type": "core.GenericEventTrigger",
 				"configuration": {
 					"eventSource": "MyTrigger",
-					"eventTopic": "smarthome/items/MyTrigger/state",
+					"eventTopic": "openhab/items/MyTrigger/state",
 					"eventTypes": "ItemStateEvent"
 				}
 			}
