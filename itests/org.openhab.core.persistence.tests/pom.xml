@@ -10,9 +10,9 @@
     <version>3.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.model.persistence.tests</artifactId>
+  <artifactId>org.openhab.core.persistence.tests</artifactId>
 
-  <name>openHAB Core :: Integration Tests :: Model Persistence Tests</name>
+  <name>openHAB Core :: Integration Tests :: Persistence Tests</name>
 
   <dependencies>
     <dependency>

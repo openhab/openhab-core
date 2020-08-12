@@ -333,7 +333,7 @@ public class DefaultChartProvider implements ChartProvider {
             }
 
             state = historicItem.getState();
-            xData.add(historicItem.getTimestamp());
+            xData.add(Date.from(historicItem.getTimestamp().toInstant()));
             yData.add(convertData(state));
         }
 

@@ -10,11 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.persistence.tests;
+package org.openhab.core.persistence.tests;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -54,7 +55,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
     public void store(Item item, @Nullable String alias) {
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public Iterable<HistoricItem> query(FilterCriteria filter) {
         int startValue = 1950;
@@ -76,8 +76,8 @@ public class TestPersistenceService implements QueryablePersistenceService {
             final int year = i;
             results.add(new HistoricItem() {
                 @Override
-                public Date getTimestamp() {
-                    return new Date(year - 1900, 0, 1);
+                public ZonedDateTime getTimestamp() {
+                    return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
                 }
 
                 @Override

@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 public class HostFragmentSupportTest extends JavaOSGiTest {
 
     private static final Locale BULGARIAN = new Locale("bg");
-    private static final Locale DEFAULT = Locale.getDefault();
+    private static final Locale DEFAULT = Locale.ENGLISH;
     private static final Locale GERMAN = Locale.GERMANY;
 
     private static final List<Locale> LOCALES = Arrays.asList(BULGARIAN, DEFAULT, GERMAN);
