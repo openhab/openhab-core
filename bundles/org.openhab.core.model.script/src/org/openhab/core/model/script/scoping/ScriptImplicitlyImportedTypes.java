@@ -82,6 +82,12 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
     @Override
     protected List<Class<?>> getStaticImportClasses() {
         List<Class<?>> result = super.getStaticImportClasses();
+        result.add(ScriptExecution.class);
+        result.add(BusEvent.class);
+        result.add(Exec.class);
+        result.add(HTTP.class);
+        result.add(Ping.class);
+
         result.add(ImperialUnits.class);
         result.add(MetricPrefix.class);
         result.add(SIUnits.class);

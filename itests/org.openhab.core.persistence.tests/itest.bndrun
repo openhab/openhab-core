@@ -4,8 +4,9 @@ Bundle-SymbolicName: ${project.artifactId}
 Fragment-Host: org.openhab.core.model.persistence
 
 -runrequires: \
-    bnd.identity;id='org.openhab.core.persistence.tests',\
-    bnd.identity;id='org.openhab.core.model.persistence.runtime'
+	bnd.identity;id='org.openhab.core.persistence.tests',\
+	bnd.identity;id='org.openhab.core.model.persistence.runtime',\
+	bnd.identity;id='org.openhab.core.persistence'
 
 #
 # done

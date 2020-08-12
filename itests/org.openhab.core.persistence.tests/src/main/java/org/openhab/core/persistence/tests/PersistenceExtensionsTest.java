@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence.extensions;
+package org.openhab.core.persistence.tests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +31,7 @@ import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
-import org.openhab.core.persistence.tests.TestPersistenceService;
+import org.openhab.core.persistence.extensions.PersistenceExtensions;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 
