@@ -68,7 +68,14 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.remove(BigInteger.class);
         result.remove(BigDecimal.class);
         result.remove(double.class);
+
         result.add(NumberExtensions.class);
+
+        result.add(BusEvent.class);
+        result.add(HTTP.class);
+        result.add(Log.class);
+        result.add(Ping.class);
+        result.add(ScriptExecution.class);
         result.add(URLEncoder.class);
 
         result.addAll(getActionClasses());
@@ -78,12 +85,13 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
     @Override
     protected List<Class<?>> getStaticImportClasses() {
         List<Class<?>> result = super.getStaticImportClasses();
-        result.add(ScriptExecution.class);
         result.add(BusEvent.class);
         result.add(Exec.class);
         result.add(HTTP.class);
         result.add(Log.class);
         result.add(Ping.class);
+        result.add(ScriptExecution.class);
+        result.add(URLEncoder.class);
 
         result.add(ImperialUnits.class);
         result.add(MetricPrefix.class);
