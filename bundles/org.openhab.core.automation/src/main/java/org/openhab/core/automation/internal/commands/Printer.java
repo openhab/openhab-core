@@ -105,7 +105,7 @@ public class Printer {
 
         List<String> rulesRows = new ArrayList<>();
         for (int i = 1; i <= ruleUIDs.size(); i++) {
-            String id = new Integer(i).toString();
+            String id = String.valueOf(i);
             String uid = ruleUIDs.get(id);
             columnValues.set(0, id);
             columnValues.set(1, uid);
@@ -563,7 +563,7 @@ public class Printer {
      */
     private static void collectListRecords(Map<String, String> list, List<String> rows, int[] columnWidths) {
         for (int i = 1; i <= list.size(); i++) {
-            String id = new Integer(i).toString();
+            String id = String.valueOf(i);
             String uid = list.get(id);
             List<String> columnValues = new ArrayList<>();
             columnValues.add(id);

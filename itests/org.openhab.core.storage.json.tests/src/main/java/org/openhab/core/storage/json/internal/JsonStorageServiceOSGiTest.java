@@ -32,7 +32,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.storage.Storage;
@@ -64,13 +64,13 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     @AfterAll
     public static void afterClass() throws IOException {
         // clean up database files ...
-        final Path userData = Paths.get(ConfigConstants.getUserDataFolder());
+        final Path userData = Paths.get(OpenHAB.getUserDataFolder());
         if (Files.exists(userData)) {
             try (Stream<Path> walk = Files.walk(userData)) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
         }
-        final Path config = Paths.get(ConfigConstants.getConfigFolder());
+        final Path config = Paths.get(OpenHAB.getConfigFolder());
         if (Files.exists(config)) {
             try (Stream<Path> walk = Files.walk(config)) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);

@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import org.junit.jupiter.api.Test;
 
@@ -52,8 +53,8 @@ public class HSBTypeTest {
     }
 
     private int convertPercentToByte(PercentType percent) {
-        return percent.value.multiply(BigDecimal.valueOf(255))
-                .divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP).intValue();
+        return percent.value.multiply(BigDecimal.valueOf(255)).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                .intValue();
     }
 
     private void compareHsbToRgbValues(String hsbValues, int red, int green, int blue) {

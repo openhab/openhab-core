@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -293,7 +293,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      * Returns the path to the root of the transformation folder
      */
     protected String getSourcePath() {
-        return ConfigConstants.getConfigFolder() + File.separator + TransformationService.TRANSFORM_FOLDER_NAME
+        return OpenHAB.getConfigFolder() + File.separator + TransformationService.TRANSFORM_FOLDER_NAME
                 + File.separator;
     }
 }

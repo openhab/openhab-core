@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.ui.icon.AbstractResourceIconProvider;
 import org.openhab.core.ui.icon.IconProvider;
@@ -47,8 +47,7 @@ public class CustomIconProvider extends AbstractResourceIconProvider {
     }
 
     private @Nullable File getIconFile(String filename, String iconSetId) {
-        File folder = new File(
-                ConfigConstants.getConfigFolder() + File.separator + "icons" + File.separator + iconSetId);
+        File folder = new File(OpenHAB.getConfigFolder() + File.separator + "icons" + File.separator + iconSetId);
         File file = new File(folder, filename);
         return file.exists() ? file : null;
     }
