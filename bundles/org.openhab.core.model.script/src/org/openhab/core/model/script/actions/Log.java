@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
-public class LogAction {
+public class Log {
 
     private static final String LOGGER_NAME_PREFIX = "org.openhab.core.model.script.";
 

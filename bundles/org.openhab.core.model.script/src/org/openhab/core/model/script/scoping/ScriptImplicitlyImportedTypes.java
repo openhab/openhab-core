@@ -28,6 +28,7 @@ import org.openhab.core.library.unit.SmartHomeUnits;
 import org.openhab.core.model.script.actions.BusEvent;
 import org.openhab.core.model.script.actions.Exec;
 import org.openhab.core.model.script.actions.HTTP;
+import org.openhab.core.model.script.actions.Log;
 import org.openhab.core.model.script.actions.Ping;
 import org.openhab.core.model.script.actions.ScriptExecution;
 import org.openhab.core.model.script.engine.IActionServiceProvider;
@@ -69,11 +70,6 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.remove(double.class);
         result.add(NumberExtensions.class);
         result.add(URLEncoder.class);
-        result.add(ScriptExecution.class);
-        result.add(BusEvent.class);
-        result.add(Exec.class);
-        result.add(HTTP.class);
-        result.add(Ping.class);
 
         result.addAll(getActionClasses());
         return result;
@@ -86,6 +82,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(BusEvent.class);
         result.add(Exec.class);
         result.add(HTTP.class);
+        result.add(Log.class);
         result.add(Ping.class);
 
         result.add(ImperialUnits.class);
