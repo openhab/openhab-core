@@ -31,9 +31,9 @@ public class AudioFormatTest {
     private final String testContainer = AudioFormat.CONTAINER_WAVE;
     private final String testCodec = AudioFormat.CODEC_PCM_SIGNED;
     private final boolean testBigEndian = true;
-    private final Integer testBitDepth = new Integer(16);
-    private final Integer testBitRate = new Integer(1000);
-    private final Long testFrequency = new Long(1024);
+    private final Integer testBitDepth = Integer.valueOf(16);
+    private final Integer testBitRate = Integer.valueOf(1000);
+    private final Long testFrequency = Long.valueOf(1024);
 
     @Test
     public void thereIsNoBestMatchForAnAudioFormatIfOneOfTheFieldsIsNull() {

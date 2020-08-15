@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.CENTI;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.DecimalFormatSymbols;
 
@@ -83,8 +84,9 @@ public class QuantityTypeTest {
     }
 
     @Test
-    public void testReflectiveInstantiation() throws InstantiationException, IllegalAccessException {
-        QuantityType.class.newInstance();
+    public void testReflectiveInstantiation() throws InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        QuantityType.class.getDeclaredConstructor().newInstance();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

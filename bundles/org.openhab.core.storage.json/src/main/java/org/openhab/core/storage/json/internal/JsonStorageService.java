@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
@@ -64,7 +64,7 @@ public class JsonStorageService implements StorageService {
 
     @Activate
     protected void activate(@Nullable Map<String, Object> properties) {
-        dbFolderName = ConfigConstants.getUserDataFolder() + File.separator + dbFolderName;
+        dbFolderName = OpenHAB.getUserDataFolder() + File.separator + dbFolderName;
         File folder = new File(dbFolderName);
         if (!folder.exists()) {
             folder.mkdirs();

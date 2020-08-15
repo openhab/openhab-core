@@ -65,7 +65,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_CREATE,
                 new File(path).toPath());
 
-        verifyZeroInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcher);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_MODIFY,
                 new File(path).toPath());
 
-        verifyZeroInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcher);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher.processWatchEvent(null, StandardWatchEventKinds.ENTRY_DELETE,
                 new File(path).toPath());
 
-        verifyZeroInteractions(configDispatcher);
+        verifyNoInteractions(configDispatcher);
     }
 
     public class TestConfigDispatcherFileWatcher extends ConfigDispatcherFileWatcher {

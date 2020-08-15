@@ -40,7 +40,7 @@ import org.junit.jupiter.api.MethodOrderer.Alphanumeric;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
-import org.openhab.core.config.core.ConfigConstants;
+import org.openhab.core.OpenHAB;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -934,16 +934,16 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     private Configuration getConfigurationWithContext(String pidWithContext) {
         String pid = null;
         String configContext = null;
-        if (pidWithContext.contains(ConfigConstants.SERVICE_CONTEXT_MARKER)) {
-            pid = pidWithContext.split(ConfigConstants.SERVICE_CONTEXT_MARKER)[0];
-            configContext = pidWithContext.split(ConfigConstants.SERVICE_CONTEXT_MARKER)[1];
+        if (pidWithContext.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
+            pid = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[0];
+            configContext = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[1];
         } else {
             throw new IllegalArgumentException("PID does not have a context");
         }
         Configuration[] configs = null;
         try {
-            configs = configAdmin.listConfigurations("(&(service.factoryPid=" + pid + ")("
-                    + ConfigConstants.SERVICE_CONTEXT + "=" + configContext + "))");
+            configs = configAdmin.listConfigurations(
+                    "(&(service.factoryPid=" + pid + ")(" + OpenHAB.SERVICE_CONTEXT + "=" + configContext + "))");
         } catch (IOException e) {
             throw new IllegalArgumentException(
                     "IOException occured while retrieving configuration for pid " + pidWithContext, e);

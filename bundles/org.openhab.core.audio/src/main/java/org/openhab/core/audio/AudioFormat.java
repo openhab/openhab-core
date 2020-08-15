@@ -347,8 +347,8 @@ public class AudioFormat {
 
             // If required set BigEndian, BitDepth, BitRate, and Frequency to default values
             if (null == format.isBigEndian()) {
-                format = new AudioFormat(format.getContainer(), format.getCodec(), new Boolean(true),
-                        format.getBitDepth(), format.getBitRate(), format.getFrequency());
+                format = new AudioFormat(format.getContainer(), format.getCodec(), Boolean.TRUE, format.getBitDepth(),
+                        format.getBitRate(), format.getFrequency());
             }
             if (null == format.getBitDepth() || null == format.getBitRate() || null == format.getFrequency()) {
                 // Define default values
@@ -363,19 +363,19 @@ public class AudioFormat {
                 // These values must be interdependent (bitRate = bitDepth * frequency)
                 if (null == bitRate) {
                     if (null == bitDepth) {
-                        bitDepth = new Integer(defaultBitDepth);
+                        bitDepth = Integer.valueOf(defaultBitDepth);
                     }
                     if (null == frequency) {
-                        frequency = new Long(defaultFrequency);
+                        frequency = Long.valueOf(defaultFrequency);
                     }
-                    bitRate = new Integer(bitDepth.intValue() * frequency.intValue());
+                    bitRate = Integer.valueOf(bitDepth.intValue() * frequency.intValue());
                 } else if (null == bitDepth) {
                     if (null == frequency) {
-                        frequency = new Long(defaultFrequency);
+                        frequency = Long.valueOf(defaultFrequency);
                     }
-                    bitDepth = new Integer(bitRate.intValue() / frequency.intValue());
+                    bitDepth = Integer.valueOf(bitRate.intValue() / frequency.intValue());
                 } else if (null == frequency) {
-                    frequency = new Long(bitRate.longValue() / bitDepth.longValue());
+                    frequency = Long.valueOf(bitRate.longValue() / bitDepth.longValue());
                 }
 
                 format = new AudioFormat(format.getContainer(), format.getCodec(), format.isBigEndian(), bitDepth,

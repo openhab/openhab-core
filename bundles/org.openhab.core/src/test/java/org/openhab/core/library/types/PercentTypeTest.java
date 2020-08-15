@@ -46,7 +46,7 @@ public class PercentTypeTest {
 
     @Test
     public void testEquals() {
-        PercentType pt1 = new PercentType(new Integer(100));
+        PercentType pt1 = new PercentType(Integer.valueOf(100));
         PercentType pt2 = new PercentType("100.0");
         PercentType pt3 = new PercentType(0);
         PercentType pt4 = new PercentType(0);
