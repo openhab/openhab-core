@@ -96,11 +96,15 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
         methodParameters[0] = SUBCMD_SAY;
 
         if (defaultTTSService != null) {
-            Dictionary<String, Object> config = new Hashtable<>();
-            config.put(CONFIG_DEFAULT_TTS, defaultTTSService);
             ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-            Configuration configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
-            configuration.update(config);
+            Dictionary<String, Object> audioConfig = new Hashtable<>();
+            audioConfig.put("defaultSink", sink.getId());
+            Configuration configuration = configAdmin.getConfiguration("org.openhab.audio", null);
+            configuration.update(audioConfig);
+            Dictionary<String, Object> voiceConfig = new Hashtable<>();
+            voiceConfig.put(CONFIG_DEFAULT_TTS, defaultTTSService);
+            configuration = configAdmin.getConfiguration(VoiceManagerImpl.CONFIGURATION_PID);
+            configuration.update(voiceConfig);
         }
 
         if (ttsServiceMockShouldBeRegistered) {

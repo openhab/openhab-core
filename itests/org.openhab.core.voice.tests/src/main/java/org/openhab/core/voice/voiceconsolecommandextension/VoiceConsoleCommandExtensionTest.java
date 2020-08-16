@@ -19,7 +19,6 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.voice.VoiceManager;
-import org.openhab.core.voice.internal.AudioManagerStub;
 import org.openhab.core.voice.internal.AudioSourceStub;
 import org.openhab.core.voice.internal.ConsoleStub;
 import org.openhab.core.voice.internal.SinkStub;
@@ -45,16 +44,14 @@ public abstract class VoiceConsoleCommandExtensionTest extends JavaOSGiTest {
     public void setup() {
         voiceManager = getService(VoiceManager.class, VoiceManagerImpl.class);
         assertNotNull(voiceManager);
+        audioManager = getService(AudioManager.class, AudioManager.class);
+        assertNotNull(audioManager);
 
         extensionService = getService(ConsoleCommandExtension.class, VoiceConsoleCommandExtension.class);
         assertNotNull(extensionService);
 
         sink = new SinkStub();
         source = new AudioSourceStub();
-        audioManager = new AudioManagerStub();
         console = new ConsoleStub();
-
-        registerService(audioManager);
-        registerService(voiceManager);
     }
 }
