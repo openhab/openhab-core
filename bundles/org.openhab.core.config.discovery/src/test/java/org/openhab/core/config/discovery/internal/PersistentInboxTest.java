@@ -21,8 +21,8 @@ import static org.mockito.Mockito.*;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -134,7 +134,7 @@ public class PersistentInboxTest {
     public void testApproveNormalization() throws URISyntaxException {
         DiscoveryResult result = DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
-        when(storage.getValues()).thenReturn(Collections.singletonList(result));
+        when(storage.getValues()).thenReturn(List.of(result));
 
         inbox.activate();
         inbox.approve(THING_UID, "Test");

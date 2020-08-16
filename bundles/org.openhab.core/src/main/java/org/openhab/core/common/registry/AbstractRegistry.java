@@ -12,7 +12,6 @@
  */
 package org.openhab.core.common.registry;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -315,10 +314,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         elementReadLock.lock();
         try {
             final E element = identifierToElement.get(key);
-            if (element == null) {
-                return null;
-            }
-            return new SimpleEntry<>(elementToProvider.get(element), element);
+            return element == null ? null : Map.entry(elementToProvider.get(element), element);
         } finally {
             elementReadLock.unlock();
         }

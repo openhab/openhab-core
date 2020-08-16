@@ -18,8 +18,8 @@ import static org.mockito.Mockito.when;
 import static org.openhab.core.config.core.internal.metadata.MetadataConfigDescriptionProviderImpl.*;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -64,11 +64,11 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
 
         when(mockProviderRestricted.getNamespace()).thenReturn(RESTRICTED);
         when(mockProviderRestricted.getDescription(any())).thenReturn("Restricted");
-        when(mockProviderRestricted.getParameterOptions(any())).thenReturn(Arrays.asList( //
+        when(mockProviderRestricted.getParameterOptions(any())).thenReturn(List.of( //
                 new ParameterOption("dimmer", "Dimmer"), //
                 new ParameterOption("switch", "Switch") //
         ));
-        when(mockProviderRestricted.getParameters(eq("dimmer"), any())).thenReturn(Arrays.asList( //
+        when(mockProviderRestricted.getParameters(eq("dimmer"), any())).thenReturn(List.of( //
                 ConfigDescriptionParameterBuilder.create("width", Type.INTEGER).build(), //
                 ConfigDescriptionParameterBuilder.create("height", Type.INTEGER).build() //
         ));

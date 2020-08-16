@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.discovery.usbserial.internal;
 
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -23,9 +22,9 @@ import static org.openhab.core.config.discovery.DiscoveryService.CONFIG_PROPERTY
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,13 +102,11 @@ public class UsbSerialDiscoveryServiceTest extends JavaOSGiTest {
         ThingTypeUID thingTypeC = new ThingTypeUID("g:h:i");
 
         UsbSerialDiscoveryParticipant discoveryParticipantA = mock(UsbSerialDiscoveryParticipant.class);
-        when(discoveryParticipantA.getSupportedThingTypeUIDs())
-                .thenReturn(new HashSet<>(asList(thingTypeA, thingTypeB)));
+        when(discoveryParticipantA.getSupportedThingTypeUIDs()).thenReturn(Set.of(thingTypeA, thingTypeB));
         registerService(discoveryParticipantA);
 
         UsbSerialDiscoveryParticipant discoveryParticipantB = mock(UsbSerialDiscoveryParticipant.class);
-        when(discoveryParticipantB.getSupportedThingTypeUIDs())
-                .thenReturn(new HashSet<>(asList(thingTypeB, thingTypeC)));
+        when(discoveryParticipantB.getSupportedThingTypeUIDs()).thenReturn(Set.of(thingTypeB, thingTypeC));
         registerService(discoveryParticipantB);
 
         assertThat(usbSerialDiscoveryService.getSupportedThingTypes(),

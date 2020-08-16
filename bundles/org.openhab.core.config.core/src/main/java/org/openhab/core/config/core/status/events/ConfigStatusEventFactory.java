@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.core.status.events;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.openhab.core.config.core.status.ConfigStatusInfo;
@@ -30,7 +29,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true, service = { EventFactory.class })
 public final class ConfigStatusEventFactory extends AbstractEventFactory {
 
-    private static final Set<String> SUPPORTED_EVENT_TYPES = Collections.singleton(ConfigStatusInfoEvent.TYPE);
+    private static final Set<String> SUPPORTED_EVENT_TYPES = Set.of(ConfigStatusInfoEvent.TYPE);
 
     /**
      * Creates a new {@link ConfigStatusEventFactory}.

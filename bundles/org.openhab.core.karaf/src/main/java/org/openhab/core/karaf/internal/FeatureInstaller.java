@@ -273,7 +273,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 Object repos = properties.get(PROPERTY_MVN_REPOS);
                 List<String> repoCfg;
                 if (repos instanceof String) {
-                    repoCfg = Arrays.asList(((String) repos).split(","));
+                    repoCfg = List.of(((String) repos).split(","));
                     return repoCfg.contains(onlineRepoUrl);
                 }
             } catch (IOException e) {

@@ -12,19 +12,16 @@
  */
 package org.openhab.core.automation.internal.module;
 
+import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -80,23 +77,20 @@ public class RunRuleModuleTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                return Arrays.asList(new Item[] { new SwitchItem("switch1"), new SwitchItem("switch2"),
-                        new SwitchItem("switch3"), new SwitchItem("ruleTrigger") });
+                return List.of(new SwitchItem("switch1"), new SwitchItem("switch2"), new SwitchItem("switch3"),
+                        new SwitchItem("ruleTrigger"));
             }
         });
         registerService(volatileStorageService);
     }
 
     private Rule createSceneRule() {
-        final Configuration sceneRuleAction1Config = new Configuration(Collections
-                .unmodifiableMap(Stream.of(new SimpleEntry<>("itemName", "switch1"), new SimpleEntry<>("command", "ON"))
-                        .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue()))));
-        final Configuration sceneRuleAction2Config = new Configuration(Collections
-                .unmodifiableMap(Stream.of(new SimpleEntry<>("itemName", "switch2"), new SimpleEntry<>("command", "ON"))
-                        .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue()))));
-        final Configuration sceneRuleAction3Config = new Configuration(Collections
-                .unmodifiableMap(Stream.of(new SimpleEntry<>("itemName", "switch3"), new SimpleEntry<>("command", "ON"))
-                        .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue()))));
+        final Configuration sceneRuleAction1Config = new Configuration(
+                Map.ofEntries(entry("itemName", "switch1"), entry("command", "ON")));
+        final Configuration sceneRuleAction2Config = new Configuration(
+                Map.ofEntries(entry("itemName", "switch2"), entry("command", "ON")));
+        final Configuration sceneRuleAction3Config = new Configuration(
+                Map.ofEntries(entry("itemName", "switch3"), entry("command", "ON")));
 
         final Rule sceneRule = RuleBuilder.create("exampleSceneRule").withActions(
                 ModuleBuilder.createAction().withId("sceneItemPostCommandAction1").withTypeUID("core.ItemCommandAction")
@@ -111,17 +105,14 @@ public class RunRuleModuleTest extends JavaOSGiTest {
     }
 
     private Rule createOuterRule() {
-        final Configuration outerRuleTriggerConfig = new Configuration(Collections.unmodifiableMap(Stream
-                .of(new SimpleEntry<>("eventSource", "ruleTrigger"), new SimpleEntry<>("eventTopic", "openhab/*"),
-                        new SimpleEntry<>("eventTypes", "ItemStateEvent"))
-                .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue()))));
+        final Configuration outerRuleTriggerConfig = new Configuration(
+                Map.ofEntries(entry("eventSource", "ruleTrigger"), entry("eventTopic", "openhab/*"),
+                        entry("eventTypes", "ItemStateEvent")));
 
         final List<String> ruleUIDs = new ArrayList<>();
         ruleUIDs.add("exampleSceneRule");
 
-        final Configuration outerRuleActionConfig = new Configuration(
-                Collections.unmodifiableMap(Stream.of(new SimpleEntry<>("ruleUIDs", ruleUIDs))
-                        .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue()))));
+        final Configuration outerRuleActionConfig = new Configuration(Map.of("ruleUIDs", ruleUIDs));
 
         final Rule outerRule = RuleBuilder.create("sceneActivationRule")
                 .withTriggers(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger2")
@@ -180,7 +171,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override

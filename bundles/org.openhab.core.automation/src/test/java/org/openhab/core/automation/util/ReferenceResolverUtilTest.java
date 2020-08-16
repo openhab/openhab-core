@@ -15,7 +15,6 @@ package org.openhab.core.automation.util;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -154,14 +153,14 @@ public class ReferenceResolverUtilTest {
     @Test
     public void testGetFromList() {
         String ken = "Ken";
-        List<String> names = Arrays.asList("John", ken, "Sue");
+        List<String> names = List.of("John", ken, "Sue");
         assertEquals(ken,
                 ReferenceResolver.resolveComplexDataReference(names, ReferenceResolver.splitReferenceToTokens("[1]")));
     }
 
     @Test
     public void testGetFromListInvalidIndexFormat() {
-        List<String> names = Arrays.asList("John", "Ken", "Sue");
+        List<String> names = List.of("John", "Ken", "Sue");
         assertThrows(NumberFormatException.class, () -> ReferenceResolver.resolveComplexDataReference(names,
                 ReferenceResolver.splitReferenceToTokens("[Ten]")));
     }
@@ -169,10 +168,7 @@ public class ReferenceResolverUtilTest {
     @Test
     public void getFromMap() {
         String phone = "0331 1387 121";
-        Map<String, String> phones = new HashMap<>();
-        phones.put("John", phone);
-        phones.put("Sue", "0222 2184 121");
-        phones.put("Mark", "0222 5641 121");
+        Map<String, String> phones = Map.of("John", phone, "Sue", "0222 2184 121", "Mark", "0222 5641 121");
         assertEquals(phone, ReferenceResolver.resolveComplexDataReference(phones,
                 ReferenceResolver.splitReferenceToTokens("[\"John\"]")));
     }
@@ -180,19 +176,14 @@ public class ReferenceResolverUtilTest {
     @Test
     public void getFromMapWithKeyThatContainsSpecialCharacters() {
         String phone = "0331 1387 121";
-        Map<String, String> phones = new HashMap<>();
-        phones.put("John[].Smi\"th].", phone);
-        phones.put("Sue", "0222 2184 121");
-        phones.put("Mark", "0222 5641 121");
+        Map<String, String> phones = Map.of("John[].Smi\"th].", phone, "Sue", "0222 2184 121", "Mark", "0222 5641 121");
         assertEquals(phone, ReferenceResolver.resolveComplexDataReference(phones,
                 ReferenceResolver.splitReferenceToTokens("[\"John[].Smi\"th].\"]")));
     }
 
     @Test
     public void getFromMapUnExistingKey() {
-        Map<String, String> phones = new HashMap<>();
-        phones.put("Sue", "0222 2184 121");
-        phones.put("Mark", "0222 5641 121");
+        Map<String, String> phones = Map.of("Sue", "0222 2184 121", "Mark", "0222 5641 121");
         assertNull(ReferenceResolver.resolveComplexDataReference(phones,
                 ReferenceResolver.splitReferenceToTokens("[\"John\"]")));
     }
@@ -200,21 +191,21 @@ public class ReferenceResolverUtilTest {
     @Test
     public void getFromList() {
         String ken = "Ken";
-        List<String> names = Arrays.asList(new String[] { "John", ken, "Sue" });
+        List<String> names = List.of("John", ken, "Sue");
         assertEquals(ken,
                 ReferenceResolver.resolveComplexDataReference(names, ReferenceResolver.splitReferenceToTokens("[1]")));
     }
 
     @Test
     public void testGetFromListInvalidIndex() {
-        List<String> names = Arrays.asList(new String[] { "John", "Ken", "Sue" });
+        List<String> names = List.of("John", "Ken", "Sue");
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> ReferenceResolver.resolveComplexDataReference(names,
                 ReferenceResolver.splitReferenceToTokens("[10]")));
     }
 
     @Test
     public void testGetFromInvalidIndexFormat() {
-        List<String> names = Arrays.asList(new String[] { "John", "Ken", "Sue" });
+        List<String> names = List.of("John", "Ken", "Sue");
         assertThrows(NumberFormatException.class, () -> ReferenceResolver.resolveComplexDataReference(names,
                 ReferenceResolver.splitReferenceToTokens("[Ten]")));
     }
@@ -238,8 +229,7 @@ public class ReferenceResolverUtilTest {
     @Test
     public void testBeanFromBean() {
         String phone = "0331 1387 121";
-        Map<String, String> phones = new HashMap<>();
-        phones.put("John", phone);
+        Map<String, String> phones = Map.of("John", phone);
         B1<Map<String, String>> b3 = new B1<>(phones);
         B2<B1<Map<String, String>>> b4 = new B2<>(b3);
         assertEquals(phone, ReferenceResolver.resolveComplexDataReference(b4,
@@ -252,7 +242,7 @@ public class ReferenceResolverUtilTest {
         B1<String> b31 = new B1<>("Ken");
         B1<String> b32 = new B1<>("Sue");
         B1<String> b33 = new B1<>(name);
-        List<B1<String>> b = Arrays.asList(b31, b32, b33);
+        List<B1<String>> b = List.of(b31, b32, b33);
         assertEquals(name, ReferenceResolver.resolveComplexDataReference(b,
                 ReferenceResolver.splitReferenceToTokens("[2].value")));
     }

@@ -13,10 +13,9 @@
 package org.openhab.core.io.rest.core.config;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -50,10 +49,10 @@ public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionPara
 
         if (multiple && defaultValue != null) {
             if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                defaultValues = Arrays.asList(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream().map(v -> v.trim())
+                defaultValues = List.of(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream().map(v -> v.trim())
                         .filter(v -> !v.isEmpty()).collect(Collectors.toList());
             } else {
-                defaultValues = Collections.singleton(defaultValue);
+                defaultValues = Set.of(defaultValue);
             }
         }
     }

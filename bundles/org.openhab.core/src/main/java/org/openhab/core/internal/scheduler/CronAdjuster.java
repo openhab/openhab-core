@@ -17,7 +17,6 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,10 +58,10 @@ class CronAdjuster implements SchedulerTemporalAdjuster {
     private static final String[] MONTHS2 = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT",
             "NOV", "DEC" };
     private static final Map<String, Integer> MONTHS = IntStream.range(0, MONTHS2.length)
-            .mapToObj(i -> new SimpleEntry<>(MONTHS2[i], i)).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+            .mapToObj(i -> Map.entry(MONTHS2[i], i)).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     private static final String[] WEEK_DAYS_STRINGS = { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" };
     private static final Map<String, Integer> WEEK_DAYS = IntStream.range(0, WEEK_DAYS_STRINGS.length)
-            .mapToObj(i -> new SimpleEntry<>(WEEK_DAYS_STRINGS[i], i + 1))
+            .mapToObj(i -> Map.entry(WEEK_DAYS_STRINGS[i], i + 1))
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
     private final List<Field> fields = new ArrayList<>(7);

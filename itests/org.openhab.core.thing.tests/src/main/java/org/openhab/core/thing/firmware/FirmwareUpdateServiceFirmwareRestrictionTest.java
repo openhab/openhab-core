@@ -17,9 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -165,8 +163,7 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
         // Mock the provider to return the firmwares
         FirmwareProvider lambdaFirmwareProvider = mock(FirmwareProvider.class);
-        Set<Firmware> resultSet = new HashSet<>(Arrays.asList(fw38, fw40));
-        when(lambdaFirmwareProvider.getFirmwares(any(), any())).thenReturn(resultSet);
+        when(lambdaFirmwareProvider.getFirmwares(any(), any())).thenReturn(Set.of(fw38, fw40));
         registerService(lambdaFirmwareProvider);
 
         FirmwareUpdateService firmwareUpdateService = getService(FirmwareUpdateService.class);
@@ -235,8 +232,7 @@ public class FirmwareUpdateServiceFirmwareRestrictionTest extends JavaOSGiTest {
 
     private void registerFirmwareProviderWithSingleFirmware(Firmware firmwareToReturn) {
         lambdaFirmwareProvider = mock(FirmwareProvider.class);
-        Set<Firmware> resultSet = new HashSet<>(Arrays.asList(firmwareToReturn));
-        when(lambdaFirmwareProvider.getFirmwares(any(), any())).thenReturn(resultSet);
+        when(lambdaFirmwareProvider.getFirmwares(any(), any())).thenReturn(Set.of(firmwareToReturn));
         when(lambdaFirmwareProvider.getFirmware(any(), any(), any())).thenReturn(firmwareToReturn);
         registerService(lambdaFirmwareProvider);
     }

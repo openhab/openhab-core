@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -162,7 +161,7 @@ public class StateDescriptionServiceImplTest {
 
     @Test
     public void testFragmentsAreMergedInProviderOrder() {
-        final List<StateOption> options = Arrays.asList(new StateOption("value", "label"));
+        final List<StateOption> options = List.of(new StateOption("value", "label"));
 
         StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create()
                 .withMinimum(BigDecimal.ZERO) //

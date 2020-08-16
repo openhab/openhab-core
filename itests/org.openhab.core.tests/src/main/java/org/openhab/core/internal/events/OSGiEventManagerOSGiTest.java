@@ -17,11 +17,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,29 +76,27 @@ public class OSGiEventManagerOSGiTest extends JavaOSGiTest {
         eventPublisher = getService(EventPublisher.class);
         assertNotNull(eventPublisher);
 
-        when(eventTypeFactoryAB.getSupportedEventTypes())
-                .thenReturn(new HashSet<>(Arrays.asList(EVENT_TYPE_A, EVENT_TYPE_B)));
+        when(eventTypeFactoryAB.getSupportedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A, EVENT_TYPE_B));
         when(eventTypeFactoryAB.createEvent(any(), any(), any(), any()))
                 .thenAnswer(answer -> createEvent(answer.getArgument(0), answer.getArgument(2), answer.getArgument(1)));
         internalRegisterService(EVENT_TYPE_FACTORY_A_B, EventFactory.class, eventTypeFactoryAB);
 
-        when(eventTypeFactoryC.getSupportedEventTypes()).thenReturn(Collections.singleton(EVENT_TYPE_C));
+        when(eventTypeFactoryC.getSupportedEventTypes()).thenReturn(Set.of(EVENT_TYPE_C));
         when(eventTypeFactoryC.createEvent(any(), any(), any(), any()))
                 .thenAnswer(answer -> createEvent(answer.getArgument(0), answer.getArgument(2), answer.getArgument(1)));
         internalRegisterService(EVENT_TYPE_FACTORY_C, EventFactory.class, eventTypeFactoryC);
 
-        when(subscriber1.getSubscribedEventTypes()).thenReturn(Collections.singleton(EVENT_TYPE_A));
+        when(subscriber1.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A));
         internalRegisterService(TYPE_BASED_SUBSCRIBER_1, EventSubscriber.class, subscriber1);
 
-        when(subscriber2.getSubscribedEventTypes()).thenReturn(Collections.singleton(EVENT_TYPE_A));
+        when(subscriber2.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_A));
         internalRegisterService(TYPE_BASED_SUBSCRIBER_2, EventSubscriber.class, subscriber2);
 
-        when(subscriber3.getSubscribedEventTypes())
-                .thenReturn(new HashSet<>(Arrays.asList(EVENT_TYPE_B, EVENT_TYPE_C)));
+        when(subscriber3.getSubscribedEventTypes()).thenReturn(Set.of(EVENT_TYPE_B, EVENT_TYPE_C));
         when(subscriber3.getEventFilter()).thenReturn(new TopicEventFilter(TOPIC));
         internalRegisterService(TOPIC_BASED_SUBSCRIBER_3, EventSubscriber.class, subscriber3);
 
-        when(subscriber4.getSubscribedEventTypes()).thenReturn(Collections.singleton(EventSubscriber.ALL_EVENT_TYPES));
+        when(subscriber4.getSubscribedEventTypes()).thenReturn(Set.of(EventSubscriber.ALL_EVENT_TYPES));
         when(subscriber4.getEventFilter()).thenReturn(new TopicEventFilter(TOPIC));
         internalRegisterService(ALL_EVENT_TYPES_SUBSCRIBER_4, EventSubscriber.class, subscriber4);
     }

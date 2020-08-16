@@ -13,7 +13,6 @@
 package org.openhab.core.io.rest.sitemap;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -342,7 +341,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
 
     @Override
     public Set<String> getSubscribedEventTypes() {
-        return Collections.singleton(ItemStatePredictedEvent.TYPE);
+        return Set.of(ItemStatePredictedEvent.TYPE);
     }
 
     @Override

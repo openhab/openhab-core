@@ -112,7 +112,7 @@ public class ConfigUtil {
                 if (defaultValue != null && configuration.get(parameter.getName()) == null) {
                     if (parameter.isMultiple()) {
                         if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                            List<Object> values = Arrays.asList(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream()
+                            List<Object> values = List.of(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream()
                                     .map(v -> v.trim()).filter(v -> !v.isEmpty())
                                     .map(v -> ConfigUtil.getDefaultValueAsCorrectType(parameter.getName(),
                                             parameter.getType(), v))

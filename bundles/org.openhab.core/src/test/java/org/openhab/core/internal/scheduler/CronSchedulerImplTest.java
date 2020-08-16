@@ -14,7 +14,6 @@ package org.openhab.core.internal.scheduler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +60,7 @@ public class CronSchedulerImplTest {
         cronScheduler.schedule(foo -> {
             s.release();
             ref.set(foo.get("foo"));
-        }, Collections.singletonMap("foo", "bar"), "#\n" //
+        }, Map.of("foo", "bar"), "#\n" //
                 + "\n" //
                 + " foo = bar \n" //
                 + "# bla bla foo=foo\n" //
@@ -78,7 +77,7 @@ public class CronSchedulerImplTest {
     public void testAddRemoveScheduler() throws InterruptedException {
         Semaphore s = new Semaphore(0);
         CronJob cronJob = m -> s.release();
-        Map<String, Object> map = Collections.singletonMap(CronJob.CRON, "* * * * * *");
+        Map<String, Object> map = Map.of(CronJob.CRON, "* * * * * *");
         cronScheduler.addSchedule(cronJob, map);
         s.acquire();
         cronScheduler.removeSchedule(cronJob);

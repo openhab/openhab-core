@@ -12,19 +12,17 @@
  */
 package org.openhab.core.automation.internal.module;
 
+import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -87,12 +85,12 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                return Arrays.asList(new Item[] { new SwitchItem("myMotionItem"), new SwitchItem("myPresenceItem"),
+                return List.of(new SwitchItem("myMotionItem"), new SwitchItem("myPresenceItem"),
                         new SwitchItem("myLampItem"), new SwitchItem("myMotionItem2"),
                         new SwitchItem("myPresenceItem2"), new SwitchItem("myLampItem2"),
                         new SwitchItem("myMotionItem3"), new SwitchItem("myPresenceItem3"),
                         new SwitchItem("myLampItem3"), new SwitchItem("myMotionItem4"),
-                        new SwitchItem("myPresenceItem4"), new SwitchItem("myLampItem4") });
+                        new SwitchItem("myPresenceItem4"), new SwitchItem("myLampItem4"));
             }
         });
         registerService(volatileStorageService);
@@ -113,7 +111,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override
@@ -134,13 +132,10 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
     @Test
     public void itemStateUpdatedBySimpleRule() throws ItemNotFoundException, InterruptedException {
-        final Configuration triggerConfig = new Configuration(Stream
-                .of(new SimpleEntry<>("eventSource", "myMotionItem2"), new SimpleEntry<>("eventTopic", "openhab/*"),
-                        new SimpleEntry<>("eventTypes", "ItemStateEvent"))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+        final Configuration triggerConfig = new Configuration(Map.ofEntries(entry("eventSource", "myMotionItem2"),
+                entry("eventTopic", "openhab/*"), entry("eventTypes", "ItemStateEvent")));
         final Configuration actionConfig = new Configuration(
-                Stream.of(new SimpleEntry<>("itemName", "myLampItem2"), new SimpleEntry<>("command", "ON"))
-                        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+                Map.ofEntries(entry("itemName", "myLampItem2"), entry("command", "ON")));
         final Rule rule = RuleBuilder.create("myRule21" + new Random().nextInt())
                 .withTriggers(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger2")
                         .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build())
@@ -176,7 +171,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override
@@ -208,16 +203,12 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     }
 
     private Configuration newRightOperatorConfig(final Object right, final Object operator) {
-        return new Configuration(Stream.of(new SimpleEntry<>("right", right), new SimpleEntry<>("operator", operator))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+        return new Configuration(Map.of("right", right, "operator", operator));
     }
 
     private Configuration newRightOperatorInputPropertyConfig(final Object right, final Object operator,
             final Object inputProperty) {
-        return new Configuration(Stream
-                .of(new SimpleEntry<>("right", right), new SimpleEntry<>("operator", operator),
-                        new SimpleEntry<>("inputproperty", inputProperty))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+        return new Configuration(Map.of("right", right, "operator", operator, "inputproperty", inputProperty));
     }
 
     private void assertSatisfiedHandlerInput(final CompareConditionHandler handler, final boolean expected,
@@ -233,8 +224,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     @Test
     public void compareConditionWorks() {
         final Configuration conditionConfig = newRightOperatorConfig("ON", "=");
-        final Map<String, String> inputs = Stream.of(new SimpleEntry<>("input", "someTrigger.someoutput"))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+        final Map<String, String> inputs = Map.of("input", "someTrigger.someoutput");
         Condition condition = ModuleBuilder.createCondition().withId("id").withTypeUID("core.GenericCompareCondition")
                 .withConfiguration(conditionConfig).withInputs(inputs).build();
         CompareConditionHandler handler = new CompareConditionHandler(condition);
@@ -310,8 +300,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         assertSatisfiedHandlerInput(handler, false, "something matches?");
         assertSatisfiedHandlerInput(handler, true, "anything matches?");
 
-        assertFalse(handler.isSatisfied(Stream.of(new SimpleEntry<>("nothing", "nothing"))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()))));
+        assertFalse(handler.isSatisfied(Map.of("nothing", "nothing")));
 
         condition = ModuleBuilder.createCondition(condition)
                 .withConfiguration(newRightOperatorConfig("ONOFF", "matches")).build();
@@ -353,11 +342,9 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
     @Test
     public void ruleTriggeredByCompositeTrigger() throws ItemNotFoundException, InterruptedException {
-        final Configuration triggerConfig = new Configuration(Stream.of(new SimpleEntry<>("itemName", "myMotionItem3"))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+        final Configuration triggerConfig = new Configuration(Map.of("itemName", "myMotionItem3"));
         final Configuration actionConfig = new Configuration(
-                Stream.of(new SimpleEntry<>("itemName", "myLampItem3"), new SimpleEntry<>("command", "ON"))
-                        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+                Map.ofEntries(entry("itemName", "myLampItem3"), entry("command", "ON")));
         final Rule rule = RuleBuilder.create("myRule21" + new Random().nextInt() + "_COMPOSITE")
                 .withTriggers(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger3")
                         .withTypeUID("core.ItemStateChangeTrigger").withConfiguration(triggerConfig).build())
@@ -388,7 +375,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(RuleStatusInfoEvent.TYPE);
+                return Set.of(RuleStatusInfoEvent.TYPE);
             }
 
             @Override
@@ -429,12 +416,9 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         final String secondRuleAction = "secondRuleAction";
 
         try {
-            final Configuration triggerConfig = new Configuration(
-                    Stream.of(new SimpleEntry<>("itemName", "myMotionItem3"))
-                            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+            final Configuration triggerConfig = new Configuration(Map.of("itemName", "myMotionItem3"));
             final Configuration actionConfig = new Configuration(
-                    Stream.of(new SimpleEntry<>("enable", false), new SimpleEntry<>("ruleUIDs", firstConfig))
-                            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+                    Map.ofEntries(entry("enable", false), entry("ruleUIDs", firstConfig)));
 
             final Rule rule = RuleBuilder.create(firstRuleAction)
                     .withTriggers(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger3")
@@ -460,12 +444,9 @@ public class RuntimeRuleTest extends JavaOSGiTest {
                 assertEquals(RuleStatus.IDLE, ruleEngine.getStatus(thirdRuleUID));
             });
 
-            final Configuration triggerConfig2 = new Configuration(
-                    Stream.of(new SimpleEntry<>("itemName", "myMotionItem3"))
-                            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+            final Configuration triggerConfig2 = new Configuration(Map.of("itemName", "myMotionItem3"));
             final Configuration actionConfig2 = new Configuration(
-                    Stream.of(new SimpleEntry<>("enable", true), new SimpleEntry<>("ruleUIDs", secondConfig))
-                            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+                    Map.ofEntries(entry("enable", true), entry("ruleUIDs", secondConfig)));
 
             final Rule rule2 = RuleBuilder.create(secondRuleAction)
                     .withTriggers(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger3")

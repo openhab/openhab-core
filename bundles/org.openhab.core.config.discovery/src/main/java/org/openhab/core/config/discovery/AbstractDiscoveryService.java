@@ -13,10 +13,8 @@
 package org.openhab.core.config.discovery;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -88,18 +86,11 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     public AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
             boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
-        if (supportedThingTypes == null) {
-            this.supportedThingTypes = Collections.emptySet();
-        } else {
-            this.supportedThingTypes = Collections.unmodifiableSet(new HashSet<>(supportedThingTypes));
-        }
-
         if (timeout < 0) {
             throw new IllegalArgumentException("The timeout must be >= 0!");
         }
-
+        this.supportedThingTypes = supportedThingTypes == null ? Set.of() : Set.copyOf(supportedThingTypes);
         this.timeout = timeout;
-
         this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
     }
 

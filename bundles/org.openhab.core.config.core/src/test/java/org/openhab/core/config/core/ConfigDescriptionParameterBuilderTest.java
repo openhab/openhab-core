@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -67,8 +67,8 @@ public class ConfigDescriptionParameterBuilderTest {
                 .withDefault(defaultVal)
                 .withLabel(label)
                 .withDescription(description)
-                .withOptions(Arrays.asList(options))
-                .withFilterCriteria(Arrays.asList(criterias))
+                .withOptions(List.of(options))
+                .withFilterCriteria(List.of(criterias))
                 .withGroupName(groupName)
                 .withAdvanced(advanced)
                 .withLimitToOptions(limitToOptions)

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.module.script.internal.defaultscope;
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -115,7 +114,7 @@ public class ItemRegistryDelegate implements Map<String, State> {
     public Set<java.util.Map.Entry<String, State>> entrySet() {
         Set<Map.Entry<String, State>> entries = new HashSet<>();
         for (Item item : itemRegistry.getAll()) {
-            entries.add(new AbstractMap.SimpleEntry<>(item.getName(), item.getState()));
+            entries.add(Map.entry(item.getName(), item.getState()));
         }
         return entries;
     }

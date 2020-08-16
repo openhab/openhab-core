@@ -17,8 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Timeout;
@@ -37,7 +37,7 @@ public class CronAdjusterTest {
     private static final String JAN_1ST_2015 = "2015-01-01T00:00:00";
 
     public static Collection<Object[]> arguments() {
-        return Arrays.asList(new Object[][] { { JAN_1ST_2015, "@reboot", new String[] { "2200-01-01T00:00" } },
+        return List.of(new Object[][] { { JAN_1ST_2015, "@reboot", new String[] { "2200-01-01T00:00" } },
                 { JAN_1ST_2015, "@hourly",
                         new String[] { "2015-01-01T01:00", "2015-01-01T02:00", "2015-01-01T03:00",
                                 "2015-01-01T04:00" } },

@@ -13,8 +13,6 @@
 package org.openhab.core.thing.type;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.openhab.core.config.core.ConfigDescription;
@@ -146,9 +144,9 @@ public class ChannelType extends AbstractDescriptionType {
         this.configDescriptionURI = configDescriptionURI;
 
         if (tags != null) {
-            this.tags = Collections.unmodifiableSet(new HashSet<>(tags));
+            this.tags = Set.copyOf(tags);
         } else {
-            this.tags = Collections.unmodifiableSet(new HashSet<>(0));
+            this.tags = Set.of();
         }
 
         this.advanced = advanced;

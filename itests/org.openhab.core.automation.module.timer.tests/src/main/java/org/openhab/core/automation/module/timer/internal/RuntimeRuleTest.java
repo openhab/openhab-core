@@ -16,12 +16,12 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +71,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
     @BeforeEach
     public void before() {
-        ItemProvider itemProvider = new TestItemProvider(Collections.singleton(new SwitchItem("myLampItem")));
+        ItemProvider itemProvider = new TestItemProvider(Set.of(new SwitchItem("myLampItem")));
         registerService(itemProvider);
         registerService(volatileStorageService);
         waitForAssert(() -> {
@@ -101,8 +101,8 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         String testExpression = "* * * * * ?";
 
         ;
-        Configuration triggerConfig = new Configuration(Collections.singletonMap("cronExpression", testExpression));
-        List<Trigger> triggers = Collections.singletonList(ModuleBuilder.createTrigger().withId("MyTimerTrigger")
+        Configuration triggerConfig = new Configuration(Map.of("cronExpression", testExpression));
+        List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("MyTimerTrigger")
                 .withTypeUID(GenericCronTriggerHandler.MODULE_TYPE_ID).withConfiguration(triggerConfig).build());
 
         Rule rule = RuleBuilder.create("MyRule" + new Random().nextInt()).withTriggers(triggers)
@@ -157,7 +157,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
             @Override
             public java.util.Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override
@@ -173,15 +173,15 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         logger.info("Create rule");
         String testExpression = "* * * * * ?";
 
-        Configuration triggerConfig = new Configuration(Collections.singletonMap("cronExpression", testExpression));
-        List<Trigger> triggers = Collections.singletonList(ModuleBuilder.createTrigger().withId("MyTimerTrigger")
+        Configuration triggerConfig = new Configuration(Map.of("cronExpression", testExpression));
+        List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("MyTimerTrigger")
                 .withTypeUID(GenericCronTriggerHandler.MODULE_TYPE_ID).withConfiguration(triggerConfig).build());
 
         Map<String, Object> cfgEntries = new HashMap<>();
         cfgEntries.put("itemName", testItemName);
         cfgEntries.put("command", "ON");
         Configuration actionConfig = new Configuration(cfgEntries);
-        List<Action> actions = Collections.singletonList(ModuleBuilder.createAction().withId("MyItemPostCommandAction")
+        List<Action> actions = List.of(ModuleBuilder.createAction().withId("MyItemPostCommandAction")
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());
 
         Rule rule = RuleBuilder.create("MyRule" + new Random().nextInt()).withTriggers(triggers).withActions(actions)

@@ -20,7 +20,6 @@ import static org.mockito.Mockito.mock;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,9 +177,7 @@ public class ThingTypeBuilderTest {
 
     @Test
     public void withExtensibleChannelTypeIdsShouldSetUnmodifiableExtensibleChannelTypeIds() {
-        ThingType thingType = builder
-                .withExtensibleChannelTypeIds(Arrays.asList(new String[] { "channelTypeId1", "channelTypeId2" }))
-                .build();
+        ThingType thingType = builder.withExtensibleChannelTypeIds(List.of("channelTypeId1", "channelTypeId2")).build();
 
         assertThat(thingType.getExtensibleChannelTypeIds(), is(hasSize(2)));
         try {
@@ -193,8 +190,7 @@ public class ThingTypeBuilderTest {
 
     @Test
     public void withSupportedBridgeTypeUIDsShouldSetUnmodifiableSupportedBridgeTypeUIDs() {
-        ThingType thingType = builder.withSupportedBridgeTypeUIDs(Arrays.asList(new String[] { "bridgeTypeUID1" }))
-                .build();
+        ThingType thingType = builder.withSupportedBridgeTypeUIDs(List.of("bridgeTypeUID1")).build();
 
         assertThat(thingType.getSupportedBridgeTypeUIDs(), is(hasSize(1)));
         try {

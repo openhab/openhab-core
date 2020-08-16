@@ -15,9 +15,8 @@ package org.openhab.core.automation.module.script;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -76,7 +75,7 @@ public class ScriptRuleOSGiTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                return Arrays.asList(new Item[] { new SwitchItem("MyTrigger"), new SwitchItem("ScriptItem") });
+                return List.of(new SwitchItem("MyTrigger"), new SwitchItem("ScriptItem"));
             }
 
             @Override
@@ -96,7 +95,7 @@ public class ScriptRuleOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override

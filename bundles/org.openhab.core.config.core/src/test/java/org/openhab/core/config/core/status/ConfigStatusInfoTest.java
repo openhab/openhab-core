@@ -12,13 +12,14 @@
  */
 package org.openhab.core.config.core.status;
 
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -129,14 +130,9 @@ public class ConfigStatusInfoTest {
         assertThat(info.getConfigStatusMessages(PARAM3, PARAM4).size(), is(2));
         assertThat(info.getConfigStatusMessages(PARAM3, PARAM4), hasItems(MSG3, MSG4));
 
-        assertThat(info
-                .getConfigStatusMessages(unmodifiableSet(Stream.of(Type.INFORMATION, Type.WARNING).collect(toSet())),
-                        unmodifiableSet(Stream.of(PARAM1, PARAM6).collect(toSet())))
-                .size(), is(5));
-        assertThat(
-                info.getConfigStatusMessages(
-                        unmodifiableSet(Stream.of(Type.INFORMATION, Type.WARNING).collect(toSet())),
-                        unmodifiableSet(Stream.of(PARAM1, PARAM6).collect(toSet()))),
+        assertThat(info.getConfigStatusMessages(Set.of(Type.INFORMATION, Type.WARNING), Set.of(PARAM1, PARAM6)).size(),
+                is(5));
+        assertThat(info.getConfigStatusMessages(Set.of(Type.INFORMATION, Type.WARNING), Set.of(PARAM1, PARAM6)),
                 hasItems(MSG1, MSG2, MSG3, MSG4, MSG6));
 
         assertThat(info.getConfigStatusMessages("unknown").size(), is(0));

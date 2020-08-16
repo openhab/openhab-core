@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,15 +41,15 @@ public class ChannelDTOTest {
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "thing-id");
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("binding-id", "channel-type-id");
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel1");
-    private final Map<String, String> properties = Collections.singletonMap("key1", "value1");
-    private final Set<String> tags = Collections.singleton("tag1");
+    private final Map<String, String> properties = Map.of("key1", "value1");
+    private final Set<String> tags = Set.of("tag1");
 
     @Test
     public void testChannelDTOMappingIsBidirectional() {
         Channel subject = ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.STRING).withType(CHANNEL_TYPE_UID)
                 .withLabel("Test").withDescription("My test channel")
-                .withConfiguration(new Configuration(Collections.singletonMap("param1", "value1")))
-                .withProperties(properties).withDefaultTags(tags).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build();
+                .withConfiguration(new Configuration(Map.of("param1", "value1"))).withProperties(properties)
+                .withDefaultTags(tags).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build();
         Channel result = ChannelDTOMapper.map(ChannelDTOMapper.map(subject));
         assertThat(result, is(instanceOf(Channel.class)));
         assertThat(result.getChannelTypeUID(), is(CHANNEL_TYPE_UID));

@@ -17,8 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -74,10 +73,10 @@ public class ChannelTypeResourceTest {
         when(channelTypeRegistry.getChannelType(uid)).thenReturn(channelType);
 
         TriggerProfileType profileType = mock(TriggerProfileType.class);
-        when(profileType.getSupportedChannelTypeUIDs()).thenReturn(Collections.singletonList(uid));
-        when(profileType.getSupportedItemTypes()).thenReturn(Arrays.asList("Switch", "Dimmer"));
+        when(profileType.getSupportedChannelTypeUIDs()).thenReturn(List.of(uid));
+        when(profileType.getSupportedItemTypes()).thenReturn(List.of("Switch", "Dimmer"));
 
-        when(profileTypeRegistry.getProfileTypes()).thenReturn(Collections.singletonList(profileType));
+        when(profileTypeRegistry.getProfileTypes()).thenReturn(List.of(profileType));
 
         Response response = channelTypeResource.getLinkableItemTypes(uid.getAsString());
 

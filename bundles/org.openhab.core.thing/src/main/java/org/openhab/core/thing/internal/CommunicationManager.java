@@ -12,9 +12,6 @@
  */
 package org.openhab.core.thing.internal;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -94,8 +91,8 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     // the timeout to use for any item event processing
     public static final long THINGHANDLER_EVENT_TIMEOUT = TimeUnit.SECONDS.toMillis(30);
 
-    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Collections.unmodifiableSet(
-            new HashSet<>(Arrays.asList(ItemStateEvent.TYPE, ItemCommandEvent.TYPE, ChannelTriggeredEvent.TYPE)));
+    private static final Set<String> SUBSCRIBED_EVENT_TYPES = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
+            ChannelTriggeredEvent.TYPE);
 
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 

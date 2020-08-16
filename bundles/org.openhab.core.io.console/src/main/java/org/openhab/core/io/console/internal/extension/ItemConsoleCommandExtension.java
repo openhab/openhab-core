@@ -14,8 +14,8 @@ package org.openhab.core.io.console.internal.extension;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -86,7 +86,7 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                     if (args.length > 1) {
                         Item item = itemRegistry.get(args[1]);
                         if (item != null) {
-                            removeItems(console, Collections.singleton(item));
+                            removeItems(console, Set.of(item));
                         } else {
                             console.println("0 item(s) removed.");
                         }

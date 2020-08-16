@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,17 +120,17 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
          * Create Rule
          */
         logger.info("Create rule");
-        Configuration triggerConfig = new Configuration(Collections.singletonMap("itemName", testItemName1));
-        List<Trigger> triggers = Collections.singletonList(ModuleBuilder.createTrigger().withId("MyTrigger")
+        Configuration triggerConfig = new Configuration(Map.of("itemName", testItemName1));
+        List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("MyTrigger")
                 .withTypeUID(ItemStateTriggerHandler.UPDATE_MODULE_TYPE_ID).withConfiguration(triggerConfig).build());
 
-        List<Condition> conditions = Collections.singletonList(getPassingCondition());
+        List<Condition> conditions = List.of(getPassingCondition());
 
         Map<String, Object> cfgEntries = new HashMap<>();
         cfgEntries.put("itemName", testItemName2);
         cfgEntries.put("command", "ON");
         Configuration actionConfig = new Configuration(cfgEntries);
-        List<Action> actions = Collections.singletonList(ModuleBuilder.createAction().withId("MyItemPostCommandAction")
+        List<Action> actions = List.of(ModuleBuilder.createAction().withId("MyItemPostCommandAction")
                 .withTypeUID(ItemCommandActionHandler.ITEM_COMMAND_ACTION).withConfiguration(actionConfig).build());
 
         // prepare the execution
@@ -141,7 +140,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override

@@ -14,8 +14,8 @@ package org.openhab.core.magic.binding.internal;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -56,7 +56,7 @@ public class MagicServiceImpl implements MagicService {
         }
 
         if (PARAMETER_BACKEND_DECIMAL.equals(param)) {
-            return Arrays.asList(new ParameterOption(BigDecimal.ONE.toPlainString(), "1"),
+            return List.of(new ParameterOption(BigDecimal.ONE.toPlainString(), "1"),
                     new ParameterOption(BigDecimal.TEN.toPlainString(), "10"),
                     new ParameterOption(BigDecimal.valueOf(21d).toPlainString(), "21"));
         }

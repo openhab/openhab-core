@@ -12,13 +12,14 @@
  */
 package org.openhab.core.io.rest.internal.filter;
 
-import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.io.rest.internal.filter.CorsFilter.*;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -62,7 +63,7 @@ public class CorsFilterTest {
     @BeforeEach
     public void setUp() {
         filter = new CorsFilter();
-        filter.activate(singletonMap("enable", "true"));
+        filter.activate(Map.of("enable", "true"));
     }
 
     @Test
@@ -163,13 +164,13 @@ public class CorsFilterTest {
             String requestHeadersValue) {
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         if (originValue != null) {
-            headers.put(ORIGIN_HEADER, singletonList(originValue));
+            headers.put(ORIGIN_HEADER, List.of(originValue));
         }
         if (requestMethodValue != null) {
-            headers.put(ACCESS_CONTROL_REQUEST_METHOD, singletonList(requestMethodValue));
+            headers.put(ACCESS_CONTROL_REQUEST_METHOD, List.of(requestMethodValue));
         }
         if (requestHeadersValue != null) {
-            headers.put(ACCESS_CONTROL_REQUEST_HEADERS, singletonList(requestHeadersValue));
+            headers.put(ACCESS_CONTROL_REQUEST_HEADERS, List.of(requestHeadersValue));
         }
 
         when(requestContext.getHeaders()).thenReturn(headers);

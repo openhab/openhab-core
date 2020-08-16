@@ -12,18 +12,14 @@
  */
 package org.openhab.core.config.discovery.inbox;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,12 +57,10 @@ public class InboxPredicatesTest {
     private static final ThingTypeUID THING_TYPE_UID12 = new ThingTypeUID(BINDING_ID1, THING_TYPE_ID2);
     private static final ThingTypeUID THING_TYPE_UID21 = new ThingTypeUID(BINDING_ID2, THING_TYPE_ID1);
 
-    private static final Map<String, Object> PROPS1 = Collections
-            .unmodifiableMap(Stream.of(new SimpleEntry<>(PROP1, PROP_VAL1), new SimpleEntry<>(PROP2, PROP_VAL2))
-                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
-    private static final Map<String, Object> PROPS2 = Collections.singletonMap(PROP2, PROP_VAL2);
+    private static final Map<String, Object> PROPS1 = Map.ofEntries(entry(PROP1, PROP_VAL1), entry(PROP2, PROP_VAL2));
+    private static final Map<String, Object> PROPS2 = Map.of(PROP2, PROP_VAL2);
 
-    private static final List<DiscoveryResult> RESULTS = Arrays.asList(
+    private static final List<DiscoveryResult> RESULTS = List.of(
             DiscoveryResultBuilder.create(THING_UID11).withThingType(THING_TYPE_UID11).withProperties(PROPS1)
                     .withRepresentationProperty(PROP1).withLabel("label").build(),
             DiscoveryResultBuilder.create(THING_UID12).withThingType(THING_TYPE_UID11).withProperties(PROPS1)

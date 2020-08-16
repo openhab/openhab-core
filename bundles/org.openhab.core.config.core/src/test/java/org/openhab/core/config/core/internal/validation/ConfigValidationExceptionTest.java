@@ -12,8 +12,6 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,7 +21,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
@@ -59,11 +56,11 @@ public class ConfigValidationExceptionTest {
             MAX);
 
     private static final ConfigValidationMessage MSG1 = createMessage(PARAM1, TXT_DEFAULT1,
-            MessageKey.PARAMETER_REQUIRED.key, emptyList());
+            MessageKey.PARAMETER_REQUIRED.key, List.of());
     private static final ConfigValidationMessage MSG2 = createMessage(PARAM2, TXT_DEFAULT2,
-            MessageKey.MAX_VALUE_TXT_VIOLATED.key, singletonList(MAX));
+            MessageKey.MAX_VALUE_TXT_VIOLATED.key, List.of(MAX));
 
-    private static final List<ConfigValidationMessage> ALL = Stream.of(MSG1, MSG2).collect(toList());
+    private static final List<ConfigValidationMessage> ALL = List.of(MSG1, MSG2);
 
     private static final Bundle BUNDLE = Mockito.mock(Bundle.class);
 

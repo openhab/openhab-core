@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -56,7 +55,7 @@ public class UpdateConsoleCommandExtension extends AbstractConsoleCommandExtensi
 
     @Override
     public List<String> getUsages() {
-        return Collections.singletonList(buildCommandUsage("<item> <state>", "sends a status update for an item"));
+        return List.of(buildCommandUsage("<item> <state>", "sends a status update for an item"));
     }
 
     @Override

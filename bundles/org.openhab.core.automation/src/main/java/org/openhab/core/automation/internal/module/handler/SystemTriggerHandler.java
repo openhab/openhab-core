@@ -13,7 +13,6 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -59,7 +58,7 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
         super(module);
         this.startlevel = ((BigDecimal) module.getConfiguration().get(CFG_STARTLEVEL)).intValue();
         if (STARTLEVEL_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Collections.singleton(StartlevelEvent.TYPE);
+            this.types = Set.of(StartlevelEvent.TYPE);
         } else {
             logger.warn("Module type '{}' is not (yet) handled by this class.", module.getTypeUID());
             throw new IllegalArgumentException(module.getTypeUID() + " is no valid module type.");

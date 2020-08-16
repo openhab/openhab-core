@@ -18,7 +18,7 @@ import static org.openhab.core.io.rest.internal.filter.ProxyFilter.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -169,10 +169,10 @@ public class ProxyFilterTest {
     private void setupContextHeaders(String protoHeader, String hostHeader) {
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         if (protoHeader != null) {
-            headers.put(PROTO_PROXY_HEADER, Collections.singletonList(protoHeader));
+            headers.put(PROTO_PROXY_HEADER, List.of(protoHeader));
         }
         if (hostHeader != null) {
-            headers.put(HOST_PROXY_HEADER, Collections.singletonList(hostHeader));
+            headers.put(HOST_PROXY_HEADER, List.of(hostHeader));
         }
         when(context.getHeaders()).thenReturn(headers);
     }

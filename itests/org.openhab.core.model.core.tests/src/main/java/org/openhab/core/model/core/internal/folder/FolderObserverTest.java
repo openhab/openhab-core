@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -458,8 +457,7 @@ public class FolderObserverTest extends JavaOSGiTest {
          */
         @Override
         public Iterable<String> getAllModelNamesOfType(String modelType) {
-            List<String> arrayOfModelsToBeRemoved = Collections.singletonList(MOCK_MODEL_TO_BE_REMOVED);
-            return arrayOfModelsToBeRemoved;
+            return List.of(MOCK_MODEL_TO_BE_REMOVED);
         }
 
         @Override
@@ -488,7 +486,7 @@ public class FolderObserverTest extends JavaOSGiTest {
 
         @Override
         public Set<String> removeAllModelsOfType(String modelType) {
-            return Collections.emptySet();
+            return Set.of();
         }
     }
 }

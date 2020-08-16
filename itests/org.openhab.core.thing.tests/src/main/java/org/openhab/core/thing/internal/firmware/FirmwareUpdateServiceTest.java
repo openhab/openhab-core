@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.internal.firmware;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,11 +27,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -229,7 +230,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
                     || THING_TYPE_UID1.equals(thing.getThingTypeUID())) {
                 return Collections.emptySet();
             } else {
-                return Collections.singleton(FWALPHA_EN);
+                return Set.of(FWALPHA_EN);
             }
         });
 
@@ -285,7 +286,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
                     || THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
                 return Collections.emptySet();
             } else {
-                return Collections.singleton(FW113_EN);
+                return Set.of(FW113_EN);
             }
         });
 
@@ -660,7 +661,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         when(mockFirmwareRegistry.getFirmwares(any(Thing.class), any())).thenAnswer(invocation -> {
             Thing thing = (Thing) invocation.getArguments()[0];
             if (THING_TYPE_UID1.equals(thing.getThingTypeUID())) {
-                return Collections.singleton(FWALPHA_RESTRICTED_TO_MODEL2);
+                return Set.of(FWALPHA_RESTRICTED_TO_MODEL2);
             } else {
                 return Collections.emptySet();
             }
@@ -861,9 +862,9 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         when(mockFirmwareRegistry.getFirmwares(any(Thing.class))).thenAnswer(invocation -> {
             Thing thing = (Thing) invocation.getArguments()[0];
             if (THING_TYPE_UID3.equals(thing.getThingTypeUID())) {
-                return Collections.singleton(FW120_EN);
+                return Set.of(FW120_EN);
             } else {
-                return Collections.emptySet();
+                return Set.of();
             }
         });
 
@@ -985,10 +986,9 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
     }
 
     private void updateConfig(int period, int delay, TimeUnit timeUnit) throws IOException {
-        Map<String, Object> properties = new Hashtable<>();
-        properties.put(FirmwareUpdateServiceImpl.PERIOD_CONFIG_KEY, period);
-        properties.put(FirmwareUpdateServiceImpl.DELAY_CONFIG_KEY, delay);
-        properties.put(FirmwareUpdateServiceImpl.TIME_UNIT_CONFIG_KEY, timeUnit.name());
+        Map<String, Object> properties = Map.ofEntries(entry(FirmwareUpdateServiceImpl.PERIOD_CONFIG_KEY, period),
+                entry(FirmwareUpdateServiceImpl.DELAY_CONFIG_KEY, delay),
+                entry(FirmwareUpdateServiceImpl.TIME_UNIT_CONFIG_KEY, timeUnit.name()));
         firmwareUpdateService.modified(properties);
     }
 }

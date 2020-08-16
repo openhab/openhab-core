@@ -18,7 +18,6 @@ import static org.hamcrest.core.IsIterableContaining.hasItems;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +61,7 @@ public class ConfigurationTest {
         configuration.put("booleanField", false);
         configuration.put("stringField", "test");
         configuration.put("enumField", "ON");
-        configuration.put("listField", Arrays.asList("one", "two", "three"));
+        configuration.put("listField", List.of("one", "two", "three"));
         configuration.put("notExisitingProperty", true);
 
         ConfigClass configClass = configuration.as(ConfigClass.class);

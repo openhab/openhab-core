@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
@@ -60,7 +60,7 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
         eventPublisher = getService(EventPublisher.class);
         assertNotNull(eventPublisher);
 
-        when(itemProvider.getAll()).thenReturn(Collections.singletonList(new SwitchItem(ITEM_NAME)));
+        when(itemProvider.getAll()).thenReturn(List.of(new SwitchItem(ITEM_NAME)));
         registerService(itemProvider);
 
         EventSubscriber itemEventSubscriber = new AbstractItemEventSubscriber() {
@@ -76,8 +76,8 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
         };
         registerService(itemEventSubscriber, EventSubscriber.class.getName());
 
-        when(mockMetadataProvider.getAll()).thenReturn(Collections
-                .singletonList(new Metadata(new MetadataKey("autoupdate", ITEM_NAME), Boolean.toString(false), null)));
+        when(mockMetadataProvider.getAll()).thenReturn(
+                List.of(new Metadata(new MetadataKey("autoupdate", ITEM_NAME), Boolean.toString(false), null)));
         registerService(mockMetadataProvider);
     }
 
@@ -131,7 +131,7 @@ public class AbstractItemEventSubscriberOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSupportedEventTypes() {
-                return Collections.singleton(someEventType);
+                return Set.of(someEventType);
             }
         };
         registerService(someEventFactory);

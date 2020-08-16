@@ -12,7 +12,6 @@
  */
 package org.openhab.core.internal.events;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,8 +70,7 @@ public class OSGiEventManager implements EventHandler {
             final Set<EventSubscriber> entries = typedEventSubscribers.get(subscribedEventType);
             if (entries == null) {
                 // Use a copy on write array set because the set is written and read by different threads!
-                typedEventSubscribers.put(subscribedEventType,
-                        new CopyOnWriteArraySet<>(Collections.singleton(eventSubscriber)));
+                typedEventSubscribers.put(subscribedEventType, new CopyOnWriteArraySet<>(Set.of(eventSubscriber)));
             } else {
                 entries.add(eventSubscriber);
             }

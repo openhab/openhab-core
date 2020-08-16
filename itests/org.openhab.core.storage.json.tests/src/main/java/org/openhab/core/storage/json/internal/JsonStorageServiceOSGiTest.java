@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -101,8 +100,8 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     public void testSerialization() {
         assertThat(storage.getKeys().size(), is(0));
 
-        storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, Arrays.asList("LIGHT", "GROUND_FLOOR")));
-        storage.put(KEY2, new PersistedItem(CoreItemFactory.NUMBER, Arrays.asList("TEMPERATURE", "OUTSIDE")));
+        storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, List.of("LIGHT", "GROUND_FLOOR")));
+        storage.put(KEY2, new PersistedItem(CoreItemFactory.NUMBER, List.of("TEMPERATURE", "OUTSIDE")));
         assertThat(storage.getKeys().size(), is(2));
 
         storage.remove(KEY1);
@@ -116,7 +115,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
 
         assertThat(storage.getKeys().size(), is(0));
 
-        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, Arrays.asList("LIGHT", "GROUND_FLOOR")));
+        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.STRING, List.of("LIGHT", "GROUND_FLOOR")));
         assertThat(storage.getKeys().size(), is(1));
         assertThat(pItem, is(nullValue()));
 
@@ -124,7 +123,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
         assertThat(pItem, is(notNullValue()));
         assertThat(pItem.itemType, is(CoreItemFactory.STRING));
 
-        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.NUMBER, Arrays.asList("TEMPERATURE")));
+        pItem = storage.put(KEY1, new PersistedItem(CoreItemFactory.NUMBER, List.of("TEMPERATURE")));
         assertThat(pItem, is(notNullValue()));
         assertThat(storage.getKeys().size(), is(1));
         assertThat(pItem.itemType, is(CoreItemFactory.STRING));

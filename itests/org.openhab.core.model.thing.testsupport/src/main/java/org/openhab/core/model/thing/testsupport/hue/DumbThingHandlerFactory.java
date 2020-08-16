@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.thing.testsupport.hue;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.openhab.core.config.core.Configuration;
@@ -38,7 +37,7 @@ public class DumbThingHandlerFactory extends BaseThingHandlerFactory implements 
 
     public static final ThingTypeUID THING_TYPE_TEST = new ThingTypeUID(BINDING_ID, "DUMB");
 
-    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_TEST);
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Set.of(THING_TYPE_TEST);
 
     private boolean dumb;
 

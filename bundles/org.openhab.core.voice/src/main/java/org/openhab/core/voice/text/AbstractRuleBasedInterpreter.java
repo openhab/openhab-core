@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInterpreter {
 
     private static final String JSGF = "JSGF";
-    private static final Set<String> SUPPORTED_GRAMMERS = Collections.unmodifiableSet(Collections.singleton(JSGF));
+    private static final Set<String> SUPPORTED_GRAMMERS = Set.of(JSGF);
 
     private static final String OK = "ok";
     private static final String SORRY = "sorry";

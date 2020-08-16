@@ -12,7 +12,7 @@
  */
 package org.openhab.core.addon;
 
-import java.util.Collections;
+import java.util.Set;
 
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
@@ -44,7 +44,7 @@ public class AddonEventFactory extends AbstractEventFactory {
      * Constructs a new AddonEventFactory.
      */
     public AddonEventFactory() {
-        super(Collections.singleton(AddonEvent.TYPE));
+        super(Set.of(AddonEvent.TYPE));
     }
 
     @Override

@@ -19,11 +19,10 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -181,7 +180,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         channelDefinitions.add(new ChannelDefinitionBuilder("7_1", channelType7.getUID()).build());
         channelDefinitions.add(new ChannelDefinitionBuilder("7_2", channelType7.getUID()).build());
 
-        registerService(new SimpleThingTypeProvider(Collections.singleton(ThingTypeBuilder
+        registerService(new SimpleThingTypeProvider(Set.of(ThingTypeBuilder
                 .instance(new ThingTypeUID("hue:lamp"), "label").withChannelDefinitions(channelDefinitions).build())));
 
         List<Item> items = new ArrayList<>();
@@ -422,8 +421,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         final @Nullable StateDescription newState = StateDescriptionFragmentBuilder.create()
                 .withMinimum(BigDecimal.valueOf(10)).withMaximum(BigDecimal.valueOf(100))
                 .withStep(BigDecimal.valueOf(5)).withPattern("VALUE %d").withReadOnly(false)
-                .withOptions(Arrays.asList(new StateOption("value0", "label0"), new StateOption("value1", "label1")))
-                .build().toStateDescription();
+                .withOptions(List.of(new StateOption("value0", "label0"), new StateOption("value1", "label1"))).build()
+                .toStateDescription();
 
         @Override
         public @Nullable StateDescription getStateDescription(Channel channel, @Nullable StateDescription original,
@@ -440,8 +439,8 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
                         .withMaximum(original.getMaximum().add(BigDecimal.ONE))
                         .withStep(original.getStep().add(BigDecimal.TEN)).withPattern("NEW " + original.getPattern())
                         .withReadOnly(!original.isReadOnly())
-                        .withOptions(Collections.singletonList(new StateOption("NEW SOUND", "My great new sound.")))
-                        .build().toStateDescription();
+                        .withOptions(List.of(new StateOption("NEW SOUND", "My great new sound."))).build()
+                        .toStateDescription();
             }
             return null;
         }

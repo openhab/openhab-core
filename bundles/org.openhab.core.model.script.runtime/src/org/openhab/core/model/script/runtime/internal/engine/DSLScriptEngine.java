@@ -13,7 +13,6 @@
 package org.openhab.core.model.script.runtime.internal.engine;
 
 import java.io.Reader;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -210,7 +209,7 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
             @Override
             public List<String> getMimeTypes() {
-                return Collections.singletonList(MIMETYPE_OPENHAB_DSL_RULE);
+                return List.of(MIMETYPE_OPENHAB_DSL_RULE);
             }
 
             @Override

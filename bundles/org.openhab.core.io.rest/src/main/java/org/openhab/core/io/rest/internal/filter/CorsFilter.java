@@ -13,7 +13,6 @@
 package org.openhab.core.io.rest.internal.filter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,8 +70,8 @@ public class CorsFilter implements ContainerResponseFilter {
     static final String VARY_HEADER_WILDCARD = "*";
     static final String HEADERS_SEPARATOR = ",";
 
-    static final List<String> ACCEPTED_HTTP_METHODS_LIST = Arrays.asList(HTTP_GET_METHOD, HTTP_POST_METHOD,
-            HTTP_PUT_METHOD, HTTP_DELETE_METHOD, HTTP_HEAD_METHOD, HTTP_OPTIONS_METHOD);
+    static final List<String> ACCEPTED_HTTP_METHODS_LIST = List.of(HTTP_GET_METHOD, HTTP_POST_METHOD, HTTP_PUT_METHOD,
+            HTTP_DELETE_METHOD, HTTP_HEAD_METHOD, HTTP_OPTIONS_METHOD);
 
     static final String ACCEPTED_HTTP_METHODS = ACCEPTED_HTTP_METHODS_LIST.stream()
             .collect(Collectors.joining(HEADERS_SEPARATOR));

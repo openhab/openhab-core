@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import java.util.Collections;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +60,7 @@ public class EphemerisModuleHandlerFactoryTest {
     public void testFactoryCreatesModuleHandlerForDaysetCondition() {
         when(moduleMock.getTypeUID()).thenReturn(EphemerisConditionHandler.DAYSET_MODULE_TYPE_ID);
 
-        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Collections.singletonMap("dayset", "school")));
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of("dayset", "school")));
         ModuleHandler handler = factory.internalCreate(moduleMock, "My second rule");
         assertThat(handler, is(notNullValue()));
         assertThat(handler, instanceOf(EphemerisConditionHandler.class));
@@ -75,7 +75,7 @@ public class EphemerisModuleHandlerFactoryTest {
         assertThat(handler, is(notNullValue()));
         assertThat(handler, instanceOf(EphemerisConditionHandler.class));
 
-        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Collections.singletonMap("offset", 5)));
+        when(moduleMock.getConfiguration()).thenReturn(new Configuration(Map.of("offset", 5)));
         handler = factory.internalCreate(moduleMock, "My second rule");
         assertThat(handler, is(notNullValue()));
         assertThat(handler, instanceOf(EphemerisConditionHandler.class));

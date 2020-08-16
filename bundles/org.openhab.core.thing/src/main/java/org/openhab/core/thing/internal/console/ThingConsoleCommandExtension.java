@@ -163,7 +163,7 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_LIST, "lists all things"),
+        return List.of(buildCommandUsage(SUBCMD_LIST, "lists all things"),
                 buildCommandUsage(SUBCMD_SHOW + " <thingUID>*",
                         "show details about one or more things; show details for all things if no thingUID provided"),
                 buildCommandUsage(SUBCMD_CLEAR, "removes all managed things"),
@@ -171,7 +171,7 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_TRIGGER + " <channelUID> [<event>]",
                         "triggers the <channelUID> with <event> (if given)"),
                 buildCommandUsage(SUBCMD_DISABLE + " <thingUID>", "disables a thing"),
-                buildCommandUsage(SUBCMD_ENABLE + " <thingUID>", "enables a thing") });
+                buildCommandUsage(SUBCMD_ENABLE + " <thingUID>", "enables a thing"));
     }
 
     private void printThings(Console console, Collection<Thing> things) {

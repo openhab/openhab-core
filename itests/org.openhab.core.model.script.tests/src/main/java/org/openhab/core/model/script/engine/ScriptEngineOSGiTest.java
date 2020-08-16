@@ -16,8 +16,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
@@ -79,8 +79,7 @@ public class ScriptEngineOSGiTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                return Arrays.asList(new SwitchItem(ITEM_NAME),
-                        createNumberItem(NUMBER_ITEM_TEMPERATURE, Temperature.class),
+                return List.of(new SwitchItem(ITEM_NAME), createNumberItem(NUMBER_ITEM_TEMPERATURE, Temperature.class),
                         createNumberItem(NUMBER_ITEM_LENGTH, Length.class), new NumberItem(NUMBER_ITEM_DECIMAL));
             }
 

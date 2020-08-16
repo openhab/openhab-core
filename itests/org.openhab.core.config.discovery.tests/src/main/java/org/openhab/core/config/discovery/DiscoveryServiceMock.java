@@ -12,8 +12,8 @@
  */
 package org.openhab.core.config.discovery;
 
-import java.util.Collections;
 import java.util.Random;
+import java.util.Set;
 
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -41,7 +41,7 @@ public class DiscoveryServiceMock extends AbstractDiscoveryService {
     }
 
     public DiscoveryServiceMock(ThingTypeUID thingType, int timeout, boolean faulty) {
-        super(Collections.singleton(thingType), timeout);
+        super(Set.of(thingType), timeout);
         this.thingType = thingType;
         this.faulty = faulty;
     }

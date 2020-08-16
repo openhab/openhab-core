@@ -14,7 +14,6 @@ package org.openhab.core.config.discovery.internal.console;
 
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -193,12 +192,12 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_LIST, "lists all current inbox entries"),
+        return List.of(buildCommandUsage(SUBCMD_LIST, "lists all current inbox entries"),
                 buildCommandUsage(SUBCMD_LIST_IGNORED, "lists all ignored inbox entries"),
                 buildCommandUsage(SUBCMD_APPROVE + " <thingUID> <label>", "creates a thing for an inbox entry"),
                 buildCommandUsage(SUBCMD_CLEAR, "clears all current inbox entries"),
                 buildCommandUsage(SUBCMD_REMOVE + " [<thingUID>|<thingTypeUID>]",
                         "remove the inbox entries of a given thing id or thing type"),
-                buildCommandUsage(SUBCMD_IGNORE + " <thingUID>", "ignores an inbox entry permanently") });
+                buildCommandUsage(SUBCMD_IGNORE + " <thingUID>", "ignores an inbox entry permanently"));
     }
 }

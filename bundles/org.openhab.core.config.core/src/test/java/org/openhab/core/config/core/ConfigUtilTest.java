@@ -19,9 +19,8 @@ import static org.openhab.core.config.core.ConfigDescriptionParameter.Type.*;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -124,7 +123,7 @@ public class ConfigUtilTest {
                 .withParameter(configDescriptionParameterBuilder1.build()).build();
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
-        verifyValuesOfConfiguration(configuration.get("p1"), 1, Collections.singletonList(new BigDecimal("2.5")));
+        verifyValuesOfConfiguration(configuration.get("p1"), 1, List.of(new BigDecimal("2.5")));
     }
 
     @Test
@@ -137,7 +136,7 @@ public class ConfigUtilTest {
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
         verifyValuesOfConfiguration(configuration.get("p1"), 3,
-                Arrays.asList(new BigDecimal("2.3"), new BigDecimal("2.4"), new BigDecimal("2.5")));
+                List.of(new BigDecimal("2.3"), new BigDecimal("2.4"), new BigDecimal("2.5")));
     }
 
     @Test
@@ -150,7 +149,7 @@ public class ConfigUtilTest {
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
         verifyValuesOfConfiguration(configuration.get("p1"), 3,
-                Arrays.asList(new BigDecimal("2.3"), new BigDecimal("2.4"), new BigDecimal("2.5")));
+                List.of(new BigDecimal("2.3"), new BigDecimal("2.4"), new BigDecimal("2.5")));
     }
 
     @Test
@@ -162,8 +161,7 @@ public class ConfigUtilTest {
                 .withParameter(configDescriptionParameterBuilder2.build()).build();
 
         ConfigUtil.applyDefaultConfiguration(configuration, configDescription);
-        verifyValuesOfConfiguration(configuration.get("p2"), 3,
-                Arrays.asList("first value", "second value", "third value"));
+        verifyValuesOfConfiguration(configuration.get("p2"), 3, List.of("first value", "second value", "third value"));
     }
 
     private void verifyValuesOfConfiguration(Object subject, int expectedSize, List<?> expectedValues) {
@@ -181,21 +179,15 @@ public class ConfigUtilTest {
         ConfigDescription configDescriptionString = ConfigDescriptionBuilder.create(new URI("thingType:fooThing"))
                 .withParameter(ConfigDescriptionParameterBuilder.create("foo", TEXT).build()).build();
 
-        assertThat(
-                ConfigUtil.normalizeTypes(Collections.singletonMap("foo", "1"), Arrays.asList(configDescriptionInteger))
-                        .get("foo"),
+        assertThat(ConfigUtil.normalizeTypes(Map.of("foo", "1"), List.of(configDescriptionInteger)).get("foo"),
                 is(instanceOf(BigDecimal.class)));
-        assertThat(
-                ConfigUtil.normalizeTypes(Collections.singletonMap("foo", "1"), Arrays.asList(configDescriptionString))
-                        .get("foo"),
+        assertThat(ConfigUtil.normalizeTypes(Map.of("foo", "1"), List.of(configDescriptionString)).get("foo"),
                 is(instanceOf(String.class)));
-        assertThat(
-                ConfigUtil.normalizeTypes(Collections.singletonMap("foo", "1"),
-                        Arrays.asList(configDescriptionInteger, configDescriptionString)).get("foo"),
-                is(instanceOf(BigDecimal.class)));
-        assertThat(
-                ConfigUtil.normalizeTypes(Collections.singletonMap("foo", "1"),
-                        Arrays.asList(configDescriptionString, configDescriptionInteger)).get("foo"),
-                is(instanceOf(String.class)));
+        assertThat(ConfigUtil
+                .normalizeTypes(Map.of("foo", "1"), List.of(configDescriptionInteger, configDescriptionString))
+                .get("foo"), is(instanceOf(BigDecimal.class)));
+        assertThat(ConfigUtil
+                .normalizeTypes(Map.of("foo", "1"), List.of(configDescriptionString, configDescriptionInteger))
+                .get("foo"), is(instanceOf(String.class)));
     }
 }

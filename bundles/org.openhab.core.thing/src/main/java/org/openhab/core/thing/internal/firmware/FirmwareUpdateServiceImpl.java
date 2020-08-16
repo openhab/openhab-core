@@ -17,7 +17,6 @@ import static org.openhab.core.thing.firmware.FirmwareStatusInfo.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,8 +27,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -77,9 +74,8 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, EventSubscriber {
     private static final String THREAD_POOL_NAME = FirmwareUpdateServiceImpl.class.getSimpleName();
-    private static final Set<String> SUPPORTED_TIME_UNITS = Collections.unmodifiableSet(
-            Stream.of(TimeUnit.SECONDS.name(), TimeUnit.MINUTES.name(), TimeUnit.HOURS.name(), TimeUnit.DAYS.name())
-                    .collect(Collectors.toSet()));
+    private static final Set<String> SUPPORTED_TIME_UNITS = Set.of(TimeUnit.SECONDS.name(), TimeUnit.MINUTES.name(),
+            TimeUnit.HOURS.name(), TimeUnit.DAYS.name());
     protected static final String PERIOD_CONFIG_KEY = "period";
     protected static final String DELAY_CONFIG_KEY = "delay";
     protected static final String TIME_UNIT_CONFIG_KEY = "timeUnit";
@@ -95,7 +91,7 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
 
     protected int timeout = 30 * 60 * 1000;
 
-    private final Set<String> subscribedEventTypes = Collections.singleton(ThingStatusInfoChangedEvent.TYPE);
+    private final Set<String> subscribedEventTypes = Set.of(ThingStatusInfoChangedEvent.TYPE);
 
     private final Map<ThingUID, FirmwareStatusInfo> firmwareStatusInfoMap = new ConcurrentHashMap<>();
     private final Map<ThingUID, ProgressCallbackImpl> progressCallbackMap = new ConcurrentHashMap<>();
@@ -430,9 +426,9 @@ public final class FirmwareUpdateServiceImpl implements FirmwareUpdateService, E
     private boolean isValid(Map<String, Object> config) {
         // the config description validator does not support option value validation at the moment; so we will validate
         // the time unit here
-        if (!SUPPORTED_TIME_UNITS.contains(config.get(TIME_UNIT_CONFIG_KEY))) {
-            logger.debug("Given time unit {} is not supported. Will keep current configuration.",
-                    config.get(TIME_UNIT_CONFIG_KEY));
+        Object timeUnit = config.get(TIME_UNIT_CONFIG_KEY);
+        if (timeUnit == null || !SUPPORTED_TIME_UNITS.contains(timeUnit)) {
+            logger.debug("Given time unit {} is not supported. Will keep current configuration.", timeUnit);
             return false;
         }
 

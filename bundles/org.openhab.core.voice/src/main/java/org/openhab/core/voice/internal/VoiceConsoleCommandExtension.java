@@ -63,9 +63,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
+        return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
-                buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services") });
+                buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"));
     }
 
     @Override

@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -71,13 +70,12 @@ public class StateDescriptionFragmentBuilderTest {
     @Test
     public void builderWithOption() {
         StateOption option = new StateOption("value", "label");
-        assertThat(builder.withOption(option).build().getOptions(), is(Arrays.asList(option)));
+        assertThat(builder.withOption(option).build().getOptions(), is(List.of(option)));
     }
 
     @Test
     public void builderWithOptions() {
-        List<StateOption> options = Arrays.asList(new StateOption("value1", "label1"),
-                new StateOption("value2", "label2"));
+        List<StateOption> options = List.of(new StateOption("value1", "label1"), new StateOption("value2", "label2"));
         assertThat(builder.withOptions(options).build().getOptions(), is(options));
     }
 
@@ -85,7 +83,7 @@ public class StateDescriptionFragmentBuilderTest {
     @Test
     public void builderWithStateDescription() {
         StateDescription source = new StateDescription(BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.ONE, "pattern", true,
-                Collections.singletonList(new StateOption("value", "label")));
+                List.of(new StateOption("value", "label")));
         StateDescriptionFragmentBuilder builder = StateDescriptionFragmentBuilder.create(source);
         StateDescriptionFragment fragment = builder.build();
 
@@ -103,7 +101,7 @@ public class StateDescriptionFragmentBuilderTest {
     public void subsequentBuildsCreateIndependentFragments() {
         StateDescriptionFragment fragment1 = builder.withMinimum(BigDecimal.ZERO).withMaximum(BigDecimal.TEN)
                 .withStep(BigDecimal.ONE).withPattern("pattern").withReadOnly(Boolean.FALSE)
-                .withOptions(Collections.singletonList(new StateOption("value", "label"))).build();
+                .withOptions(List.of(new StateOption("value", "label"))).build();
         StateDescriptionFragment fragment2 = builder.withMinimum(BigDecimal.ONE).withMaximum(BigDecimal.ONE)
                 .withStep(BigDecimal.ZERO).withPattern("pattern_new").withReadOnly(Boolean.TRUE)
                 .withOptions(Collections.emptyList()).build();

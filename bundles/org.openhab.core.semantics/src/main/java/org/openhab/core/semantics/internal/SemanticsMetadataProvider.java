@@ -12,7 +12,6 @@
  */
 package org.openhab.core.semantics.internal;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -220,15 +219,15 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     }
 
     private void initRelations() {
-        parentRelations.put(Arrays.asList(Equipment.class, Location.class), "hasLocation");
-        parentRelations.put(Arrays.asList(Point.class, Location.class), "hasLocation");
-        parentRelations.put(Arrays.asList(Location.class, Location.class), "isPartOf");
-        parentRelations.put(Arrays.asList(Equipment.class, Equipment.class), "isPartOf");
-        parentRelations.put(Arrays.asList(Point.class, Equipment.class), "isPointOf");
+        parentRelations.put(List.of(Equipment.class, Location.class), "hasLocation");
+        parentRelations.put(List.of(Point.class, Location.class), "hasLocation");
+        parentRelations.put(List.of(Location.class, Location.class), "isPartOf");
+        parentRelations.put(List.of(Equipment.class, Equipment.class), "isPartOf");
+        parentRelations.put(List.of(Point.class, Equipment.class), "isPointOf");
 
-        memberRelations.put(Arrays.asList(Equipment.class, Point.class), "hasPoint");
+        memberRelations.put(List.of(Equipment.class, Point.class), "hasPoint");
 
-        propertyRelations.put(Arrays.asList(Point.class), "relatesTo");
+        propertyRelations.put(List.of(Point.class), "relatesTo");
     }
 
     @Override

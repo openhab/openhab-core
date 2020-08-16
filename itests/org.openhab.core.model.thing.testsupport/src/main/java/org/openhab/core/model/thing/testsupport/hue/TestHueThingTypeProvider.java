@@ -15,9 +15,9 @@
 package org.openhab.core.model.thing.testsupport.hue;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -55,8 +55,8 @@ public class TestHueThingTypeProvider implements ThingTypeProvider {
                     TestHueChannelTypeProvider.COLOR_TEMP_CHANNEL_TYPE_UID).build();
             THING_TYPES.put(TestHueThingHandlerFactory.THING_TYPE_LCT001, ThingTypeBuilder
                     .instance(TestHueThingHandlerFactory.THING_TYPE_LCT001, "LCT001")
-                    .withSupportedBridgeTypeUIDs(Arrays.asList(TestHueThingHandlerFactory.THING_TYPE_BRIDGE.toString()))
-                    .withDescription("Hue LAMP").isListed(false).withChannelDefinitions(Arrays.asList(color, colorTemp))
+                    .withSupportedBridgeTypeUIDs(List.of(TestHueThingHandlerFactory.THING_TYPE_BRIDGE.toString()))
+                    .withDescription("Hue LAMP").isListed(false).withChannelDefinitions(List.of(color, colorTemp))
                     .withConfigDescriptionURI(new URI("hue", "LCT001", null)).build());
 
             THING_TYPES.put(TestHueThingHandlerFactoryX.THING_TYPE_BRIDGE,
@@ -68,20 +68,18 @@ public class TestHueThingTypeProvider implements ThingTypeProvider {
 
             ChannelDefinition colorTempX = new ChannelDefinitionBuilder("Xcolor_temperature",
                     TestHueChannelTypeProvider.COLORX_TEMP_CHANNEL_TYPE_UID).build();
-            THING_TYPES.put(TestHueThingHandlerFactoryX.THING_TYPE_LCT001,
-                    ThingTypeBuilder.instance(TestHueThingHandlerFactoryX.THING_TYPE_LCT001, "XLCT001")
-                            .withSupportedBridgeTypeUIDs(
-                                    Arrays.asList(TestHueThingHandlerFactoryX.THING_TYPE_BRIDGE.toString()))
-                            .withDescription("Hue LAMP").isListed(false)
-                            .withChannelDefinitions(Arrays.asList(colorX, colorTempX))
-                            .withConfigDescriptionURI(new URI("Xhue", "XLCT001", null)).build());
+            THING_TYPES.put(TestHueThingHandlerFactoryX.THING_TYPE_LCT001, ThingTypeBuilder
+                    .instance(TestHueThingHandlerFactoryX.THING_TYPE_LCT001, "XLCT001")
+                    .withSupportedBridgeTypeUIDs(List.of(TestHueThingHandlerFactoryX.THING_TYPE_BRIDGE.toString()))
+                    .withDescription("Hue LAMP").isListed(false).withChannelDefinitions(List.of(colorX, colorTempX))
+                    .withConfigDescriptionURI(new URI("Xhue", "XLCT001", null)).build());
 
             ChannelGroupDefinition groupDefinition = new ChannelGroupDefinition("group",
                     TestHueChannelTypeProvider.GROUP_CHANNEL_GROUP_TYPE_UID);
             THING_TYPES.put(TestHueThingHandlerFactory.THING_TYPE_GROUPED, ThingTypeBuilder
                     .instance(TestHueThingHandlerFactory.THING_TYPE_GROUPED, "grouped")
-                    .withSupportedBridgeTypeUIDs(Arrays.asList(TestHueThingHandlerFactory.THING_TYPE_BRIDGE.toString()))
-                    .withDescription("Grouped Lamp").withChannelGroupDefinitions(Arrays.asList(groupDefinition))
+                    .withSupportedBridgeTypeUIDs(List.of(TestHueThingHandlerFactory.THING_TYPE_BRIDGE.toString()))
+                    .withDescription("Grouped Lamp").withChannelGroupDefinitions(List.of(groupDefinition))
                     .withConfigDescriptionURI(new URI("hue", "grouped", null)).build());
         } catch (Exception e) {
             logger.error("{}", e.getMessage());

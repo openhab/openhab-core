@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -67,7 +66,7 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
         super(module);
         this.groupName = (String) module.getConfiguration().get(CFG_GROUPNAME);
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
-        this.types = Collections.singleton(ItemCommandEvent.TYPE);
+        this.types = Set.of(ItemCommandEvent.TYPE);
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();
         this.topic = "openhab/items/";

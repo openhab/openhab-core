@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -73,9 +72,9 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
         this.status = (String) module.getConfiguration().get(CFG_STATUS);
         this.previousStatus = (String) module.getConfiguration().get(CFG_PREVIOUS_STATUS);
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Collections.singleton(ThingStatusInfoEvent.TYPE);
+            this.types = Set.of(ThingStatusInfoEvent.TYPE);
         } else {
-            this.types = Collections.singleton(ThingStatusInfoChangedEvent.TYPE);
+            this.types = Set.of(ThingStatusInfoChangedEvent.TYPE);
         }
         this.bundleContext = bundleContext;
         Dictionary<String, Object> properties = new Hashtable<>();

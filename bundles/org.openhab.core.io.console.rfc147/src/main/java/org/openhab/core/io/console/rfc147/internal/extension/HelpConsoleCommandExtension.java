@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.console.rfc147.internal.extension;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.openhab.core.io.console.Console;
@@ -52,6 +51,6 @@ public class HelpConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     @Override
     public List<String> getUsages() {
-        return Collections.singletonList(buildCommandUsage(getDescription()));
+        return List.of(buildCommandUsage(getDescription()));
     }
 }

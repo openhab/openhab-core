@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public class ThingDTOTest {
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("binding-id", "thing-type-id");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, "thing-id");
-    private final Map<String, String> properties = Collections.singletonMap("key1", "value1");
+    private final Map<String, String> properties = Map.of("key1", "value1");
 
     @Test
     public void testThingDTOMappingIsBidirectional() {
@@ -53,8 +52,8 @@ public class ThingDTOTest {
                 .withChannels(
                         ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), CoreItemFactory.STRING).build(),
                         ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), CoreItemFactory.STRING).build())
-                .withConfiguration(new Configuration(Collections.singletonMap("param1", "value1")))
-                .withProperties(properties).withLocation("Somewhere over the rainbow").build();
+                .withConfiguration(new Configuration(Map.of("param1", "value1"))).withProperties(properties)
+                .withLocation("Somewhere over the rainbow").build();
         Thing result = ThingDTOMapper.map(ThingDTOMapper.map(subject), false);
         assertThat(result, is(instanceOf(ThingImpl.class)));
         assertThat(result.getThingTypeUID(), is(THING_TYPE_UID));

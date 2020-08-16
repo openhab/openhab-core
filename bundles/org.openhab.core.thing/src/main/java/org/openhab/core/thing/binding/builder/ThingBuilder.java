@@ -14,7 +14,6 @@ package org.openhab.core.thing.binding.builder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class ThingBuilder {
     }
 
     public ThingBuilder withChannel(Channel channel) {
-        validateChannelUIDs(Collections.singletonList(channel));
+        validateChannelUIDs(List.of(channel));
         ThingHelper.ensureUniqueChannels(channels, channel);
         channels.add(channel);
         return this;

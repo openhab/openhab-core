@@ -14,7 +14,6 @@ package org.openhab.core.model.thing.testsupport.hue;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -45,7 +44,7 @@ public class DumbThingTypeProvider implements ThingTypeProvider {
         try {
             ChannelDefinition channel1 = new ChannelDefinitionBuilder("channel1",
                     new ChannelTypeUID(DumbThingHandlerFactory.BINDING_ID, "channel1")).build();
-            List<ChannelDefinition> channelDefinitions = Collections.singletonList(channel1);
+            List<ChannelDefinition> channelDefinitions = List.of(channel1);
 
             THING_TYPES.put(DumbThingHandlerFactory.THING_TYPE_TEST,
                     ThingTypeBuilder.instance(DumbThingHandlerFactory.THING_TYPE_TEST, "DUMB")

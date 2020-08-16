@@ -12,16 +12,13 @@
  */
 package org.openhab.core.automation.event;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -89,9 +86,9 @@ public class RuleEventTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                return Arrays.asList(new Item[] { new SwitchItem("myMotionItem"), new SwitchItem("myPresenceItem"),
+                return List.of(new SwitchItem("myMotionItem"), new SwitchItem("myPresenceItem"),
                         new SwitchItem("myLampItem"), new SwitchItem("myMotionItem2"),
-                        new SwitchItem("myPresenceItem2"), new SwitchItem("myLampItem2") });
+                        new SwitchItem("myPresenceItem2"), new SwitchItem("myLampItem2"));
             }
 
             @Override
@@ -110,12 +107,8 @@ public class RuleEventTest extends JavaOSGiTest {
         EventSubscriber ruleEventHandler = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                Set<String> types = new HashSet<>();
-                types.add(RuleAddedEvent.TYPE);
-                types.add(RuleRemovedEvent.TYPE);
-                types.add(RuleStatusInfoEvent.TYPE);
-                types.add(RuleUpdatedEvent.TYPE);
-                return types;
+                return Set.of(RuleAddedEvent.TYPE, RuleRemovedEvent.TYPE, RuleStatusInfoEvent.TYPE,
+                        RuleUpdatedEvent.TYPE);
             }
 
             @Override
@@ -132,21 +125,15 @@ public class RuleEventTest extends JavaOSGiTest {
         registerService(ruleEventHandler);
 
         // Creation of RULE
-        Map<String, Object> triggerCfgEntries = new HashMap<>();
-        triggerCfgEntries.put("eventSource", "myMotionItem2");
-        triggerCfgEntries.put("eventTopic", "openhab/*");
-        triggerCfgEntries.put("eventTypes", "ItemStateEvent");
-        Configuration triggerConfig = new Configuration(triggerCfgEntries);
+        Configuration triggerConfig = new Configuration(Map.ofEntries(entry("eventSource", "myMotionItem2"),
+                entry("eventTopic", "openhab/*"), entry("eventTypes", "ItemStateEvent")));
 
-        Map<String, Object> actionCfgEntries = new HashMap<>();
-        actionCfgEntries.put("itemName", "myLampItem2");
-        actionCfgEntries.put("command", "ON");
-        Configuration actionConfig = new Configuration(actionCfgEntries);
+        Configuration actionConfig = new Configuration(
+                Map.ofEntries(entry("itemName", "myLampItem2"), entry("command", "ON")));
 
-        List<Trigger> triggers = Collections
-                .singletonList(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger2")
-                        .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build());
-        List<Action> actions = Collections.singletonList(ModuleBuilder.createAction().withId("ItemPostCommandAction2")
+        List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("ItemStateChangeTrigger2")
+                .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build());
+        List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction2")
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());
 
         Rule rule = RuleBuilder.create("myRule21").withTriggers(triggers).withActions(actions)
@@ -183,7 +170,7 @@ public class RuleEventTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemCommandEvent.TYPE);
+                return Set.of(ItemCommandEvent.TYPE);
             }
 
             @Override
@@ -212,7 +199,7 @@ public class RuleEventTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(RuleRemovedEvent.TYPE);
+                return Set.of(RuleRemovedEvent.TYPE);
             }
 
             @Override

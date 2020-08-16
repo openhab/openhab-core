@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +58,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     private final Logger logger = LoggerFactory.getLogger(ModelRepositoryImpl.class);
     private final ResourceSet resourceSet;
-    private final Map<String, String> resourceOptions = Collections.singletonMap(XtextResource.OPTION_ENCODING,
+    private final Map<String, String> resourceOptions = Map.of(XtextResource.OPTION_ENCODING,
             StandardCharsets.UTF_8.name());
 
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();

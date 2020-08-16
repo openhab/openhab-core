@@ -16,8 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -105,17 +104,11 @@ public class Constants {
     public static final Firmware FWBETA_EN = FirmwareBuilder.create(THING_TYPE_UID2, VBETA).withVendor(VENDOR2)
             .withModel(MODEL2).withDescription("English description vbeta").withChangelog("English changelog vbeta")
             .withOnlineChangelog(newURL("http://url/changelog-vbeta?lang=en"))
-            .withProperties(Collections.singletonMap(Firmware.PROPERTY_REQUIRES_FACTORY_RESET, "true")).build();
+            .withProperties(Map.of(Firmware.PROPERTY_REQUIRES_FACTORY_RESET, "true")).build();
     public static final Firmware FWGAMMA_EN = FirmwareBuilder.create(THING_TYPE_UID2, VGAMMA).withVendor(VENDOR2)
             .withModel(MODEL2).withDescription("English description vgamma").withChangelog("English changelog vgamma")
             .withOnlineChangelog(newURL("http://url/changelog-vgamma?lang=en"))
-            .withProperties(new HashMap<String, String>() {
-                private static final long serialVersionUID = 1L;
-                {
-                    put("prop1", "a");
-                    put("prop2", "b");
-                }
-            }).build();
+            .withProperties(Map.of("prop1", "a", "prop2", "b")).build();
 
     public static final Firmware FWALPHA_DE = FirmwareBuilder.create(THING_TYPE_UID2, VALPHA).withVendor(VENDOR2)
             .withModel(MODEL2).withDescription("German description valpha").withChangelog("German changelog valpha")
@@ -123,17 +116,11 @@ public class Constants {
     public static final Firmware FWBETA_DE = FirmwareBuilder.create(THING_TYPE_UID2, VBETA).withVendor(VENDOR2)
             .withModel(MODEL2).withDescription("German description vbeta").withChangelog("German changelog vbeta")
             .withOnlineChangelog(newURL("http://url/changelog-vbeta?lang=de"))
-            .withProperties(Collections.singletonMap(Firmware.PROPERTY_REQUIRES_FACTORY_RESET, "true")).build();
+            .withProperties(Map.of(Firmware.PROPERTY_REQUIRES_FACTORY_RESET, "true")).build();
     public static final Firmware FWGAMMA_DE = FirmwareBuilder.create(THING_TYPE_UID2, VGAMMA).withVendor(VENDOR2)
             .withModel(MODEL2).withDescription("German description vgamma").withChangelog("German changelog vgamma")
             .withOnlineChangelog(newURL("http://url/changelog-vgamma?lang=de"))
-            .withProperties(new HashMap<String, String>() {
-                private static final long serialVersionUID = 1L;
-                {
-                    put("prop1", "a");
-                    put("prop2", "b");
-                }
-            }).build();
+            .withProperties(Map.of("prop1", "a", "prop2", "b")).build();
 
     public static final Firmware FW120_EN = FirmwareBuilder.create(THING_TYPE_UID3, V120).withVendor(VENDOR1)
             .withModel(MODEL1).withDescription("English description v1.2.0").withChangelog("English changelog v1.2.0")

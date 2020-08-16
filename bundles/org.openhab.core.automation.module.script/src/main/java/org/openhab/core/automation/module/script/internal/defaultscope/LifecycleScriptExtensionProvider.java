@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,17 +41,17 @@ public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider
 
     @Override
     public Collection<String> getDefaultPresets() {
-        return Collections.singleton(LIFECYCLE_PRESET_NAME);
+        return Set.of(LIFECYCLE_PRESET_NAME);
     }
 
     @Override
     public Collection<String> getPresets() {
-        return Collections.singleton(LIFECYCLE_PRESET_NAME);
+        return Set.of(LIFECYCLE_PRESET_NAME);
     }
 
     @Override
     public Collection<String> getTypes() {
-        return Collections.singleton(LIFECYCLE_TRACKER_NAME);
+        return Set.of(LIFECYCLE_TRACKER_NAME);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider
         if (LIFECYCLE_PRESET_NAME.equals(preset)) {
             final Object requestedType = get(scriptIdentifier, LIFECYCLE_TRACKER_NAME);
             if (requestedType != null) {
-                return Collections.singletonMap(LIFECYCLE_TRACKER_NAME, requestedType);
+                return Map.of(LIFECYCLE_TRACKER_NAME, requestedType);
             }
         }
 

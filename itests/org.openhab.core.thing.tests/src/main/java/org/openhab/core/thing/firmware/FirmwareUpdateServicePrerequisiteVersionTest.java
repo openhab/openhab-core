@@ -18,11 +18,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,8 +109,7 @@ public class FirmwareUpdateServicePrerequisiteVersionTest extends JavaOSGiTest {
 
     private FirmwareProvider createFirmwareProvider(Thing thing, Firmware... firmwares) {
         FirmwareProvider firmwareProvider = mock(FirmwareProvider.class);
-        when(firmwareProvider.getFirmwares(eq(thing), any(Locale.class)))
-                .thenReturn(new HashSet<>(Arrays.asList(firmwares)));
+        when(firmwareProvider.getFirmwares(eq(thing), any(Locale.class))).thenReturn(Set.of(firmwares));
         return firmwareProvider;
     }
 
