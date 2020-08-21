@@ -14,10 +14,6 @@
 
   <name>openHAB Core :: Bundles :: Audio</name>
 
-  <properties>
-    <bnd.importpackage>!javazoom.*</bnd.importpackage>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>javazoom</groupId>
