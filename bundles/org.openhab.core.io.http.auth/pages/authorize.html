@@ -19,6 +19,17 @@ body {
 		Ubuntu, Cantarell, "Noto Sans", sans-serif, Helvetica, Arial,
 		sans-serif;
 }
+	
+@media (prefers-color-scheme: dark) {
+	body, input.field {
+		background-color: rgb(18, 18, 18);
+		color: white;
+	}
+	
+	input.field {
+		border-bottom: 1px solid #333 !important;
+	}
+}
 
 .logo {
 	margin-top: 3rem;
@@ -49,8 +60,14 @@ input.submit {
 	background-color: rgb(33, 150, 243);
 	color: white;
 	border-radius: 4px;
-	font-size: 11pt;
-	text-transform: uppercase;
+	font-size: 14px;
+	font-weight: 600;
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+	
+input.submit:hover {
+	background-color: rgb(72, 168, 245);
 }
 </style>
 </head>
