@@ -168,7 +168,8 @@ public class JSONResponse {
         }
 
         Thread writerThread = new Thread(() -> {
-            try (JsonWriter jsonWriter = new JsonWriter(new BufferedWriter(new OutputStreamWriter(out)))) {
+            try (JsonWriter jsonWriter = new JsonWriter(
+                    new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8)))) {
                 gson.toJson(entity, entity.getClass(), jsonWriter);
                 jsonWriter.flush();
             } catch (IOException | JsonIOException e) {
