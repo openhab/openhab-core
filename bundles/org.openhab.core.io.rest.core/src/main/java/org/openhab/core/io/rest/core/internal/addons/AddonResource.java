@@ -109,11 +109,11 @@ public class AddonResource implements RESTResource {
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addExtensionService(AddonService featureService) {
+    protected void addAddonService(AddonService featureService) {
         this.addonServices.add(featureService);
     }
 
-    protected void removeExtensionService(AddonService featureService) {
+    protected void removeAddonService(AddonService featureService) {
         this.addonServices.remove(featureService);
     }
 
@@ -121,11 +121,11 @@ public class AddonResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get all add-ons.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))) })
-    public Response getExtensions(
+    public Response getAddon(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        return Response.ok(new Stream2JSONInputStream(getAllExtensions(locale))).build();
+        return Response.ok(new Stream2JSONInputStream(getAllAddons(locale))).build();
     }
 
     @GET
@@ -137,7 +137,7 @@ public class AddonResource implements RESTResource {
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        Stream<AddonType> addonTypeStream = getAllExtensionTypes(locale).stream().distinct();
+        Stream<AddonType> addonTypeStream = getAllAddonTypes(locale).stream().distinct();
         return Response.ok(new Stream2JSONInputStream(addonTypeStream)).build();
     }
 
@@ -183,7 +183,7 @@ public class AddonResource implements RESTResource {
     @Operation(summary = "Installs the add-on from the given URL.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "The given URL is malformed or not valid.") })
-    public Response installExtensionByURL(
+    public Response installAddonByURL(
             final @PathParam("url") @Parameter(description = "addon install URL") String url) {
         try {
             URI addonURI = new URI(url);
@@ -201,8 +201,7 @@ public class AddonResource implements RESTResource {
     @Path("/{addonId: [a-zA-Z_0-9-:]+}/uninstall")
     @Operation(summary = "Uninstalls the add-on with the given ID.", responses = {
             @ApiResponse(responseCode = "200", description = "OK") })
-    public Response uninstallExtension(
-            final @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
+    public Response uninstallAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId) {
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
                 AddonService addonService = getAddonService(addonId);
@@ -220,11 +219,11 @@ public class AddonResource implements RESTResource {
         eventPublisher.post(event);
     }
 
-    private Stream<Addon> getAllExtensions(Locale locale) {
+    private Stream<Addon> getAllAddons(Locale locale) {
         return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(l -> l.stream());
     }
 
-    private Set<AddonType> getAllExtensionTypes(Locale locale) {
+    private Set<AddonType> getAllAddonTypes(Locale locale) {
         final Collator coll = Collator.getInstance(locale);
         coll.setStrength(Collator.PRIMARY);
         Set<AddonType> ret = new TreeSet<>(new Comparator<AddonType>() {
