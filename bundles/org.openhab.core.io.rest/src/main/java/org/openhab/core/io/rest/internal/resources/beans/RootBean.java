@@ -36,8 +36,6 @@ public class RootBean {
     public static class RuntimeInfo {
         public final String version = OpenHAB.getVersion();
         public final String buildString = OpenHAB.buildString();
-        public final String configFolder = OpenHAB.getConfigFolder();
-        public final String userdataFolder = OpenHAB.getUserDataFolder();
     }
 
     public static class Links {
