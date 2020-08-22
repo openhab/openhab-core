@@ -413,7 +413,10 @@ public class FolderObserverTest extends JavaOSGiTest {
             File file = new File(UNWATCHED_DIRECTORY, filename);
             file.createNewFile();
             Files.setAttribute(file.toPath(), "dos:hidden", true);
-            Files.move(file.toPath(), EXISTING_SUBDIR_PATH.toPath());
+            try {
+                Files.move(file.toPath(), EXISTING_SUBDIR_PATH.toPath());
+            } catch (java.nio.file.FileAlreadyExistsException e) {
+            }
             try (Stream<Path> walk = Files.walk(UNWATCHED_DIRECTORY.toPath())) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
