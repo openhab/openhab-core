@@ -416,7 +416,6 @@ public class FolderObserverTest extends JavaOSGiTest {
             try {
                 Files.move(file.toPath(), EXISTING_SUBDIR_PATH.toPath());
             } catch (java.nio.file.FileAlreadyExistsException e) {
-
             }
             try (Stream<Path> walk = Files.walk(UNWATCHED_DIRECTORY.toPath())) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
