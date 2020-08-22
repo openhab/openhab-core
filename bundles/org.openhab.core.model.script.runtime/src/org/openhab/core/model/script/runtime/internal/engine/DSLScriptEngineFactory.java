@@ -24,6 +24,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * An implementation of {@link ScriptEngineFactory} for DSL scripts.
@@ -40,7 +41,7 @@ public class DSLScriptEngineFactory implements ScriptEngineFactory {
 
     private final ScriptEngine scriptEngine;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policyOption = ReferencePolicyOption.GREEDY)
     protected @Nullable DSLScriptContextProvider contextProvider;
 
     @Activate
