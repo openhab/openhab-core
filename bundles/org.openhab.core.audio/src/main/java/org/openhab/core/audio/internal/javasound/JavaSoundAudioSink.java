@@ -187,7 +187,7 @@ public class JavaSoundAudioSink implements AudioSink {
                         .exec(new String[] { "osascript", "-e", "output volume of (get volume settings)" });
                 String value = null;
                 try (Scanner scanner = new Scanner(p.getInputStream(), StandardCharsets.UTF_8.name())) {
-                    value = scanner.useDelimiter("\\A").next();
+                    value = scanner.useDelimiter("\\A").next().strip();
                 }
                 try {
                     cachedVolume = new PercentType(value);
