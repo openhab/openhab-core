@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.AfterEach;
@@ -231,8 +232,7 @@ public class AudioManagerTest {
         audioManager.addAudioSource(audioSource);
 
         if (isSourceDefault) {
-            audioManager
-                    .modified(Collections.singletonMap(AudioManagerImpl.CONFIG_DEFAULT_SOURCE, audioSource.getId()));
+            audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SOURCE, audioSource.getId()));
         } else {
             // just to make sure there is no default source
             audioManager.modified(Collections.emptyMap());
@@ -250,10 +250,10 @@ public class AudioManagerTest {
         audioManager.addAudioSink(audioSink);
 
         if (isSinkDefault) {
-            audioManager.modified(Collections.singletonMap(AudioManagerImpl.CONFIG_DEFAULT_SINK, audioSink.getId()));
+            audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SINK, audioSink.getId()));
         } else {
             // just to make sure there is no default sink
-            audioManager.modified(Collections.emptyMap());
+            audioManager.modified(Map.of());
         }
 
         assertThat(String.format("The sink %s was not registered", audioSink.getId()), audioManager.getSink(),

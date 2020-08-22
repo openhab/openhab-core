@@ -154,7 +154,7 @@ public class GenericItemTest {
 
             @Override
             public List<CommandOption> getCommandOptions() {
-                return Arrays.asList(new CommandOption("ALERT", "Alert"), new CommandOption("REBOOT", "Reboot"));
+                return List.of(new CommandOption("ALERT", "Alert"), new CommandOption("REBOOT", "Reboot"));
             }
         });
         item.setCommandDescriptionService(commandDescriptionService);
@@ -172,7 +172,7 @@ public class GenericItemTest {
 
                     @Override
                     public List<CommandOption> getCommandOptions() {
-                        return Arrays.asList(new CommandOption("C1", "Command 1"), new CommandOption("C2", "Command 2"),
+                        return List.of(new CommandOption("C1", "Command 1"), new CommandOption("C2", "Command 2"),
                                 new CommandOption("C3", "Command 3"));
                     }
                 });
@@ -186,7 +186,7 @@ public class GenericItemTest {
         TestItem item = new TestItem("test");
 
         StateDescriptionService stateDescriptionService = mock(StateDescriptionService.class);
-        List<StateOption> stateOptions = Arrays.asList(new StateOption("STATE1", "State 1"),
+        List<StateOption> stateOptions = List.of(new StateOption("STATE1", "State 1"),
                 new StateOption("STATE2", "State 2"));
         when(stateDescriptionService.getStateDescription("test", null)).thenReturn(
                 StateDescriptionFragmentBuilder.create().withOptions(stateOptions).build().toStateDescription());

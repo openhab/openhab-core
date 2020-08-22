@@ -12,12 +12,9 @@
  */
 package org.openhab.core.config.core.internal.normalization;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
+import static java.util.Map.entry;
+
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -31,12 +28,9 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  */
 public final class NormalizerFactory {
 
-    private static final Map<Type, Normalizer> NORMALIZERS = Collections.unmodifiableMap(Stream
-            .of(new SimpleEntry<>(Type.BOOLEAN, new BooleanNormalizer()),
-                    new SimpleEntry<>(Type.TEXT, new TextNormalizer()),
-                    new SimpleEntry<>(Type.INTEGER, new IntNormalizer()),
-                    new SimpleEntry<>(Type.DECIMAL, new DecimalNormalizer()))
-            .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+    private static final Map<Type, Normalizer> NORMALIZERS = Map.ofEntries(entry(Type.BOOLEAN, new BooleanNormalizer()),
+            entry(Type.TEXT, new TextNormalizer()), entry(Type.INTEGER, new IntNormalizer()),
+            entry(Type.DECIMAL, new DecimalNormalizer()));
 
     private NormalizerFactory() {
         // prevent instantiation

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,7 +21,7 @@ import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,7 +68,7 @@ public class DeltaUsbSerialScannerTest {
     public void testInitialNonEmptyResult() throws IOException {
         UsbSerialDeviceInformation usb1 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
-        when(usbSerialScanner.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)));
+        when(usbSerialScanner.scan()).thenReturn(Set.of(usb1, usb2));
 
         Delta<UsbSerialDeviceInformation> delta = deltaUsbSerialScanner.scan();
 
@@ -88,10 +87,10 @@ public class DeltaUsbSerialScannerTest {
         UsbSerialDeviceInformation usb2 = usbDeviceInfoGenerator.generate();
         UsbSerialDeviceInformation usb3 = usbDeviceInfoGenerator.generate();
 
-        when(usbSerialScanner.scan()).thenReturn(new HashSet<>(asList(usb1, usb2)));
+        when(usbSerialScanner.scan()).thenReturn(Set.of(usb1, usb2));
         deltaUsbSerialScanner.scan();
 
-        when(usbSerialScanner.scan()).thenReturn(new HashSet<>(asList(usb2, usb3)));
+        when(usbSerialScanner.scan()).thenReturn(Set.of(usb2, usb3));
         Delta<UsbSerialDeviceInformation> delta = deltaUsbSerialScanner.scan();
 
         assertThat(delta.getAdded(), contains(usb3));

@@ -21,8 +21,8 @@ import static org.mockito.Mockito.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,8 +61,7 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         when(configOptionsProviderMock.getParameterOptions(any(), any(), any(), any())).thenReturn(oList1);
 
         configDescriptionProviderMock = mock(ConfigDescriptionProvider.class);
-        when(configDescriptionProviderMock.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescription));
+        when(configDescriptionProviderMock.getConfigDescriptions(any())).thenReturn(Set.of(configDescription));
         when(configDescriptionProviderMock.getConfigDescription(any(), any())).thenReturn(configDescription);
     }
 

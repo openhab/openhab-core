@@ -12,7 +12,8 @@
  */
 package org.openhab.core.thing.binding;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Map.entry;
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,12 +23,11 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -233,14 +233,14 @@ public class ThingFactoryTest extends JavaOSGiTest {
                 .state(new ChannelTypeUID("bindingId:channelTypeId2"), "channelLabel2", "Dimmer").withTag("tag3")
                 .build();
 
-        registerChannelTypes(Stream.of(channelType1, channelType2).collect(toSet()), emptyList());
+        registerChannelTypes(Set.of(channelType1, channelType2), emptyList());
 
         ChannelDefinition channelDef1 = new ChannelDefinitionBuilder("ch1", channelType1.getUID()).build();
         ChannelDefinition channelDef2 = new ChannelDefinitionBuilder("ch2", channelType2.getUID()).build();
 
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
-                .withSupportedBridgeTypeUIDs(emptyList())
-                .withChannelDefinitions(Stream.of(channelDef1, channelDef2).collect(toList())).build();
+                .withSupportedBridgeTypeUIDs(emptyList()).withChannelDefinitions(List.of(channelDef1, channelDef2))
+                .build();
         Configuration configuration = new Configuration();
 
         Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"), configuration);
@@ -260,7 +260,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
     public void createThingWithChannelsGroups() {
         ChannelType channelType1 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("bindingId:channelTypeId1"), "channelLabel", "Color")
-                .withTags(Stream.of("tag1", "tag2").collect(toSet())).build();
+                .withTags(Set.of("tag1", "tag2")).build();
 
         ChannelType channelType2 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("bindingId:channelTypeId2"), "channelLabel2", "Dimmer").withTag("tag3")
@@ -271,26 +271,24 @@ public class ThingFactoryTest extends JavaOSGiTest {
 
         ChannelGroupType channelGroupType1 = ChannelGroupTypeBuilder
                 .instance(new ChannelGroupTypeUID("bindingid:groupTypeId1"), "label").withDescription("description")
-                .withCategory("myCategory1")
-                .withChannelDefinitions(Stream.of(channelDef1, channelDef2).collect(toList())).build();
+                .withCategory("myCategory1").withChannelDefinitions(List.of(channelDef1, channelDef2)).build();
         ChannelGroupType channelGroupType2 = ChannelGroupTypeBuilder
                 .instance(new ChannelGroupTypeUID("bindingid:groupTypeId2"), "label").withDescription("description")
-                .withCategory("myCategory2").withChannelDefinitions(singletonList(channelDef1)).build();
+                .withCategory("myCategory2").withChannelDefinitions(List.of(channelDef1)).build();
 
         ChannelGroupDefinition channelGroupDef1 = new ChannelGroupDefinition("group1", channelGroupType1.getUID());
         ChannelGroupDefinition channelGroupDef2 = new ChannelGroupDefinition("group2", channelGroupType2.getUID());
 
-        registerChannelTypes(Stream.of(channelType1, channelType2).collect(toSet()),
-                Stream.of(channelGroupType1, channelGroupType2).collect(toSet()));
+        registerChannelTypes(Set.of(channelType1, channelType2), Set.of(channelGroupType1, channelGroupType2));
 
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
                 .withSupportedBridgeTypeUIDs(emptyList())
-                .withChannelGroupDefinitions(Stream.of(channelGroupDef1, channelGroupDef2).collect(toList())).build();
+                .withChannelGroupDefinitions(List.of(channelGroupDef1, channelGroupDef2)).build();
         Configuration configuration = new Configuration();
 
         Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"), configuration);
 
-        List<String> channelUIDs = Arrays.asList("bindingId:thingType:thingId:group1#ch1",
+        List<String> channelUIDs = List.of("bindingId:thingType:thingId:group1#ch1",
                 "bindingId:thingType:thingId:group1#ch2", "bindingId:thingType:thingId:group2#ch1");
         assertThat(thing.getChannels().size(), is(3));
         for (Channel channel : thing.getChannels()) {
@@ -300,9 +298,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
 
     @Test
     public void createThingWithProperties() {
-        Map<String, String> properties = new HashMap<>();
-        properties.put("key1", "value1");
-        properties.put("key2", "value2");
+        Map<String, String> properties = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
 
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
                 .withProperties(properties).build();
@@ -316,9 +312,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
 
     @Test
     public void createBridgeWithProperties() {
-        Map<String, String> properties = new HashMap<>();
-        properties.put("key1", "value1");
-        properties.put("key2", "value2");
+        Map<String, String> properties = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
 
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId", "thingTypeId"), "label")
                 .withProperties(properties).buildBridge();

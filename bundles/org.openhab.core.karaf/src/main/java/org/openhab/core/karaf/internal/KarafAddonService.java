@@ -14,7 +14,6 @@ package org.openhab.core.karaf.internal;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -70,7 +69,7 @@ public class KarafAddonService implements AddonService {
         try {
             for (Feature feature : featuresService.listFeatures()) {
                 if (feature.getName().startsWith(FeatureInstaller.PREFIX)
-                        && Arrays.asList(FeatureInstaller.EXTENSION_TYPES).contains(getType(feature.getName()))) {
+                        && List.of(FeatureInstaller.EXTENSION_TYPES).contains(getType(feature.getName()))) {
                     Addon addon = getAddon(feature);
                     // for simple packaging, we filter out all openHAB 1 add-ons as they cannot be used through the UI
                     if (!FeatureInstaller.SIMPLE_PACKAGE.equals(featureInstaller.getCurrentPackage())

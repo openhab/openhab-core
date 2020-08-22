@@ -14,7 +14,7 @@ package org.openhab.core.magic.binding.handler;
 
 import static org.openhab.core.magic.binding.MagicBindingConstants.*;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.magic.binding.internal.MagicDynamicStateDescriptionProvider;
@@ -51,15 +51,15 @@ public class MagicDynamicStateDescriptionThingHandler extends BaseThingHandler {
     public void initialize() {
         ChannelUID systemCommandChannelUID = new ChannelUID(getThing().getUID(), CHANNEL_SYSTEM_COMMAND);
         stateDescriptionProvider.setStateOptions(systemCommandChannelUID,
-                Arrays.asList(new StateOption(SYSTEM_COMMAND_HIBERNATE, SYSTEM_COMMAND_HIBERNATE),
+                List.of(new StateOption(SYSTEM_COMMAND_HIBERNATE, SYSTEM_COMMAND_HIBERNATE),
                         new StateOption(SYSTEM_COMMAND_REBOOT, SYSTEM_COMMAND_REBOOT),
                         new StateOption(SYSTEM_COMMAND_SHUTDOWN, SYSTEM_COMMAND_SHUTDOWN),
                         new StateOption(SYSTEM_COMMAND_SUSPEND, SYSTEM_COMMAND_SUSPEND),
                         new StateOption(SYSTEM_COMMAND_QUIT, SYSTEM_COMMAND_QUIT)));
 
         ChannelUID signalStrengthChannelUID = new ChannelUID(getThing().getUID(), CHANNEL_SIGNAL_STRENGTH);
-        stateDescriptionProvider.setStateOptions(signalStrengthChannelUID, Arrays.asList(
-                new StateOption("1", "Unusable"), new StateOption("2", "Okay"), new StateOption("3", "Amazing")));
+        stateDescriptionProvider.setStateOptions(signalStrengthChannelUID, List.of(new StateOption("1", "Unusable"),
+                new StateOption("2", "Okay"), new StateOption("3", "Amazing")));
 
         updateStatus(ThingStatus.ONLINE);
     }

@@ -12,13 +12,10 @@
  */
 package org.openhab.core.config.core.internal.validation;
 
+import static java.util.Map.entry;
+
 import java.math.BigDecimal;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 
@@ -30,12 +27,9 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  */
 final class TypeIntrospections {
 
-    private static final Map<Type, TypeIntrospection> INTROSPECTIONS = Collections.unmodifiableMap(Stream
-            .of(new SimpleEntry<>(Type.BOOLEAN, new BooleanIntrospection()),
-                    new SimpleEntry<>(Type.TEXT, new StringIntrospection()),
-                    new SimpleEntry<>(Type.INTEGER, new IntegerIntrospection()),
-                    new SimpleEntry<>(Type.DECIMAL, new FloatIntrospection()))
-            .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+    private static final Map<Type, TypeIntrospection> INTROSPECTIONS = Map.ofEntries(
+            entry(Type.BOOLEAN, new BooleanIntrospection()), entry(Type.TEXT, new StringIntrospection()),
+            entry(Type.INTEGER, new IntegerIntrospection()), entry(Type.DECIMAL, new FloatIntrospection()));
 
     private TypeIntrospections() {
         super();

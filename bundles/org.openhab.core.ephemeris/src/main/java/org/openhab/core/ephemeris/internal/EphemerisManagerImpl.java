@@ -26,7 +26,6 @@ import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -141,7 +140,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
                     }
                     String[] setDefinition = value.split(",");
                     if (setDefinition.length > 0) {
-                        addDayset(setName, Arrays.asList(setDefinition));
+                        addDayset(setName, List.of(setDefinition));
                     } else {
                         logger.warn("Erroneous dayset definition {} : {}", e.getKey(), entry);
                     }

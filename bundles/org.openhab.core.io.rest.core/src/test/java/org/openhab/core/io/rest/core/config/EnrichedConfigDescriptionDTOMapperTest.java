@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import java.net.URI;
-import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ConfigDescription;
@@ -89,6 +89,6 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         EnrichedConfigDescriptionParameterDTO ecdpdto = (EnrichedConfigDescriptionParameterDTO) cdpdto;
         assertThat(ecdpdto.defaultValues, is(notNullValue()));
         assertThat(ecdpdto.defaultValues, hasSize(3));
-        assertThat(ecdpdto.defaultValues, is(equalTo(Arrays.asList("first value", "second value", "third value"))));
+        assertThat(ecdpdto.defaultValues, is(equalTo(List.of("first value", "second value", "third value"))));
     }
 }

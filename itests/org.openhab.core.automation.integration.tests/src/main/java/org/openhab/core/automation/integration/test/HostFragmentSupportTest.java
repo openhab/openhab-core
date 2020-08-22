@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,7 +46,7 @@ public class HostFragmentSupportTest extends JavaOSGiTest {
     private static final Locale DEFAULT = Locale.ENGLISH;
     private static final Locale GERMAN = Locale.GERMANY;
 
-    private static final List<Locale> LOCALES = Arrays.asList(BULGARIAN, DEFAULT, GERMAN);
+    private static final List<Locale> LOCALES = List.of(BULGARIAN, DEFAULT, GERMAN);
 
     private final Logger logger = LoggerFactory.getLogger(HostFragmentSupportTest.class);
     private ModuleTypeRegistry registry;

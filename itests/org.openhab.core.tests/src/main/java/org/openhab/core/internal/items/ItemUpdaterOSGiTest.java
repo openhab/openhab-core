@@ -14,7 +14,6 @@ package org.openhab.core.internal.items;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -67,7 +66,7 @@ public class ItemUpdaterOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemStateChangedEvent.TYPE);
+                return Set.of(ItemStateChangedEvent.TYPE);
             }
 
             @Override

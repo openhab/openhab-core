@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,8 +20,6 @@ import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,13 +131,13 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         thingHandlerFactory.activate(componentContext);
         registerService(thingHandlerFactory, ThingHandlerFactory.class.getName());
 
-        Map<String, String> thingTypeGenericProperties = new HashMap<>();
-        thingTypeGenericProperties.put(PROPERTY_ON_GENERIC_THING_TYPE, GENERIC_VALUE);
-        thingTypeGenericProperties.put(PROPERTY_ON_GENERIC_AND_SPECIFIC_THING_TYPE, GENERIC_VALUE);
+        Map<String, String> thingTypeGenericProperties = Map.ofEntries(
+                entry(PROPERTY_ON_GENERIC_THING_TYPE, GENERIC_VALUE),
+                entry(PROPERTY_ON_GENERIC_AND_SPECIFIC_THING_TYPE, GENERIC_VALUE));
 
-        Map<String, String> thingTypeSpecificProperties = new HashMap<>();
-        thingTypeSpecificProperties.put(PROPERTY_ON_SPECIFIC_THING_TYPE, SPECIFIC_VALUE);
-        thingTypeSpecificProperties.put(PROPERTY_ON_GENERIC_AND_SPECIFIC_THING_TYPE, SPECIFIC_VALUE);
+        Map<String, String> thingTypeSpecificProperties = Map.ofEntries(
+                entry(PROPERTY_ON_SPECIFIC_THING_TYPE, SPECIFIC_VALUE),
+                entry(PROPERTY_ON_GENERIC_AND_SPECIFIC_THING_TYPE, SPECIFIC_VALUE));
 
         thingTypeGeneric = registerThingTypeAndConfigDescription(THING_TYPE_GENERIC_UID, thingTypeGenericProperties);
         thingTypeSpecific = registerThingTypeAndConfigDescription(THING_TYPE_SPECIFIC_UID, thingTypeSpecificProperties);
@@ -218,8 +217,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
             updateStatus(ThingStatus.ONLINE);
             genericInits++;
             if (selfChanging) {
-                Map<String, Object> properties = new HashMap<>(1);
-                properties.put("providedspecific", "there");
+                Map<String, Object> properties = Map.of("providedspecific", "there");
                 changeThingType(THING_TYPE_SPECIFIC_UID, new Configuration(properties));
             }
         }
@@ -318,8 +316,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         // println "[ChangeThingTypeOSGiTest] ======== assert loading specialized thing type works directly"
 
         StorageService storage = getService(StorageService.class);
-        Map<String, Object> properties = new HashMap<>(1);
-        properties.put("providedspecific", "there");
+        Map<String, Object> properties = Map.of("providedspecific", "there");
         Thing persistedThing = ThingFactory.createThing(thingTypeSpecific,
                 new ThingUID("testBinding", "persistedThing"), new Configuration(properties), null, null);
         persistedThing.setProperty("universal", "survives");
@@ -411,15 +408,13 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
                 .withChannelDefinitions(getChannelDefinitions(thingTypeUID))
                 .withConfigDescriptionURI(configDescriptionUri).withProperties(thingTypeProperties).build();
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri)
-                .withParameters(
-                        Arrays.asList(
-                                ConfigDescriptionParameterBuilder
-                                        .create("parameter" + thingTypeUID.getId(),
-                                                ConfigDescriptionParameter.Type.TEXT)
-                                        .withRequired(false).withDefault("default" + thingTypeUID.getId()).build(),
-                                ConfigDescriptionParameterBuilder
-                                        .create("provided" + thingTypeUID.getId(), ConfigDescriptionParameter.Type.TEXT)
-                                        .withRequired(false).build()))
+                .withParameters(List.of(
+                        ConfigDescriptionParameterBuilder
+                                .create("parameter" + thingTypeUID.getId(), ConfigDescriptionParameter.Type.TEXT)
+                                .withRequired(false).withDefault("default" + thingTypeUID.getId()).build(),
+                        ConfigDescriptionParameterBuilder
+                                .create("provided" + thingTypeUID.getId(), ConfigDescriptionParameter.Type.TEXT)
+                                .withRequired(false).build()))
                 .build();
 
         thingTypes.put(thingTypeUID, thingType);
@@ -429,7 +424,6 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
     }
 
     private List<ChannelDefinition> getChannelDefinitions(ThingTypeUID thingTypeUID) throws URISyntaxException {
-        List<ChannelDefinition> channelDefinitions = new ArrayList<>();
         ChannelTypeUID channelTypeUID = new ChannelTypeUID("test:" + thingTypeUID.getId());
         ChannelType channelType = new ChannelType(channelTypeUID, false, "itemType", "channelLabel", "description",
                 "category", new HashSet<>(), null, new URI("scheme", "channelType:" + thingTypeUID.getId(), null));
@@ -437,7 +431,6 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         channelTypes.put(channelTypeUID, channelType);
 
         ChannelDefinition cd = new ChannelDefinitionBuilder("channel" + thingTypeUID.getId(), channelTypeUID).build();
-        channelDefinitions.add(cd);
-        return channelDefinitions;
+        return List.of(cd);
     }
 }

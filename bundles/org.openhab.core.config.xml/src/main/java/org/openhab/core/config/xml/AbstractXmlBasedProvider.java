@@ -13,7 +13,6 @@
 package org.openhab.core.config.xml;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,7 +63,7 @@ public abstract class AbstractXmlBasedProvider<@NonNull T_ID, @NonNull T_OBJECT 
      * @param object the object to be added
      */
     public final synchronized void add(Bundle bundle, T_OBJECT object) {
-        addAll(bundle, Collections.singletonList(object));
+        addAll(bundle, List.of(object));
     }
 
     /**

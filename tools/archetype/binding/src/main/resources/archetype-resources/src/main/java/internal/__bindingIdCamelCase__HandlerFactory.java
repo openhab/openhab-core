@@ -39,7 +39,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(configurationPid = "binding.${bindingId}", service = ThingHandlerFactory.class)
 public class ${bindingIdCamelCase}HandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_SAMPLE);
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_SAMPLE);
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {

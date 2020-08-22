@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.core.internal.binding;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -192,7 +193,7 @@ public class BindingResource implements RESTResource {
             return properties;
         }
 
-        return ConfigUtil.normalizeTypes(properties, Collections.singletonList(configDesc));
+        return ConfigUtil.normalizeTypes(properties, List.of(configDesc));
     }
 
     private @Nullable String getConfigId(String bindingId) {

@@ -20,8 +20,8 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,39 +68,36 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
                 .create("param1", ConfigDescriptionParameter.Type.INTEGER).build();
 
         configDescription = ConfigDescriptionBuilder.create(uriDummy).withParameter(param1).build();
-        when(configDescriptionProviderMock.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescription));
+        when(configDescriptionProviderMock.getConfigDescriptions(any())).thenReturn(Set.of(configDescription));
         when(configDescriptionProviderMock.getConfigDescription(eq(uriDummy), any())).thenReturn(configDescription);
 
         configDescription1 = ConfigDescriptionBuilder.create(uriDummy1).build();
-        when(configDescriptionProviderMock1.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescription1));
+        when(configDescriptionProviderMock1.getConfigDescriptions(any())).thenReturn(Set.of(configDescription1));
         when(configDescriptionProviderMock1.getConfigDescription(eq(uriDummy1), any())).thenReturn(configDescription1);
 
         configDescriptionAliased = ConfigDescriptionBuilder.create(uriAliases).withParameter(
                 ConfigDescriptionParameterBuilder.create("instanceId", ConfigDescriptionParameter.Type.INTEGER).build())
                 .build();
         when(configDescriptionProviderAliased.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescriptionAliased));
+                .thenReturn(Set.of(configDescriptionAliased));
         when(configDescriptionProviderAliased.getConfigDescription(eq(uriAliases), any()))
                 .thenReturn(configDescriptionAliased);
 
         ConfigDescriptionParameter param2 = ConfigDescriptionParameterBuilder
                 .create("param2", ConfigDescriptionParameter.Type.INTEGER).build();
         configDescription2 = ConfigDescriptionBuilder.create(uriDummy).withParameter(param2).build();
-        when(configDescriptionProviderMock2.getConfigDescriptions(any()))
-                .thenReturn(Collections.singleton(configDescription2));
+        when(configDescriptionProviderMock2.getConfigDescriptions(any())).thenReturn(Set.of(configDescription2));
         when(configDescriptionProviderMock2.getConfigDescription(eq(uriDummy), any())).thenReturn(configDescription2);
 
         when(aliasProvider.getAlias(eq(uriAliases))).thenReturn(uriDummy);
 
         when(configOptionsProviderMockAliased.getParameterOptions(eq(uriAliases), anyString(), any(), any()))
-                .thenReturn(Collections.singletonList(new ParameterOption("Option", "Aliased")));
+                .thenReturn(List.of(new ParameterOption("Option", "Aliased")));
         when(configOptionsProviderMockAliased.getParameterOptions(eq(uriDummy), anyString(), any(), any()))
                 .thenReturn(null);
 
         when(configOptionsProviderMock.getParameterOptions(eq(uriDummy), anyString(), any(), any()))
-                .thenReturn(Collections.singletonList(new ParameterOption("Option", "Original")));
+                .thenReturn(List.of(new ParameterOption("Option", "Original")));
         when(configOptionsProviderMock.getParameterOptions(eq(uriAliases), anyString(), any(), any())).thenReturn(null);
     }
 

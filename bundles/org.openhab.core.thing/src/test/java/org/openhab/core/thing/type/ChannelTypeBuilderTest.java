@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +43,7 @@ public class ChannelTypeBuilderTest {
     private static final String CATEGORY = "category";
     private static final String LABEL = "label";
     private static final String TAG = "tag";
-    private static final List<String> TAGS = Arrays.asList("TAG1", "TAG2");
+    private static final List<String> TAGS = List.of("TAG1", "TAG2");
     private static URI configDescriptionUri;
     private static final ChannelTypeUID CHANNEL_TYPE_UID = new ChannelTypeUID("bindingId", "channelId");
     private static final StateDescriptionFragment STATE_DESCRIPTION_FRAGMENT = StateDescriptionFragmentBuilder.create()
@@ -52,7 +51,7 @@ public class ChannelTypeBuilderTest {
             .build();
     private static final StateDescription STATE_DESCRIPTION = STATE_DESCRIPTION_FRAGMENT.toStateDescription();
     private static final EventDescription EVENT_DESCRIPTION = new EventDescription(
-            Arrays.asList(new EventOption(CommonTriggerEvents.DIR1_PRESSED, null),
+            List.of(new EventOption(CommonTriggerEvents.DIR1_PRESSED, null),
                     new EventOption(CommonTriggerEvents.DIR1_RELEASED, null)));
 
     private StateChannelTypeBuilder stateBuilder;

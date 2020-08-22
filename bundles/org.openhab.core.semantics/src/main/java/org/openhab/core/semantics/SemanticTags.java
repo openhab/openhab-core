@@ -12,8 +12,6 @@
  */
 package org.openhab.core.semantics;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -87,9 +85,9 @@ public class SemanticTags {
                 Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
         try {
             String entry = rb.getString(tag.getAnnotation(TagInfo.class).id());
-            return Arrays.asList(entry.toLowerCase(locale).split(","));
+            return List.of(entry.toLowerCase(locale).split(","));
         } catch (MissingResourceException e) {
-            return Collections.singletonList(tag.getAnnotation(TagInfo.class).label());
+            return List.of(tag.getAnnotation(TagInfo.class).label());
         }
     }
 

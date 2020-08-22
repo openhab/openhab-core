@@ -13,7 +13,6 @@
 package org.openhab.core.model.thing.testsupport.hue;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -68,17 +67,17 @@ public class TestHueChannelTypeProvider implements ChannelTypeProvider, ChannelG
                     .withDescription("description")
                     .withConfigDescriptionURI(new URI("Xhue", "XLCT001:Xcolor_temperature", null)).build();
 
-            channelTypes = Arrays.asList(ctColor, ctColorTemperature, ctColorX, ctColorTemperatureX);
+            channelTypes = List.of(ctColor, ctColorTemperature, ctColorX, ctColorTemperatureX);
 
             ChannelGroupType groupX = ChannelGroupTypeBuilder.instance(GROUP_CHANNEL_GROUP_TYPE_UID, "Channel Group")
                     .withDescription("Channel Group")
-                    .withChannelDefinitions(Arrays.asList(
+                    .withChannelDefinitions(List.of(
                             new ChannelDefinitionBuilder("foo", TestHueChannelTypeProvider.COLOR_CHANNEL_TYPE_UID)
                                     .build(),
                             new ChannelDefinitionBuilder("bar", TestHueChannelTypeProvider.COLOR_CHANNEL_TYPE_UID)
                                     .build()))
                     .build();
-            channelGroupTypes = Arrays.asList(groupX);
+            channelGroupTypes = List.of(groupX);
         } catch (Exception willNeverBeThrown) {
         }
     }

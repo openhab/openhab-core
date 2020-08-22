@@ -12,14 +12,12 @@
  */
 package org.openhab.core.thing.internal;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -93,11 +91,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                Set<String> types = new HashSet<>();
-                types.add(ThingAddedEvent.TYPE);
-                types.add(ThingRemovedEvent.TYPE);
-                types.add(ThingUpdatedEvent.TYPE);
-                return types;
+                return Set.of(ThingAddedEvent.TYPE, ThingRemovedEvent.TYPE, ThingUpdatedEvent.TYPE);
             }
 
             @Override
@@ -164,7 +158,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
             @Override
             public Collection<Thing> getAll() {
-                return Collections.singleton(thing);
+                return Set.of(thing);
             }
 
             @Override
@@ -175,9 +169,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
 
         ThingRegistry thingRegistry = getService(ThingRegistry.class);
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("param1", "value1");
-        parameters.put("param2", 1);
+        Map<String, Object> parameters = Map.ofEntries(entry("param1", "value1"), entry("param2", 1));
 
         thingRegistry.updateConfiguration(thingUID, parameters);
 
@@ -188,8 +180,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
     public void assertThatThingRegistryThrowsExceptionForConfigUpdateOfNonExistingThing() {
         ThingRegistry thingRegistry = getService(ThingRegistry.class);
         ThingUID thingUID = new ThingUID(THING_TYPE_UID, "thing");
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("param", "value1");
+        Map<String, Object> parameters = Map.of("param", "value1");
         assertThrows(IllegalArgumentException.class, () -> thingRegistry.updateConfiguration(thingUID, parameters));
     }
 

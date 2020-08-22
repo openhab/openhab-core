@@ -15,7 +15,7 @@ package org.openhab.core.internal.items;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.items.SwitchItem;
@@ -125,7 +125,7 @@ public class ItemTagTest {
         SwitchItem item = new SwitchItem(ITEM1);
         assertThat(item.getTags().size(), is(0));
 
-        item.addTags(Arrays.asList(TAG1_UPPERCASE, TAG2_MIXED_CASE, TAG3));
+        item.addTags(List.of(TAG1_UPPERCASE, TAG2_MIXED_CASE, TAG3));
         assertThat(item.getTags().size(), is(3));
         assertThat(item.hasTag(TAG1), is(true));
         assertThat(item.hasTag(TAG2), is(true));
@@ -143,6 +143,6 @@ public class ItemTagTest {
         assertThat(item.hasTag(TAG2), is(true));
         assertThat(item.hasTag(TAG3), is(true));
 
-        assertThat(item.getTags().containsAll(Arrays.asList(TAG1_UPPERCASE, TAG2_MIXED_CASE, TAG3)), is(true));
+        assertThat(item.getTags().containsAll(List.of(TAG1_UPPERCASE, TAG2_MIXED_CASE, TAG3)), is(true));
     }
 }

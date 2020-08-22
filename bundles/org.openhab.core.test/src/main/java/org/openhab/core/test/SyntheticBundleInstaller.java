@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
 import org.openhab.core.service.ReadyMarker;
@@ -72,8 +70,7 @@ public class SyntheticBundleInstaller {
     /**
      * A list of default extensions to be included in the synthetic bundle.
      */
-    private static final Set<String> DEFAULT_EXTENSIONS = Collections
-            .unmodifiableSet(Stream.of("*.xml", "*.properties", "*.json", ".keep").collect(Collectors.toSet()));
+    private static final Set<String> DEFAULT_EXTENSIONS = Set.of("*.xml", "*.properties", "*.json", ".keep");
 
     /**
      * Install synthetic bundle, denoted by its name, into the test runtime (by using the given bundle context). Only

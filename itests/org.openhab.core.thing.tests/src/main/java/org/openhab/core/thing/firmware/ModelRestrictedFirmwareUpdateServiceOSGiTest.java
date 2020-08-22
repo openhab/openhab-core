@@ -17,9 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openhab.core.thing.Thing.*;
 import static org.openhab.core.thing.firmware.FirmwareStatus.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -221,9 +218,9 @@ public class ModelRestrictedFirmwareUpdateServiceOSGiTest extends JavaOSGiTest {
             @Override
             public Set<Firmware> getFirmwares(Thing thing, Locale locale) {
                 if (thing.getThingTypeUID().equals(THING_TYPE.getUID())) {
-                    return new HashSet<>(Arrays.asList(firmwares));
+                    return Set.of(firmwares);
                 } else {
-                    return Collections.emptySet();
+                    return Set.of();
                 }
             }
 

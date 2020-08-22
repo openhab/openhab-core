@@ -20,9 +20,9 @@ import static org.mockito.MockitoAnnotations.openMocks;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -163,7 +163,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         channelDefinitions.add(new ChannelDefinitionBuilder("7_1", channelType2.getUID()).build());
         channelDefinitions.add(new ChannelDefinitionBuilder("7_2", channelType3.getUID()).build());
 
-        registerService(new SimpleThingTypeProvider(Collections.singleton(ThingTypeBuilder
+        registerService(new SimpleThingTypeProvider(Set.of(ThingTypeBuilder
                 .instance(new ThingTypeUID("hue:lamp"), "label").withChannelDefinitions(channelDefinitions).build())));
 
         List<Item> items = new ArrayList<>();

@@ -13,7 +13,6 @@
 package org.openhab.core.model.script.extension;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,7 +67,7 @@ public class ScriptEngineConsoleCommandExtension extends AbstractConsoleCommandE
 
     @Override
     public List<String> getUsages() {
-        return Collections.singletonList(buildCommandUsage("<script to execute>", "Executes a script"));
+        return List.of(buildCommandUsage("<script to execute>", "Executes a script"));
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC)

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.types;
 
+import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,9 +22,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -176,7 +176,7 @@ public class DateTimeTypeTest {
      */
     public static Collection<Object[]> parameters() {
         // for simplicity we use always the same input time.
-        return Arrays.asList(new Object[][] {
+        return List.of(new Object[][] {
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("UTC"),
                         "2014-03-30T10:58:47.033+0000", "2014-03-30T10:58:47.033+0000") },
                 { new ParameterSet(TimeZone.getTimeZone("UTC"), initTimeMap(), TimeZone.getTimeZone("CET"),
@@ -222,15 +222,8 @@ public class DateTimeTypeTest {
     }
 
     private static Map<String, Integer> initTimeMap() {
-        Map<String, Integer> inputTimeMap = new HashMap<>();
-        inputTimeMap.put("year", 2014);
-        inputTimeMap.put("month", 2);
-        inputTimeMap.put("date", 30);
-        inputTimeMap.put("hourOfDay", 10);
-        inputTimeMap.put("minute", 58);
-        inputTimeMap.put("second", 47);
-        inputTimeMap.put("milliseconds", 33);
-        return inputTimeMap;
+        return Map.ofEntries(entry("year", 2014), entry("month", 2), entry("date", 30), entry("hourOfDay", 10),
+                entry("minute", 58), entry("second", 47), entry("milliseconds", 33));
     }
 
     @Test

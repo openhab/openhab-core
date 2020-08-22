@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -333,7 +332,7 @@ public class AutoUpdateManagerTest {
 
     @Test
     public void testAutoUpdateDisabled() {
-        aum.modified(Collections.singletonMap(AutoUpdateManager.PROPERTY_ENABLED, "false"));
+        aum.modified(Map.of(AutoUpdateManager.PROPERTY_ENABLED, "false"));
 
         aum.receiveCommand(event, item);
 
@@ -343,7 +342,7 @@ public class AutoUpdateManagerTest {
     @Test
     public void testAutoUpdateSendOptimisticUpdates() {
         links.add(new ItemChannelLink("test", CHANNEL_UID_ONLINE_1));
-        aum.modified(Collections.singletonMap(AutoUpdateManager.PROPERTY_SEND_OPTIMISTIC_UPDATES, "true"));
+        aum.modified(Map.of(AutoUpdateManager.PROPERTY_SEND_OPTIMISTIC_UPDATES, "true"));
 
         aum.receiveCommand(event, item);
 

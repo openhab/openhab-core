@@ -12,8 +12,6 @@
  */
 package org.openhab.core.thing;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -70,7 +68,7 @@ public class Channel {
     Channel() {
         this.kind = ChannelKind.STATE;
         this.configuration = new Configuration();
-        this.properties = Collections.unmodifiableMap(new HashMap<>(0));
+        this.properties = Map.of();
     }
 
     /**
@@ -82,7 +80,7 @@ public class Channel {
         this.acceptedItemType = acceptedItemType;
         this.kind = ChannelKind.STATE;
         this.configuration = new Configuration();
-        this.properties = Collections.unmodifiableMap(new HashMap<>(0));
+        this.properties = Map.of();
     }
 
     /**
@@ -125,17 +123,9 @@ public class Channel {
         this.label = label;
         this.description = description;
         this.autoUpdatePolicy = autoUpdatePolicy;
-        this.defaultTags = Collections.<String> unmodifiableSet(new HashSet<>(defaultTags));
-        if (configuration == null) {
-            this.configuration = new Configuration();
-        } else {
-            this.configuration = configuration;
-        }
-        if (properties == null) {
-            this.properties = Collections.unmodifiableMap(new HashMap<>(0));
-        } else {
-            this.properties = properties;
-        }
+        this.defaultTags = Set.copyOf(defaultTags);
+        this.configuration = configuration == null ? new Configuration() : configuration;
+        this.properties = properties == null ? Map.of() : properties;
     }
 
     /**
@@ -211,7 +201,7 @@ public class Channel {
      */
     public Map<String, String> getProperties() {
         synchronized (this) {
-            return Collections.unmodifiableMap(new HashMap<>(properties));
+            return Map.copyOf(properties);
         }
     }
 

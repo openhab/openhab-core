@@ -13,11 +13,8 @@
 package org.openhab.core.audio.internal.fake;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -51,10 +48,9 @@ public class AudioSinkFake implements AudioSink {
     public boolean isUnsupportedAudioFormatExceptionExpected;
     public boolean isUnsupportedAudioStreamExceptionExpected;
 
-    private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Collections
-            .unmodifiableSet(Stream.of(AudioFormat.MP3, AudioFormat.WAV).collect(Collectors.toSet()));
-    private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Collections
-            .unmodifiableSet(Stream.of(FixedLengthAudioStream.class, URLAudioStream.class).collect(Collectors.toSet()));
+    private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
+    private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Set
+            .of(FixedLengthAudioStream.class, URLAudioStream.class);
 
     @Override
     public String getId() {

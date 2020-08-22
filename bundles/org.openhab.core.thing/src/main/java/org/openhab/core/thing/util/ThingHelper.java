@@ -150,7 +150,7 @@ public class ThingHelper {
      * @throws IllegalArgumentException in case there are duplicate channels found
      */
     public static void ensureUniqueChannels(final Collection<Channel> channels, final Channel channel) {
-        ensureUniqueChannels(channels, Collections.singleton(channel));
+        ensureUniqueChannels(channels, Set.of(channel));
     }
 
     private static void ensureUniqueChannels(final Collection<Channel> channels1, final Collection<Channel> channels2) {
@@ -158,7 +158,7 @@ public class ThingHelper {
                 ensureUniqueChannels(channels2.iterator(), new HashSet<>(channels1.size() + channels2.size())));
     }
 
-    private static HashSet<UID> ensureUniqueChannels(final Iterator<Channel> channels, final HashSet<UID> ids) {
+    private static Set<UID> ensureUniqueChannels(final Iterator<Channel> channels, final Set<UID> ids) {
         while (channels.hasNext()) {
             final Channel channel = channels.next();
             if (!ids.add(channel.getUID())) {

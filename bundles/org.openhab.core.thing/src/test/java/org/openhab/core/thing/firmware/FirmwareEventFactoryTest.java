@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -96,7 +96,7 @@ public class FirmwareEventFactoryTest extends JavaTest {
     public void testSerializationAndDeserializationFirmwareUpdateProgressInfo() throws Exception {
         FirmwareUpdateProgressInfo firmwareUpdateProgressInfo = FirmwareUpdateProgressInfo
                 .createFirmwareUpdateProgressInfo(thingUID, "1.2.3", ProgressStep.UPDATING,
-                        Arrays.asList(ProgressStep.WAITING, ProgressStep.UPDATING), false, 10);
+                        List.of(ProgressStep.WAITING, ProgressStep.UPDATING), false, 10);
         FirmwareUpdateProgressInfoEvent progressInfoEvent = FirmwareEventFactory
                 .createFirmwareUpdateProgressInfoEvent(firmwareUpdateProgressInfo);
 

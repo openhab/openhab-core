@@ -17,10 +17,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Condition;
@@ -49,8 +50,8 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
 
     @Test
     public void assertThatConditionWorks() {
-        Configuration conditionConfiguration = new Configuration(Collections.singletonMap("days",
-                Arrays.asList(new String[] { "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN" })));
+        Configuration conditionConfiguration = new Configuration(
+                Map.of("days", List.of("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")));
         Condition condition = ModuleBuilder.createCondition().withId("id")
                 .withTypeUID(DayOfWeekConditionHandler.MODULE_TYPE_ID).withConfiguration(conditionConfiguration)
                 .build();
@@ -59,15 +60,12 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
         assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
 
         condition = ModuleBuilder.createCondition(condition)
-                .withConfiguration(new Configuration(Collections.singletonMap("days", Collections.emptyList())))
-                .build();
+                .withConfiguration(new Configuration(Map.of("days", List.of()))).build();
         handler = new DayOfWeekConditionHandler(condition);
         assertThat(handler.isSatisfied(Collections.emptyMap()), is(false));
 
         condition = ModuleBuilder.createCondition(condition)
-                .withConfiguration(
-                        new Configuration(Collections.singletonMap("days", Collections.singletonList(dayOfWeek))))
-                .build();
+                .withConfiguration(new Configuration(Map.of("days", List.of(dayOfWeek)))).build();
         handler = new DayOfWeekConditionHandler(condition);
         assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
     }
@@ -82,13 +80,13 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
 
     @Override
     protected Condition getPassingCondition() {
-        Configuration conditionConfig = new Configuration(Collections.singletonMap("days", dayOfWeek));
+        Configuration conditionConfig = new Configuration(Map.of("days", dayOfWeek));
         return ModuleBuilder.createCondition().withId("MyDOWCondition")
                 .withTypeUID(DayOfWeekConditionHandler.MODULE_TYPE_ID).withConfiguration(conditionConfig).build();
     }
 
     @Override
     protected Configuration getFailingConfiguration() {
-        return new Configuration(Collections.singletonMap("days", Collections.emptyList()));
+        return new Configuration(Map.of("days", List.of()));
     }
 }

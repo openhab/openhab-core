@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.measure.quantity.Temperature;
@@ -39,7 +38,7 @@ public class CoreItemFactoryTest {
     @BeforeEach
     public void setup() {
         coreItemFactory = new CoreItemFactory();
-        itemTypeNames = Arrays.asList(coreItemFactory.getSupportedItemTypes());
+        itemTypeNames = List.of(coreItemFactory.getSupportedItemTypes());
     }
 
     @Test

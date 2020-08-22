@@ -17,10 +17,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -84,7 +84,7 @@ public class SayCommandTest extends VoiceConsoleCommandExtensionTest {
         params[11] = new Object[] { true, false, false, ttsService, false, false };
         params[12] = new Object[] { true, true, true, ttsService, true, true };
 
-        return Arrays.asList(params);
+        return List.of(params);
     }
 
     @ParameterizedTest

@@ -13,7 +13,7 @@
 package org.openhab.core.magic.binding.handler;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.magic.binding.internal.automation.modules.MagicThingActionsService;
@@ -57,6 +57,6 @@ public class MagicActionModuleThingHandler extends BaseThingHandler {
 
     @Override
     public Collection<Class<? extends ThingHandlerService>> getServices() {
-        return Collections.singletonList(MagicThingActionsService.class);
+        return List.of(MagicThingActionsService.class);
     }
 }

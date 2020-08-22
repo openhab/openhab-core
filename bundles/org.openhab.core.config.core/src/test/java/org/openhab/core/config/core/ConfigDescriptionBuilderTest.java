@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +65,7 @@ public class ConfigDescriptionBuilderTest {
 
     @Test
     public void testWithTwoParameters() {
-        final List<ConfigDescriptionParameter> params = Arrays.asList(PARAM1, PARAM2);
+        final List<ConfigDescriptionParameter> params = List.of(PARAM1, PARAM2);
 
         ConfigDescription configDescription = builder.withParameters(params).build();
         assertThat(configDescription.getUID(), is(CONFIG_URI));
@@ -86,7 +85,7 @@ public class ConfigDescriptionBuilderTest {
 
     @Test
     public void testWithTwoParameterGroups() {
-        final List<ConfigDescriptionParameterGroup> groups = Arrays.asList(GROUP1, GROUP2);
+        final List<ConfigDescriptionParameterGroup> groups = List.of(GROUP1, GROUP2);
 
         ConfigDescription configDescription = builder.withParameterGroups(groups).build();
         assertThat(configDescription.getUID(), is(CONFIG_URI));

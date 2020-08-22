@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -182,12 +183,12 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getDefaultPresets() {
-        return Collections.singleton(PRESET_DEFAULT);
+        return Set.of(PRESET_DEFAULT);
     }
 
     @Override
     public Collection<String> getPresets() {
-        return Collections.singleton(PRESET_DEFAULT);
+        return Set.of(PRESET_DEFAULT);
     }
 
     @Override

@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.emf.common.util.URI;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ public class MappingUriExtensionsTest {
     private File confFolder;
 
     private static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 { "conf", //
                         "file:///q:/conf", //
                         "file:///q:/conf", //

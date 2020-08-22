@@ -250,7 +250,7 @@ public class ConfigurableServiceResource implements RESTResource {
             return properties;
         }
 
-        return ConfigUtil.normalizeTypes(properties, Collections.singletonList(configDesc));
+        return ConfigUtil.normalizeTypes(properties, List.of(configDesc));
     }
 
     @DELETE

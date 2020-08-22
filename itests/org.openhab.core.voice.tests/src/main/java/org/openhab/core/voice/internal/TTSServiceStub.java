@@ -17,8 +17,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
@@ -37,8 +35,7 @@ import org.osgi.framework.ServiceReference;
  */
 public class TTSServiceStub implements TTSService {
 
-    private static final Set<AudioFormat> SUPPORTED_FORMATS = Stream.of(AudioFormat.MP3, AudioFormat.WAV)
-            .collect(Collectors.toSet());
+    private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
 
     private static final String TTS_SERVICE_STUB_ID = "ttsServiceStubID";
     private static final String TTS_SERVICE_STUB_LABEL = "ttsServiceStubLabel";

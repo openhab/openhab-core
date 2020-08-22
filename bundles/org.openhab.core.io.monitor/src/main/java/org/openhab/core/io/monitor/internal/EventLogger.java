@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.monitor.internal;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +32,7 @@ public class EventLogger implements EventSubscriber {
 
     private final Map<String, Logger> eventLoggers = new HashMap<>();
 
-    private final Set<String> subscribedEventTypes = Collections.singleton(EventSubscriber.ALL_EVENT_TYPES);
+    private final Set<String> subscribedEventTypes = Set.of(EventSubscriber.ALL_EVENT_TYPES);
 
     @Override
     public Set<String> getSubscribedEventTypes() {

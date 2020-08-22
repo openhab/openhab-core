@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.discovery.internal;
 
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,7 +24,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -907,7 +905,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         final ThingTypeProvider thingTypeProvider = new ThingTypeProvider() {
             @Override
             public Collection<ThingType> getThingTypes(@Nullable Locale locale) {
-                return Collections.singleton(testThingType);
+                return Set.of(testThingType);
             }
 
             @Override
@@ -923,7 +921,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         final ConfigDescriptionProvider configDescriptionProvider = new ConfigDescriptionProvider() {
             @Override
             public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
-                return Collections.singleton(testConfigDescription);
+                return Set.of(testConfigDescription);
             }
 
             @Override
@@ -969,11 +967,11 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(inbox.getAll().size(), is(1));
 
         // should not remove a result
-        inbox.removeOlderResults(discoveryService2, now, singleton(testThingType.getUID()), null);
+        inbox.removeOlderResults(discoveryService2, now, Set.of(testThingType.getUID()), null);
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result
-        inbox.removeOlderResults(discoveryService1, now, singleton(testThingType.getUID()), null);
+        inbox.removeOlderResults(discoveryService1, now, Set.of(testThingType.getUID()), null);
         assertThat(inbox.getAll().size(), is(0));
     }
 
@@ -984,7 +982,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result
-        inbox.removeOlderResults(discoveryService2, now, singleton(testThingType.getUID()), null);
+        inbox.removeOlderResults(discoveryService2, now, Set.of(testThingType.getUID()), null);
         assertThat(inbox.getAll().size(), is(0));
     }
 

@@ -12,10 +12,10 @@
  */
 package org.openhab.core.thing.util;
 
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -90,8 +90,8 @@ public class ThingHelperTest {
 
         assertTrue(ThingHelper.equals(thingA, thingB));
 
-        ((ThingImpl) thingB).setChannels(singletonList(
-                ChannelBuilder.create(new ChannelUID("binding:type:thingId:channel3"), "itemType3").build()));
+        ((ThingImpl) thingB).setChannels(
+                List.of(ChannelBuilder.create(new ChannelUID("binding:type:thingId:channel3"), "itemType3").build()));
 
         assertFalse(ThingHelper.equals(thingA, thingB));
     }

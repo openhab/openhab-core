@@ -17,9 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -43,13 +42,7 @@ public class ThingBuilderTest {
     private static final String KEY2 = "key2";
     private static final String VALUE1 = "value1";
     private static final String VALUE2 = "value2";
-    private final Map<String, String> properties = new HashMap<String, String>() {
-        private static final long serialVersionUID = 1L;
-        {
-            put(KEY1, VALUE1);
-            put(KEY2, VALUE2);
-        }
-    };
+    private final Map<String, String> properties = Map.of(KEY1, VALUE1, KEY2, VALUE2);
     private ThingBuilder thingBuilder;
 
     @BeforeEach
@@ -78,7 +71,7 @@ public class ThingBuilderTest {
 
     @Test
     public void testWithChannelsDuplicatesCollections() {
-        assertThrows(IllegalArgumentException.class, () -> thingBuilder.withChannels(Arrays.asList( //
+        assertThrows(IllegalArgumentException.class, () -> thingBuilder.withChannels(List.of( //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build(), //
                 ChannelBuilder.create(new ChannelUID(THING_UID, "channel1")).build())));
     }

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.rest.sse.internal.listeners;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -36,7 +35,7 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class SseEventSubscriber implements EventSubscriber {
 
-    private final Set<String> subscribedEventTypes = Collections.singleton(EventSubscriber.ALL_EVENT_TYPES);
+    private final Set<String> subscribedEventTypes = Set.of(EventSubscriber.ALL_EVENT_TYPES);
 
     private final SsePublisher ssePublisher;
 

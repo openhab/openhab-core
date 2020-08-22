@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -161,7 +160,7 @@ public class ConfigMapper {
                 final Enum<?> enumvalue = Enum.valueOf(enumType, value.toString());
                 result = enumvalue;
             } else if (Collection.class.isAssignableFrom(type)) {
-                result = Collections.singletonList(value);
+                result = List.of(value);
             }
         }
         return result;

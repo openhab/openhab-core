@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -60,7 +59,7 @@ public class PersistenceExtensionsTest {
 
         @Override
         public Set<PersistenceService> getAll() {
-            return Collections.singleton(testPersistenceService);
+            return Set.of(testPersistenceService);
         }
 
         @Override
@@ -77,12 +76,12 @@ public class PersistenceExtensionsTest {
         item = new GenericItem("Test", "Test") {
             @Override
             public List<Class<? extends State>> getAcceptedDataTypes() {
-                return Collections.emptyList();
+                return List.of();
             }
 
             @Override
             public List<Class<? extends Command>> getAcceptedCommandTypes() {
-                return Collections.emptyList();
+                return List.of();
             }
         };
     }

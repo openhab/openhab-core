@@ -12,10 +12,8 @@
  */
 package org.openhab.core.automation.module.script.internal.factory;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
-
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -46,8 +44,8 @@ public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptModuleHandlerFactory.class);
 
-    private static final Collection<String> TYPES = unmodifiableList(
-            asList(ScriptActionHandler.TYPE_ID, ScriptConditionHandler.TYPE_ID));
+    private static final Collection<String> TYPES = List.of(ScriptActionHandler.TYPE_ID,
+            ScriptConditionHandler.TYPE_ID);
     private @NonNullByDefault({}) ScriptEngineManager scriptEngineManager;
 
     @Override

@@ -12,15 +12,16 @@
  */
 package org.openhab.core.thing.internal;
 
+import static java.util.Map.entry;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -79,10 +80,7 @@ public class ChannelItemProviderTest {
     public void setup() {
         provider = createProvider();
 
-        Map<String, Object> props = new HashMap<>();
-        props.put("enabled", "true");
-        props.put("initialDelay", "false");
-        provider.activate(props);
+        provider.activate(Map.ofEntries(entry("enabled", "true"), entry("initialDelay", "false")));
 
         when(thingRegistryMock.getChannel(same(CHANNEL_UID))).thenReturn(CHANNEL);
         when(itemFactoryMock.createItem(CoreItemFactory.NUMBER, ITEM_NAME)).thenReturn(ITEM);
@@ -199,8 +197,8 @@ public class ChannelItemProviderTest {
             provider.itemRegistryListener.beforeAdding((Item) invocation.getArguments()[1]);
             return null;
         }).when(listenerMock).added(same(provider), any(Item.class));
-        when(linkRegistryMock.getBoundChannels(eq(ITEM_NAME))).thenReturn(Collections.singleton(CHANNEL_UID));
-        when(linkRegistryMock.getLinks(eq(CHANNEL_UID))).thenReturn(Collections.singleton(LINK));
+        when(linkRegistryMock.getBoundChannels(eq(ITEM_NAME))).thenReturn(Set.of(CHANNEL_UID));
+        when(linkRegistryMock.getLinks(eq(CHANNEL_UID))).thenReturn(Set.of(LINK));
     }
 
     private ChannelItemProvider createProvider() {

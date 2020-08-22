@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -48,7 +47,7 @@ public class StatusConsoleCommandExtension extends AbstractConsoleCommandExtensi
 
     @Override
     public List<String> getUsages() {
-        return Collections.singletonList(buildCommandUsage("<item>", "shows the current status of an item"));
+        return List.of(buildCommandUsage("<item>", "shows the current status of an item"));
     }
 
     @Override

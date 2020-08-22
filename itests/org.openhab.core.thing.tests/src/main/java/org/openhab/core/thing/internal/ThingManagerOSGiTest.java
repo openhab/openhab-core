@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.internal;
 
-import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +23,6 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -314,8 +312,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         registerThingTypeProvider();
 
         Thing thing2 = ThingBuilder.create(THING_TYPE_UID, THING_UID)
-                .withChannels(singletonList(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).build()))
-                .build();
+                .withChannels(List.of(ChannelBuilder.create(CHANNEL_UID, CoreItemFactory.SWITCH).build())).build();
 
         class ThingHandlerState {
             boolean raceCondition;
@@ -872,7 +869,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Collections.singleton(ItemStateEvent.TYPE);
+                return Set.of(ItemStateEvent.TYPE);
             }
 
             @Override
@@ -1088,7 +1085,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         assertThat(thingManager, is(notNullValue()));
 
         ThingProvider customThingProvider = mock(ThingProvider.class);
-        when(customThingProvider.getAll()).thenReturn(Collections.singletonList(thing));
+        when(customThingProvider.getAll()).thenReturn(List.of(thing));
 
         registerService(customThingProvider);
 
@@ -1140,7 +1137,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         EventSubscriber thingStatusEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return singleton(ThingStatusInfoEvent.TYPE);
+                return Set.of(ThingStatusInfoEvent.TYPE);
             }
 
             @Override
@@ -1236,7 +1233,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         EventSubscriber thingStatusEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return singleton(ThingStatusInfoChangedEvent.TYPE);
+                return Set.of(ThingStatusInfoChangedEvent.TYPE);
             }
 
             @Override
@@ -1318,7 +1315,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         EventSubscriber thingStatusInfoEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return singleton(ThingStatusInfoEvent.TYPE);
+                return Set.of(ThingStatusInfoEvent.TYPE);
             }
 
             @Override
@@ -1338,7 +1335,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         EventSubscriber thingStatusInfoChangedEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return singleton(ThingStatusInfoChangedEvent.TYPE);
+                return Set.of(ThingStatusInfoChangedEvent.TYPE);
             }
 
             @Override

@@ -420,8 +420,8 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
 
     private @Nullable PersistenceServiceConfiguration getDefaultConfig(PersistenceService persistenceService) {
         List<PersistenceStrategy> strategies = persistenceService.getDefaultStrategies();
-        List<PersistenceItemConfiguration> configs = Collections.singletonList(new PersistenceItemConfiguration(
-                Collections.singletonList(new PersistenceAllConfig()), null, strategies, null));
+        List<PersistenceItemConfiguration> configs = List
+                .of(new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), null, strategies, null));
         return new PersistenceServiceConfiguration(configs, strategies, strategies);
     }
 

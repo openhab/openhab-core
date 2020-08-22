@@ -19,12 +19,9 @@ import static org.openhab.core.thing.firmware.Constants.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -86,12 +83,12 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         @Override
         public @Nullable Set<Firmware> getFirmwares(Thing thing, @Nullable Locale locale) {
             if (!thing.equals(thing1)) {
-                return Collections.emptySet();
+                return Set.of();
             }
             if (Locale.ENGLISH.equals(locale)) {
-                return Stream.of(FW111_EN, FW112_EN).collect(Collectors.toSet());
+                return Set.of(FW111_EN, FW112_EN);
             } else {
-                return Stream.of(FW111_DE, FW112_DE).collect(Collectors.toSet());
+                return Set.of(FW111_DE, FW112_DE);
             }
         }
 
@@ -142,15 +139,15 @@ public class FirmwareRegistryOSGiTest extends JavaOSGiTest {
         public @Nullable Set<Firmware> getFirmwares(Thing thing, @Nullable Locale locale) {
             if (THING_TYPE_UID1.equals(thing.getThingTypeUID())) {
                 if (Locale.ENGLISH.equals(locale)) {
-                    return Collections.singleton(FW111_FIX_EN);
+                    return Set.of(FW111_FIX_EN);
                 } else {
-                    return Collections.singleton(FW111_FIX_DE);
+                    return Set.of(FW111_FIX_DE);
                 }
             } else if (THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
                 if (Locale.ENGLISH.equals(locale)) {
-                    return Stream.of(FWALPHA_EN, FWBETA_EN, FWGAMMA_EN).collect(Collectors.toSet());
+                    return Set.of(FWALPHA_EN, FWBETA_EN, FWGAMMA_EN);
                 } else {
-                    return Stream.of(FWALPHA_DE, FWBETA_DE, FWGAMMA_DE).collect(Collectors.toSet());
+                    return Set.of(FWALPHA_DE, FWBETA_DE, FWGAMMA_DE);
                 }
             }
             return null;

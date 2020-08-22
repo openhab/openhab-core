@@ -12,6 +12,7 @@
  */
 package org.openhab.core.ephemeris.internal;
 
+import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.openhab.core.ephemeris.internal.EphemerisManagerImpl.*;
@@ -21,13 +22,13 @@ import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,17 +67,14 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
         ephemerisManager = getService(EphemerisManager.class, EphemerisManagerImpl.class);
         assertNotNull(ephemerisManager);
 
-        ephemerisManager.modified(Stream
-                .of(new SimpleEntry<>(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Saturday,Sunday"),
-                        new SimpleEntry<>(CONFIG_COUNTRY, Locale.GERMANY.getCountry()))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+        ephemerisManager.modified(Map.ofEntries(entry(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Saturday,Sunday"),
+                entry(CONFIG_COUNTRY, Locale.GERMANY.getCountry())));
     }
 
     @Test
     public void testEphemerisManagerLoadedProperly() {
         assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
-        assertEquals(Stream.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).collect(Collectors.toSet()),
-                ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
+        assertEquals(Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY), ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
         assertFalse(ephemerisManager.countries.isEmpty());
         assertFalse(ephemerisManager.regions.isEmpty());
         assertFalse(ephemerisManager.cities.isEmpty());
@@ -84,26 +82,22 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testConfigurtationDaysetWeekendFailed() {
-        assertThrows(IllegalArgumentException.class, () -> ephemerisManager
-                .modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Foo,Bar")));
+        assertThrows(IllegalArgumentException.class,
+                () -> ephemerisManager.modified(Map.of(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, "Foo,Bar")));
     }
 
     @Test
     public void testConfigurtationDaysetWeekendIterable() {
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND,
-                Stream.of("Saturday", "Sunday").collect(Collectors.toList())));
+        ephemerisManager.modified(Map.of(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, List.of("Saturday", "Sunday")));
         assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
-        assertEquals(Stream.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).collect(Collectors.toSet()),
-                ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
+        assertEquals(Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY), ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
     }
 
     @Test
     public void testConfigurtationDaysetWeekendListAsString() {
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND,
-                Stream.of("Saturday", "Sunday").collect(Collectors.toList()).toString()));
+        ephemerisManager.modified(Map.of(CONFIG_DAYSET_PREFIX + CONFIG_DAYSET_WEEKEND, List.of("Saturday", "Sunday")));
         assertTrue(ephemerisManager.daysets.containsKey(CONFIG_DAYSET_WEEKEND));
-        assertEquals(Stream.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).collect(Collectors.toSet()),
-                ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
+        assertEquals(Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY), ephemerisManager.daysets.get(CONFIG_DAYSET_WEEKEND));
     }
 
     @Test
@@ -158,10 +152,10 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
                 null, Locale.US);
         assertNotNull(options);
         assertEquals(7, options.size());
-        assertEquals(Stream.of(new ParameterOption("MONDAY", "Monday"), new ParameterOption("TUESDAY", "Tuesday"),
+        assertEquals(List.of(new ParameterOption("MONDAY", "Monday"), new ParameterOption("TUESDAY", "Tuesday"),
                 new ParameterOption("WEDNESDAY", "Wednesday"), new ParameterOption("THURSDAY", "Thursday"),
                 new ParameterOption("FRIDAY", "Friday"), new ParameterOption("SATURDAY", "Saturday"),
-                new ParameterOption("SUNDAY", "Sunday")).collect(Collectors.toList()), options);
+                new ParameterOption("SUNDAY", "Sunday")), options);
     }
 
     @Test
@@ -170,10 +164,10 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
                 null, Locale.GERMAN);
         assertNotNull(options);
         assertEquals(7, options.size());
-        assertEquals(Stream.of(new ParameterOption("MONDAY", "Montag"), new ParameterOption("TUESDAY", "Dienstag"),
+        assertEquals(List.of(new ParameterOption("MONDAY", "Montag"), new ParameterOption("TUESDAY", "Dienstag"),
                 new ParameterOption("WEDNESDAY", "Mittwoch"), new ParameterOption("THURSDAY", "Donnerstag"),
                 new ParameterOption("FRIDAY", "Freitag"), new ParameterOption("SATURDAY", "Samstag"),
-                new ParameterOption("SUNDAY", "Sonntag")).collect(Collectors.toList()), options);
+                new ParameterOption("SUNDAY", "Sonntag")), options);
     }
 
     @Test
@@ -187,7 +181,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testConfigOptionProviderRegionsAustria() {
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_COUNTRY, COUNTRY_AUSTRALIA_KEY));
+        ephemerisManager.modified(Map.of(CONFIG_COUNTRY, COUNTRY_AUSTRALIA_KEY));
 
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_REGION,
                 null, null);
@@ -208,8 +202,8 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     @Test
     public void testConfigOptionProviderCitiesNorthRhineWestphalia() {
         ephemerisManager.modified(Stream
-                .of(new SimpleEntry<>(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
-                        new SimpleEntry<>(CONFIG_REGION, REGION_NORTHRHINEWESTPHALIA_KEY))
+                .of(entry(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
+                        entry(CONFIG_REGION, REGION_NORTHRHINEWESTPHALIA_KEY))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null,
@@ -219,10 +213,8 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testConfigOptionProviderCitiesBavaria() {
-        ephemerisManager.modified(Stream
-                .of(new SimpleEntry<>(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
-                        new SimpleEntry<>(CONFIG_REGION, REGION_BAVARIA_KEY))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+        ephemerisManager.modified(Map.ofEntries(entry(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
+                entry(CONFIG_REGION, REGION_BAVARIA_KEY)));
 
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null,
                 null);
@@ -233,10 +225,8 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testConfigOptionProviderCitiesTasmania() {
-        ephemerisManager.modified(Stream
-                .of(new SimpleEntry<>(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
-                        new SimpleEntry<>(CONFIG_REGION, REGION_TASMANIA_KEY))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+        ephemerisManager.modified(Map.ofEntries(entry(CONFIG_COUNTRY, Locale.GERMANY.getCountry()),
+                entry(CONFIG_REGION, REGION_TASMANIA_KEY)));
 
         final Collection<ParameterOption> options = ephemerisManager.getParameterOptions(CONFIG_URI, CONFIG_CITY, null,
                 null);
@@ -249,8 +239,7 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
     public void testWeekends() {
         ZonedDateTime monday = ZonedDateTime.of(2019, 10, 28, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
         ZonedDateTime sunday = ZonedDateTime.of(2019, 10, 27, 0, 0, 0, 0, ZoneId.of("Europe/Paris"));
-        ephemerisManager.modified(Collections.singletonMap(CONFIG_DAYSET_PREFIX + INTERNAL_DAYSET,
-                Stream.of("Monday", "Tuesday").collect(Collectors.toList())));
+        ephemerisManager.modified(Map.of(CONFIG_DAYSET_PREFIX + INTERNAL_DAYSET, List.of("Monday", "Tuesday")));
         assertTrue(ephemerisManager.isWeekend(sunday));
         assertFalse(ephemerisManager.isWeekend(monday));
         assertTrue(ephemerisManager.isInDayset(INTERNAL_DAYSET, monday));

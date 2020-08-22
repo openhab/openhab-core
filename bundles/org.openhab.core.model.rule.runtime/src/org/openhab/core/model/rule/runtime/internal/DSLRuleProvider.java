@@ -14,7 +14,6 @@ package org.openhab.core.model.rule.runtime.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -257,8 +256,8 @@ public class DSLRuleProvider
         Configuration cfg = new Configuration();
         cfg.put("script", context + removeIndentation(script));
         cfg.put("type", MIMETYPE_OPENHAB_DSL_RULE);
-        List<Action> actions = Collections.singletonList(ActionBuilder.create().withId("script")
-                .withTypeUID("script.ScriptAction").withConfiguration(cfg).build());
+        List<Action> actions = List.of(ActionBuilder.create().withId("script").withTypeUID("script.ScriptAction")
+                .withConfiguration(cfg).build());
 
         return RuleBuilder.create(uid).withName(name).withTriggers(triggers).withActions(actions).build();
     }
