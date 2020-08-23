@@ -137,6 +137,9 @@ public class ProfileCallbackImpl implements ProfileCallback {
         State acceptedState;
         if (state instanceof StringType && !(item instanceof StringItem)) {
             acceptedState = TypeParser.parseState(item.getAcceptedDataTypes(), state.toString());
+            if (acceptedState == null) {
+                acceptedState = state;
+            }
         } else {
             acceptedState = itemStateConverter.convertToAcceptedState(state, item);
         }
