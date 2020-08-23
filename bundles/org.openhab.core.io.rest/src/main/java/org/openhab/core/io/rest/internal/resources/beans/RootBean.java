@@ -15,6 +15,7 @@ package org.openhab.core.io.rest.internal.resources.beans;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.io.rest.RESTConstants;
 
@@ -25,6 +26,7 @@ import org.openhab.core.io.rest.RESTConstants;
  * @author Kai Kreuzer - Initial contribution
  * @author Yannick Schaus - Add runtime info
  */
+@NonNullByDefault
 public class RootBean {
 
     public final String version = RESTConstants.API_VERSION;

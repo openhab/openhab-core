@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.internal.resources.beans;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
 
 /**
@@ -19,6 +20,7 @@ import org.openhab.core.OpenHAB;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class SystemInfoBean {
 
     public final SystemInfo systemInfo = new SystemInfo();
