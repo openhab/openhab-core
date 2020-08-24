@@ -19,6 +19,8 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingHandler;
@@ -28,6 +30,7 @@ import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TypeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +134,15 @@ public class ProfileCallbackImpl implements ProfileCallback {
     @Override
     public void sendUpdate(State state) {
         Item item = itemProvider.apply(link.getItemName());
-        State acceptedState = itemStateConverter.convertToAcceptedState(state, item);
+        State acceptedState;
+        if (state instanceof StringType && !(item instanceof StringItem)) {
+            acceptedState = TypeParser.parseState(item.getAcceptedDataTypes(), state.toString());
+            if (acceptedState == null) {
+                acceptedState = state;
+            }
+        } else {
+            acceptedState = itemStateConverter.convertToAcceptedState(state, item);
+        }
         eventPublisher.post(
                 ItemEventFactory.createStateEvent(link.getItemName(), acceptedState, link.getLinkedUID().toString()));
     }
