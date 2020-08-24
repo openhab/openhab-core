@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.internal.resources.beans.RootBean;
@@ -79,10 +80,12 @@ public class RootResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(RootResource.class);
     private final JaxrsServiceRuntime runtime;
+    private final LocaleProvider localeProvider;
 
     @Activate
-    public RootResource(final @Reference JaxrsServiceRuntime runtime) {
+    public RootResource(final @Reference JaxrsServiceRuntime runtime, final @Reference LocaleProvider localeProvider) {
         this.runtime = runtime;
+        this.localeProvider = localeProvider;
     }
 
     @GET
@@ -95,7 +98,7 @@ public class RootResource implements RESTResource {
         final Map<String, String> collectedLinks = new HashMap<>();
 
         final RuntimeDTO runtimeDTO = runtime.getRuntimeDTO();
-        final RootBean bean = new RootBean();
+        final RootBean bean = new RootBean(localeProvider);
         for (final ApplicationDTO applicationDTO : runtimeDTO.applicationDTOs) {
             for (final ResourceDTO resourceDTO : applicationDTO.resourceDTOs) {
                 // We are using the JAX-RS name per convention for the link type.

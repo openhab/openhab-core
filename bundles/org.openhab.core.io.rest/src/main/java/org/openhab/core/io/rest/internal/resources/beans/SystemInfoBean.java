@@ -28,7 +28,10 @@ public class SystemInfoBean {
     public static class SystemInfo {
         public final String configFolder = OpenHAB.getConfigFolder();
         public final String userdataFolder = OpenHAB.getUserDataFolder();
+        public final String logFolder = System.getProperty("openhab.logdir");
         public final String javaVersion = System.getProperty("java.version");
+        public final String javaVendor = System.getProperty("java.vendor");
+        public final String javaVendorVersion = System.getProperty("java.vendor.version");
         public final String osName = System.getProperty("os.name");
         public final String osVersion = System.getProperty("os.version");
         public final String osArchitecture = System.getProperty("os.arch");
