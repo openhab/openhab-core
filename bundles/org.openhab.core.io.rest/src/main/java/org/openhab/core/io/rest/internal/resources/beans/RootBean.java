@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.rest.RESTConstants;
 
 /**
@@ -31,9 +32,15 @@ public class RootBean {
 
     public final String version = RESTConstants.API_VERSION;
 
+    public final String locale;
+
     public final RuntimeInfo runtimeInfo = new RuntimeInfo();
 
     public final List<Links> links = new ArrayList<>();
+
+    public RootBean(LocaleProvider localeProvider) {
+        this.locale = localeProvider.getLocale().toString();
+    }
 
     public static class RuntimeInfo {
         public final String version = OpenHAB.getVersion();
