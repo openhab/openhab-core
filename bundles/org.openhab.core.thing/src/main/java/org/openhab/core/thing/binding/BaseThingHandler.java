@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -509,7 +510,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * @param value the value of the property
      */
     protected void updateProperty(String name, String value) {
-        updateProperties(Map.of(name, value));
+        updateProperties(Collections.singletonMap(name, value));
     }
 
     /**
