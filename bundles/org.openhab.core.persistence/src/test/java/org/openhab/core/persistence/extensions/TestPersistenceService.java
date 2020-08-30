@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence.tests;
+package org.openhab.core.persistence.extensions;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

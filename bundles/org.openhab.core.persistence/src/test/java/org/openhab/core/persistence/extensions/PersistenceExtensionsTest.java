@@ -10,14 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence.tests;
+package org.openhab.core.persistence.extensions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -31,9 +30,6 @@ import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
-import org.openhab.core.persistence.extensions.PersistenceExtensions;
-import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -78,17 +74,6 @@ public class PersistenceExtensionsTest {
         itemFactory = new CoreItemFactory();
         item = itemFactory.createItem(CoreItemFactory.NUMBER, "Test");
         assertEquals(CoreItemFactory.NUMBER, item.getType());
-        item = new GenericItem("Test", "Test") {
-            @Override
-            public List<Class<? extends State>> getAcceptedDataTypes() {
-                return List.of();
-            }
-
-            @Override
-            public List<Class<? extends Command>> getAcceptedCommandTypes() {
-                return List.of();
-            }
-        };
     }
 
     @Test
