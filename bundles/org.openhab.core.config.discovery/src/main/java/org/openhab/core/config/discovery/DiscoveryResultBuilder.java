@@ -12,8 +12,12 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -149,8 +153,8 @@ public class DiscoveryResultBuilder {
     public DiscoveryResult build() {
         if (representationProperty != null && !properties.containsKey(representationProperty)) {
             logger.warn(
-                    "Representation property '{}' of discovery result for thing '{}' is missing in properties map. It should be added.",
-                    representationProperty, thingUID);
+                    "Representation property '{}' of discovery result for thing '{}' is missing in properties map. It has to be fixed by the bindings developer.\n{}",
+                    representationProperty, thingUID, getStackTrace(Thread.currentThread()));
         }
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
                 ttl);
@@ -162,5 +166,15 @@ public class DiscoveryResultBuilder {
             throw new IllegalArgumentException(
                     "Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'");
         }
+    }
+
+    private String getStackTrace(final Thread thread) {
+        StackTraceElement[] elements = AccessController.doPrivileged(new PrivilegedAction<StackTraceElement[]>() {
+            @Override
+            public StackTraceElement[] run() {
+                return thread.getStackTrace();
+            }
+        });
+        return Arrays.stream(elements).map(element -> "\tat " + element.toString()).collect(Collectors.joining("\n"));
     }
 }
