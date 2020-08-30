@@ -370,12 +370,108 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the average value of the state of a given <code>item</code> since a certain point in time.
-     * The default persistence service is used.
+     * Gets the variance of the state of the given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
      *
-     * @param item the item to get the average state value for
-     * @param timestamp the point in time from which to search for the average state value
-     * @return the average state values since <code>timestamp</code> or the state of the given <code>item</code> if no
+     * @param item the {@link Item} to get the variance for
+     * @param timestamp the point in time from which to compute the variance
+     * @return the variance between now and then, or <code>null</code> if there is no default persistence service
+     *         available or it is not a {@link QueryablePersistenceService}, or if there is no persisted state for the
+     *         given <code>item</code> at the given <code>timestamp</code>
+     */
+    public static DecimalType varianceSince(Item item, ZonedDateTime timestamp) {
+        return varianceSince(item, timestamp, getDefaultServiceId());
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} since a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param timestamp the point in time from which to compute the variance
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the variance between now and then, or <code>null</code> if the persistence service given by
+     *         <code>serviceId</code> is not available or it is not a {@link QueryablePersistenceService}, or if there
+     *         is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
+     */
+    public static DecimalType varianceSince(Item item, ZonedDateTime timestamp, String serviceId) {
+        Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
+        Iterator<HistoricItem> it = result.iterator();
+        DecimalType averageSince = internalAverageSince(item, it);
+
+        if (averageSince != null) {
+            BigDecimal average = averageSince.toBigDecimal(), sum = BigDecimal.ZERO;
+            int count = 0;
+
+            while (it.hasNext()) {
+                State state = it.next().getState();
+                if (state instanceof DecimalType) {
+                    count++;
+                    sum = sum.add(((DecimalType) state).toBigDecimal().subtract(average, MathContext.DECIMAL64).pow(2,
+                            MathContext.DECIMAL64));
+                }
+            }
+
+            // avoid division by zero
+            if (count > 0) {
+                return new DecimalType(sum.divide(BigDecimal.valueOf(count), MathContext.DECIMAL64));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the standard deviation of the state of the given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
+     * operation. Get the variance only, it is the squared deviation.
+     *
+     * @param item the {@link Item} to get the standard deviation for
+     * @param timestamp the point in time from which to compute the standard deviation
+     * @return the standard deviation between now and then, or <code>null</code> if there is no default persistence
+     *         service available or it is not a {@link QueryablePersistenceService}, or if there is no persisted state
+     *         for the given <code>item</code> at the given <code>timestamp</code>
+     */
+    public static DecimalType deviationSince(Item item, ZonedDateTime timestamp) {
+        return deviationSince(item, timestamp, getDefaultServiceId());
+    }
+
+    /**
+     * Gets the standard deviation of the state of the given {@link Item} since a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
+     * operation. Get the variance only, it is the squared deviation.
+     *
+     * @param item the {@link Item} to get the standard deviation for
+     * @param timestamp the point in time from which to compute the standard deviation
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the standard deviation between now and then, or <code>null</code> if the persistence service given by
+     *         <code>serviceId</code> it is not available or is not a {@link QueryablePersistenceService}, or if there
+     *         is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
+     */
+    public static DecimalType deviationSince(Item item, ZonedDateTime timestamp, String serviceId) {
+        DecimalType varianceSince = varianceSince(item, timestamp, serviceId);
+
+        if (varianceSince != null) {
+            BigDecimal variance = varianceSince.toBigDecimal();
+
+            // avoid ArithmeticException if variance is less than zero
+            if (BigDecimal.ZERO.compareTo(variance) != 1) {
+                return new DecimalType(variance.sqrt(MathContext.DECIMAL64));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the average value of the state of a given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the average value for
+     * @param timestamp the point in time from which to search for the average value
+     * @return the average value since <code>timestamp</code> or the state of the given <code>item</code> if no
      *         previous states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}
      */
@@ -384,26 +480,28 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the average value of the state of a given <code>item</code> since a certain point in time.
+     * Gets the average value of the state of a given {@link Item} since a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
-     * @param item the item to get the average state value for
-     * @param timestamp the point in time from which to search for the average state value
+     * @param item the {@link Item} to get the average value for
+     * @param timestamp the point in time from which to search for the average value
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the average state values since <code>timestamp</code>, or the state of the given <code>item</code> if no
+     * @return the average value since <code>timestamp</code>, or the state of the given <code>item</code> if no
      *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
      *         refer to an available {@link QueryablePersistenceService}
      */
     public static DecimalType averageSince(Item item, ZonedDateTime timestamp, String serviceId) {
         Iterable<HistoricItem> result = getAllStatesSince(item, timestamp, serviceId);
         Iterator<HistoricItem> it = result.iterator();
+        return internalAverageSince(item, it);
+    }
 
+    private static DecimalType internalAverageSince(Item item, Iterator<HistoricItem> it) {
         BigDecimal total = BigDecimal.ZERO;
 
         BigDecimal avgValue, timeSpan;
-        DecimalType lastState = null, thisState = null;
-        BigDecimal lastTimestamp = null, thisTimestamp = null;
-        BigDecimal firstTimestamp = null;
+        DecimalType lastState = null, thisState;
+        BigDecimal firstTimestamp = null, lastTimestamp = null, thisTimestamp = null;
 
         while (it.hasNext()) {
             HistoricItem thisItem = it.next();
@@ -586,12 +684,11 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the evolution rate of the state of a given <code>item</code> since a certain point in time.
-     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     * Gets the evolution rate of the state of a given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
      *
      * @param item the item to get the evolution rate value for
      * @param timestamp the point in time from which to compute the evolution rate
-     * @param serviceId the name of the {@link PersistenceService} to use
      * @return the evolution rate in percent (positive and negative) between now and then, or <code>null</code> if
      *         there is no default persistence service available, the default persistence service is not a
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
@@ -603,14 +700,14 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the evolution rate of the state of a given <code>item</code> since a certain point in time.
+     * Gets the evolution rate of the state of a given {@link Item} since a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
-     * @param item the item to get the evolution rate value for
+     * @param item the {@link Item} to get the evolution rate value for
      * @param timestamp the point in time from which to compute the evolution rate
      * @param serviceId the name of the {@link PersistenceService} to use
      * @return the evolution rate in percent (positive and negative) between now and then, or <code>null</code> if
-     *         the persistence service given by serviceId is not available or is not a
+     *         the persistence service given by <code>serviceId</code> is not available or is not a
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given
      *         <code>item</code> at the given <code>timestamp</code> using the persistence service given by
      *         <code>serviceId</code>, or if there is a state but it is zero (which would cause a divide-by-zero
