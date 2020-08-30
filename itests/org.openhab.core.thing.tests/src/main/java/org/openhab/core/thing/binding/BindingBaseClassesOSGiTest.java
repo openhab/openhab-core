@@ -445,14 +445,14 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
             updateConfiguration(configuration);
         }
 
-        public void updateProperties() {
+        public void updateProperties(String value) {
             Map<String, String> properties = editProperties();
-            properties.put(Thing.PROPERTY_MODEL_ID, "1234");
+            properties.put(Thing.PROPERTY_MODEL_ID, value);
             updateProperties(properties);
         }
 
-        public void updateProperty() {
-            updateProperty(Thing.PROPERTY_VENDOR, "vendor");
+        public void updateProperty(String value) {
+            updateProperty(Thing.PROPERTY_VENDOR, value);
         }
     }
 
@@ -533,13 +533,25 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(nullValue()));
             assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(nullValue()));
 
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties();
+            // set properties
+            String modelId = "1234";
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties(modelId);
 
-            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is("1234"));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(modelId));
 
-            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty();
+            String vendor = "vendor";
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(vendor);
 
-            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is("vendor"));
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(vendor));
+
+            // unset properties
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperties((String) null);
+
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_MODEL_ID), is(nullValue()));
+
+            ((YetAnotherThingHandler) listener.getThing().getHandler()).updateProperty(null);
+
+            assertThat(listener.getThing().getProperties().get(Thing.PROPERTY_VENDOR), is(nullValue()));
         } finally {
             thingRegistry.removeRegistryChangeListener(listener);
         }
