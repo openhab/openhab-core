@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeProvider;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
@@ -32,6 +34,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * @author Simon Kaufmann - Initial contribution
  */
 @Component(service = ProfileTypeRegistry.class)
+@NonNullByDefault
 public class ProfileTypeRegistryImpl implements ProfileTypeRegistry {
 
     private final List<ProfileTypeProvider> profileTypeProviders = new CopyOnWriteArrayList<>();
@@ -42,7 +45,7 @@ public class ProfileTypeRegistryImpl implements ProfileTypeRegistry {
     }
 
     @Override
-    public List<ProfileType> getProfileTypes(Locale locale) {
+    public List<ProfileType> getProfileTypes(@Nullable Locale locale) {
         List<ProfileType> profileTypes = new ArrayList<>();
         for (ProfileTypeProvider profileTypeProvider : profileTypeProviders) {
             profileTypes.addAll(profileTypeProvider.getProfileTypes(locale));

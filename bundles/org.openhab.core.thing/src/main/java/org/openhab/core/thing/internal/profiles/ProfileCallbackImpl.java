@@ -14,6 +14,7 @@ package org.openhab.core.thing.internal.profiles;
 
 import java.util.function.Function;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public class ProfileCallbackImpl implements ProfileCallback {
 
     private final Logger logger = LoggerFactory.getLogger(ProfileCallbackImpl.class);
