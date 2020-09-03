@@ -12,9 +12,10 @@
  */
 package org.openhab.core.config.discovery.inbox.events;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTOMapper;
@@ -28,6 +29,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 @Component(immediate = true, service = EventFactory.class)
 public class InboxEventFactory extends AbstractEventFactory {
 
@@ -41,12 +43,12 @@ public class InboxEventFactory extends AbstractEventFactory {
      * Constructs a new InboxEventFactory.
      */
     public InboxEventFactory() {
-        super(Stream.of(InboxAddedEvent.TYPE, InboxUpdatedEvent.TYPE, InboxRemovedEvent.TYPE)
-                .collect(Collectors.toSet()));
+        super(Set.of(InboxAddedEvent.TYPE, InboxUpdatedEvent.TYPE, InboxRemovedEvent.TYPE));
     }
 
     @Override
-    protected Event createEventByType(String eventType, String topic, String payload, String source) throws Exception {
+    protected Event createEventByType(String eventType, String topic, String payload, @Nullable String source)
+            throws Exception {
         if (InboxAddedEvent.TYPE.equals(eventType)) {
             return createAddedEvent(topic, payload);
         } else if (InboxRemovedEvent.TYPE.equals(eventType)) {

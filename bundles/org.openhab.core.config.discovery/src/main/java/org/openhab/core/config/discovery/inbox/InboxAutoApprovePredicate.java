@@ -14,6 +14,7 @@ package org.openhab.core.config.discovery.inbox;
 
 import java.util.function.Predicate;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.internal.AutomaticInboxProcessor;
 import org.osgi.service.component.annotations.Component;
@@ -34,6 +35,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Henning Sudbrock - Initial contribution
  */
+@NonNullByDefault
 public interface InboxAutoApprovePredicate extends Predicate<DiscoveryResult> {
 
 }
