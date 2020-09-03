@@ -13,16 +13,17 @@
 package org.openhab.core.config.discovery;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
@@ -51,7 +52,7 @@ public class DiscoveryResultBuilderTest {
     private DiscoveryResultBuilder builder;
     private DiscoveryResult discoveryResult;
 
-    @Before
+    @BeforeEach
     public void setup() {
         builder = DiscoveryResultBuilder.create(THING_UID).withThingType(THING_TYPE_UID).withProperties(properties)
                 .withRepresentationProperty(KEY1).withLabel("Test");
@@ -85,15 +86,14 @@ public class DiscoveryResultBuilderTest {
         assertThat(otherDiscoveryResult.getBridgeUID(), is(BRIDGE_UID));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testDiscoveryResultBuilderWithBridge() {
-        @SuppressWarnings("unused")
-        DiscoveryResult otherDiscoveryResult = DiscoveryResultBuilder
-                .create(new ThingUID(THING_TYPE_UID, "otherThingId")).withBridge(BRIDGE_UID).build();
+        assertThrows(IllegalArgumentException.class, () -> DiscoveryResultBuilder
+                .create(new ThingUID(THING_TYPE_UID, "otherThingId")).withBridge(BRIDGE_UID).build());
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void subsequentBuildsCreateIndependentDiscoveryResults() {
         DiscoveryResult otherDiscoveryResult = builder.withLabel("Second Test").withProperties(Collections.emptyMap())
                 .build();
