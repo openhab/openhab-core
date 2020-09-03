@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +37,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonEventFactory;
+import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -102,6 +102,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     private boolean paxCfgUpdated = true; // a flag used to check whether CM has already successfully updated the pax
                                           // configuration as this must be waited for before trying to add feature repos
+    private Map<String, Object> configMapCache;
 
     private static String currentPackage = null;
 
@@ -123,9 +124,9 @@ public class FeatureInstaller implements ConfigurationListener {
 
     @Activate
     protected void activate(final Map<String, Object> config) {
+        scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("karaf-addons"));
         setOnlineRepoUrl();
         modified(config);
-        scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleWithFixedDelay(() -> {
             logger.debug("Running scheduled sync job");
             try {
@@ -136,7 +137,10 @@ public class FeatureInstaller implements ConfigurationListener {
                     final String key = enumeration.nextElement();
                     cfgMap.put(key, cfg.get(key));
                 }
-                modified(cfgMap);
+                if (!cfgMap.equals(configMapCache)) {
+                    configMapCache = cfgMap;
+                    modified(cfgMap);
+                }
             } catch (IOException e) {
                 logger.debug("Failed to retrieve the addons configuration from configuration admin: {}",
                         e.getMessage());
@@ -168,7 +172,6 @@ public class FeatureInstaller implements ConfigurationListener {
         }
 
         final FeaturesService service = featuresService;
-        ExecutorService scheduler = Executors.newSingleThreadExecutor();
 
         scheduler.execute(() -> {
             if (configChanged) {
@@ -336,15 +339,19 @@ public class FeatureInstaller implements ConfigurationListener {
                     Feature[] features = service.listInstalledFeatures();
                     for (String addon : entries) {
                         if (addon != null && !addon.isEmpty()) {
-                            String id = PREFIX + type + "-" + addon.trim();
-                            targetAddons.add(id);
-                            if (!isInstalled(features, id)) {
-                                installAddons.add(id);
+                            String id = PREFIX + type + "-" + addon.strip();
+                            if (service.getFeature(id) != null) {
+                                targetAddons.add(id);
+                                if (!isInstalled(features, id)) {
+                                    installAddons.add(id);
+                                }
+                            } else {
+                                logger.warn("The {} add-on '{}' does not exist - ignoring it.", type, addon.strip());
                             }
                         }
                     }
 
-                    // we collect all installed addons
+                    // we collect all installed add-ons
                     for (String addon : getAllAddonsOfType(service, type)) {
                         if (addon != null && !addon.isEmpty()) {
                             String id = PREFIX + type + "-" + addon.trim();
@@ -414,6 +421,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 }
                 if (!failed.isEmpty()) {
                     logger.error("Failed installing '{}'", failed.stream().collect(Collectors.joining(", ")));
+                    configMapCache = null; // make sure we retry the installation
                 }
 
                 for (String addon : installed) {
@@ -421,10 +429,12 @@ public class FeatureInstaller implements ConfigurationListener {
                 }
             } catch (Exception e) {
                 logger.error("Failed retrieving features: {}", e.getMessage());
+                configMapCache = null; // make sure we retry the installation
             }
         } catch (Exception e) {
             logger.error("Failed installing '{}': {}", addons.stream().collect(Collectors.joining(", ")),
                     e.getMessage());
+            configMapCache = null; // make sure we retry the installation
         }
     }
 
@@ -448,6 +458,7 @@ public class FeatureInstaller implements ConfigurationListener {
             }
         } catch (Exception e) {
             logger.error("Failed installing '{}': {}", name, e.getMessage());
+            configMapCache = null; // make sure we retry the installation
         }
         return false;
     }

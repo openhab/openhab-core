@@ -62,10 +62,10 @@ public class AddonEvent extends AbstractEvent {
     @Override
     public String toString() {
         if (getTopic().equals(AddonEventFactory.buildTopic(AddonEventFactory.ADDON_INSTALLED_EVENT_TOPIC, id))) {
-            return "Addon '" + id + "' has been installed.";
+            return "Add-on '" + id + "' has been installed.";
         } else if (getTopic()
                 .equals(AddonEventFactory.buildTopic(AddonEventFactory.ADDON_UNINSTALLED_EVENT_TOPIC, id))) {
-            return "Addon '" + id + "' has been uninstalled.";
+            return "Add-on '" + id + "' has been uninstalled.";
         } else {
             return id + ": " + (msg != null ? msg : "Operation failed.");
         }
