@@ -421,6 +421,7 @@ public class FeatureInstaller implements ConfigurationListener {
                 }
                 if (!failed.isEmpty()) {
                     logger.error("Failed installing '{}'", failed.stream().collect(Collectors.joining(", ")));
+                    configMapCache = null; // make sure we retry the installation
                 }
 
                 for (String addon : installed) {
@@ -428,10 +429,12 @@ public class FeatureInstaller implements ConfigurationListener {
                 }
             } catch (Exception e) {
                 logger.error("Failed retrieving features: {}", e.getMessage());
+                configMapCache = null; // make sure we retry the installation
             }
         } catch (Exception e) {
             logger.error("Failed installing '{}': {}", addons.stream().collect(Collectors.joining(", ")),
                     e.getMessage());
+            configMapCache = null; // make sure we retry the installation
         }
     }
 
@@ -455,6 +458,7 @@ public class FeatureInstaller implements ConfigurationListener {
             }
         } catch (Exception e) {
             logger.error("Failed installing '{}': {}", name, e.getMessage());
+            configMapCache = null; // make sure we retry the installation
         }
         return false;
     }
