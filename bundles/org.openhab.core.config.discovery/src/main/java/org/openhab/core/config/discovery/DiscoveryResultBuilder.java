@@ -88,7 +88,7 @@ public class DiscoveryResultBuilder {
      * @return the updated builder
      */
     public DiscoveryResultBuilder withProperty(String key, Object value) {
-        this.properties.put(key, value);
+        properties.put(key, value);
         return this;
     }
 
@@ -110,6 +110,7 @@ public class DiscoveryResultBuilder {
      * @return the updated builder
      */
     public DiscoveryResultBuilder withBridge(@Nullable ThingUID bridgeUID) {
+        validateThingUID(bridgeUID);
         this.bridgeUID = bridgeUID;
         return this;
     }
@@ -145,5 +146,13 @@ public class DiscoveryResultBuilder {
     public DiscoveryResult build() {
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
                 ttl);
+    }
+
+    private void validateThingUID(@Nullable ThingUID bridgeUID) {
+        if (bridgeUID != null && (!thingUID.getBindingId().equals(bridgeUID.getBindingId())
+                || !thingUID.getBridgeIds().contains(bridgeUID.getId()))) {
+            throw new IllegalArgumentException(
+                    "Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'");
+        }
     }
 }

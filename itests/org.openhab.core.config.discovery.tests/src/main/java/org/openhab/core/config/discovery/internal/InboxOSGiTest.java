@@ -110,22 +110,25 @@ public class InboxOSGiTest extends JavaOSGiTest {
     private static final ThingTypeUID BRIDGE_THING_TYPE_UID = new ThingTypeUID("bindingId", "bridge");
 
     private static final ThingUID BRIDGE_THING_UID = new ThingUID(BRIDGE_THING_TYPE_UID, "bridgeId");
+    private static final ThingUID OTHER_BRIDGE_THING_UID = new ThingUID(THING_TYPE_UID, "id5");
 
     private static final DiscoveryResult BRIDGE = DiscoveryResultBuilder.create(BRIDGE_THING_UID)
             .withThingType(BRIDGE_THING_TYPE_UID).withRepresentationProperty("Bridge1").withLabel("bridge")
             .withTTL(DEFAULT_TTL).build();
     private static final DiscoveryResult THING1_WITH_BRIDGE = DiscoveryResultBuilder
-            .create(new ThingUID(THING_TYPE_UID, "id1")).withThingType(THING_TYPE_UID).withBridge(BRIDGE_THING_UID)
-            .withRepresentationProperty("Thing1").withLabel("thing1").withTTL(DEFAULT_TTL).build();
+            .create(new ThingUID(THING_TYPE_UID, BRIDGE_THING_UID, "id1")).withThingType(THING_TYPE_UID)
+            .withBridge(BRIDGE_THING_UID).withRepresentationProperty("Thing1").withLabel("thing1").withTTL(DEFAULT_TTL)
+            .build();
     private static final DiscoveryResult THING2_WITH_BRIDGE = DiscoveryResultBuilder
-            .create(new ThingUID(THING_TYPE_UID, "id2")).withThingType(THING_TYPE_UID).withBridge(BRIDGE_THING_UID)
-            .withRepresentationProperty("Thing2").withLabel("thing2").withTTL(DEFAULT_TTL).build();
+            .create(new ThingUID(THING_TYPE_UID, BRIDGE_THING_UID, "id2")).withThingType(THING_TYPE_UID)
+            .withBridge(BRIDGE_THING_UID).withRepresentationProperty("Thing2").withLabel("thing2").withTTL(DEFAULT_TTL)
+            .build();
     private static final DiscoveryResult THING_WITHOUT_BRIDGE = DiscoveryResultBuilder
             .create(new ThingUID(THING_TYPE_UID, "id3")).withThingType(THING_TYPE_UID)
             .withRepresentationProperty("Thing3").withLabel("thing3").withTTL(DEFAULT_TTL).build();
     private static final DiscoveryResult THING_WITH_OTHER_BRIDGE = DiscoveryResultBuilder
-            .create(new ThingUID(THING_TYPE_UID, "id4")).withThingType(THING_TYPE_UID)
-            .withBridge(new ThingUID(THING_TYPE_UID, "id5")).withRepresentationProperty("Thing4").withLabel("thing4")
+            .create(new ThingUID(THING_TYPE_UID, OTHER_BRIDGE_THING_UID, "id4")).withThingType(THING_TYPE_UID)
+            .withBridge(OTHER_BRIDGE_THING_UID).withRepresentationProperty("Thing4").withLabel("thing4")
             .withTTL(DEFAULT_TTL).build();
 
     private final URI testURI = createURI("http:dummy");

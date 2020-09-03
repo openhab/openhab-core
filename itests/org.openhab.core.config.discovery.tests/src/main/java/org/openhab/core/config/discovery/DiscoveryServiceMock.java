@@ -15,26 +15,25 @@ package org.openhab.core.config.discovery;
 import java.util.Random;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
 /**
- * The {@link DiscoveryServiceMock} is a mock for a {@link
- * org.openhab.core.config.discovery.DiscoveryService} which can simulate a working and faulty
+ * The {@link DiscoveryServiceMock} is a mock for a {@link DiscoveryService} which can simulate a working and faulty
  * discovery.<br>
- * If this mock is configured to be faulty, an exception is thrown if the discovery is enforced or
- * aborted.
+ * If this mock is configured to be faulty, an exception is thrown if the discovery is enforced or aborted.
  *
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
  */
+@NonNullByDefault
 public class DiscoveryServiceMock extends AbstractDiscoveryService {
 
     public static final int DEFAULT_TTL = 60;
 
-    ThingTypeUID thingType;
-    int timeout;
-    boolean faulty;
+    final ThingTypeUID thingType;
+    final boolean faulty;
 
     public DiscoveryServiceMock(ThingTypeUID thingType, int timeout) {
         this(thingType, timeout, false);
