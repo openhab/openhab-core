@@ -10,29 +10,26 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.persistence.tests;
+package org.openhab.core.persistence.extensions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.items.GenericItem;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
-import org.openhab.core.persistence.extensions.PersistenceExtensions;
-import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -68,22 +65,15 @@ public class PersistenceExtensionsTest {
         }
     };
 
+    private CoreItemFactory itemFactory;
     private GenericItem item;
 
     @BeforeEach
     public void setUp() {
         new PersistenceExtensions(registry);
-        item = new GenericItem("Test", "Test") {
-            @Override
-            public List<Class<? extends State>> getAcceptedDataTypes() {
-                return List.of();
-            }
-
-            @Override
-            public List<Class<? extends Command>> getAcceptedCommandTypes() {
-                return List.of();
-            }
-        };
+        itemFactory = new CoreItemFactory();
+        item = itemFactory.createItem(CoreItemFactory.NUMBER, "Test");
+        assertEquals(CoreItemFactory.NUMBER, item.getType());
     }
 
     @Test
@@ -115,6 +105,33 @@ public class PersistenceExtensionsTest {
     }
 
     @Test
+    public void testMaximumSince() {
+        item.setState(new QuantityType<>(1, SIUnits.CELSIUS));
+        HistoricItem historicItem = PersistenceExtensions.maximumSince(item,
+                ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertEquals("1", historicItem.getState().toString());
+
+        item.setState(new DecimalType(1));
+        historicItem = PersistenceExtensions.maximumSince(item,
+                ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertEquals("1", historicItem.getState().toString());
+
+        historicItem = PersistenceExtensions.maximumSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertEquals("2012", historicItem.getState().toString());
+        assertEquals(ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), historicItem.getTimestamp());
+
+        // default persistence service
+        historicItem = PersistenceExtensions.maximumSince(item,
+                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
+        assertNotNull(historicItem);
+        assertEquals("1", historicItem.getState().toString());
+    }
+
+    @Test
     public void testMinimumSince() {
         item.setState(new QuantityType<>(5000, SIUnits.CELSIUS));
         HistoricItem historicItem = PersistenceExtensions.minimumSince(item,
@@ -141,31 +158,56 @@ public class PersistenceExtensionsTest {
         assertEquals("5000", historicItem.getState().toString());
     }
 
-    @Test
-    public void testMaximumSince() {
-        item.setState(new QuantityType<>(1, SIUnits.CELSIUS));
-        HistoricItem historicItem = PersistenceExtensions.maximumSince(item,
-                ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
-        assertNotNull(historicItem);
-        assertEquals("1", historicItem.getState().toString());
+    public void testVarianceSince() {
+        item.setState(new DecimalType(3025));
 
-        item.setState(new DecimalType(1));
-        historicItem = PersistenceExtensions.maximumSince(item,
-                ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
-        assertNotNull(historicItem);
-        assertEquals("1", historicItem.getState().toString());
+        ZonedDateTime startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        ZonedDateTime endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        long storedInterval = endStored.toInstant().toEpochMilli() - startStored.toInstant().toEpochMilli();
+        long recentInterval = Instant.now().toEpochMilli() - endStored.toInstant().toEpochMilli();
+        double expectedAverage = (2007.4994 * storedInterval + 2518.5 * recentInterval)
+                / (storedInterval + recentInterval);
+        double expected = IntStream.of(2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012)
+                .mapToDouble(i -> Double.parseDouble(Integer.toString(i))).map(d -> Math.pow(d - expectedAverage, 2))
+                .sum() / 10d;
+        DecimalType variance = PersistenceExtensions.varianceSince(item, startStored, TestPersistenceService.ID);
+        assertNotNull(variance);
+        assertEquals(expected, variance.doubleValue(), 0.01);
 
-        historicItem = PersistenceExtensions.maximumSince(item,
-                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), TestPersistenceService.ID);
-        assertNotNull(historicItem);
-        assertEquals("2012", historicItem.getState().toString());
-        assertEquals(ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), historicItem.getTimestamp());
+        item.setState(new QuantityType<>(3025, SIUnits.CELSIUS));
+        variance = PersistenceExtensions.varianceSince(item, startStored, TestPersistenceService.ID);
+        assertNotNull(variance);
+        assertEquals(expected, variance.doubleValue(), 0.01);
 
         // default persistence service
-        historicItem = PersistenceExtensions.maximumSince(item,
-                ZonedDateTime.of(2005, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
-        assertNotNull(historicItem);
-        assertEquals("1", historicItem.getState().toString());
+        variance = PersistenceExtensions.varianceSince(item, startStored);
+        assertNull(variance);
+    }
+
+    public void testDeviationSince() {
+        item.setState(new DecimalType(3025));
+
+        ZonedDateTime startStored = ZonedDateTime.of(2003, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        ZonedDateTime endStored = ZonedDateTime.of(2012, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        long storedInterval = endStored.toInstant().toEpochMilli() - startStored.toInstant().toEpochMilli();
+        long recentInterval = Instant.now().toEpochMilli() - endStored.toInstant().toEpochMilli();
+        double expectedAverage = (2007.4994 * storedInterval + 2518.5 * recentInterval)
+                / (storedInterval + recentInterval);
+        double expected = Math.sqrt(IntStream.of(2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012)
+                .mapToDouble(i -> Double.parseDouble(Integer.toString(i))).map(d -> Math.pow(d - expectedAverage, 2))
+                .sum() / 10d);
+        DecimalType deviation = PersistenceExtensions.deviationSince(item, startStored, TestPersistenceService.ID);
+        assertNotNull(deviation);
+        assertEquals(expected, deviation.doubleValue(), 0.01);
+
+        item.setState(new QuantityType<>(3025, SIUnits.CELSIUS));
+        deviation = PersistenceExtensions.deviationSince(item, startStored, TestPersistenceService.ID);
+        assertNotNull(deviation);
+        assertEquals(expected, deviation.doubleValue(), 0.01);
+
+        // default persistence service
+        deviation = PersistenceExtensions.deviationSince(item, startStored);
+        assertNull(deviation);
     }
 
     @Test
