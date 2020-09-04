@@ -59,6 +59,27 @@ public class DiscoveryResultBuilderTest {
         discoveryResult = builder.build();
     }
 
+    public void testInstance() {
+        assertThat(builder, is(instanceOf(DiscoveryResultBuilder.class)));
+        assertThat(builder.withLabel("TEST"), is(instanceOf(DiscoveryResultBuilder.class)));
+        assertThat(builder.build(), is(instanceOf(DiscoveryResult.class)));
+    }
+
+    @Test
+    void testDiscoveryResultBuilderWithMissingRepresentationProperty() {
+        final String property = "test";
+        builder.withRepresentationProperty(property);
+        // there will be a warning now because the representation property is missing in properties map
+        builder.build();
+    }
+
+    @Test
+    void testDiscoveryResultBuilderWithExistingRepresentationProperty() {
+        final String property = "test";
+        builder.withProperty(property, "test").withRepresentationProperty(property);
+        builder.build();
+    }
+
     @Test
     public void testDiscoveryResultBuilder() {
         assertThat(discoveryResult.getThingUID(), is(THING_UID));
