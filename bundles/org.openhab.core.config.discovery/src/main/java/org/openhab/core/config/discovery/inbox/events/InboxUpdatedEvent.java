@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery.inbox.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
 
 /**
@@ -20,6 +21,7 @@ import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public class InboxUpdatedEvent extends AbstractInboxEvent {
 
     /**

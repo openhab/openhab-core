@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery.inbox.events;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
 import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.events.AbstractEvent;
@@ -22,6 +23,7 @@ import org.openhab.core.events.AbstractEvent;
  *
  * @author Stefan Bußweiler - Initial contribution
  */
+@NonNullByDefault
 public abstract class AbstractInboxEvent extends AbstractEvent {
 
     private final DiscoveryResultDTO discoveryResult;
@@ -40,7 +42,7 @@ public abstract class AbstractInboxEvent extends AbstractEvent {
 
     /**
      * Gets the discovery result as data transfer object.
-     * 
+     *
      * @return the discoveryResult
      */
     public DiscoveryResultDTO getDiscoveryResult() {
