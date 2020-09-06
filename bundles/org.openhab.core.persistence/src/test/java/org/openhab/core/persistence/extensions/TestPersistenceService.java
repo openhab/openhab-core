@@ -60,11 +60,11 @@ public class TestPersistenceService implements QueryablePersistenceService {
         int startValue = 1950;
         int endValue = 2012;
 
-        if (filter.getBeginDateZoned() != null) {
-            startValue = filter.getBeginDateZoned().getYear();
+        if (filter.getBeginDate() != null) {
+            startValue = filter.getBeginDate().getYear();
         }
-        if (filter.getEndDateZoned() != null) {
-            endValue = filter.getEndDateZoned().getYear();
+        if (filter.getEndDate() != null) {
+            endValue = filter.getEndDate().getYear();
         }
 
         if (endValue <= startValue || startValue < 1950) {
