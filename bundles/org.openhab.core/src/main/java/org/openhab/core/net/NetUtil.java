@@ -211,41 +211,6 @@ public class NetUtil implements NetworkAddressService {
         networkAddressChangeListeners.remove(listener);
     }
 
-    /**
-     * @deprecated Please use the NetworkAddressService with {@link #getPrimaryIpv4HostAddress()}
-     *
-     *             Get the first candidate for a local IPv4 host address (non loopback, non localhost).
-     */
-    @Deprecated
-    public static @Nullable String getLocalIpv4HostAddress() {
-        try {
-            String hostAddress = null;
-            final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                final NetworkInterface current = interfaces.nextElement();
-                if (!current.isUp() || current.isLoopback() || current.isVirtual() || current.isPointToPoint()) {
-                    continue;
-                }
-                final Enumeration<InetAddress> addresses = current.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    final InetAddress currentAddr = addresses.nextElement();
-                    if (currentAddr.isLoopbackAddress() || (currentAddr instanceof Inet6Address)) {
-                        continue;
-                    }
-                    if (hostAddress != null) {
-                        LOGGER.warn("Found multiple local interfaces - ignoring {}", currentAddr.getHostAddress());
-                    } else {
-                        hostAddress = currentAddr.getHostAddress();
-                    }
-                }
-            }
-            return hostAddress;
-        } catch (SocketException ex) {
-            LOGGER.error("Could not retrieve network interface: {}", ex.getMessage(), ex);
-            return null;
-        }
-    }
-
     private @Nullable String getFirstLocalIPv4Address() {
         try {
             String hostAddress = null;
@@ -337,23 +302,6 @@ public class NetUtil implements NetworkAddressService {
                     broadcastAddress);
         }
         return broadcastAddress;
-    }
-
-    /**
-     * @deprecated Please use the NetworkAddressService with {@link #getConfiguredBroadcastAddress()}
-     *
-     *             Get the first candidate for a broadcast address
-     *
-     * @return broadcast address, null if no broadcast address is found
-     */
-    @Deprecated
-    public static @Nullable String getBroadcastAddress() {
-        final List<String> broadcastAddresses = getAllBroadcastAddresses();
-        if (!broadcastAddresses.isEmpty()) {
-            return broadcastAddresses.get(0);
-        } else {
-            return null;
-        }
     }
 
     private static @Nullable String getFirstIpv4BroadcastAddress() {
