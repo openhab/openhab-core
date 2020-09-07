@@ -15,6 +15,7 @@ package org.openhab.core.thing.internal.profiles;
 import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
@@ -47,14 +48,14 @@ public class ProfileCallbackImpl implements ProfileCallback {
 
     private final EventPublisher eventPublisher;
     private final ItemChannelLink link;
-    private final Function<ThingUID, Thing> thingProvider;
-    private final Function<String, Item> itemProvider;
+    private final Function<ThingUID, @Nullable Thing> thingProvider;
+    private final Function<String, @Nullable Item> itemProvider;
     private final SafeCaller safeCaller;
     private final ItemStateConverter itemStateConverter;
 
     public ProfileCallbackImpl(EventPublisher eventPublisher, SafeCaller safeCaller,
-            ItemStateConverter itemStateConverter, ItemChannelLink link, Function<ThingUID, Thing> thingProvider,
-            Function<String, Item> itemProvider) {
+            ItemStateConverter itemStateConverter, ItemChannelLink link,
+            Function<ThingUID, @Nullable Thing> thingProvider, Function<String, @Nullable Item> itemProvider) {
         this.eventPublisher = eventPublisher;
         this.safeCaller = safeCaller;
         this.itemStateConverter = itemStateConverter;
