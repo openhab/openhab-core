@@ -101,8 +101,7 @@ public class ItemUIRegistryImplTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl();
-        uiRegistry.setItemRegistry(registry);
+        uiRegistry = new ItemUIRegistryImpl(registry);
 
         when(widget.getItem()).thenReturn(ITEM_NAME);
         when(registry.getItem(ITEM_NAME)).thenReturn(item);

@@ -128,7 +128,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
     @Activate
-    public ItemUIRegistryImpl(ItemRegistry itemRegistry) {
+    public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry) {
         this.itemRegistry = itemRegistry;
     }
 
