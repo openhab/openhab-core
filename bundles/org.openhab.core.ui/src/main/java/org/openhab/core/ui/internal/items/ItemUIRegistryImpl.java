@@ -37,7 +37,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
@@ -86,6 +85,7 @@ import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.ui.internal.UIActivator;
 import org.openhab.core.ui.items.ItemUIProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -123,30 +123,13 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
-    private @Nullable ItemRegistry itemRegistry;
-    private @Nullable ItemBuilderFactory itemBuilderFactory;
+    private final ItemRegistry itemRegistry;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
-    public ItemUIRegistryImpl() {
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    public void setItemRegistry(ItemRegistry itemRegistry) {
+    @Activate
+    public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry) {
         this.itemRegistry = itemRegistry;
-    }
-
-    public void unsetItemRegistry(ItemRegistry itemRegistry) {
-        this.itemRegistry = null;
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected void setItemBuilderFactory(ItemBuilderFactory itemBuilderFactory) {
-        this.itemBuilderFactory = itemBuilderFactory;
-    }
-
-    protected void unsetItemBuilderFactory(ItemBuilderFactory itemBuilderFactory) {
-        this.itemBuilderFactory = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -364,7 +347,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     considerTransform = true;
                 } else if (state instanceof Type) {
                     // if the channel contains options, we build a label with the mapped option value
-                    if (stateDescription != null && stateDescription.getOptions() != null) {
+                    if (stateDescription != null) {
                         for (StateOption option : stateDescription.getOptions()) {
                             if (option.getValue().equals(state.toString()) && option.getLabel() != null) {
                                 State stateOption = new StringType(option.getLabel());
@@ -608,22 +591,23 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             itemState = convertStateToWidgetUnit((QuantityType<?>) itemState, w);
         }
 
-        if (w instanceof Switch && i instanceof RollershutterItem) {
-            // RollerShutter are represented as Switch in a Sitemap but need a PercentType state
-            returnState = itemState.as(PercentType.class);
-        } else if (w instanceof Slider) {
-            if (i.getAcceptedDataTypes().contains(PercentType.class)) {
+        if (itemState != null) {
+            if (w instanceof Switch && i instanceof RollershutterItem) {
+                // RollerShutter are represented as Switch in a Sitemap but need a PercentType state
                 returnState = itemState.as(PercentType.class);
-            } else {
-                returnState = itemState.as(DecimalType.class);
-            }
-        } else if (w instanceof Switch) {
-            Switch sw = (Switch) w;
-            if (sw.getMappings().isEmpty()) {
-                returnState = itemState.as(OnOffType.class);
+            } else if (w instanceof Slider) {
+                if (i.getAcceptedDataTypes().contains(PercentType.class)) {
+                    returnState = itemState.as(PercentType.class);
+                } else {
+                    returnState = itemState.as(DecimalType.class);
+                }
+            } else if (w instanceof Switch) {
+                Switch sw = (Switch) w;
+                if (sw.getMappings().isEmpty()) {
+                    returnState = itemState.as(OnOffType.class);
+                }
             }
         }
-
         // if returnState is null, a conversion was not possible
         if (returnState == null) {
             // we return the original state to not break anything
@@ -829,61 +813,37 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public Item getItem(String name) throws ItemNotFoundException {
-        if (itemRegistry != null) {
-            return itemRegistry.getItem(name);
-        } else {
-            throw new ItemNotFoundException(name);
-        }
+        return itemRegistry.getItem(name);
     }
 
     @Override
     public Item getItemByPattern(String name) throws ItemNotFoundException, ItemNotUniqueException {
-        if (itemRegistry != null) {
-            return itemRegistry.getItemByPattern(name);
-        } else {
-            throw new ItemNotFoundException(name);
-        }
+        return itemRegistry.getItemByPattern(name);
     }
 
     @Override
     public Collection<Item> getItems() {
-        if (itemRegistry != null) {
-            return itemRegistry.getItems();
-        } else {
-            return Collections.emptyList();
-        }
+        return itemRegistry.getItems();
     }
 
     @Override
     public Collection<Item> getItemsOfType(String type) {
-        if (itemRegistry != null) {
-            return itemRegistry.getItemsOfType(type);
-        } else {
-            return Collections.emptyList();
-        }
+        return itemRegistry.getItemsOfType(type);
     }
 
     @Override
     public Collection<Item> getItems(String pattern) {
-        if (itemRegistry != null) {
-            return itemRegistry.getItems(pattern);
-        } else {
-            return Collections.emptyList();
-        }
+        return itemRegistry.getItems(pattern);
     }
 
     @Override
     public void addRegistryChangeListener(RegistryChangeListener<Item> listener) {
-        if (itemRegistry != null) {
-            itemRegistry.addRegistryChangeListener(listener);
-        }
+        itemRegistry.addRegistryChangeListener(listener);
     }
 
     @Override
     public void removeRegistryChangeListener(RegistryChangeListener<Item> listener) {
-        if (itemRegistry != null) {
-            itemRegistry.removeRegistryChangeListener(listener);
-        }
+        itemRegistry.removeRegistryChangeListener(listener);
     }
 
     @Override
@@ -932,7 +892,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return id;
     }
 
-    private boolean matchStateToValue(State state, String value, String matchCondition) {
+    private boolean matchStateToValue(State state, String value, @Nullable String matchCondition) {
         // Check if the value is equal to the supplied value
         boolean matched = false;
 
@@ -952,7 +912,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 return matched;
             }
         }
-
         if (UnDefType.NULL.toString().equals(unquotedValue) || UnDefType.UNDEF.toString().equals(unquotedValue)) {
             switch (condition) {
                 case EQUAL:
@@ -1078,7 +1037,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return matched;
     }
 
-    private @Nullable String processColorDefinition(@Nullable State state, List<ColorArray> colorList) {
+    private @Nullable String processColorDefinition(@Nullable State state, @Nullable List<ColorArray> colorList) {
         // Sanity check
         if (colorList == null) {
             return null;
@@ -1233,11 +1192,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
 
         public static @Nullable Condition fromString(String text) {
-            if (text != null) {
-                for (Condition c : Condition.values()) {
-                    if (text.equalsIgnoreCase(c.value)) {
-                        return c;
-                    }
+            for (Condition c : Condition.values()) {
+                if (text.equalsIgnoreCase(c.value)) {
+                    return c;
                 }
             }
             return null;
@@ -1251,87 +1208,52 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public Collection<Item> getItemsByTag(String... tags) {
-        if (itemRegistry != null) {
-            return itemRegistry.getItemsByTag(tags);
-        } else {
-            return Collections.emptyList();
-        }
+        return itemRegistry.getItemsByTag(tags);
     }
 
     @Override
     public Collection<Item> getItemsByTagAndType(String type, String... tags) {
-        if (itemRegistry != null) {
-            return itemRegistry.getItemsByTagAndType(type, tags);
-        } else {
-            return Collections.emptyList();
-        }
+        return itemRegistry.getItemsByTagAndType(type, tags);
     }
 
     @Override
     public <T extends Item> Collection<T> getItemsByTag(Class<T> typeFilter, String... tags) {
-        if (itemRegistry != null) {
-            return itemRegistry.getItemsByTag(typeFilter, tags);
-        } else {
-            return Collections.emptyList();
-        }
+        return itemRegistry.getItemsByTag(typeFilter, tags);
     }
 
     @Override
     public Item add(Item element) {
-        if (itemRegistry != null) {
-            return itemRegistry.add(element);
-        }
-        return element;
+        return itemRegistry.add(element);
     }
 
     @Override
     public @Nullable Item update(Item element) {
-        if (itemRegistry != null) {
-            return itemRegistry.update(element);
-        } else {
-            return null;
-        }
+        return itemRegistry.update(element);
     }
 
     @Override
     public @Nullable Item remove(String key) {
-        if (itemRegistry != null) {
-            return itemRegistry.remove(key);
-        } else {
-            return null;
-        }
+        return itemRegistry.remove(key);
     }
 
     @Override
     public @Nullable Item get(String key) {
-        if (itemRegistry != null) {
-            return itemRegistry.get(key);
-        } else {
-            return null;
-        }
+        return itemRegistry.get(key);
     }
 
     @Override
     public @Nullable Item remove(String itemName, boolean recursive) {
-        if (itemRegistry != null) {
-            return itemRegistry.remove(itemName, recursive);
-        } else {
-            return null;
-        }
+        return itemRegistry.remove(itemName, recursive);
     }
 
     @Override
     public void addRegistryHook(RegistryHook<Item> hook) {
-        if (itemRegistry != null) {
-            itemRegistry.addRegistryHook(hook);
-        }
+        itemRegistry.addRegistryHook(hook);
     }
 
     @Override
     public void removeRegistryHook(RegistryHook<Item> hook) {
-        if (itemRegistry != null) {
-            itemRegistry.removeRegistryHook(hook);
-        }
+        itemRegistry.removeRegistryHook(hook);
     }
 
     @Override
@@ -1364,8 +1286,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return state;
     }
 
-    private @Nullable String getUnitFromLabel(String label) {
-        if (label.isBlank()) {
+    private @Nullable String getUnitFromLabel(@Nullable String label) {
+        if (label == null || label.isBlank()) {
             return null;
         }
         Matcher m = LABEL_PATTERN.matcher(label);
