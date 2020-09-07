@@ -137,6 +137,12 @@ public class ProfileCallbackImpl implements ProfileCallback {
     @Override
     public void sendUpdate(State state) {
         Item item = itemProvider.apply(link.getItemName());
+        if (item == null) {
+            logger.warn("Cannot post update event '{}' for item '{}', because no item could be found.", state,
+                    link.getItemName());
+            return;
+        }
+
         State acceptedState;
         if (state instanceof StringType && !(item instanceof StringItem)) {
             acceptedState = TypeParser.parseState(item.getAcceptedDataTypes(), state.toString());
@@ -146,6 +152,7 @@ public class ProfileCallbackImpl implements ProfileCallback {
         } else {
             acceptedState = itemStateConverter.convertToAcceptedState(state, item);
         }
+
         eventPublisher.post(
                 ItemEventFactory.createStateEvent(link.getItemName(), acceptedState, link.getLinkedUID().toString()));
     }
