@@ -91,28 +91,12 @@ public class Configuration {
         return properties.containsKey(key);
     }
 
-    /**
-     * @deprecated Use {@link #get(String)} instead.
-     */
-    @Deprecated
-    public Object get(Object key) {
-        return this.get((String) key);
-    }
-
     public Object get(String key) {
         return properties.get(key);
     }
 
     public Object put(String key, @Nullable Object value) {
         return properties.put(key, ConfigUtil.normalizeType(value, null));
-    }
-
-    /**
-     * @deprecated Use {@link #remove(String)} instead.
-     */
-    @Deprecated
-    public Object remove(Object key) {
-        return remove((String) key);
     }
 
     public Object remove(String key) {

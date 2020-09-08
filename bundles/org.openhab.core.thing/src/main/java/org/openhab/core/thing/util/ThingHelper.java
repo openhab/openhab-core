@@ -109,19 +109,6 @@ public class ThingHelper {
     }
 
     /**
-     * @deprecated Use {@link ThingHelper#ensureUniqueChannels(Collection)} instead.
-     */
-    @Deprecated
-    public static void ensureUnique(Collection<Channel> channels) {
-        Set<UID> ids = new HashSet<>();
-        for (Channel channel : channels) {
-            if (!ids.add(channel.getUID())) {
-                throw new IllegalArgumentException("Duplicate channels " + channel.getUID().getAsString());
-            }
-        }
-    }
-
-    /**
      * Ensures that there are no duplicate channels in the array (i.e. not using the same ChannelUID)
      *
      * @param channels the channels to check
