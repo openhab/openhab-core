@@ -7,7 +7,6 @@ jdk: openjdk11
 cache:
   directories:
   - $HOME/.m2
-  - $HOME/.bnd/cache/
 
 before_install:
   - echo "MAVEN_OPTS='-Xms1g -Xmx2g'" > ~/.mavenrc
