@@ -75,15 +75,6 @@ public abstract class UID extends AbstractUID {
         return getSegment(0);
     }
 
-    /**
-     * @deprecated use {@link #getAllSegments()} instead
-     */
-    @Deprecated
-    protected String[] getSegments() {
-        final List<String> segments = super.getAllSegments();
-        return segments.toArray(new String[segments.size()]);
-    }
-
     @Override
     // Avoid subclasses to require importing the o.e.sh.core.common package
     protected List<String> getAllSegments() {
