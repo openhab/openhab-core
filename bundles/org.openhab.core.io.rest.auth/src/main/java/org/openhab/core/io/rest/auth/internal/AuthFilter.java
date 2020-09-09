@@ -47,7 +47,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
 @Priority(Priorities.AUTHENTICATION)
 @Provider
 public class AuthFilter implements ContainerRequestFilter {
-    private static final String COOKIE_AUTH_HEADER = "X-OPENHAB-AUTH-HEADER";
     private static final String ALT_AUTH_HEADER = "X-OPENHAB-TOKEN";
 
     @Reference
@@ -57,7 +56,6 @@ public class AuthFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         try {
             String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-
             if (authHeader != null) {
                 String[] authParts = authHeader.split(" ");
                 if (authParts.length == 2) {
@@ -69,23 +67,11 @@ public class AuthFilter implements ContainerRequestFilter {
                 }
             }
 
-            if (requestContext.getCookies().containsKey(COOKIE_AUTH_HEADER)) {
-                String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
-                if (altTokenHeader != null) {
-                    Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(altTokenHeader);
-                    requestContext.setSecurityContext(new JwtSecurityContext(auth));
-                    return;
-                }
-            }
-
-            // support the api_key query parameter of the Swagger UI
-            if (requestContext.getUriInfo().getRequestUri().toString().contains("api_key=")) {
-                String apiKey = requestContext.getUriInfo().getQueryParameters(true).getFirst("api_key");
-                if (apiKey != null) {
-                    Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(apiKey);
-                    requestContext.setSecurityContext(new JwtSecurityContext(auth));
-                    return;
-                }
+            String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
+            if (altTokenHeader != null) {
+                Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(altTokenHeader);
+                requestContext.setSecurityContext(new JwtSecurityContext(auth));
+                return;
             }
         } catch (AuthenticationException e) {
             requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid token"));
