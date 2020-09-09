@@ -1,8 +1,7 @@
-sudo: required
-dist: bionic
+os: linux
+dist: focal
 
 language: java
-
 jdk: openjdk11
 
 cache:
