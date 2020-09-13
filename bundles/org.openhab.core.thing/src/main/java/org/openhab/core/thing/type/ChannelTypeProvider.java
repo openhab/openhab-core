@@ -13,7 +13,6 @@
 package org.openhab.core.thing.type;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -39,21 +38,4 @@ public interface ChannelTypeProvider {
      */
     @Nullable
     ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale);
-
-    /**
-     * @deprecated The {@link ChannelGroupTypeProvider} is now to be implemented/used instead.
-     */
-    @Deprecated
-    default @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID,
-            @Nullable Locale locale) {
-        return null;
-    }
-
-    /**
-     * @deprecated The {@link ChannelGroupTypeProvider} is now to be implemented/used instead.
-     */
-    @Deprecated
-    default Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
-        return Collections.emptyList();
-    }
 }

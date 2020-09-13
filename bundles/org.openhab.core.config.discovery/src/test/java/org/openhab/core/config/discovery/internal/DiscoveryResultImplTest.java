@@ -35,14 +35,12 @@ public class DiscoveryResultImplTest {
 
     private static final int DEFAULT_TTL = 60;
 
-    @SuppressWarnings("unused")
     @Test
     public void testInvalidConstructorForThingType() {
         assertThrows(IllegalArgumentException.class,
                 () -> new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL));
     }
 
-    @SuppressWarnings("unused")
     @Test
     public void testInvalidConstructorForTTL() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");

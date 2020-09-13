@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.AbstractUID;
 import org.openhab.core.config.discovery.internal.DiscoveryResultImpl;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
@@ -50,7 +51,6 @@ public class DiscoveryResultBuilder {
     private @Nullable ThingTypeUID thingTypeUID;
 
     private DiscoveryResultBuilder(ThingUID thingUID) {
-        this.thingTypeUID = thingUID.getThingTypeUID();
         this.thingUID = thingUID;
     };
 
@@ -155,6 +155,12 @@ public class DiscoveryResultBuilder {
             logger.warn(
                     "Representation property '{}' of discovery result for thing '{}' is missing in properties map. It has to be fixed by the bindings developer.\n{}",
                     representationProperty, thingUID, getStackTrace(Thread.currentThread()));
+        }
+        if (thingTypeUID == null) {
+            String[] segments = thingUID.getAsString().split(AbstractUID.SEPARATOR);
+            if (!segments[1].isEmpty()) {
+                thingTypeUID = new ThingTypeUID(thingUID.getBindingId(), segments[1]);
+            }
         }
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
                 ttl);

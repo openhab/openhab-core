@@ -32,7 +32,7 @@ public class DiscoveryResultDTO {
     public @Nullable String label;
     public @Nullable Map<String, Object> properties;
     public @Nullable String representationProperty;
-    public @Nullable String thingUID;
+    public @NonNullByDefault({}) String thingUID;
     public @Nullable String thingTypeUID;
 
     public DiscoveryResultDTO() {

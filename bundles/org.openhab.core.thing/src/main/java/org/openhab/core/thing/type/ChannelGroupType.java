@@ -15,6 +15,9 @@ package org.openhab.core.thing.type;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link ChannelGroupType} contains a list of {@link ChannelDefinition}s and further meta information such as label
  * and description, which are generally used by user interfaces.
@@ -25,27 +28,24 @@ import java.util.List;
  * @author Michael Grammling - Initial contribution
  * @author Christoph Weitkamp - Removed "advanced" attribute
  */
+@NonNullByDefault
 public class ChannelGroupType extends AbstractDescriptionType {
 
     private final List<ChannelDefinition> channelDefinitions;
-    private final String category;
+    private final @Nullable String category;
 
     /**
      * Creates a new instance of this class with the specified parameters.
      *
      * @param uid the unique identifier which identifies this channel group type within the
-     *            overall system (must neither be null, nor empty)
      * @param label the human readable label for the according type
-     *            (must neither be null nor empty)
      * @param description the human readable description for the according type
-     *            (could be null or empty)
-     * @param category the category of this channel group type, e.g. Temperature (could be null or empty)
+     * @param category the category of this channel group type, e.g. Temperature
      * @param channelDefinitions the channel definitions this channel group forms
-     *            (could be null or empty)
      * @throws IllegalArgumentException if the UID is null, or the label is null or empty
      */
-    ChannelGroupType(ChannelGroupTypeUID uid, String label, String description, String category,
-            List<ChannelDefinition> channelDefinitions) throws IllegalArgumentException {
+    ChannelGroupType(ChannelGroupTypeUID uid, String label, @Nullable String description, @Nullable String category,
+            @Nullable List<ChannelDefinition> channelDefinitions) throws IllegalArgumentException {
         super(uid, label, description);
 
         this.category = category;
@@ -58,13 +58,13 @@ public class ChannelGroupType extends AbstractDescriptionType {
      * <p>
      * The returned list is immutable.
      *
-     * @return the channels this Thing type provides (not null, could be empty)
+     * @return the channels this Thing type provides
      */
     public List<ChannelDefinition> getChannelDefinitions() {
         return channelDefinitions;
     }
 
-    public String getCategory() {
+    public @Nullable String getCategory() {
         return category;
     }
 

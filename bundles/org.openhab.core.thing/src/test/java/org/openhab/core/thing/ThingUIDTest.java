@@ -12,7 +12,9 @@
  */
 package org.openhab.core.thing;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,29 +26,31 @@ public class ThingUIDTest {
     @Test
     public void testThreeSegments() {
         ThingTypeUID thingType = new ThingTypeUID("fake", "type");
-        ThingUID t = new ThingUID(thingType, "gaga");
+        ThingUID subject = new ThingUID(thingType, "thing");
 
-        assertEquals("type", t.getThingTypeId());
-        assertEquals("gaga", t.getId());
-        assertEquals("fake:type:gaga", t.getAsString());
+        assertEquals("fake", subject.getBindingId());
+        assertEquals("thing", subject.getId());
+        assertThat(subject.getAllSegments(), hasSize(3));
+        assertEquals("fake:type:thing", subject.getAsString());
     }
 
     @Test
     public void testTwoSegments() {
-        ThingUID t = new ThingUID("fake", "gaga");
+        ThingUID subject = new ThingUID("fake", "thing");
 
-        assertNull(t.getThingTypeId());
-        assertEquals("gaga", t.getId());
-        assertEquals("fake::gaga", t.getAsString());
+        assertEquals("fake", subject.getBindingId());
+        assertEquals("thing", subject.getId());
+        assertThat(subject.getAllSegments(), hasSize(3));
+        assertEquals("fake::thing", subject.getAsString());
     }
 
     @Test
     public void testGetBridgeIds() {
         ThingTypeUID thingType = new ThingTypeUID("fake", "type");
-        ThingUID t = new ThingUID(thingType, new ThingUID("fake", "something", "bridge"), "thing");
+        ThingUID subject = new ThingUID(thingType, new ThingUID("fake", "something", "bridge"), "thing");
 
-        assertEquals("fake:type:bridge:thing", t.getAsString());
-        assertEquals(1, t.getBridgeIds().size());
-        assertEquals("bridge", t.getBridgeIds().get(0));
+        assertEquals("fake:type:bridge:thing", subject.getAsString());
+        assertThat(subject.getBridgeIds(), hasSize(1));
+        assertEquals("bridge", subject.getBridgeIds().get(0));
     }
 }

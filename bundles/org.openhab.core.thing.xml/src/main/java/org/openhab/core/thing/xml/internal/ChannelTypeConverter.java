@@ -190,18 +190,20 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         final ChannelTypeBuilder<?> builder;
         if (cKind == ChannelKind.STATE) {
             builder = ChannelTypeBuilder.state(channelTypeUID, label, itemType).isAdvanced(advanced)
-                    .withCategory(category).withTags(tags).withConfigDescriptionURI(configDescriptionURI)
+                    .withCategory(category).withConfigDescriptionURI(configDescriptionURI)
                     .withStateDescription(stateDescription).withAutoUpdatePolicy(autoUpdatePolicy)
                     .withCommandDescription(commandDescription);
         } else if (cKind == ChannelKind.TRIGGER) {
             builder = ChannelTypeBuilder.trigger(channelTypeUID, label).isAdvanced(advanced).withCategory(category)
-                    .withTags(tags).withConfigDescriptionURI(configDescriptionURI)
-                    .withEventDescription(eventDescription);
+                    .withConfigDescriptionURI(configDescriptionURI).withEventDescription(eventDescription);
         } else {
             throw new IllegalArgumentException(String.format("Unknown channel kind: '%s'", cKind));
         }
         if (description != null) {
             builder.withDescription(description);
+        }
+        if (tags != null) {
+            builder.withTags(tags);
         }
         ChannelType channelType = builder.build();
 

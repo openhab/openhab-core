@@ -40,22 +40,22 @@ import org.openhab.core.thing.binding.ThingHandler;
 public interface Thing extends Identifiable<ThingUID> {
 
     /** the key for the vendor property */
-    String PROPERTY_VENDOR = "vendor";
+    final String PROPERTY_VENDOR = "vendor";
 
     /** the key for the model ID property */
-    String PROPERTY_MODEL_ID = "modelId";
+    final String PROPERTY_MODEL_ID = "modelId";
 
     /** the key for the serial number property */
-    String PROPERTY_SERIAL_NUMBER = "serialNumber";
+    final String PROPERTY_SERIAL_NUMBER = "serialNumber";
 
     /** the key for the hardware version property */
-    String PROPERTY_HARDWARE_VERSION = "hardwareVersion";
+    final String PROPERTY_HARDWARE_VERSION = "hardwareVersion";
 
     /** the key for the firmware version property */
-    String PROPERTY_FIRMWARE_VERSION = "firmwareVersion";
+    final String PROPERTY_FIRMWARE_VERSION = "firmwareVersion";
 
     /** the key for the MAC address property */
-    String PROPERTY_MAC_ADDRESS = "macAddress";
+    final String PROPERTY_MAC_ADDRESS = "macAddress";
 
     /**
      * Returns the human readable label for this thing.

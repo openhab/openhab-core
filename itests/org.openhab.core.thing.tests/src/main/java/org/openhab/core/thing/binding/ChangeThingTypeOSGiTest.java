@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +53,7 @@ import org.openhab.core.thing.type.ChannelGroupType;
 import org.openhab.core.thing.type.ChannelGroupTypeProvider;
 import org.openhab.core.thing.type.ChannelGroupTypeUID;
 import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeProvider;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.ThingType;
@@ -425,9 +425,10 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
 
     private List<ChannelDefinition> getChannelDefinitions(ThingTypeUID thingTypeUID) throws URISyntaxException {
         ChannelTypeUID channelTypeUID = new ChannelTypeUID("test:" + thingTypeUID.getId());
-        ChannelType channelType = new ChannelType(channelTypeUID, false, "itemType", "channelLabel", "description",
-                "category", new HashSet<>(), null, new URI("scheme", "channelType:" + thingTypeUID.getId(), null));
-
+        ChannelType channelType = ChannelTypeBuilder.state(channelTypeUID, "channelLabel", "itemType")
+                .withDescription("description") //
+                .withCategory("category") //
+                .withConfigDescriptionURI(new URI("scheme", "channelType:" + thingTypeUID.getId(), null)).build();
         channelTypes.put(channelTypeUID, channelType);
 
         ChannelDefinition cd = new ChannelDefinitionBuilder("channel" + thingTypeUID.getId(), channelTypeUID).build();

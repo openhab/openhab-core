@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.i18n;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -23,11 +24,11 @@ import org.openhab.core.thing.internal.i18n.ThingTypeI18nUtil;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeUID;
-import org.openhab.core.thing.type.StateChannelTypeBuilder;
 import org.openhab.core.thing.type.TriggerChannelTypeBuilder;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
+import org.openhab.core.types.EventDescription;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
@@ -147,39 +148,46 @@ public class ChannelTypeI18nLocalizationService {
         String description = thingTypeI18nUtil.getChannelDescription(bundle, channelTypeUID,
                 channelType.getDescription(), locale);
 
+        final ChannelTypeBuilder<?> builder;
         switch (channelType.getKind()) {
             case STATE:
                 StateDescriptionFragment stateDescriptionFragment = createLocalizedStateDescriptionFragment(bundle,
                         channelType.getState(), channelTypeUID, locale);
                 CommandDescription command = createLocalizedCommandDescription(bundle,
                         channelType.getCommandDescription(), channelTypeUID, locale);
+                String itemType = channelType.getItemType();
+                if (itemType == null || itemType.isBlank()) {
+                    throw new IllegalArgumentException("If the kind is 'state', the item type must be set!");
+                }
 
-                StateChannelTypeBuilder stateBuilder = ChannelTypeBuilder
-                        .state(channelTypeUID, label == null ? defaultLabel : label, channelType.getItemType())
-                        .isAdvanced(channelType.isAdvanced()).withCategory(channelType.getCategory())
-                        .withConfigDescriptionURI(channelType.getConfigDescriptionURI()).withTags(channelType.getTags())
+                builder = ChannelTypeBuilder.state(channelTypeUID, label == null ? defaultLabel : label, itemType)
                         .withStateDescriptionFragment(stateDescriptionFragment)
                         .withAutoUpdatePolicy(channelType.getAutoUpdatePolicy()).withCommandDescription(command);
-                if (description != null) {
-                    stateBuilder.withDescription(description);
-                }
-                return stateBuilder.build();
+                break;
             case TRIGGER:
-                TriggerChannelTypeBuilder triggerBuilder = ChannelTypeBuilder
-                        .trigger(channelTypeUID, label == null ? defaultLabel : label)
-                        .isAdvanced(channelType.isAdvanced()).withCategory(channelType.getCategory())
-                        .withConfigDescriptionURI(channelType.getConfigDescriptionURI()).withTags(channelType.getTags())
-                        .withEventDescription(channelType.getEvent());
-                if (description != null) {
-                    triggerBuilder.withDescription(description);
+                EventDescription eventDescription = channelType.getEvent();
+
+                TriggerChannelTypeBuilder triggerBuilder = ChannelTypeBuilder.trigger(channelTypeUID,
+                        label == null ? defaultLabel : label);
+                if (eventDescription != null) {
+                    triggerBuilder.withEventDescription(eventDescription);
                 }
-                return triggerBuilder.build();
+                builder = triggerBuilder;
+                break;
             default:
-                return new ChannelType(channelTypeUID, channelType.isAdvanced(), channelType.getItemType(),
-                        channelType.getKind(), label == null ? defaultLabel : label, description,
-                        channelType.getCategory(), channelType.getTags(), channelType.getState(),
-                        channelType.getEvent(), channelType.getConfigDescriptionURI(),
-                        channelType.getAutoUpdatePolicy());
+                throw new IllegalArgumentException("Kind must not be null or empty!");
         }
+        if (description != null) {
+            builder.withDescription(description);
+        }
+        String category = channelType.getCategory();
+        if (category != null) {
+            builder.withCategory(category);
+        }
+        URI configDescriptionURI = channelType.getConfigDescriptionURI();
+        if (configDescriptionURI != null) {
+            builder.withConfigDescriptionURI(configDescriptionURI);
+        }
+        return builder.isAdvanced(channelType.isAdvanced()).withTags(channelType.getTags()).build();
     }
 }

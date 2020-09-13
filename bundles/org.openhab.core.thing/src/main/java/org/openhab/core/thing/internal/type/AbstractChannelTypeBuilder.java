@@ -40,7 +40,7 @@ abstract class AbstractChannelTypeBuilder<T extends ChannelTypeBuilder<T>> imple
     protected final Set<String> tags = new HashSet<>();
     protected @Nullable URI configDescriptionURI;
 
-    public AbstractChannelTypeBuilder(ChannelTypeUID channelTypeUID, String label) {
+    protected AbstractChannelTypeBuilder(ChannelTypeUID channelTypeUID, String label) {
         if (channelTypeUID == null) {
             throw new IllegalArgumentException("ChannelTypeUID must be set.");
         }
@@ -79,9 +79,7 @@ abstract class AbstractChannelTypeBuilder<T extends ChannelTypeBuilder<T>> imple
 
     @Override
     public T withTags(Collection<String> tags) {
-        if (tags != null) {
-            this.tags.addAll(tags);
-        }
+        this.tags.addAll(tags);
         return (T) this;
     }
 

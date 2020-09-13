@@ -37,66 +37,6 @@ import org.openhab.core.thing.ThingTypeUID;
 public class BridgeType extends ThingType {
 
     /**
-     * @deprecated Use {@link ThingTypeBuilder}.buildBridge() instead.
-     *
-     */
-    @Deprecated
-    public BridgeType(String bindingId, String thingTypeId, String label) throws IllegalArgumentException {
-        this(new ThingTypeUID(bindingId, thingTypeId), null, label, null, null, true, null, null, null, null, null);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @deprecated Use {@link ThingTypeBuilder}.buildBridge() instead.
-     *
-     * @throws IllegalArgumentException if the UID is null or empty,
-     *             or the the meta information is null
-     */
-    @Deprecated
-    public BridgeType(ThingTypeUID uid, List<String> supportedBridgeTypeUIDs, String label, String description,
-            List<ChannelDefinition> channelDefinitions, List<ChannelGroupDefinition> channelGroupDefinitions,
-            Map<String, String> properties, URI configDescriptionURI) throws IllegalArgumentException {
-        this(uid, supportedBridgeTypeUIDs, label, description, null, true, null, channelDefinitions,
-                channelGroupDefinitions, properties, configDescriptionURI);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @deprecated Use {@link ThingTypeBuilder}.buildBridge() instead.
-     *
-     * @throws IllegalArgumentException if the UID is null or empty,
-     *             or the the meta information is null
-     */
-    @Deprecated
-    public BridgeType(ThingTypeUID uid, List<String> supportedBridgeTypeUIDs, String label, String description,
-            String category, boolean listed, List<ChannelDefinition> channelDefinitions,
-            List<ChannelGroupDefinition> channelGroupDefinitions, Map<String, String> properties,
-            URI configDescriptionURI) throws IllegalArgumentException {
-        this(uid, supportedBridgeTypeUIDs, label, description, category, listed, null, channelDefinitions,
-                channelGroupDefinitions, properties, configDescriptionURI);
-    }
-
-    /**
-     * Creates a new instance of this class with the specified parameters.
-     *
-     * @deprecated Use {@link ThingTypeBuilder}.buildBridge() instead.
-     *
-     * @throws IllegalArgumentException if the UID is null or empty,
-     *             or the the meta information is null
-     */
-    @Deprecated
-    public BridgeType(ThingTypeUID uid, @Nullable List<String> supportedBridgeTypeUIDs, String label,
-            @Nullable String description, @Nullable String category, boolean listed,
-            @Nullable String representationProperty, @Nullable List<ChannelDefinition> channelDefinitions,
-            @Nullable List<ChannelGroupDefinition> channelGroupDefinitions, @Nullable Map<String, String> properties,
-            @Nullable URI configDescriptionURI) throws IllegalArgumentException {
-        super(uid, supportedBridgeTypeUIDs, label, description, category, listed, representationProperty,
-                channelDefinitions, channelGroupDefinitions, properties, configDescriptionURI);
-    }
-
-    /**
      * A new instance of BridgeType.
      *
      * @see ThingType(uid, supportedBridgeTypeUIDs, label, description, category, listed, representationProperty,

@@ -33,8 +33,8 @@ import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.io.rest.LocaleServiceImpl;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
 import org.openhab.core.thing.profiles.TriggerProfileType;
-import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
@@ -67,27 +67,22 @@ public class ChannelTypeResourceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void returnLinkableItemTypesForTriggerChannelType() throws IOException {
-        ChannelType channelType = mockChannelType("ct");
-        ChannelTypeUID uid = channelType.getUID();
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID("binding", "ct");
+        ChannelType channelType = ChannelTypeBuilder.trigger(channelTypeUID, "Label").build();
 
-        when(channelTypeRegistry.getChannelType(uid)).thenReturn(channelType);
+        when(channelTypeRegistry.getChannelType(channelTypeUID)).thenReturn(channelType);
 
         TriggerProfileType profileType = mock(TriggerProfileType.class);
-        when(profileType.getSupportedChannelTypeUIDs()).thenReturn(List.of(uid));
+        when(profileType.getSupportedChannelTypeUIDs()).thenReturn(List.of(channelTypeUID));
         when(profileType.getSupportedItemTypes()).thenReturn(List.of("Switch", "Dimmer"));
 
         when(profileTypeRegistry.getProfileTypes()).thenReturn(List.of(profileType));
 
-        Response response = channelTypeResource.getLinkableItemTypes(uid.getAsString());
+        Response response = channelTypeResource.getLinkableItemTypes(channelTypeUID.getAsString());
 
-        verify(channelTypeRegistry).getChannelType(uid);
+        verify(channelTypeRegistry).getChannelType(channelTypeUID);
         verify(profileTypeRegistry).getProfileTypes();
         assertThat(response.getStatus(), is(200));
         assertThat((Set<String>) response.getEntity(), IsIterableContaining.hasItems("Switch", "Dimmer"));
-    }
-
-    private ChannelType mockChannelType(String channelId) {
-        return new ChannelType(new ChannelTypeUID("binding", channelId), false, null, ChannelKind.TRIGGER, "Label",
-                null, null, null, null, null, null);
     }
 }
