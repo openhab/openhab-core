@@ -168,13 +168,6 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
                 fail("Failed to get service reference: " + e.getMessage());
             }
         });
-        waitForAssert(() -> {
-            try {
-                assertThat(bundleContext.getServiceReferences(ChannelItemProvider.class, null), is(notNullValue()));
-            } catch (InvalidSyntaxException e) {
-                fail("Failed to get service reference: " + e.getMessage());
-            }
-        });
 
         Bundle bundle = mock(Bundle.class);
         when(bundle.getSymbolicName()).thenReturn("org.openhab.core.thing");
@@ -794,6 +787,8 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         managedItemChannelLinkProvider.add(new ItemChannelLink(itemName, CHANNEL_UID));
 
         registerService(thingHandlerFactory);
+        Item item = new StringItem(itemName);
+        itemRegistry.add(item);
         waitForAssert(() -> assertThat(itemRegistry.get(itemName), is(notNullValue())));
 
         state.callback.statusUpdated(thing, ThingStatusInfoBuilder.create(ThingStatus.ONLINE).build());
@@ -1954,11 +1949,13 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         when(thingHandlerFactory.registerHandler(any(Thing.class))).thenReturn(thingHandler);
 
         registerService(thingHandlerFactory);
+        String itemName = "testItem";
+        Item item = new StringItem(itemName);
+        itemRegistry.add(item);
+        itemChannelLinkRegistry.add(new ItemChannelLink(itemName, new ChannelUID(thing.getUID(), "channel")));
+        waitForAssert(() -> assertThat(itemRegistry.get(itemName), is(notNullValue())));
 
-        itemChannelLinkRegistry.add(new ItemChannelLink("testItem", new ChannelUID(thing.getUID(), "channel")));
-        waitForAssert(() -> assertThat(itemRegistry.get("testItem"), is(notNullValue())));
-
-        eventPublisher.post(ItemEventFactory.createCommandEvent("testItem", OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, OnOffType.ON));
 
         assertThat(state.handleCommandCalled, is(false));
 
@@ -1967,7 +1964,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         state.callback.statusUpdated(thing, unknownNone);
         assertThat(thing.getStatusInfo(), is(unknownNone));
 
-        eventPublisher.post(ItemEventFactory.createCommandEvent("testItem", OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createCommandEvent(itemName, OnOffType.ON));
 
         waitForAssert(() -> {
             assertThat(state.handleCommandCalled, is(true));
