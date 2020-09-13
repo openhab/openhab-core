@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal.thing;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -165,12 +166,9 @@ public class ThingTypeResource implements RESTResource {
 
     private ThingTypeDTO convertToThingTypeDTO(ThingType thingType, Locale locale) {
         final ConfigDescription configDescription;
-        if (thingType.getConfigDescriptionURI() != null) {
-            configDescription = this.configDescriptionRegistry.getConfigDescription(thingType.getConfigDescriptionURI(),
-                    locale);
-        } else {
-            configDescription = null;
-        }
+
+        final URI descURI = thingType.getConfigDescriptionURI();
+        configDescription = descURI == null ? null : configDescriptionRegistry.getConfigDescription(descURI, locale);
 
         List<ConfigDescriptionParameterDTO> parameters;
         List<ConfigDescriptionParameterGroupDTO> parameterGroups;

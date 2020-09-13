@@ -563,9 +563,11 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     private List<ConfigDescriptionParameter> getConfigDescParams(@Nullable ThingType thingType) {
         if (thingType != null && thingType.getConfigDescriptionURI() != null) {
             URI descURI = thingType.getConfigDescriptionURI();
-            ConfigDescription desc = configDescRegistry.getConfigDescription(descURI);
-            if (desc != null) {
-                return desc.getParameters();
+            if (descURI != null) {
+                ConfigDescription desc = configDescRegistry.getConfigDescription(descURI);
+                if (desc != null) {
+                    return desc.getParameters();
+                }
             }
         }
         return Collections.emptyList();

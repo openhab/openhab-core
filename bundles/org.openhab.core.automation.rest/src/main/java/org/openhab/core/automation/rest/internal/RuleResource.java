@@ -253,8 +253,9 @@ public class RuleResource implements RESTResource {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
     public Response updateConfiguration(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
-            @Parameter(description = "config") Map<String, Object> configurationParameters) throws IOException {
-        Map<String, Object> config = ConfigUtil.normalizeTypes(configurationParameters);
+            @Parameter(description = "config") Map<String, @Nullable Object> configurationParameters)
+            throws IOException {
+        Map<String, @Nullable Object> config = ConfigUtil.normalizeTypes(configurationParameters);
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule == null) {
             logger.info("Received HTTP PUT request for update config at '{}' for the unknown rule '{}'.",

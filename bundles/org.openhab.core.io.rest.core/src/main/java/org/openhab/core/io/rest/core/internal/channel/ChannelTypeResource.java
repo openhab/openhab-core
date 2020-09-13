@@ -12,7 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal.channel;
 
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -189,25 +189,16 @@ public class ChannelTypeResource implements RESTResource {
     }
 
     private ChannelTypeDTO convertToChannelTypeDTO(ChannelType channelType, Locale locale) {
-        final ConfigDescription configDescription;
-        if (channelType.getConfigDescriptionURI() != null) {
-            configDescription = this.configDescriptionRegistry
-                    .getConfigDescription(channelType.getConfigDescriptionURI(), locale);
-        } else {
-            configDescription = null;
-        }
+        final URI descURI = channelType.getConfigDescriptionURI();
+        final ConfigDescription configDescription = descURI == null ? null
+                : configDescriptionRegistry.getConfigDescription(descURI, locale);
+        final ConfigDescriptionDTO configDescriptionDTO = configDescription == null ? null
+                : ConfigDescriptionDTOMapper.map(configDescription);
 
-        List<ConfigDescriptionParameterDTO> parameters;
-        List<ConfigDescriptionParameterGroupDTO> parameterGroups;
-
-        if (configDescription != null) {
-            ConfigDescriptionDTO configDescriptionDTO = ConfigDescriptionDTOMapper.map(configDescription);
-            parameters = configDescriptionDTO.parameters;
-            parameterGroups = configDescriptionDTO.parameterGroups;
-        } else {
-            parameters = new ArrayList<>(0);
-            parameterGroups = new ArrayList<>(0);
-        }
+        final List<ConfigDescriptionParameterDTO> parameters = configDescriptionDTO == null ? List.of()
+                : configDescriptionDTO.parameters;
+        final List<ConfigDescriptionParameterGroupDTO> parameterGroups = configDescriptionDTO == null ? List.of()
+                : configDescriptionDTO.parameterGroups;
 
         return new ChannelTypeDTO(channelType.getUID().toString(), channelType.getLabel(), channelType.getDescription(),
                 channelType.getCategory(), channelType.getItemType(), channelType.getKind(), parameters,

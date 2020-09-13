@@ -112,5 +112,6 @@ Fragment-Host: org.openhab.core.model.thing
 	net.bytebuddy.byte-buddy-agent;version='[1.10.13,1.10.14)',\
 	org.hamcrest;version='[2.2.0,2.2.1)',\
 	org.mockito.mockito-core;version='[3.4.6,3.4.7)',\
-	org.opentest4j;version='[1.2.0,1.2.1)'
+	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.openhab.core.model.sitemap.runtime;version='[3.0.0,3.0.1)'
 
