@@ -63,7 +63,6 @@ public class ${bindingIdCamelCase}Handler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        // logger.debug("Start initializing!");
         config = getConfigAs(${bindingIdCamelCase}Configuration.class);
 
         // TODO: Initialize the handler.
@@ -90,7 +89,10 @@ public class ${bindingIdCamelCase}Handler extends BaseThingHandler {
             }
         });
 
-        // logger.debug("Finished initializing!");
+        // These logging types should be primarily used by bindings
+        // logger.trace("Example trace message");
+        // logger.debug("Example debug message");
+        // logger.warn("Example warn message");
 
         // Note: When initialization can NOT be done set the status with more details for further
         // analysis. See also class ThingStatusDetail for all available status details.
