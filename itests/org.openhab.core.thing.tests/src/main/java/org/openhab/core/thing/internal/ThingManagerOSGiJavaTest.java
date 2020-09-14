@@ -173,13 +173,6 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
                 throw new RuntimeException(e);
             }
         });
-        waitForAssert(() -> {
-            try {
-                assertThat(bundleContext.getServiceReferences(ChannelItemProvider.class, null), is(notNullValue()));
-            } catch (InvalidSyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     @AfterEach
