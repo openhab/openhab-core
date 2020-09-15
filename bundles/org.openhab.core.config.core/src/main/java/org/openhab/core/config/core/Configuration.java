@@ -96,7 +96,8 @@ public class Configuration {
     }
 
     public Object put(String key, @Nullable Object value) {
-        return properties.put(key, ConfigUtil.normalizeType(value, null));
+        Object normalizedValue = value == null ? null : ConfigUtil.normalizeType(value, null);
+        return properties.put(key, normalizedValue);
     }
 
     public Object remove(String key) {

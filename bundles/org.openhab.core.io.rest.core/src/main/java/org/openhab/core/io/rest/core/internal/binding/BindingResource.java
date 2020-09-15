@@ -188,12 +188,15 @@ public class BindingResource implements RESTResource {
             return properties;
         }
 
-        ConfigDescription configDesc = configDescRegistry.getConfigDescription(bindingInfo.getConfigDescriptionURI());
-        if (configDesc == null) {
-            return properties;
+        URI descURI = bindingInfo.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription configDesc = configDescRegistry.getConfigDescription(descURI);
+            if (configDesc != null) {
+                return ConfigUtil.normalizeTypes(properties, List.of(configDesc));
+            }
         }
 
-        return ConfigUtil.normalizeTypes(properties, List.of(configDesc));
+        return properties;
     }
 
     private @Nullable String getConfigId(String bindingId) {

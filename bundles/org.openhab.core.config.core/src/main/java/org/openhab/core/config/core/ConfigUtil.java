@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.core;
 
+import static java.util.function.Predicate.not;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -22,8 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.internal.normalization.Normalizer;
@@ -45,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Höfer - Minor changes for type normalization based on config description
  */
+@NonNullByDefault
 public class ConfigUtil {
 
     private static final String DEFAULT_LIST_DELIMITER = ",";
@@ -112,11 +117,14 @@ public class ConfigUtil {
                 if (defaultValue != null && configuration.get(parameter.getName()) == null) {
                     if (parameter.isMultiple()) {
                         if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                            List<Object> values = List.of(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream()
-                                    .map(v -> v.trim()).filter(v -> !v.isEmpty())
-                                    .map(v -> ConfigUtil.getDefaultValueAsCorrectType(parameter.getName(),
-                                            parameter.getType(), v))
-                                    .filter(v -> v != null).collect(Collectors.toList());
+                            List<Object> values = (List<Object>) List.of(defaultValue.split(DEFAULT_LIST_DELIMITER))
+                                    .stream() //
+                                    .map(String::trim) //
+                                    .filter(not(String::isEmpty)) //
+                                    .map(value -> ConfigUtil.getDefaultValueAsCorrectType(parameter.getName(),
+                                            parameter.getType(), value)) //
+                                    .filter(Objects::nonNull) //
+                                    .collect(Collectors.toList());
                             Integer multipleLimit = parameter.getMultipleLimit();
                             if (multipleLimit != null && values.size() > multipleLimit.intValue()) {
                                 LoggerFactory.getLogger(ConfigUtil.class).warn(
@@ -147,13 +155,13 @@ public class ConfigUtil {
      * @param configuration the configuration that needs to be normalized
      * @return normalized configuration
      */
-    public static Map<String, Object> normalizeTypes(Map<String, Object> configuration) {
-        Map<String, Object> convertedConfiguration = new HashMap<>(configuration.size());
-        for (Entry<String, Object> parameter : configuration.entrySet()) {
+    public static Map<String, @Nullable Object> normalizeTypes(Map<String, @Nullable Object> configuration) {
+        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>(configuration.size());
+        for (Entry<String, @Nullable Object> parameter : configuration.entrySet()) {
             String name = parameter.getKey();
             Object value = parameter.getValue();
             if (!isOSGiConfigParameter(name)) {
-                convertedConfiguration.put(name, normalizeType(value, null));
+                convertedConfiguration.put(name, value == null ? null : normalizeType(value, null));
             }
         }
         return convertedConfiguration;
@@ -171,8 +179,7 @@ public class ConfigUtil {
         if (configDescriptionParameter != null) {
             Normalizer normalizer = NormalizerFactory.getNormalizer(configDescriptionParameter);
             return normalizer.normalize(value);
-        } else if (value == null || value instanceof Boolean || value instanceof String
-                || value instanceof BigDecimal) {
+        } else if (value instanceof Boolean || value instanceof String || value instanceof BigDecimal) {
             return value;
         } else if (value instanceof Number) {
             return new BigDecimal(value.toString());
@@ -195,15 +202,15 @@ public class ConfigUtil {
      * If multiple config descriptions are given and a parameter is described several times, then the first one (lower
      * index in the list) wins.
      *
-     * @param configuration the configuration to be normalized (can be null)
-     * @param configDescriptions the configuration descriptions that should be applied (must not be null or empty).
+     * @param configuration the configuration to be normalized
+     * @param configDescriptions the configuration descriptions that should be applied (must not be empty).
      * @return the normalized configuration or null if given configuration was null
      * @throws IllegalArgumentExcetpion if given config description is null
      */
-    public static Map<String, Object> normalizeTypes(Map<String, Object> configuration,
+    public static @Nullable Map<String, Object> normalizeTypes(@Nullable Map<String, Object> configuration,
             List<ConfigDescription> configDescriptions) {
-        if (configDescriptions == null || configDescriptions.isEmpty()) {
-            throw new IllegalArgumentException("Config description must not be null.");
+        if (configDescriptions.isEmpty()) {
+            throw new IllegalArgumentException("Config description must not be empty.");
         }
 
         if (configuration == null) {

@@ -757,13 +757,15 @@ public class ThingResource implements RESTResource {
         }
 
         List<ConfigDescription> configDescriptions = new ArrayList<>(2);
-        if (thingType.getConfigDescriptionURI() != null) {
-            ConfigDescription typeConfigDesc = configDescRegistry
-                    .getConfigDescription(thingType.getConfigDescriptionURI());
+
+        URI descURI = thingType.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription typeConfigDesc = configDescRegistry.getConfigDescription(descURI);
             if (typeConfigDesc != null) {
                 configDescriptions.add(typeConfigDesc);
             }
         }
+
         if (thingUID != null) {
             ConfigDescription thingConfigDesc = configDescRegistry
                     .getConfigDescription(getConfigDescriptionURI(thingUID));
@@ -791,9 +793,9 @@ public class ThingResource implements RESTResource {
         }
 
         List<ConfigDescription> configDescriptions = new ArrayList<>(2);
-        if (channelType.getConfigDescriptionURI() != null) {
-            ConfigDescription typeConfigDesc = configDescRegistry
-                    .getConfigDescription(channelType.getConfigDescriptionURI());
+        URI descURI = channelType.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription typeConfigDesc = configDescRegistry.getConfigDescription(descURI);
             if (typeConfigDesc != null) {
                 configDescriptions.add(typeConfigDesc);
             }
