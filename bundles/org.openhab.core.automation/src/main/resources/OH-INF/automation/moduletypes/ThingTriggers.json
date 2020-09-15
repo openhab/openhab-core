@@ -2,7 +2,7 @@
 	"triggers": [
 		{
 			"uid": "core.ThingStatusUpdateTrigger",
-			"label": "A thing status is updated",
+			"label": "a thing status is updated",
 			"description": "This triggers the rule if a thing status is updated (even if it does not change).",
 			"configDescriptions": [
 				{
@@ -70,7 +70,7 @@
 		},
 		{
 			"uid": "core.ThingStatusChangeTrigger",
-			"label": "A thing status changes",
+			"label": "a thing status changes",
 			"description": "This triggers the rule if a thing status has changed.",
 			"configDescriptions": [
 				{

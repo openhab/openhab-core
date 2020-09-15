@@ -2,7 +2,7 @@
 	"triggers": [
 		{
 			"uid": "core.SystemStartlevelTrigger",
-			"label": "A system startlevel is reached",
+			"label": "a system startlevel is reached",
 			"description": "This triggers the rule if a given startlevel is reached by the system.",
 			"configDescriptions": [
 				{
