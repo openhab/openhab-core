@@ -128,15 +128,14 @@ public class EventHandler implements AutoCloseable {
 
     private @Nullable Event createEvent(final EventFactory eventFactory, final String type, final String payload,
             final String topic, final @Nullable String source) {
-        Event event = null;
         try {
-            event = eventFactory.createEvent(type, topic, payload, source);
-        } catch (Exception e) {
-            logger.error(
-                    "Creation of Event failed, because one of the registered event factories has thrown an exception: {}",
-                    e.getMessage(), e);
+            return eventFactory.createEvent(type, topic, payload, source);
+        } catch (final Exception ex) {
+            logger.warn(
+                    "Creation of event failed, because one of the registered event factories has thrown an exception: {}",
+                    ex.getMessage(), ex);
+            return null;
         }
-        return event;
     }
 
     private synchronized void dispatchEvent(final Set<EventSubscriber> eventSubscribers, final Event event) {
@@ -152,7 +151,7 @@ public class EventHandler implements AutoCloseable {
                     try {
                         eventSubscriber.receive(event);
                     } catch (final Exception ex) {
-                        logger.error("Dispatching/filtering event for subscriber '{}' failed: {}",
+                        logger.warn("Dispatching/filtering event for subscriber '{}' failed: {}",
                                 EventSubscriber.class.getName(), ex.getMessage(), ex);
                     }
                     logTimeout.cancel(false);
