@@ -38,7 +38,6 @@ Fragment-Host: org.openhab.core.io.rest.core
 	org.eclipse.jetty.servlet;version='[9.4.20,9.4.21)',\
 	org.eclipse.jetty.util;version='[9.4.20,9.4.21)',\
 	org.apache.aries.javax.jax.rs-api;version='[1.0.0,1.0.1)',\
-	org.apache.aries.jax.rs.whiteboard;version='[1.0.8,1.0.9)',\
 	org.apache.xbean.bundleutils;version='[4.12.0,4.12.1)',\
 	org.apache.xbean.finder;version='[4.12.0,4.12.1)',\
 	org.eclipse.jetty.xml;version='[9.4.20,9.4.21)',\
@@ -76,4 +75,6 @@ Fragment-Host: org.openhab.core.io.rest.core
 	net.bytebuddy.byte-buddy-agent;version='[1.10.13,1.10.14)',\
 	org.hamcrest;version='[2.2.0,2.2.1)',\
 	org.mockito.mockito-core;version='[3.4.6,3.4.7)',\
-	org.opentest4j;version='[1.2.0,1.2.1)'
+	org.opentest4j;version='[1.2.0,1.2.1)',\
+	jakarta.xml.bind-api;version='[2.3.3,2.3.4)',\
+	org.apache.aries.jax.rs.whiteboard;version='[1.0.9,1.0.10)'
