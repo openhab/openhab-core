@@ -247,10 +247,10 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
         }
     }
 
-    private @Nullable String getFileExtension(String fileName) {
+    private String getFileExtension(String fileName) {
         int extensionPos = fileName.lastIndexOf(EXTENSION_SEPARATOR);
         int lastSeparatorPos = Math.max(fileName.lastIndexOf(UNIX_SEPARATOR), fileName.lastIndexOf(WINDOWS_SEPARATOR));
-        return lastSeparatorPos > extensionPos ? null : fileName.substring(extensionPos + 1);
+        return lastSeparatorPos > extensionPos ? "" : fileName.substring(extensionPos + 1);
     }
 
     /**
@@ -262,31 +262,21 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      */
     protected String getLocalizedProposedFilename(String filename, final WatchService watchService) {
         final File file = new File(filename);
+        if (file.getParent() != null) {
+            watchSubDirectory(file.getParent(), watchService);
+        }
+
         String extension = getFileExtension(filename);
-        String prefix = file.getPath();
-        String result = filename;
-
-        if (extension == null) {
-            extension = "";
-        }
-        if (!prefix.isEmpty()) {
-            watchSubDirectory(prefix, watchService);
-        }
-
         // the filename may already contain locale information
         if (!filename.matches(".*_[a-z]{2}." + extension + "$")) {
-            String basename = file.getName();
-            String alternateName = prefix + basename + "_" + getLocale().getLanguage() + "." + extension;
+            String alternateName = filename + "_" + getLocale().getLanguage() + "." + extension;
             String alternatePath = getSourcePath() + alternateName;
-
-            File f = new File(alternatePath);
-            if (f.exists()) {
-                result = alternateName;
+            if (new File(alternatePath).exists()) {
+                return alternatePath;
             }
         }
 
-        result = getSourcePath() + result;
-        return result;
+        return getSourcePath() + filename;
     }
 
     /**
