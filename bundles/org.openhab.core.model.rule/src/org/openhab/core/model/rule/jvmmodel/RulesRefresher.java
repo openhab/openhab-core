@@ -17,7 +17,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.system.StartlevelEvent;
@@ -50,29 +51,64 @@ import org.slf4j.LoggerFactory;
  * @author Maoliang Huang - refactor
  */
 @Component(immediate = true, service = {})
+@NonNullByDefault
 public class RulesRefresher implements ReadyTracker {
 
-    // delay in ms before rule resources are refreshed after items or services have changed
-    private static final long REFRESH_DELAY = 5000;
+    // delay in seconds before rule resources are refreshed after items or services have changed
+    private static final long REFRESH_DELAY = 5;
 
     private static final String POOL_NAME = "automation";
     public static final String RULES_REFRESH = "rules_refresh";
 
     private final Logger logger = LoggerFactory.getLogger(RulesRefresher.class);
 
-    private ScheduledFuture<?> job;
-    private ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(POOL_NAME);
+    private @Nullable ScheduledFuture<?> job;
+    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(POOL_NAME);
     private boolean started;
-    private ReadyMarker marker = new ReadyMarker("dsl", RULES_REFRESH);
-
-    private ItemRegistryChangeListener itemRegistryChangeListener;
-    private ThingRegistryChangeListener thingRegistryChangeListener;
+    private final ReadyMarker marker = new ReadyMarker("dsl", RULES_REFRESH);
 
     private final ModelRepository modelRepository;
     private final ItemRegistry itemRegistry;
     private final ThingRegistry thingRegistry;
     private final EventPublisher eventPublisher;
     private final ReadyService readyService;
+
+    private final ItemRegistryChangeListener itemRegistryChangeListener = new ItemRegistryChangeListener() {
+        @Override
+        public void added(Item element) {
+            scheduleRuleRefresh();
+        }
+
+        @Override
+        public void removed(Item element) {
+            scheduleRuleRefresh();
+        }
+
+        @Override
+        public void updated(Item oldElement, Item element) {
+        }
+
+        @Override
+        public void allItemsChanged(Collection<String> oldItemNames) {
+            scheduleRuleRefresh();
+        }
+    };
+
+    private final ThingRegistryChangeListener thingRegistryChangeListener = new ThingRegistryChangeListener() {
+        @Override
+        public void added(Thing element) {
+            scheduleRuleRefresh();
+        }
+
+        @Override
+        public void removed(Thing element) {
+            scheduleRuleRefresh();
+        }
+
+        @Override
+        public void updated(Thing oldElement, Thing element) {
+        }
+    };
 
     @Activate
     public RulesRefresher(@Reference ModelRepository modelRepository, @Reference ItemRegistry itemRegistry,
@@ -104,8 +140,9 @@ public class RulesRefresher implements ReadyTracker {
     }
 
     protected synchronized void scheduleRuleRefresh() {
-        if (job != null && !job.isDone()) {
-            job.cancel(false);
+        ScheduledFuture<?> localJob = job;
+        if (localJob != null && !localJob.isDone()) {
+            localJob.cancel(false);
         }
         job = scheduler.schedule(() -> {
             try {
@@ -114,7 +151,7 @@ public class RulesRefresher implements ReadyTracker {
                 logger.debug("Exception occurred during execution: {}", e.getMessage(), e);
             }
             readyService.markReady(marker);
-        }, REFRESH_DELAY, TimeUnit.MILLISECONDS);
+        }, REFRESH_DELAY, TimeUnit.SECONDS);
         readyService.unmarkReady(marker);
     }
 
@@ -124,60 +161,19 @@ public class RulesRefresher implements ReadyTracker {
             // TODO: This is still a very dirty hack in the absence of a proper system start level management.
             scheduler.schedule(() -> {
                 StartlevelEvent startlevelEvent = SystemEventFactory.createStartlevelEvent(20);
-                if (eventPublisher != null) {
-                    eventPublisher.post(startlevelEvent);
-                }
-            }, 5, TimeUnit.SECONDS);
+                eventPublisher.post(startlevelEvent);
+            }, 15, TimeUnit.SECONDS);
         }
     }
 
     @Override
-    public void onReadyMarkerAdded(@NonNull ReadyMarker readyMarker) {
-        itemRegistryChangeListener = new ItemRegistryChangeListener() {
-            @Override
-            public void added(Item element) {
-                scheduleRuleRefresh();
-            }
-
-            @Override
-            public void removed(Item element) {
-                scheduleRuleRefresh();
-            }
-
-            @Override
-            public void updated(Item oldElement, Item element) {
-
-            }
-
-            @Override
-            public void allItemsChanged(Collection<String> oldItemNames) {
-                scheduleRuleRefresh();
-            }
-        };
-
-        thingRegistryChangeListener = new ThingRegistryChangeListener() {
-            @Override
-            public void added(Thing element) {
-                scheduleRuleRefresh();
-            }
-
-            @Override
-            public void removed(Thing element) {
-                scheduleRuleRefresh();
-            }
-
-            @Override
-            public void updated(Thing oldElement, Thing element) {
-            }
-        };
-
+    public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         itemRegistry.addRegistryChangeListener(itemRegistryChangeListener);
         thingRegistry.addRegistryChangeListener(thingRegistryChangeListener);
-
         setStartLevel();
     }
 
     @Override
-    public void onReadyMarkerRemoved(@NonNull ReadyMarker readyMarker) {
+    public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
     }
 }
