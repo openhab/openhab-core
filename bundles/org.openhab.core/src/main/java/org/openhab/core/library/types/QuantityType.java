@@ -55,7 +55,6 @@ import tec.uom.se.quantity.Quantities;
                                                                     // annotated.
 public class QuantityType<T extends Quantity<T>> extends Number
         implements PrimitiveType, State, Command, Comparable<QuantityType<T>> {
-    private final Logger logger = LoggerFactory.getLogger(QuantityType.class);
 
     private static final long serialVersionUID = 8828949721938234629L;
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
@@ -69,11 +68,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
     // The later would be an exponent from the scalar value.
     private static final String UNIT_PATTERN = "(?<=\\d)\\s*(?=[a-zA-Z°µ%'](?![\\+\\-]?\\d))";
 
-    private final Quantity<T> quantity;
-
     static {
         UnitInitializer.init();
     }
+
+    private transient final Logger logger = LoggerFactory.getLogger(QuantityType.class);
+
+    private final Quantity<T> quantity;
 
     /**
      * Creates a dimensionless {@link QuantityType} with scalar 0 and unit {@link AbstractUnit#ONE}.
