@@ -54,7 +54,9 @@ public class ChannelLinkNotifier implements RegistryChangeListener<ItemChannelLi
 
         itemChannelLinkRegistry.addRegistryChangeListener(this);
         // registry does not dispatch notifications about existing links to listeners
-        itemChannelLinkRegistry.getAll().forEach(this::added);
+        itemChannelLinkRegistry.getAll().stream().map(ItemChannelLink::getLinkedUID).distinct()
+                .forEach(channelUID -> call(channelUID.getThingUID(), handler -> handler.channelLinked(channelUID),
+                        "channelLinked"));
     }
 
     @Deactivate
@@ -75,7 +77,12 @@ public class ChannelLinkNotifier implements RegistryChangeListener<ItemChannelLi
         ChannelUID channelUID = element.getLinkedUID();
         ThingUID thingUID = channelUID.getThingUID();
 
-        call(thingUID, handler -> handler.channelUnlinked(channelUID), "channelUnlinked");
+        boolean channelLinked = itemChannelLinkRegistry.getAll().stream()
+                .anyMatch(itemChannelLink -> channelUID.equals(itemChannelLink.getLinkedUID()));
+
+        if (!channelLinked) {
+            call(thingUID, handler -> handler.channelUnlinked(channelUID), "channelUnlinked");
+        }
     }
 
     @Override

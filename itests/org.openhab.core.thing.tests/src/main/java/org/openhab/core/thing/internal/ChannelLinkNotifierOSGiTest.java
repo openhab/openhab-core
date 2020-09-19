@@ -297,11 +297,26 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void initializedThingHandlerReceivesChannelLinkedEventsWhenNotifierIsActivated() {
+    public void initializedThingHandlerReceivesChannelLinkedEventsWithSingleLinkWhenNotifierIsActivated() {
         Thing subjectThing = addInitializedThing();
 
         // link each thing channel to an item
         addItemsAndLinks(subjectThing, "link1");
+
+        getHandler(subjectThing).resetChannelLinkEvents();
+
+        registerService(new ChannelLinkNotifier(itemChannelLinkRegistry, thingRegistry));
+        assertAllChannelsLinkedBasedOnEvents(subjectThing, 1);
+    }
+
+    @Test
+    public void initializedThingHandlerReceivesChannelLinkedEventsWithMultipleLinksWhenNotifierIsActivated() {
+        Thing subjectThing = addInitializedThing();
+
+        // link each thing channel to three items
+        addItemsAndLinks(subjectThing, "link1");
+        addItemsAndLinks(subjectThing, "link2");
+        addItemsAndLinks(subjectThing, "link3");
 
         getHandler(subjectThing).resetChannelLinkEvents();
 
@@ -339,7 +354,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void initializedThingHandlerReceivesChannelUnlinkedEventsWhenRemovingLinks() {
+    public void initializedThingHandlerReceivesChannelUnlinkedEventsWithSingleLinkWhenRemovingLinks() {
         Thing subjectThing = addInitializedThing();
         Thing otherThing = addInitializedThing();
 
@@ -352,6 +367,45 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         // unlink each thing channel from each item
         removeItemsAndLinks(subjectThing, "link1");
+        assertAllChannelsUnlinkedBasedOnEvents(subjectThing, 1);
+        assertNoChannelLinkEventsReceived(otherThing);
+    }
+
+    @Test
+    public void initializedThingHandlerReceivesNoChannelUnlinkedEventsWithMultipleLinksWhenRemovingOneLink() {
+        Thing subjectThing = addInitializedThing();
+        Thing otherThing = addInitializedThing();
+
+        // link each thing channel to two items
+        addItemsAndLinks(subjectThing, "link1");
+        addItemsAndLinks(subjectThing, "link2");
+        assertAllChannelsLinkedBasedOnEvents(subjectThing, 2);
+        assertNoChannelLinkEventsReceived(otherThing);
+
+        getHandler(subjectThing).resetChannelLinkEvents();
+
+        // remove one of the links from each thing channel so they are still linked to one item
+        removeItemsAndLinks(subjectThing, "link2");
+        assertNoChannelLinkEventsReceived(subjectThing);
+        assertNoChannelLinkEventsReceived(otherThing);
+    }
+
+    @Test
+    public void initializedThingHandlerReceivesChannelUnlinkedEventsWithMultipleLinksWhenRemovingAllLinks() {
+        Thing subjectThing = addInitializedThing();
+        Thing otherThing = addInitializedThing();
+
+        // link each thing channel to two items
+        addItemsAndLinks(subjectThing, "link1");
+        addItemsAndLinks(subjectThing, "link2");
+        assertAllChannelsLinkedBasedOnEvents(subjectThing, 2);
+        assertNoChannelLinkEventsReceived(otherThing);
+
+        getHandler(subjectThing).resetChannelLinkEvents();
+
+        // unlink each thing channel from all items
+        removeItemsAndLinks(subjectThing, "link1");
+        removeItemsAndLinks(subjectThing, "link2");
         assertAllChannelsUnlinkedBasedOnEvents(subjectThing, 1);
         assertNoChannelLinkEventsReceived(otherThing);
     }
@@ -370,7 +424,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         // update the links of each thing channel
         updateLinks(subjectThing, "link1");
-        assertAllChannelsLinkedBasedOnEvents(subjectThing, 2);
+        assertAllChannelsLinkedBasedOnEvents(subjectThing, 1);
         assertNoChannelLinkEventsReceived(otherThing);
     }
 
@@ -407,7 +461,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void uninitializedThingHandlerReceivesChannelLinkedEventsWhenUpdatingLinks() {
+    public void uninitializedThingHandlerReceivesNoChannelLinkedEventsWhenUpdatingLinks() {
         Thing subjectThing = addUninitializedThing();
         Thing otherThing = addInitializedThing();
 
