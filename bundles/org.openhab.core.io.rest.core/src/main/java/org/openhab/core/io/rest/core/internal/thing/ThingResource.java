@@ -331,7 +331,7 @@ public class ThingResource implements RESTResource {
     @DELETE
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
-    @Operation(summary = "Removes a thing from the registry. Set \'force\' to __true__ if you want the thing te be removed immediately.", security = {
+    @Operation(summary = "Removes a thing from the registry. Set \'force\' to __true__ if you want the thing to be removed immediately.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK, was deleted."),
                     @ApiResponse(responseCode = "202", description = "ACCEPTED for asynchronous deletion."),
