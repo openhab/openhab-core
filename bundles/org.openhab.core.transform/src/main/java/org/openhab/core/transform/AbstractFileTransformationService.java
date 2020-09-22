@@ -266,17 +266,19 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
             watchSubDirectory(file.getParent(), watchService);
         }
 
+        String sourcePath = getSourcePath();
         String extension = getFileExtension(filename);
+
         // the filename may already contain locale information
         if (!filename.matches(".*_[a-z]{2}." + extension + "$")) {
-            String alternateName = filename + "_" + getLocale().getLanguage() + "." + extension;
-            String alternatePath = getSourcePath() + alternateName;
+            String alternatePath = sourcePath + filename.substring(0, filename.length() - extension.length() - 1) + "_"
+                    + getLocale().getLanguage() + "." + extension;
             if (new File(alternatePath).exists()) {
                 return alternatePath;
             }
         }
 
-        return getSourcePath() + filename;
+        return sourcePath + filename;
     }
 
     /**
