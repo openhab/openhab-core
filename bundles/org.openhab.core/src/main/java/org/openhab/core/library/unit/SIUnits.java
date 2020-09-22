@@ -24,8 +24,8 @@ import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import tec.uom.se.format.SimpleUnitFormat;
-import tec.uom.se.unit.Units;
+import tech.units.indriya.format.SimpleUnitFormat;
+import tech.units.indriya.unit.Units;
 
 /**
  * Delegate SI units to {@link Units} to hide this dependency from the rest of openHAB.

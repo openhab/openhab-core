@@ -96,6 +96,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @Test
     public void testAvgFunctionQuantityType() {
+        items = new LinkedHashSet<>(); // we need an ordered set to guarantee the Unit of the first entry
         items.add(createNumberItem("TestItem1", Temperature.class, new QuantityType<>("100 °C")));
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
         items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("200 °C")));

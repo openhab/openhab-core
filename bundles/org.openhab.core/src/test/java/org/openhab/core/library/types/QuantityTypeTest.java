@@ -32,15 +32,15 @@ import javax.measure.quantity.Time;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
-import org.openhab.core.library.dimension.Density;
-import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.SmartHomeUnits;
 import org.openhab.core.types.util.UnitUtils;
 
-import tec.uom.se.quantity.QuantityDimension;
-import tec.uom.se.unit.Units;
+import si.uom.quantity.Density;
+import si.uom.quantity.Intensity;
+import tech.units.indriya.unit.UnitDimension;
+import tech.units.indriya.unit.Units;
 
 /**
  * @author Gaël L'hopital - Initial contribution
@@ -57,9 +57,9 @@ public class QuantityTypeTest {
         new QuantityType<>("57%");
 
         QuantityType<Dimensionless> dt0 = new QuantityType<>("12");
-        assertTrue(dt0.getUnit().getDimension() == QuantityDimension.NONE);
+        assertTrue(dt0.getUnit().getDimension() == UnitDimension.NONE);
         dt0 = new QuantityType<>("2rad");
-        assertTrue(dt0.getUnit().getDimension() == QuantityDimension.NONE);
+        assertTrue(dt0.getUnit().getDimension() == UnitDimension.NONE);
     }
 
     @Test
@@ -94,13 +94,13 @@ public class QuantityTypeTest {
     public void testUnits() {
         QuantityType<Length> dt2 = new QuantityType<>("2 m");
         // Check that the unit has correctly been identified
-        assertEquals(dt2.getDimension(), QuantityDimension.LENGTH);
+        assertEquals(dt2.getDimension(), UnitDimension.LENGTH);
         assertEquals(dt2.getUnit(), SIUnits.METRE);
         assertEquals("2 m", dt2.toString());
 
         QuantityType<Length> dt1 = new QuantityType<>("2.1cm");
         // Check that the unit has correctly been identified
-        assertEquals(dt1.getDimension(), QuantityDimension.LENGTH);
+        assertEquals(dt1.getDimension(), UnitDimension.LENGTH);
         assertEquals(dt1.getUnit(), CENTI(SIUnits.METRE));
         assertEquals("2.1 cm", dt1.toString());
 
@@ -217,6 +217,7 @@ public class QuantityTypeTest {
         assertThat(QuantityType.valueOf(temp.toFullString()), is(temp));
     }
 
+    @Test
     public void testAdd() {
         QuantityType<?> result = new QuantityType<>("20 m").add(new QuantityType<>("20cm"));
         assertThat(result, is(new QuantityType<>("20.20 m")));
@@ -255,19 +256,19 @@ public class QuantityTypeTest {
 
     @Test
     public void testDivideZero() {
-        assertThrows(ArithmeticException.class, () -> new QuantityType<>("4 m").divide(QuantityType.ZERO));
+        assertThrows(IllegalArgumentException.class, () -> new QuantityType<>("4 m").divide(QuantityType.ZERO));
     }
 
     @Test
     public void testExponentials() {
         QuantityType<Length> exponential = new QuantityType<>("10E-2 m");
-        assertEquals(exponential, new QuantityType<>("10 cm"));
+        assertEquals(new QuantityType<>("10 cm"), exponential);
 
         exponential = new QuantityType<>("10E+3 m");
-        assertEquals(exponential, new QuantityType<>("10 km"));
+        assertEquals(new QuantityType<>("10 km"), exponential);
 
         exponential = new QuantityType<>("10E3 m");
-        assertEquals(exponential, new QuantityType<>("10 km"));
+        assertEquals(new QuantityType<>("10 km"), exponential);
     }
 
     @Test

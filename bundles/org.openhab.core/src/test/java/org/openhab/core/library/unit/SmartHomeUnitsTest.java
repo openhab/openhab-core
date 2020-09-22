@@ -12,7 +12,7 @@
  */
 package org.openhab.core.library.unit;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,14 +28,16 @@ import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.ArealDensity;
-import org.openhab.core.library.dimension.Density;
-import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.types.QuantityType;
 
-import tec.uom.se.quantity.Quantities;
-import tec.uom.se.unit.Units;
+import si.uom.quantity.Density;
+import si.uom.quantity.Intensity;
+import tech.units.indriya.quantity.Quantities;
+import tech.units.indriya.unit.Units;
 
 /**
  * Test for the framework defined {@link SmartHomeUnits}.
@@ -44,15 +46,20 @@ import tec.uom.se.unit.Units;
  */
 public class SmartHomeUnitsTest {
 
-    private static final double DEFAULT_ERROR = 0.0000000000000001d;
+    private static final double DEFAULT_ERROR = 0.000000000000001d;
+
+    private static <Q extends Quantity<?>> Matcher<? super Q> isQuantityEquals(Q quantity) {
+        return new QuantityEquals(quantity);
+    }
 
     @Test
     public void testInHg2PascalConversion() {
         Quantity<Pressure> inHg = Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.INCH_OF_MERCURY);
 
-        assertThat(inHg.to(SIUnits.PASCAL), is(Quantities.getQuantity(new BigDecimal("3386.388"), SIUnits.PASCAL)));
-        assertThat(inHg.to(MetricPrefix.HECTO(SIUnits.PASCAL)),
-                is(Quantities.getQuantity(new BigDecimal("33.86388"), MetricPrefix.HECTO(SIUnits.PASCAL))));
+        assertThat(inHg.to(SIUnits.PASCAL),
+                isQuantityEquals(Quantities.getQuantity(new BigDecimal("3386.388"), SIUnits.PASCAL)));
+        assertThat(inHg.to(MetricPrefix.HECTO(SIUnits.PASCAL)), isQuantityEquals(
+                Quantities.getQuantity(new BigDecimal("33.86388"), MetricPrefix.HECTO(SIUnits.PASCAL))));
     }
 
     @Test
@@ -66,16 +73,17 @@ public class SmartHomeUnitsTest {
         Quantity<Pressure> pascal = Quantities.getQuantity(new BigDecimal("3386.388"), SIUnits.PASCAL);
 
         assertThat(pascal.to(ImperialUnits.INCH_OF_MERCURY),
-                is(Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.INCH_OF_MERCURY)));
+                isQuantityEquals(Quantities.getQuantity(BigDecimal.ONE, ImperialUnits.INCH_OF_MERCURY)));
     }
 
     @Test
     public void testmmHg2PascalConversion() {
         Quantity<Pressure> mmHg = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.MILLIMETRE_OF_MERCURY);
 
-        assertThat(mmHg.to(SIUnits.PASCAL), is(Quantities.getQuantity(new BigDecimal("133.322368"), SIUnits.PASCAL)));
-        assertThat(mmHg.to(MetricPrefix.HECTO(SIUnits.PASCAL)),
-                is(Quantities.getQuantity(new BigDecimal("1.33322368"), MetricPrefix.HECTO(SIUnits.PASCAL))));
+        assertThat(mmHg.to(SIUnits.PASCAL),
+                isQuantityEquals(Quantities.getQuantity(new BigDecimal("133.322368"), SIUnits.PASCAL)));
+        assertThat(mmHg.to(MetricPrefix.HECTO(SIUnits.PASCAL)), isQuantityEquals(
+                Quantities.getQuantity(new BigDecimal("1.33322368"), MetricPrefix.HECTO(SIUnits.PASCAL))));
     }
 
     @Test
@@ -89,7 +97,7 @@ public class SmartHomeUnitsTest {
         Quantity<Pressure> pascal = Quantities.getQuantity(new BigDecimal("133.322368"), SIUnits.PASCAL);
 
         assertThat(pascal.to(SmartHomeUnits.MILLIMETRE_OF_MERCURY),
-                is(Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.MILLIMETRE_OF_MERCURY)));
+                isQuantityEquals(Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.MILLIMETRE_OF_MERCURY)));
     }
 
     @Test
@@ -97,7 +105,7 @@ public class SmartHomeUnitsTest {
         Quantity<Pressure> pascal = Quantities.getQuantity(BigDecimal.valueOf(100), SIUnits.PASCAL);
 
         assertThat(pascal.to(MetricPrefix.HECTO(SIUnits.PASCAL)),
-                is(Quantities.getQuantity(BigDecimal.ONE, MetricPrefix.HECTO(SIUnits.PASCAL))));
+                isQuantityEquals(Quantities.getQuantity(BigDecimal.ONE, MetricPrefix.HECTO(SIUnits.PASCAL))));
     }
 
     @Test
@@ -110,7 +118,7 @@ public class SmartHomeUnitsTest {
         Quantity<Temperature> kelvin = Quantities.getQuantity(BigDecimal.ZERO, SmartHomeUnits.KELVIN);
 
         assertThat(kelvin.to(ImperialUnits.FAHRENHEIT),
-                is(Quantities.getQuantity(new BigDecimal("-459.67"), ImperialUnits.FAHRENHEIT)));
+                isQuantityEquals(Quantities.getQuantity(new BigDecimal("-459.67"), ImperialUnits.FAHRENHEIT)));
     }
 
     @Test
@@ -118,7 +126,7 @@ public class SmartHomeUnitsTest {
         Quantity<Temperature> kelvin = Quantities.getQuantity(new BigDecimal("300"), SmartHomeUnits.KELVIN);
 
         assertThat(kelvin.to(ImperialUnits.FAHRENHEIT),
-                is(Quantities.getQuantity(new BigDecimal("80.33"), ImperialUnits.FAHRENHEIT)));
+                isQuantityEquals(Quantities.getQuantity(new BigDecimal("80.33"), ImperialUnits.FAHRENHEIT)));
     }
 
     @Test
@@ -276,7 +284,7 @@ public class SmartHomeUnitsTest {
         Quantity<Dimensionless> one1 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.ONE);
         Quantity<Dimensionless> one2 = Quantities.getQuantity(BigDecimal.ONE, SmartHomeUnits.ONE);
 
-        assertThat(one1.add(one2).toString(), is("2 one"));
+        assertThat(one1.add(one2).toString(), is("2"));
     }
 
     @Test
@@ -288,7 +296,7 @@ public class SmartHomeUnitsTest {
     @Test
     public void testDb() {
         QuantityType<Dimensionless> ratio = new QuantityType<>("100");
-        assertEquals("20.0 dB", ratio.toUnit("dB").toString());
+        assertEquals(20.0, ratio.toUnit("dB").doubleValue(), DEFAULT_ERROR);
     }
 
     @Test
@@ -337,7 +345,11 @@ public class SmartHomeUnitsTest {
 
     @Test
     public void testMicrowattPerSquareCentimetreFromString() {
-        assertThat(QuantityType.valueOf("2.60 µW/cm²").getUnit().toString(), is("µW/cm²"));
+        assertThat(QuantityType.valueOf("2.60 µW/cm²").getUnit().toString(),
+                anyOf(is("\u00B5W/cm²"), is("\u03BCW/cm²")));
+
+        assertThat(QuantityType.valueOf("2.60 \u03BCW/cm²").getUnit().toString(),
+                anyOf(is("\u00B5W/cm²"), is("\u03BCW/cm²")));
     }
 
     @Test
@@ -353,6 +365,28 @@ public class SmartHomeUnitsTest {
     public void testConductivity() {
         QuantityType<?> oneSM = QuantityType.valueOf("1 S/m");
         QuantityType<?> converted = oneSM.toUnit("µS/cm");
-        assertEquals("10000 µS/cm", converted.toString());
+        assertThat(converted.toString(), anyOf(is("10000 \u00B5S/cm"), is("10000 \u03BCS/cm")));
+    }
+
+    private static class QuantityEquals extends IsEqual<Quantity<?>> {
+        private Quantity<?> quantity;
+
+        public QuantityEquals(Quantity<?> quantity) {
+            super(quantity);
+            this.quantity = quantity;
+        }
+
+        @Override
+        public boolean matches(Object actualValue) {
+            if (actualValue instanceof Quantity) {
+                Quantity<?> other = (Quantity<?>) actualValue;
+
+                if (!other.getUnit().isCompatible(quantity.getUnit())) {
+                    return false;
+                }
+                return Math.abs(other.getValue().doubleValue() - quantity.getValue().doubleValue()) <= DEFAULT_ERROR;
+            }
+            return false;
+        }
     }
 }

@@ -52,22 +52,21 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.dimension.ArealDensity;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
-import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
-import org.openhab.core.library.dimension.Intensity;
-import org.openhab.core.library.dimension.VolumetricFlowRate;
 
-import tec.uom.se.AbstractUnit;
-import tec.uom.se.format.SimpleUnitFormat;
-import tec.uom.se.function.ExpConverter;
-import tec.uom.se.function.LogConverter;
-import tec.uom.se.function.MultiplyConverter;
-import tec.uom.se.function.PiMultiplierConverter;
-import tec.uom.se.function.RationalConverter;
-import tec.uom.se.unit.AlternateUnit;
-import tec.uom.se.unit.ProductUnit;
-import tec.uom.se.unit.TransformedUnit;
-import tec.uom.se.unit.Units;
+import si.uom.NonSI;
+import si.uom.quantity.Density;
+import si.uom.quantity.Intensity;
+import si.uom.quantity.VolumetricFlowRate;
+import tech.units.indriya.AbstractUnit;
+import tech.units.indriya.format.SimpleUnitFormat;
+import tech.units.indriya.function.ExpConverter;
+import tech.units.indriya.function.LogConverter;
+import tech.units.indriya.function.MultiplyConverter;
+import tech.units.indriya.unit.AlternateUnit;
+import tech.units.indriya.unit.ProductUnit;
+import tech.units.indriya.unit.TransformedUnit;
+import tech.units.indriya.unit.Units;
 
 /**
  * Delegate common units to {@link Units} to hide this dependency from the rest of openHAB.
@@ -86,11 +85,9 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<Acceleration> STANDARD_GRAVITY = addUnit(METRE_PER_SQUARE_SECOND.multiply(9.80665));
     public static final Unit<AmountOfSubstance> MOLE = addUnit(Units.MOLE);
     @SuppressWarnings("unchecked")
-    public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(
-            new TransformedUnit<>("°dH", (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE),
-                    RationalConverter.of(5.6, 1)));
-    public static final Unit<Angle> DEGREE_ANGLE = addUnit(new TransformedUnit<>(Units.RADIAN,
-            new PiMultiplierConverter().concatenate(new RationalConverter(BigInteger.ONE, BigInteger.valueOf(180)))));
+    public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(new TransformedUnit<>("°dH",
+            (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE), MultiplyConverter.of(5.6)));
+    public static final Unit<Angle> DEGREE_ANGLE = addUnit(NonSI.DEGREE_ANGLE);
     public static final Unit<Angle> RADIAN = addUnit(Units.RADIAN);
     public static final Unit<ArealDensity> DOBSON_UNIT = addUnit(
             new ProductUnit<ArealDensity>(MetricPrefix.MILLI(Units.MOLE).multiply(0.4462).divide(Units.SQUARE_METRE)));
@@ -98,15 +95,15 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<Density> KILOGRAM_PER_CUBICMETRE = addUnit(
             new ProductUnit<Density>(Units.KILOGRAM.divide(Units.CUBIC_METRE)));
     public static final Unit<Density> MICROGRAM_PER_CUBICMETRE = addUnit(new TransformedUnit<>(KILOGRAM_PER_CUBICMETRE,
-            new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000000))));
+            MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000000))));
     public static final Unit<Dimensionless> ONE = addUnit(AbstractUnit.ONE);
     public static final Unit<Dimensionless> PERCENT = addUnit(Units.PERCENT);
     public static final Unit<Dimensionless> PARTS_PER_BILLION = addUnit(
-            new TransformedUnit<>(ONE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000000))));
+            new TransformedUnit<>(ONE, MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000000))));
     public static final Unit<Dimensionless> PARTS_PER_MILLION = addUnit(
-            new TransformedUnit<>(ONE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000))));
+            new TransformedUnit<>(ONE, MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000))));
     public static final Unit<Dimensionless> DECIBEL = addUnit(ONE.transform(
-            new LogConverter(10).inverse().concatenate(new RationalConverter(BigInteger.ONE, BigInteger.TEN))));
+            new LogConverter(10).inverse().concatenate(MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.TEN))));
     public static final Unit<ElectricCurrent> AMPERE = addUnit(Units.AMPERE);
     public static final Unit<ElectricCapacitance> FARAD = addUnit(Units.FARAD);
     public static final Unit<ElectricCharge> COULOMB = addUnit(Units.COULOMB);
@@ -134,7 +131,7 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<Frequency> HERTZ = addUnit(Units.HERTZ);
     public static final Unit<Intensity> IRRADIANCE = addUnit(new ProductUnit<>(Units.WATT.divide(Units.SQUARE_METRE)));
     public static final Unit<Intensity> MICROWATT_PER_SQUARE_CENTIMETRE = addUnit(
-            new TransformedUnit<>(IRRADIANCE, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(100))));
+            new TransformedUnit<>(IRRADIANCE, MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(100))));
     public static final Unit<Illuminance> LUX = addUnit(Units.LUX);
     public static final Unit<LuminousFlux> LUMEN = addUnit(Units.LUMEN);
     public static final Unit<LuminousIntensity> CANDELA = addUnit(Units.CANDELA);
@@ -142,11 +139,11 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<MagneticFluxDensity> TESLA = addUnit(Units.TESLA);
     public static final Unit<Power> WATT = addUnit(Units.WATT);
     public static final Unit<Power> DECIBEL_MILLIWATTS = new TransformedUnit<>("dBm", MetricPrefix.MILLI(WATT),
-            new ExpConverter(10.0).concatenate(new MultiplyConverter(0.1)));
+            new ExpConverter(10.0).concatenate(MultiplyConverter.of(0.1)));
     public static final Unit<Pressure> MILLIMETRE_OF_MERCURY = addUnit(new TransformedUnit<>("mmHg", Units.PASCAL,
-            new RationalConverter(BigInteger.valueOf(133322368), BigInteger.valueOf(1000000))));
+            MultiplyConverter.ofRational(BigInteger.valueOf(133322368), BigInteger.valueOf(1000000))));
     public static final Unit<Pressure> BAR = addUnit(new TransformedUnit<>("bar", Units.PASCAL,
-            new RationalConverter(BigInteger.valueOf(100000), BigInteger.ONE)));
+            MultiplyConverter.ofRational(BigInteger.valueOf(100000), BigInteger.ONE)));
     public static final Unit<Pressure> MILLIBAR = addUnit(MetricPrefix.MILLI(BAR));
     public static final Unit<Radioactivity> BECQUEREL = addUnit(Units.BECQUEREL);
     public static final Unit<Density> BECQUEREL_PER_CUBIC_METRE = addUnit(
@@ -154,12 +151,12 @@ public final class SmartHomeUnits extends CustomUnits {
     public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(Units.GRAY);
     public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(Units.SIEVERT);
     public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(new TransformedUnit<>("mm/h",
-            Units.KILOMETRE_PER_HOUR, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(1000000))));
+            Units.KILOMETRE_PER_HOUR, MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000))));
     public static final Unit<Speed> INCHES_PER_HOUR = addUnit(new TransformedUnit<>("in/h",
-            ImperialUnits.MILES_PER_HOUR, new RationalConverter(BigInteger.ONE, BigInteger.valueOf(63360))));
+            ImperialUnits.MILES_PER_HOUR, MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(63360))));
     public static final Unit<Speed> METRE_PER_SECOND = addUnit(Units.METRE_PER_SECOND);
     public static final Unit<Speed> KNOT = addUnit(new TransformedUnit<>("kn", Units.KILOMETRE_PER_HOUR,
-            new RationalConverter(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
+            MultiplyConverter.ofRational(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
     public static final Unit<SolidAngle> STERADIAN = addUnit(Units.STERADIAN);
     public static final Unit<Temperature> KELVIN = addUnit(Units.KELVIN);
     public static final Unit<Time> SECOND = addUnit(Units.SECOND);
