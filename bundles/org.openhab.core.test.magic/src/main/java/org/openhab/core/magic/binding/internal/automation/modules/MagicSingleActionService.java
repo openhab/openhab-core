@@ -33,11 +33,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  */
-@Component(configurationPid = "org.openhab.magicsingleaction", property = {
-        Constants.SERVICE_PID + "=org.openhab.automation.action.magicSingleActionService",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=automationAction:magicSingleAction",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Magic Single Action Service",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=RuleActions" })
+@Component(configurationPid = "org.openhab.magicsingleaction", //
+        property = Constants.SERVICE_PID + "=org.openhab.automation.action.magicSingleActionService")
+@ConfigurableService(category = "RuleActions", label = "Magic Single Action Service", description_uri = "automationAction:magicSingleAction")
 @ActionScope(name = "binding.magicService")
 public class MagicSingleActionService implements AnnotatedActions {
 
