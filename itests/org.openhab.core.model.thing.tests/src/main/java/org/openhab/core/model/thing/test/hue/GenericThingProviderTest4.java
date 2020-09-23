@@ -91,7 +91,8 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
                     throw new IllegalStateException("Interrupted while sleeping", e);
                 }
             }
-            super.initialize();
+
+            updateStatus(ThingStatus.ONLINE);
         }
 
         @Override

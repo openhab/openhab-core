@@ -152,15 +152,6 @@ public abstract class BaseThingHandler implements ThingHandler {
     }
 
     @Override
-    @Deprecated
-    public void initialize() {
-        // should be overridden by subclasses!
-        updateStatus(ThingStatus.ONLINE);
-        logger.warn(
-                "BaseThingHandler.initialize() will be removed soon, ThingStatus can be set manually via updateStatus(ThingStatus.ONLINE)");
-    }
-
-    @Override
     public void thingUpdated(Thing thing) {
         dispose();
         this.thing = thing;

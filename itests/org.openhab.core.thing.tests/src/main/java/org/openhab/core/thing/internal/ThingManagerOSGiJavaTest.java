@@ -318,6 +318,11 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void handleCommand(ChannelUID channelUID, Command command) {
             }
+
+            @Override
+            public void initialize() {
+                updateStatus(ThingStatus.ONLINE);
+            }
         });
 
         ConfigDescriptionProvider mockConfigDescriptionProvider = mock(ConfigDescriptionProvider.class);
