@@ -310,10 +310,6 @@ public class MqttBrokerConnectionTests extends JavaTest {
         connection.setKeepAliveInterval(80);
         assertEquals(80, connection.getKeepAliveInterval());
 
-        assertFalse(connection.isRetain());
-        connection.setRetain(true);
-        assertTrue(connection.isRetain());
-
         assertEquals(MqttBrokerConnection.DEFAULT_QOS, connection.getQos());
         connection.setQos(2);
         assertEquals(2, connection.getQos());

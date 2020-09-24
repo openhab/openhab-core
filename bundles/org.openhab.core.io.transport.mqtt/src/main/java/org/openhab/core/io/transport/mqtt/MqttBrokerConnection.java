@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.transport.mqtt;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -95,8 +94,6 @@ public class MqttBrokerConnection {
 
     /// Configuration variables
     private int qos = DEFAULT_QOS;
-    @Deprecated
-    private boolean retain = false;
     private @Nullable MqttWillAndTestament lastWill;
     protected @Nullable AbstractReconnectStrategy reconnectStrategy;
     private int keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
@@ -117,7 +114,6 @@ public class MqttBrokerConnection {
      * The callback will interact with the {@link AbstractReconnectStrategy} as well as inform registered
      * {@link MqttConnectionObserver}s.
      */
-    @NonNullByDefault
     public class ConnectionCallback implements MqttClientConnectedListener, MqttClientDisconnectedListener {
         private final MqttBrokerConnection connection;
         private final Runnable cancelTimeoutFuture;
@@ -199,25 +195,6 @@ public class MqttBrokerConnection {
      */
     public MqttBrokerConnection(String host, @Nullable Integer port, boolean secure, @Nullable String clientId) {
         this(Protocol.TCP, MqttVersion.V3, host, port, secure, clientId);
-    }
-
-    /**
-     * Create a new MQTT3 client connection to a server with the given protocol, mqtt client version, host and port.
-     *
-     * @param protocol The transport protocol
-     * @param host A host name or address
-     * @param port A port or null to select the default port for a secure or insecure connection
-     * @param secure A secure connection
-     * @param clientId Client id. Each client on a MQTT server has a unique client id. Sometimes client ids are
-     *            used for access restriction implementations.
-     *            If none is specified, a default is generated. The client id cannot be longer than 65535
-     *            characters.
-     * @throws IllegalArgumentException If the client id or port is not valid.
-     */
-    @Deprecated
-    public MqttBrokerConnection(Protocol protocol, String host, @Nullable Integer port, boolean secure,
-            @Nullable String clientId) {
-        this(protocol, MqttVersion.V3, host, port, secure, clientId);
     }
 
     /**
@@ -389,27 +366,6 @@ public class MqttBrokerConnection {
     }
 
     /**
-     * use retain flags on message publish instead
-     *
-     * @return true if newly messages sent to the broker should be retained by the broker.
-     */
-    @Deprecated
-    public boolean isRetain() {
-        return retain;
-    }
-
-    /**
-     * Set whether newly published messages should be retained by the broker.
-     * use retain flags on message publish instead
-     *
-     * @param retain true to retain.
-     */
-    @Deprecated
-    public void setRetain(boolean retain) {
-        this.retain = retain;
-    }
-
-    /**
      * Return the last will object or null if there is none.
      */
     public @Nullable MqttWillAndTestament getLastWill() {
@@ -442,23 +398,6 @@ public class MqttBrokerConnection {
      */
     public void setLastWill(@Nullable MqttWillAndTestament lastWill) {
         this.lastWill = lastWill;
-    }
-
-    /**
-     * Sets the path for the persistence storage.
-     *
-     * A persistence mechanism is necessary to enable reliable messaging.
-     * For messages sent at qualities of service (QoS) 1 or 2 to be reliably delivered, messages must be stored (on both
-     * the client and server) until the delivery of the message is complete.
-     * If messages are not safely stored when being delivered then a failure in the client or server can result in lost
-     * messages.
-     * A file persistence storage is used that uses the given path. If the path does not exist it will be created on
-     * runtime (if possible). If it is set to {@code null} a implementation specific default path is used.
-     *
-     * @param persistencePath the path that should be used to store persistent data
-     */
-    @Deprecated
-    public void setPersistencePath(final @Nullable Path persistencePath) {
     }
 
     /**
@@ -798,57 +737,6 @@ public class MqttBrokerConnection {
         }
 
         return future.thenApply(this::finalizeStopAfterDisconnect);
-    }
-
-    /**
-     * Publish a message to the broker.
-     *
-     * @param topic The topic
-     * @param payload The message payload
-     * @param listener A listener to be notified of success or failure of the delivery.
-     */
-    @Deprecated
-    public void publish(String topic, byte[] payload, MqttActionCallback listener) {
-        publish(topic, payload, getQos(), isRetain(), listener);
-    }
-
-    /**
-     * Publish a message to the broker with the given QoS and retained flag.
-     *
-     * @param topic The topic
-     * @param payload The message payload
-     * @param qos The quality of service for this message
-     * @param retain Set to true to retain the message on the broker
-     * @param listener A listener to be notified of success or failure of the delivery.
-     */
-    @Deprecated
-    public void publish(String topic, byte[] payload, int qos, boolean retain, MqttActionCallback listener) {
-        final MqttAsyncClientWrapper client = this.client;
-        if (client == null) {
-            listener.onFailure(topic, new MqttException(new Throwable()));
-            return;
-        }
-
-        client.publish(topic, payload, retain, qos).whenComplete((m, t) -> {
-            if (t != null) {
-                listener.onFailure(topic, new MqttException(t));
-            } else {
-                listener.onSuccess(topic);
-            }
-        });
-        logger.debug("Publishing message to topic '{}'", topic);
-    }
-
-    /**
-     * Publish a message to the broker.
-     *
-     * @param topic The topic
-     * @param payload The message payload
-     * @return Returns a future that completes with a result of true if the publishing succeeded and completes
-     *         exceptionally on an error or with a result of false if no broker connection is established.
-     */
-    public CompletableFuture<Boolean> publish(String topic, byte[] payload) {
-        return publish(topic, payload, getQos(), isRetain());
     }
 
     /**
