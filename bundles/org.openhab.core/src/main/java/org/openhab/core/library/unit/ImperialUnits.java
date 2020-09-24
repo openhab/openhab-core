@@ -16,6 +16,7 @@ import java.math.BigInteger;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Length;
+import javax.measure.quantity.Mass;
 import javax.measure.quantity.Pressure;
 import javax.measure.quantity.Speed;
 import javax.measure.quantity.Temperature;
@@ -42,18 +43,18 @@ public final class ImperialUnits extends CustomUnits {
     private static final ImperialUnits INSTANCE = new ImperialUnits();
 
     /** Additionally defined units to be used in openHAB **/
-    public static final Unit<Pressure> INCH_OF_MERCURY = addUnit(new TransformedUnit<>("inHg", Units.PASCAL,
-            new RationalConverter(BigInteger.valueOf(3386388), BigInteger.valueOf(1000))));
+    public static final Unit<Pressure> INCH_OF_MERCURY = addUnit(
+            new TransformedUnit<>("inHg", Units.PASCAL, new RationalConverter(3386388, 1000)));
 
     public static final Unit<Temperature> FAHRENHEIT = addUnit(new TransformedUnit<>("°F", Units.KELVIN,
             new RationalConverter(BigInteger.valueOf(5), BigInteger.valueOf(9)).concatenate(new AddConverter(459.67))));
 
-    public static final Unit<Speed> MILES_PER_HOUR = addUnit(new TransformedUnit<>("mph", Units.KILOMETRE_PER_HOUR,
-            new RationalConverter(BigInteger.valueOf(1609344), BigInteger.valueOf(1000000))));
+    public static final Unit<Speed> MILES_PER_HOUR = addUnit(
+            new TransformedUnit<>("mph", Units.KILOMETRE_PER_HOUR, new RationalConverter(1609344, 1000000)));
 
     /** Length **/
-    public static final Unit<Length> INCH = addUnit(new TransformedUnit<>("in", Units.METRE,
-            new RationalConverter(BigInteger.valueOf(254), BigInteger.valueOf(10000))));
+    public static final Unit<Length> INCH = addUnit(
+            new TransformedUnit<>("in", Units.METRE, new RationalConverter(254, 10000)));
 
     public static final Unit<Length> FOOT = addUnit(new TransformedUnit<>("ft", INCH, new MultiplyConverter(12.0)));
 
@@ -72,6 +73,37 @@ public final class ImperialUnits extends CustomUnits {
     public static final Unit<Length> CUBIC_FOOT = addUnit(new ProductUnit<>(SQUARE_FOOT.multiply(FOOT)));
 
     /**
+     * A unit of length equal to <code>1852.0 m</code> (standard name <code>nmi</code>).
+     */
+    public static final Unit<Length> NAUTICAL_MILE = addUnit(
+            new TransformedUnit<>("nmi", Units.METRE, new MultiplyConverter(1852.0)));
+
+    //////////
+    // Mass //
+    //////////
+
+    /**
+     * A unit of mass equal to <code>453.59237 grams</code> (avoirdupois pound, standard name <code>lb</code>).
+     */
+    public static final Unit<Mass> POUND = addUnit(
+            new TransformedUnit<>("lb", Units.KILOGRAM, new RationalConverter(45359237, 100000000)));
+
+    /**
+     * A unit of mass equal to <code>1 / 16 {@link #POUND}</code> (standard name <code>oz</code>).
+     */
+    public static final Unit<Mass> OUNCE = addUnit(new TransformedUnit<>("oz", POUND, new RationalConverter(1, 16)));
+
+    /**
+     * A unit of mass equal to <code>2000 {@link #POUND}</code> (short ton, standard name <code>ton</code>).
+     */
+    public static final Unit<Mass> TON = addUnit(new TransformedUnit<>("ton_us", POUND, new MultiplyConverter(2000.0)));
+
+    //////////////
+    // Pressure //
+    //////////////
+    public static final Unit<Pressure> POUND_FORCE_PER_SQUARE_INCH = addUnit(new TransformedUnit<Pressure>("psi",
+            MetricPrefix.KILO(Units.PASCAL), new RationalConverter(6894757, 1000000)));
+    /**
      * Add unit symbols for imperial units.
      */
     static {
@@ -84,7 +116,12 @@ public final class ImperialUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(CHAIN, CHAIN.getSymbol());
         SimpleUnitFormat.getInstance().label(FURLONG, FURLONG.getSymbol());
         SimpleUnitFormat.getInstance().label(MILE, MILE.getSymbol());
+        SimpleUnitFormat.getInstance().label(NAUTICAL_MILE, NAUTICAL_MILE.getSymbol());
         SimpleUnitFormat.getInstance().label(LEAGUE, LEAGUE.getSymbol());
+        SimpleUnitFormat.getInstance().label(POUND, POUND.getSymbol());
+        SimpleUnitFormat.getInstance().label(OUNCE, OUNCE.getSymbol());
+        SimpleUnitFormat.getInstance().label(TON, TON.getSymbol());
+        SimpleUnitFormat.getInstance().label(POUND_FORCE_PER_SQUARE_INCH, POUND_FORCE_PER_SQUARE_INCH.getSymbol());
     }
 
     private ImperialUnits() {

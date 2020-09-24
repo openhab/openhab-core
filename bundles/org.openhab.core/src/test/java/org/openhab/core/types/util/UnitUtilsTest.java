@@ -18,7 +18,9 @@ import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.*;
 
+import javax.measure.IncommensurableException;
 import javax.measure.Quantity;
+import javax.measure.UnconvertibleException;
 import javax.measure.Unit;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
@@ -27,7 +29,7 @@ import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.RadiantIntensity;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
@@ -66,16 +68,16 @@ public class UnitUtilsTest {
         assertNotNull(temperature);
         assertTrue(Temperature.class.isAssignableFrom(temperature));
 
-        Class<? extends Quantity<?>> intensity = UnitUtils.parseDimension("Intensity");
+        Class<? extends Quantity<?>> intensity = UnitUtils.parseDimension("RadiantIntensity");
         assertNotNull(intensity);
-        assertTrue(Intensity.class.isAssignableFrom(intensity));
+        assertTrue(RadiantIntensity.class.isAssignableFrom(intensity));
     }
 
     @Test
-    public void testConversionOfUnit() {
-        assertThat(SmartHomeUnits.DECIBEL_MILLIWATTS.getConverterTo(SmartHomeUnits.WATT).convert(50),
+    public void testConversionOfUnit() throws UnconvertibleException, IncommensurableException {
+        assertThat(SmartHomeUnits.DECIBEL_MILLIWATTS.getConverterToAny(SmartHomeUnits.WATT).convert(50),
                 closeTo(100, 0.001));
-        assertThat(SmartHomeUnits.WATT.getConverterTo(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1),
+        assertThat(SmartHomeUnits.WATT.getConverterToAny(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1),
                 closeTo(20, 0.0001));
         assertThat(
                 SmartHomeUnits.METRE_PER_SQUARE_SECOND.getConverterTo(SmartHomeUnits.STANDARD_GRAVITY).convert(9.8065),

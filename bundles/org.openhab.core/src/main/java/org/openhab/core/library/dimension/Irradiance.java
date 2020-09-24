@@ -17,10 +17,11 @@ import javax.measure.Quantity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Define Volumetric Flow Rate type (basic unit is m^3/s).
+ * This interface represents the intensity dimension.
  *
- * @author Łukasz Dywicki - Initial contribution
+ * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
-public interface VolumetricFlowRate extends Quantity<VolumetricFlowRate> {
+public interface Irradiance extends Quantity<Irradiance> {
+
 }

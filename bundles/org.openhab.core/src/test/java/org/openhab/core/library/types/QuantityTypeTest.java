@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
-import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.Irradiance;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.SmartHomeUnits;
@@ -281,14 +281,14 @@ public class QuantityTypeTest {
 
     @Test
     public void testIntensity() {
-        QuantityType<Intensity> density = new QuantityType<>("10 W/m²");
+        QuantityType<Irradiance> density = new QuantityType<>("10 W/m²");
         assertEquals(10, density.doubleValue(), 1E-5);
-        assertEquals(SmartHomeUnits.IRRADIANCE.toString(), density.getUnit().toString());
+        assertEquals(SmartHomeUnits.WATT_PER_SQUARE_METRE.toString(), density.getUnit().toString());
 
         density = density.toUnit("W/cm²");
         assertEquals("0.001 W/cm²", density.toString());
 
-        density = new QuantityType<>(2, SmartHomeUnits.IRRADIANCE);
+        density = new QuantityType<>(2, SmartHomeUnits.WATT_PER_SQUARE_METRE);
         assertEquals(2, density.doubleValue(), 1E-5);
         assertEquals("2 W/m²", density.toString());
 
