@@ -62,6 +62,10 @@
       <version>1.0.9</version>
       <exclusions>
         <exclusion>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>org.apache.geronimo.specs</groupId>
           <artifactId>geronimo-annotation_1.3_spec</artifactId>
         </exclusion>
