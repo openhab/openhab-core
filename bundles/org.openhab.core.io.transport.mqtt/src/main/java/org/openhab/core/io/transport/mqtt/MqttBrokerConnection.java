@@ -38,8 +38,6 @@ import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper
 import org.openhab.core.io.transport.mqtt.reconnect.AbstractReconnectStrategy;
 import org.openhab.core.io.transport.mqtt.reconnect.PeriodicReconnectStrategy;
 import org.openhab.core.io.transport.mqtt.ssl.CustomTrustManagerFactory;
-import org.openhab.core.io.transport.mqtt.sslcontext.CustomSSLContextProvider;
-import org.openhab.core.io.transport.mqtt.sslcontext.SSLContextProvider;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +89,6 @@ public class MqttBrokerConnection {
     protected final MqttVersion mqttVersion;
 
     private @Nullable TrustManagerFactory trustManagerFactory = InsecureTrustManagerFactory.INSTANCE;
-    private SSLContextProvider sslContextProvider = new CustomSSLContextProvider(trustManagerFactory);
     protected final String clientId;
     private @Nullable String user;
     private @Nullable String password;
@@ -298,7 +295,6 @@ public class MqttBrokerConnection {
         } else {
             trustManagerFactory = null;
         }
-        sslContextProvider = new CustomSSLContextProvider(trustManagerFactory);
     }
 
     public TrustManager[] getTrustManagers() {
@@ -504,26 +500,6 @@ public class MqttBrokerConnection {
      */
     public int getKeepAliveInterval() {
         return keepAliveInterval;
-    }
-
-    /**
-     * Return the ssl context provider.
-     */
-    @Deprecated
-    public SSLContextProvider getSSLContextProvider() {
-        return sslContextProvider;
-    }
-
-    /**
-     * Set the ssl context provider. The default provider is {@see AcceptAllCertifcatesSSLContext}.
-     *
-     * @return The ssl context provider. Should not be null, but the ssl context will in fact
-     *         only be used if a ssl:// url is given.
-     */
-    @Deprecated
-    public void setSSLContextProvider(SSLContextProvider sslContextProvider) {
-        this.sslContextProvider = sslContextProvider;
-        trustManagerFactory = new CustomTrustManagerFactory(sslContextProvider);
     }
 
     /**
