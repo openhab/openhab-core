@@ -38,6 +38,7 @@ import org.openhab.core.thing.ManagedThingProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingProvider;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.BaseThingHandler;
@@ -145,6 +146,11 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
             @Override
             public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
                 changedParameters = configurationParameters;
+            }
+
+            @Override
+            public void initialize() {
+                updateStatus(ThingStatus.ONLINE);
             }
         };
 
