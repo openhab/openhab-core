@@ -38,11 +38,9 @@ import org.slf4j.LoggerFactory;
  * @author Henning Treu - Initial contribution
  */
 @NonNullByDefault
-@Component(configurationPid = "org.openhab.magic", service = ConfigOptionProvider.class, immediate = true, property = {
-        Constants.SERVICE_PID + "=org.openhab.core.magic",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=test:magic",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=Magic",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=test" })
+@Component(configurationPid = "org.openhab.magic", service = ConfigOptionProvider.class, immediate = true, //
+        property = Constants.SERVICE_PID + "=org.openhab.core.magic")
+@ConfigurableService(category = "test", label = "Magic", description_uri = "test:magic")
 public class MagicServiceImpl implements MagicService {
     private final Logger logger = LoggerFactory.getLogger(MagicServiceImpl.class);
 

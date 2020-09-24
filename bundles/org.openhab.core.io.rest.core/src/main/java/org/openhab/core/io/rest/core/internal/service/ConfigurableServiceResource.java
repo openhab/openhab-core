@@ -43,6 +43,7 @@ import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.config.core.ConfigurableServiceUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -97,15 +98,6 @@ public class ConfigurableServiceResource implements RESTResource {
 
     /** The URI path to this resource */
     public static final String PATH_SERVICES = "services";
-
-    // all singleton services without multi-config services
-    private static final String CONFIGURABLE_SERVICE_FILTER = "(&("
-            + ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=*)(!("
-            + ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=*)))";
-
-    // all multi-config services without singleton services
-    private static final String CONFIGURABLE_MULTI_CONFIG_SERVICE_FILTER = "("
-            + ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=*)";
 
     private final Logger logger = LoggerFactory.getLogger(ConfigurableServiceResource.class);
 
@@ -284,24 +276,24 @@ public class ConfigurableServiceResource implements RESTResource {
         if (serviceReferences != null) {
             for (ServiceReference<?> serviceReference : serviceReferences) {
                 String id = getServiceId(serviceReference);
-                String label = (String) serviceReference.getProperty(ConfigurableService.SERVICE_PROPERTY_LABEL);
-                if (label == null) { // for multi context services the label can be changed and must be read from config
-                                     // admin.
+                ConfigurableService configurableService = ConfigurableServiceUtil
+                        .asConfigurableService((key) -> serviceReference.getProperty(key));
+
+                String label = configurableService.label();
+                if (label.isEmpty()) { // for multi context services the label can be changed and must be read from
+                                       // config admin.
                     label = configurationService.getProperty(id, OpenHAB.SERVICE_CONTEXT);
                 }
-                String category = (String) serviceReference.getProperty(ConfigurableService.SERVICE_PROPERTY_CATEGORY);
-                String configDescriptionURI = (String) serviceReference
-                        .getProperty(ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI);
 
-                if (configDescriptionURI == null) {
+                String category = configurableService.category();
+
+                String configDescriptionURI = configurableService.description_uri();
+                if (configDescriptionURI.isEmpty()) {
                     String factoryPid = (String) serviceReference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
                     configDescriptionURI = getConfigDescriptionByFactoryPid(factoryPid);
                 }
 
-                Object factoryProperty = serviceReference
-                        .getProperty(ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE);
-                boolean multiple = factoryProperty instanceof Boolean ? (Boolean) factoryProperty
-                        : Boolean.parseBoolean((String) factoryProperty);
+                boolean multiple = configurableService.factory();
 
                 services.add(new ConfigurableServiceDTO(id, label, category, configDescriptionURI, multiple));
             }
@@ -318,8 +310,9 @@ public class ConfigurableServiceResource implements RESTResource {
             ServiceReference<?>[] refs = bundleContext.getServiceReferences((String) null, filter);
 
             if (refs != null && refs.length > 0) {
-                configDescriptionURI = (String) refs[0]
-                        .getProperty(ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI);
+                ConfigurableService configurableService = ConfigurableServiceUtil
+                        .asConfigurableService((key) -> refs[0].getProperty(key));
+                configDescriptionURI = configurableService.description_uri();
             }
         } catch (InvalidSyntaxException e) {
             logger.error("Cannot get service references because the syntax of the filter '{}' is invalid.", filter);
@@ -330,8 +323,8 @@ public class ConfigurableServiceResource implements RESTResource {
     private List<ConfigurableServiceDTO> getConfigurableServices() {
         List<ConfigurableServiceDTO> services = new ArrayList<>();
 
-        services.addAll(getServicesByFilter(CONFIGURABLE_SERVICE_FILTER));
-        services.addAll(getServicesByFilter(CONFIGURABLE_MULTI_CONFIG_SERVICE_FILTER));
+        services.addAll(getServicesByFilter(ConfigurableServiceUtil.CONFIGURABLE_SERVICE_FILTER));
+        services.addAll(getServicesByFilter(ConfigurableServiceUtil.CONFIGURABLE_MULTI_CONFIG_SERVICE_FILTER));
 
         return services;
     }

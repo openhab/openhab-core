@@ -21,12 +21,9 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Stefan Triller - Initial contribution
  */
-@Component(immediate = true, service = MagicMultiActionMarker.class, property = {
-        Constants.SERVICE_PID + "=org.openhab.MagicMultiAction",
-        ConfigurableService.SERVICE_PROPERTY_FACTORY_SERVICE + "=true",
-        ConfigurableService.SERVICE_PROPERTY_LABEL + "=MagicMultiActionsService",
-        ConfigurableService.SERVICE_PROPERTY_CATEGORY + "=RuleActions",
-        ConfigurableService.SERVICE_PROPERTY_DESCRIPTION_URI + "=automationAction:magicMultiAction" })
+@Component(immediate = true, service = MagicMultiActionMarker.class, //
+        property = Constants.SERVICE_PID + "=org.openhab.MagicMultiAction")
+@ConfigurableService(category = "RuleActions", label = "MagicMultiActionsService", description_uri = "automationAction:magicMultiAction", factory = true)
 public class MagicMultiActionMarker {
 
 }
