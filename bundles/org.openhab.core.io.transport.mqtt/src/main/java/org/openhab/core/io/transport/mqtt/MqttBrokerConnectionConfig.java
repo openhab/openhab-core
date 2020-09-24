@@ -34,8 +34,6 @@ public class MqttBrokerConnectionConfig {
     public @Nullable String clientID;
     // MQTT parameters
     public Integer qos = MqttBrokerConnection.DEFAULT_QOS;
-    @Deprecated
-    public Boolean retainMessages = false;
     /** Keepalive in seconds */
     public @Nullable Integer keepAlive;
     // Last will parameters
