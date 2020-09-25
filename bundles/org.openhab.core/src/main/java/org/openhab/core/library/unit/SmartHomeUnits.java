@@ -289,17 +289,18 @@ public final class SmartHomeUnits extends CustomUnits {
         INSTANCE.quantityToUnit.put(ElectricChargeDensity.class, COULOMB_PER_CUBIC_METRE);
         INSTANCE.quantityToUnit.put(ElectricChargeSurfaceDensity.class, COULOMB_PER_SQUARE_METRE);
         INSTANCE.quantityToUnit.put(ElectricCurrentDensity.class, AMPERE_PER_SQUARE_METRE);
+        INSTANCE.quantityToUnit.put(ElectricPotential.class, VOLT);
         INSTANCE.quantityToUnit.put(Luminance.class, CANDELA_PER_SQUARE_METRE);
         INSTANCE.quantityToUnit.put(LuminousEfficacy.class, LUMEN_PER_WATT);
         INSTANCE.quantityToUnit.put(LuminousEnergy.class, LUMEN_HOUR);
         INSTANCE.quantityToUnit.put(LuminousExposure.class, LUX_HOUR);
+        INSTANCE.quantityToUnit.put(RadiationDoseAbsorbed.class, GRAY);
         INSTANCE.quantityToUnit.put(RadiationDoseAbsorptionRate.class, GRAY_PER_SECOND);
         INSTANCE.quantityToUnit.put(RadiantIntensity.class, WATT_PER_STERADIAN);
         INSTANCE.quantityToUnit.put(RadiationExposure.class, COULOMB_PER_KILOGRAM);
         INSTANCE.quantityToUnit.put(Radiance.class, WATT_PER_STERADIAN_PER_SQUARE_METRE);
+        INSTANCE.quantityToUnit.put(VolumetricFlowRate.class, LITRE_PER_SECOND);
         INSTANCE.quantityToUnit.put(WaveNumber.class, RECIPROCAL_METRE);
-
-        // SimpleUnitFormat.getInstance().alias(OCTET, "o");
     }
 
     private SmartHomeUnits() {

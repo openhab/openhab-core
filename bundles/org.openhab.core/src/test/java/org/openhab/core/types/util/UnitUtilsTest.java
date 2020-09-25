@@ -77,7 +77,7 @@ public class UnitUtilsTest {
     public void testConversionOfUnit() throws UnconvertibleException, IncommensurableException {
         assertThat(SmartHomeUnits.DECIBEL_MILLIWATTS.getConverterToAny(SmartHomeUnits.WATT).convert(50),
                 closeTo(100, 0.001));
-        assertThat(SmartHomeUnits.WATT.getConverterToAny(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1),
+        assertThat(SmartHomeUnits.WATT.getConverterTo(SmartHomeUnits.DECIBEL_MILLIWATTS).convert(0.1),
                 closeTo(20, 0.0001));
         assertThat(
                 SmartHomeUnits.METRE_PER_SQUARE_SECOND.getConverterTo(SmartHomeUnits.STANDARD_GRAVITY).convert(9.8065),
