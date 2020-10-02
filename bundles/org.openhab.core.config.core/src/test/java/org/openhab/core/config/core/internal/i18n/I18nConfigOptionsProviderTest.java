@@ -31,6 +31,7 @@ import org.openhab.core.config.core.ParameterOption;
 public class I18nConfigOptionsProviderTest {
 
     private I18nConfigOptionsProvider provider;
+    private final ParameterOption empty = new ParameterOption("", "");
     private final ParameterOption expectedLangEN = new ParameterOption("en", "English");
     private final ParameterOption expectedLangFR = new ParameterOption("en", "anglais");
     private final ParameterOption expectedCntryEN = new ParameterOption("US", "United States");
@@ -47,15 +48,23 @@ public class I18nConfigOptionsProviderTest {
     @Test
     public void testLanguage() throws Exception {
         assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.US), hasItem(expectedLangEN));
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.US), not(hasItem(empty)));
+
         assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.FRENCH), hasItem(expectedLangFR));
+        assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.FRENCH), not(hasItem(empty)));
+
         assertThat(provider.getParameterOptions(uriI18N, "language", null, null), not(IsEmptyCollection.empty()));
     }
 
     @Test
     public void testRegion() throws Exception {
         assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.US), hasItem(expectedCntryEN));
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.US), not(hasItem(empty)));
+
         assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.FRENCH),
                 anyOf(hasItem(expectedCntryFRJava8), hasItem(expectedCntryFRJava9)));
+        assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.FRENCH), not(hasItem(empty)));
+
         assertThat(provider.getParameterOptions(uriI18N, "region", null, null), not(IsEmptyCollection.empty()));
     }
 
