@@ -420,7 +420,6 @@
 	</feature>
 
 	<feature name="openhab-runtime-base" description="openHAB Runtime Base" version="${project.version}">
-		<bundle>mvn:com.google.guava/guava/18.0</bundle>
 		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
 		<feature dependency="true">openhab.tp-commons-net</feature>
 		<feature>openhab-core-base</feature>
