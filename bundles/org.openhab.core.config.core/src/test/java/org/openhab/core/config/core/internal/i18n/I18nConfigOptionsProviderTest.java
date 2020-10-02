@@ -19,7 +19,6 @@ import java.net.URI;
 import java.util.Locale;
 
 import org.hamcrest.collection.IsEmptyCollection;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.config.core.ParameterOption;
 
@@ -30,23 +29,18 @@ import org.openhab.core.config.core.ParameterOption;
  */
 public class I18nConfigOptionsProviderTest {
 
-    private I18nConfigOptionsProvider provider;
+    private final I18nConfigOptionsProvider provider = new I18nConfigOptionsProvider();
+    private final URI uriI18N = URI.create("system:i18n");
+
     private final ParameterOption empty = new ParameterOption("", "");
     private final ParameterOption expectedLangEN = new ParameterOption("en", "English");
     private final ParameterOption expectedLangFR = new ParameterOption("en", "anglais");
     private final ParameterOption expectedCntryEN = new ParameterOption("US", "United States");
     private final ParameterOption expectedCntryFRJava8 = new ParameterOption("US", "Etats-Unis");
     private final ParameterOption expectedCntryFRJava9 = new ParameterOption("US", "États-Unis");
-    private URI uriI18N;
-
-    @BeforeEach
-    public void setup() throws Exception {
-        provider = new I18nConfigOptionsProvider();
-        uriI18N = new URI("system:i18n");
-    }
 
     @Test
-    public void testLanguage() throws Exception {
+    public void testLanguage() {
         assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.US), hasItem(expectedLangEN));
         assertThat(provider.getParameterOptions(uriI18N, "language", null, Locale.US), not(hasItem(empty)));
 
@@ -57,7 +51,7 @@ public class I18nConfigOptionsProviderTest {
     }
 
     @Test
-    public void testRegion() throws Exception {
+    public void testRegion() {
         assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.US), hasItem(expectedCntryEN));
         assertThat(provider.getParameterOptions(uriI18N, "region", null, Locale.US), not(hasItem(empty)));
 
@@ -69,7 +63,7 @@ public class I18nConfigOptionsProviderTest {
     }
 
     @Test
-    public void testUnknownParameter() throws Exception {
+    public void testUnknownParameter() {
         assertThat(provider.getParameterOptions(uriI18N, "unknown", null, Locale.US), nullValue());
     }
 }
