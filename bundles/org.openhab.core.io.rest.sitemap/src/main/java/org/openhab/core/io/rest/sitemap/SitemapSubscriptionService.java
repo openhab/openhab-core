@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.sitemap;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -88,8 +90,8 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     /* subscription id -> callback */
     private final Map<String, SitemapSubscriptionCallback> callbacks = new ConcurrentHashMap<>();
 
-    /* subscription id -> creation date */
-    private final Map<String, Long> creationDates = new ConcurrentHashMap<>();
+    /* subscription id -> creation instant */
+    private final Map<String, Instant> creationInstants = new ConcurrentHashMap<>();
 
     /* sitemap+page -> listener */
     private final Map<String, PageChangeListener> pageChangeListeners = new ConcurrentHashMap<>();
@@ -107,6 +109,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     protected void deactivate() {
         pageOfSubscription.clear();
         callbacks.clear();
+        creationInstants.clear();
         for (PageChangeListener listener : pageChangeListeners.values()) {
             listener.dispose();
         }
@@ -156,7 +159,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         }
         String subscriptionId = UUID.randomUUID().toString();
         callbacks.put(subscriptionId, callback);
-        creationDates.put(subscriptionId, System.currentTimeMillis());
+        creationInstants.put(subscriptionId, Instant.now());
         logger.debug("Created new subscription with id {} ({} active subscriptions for a max of {})", subscriptionId,
                 callbacks.size(), maxSubscriptions);
         return subscriptionId;
@@ -168,7 +171,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
      * @param subscriptionId the id of the subscription to remove
      */
     public void removeSubscription(String subscriptionId) {
-        creationDates.remove(subscriptionId);
+        creationInstants.remove(subscriptionId);
         callbacks.remove(subscriptionId);
         String sitemapPage = pageOfSubscription.remove(subscriptionId);
         if (sitemapPage != null && !pageOfSubscription.values().contains(sitemapPage)) {
@@ -322,11 +325,11 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
 
     public void checkAliveClients() {
         // Release the subscriptions that are not attached to a page
-        for (Entry<String, Long> dateEntry : creationDates.entrySet()) {
-            String subscriptionId = dateEntry.getKey();
+        for (Entry<String, Instant> creationEntry : creationInstants.entrySet()) {
+            String subscriptionId = creationEntry.getKey();
             SitemapSubscriptionCallback callback = callbacks.get(subscriptionId);
             if (getPageId(subscriptionId) == null && callback != null
-                    && (dateEntry.getValue().longValue() + 30000) < System.currentTimeMillis()) {
+                    && (creationEntry.getValue().plus(Duration.ofSeconds(30)).isBefore(Instant.now()))) {
                 logger.debug("Release subscription {} as sitemap page is not set", subscriptionId);
                 removeSubscription(subscriptionId);
                 callback.onRelease(subscriptionId);
