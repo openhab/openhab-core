@@ -27,6 +27,7 @@ import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,10 +113,19 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             final Properties properties = new Properties();
             properties.load(stream);
             properties.forEach(this::parseProperty);
+
+            sortByLabel(countries);
+            regions.values().forEach(this::sortByLabel);
+            cities.values().forEach(this::sortByLabel);
         } catch (IllegalArgumentException | IllegalStateException | IOException e) {
             logger.warn("The resource '{}' could not be loaded properly! ConfigDescription options are not available.",
                     JOLLYDAY_COUNTRY_DESCRIPTIONS, e);
         }
+    }
+
+    private void sortByLabel(List<ParameterOption> parameterOptions) {
+        Collections.sort(parameterOptions,
+                (ParameterOption po1, ParameterOption po2) -> po1.getLabel().compareTo(po2.getLabel()));
     }
 
     @Activate
