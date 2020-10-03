@@ -253,8 +253,6 @@
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-integration/2.1.0</bundle>
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-jaxrs2/2.1.0</bundle>
 		<bundle dependency="true">mvn:io.swagger.core.v3/swagger-models/2.1.0</bundle>
-		<bundle dependency="true">mvn:com.google.guava/guava/27.1-jre</bundle>
-		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
 		<bundle dependency="true">mvn:javax.validation/validation-api/1.1.0.Final</bundle>
 		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.11</bundle>
 		<bundle dependency="true">mvn:org.javassist/javassist/3.26.0-GA</bundle>
