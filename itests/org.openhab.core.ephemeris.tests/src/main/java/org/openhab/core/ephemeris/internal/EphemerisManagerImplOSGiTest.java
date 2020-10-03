@@ -14,7 +14,6 @@ package org.openhab.core.ephemeris.internal;
 
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.openhab.core.ephemeris.internal.EphemerisManagerImpl.*;
 
 import java.net.URI;
@@ -61,9 +60,6 @@ public class EphemerisManagerImplOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void setUp() {
-        // TODO: Tests currently fail on Java 11 due to Jollyday requiring JAXB 2.3
-        assumeTrue(System.getProperty("java.version").startsWith("1.8"));
-
         ephemerisManager = getService(EphemerisManager.class, EphemerisManagerImpl.class);
         assertNotNull(ephemerisManager);
 
