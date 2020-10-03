@@ -2,7 +2,7 @@
 <?eclipse version="3.0"?>
 <plugin>
 	<extension point="org.eclipse.emf.ecore.generated_package">
-		<package 
+		<package
 			uri = "https://openhab.org/model/Items"
 			class = "org.openhab.core.model.items.ItemsPackage"
 			genModel = "model/generated/Items.genmodel" />
