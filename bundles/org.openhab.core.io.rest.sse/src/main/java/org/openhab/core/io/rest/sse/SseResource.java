@@ -152,7 +152,7 @@ public class SseResource implements RESTResource, SsePublisher {
 
     @GET
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @Operation(summary = "Get all events.", responses = { @ApiResponse(responseCode = "200", description = "OK"),
+    @Operation(operationId = "GetEvents" ,summary = "Get all events.", responses = { @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Topic is empty or contains invalid characters") })
     public void listen(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @QueryParam("topics") @Parameter(description = "topics") String eventFilter) {
