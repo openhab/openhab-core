@@ -257,9 +257,9 @@
 
     <!-- XStream -->
     <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.xstream</artifactId>
-      <version>1.4.7_1</version>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.4.13</version>
       <scope>compile</scope>
     </dependency>
 
