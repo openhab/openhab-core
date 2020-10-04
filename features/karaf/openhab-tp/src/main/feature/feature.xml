@@ -32,7 +32,7 @@
 		<bundle dependency="true">mvn:tec.uom.lib/uom-lib-common/1.0.3</bundle>
 
 		<!-- TODO: Unbundled libraries -->
-		<bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xstream/1.4.7_1</bundle>
+		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.13</bundle>
 	</feature>
 
 	<feature name="openhab.tp-coap" description="Californium CoAP library" version="${project.version}">

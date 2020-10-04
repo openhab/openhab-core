@@ -25,7 +25,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.glassfish.hk2.external.javax.inject;version='[2.4.0,2.4.1)',\
 	org.osgi.service.event;version='[1.4.0,1.4.1)',\
 	org.objenesis;version='[2.6.0,2.6.1)',\
-	org.apache.servicemix.bundles.xstream;version='[1.4.7,1.4.8)',\
 	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
 	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\
@@ -110,9 +109,10 @@ Fragment-Host: org.openhab.core.model.thing
 	org.objectweb.asm;version='[8.0.1,8.0.2)',\
 	org.objectweb.asm.commons;version='[8.0.1,8.0.2)',\
 	org.objectweb.asm.tree;version='[8.0.1,8.0.2)',\
-	org.openhab.core.model.sitemap.runtime;version='[3.0.0,3.0.1)',\
 	org.ops4j.pax.web.pax-web-api;version='[7.2.19,7.2.20)',\
 	org.ops4j.pax.web.pax-web-jetty;version='[7.2.19,7.2.20)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[7.2.19,7.2.20)',\
-	org.ops4j.pax.web.pax-web-spi;version='[7.2.19,7.2.20)'
+	org.ops4j.pax.web.pax-web-spi;version='[7.2.19,7.2.20)',\
+	org.openhab.core.model.rule.runtime;version='[3.0.0,3.0.1)',\
+	xstream;version='[1.4.13,1.4.14)'
 
