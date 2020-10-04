@@ -15,13 +15,17 @@
 
   <name>openHAB Core :: BOM :: Compile Model</name>
 
-  <properties>
-    <classgraph.version>4.8.35.v20190528-1517</classgraph.version>
-    <emf.1.version>2.12.0</emf.1.version>
-    <emf.3.version>2.11.0</emf.3.version>
-    <emf.mwe.version>1.5.0</emf.mwe.version>
-    <emf.mwe2.version>2.11.0</emf.mwe2.version>
-  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>xtext-dev-bom</artifactId>
+        <version>${xtext.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -41,37 +45,37 @@
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.common</artifactId>
-      <version>${emf.1.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore</artifactId>
-      <version>${emf.1.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore.change</artifactId>
-      <version>${emf.3.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-      <version>${emf.1.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.codegen</artifactId>
-      <version>${emf.3.version}</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.platform</groupId>
+          <artifactId>org.eclipse.osgi</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.codegen.ecore</artifactId>
-      <version>${emf.1.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -79,7 +83,6 @@
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.mwe2.launch</artifactId>
-      <version>${emf.mwe2.version}</version>
     </dependency>
 
     <dependency>
@@ -97,14 +100,6 @@
           <artifactId>org.eclipse.osgi</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-
-    <!-- Xtext is using a classgraph artifact from Eclipse Orbit -->
-    <!-- Karaf feature validation fails when using classgraph from Maven Central -->
-    <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>io.github.classgraph</artifactId>
-      <version>${classgraph.version}</version>
     </dependency>
 
     <!--Xbase -->

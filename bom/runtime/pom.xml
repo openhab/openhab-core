@@ -18,9 +18,27 @@
   <properties>
     <jackson.version>2.10.3</jackson.version>
     <jetty.version>9.4.20.v20190813</jetty.version>
-    <pax.web.version>7.2.11</pax.web.version>
+    <pax.web.version>7.2.19</pax.web.version>
     <swagger.version>2.1.0</swagger.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>xtext-dev-bom</artifactId>
+        <version>${xtext.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- BEG: Slightly modified EnRoute implementation index artifacts -->
@@ -728,13 +746,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.12</version>
+      <version>4.17</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.12</version>
+      <version>4.17</version>
       <scope>compile</scope>
     </dependency>
 
@@ -757,53 +775,50 @@
       <groupId>org.eclipse.orbit.bundles</groupId>
       <artifactId>io.github.classgraph</artifactId>
       <version>4.8.35.v20190528-1517</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.common</artifactId>
-      <version>2.12.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore</artifactId>
-      <version>2.12.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore.change</artifactId>
-      <version>2.11.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-      <version>2.12.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtend</groupId>
       <artifactId>org.eclipse.xtend.lib</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtend</groupId>
       <artifactId>org.eclipse.xtend.lib.macro</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.common.types</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -815,7 +830,7 @@
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.ide</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -827,25 +842,35 @@
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.util</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.xbase</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.xbase.ide</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-      <version>2.19.0</version>
+      <version>${xtext.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -882,18 +907,6 @@
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>hk2-utils</artifactId>
       <version>2.4.0-b34</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm</artifactId>
-      <version>7.1</version>
       <scope>compile</scope>
     </dependency>
 
