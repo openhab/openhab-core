@@ -56,7 +56,6 @@ public class KarafAddonService implements AddonService {
         typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"));
         typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_VOICE, "Voice"));
         if (!FeatureInstaller.SIMPLE_PACKAGE.equals(featureInstaller.getCurrentPackage())) {
-            typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_ACTION, "Actions"));
             typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_PERSISTENCE, "Persistence"));
             typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_TRANSFORMATION, "Transformations"));
             typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_UI, "User Interfaces"));
@@ -108,9 +107,6 @@ public class KarafAddonService implements AddonService {
         String version = feature.getVersion();
         String link = null;
         switch (type) {
-            case FeatureInstaller.EXTENSION_TYPE_ACTION:
-                link = "https://www.openhab.org/addons/actions/" + name + "/";
-                break;
             case FeatureInstaller.EXTENSION_TYPE_BINDING:
                 link = "https://www.openhab.org/addons/bindings/" + name + "/";
                 break;
