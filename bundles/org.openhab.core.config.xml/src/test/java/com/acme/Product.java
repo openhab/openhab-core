@@ -12,14 +12,13 @@
  */
 package com.acme;
 
-import javax.sql.rowset.spi.XmlReader;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.config.xml.util.XmlDocumentReader;
 
 /**
  * A class that is in a non-framework package.
  *
- * Used to test if the XStream security configuration in the {@link XmlReader} forbids deserialization.
+ * Used to test if the XStream security configuration in the {@link XmlDocumentReader} forbids deserialization.
  *
  * @author Wouter Born - Initial contribution
  */

@@ -107,7 +107,7 @@ public class XmlDocumentReaderTest {
      * @see https://x-stream.github.io/CVE-2017-7957.html
      */
     @Test
-    public void defaultSecurityProtectsAgainstDenailOfServiceAttacks() throws Exception {
+    public void defaultSecurityProtectsAgainstDenialOfServiceAttacks() throws Exception {
         assertThrows(ForbiddenClassException.class, () -> readXML("<void/>"));
         assertThrows(ForbiddenClassException.class, () -> readXML("<string class='void'>Hello, world!</string>"));
     }
