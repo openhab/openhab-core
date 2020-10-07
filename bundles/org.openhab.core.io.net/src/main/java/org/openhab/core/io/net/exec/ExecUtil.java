@@ -18,13 +18,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.ProcessBuilder.Redirect;
-import java.util.List;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -48,16 +46,14 @@ public class ExecUtil {
 
     /**
      * <p>
-     * Executes <code>command</code>.
+     * Executes <code>commandLine</code>.
      *
      * <p>
      * A possible {@link IOException} gets logged but no further processing is done.
      *
-     * @param command the command line to execute
-     * @param arguments optional arguments to pass to the command
+     * @param commandLine the command line to execute
      */
-    public static void executeCommandLine(String command, String... arguments) {
-        List<String> commandLine = Stream.concat(Stream.of(command), Stream.of(arguments)).collect(Collectors.toList());
+    public static void executeCommandLine(String... commandLine) {
         try {
             new ProcessBuilder(commandLine).redirectError(Redirect.DISCARD).redirectOutput(Redirect.DISCARD).start();
         } catch (IOException e) {
@@ -72,13 +68,12 @@ public class ExecUtil {
      * <p>
      * A possible {@link IOException} gets logged but no further processing is done.
      *
-     * @param command the command line to execute
      * @param timeout timeout for execution in milliseconds, 0 to wait indefinitely
-     * @param arguments optional arguments to pass to the command
+     * @param commandLine the command line to execute
      * @return response data from executed command line or <code>null</code> if an error occurred
      */
-    public static @Nullable String executeCommandLineAndWaitResponse(String command, int timeout, String... arguments) {
-        List<String> commandLine = Stream.concat(Stream.of(command), Stream.of(arguments)).collect(Collectors.toList());
+    public static @Nullable String executeCommandLineAndWaitResponse(@Nullable Duration timeout,
+            String... commandLine) {
 
         Process processTemp = null;
         Future<String> outputFuture = null;
@@ -104,9 +99,9 @@ public class ExecUtil {
                 }
             });
             int exitCode;
-            if (timeout == 0) {
+            if (timeout == null) {
                 exitCode = process.waitFor();
-            } else if (process.waitFor(timeout, TimeUnit.MILLISECONDS)) {
+            } else if (process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 exitCode = process.exitValue();
             } else {
                 logger.warn("Timeout occurred when executing commandLine '{}'", commandLine);
