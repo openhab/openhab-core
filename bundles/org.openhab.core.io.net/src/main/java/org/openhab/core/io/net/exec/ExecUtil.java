@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Pauli Anttila - Initial contribution
  * @author Kai Kreuzer - added exception logging
- * @author Connor Petty - rewrote
+ * @author Connor Petty - replaced delimiter usage with argument array
  */
 @NonNullByDefault
 public class ExecUtil {
@@ -68,9 +68,9 @@ public class ExecUtil {
      * <p>
      * A possible {@link IOException} gets logged but no further processing is done.
      *
-     * @param timeout timeout for execution in milliseconds, 0 to wait indefinitely
+     * @param timeout the max time to wait for a process to finish, 0 to wait indefinitely
      * @param commandLine the command line to execute
-     * @return response data from executed command line or <code>null</code> if an error occurred
+     * @return response data from executed command line or <code>null</code> if a timeout or error occurred
      */
     public static @Nullable String executeCommandLineAndWaitResponse(@Nullable Duration timeout,
             String... commandLine) {
