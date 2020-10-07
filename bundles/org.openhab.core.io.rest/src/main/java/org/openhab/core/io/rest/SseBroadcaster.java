@@ -145,6 +145,11 @@ public class SseBroadcaster<@NonNull I> implements Closeable {
     }
 
     private void close(final SseEventSink sink) {
+        if (sink.isClosed()) {
+            logger.debug("SSE event sink is already closed");
+            return;
+        }
+
         try {
             sink.close();
         } catch (final RuntimeException ex) {
