@@ -26,7 +26,7 @@ public class ExecUtilTest {
     @Test
     public void testBasicExecuteCommandLine() {
         if (isWindowsSystem()) {
-            ExecUtil.executeCommandLine("cmd@@/c@@dir");
+            ExecUtil.executeCommandLine("cmd", "/c", "dir");
         } else {
             ExecUtil.executeCommandLine("ls");
         }
@@ -36,7 +36,7 @@ public class ExecUtilTest {
     public void testBasicExecuteCommandLineAndWaitResponse() {
         final String result;
         if (isWindowsSystem()) {
-            result = ExecUtil.executeCommandLineAndWaitResponse("cmd@@/c@@dir", 1000);
+            result = ExecUtil.executeCommandLineAndWaitResponse("cmd", 1000, "/c", "dir");
         } else {
             result = ExecUtil.executeCommandLineAndWaitResponse("ls", 1000);
         }
@@ -48,9 +48,9 @@ public class ExecUtilTest {
     public void testExecuteCommandLineAndWaitResponseWithArguments() {
         final String result;
         if (isWindowsSystem()) {
-            result = ExecUtil.executeCommandLineAndWaitResponse("cmd@@/c@@echo@@test", 1000);
+            result = ExecUtil.executeCommandLineAndWaitResponse("cmd", 1000, "/c", "echo", "test");
         } else {
-            result = ExecUtil.executeCommandLineAndWaitResponse("echo@@'test'", 1000);
+            result = ExecUtil.executeCommandLineAndWaitResponse("echo", 1000, "'test'");
         }
         assertNotNull(result);
         assertNotEquals("test", result);
