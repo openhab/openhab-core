@@ -14,6 +14,8 @@ package org.openhab.core.io.net.exec;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,7 +28,7 @@ public class ExecUtilTest {
     @Test
     public void testBasicExecuteCommandLine() {
         if (isWindowsSystem()) {
-            ExecUtil.executeCommandLine("cmd@@/c@@dir");
+            ExecUtil.executeCommandLine("cmd", "/c", "dir");
         } else {
             ExecUtil.executeCommandLine("ls");
         }
@@ -36,9 +38,9 @@ public class ExecUtilTest {
     public void testBasicExecuteCommandLineAndWaitResponse() {
         final String result;
         if (isWindowsSystem()) {
-            result = ExecUtil.executeCommandLineAndWaitResponse("cmd@@/c@@dir", 1000);
+            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "cmd", "/c", "dir");
         } else {
-            result = ExecUtil.executeCommandLineAndWaitResponse("ls", 1000);
+            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "ls");
         }
         assertNotNull(result);
         assertNotEquals("", result);
@@ -48,9 +50,9 @@ public class ExecUtilTest {
     public void testExecuteCommandLineAndWaitResponseWithArguments() {
         final String result;
         if (isWindowsSystem()) {
-            result = ExecUtil.executeCommandLineAndWaitResponse("cmd@@/c@@echo@@test", 1000);
+            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "cmd", "/c", "echo", "test");
         } else {
-            result = ExecUtil.executeCommandLineAndWaitResponse("echo@@'test'", 1000);
+            result = ExecUtil.executeCommandLineAndWaitResponse(Duration.ofSeconds(1), "echo", "'test'");
         }
         assertNotNull(result);
         assertNotEquals("test", result);

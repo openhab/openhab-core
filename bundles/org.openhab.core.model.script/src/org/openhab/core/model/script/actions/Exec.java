@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.actions;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import org.openhab.core.io.net.exec.ExecUtil;
 
@@ -26,11 +27,8 @@ public class Exec {
 
     /**
      * <p>
-     * Executes <code>commandLine</code>. Sometimes (especially observed on MacOS) the commandLine isn't executed
-     * properly. In that cases another exec-method is to be used. To accomplish this please use the special delimiter '
-     * <code>@@</code>'. If <code>commandLine</code> contains this delimiter it is split into a String[] array and the
-     * special exec-method is used.
-     * 
+     * Executes <code>commandLine</code>.
+     *
      * <p>
      * A possible {@link IOException} gets logged but no further processing is done.
      *
@@ -38,28 +36,25 @@ public class Exec {
      *            the command line to execute
      * @see http://www.peterfriese.de/running-applescript-from-java/
      */
-    static public void executeCommandLine(String commandLine) {
+    public static void executeCommandLine(String... commandLine) {
         ExecUtil.executeCommandLine(commandLine);
     }
 
     /**
      * <p>
-     * Executes <code>commandLine</code>. Sometimes (especially observed on MacOS) the commandLine isn't executed
-     * properly. In that cases another exec-method is to be used. To accomplish this please use the special delimiter '
-     * <code>@@</code>'. If <code>commandLine</code> contains this delimiter it is split into a String[] array and the
-     * special exec-method is used.
-     * 
+     * Executes <code>commandLine</code>.
+     *
      * <p>
      * A possible {@link IOException} gets logged but no further processing is done.
      *
+     * @param timeout
+     *            timeout for execution, if null will wait indefinitely
      * @param commandLine
      *            the command line to execute
-     * @param timeout
-     *            timeout for execution in milliseconds
      * @return response data from executed command line
      */
-    static public String executeCommandLine(String commandLine, int timeout) {
-        return ExecUtil.executeCommandLineAndWaitResponse(commandLine, timeout);
+    public static String executeCommandLine(Duration timeout, String... commandLine) {
+        return ExecUtil.executeCommandLineAndWaitResponse(timeout, commandLine);
     }
 
 }
