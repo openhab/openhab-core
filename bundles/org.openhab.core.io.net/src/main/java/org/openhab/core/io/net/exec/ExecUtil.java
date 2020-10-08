@@ -68,7 +68,7 @@ public class ExecUtil {
      * <p>
      * A possible {@link IOException} gets logged but no further processing is done.
      *
-     * @param timeout the max time to wait for a process to finish, 0 to wait indefinitely
+     * @param timeout the max time to wait for a process to finish, null to wait indefinitely
      * @param commandLine the command line to execute
      * @return response data from executed command line or <code>null</code> if a timeout or error occurred
      */
