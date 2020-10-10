@@ -74,47 +74,26 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.auth.oauth2client/${project.version}</bundle>
 	</feature>
 
-	<feature name="openhab-core-automation" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
-	</feature>
-
 	<feature name="openhab-core-automation-module-script" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-automation</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-automation-module-script-rulesupport" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-automation</feature>
 		<feature dependency="true">openhab-core-automation-module-script</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.script.rulesupport/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-automation-module-media" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-automation</feature>
 		<feature dependency="true">openhab-core-automation-module-script</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.module.media/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-automation-rest" version="${project.version}">
 		<feature>openhab-core-base</feature>
-		<feature dependency="true">openhab-core-automation</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation.rest/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-config-serial" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<feature>openhab-core-io-transport-serial</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-config-discovery-usbserial" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-io-bin2json" description="Binary to JSON converter" version="${project.version}">
@@ -222,15 +201,6 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mqtt/${project.version}</bundle>
 	</feature>
 
-	<feature name="openhab-core-io-transport-serial" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortManager)"</requirement>
-		<requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortProvider)"</requirement>
-		<feature dependency="true">openhab-core-io-transport-serial-rxtx</feature>
-
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
-	</feature>
-
 	<feature name="openhab-core-io-transport-serial-javacomm" version="${project.version}">
 		<feature>openhab-core-base</feature>
 
@@ -239,29 +209,6 @@
 
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.javacomm/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-io-transport-serial-rxtx" version="${project.version}">
-		<feature>openhab-core-base</feature>
-
-		<requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
-		<feature dependency="true">openhab.tp-serial-rxtx</feature>
-
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx/${project.version}</bundle>
-	</feature>
-
-	<feature name="openhab-core-io-transport-serial-rfc2217" version="${project.version}">
-		<feature>openhab-core-base</feature>
-
-		<requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
-		<feature dependency="true">openhab-core-io-transport-serial-rxtx</feature>
-
-		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
-		<feature dependency="true">openhab.tp-commons-net</feature>
-
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx.rfc2217/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-io-transport-upnp" version="${project.version}">
@@ -422,7 +369,6 @@
 		<feature>openhab-core-automation-rest</feature>
 		<feature>openhab-core-automation-module-script</feature>
 		<feature>openhab-core-automation-module-media</feature>
-		<feature>openhab-core-automation</feature>
 		<feature>openhab-core-io-console-karaf</feature>
 		<feature>openhab-core-io-http-auth</feature>
 		<feature>openhab-core-io-rest-auth</feature>
@@ -494,9 +440,23 @@
 	</feature>
 
 	<feature name="openhab-transport-serial" description="Serial Transport" version="${project.version}">
-		<feature>openhab-core-io-transport-serial-rfc2217</feature>
-		<feature>openhab-core-config-serial</feature>
-		<feature>openhab-core-config-discovery-usbserial</feature>
+		<feature>openhab-core-base</feature>
+
+		<requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortManager)"</requirement>
+		<requirement>osgi.service;filter:="(objectClass=org.openhab.core.io.transport.serial.SerialPortProvider)"</requirement>
+
+		<requirement>openhab.tp;filter:="(feature=commons-net)"</requirement>
+		<feature dependency="true">openhab.tp-commons-net</feature>
+
+		<requirement>openhab.tp;filter:="(&amp;(feature=serial)(impl=rxtx))"</requirement>
+		<feature dependency="true">openhab.tp-serial-rxtx</feature>
+
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx.rfc2217/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-transport-upnp" description="UPnP Transport" version="${project.version}">
