@@ -196,11 +196,6 @@
 		<feature dependency="true">openhab.tp-coap</feature>
 	</feature>
 
-	<feature name="openhab-core-io-transport-dbus" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.dbus/${project.version}</bundle>
-	</feature>
-
 	<feature name="openhab-core-io-transport-http" version="${project.version}">
 		<feature>openhab-core-base</feature>
 
