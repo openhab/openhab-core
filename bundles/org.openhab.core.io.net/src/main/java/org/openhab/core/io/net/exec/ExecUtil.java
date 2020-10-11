@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.ProcessBuilder.Redirect;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -104,22 +105,33 @@ public class ExecUtil {
             } else if (process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 exitCode = process.exitValue();
             } else {
-                logger.warn("Timeout occurred when executing commandLine '{}'", commandLine);
+                logger.warn("Timeout occurred when executing commandLine '{}'", Arrays.toString(commandLine));
                 break cleanup;
             }
             if (exitCode == 0) {
                 return outputFuture.get();
             } else {
-                logger.debug("exit code '{}', result '{}', errors '{}'", exitCode, outputFuture.get(),
-                        errorFuture.get());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("exit code '{}', result '{}', errors '{}'", exitCode, outputFuture.get(),
+                            errorFuture.get());
+                }
                 return null;
             }
         } catch (ExecutionException e) {
-            logger.warn("Error occurred when executing commandLine '{}'", commandLine, e.getCause());
+            if (logger.isDebugEnabled()) {
+                logger.warn("Error occurred when executing commandLine '{}'", Arrays.toString(commandLine),
+                        e.getCause());
+            } else {
+                logger.warn("Error occurred when executing commandLine '{}'", Arrays.toString(commandLine));
+            }
         } catch (InterruptedException e) {
-            logger.debug("commandLine '{}' was interrupted", commandLine, e);
+            logger.debug("commandLine '{}' was interrupted", Arrays.toString(commandLine), e);
         } catch (IOException e) {
-            logger.warn("Error occurred when executing commandLine '{}'", commandLine, e);
+            if (logger.isDebugEnabled()) {
+                logger.warn("Failed to execute commandLine '{}'", Arrays.toString(commandLine), e);
+            } else {
+                logger.warn("Failed to execute commandLine '{}'", Arrays.toString(commandLine));
+            }
         }
         if (processTemp != null && processTemp.isAlive()) {
             processTemp.destroyForcibly();
