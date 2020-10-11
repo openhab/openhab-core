@@ -34,6 +34,8 @@ import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
@@ -126,9 +128,8 @@ public class JwtHelper {
             String jwt = jws.getCompactSerialization();
 
             return jwt;
-        } catch (Exception e) {
-            logger.error("Error while writing JWT token", e);
-            throw new RuntimeException(e.getMessage());
+        } catch (JoseException e) {
+            throw new RuntimeException("Error while writing JWT token", e);
         }
     }
 
@@ -151,9 +152,8 @@ public class JwtHelper {
             List<String> roles = jwtClaims.getStringListClaimValue("role");
             Authentication auth = new Authentication(username, roles.toArray(new String[roles.size()]));
             return auth;
-        } catch (Exception e) {
-            logger.error("Error while processing JWT token", e);
-            throw new AuthenticationException(e.getMessage());
+        } catch (InvalidJwtException | MalformedClaimException e) {
+            throw new AuthenticationException("Error while processing JWT token", e);
         }
     }
 }
