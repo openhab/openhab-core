@@ -184,11 +184,10 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
             for (ModuleInformation mi : moduleInformations) {
                 mi.setThingUID(thingUID);
 
-                ModuleType oldType = null;
                 Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
                 if (availableModuleConfigs != null) {
+                    ModuleType oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
                     if (availableModuleConfigs.size() > 1) {
-                        oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
                         availableModuleConfigs.remove(mi);
                     } else {
                         moduleInformation.remove(mi.getUID());
@@ -196,12 +195,12 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
 
                     ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
                     // localize moduletype -> remove from map
-                    if (mt != null) {
+                    if (oldType != null) {
                         for (ProviderChangeListener<ModuleType> l : changeListeners) {
-                            if (oldType != null) {
+                            if (mt != null) {
                                 l.updated(this, oldType, mt);
                             } else {
-                                l.removed(this, mt);
+                                l.removed(this, oldType);
                             }
                         }
                     }
