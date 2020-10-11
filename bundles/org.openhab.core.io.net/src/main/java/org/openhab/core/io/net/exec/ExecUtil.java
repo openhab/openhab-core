@@ -119,7 +119,7 @@ public class ExecUtil {
             }
         } catch (ExecutionException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Error occurred when executing commandLine '{}'", Arrays.toString(commandLine),
+                logger.warn("Error occurred when executing commandLine '{}'", Arrays.toString(commandLine),
                         e.getCause());
             } else {
                 logger.warn("Error occurred when executing commandLine '{}'", Arrays.toString(commandLine));
@@ -128,7 +128,7 @@ public class ExecUtil {
             logger.debug("commandLine '{}' was interrupted", Arrays.toString(commandLine), e);
         } catch (IOException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to execute commandLine '{}'", Arrays.toString(commandLine), e);
+                logger.warn("Failed to execute commandLine '{}'", Arrays.toString(commandLine), e);
             } else {
                 logger.warn("Failed to execute commandLine '{}'", Arrays.toString(commandLine));
             }
