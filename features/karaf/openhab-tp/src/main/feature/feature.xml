@@ -197,8 +197,6 @@
 
 		<bundle>mvn:org.eclipse.xtext/org.eclipse.xtext/2.23.0</bundle>
 
-		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/io.github.classgraph/4.8.35.v20190528-1517</bundle>
-
 		<bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.common/2.17.0</bundle>
 		<bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore/2.20.0</bundle>
 		<bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore.change/2.14.0</bundle>
@@ -218,13 +216,9 @@
 		<bundle dependency="true">mvn:com.google.guava/guava/27.1-jre</bundle>
 		<bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
 
-		<!--<bundle dependency="true">mvn:com.google.inject/guice/3.0</bundle> -->
-		<!--<bundle dependency="true">wrap:mvn:org.antlr/antlr-runtime/3.2</bundle> -->
-		<!--<bundle dependency="true">wrap:mvn:aopalliance/aopalliance/1.0</bundle> -->
-
-
-		<bundle dependency="true">mvn:de.maggu2810.p2redist/com.google.inject/3.0.0.v201312141243</bundle>
-		<bundle dependency="true">mvn:de.maggu2810.p2redist/org.antlr.runtime/3.2.0.v201101311130</bundle>
+		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/com.google.inject/3.0.0.v201312141243</bundle>
+		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/io.github.classgraph/4.8.35.v20190528-1517</bundle>
+		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.10.400</bundle>
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.registry/3.8.400</bundle>
