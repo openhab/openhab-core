@@ -145,26 +145,34 @@ public class ScriptModuleTypeProvider implements ModuleTypeProvider {
     public void setScriptEngineFactory(ScriptEngineFactory engineFactory) {
         ScriptEngine scriptEngine = engineFactory.createScriptEngine(engineFactory.getScriptTypes().get(0));
         if (scriptEngine != null) {
-            List<String> mimeTypes = new ArrayList<>();
-
             javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
-            String languageName = String.format("%s (%s)",
-                    factory.getLanguageName().substring(0, 1).toUpperCase() + factory.getLanguageName().substring(1),
-                    factory.getLanguageVersion());
-            mimeTypes.addAll(factory.getMimeTypes());
-            String preferredMimeType = mimeTypes.get(0);
-            mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || mimeType.contains("x-"));
-            if (!mimeTypes.isEmpty()) {
-                preferredMimeType = mimeTypes.get(0);
-            }
-            parameterOptions.put(preferredMimeType, languageName);
+            parameterOptions.put(getPreferredMimeType(factory), getLanguageName(factory));
             logger.trace("ParameterOptions: {}", parameterOptions);
         } else {
             logger.trace("setScriptEngineFactory: engine was null");
         }
     }
 
-    public void unsetScriptEngineFactory(ScriptEngineFactory scriptEngineFactory) {
-        parameterOptions.clear();
+    public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
+        ScriptEngine scriptEngine = engineFactory.createScriptEngine(engineFactory.getScriptTypes().get(0));
+        if (scriptEngine != null) {
+            javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
+            parameterOptions.remove(getPreferredMimeType(factory));
+            logger.trace("ParameterOptions: {}", parameterOptions);
+        } else {
+            logger.trace("unsetScriptEngineFactory: engine was null");
+        }
+    }
+
+    private String getPreferredMimeType(javax.script.ScriptEngineFactory factory) {
+        List<String> mimeTypes = new ArrayList<>(factory.getMimeTypes());
+        mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || mimeType.contains("x-"));
+        return mimeTypes.isEmpty() ? factory.getMimeTypes().get(0) : mimeTypes.get(0);
+    }
+
+    private String getLanguageName(javax.script.ScriptEngineFactory factory) {
+        return String.format("%s (%s)",
+                factory.getLanguageName().substring(0, 1).toUpperCase() + factory.getLanguageName().substring(1),
+                factory.getLanguageVersion());
     }
 }
