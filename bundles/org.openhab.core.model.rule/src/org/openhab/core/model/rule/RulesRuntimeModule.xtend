@@ -19,6 +19,7 @@ org.openhab.core.model.rule
 import com.google.inject.Binder
 import com.google.inject.name.Names
 import org.openhab.core.model.rule.scoping.RulesImplicitlyImportedTypes
+import org.openhab.core.model.rule.scoping.RulesJavaReflectAccess
 import org.openhab.core.model.script.interpreter.ScriptInterpreter
 import org.openhab.core.model.script.jvmmodel.ScriptTypeComputer
 import org.openhab.core.model.script.scoping.ActionClassLoader
@@ -27,6 +28,7 @@ import org.openhab.core.model.script.scoping.StateAndCommandProvider
 import org.eclipse.xtext.common.types.access.IJvmTypeProvider
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeProviderFactory
 import org.eclipse.xtext.common.types.access.reflect.ReflectionTypeScopeProvider
+import org.eclipse.xtext.common.types.util.JavaReflectAccess
 import org.eclipse.xtext.common.types.xtext.AbstractTypeScopeProvider
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.generator.IGenerator.NullGenerator
@@ -45,6 +47,10 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
 
     def Class<? extends ITypeComputer> bindITypeComputer() {
         return ScriptTypeComputer
+    }
+
+    def Class<? extends JavaReflectAccess> bindJavaReflectAccess() {
+        return RulesJavaReflectAccess
     }
 
     def Class<? extends ImplicitlyImportedFeatures> bindImplicitlyImportedTypes() {

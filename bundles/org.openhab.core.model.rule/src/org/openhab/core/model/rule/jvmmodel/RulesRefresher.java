@@ -35,6 +35,7 @@ import org.openhab.core.service.ReadyService.ReadyTracker;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingRegistryChangeListener;
+import org.openhab.core.thing.binding.ThingActions;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -134,6 +135,19 @@ public class RulesRefresher implements ReadyTracker {
     }
 
     protected void removeActionService(ActionService actionService) {
+        if (started) {
+            scheduleRuleRefresh();
+        }
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addThingActions(ThingActions thingActions) {
+        if (started) {
+            scheduleRuleRefresh();
+        }
+    }
+
+    protected void removeThingActions(ThingActions thingActions) {
         if (started) {
             scheduleRuleRefresh();
         }
