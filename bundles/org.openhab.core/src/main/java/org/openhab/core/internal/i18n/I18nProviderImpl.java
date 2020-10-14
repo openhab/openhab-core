@@ -153,10 +153,10 @@ public class I18nProviderImpl
 
         final SystemOfUnits newMeasurementSystem;
         switch (ms) {
-            case "SI":
+            case SIUnits.MEASUREMENT_SYSTEM_NAME:
                 newMeasurementSystem = SIUnits.getInstance();
                 break;
-            case "US":
+            case ImperialUnits.MEASUREMENT_SYSTEM_NAME:
                 newMeasurementSystem = ImperialUnits.getInstance();
                 break;
             default:

@@ -39,6 +39,8 @@ import tec.uom.se.unit.Units;
 @NonNullByDefault
 public final class ImperialUnits extends CustomUnits {
 
+    public static final String MEASUREMENT_SYSTEM_NAME = "US";
+
     private static final ImperialUnits INSTANCE = new ImperialUnits();
 
     /** Additionally defined units to be used in openHAB **/
@@ -109,5 +111,10 @@ public final class ImperialUnits extends CustomUnits {
     private static <U extends Unit<?>> U addUnit(U unit) {
         INSTANCE.units.add(unit);
         return unit;
+    }
+
+    @Override
+    public String getName() {
+        return MEASUREMENT_SYSTEM_NAME;
     }
 }
