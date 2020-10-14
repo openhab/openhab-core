@@ -82,5 +82,4 @@ public final class SIUnits extends CustomUnits {
     public String getName() {
         return MEASUREMENT_SYSTEM_NAME;
     }
-
 }
