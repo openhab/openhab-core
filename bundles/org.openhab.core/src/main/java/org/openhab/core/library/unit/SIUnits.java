@@ -36,6 +36,8 @@ import tec.uom.se.unit.Units;
 @NonNullByDefault
 public final class SIUnits extends CustomUnits {
 
+    public static final String MEASUREMENT_SYSTEM_NAME = "SI";
+
     private static final SIUnits INSTANCE = new SIUnits();
 
     public static final Unit<Temperature> CELSIUS = addUnit(Units.CELSIUS);
@@ -75,4 +77,10 @@ public final class SIUnits extends CustomUnits {
         INSTANCE.units.add(unit);
         return unit;
     }
+
+    @Override
+    public String getName() {
+        return MEASUREMENT_SYSTEM_NAME;
+    }
+
 }
