@@ -35,6 +35,7 @@ import org.mockito.Mock;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.internal.items.ItemBuilderFactoryImpl;
 import org.openhab.core.internal.items.ItemRegistryImpl;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemRemovedEvent;
@@ -93,11 +94,8 @@ public class ItemRegistryImplTest extends JavaTest {
         cameraItem4.addTag(CAMERA_TAG_UPPERCASE);
 
         // setup ManageItemProvider with necessary dependencies:
-        itemProvider = new ManagedItemProvider(new VolatileStorageService()) {
-            {
-                addItemFactory(coreItemFactory);
-            }
-        };
+        itemProvider = new ManagedItemProvider(new VolatileStorageService(),
+                new ItemBuilderFactoryImpl(new CoreItemFactory()));
 
         itemProvider.add(new SwitchItem(ITEM_NAME));
         itemProvider.add(cameraItem1);
