@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import org.osgi.service.component.ComponentContext;
  * @author Dennis Nobel - Initial contribution
  * @author Christoph Weitkamp - Migrated tests to pure Java
  */
+@NonNullByDefault
 public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
 
     private static final String ITEM = "item";
@@ -46,9 +48,9 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
     private static final ChannelUID CHANNEL_UID = new ChannelUID(THING_UID, "channel");
     private static final ItemChannelLink ITEM_CHANNEL_LINK = new ItemChannelLink(ITEM, CHANNEL_UID);
 
-    private ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
-    private ItemChannelLinkRegistry itemChannelLinkRegistry;
-    private ManagedThingProvider managedThingProvider;
+    private @NonNullByDefault({}) ManagedItemChannelLinkProvider managedItemChannelLinkProvider;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private @NonNullByDefault({}) ManagedThingProvider managedThingProvider;
 
     @BeforeEach
     public void setup() {
@@ -76,7 +78,7 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
 
         managedItemChannelLinkProvider.add(ITEM_CHANNEL_LINK);
 
-        assertEquals(1, itemChannelLinkRegistry.getAll().size());
+        waitForAssert(() -> assertEquals(1, itemChannelLinkRegistry.getAll().size()));
         assertEquals(1, managedItemChannelLinkProvider.getAll().size());
 
         managedItemChannelLinkProvider.remove(ITEM_CHANNEL_LINK.getUID());
@@ -88,7 +90,7 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatIsLinkedReturnsTrue() {
         managedItemChannelLinkProvider.add(ITEM_CHANNEL_LINK);
-        assertTrue(itemChannelLinkRegistry.isLinked(ITEM, CHANNEL_UID));
+        waitForAssert(() -> assertTrue(itemChannelLinkRegistry.isLinked(ITEM, CHANNEL_UID)));
     }
 
     @Test
@@ -99,9 +101,11 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGetBoundChannelsReturnsChannel() {
         managedItemChannelLinkProvider.add(ITEM_CHANNEL_LINK);
-        Set<ChannelUID> boundChannels = itemChannelLinkRegistry.getBoundChannels(ITEM);
-        assertEquals(1, boundChannels.size());
-        assertTrue(boundChannels.contains(ITEM_CHANNEL_LINK.getLinkedUID()));
+        waitForAssert(() -> {
+            Set<ChannelUID> boundChannels = itemChannelLinkRegistry.getBoundChannels(ITEM);
+            assertEquals(1, boundChannels.size());
+            assertTrue(boundChannels.contains(ITEM_CHANNEL_LINK.getLinkedUID()));
+        });
     }
 
     @Test
@@ -113,9 +117,11 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatGetBoundThingsReturnsThing() {
         managedItemChannelLinkProvider.add(ITEM_CHANNEL_LINK);
-        Set<Thing> boundThings = itemChannelLinkRegistry.getBoundThings(ITEM);
-        assertEquals(1, boundThings.size());
-        assertEquals(CHANNEL_UID.getThingUID(), boundThings.stream().findFirst().get().getUID());
+        waitForAssert(() -> {
+            Set<Thing> boundThings = itemChannelLinkRegistry.getBoundThings(ITEM);
+            assertEquals(1, boundThings.size());
+            assertEquals(CHANNEL_UID.getThingUID(), boundThings.stream().findFirst().get().getUID());
+        });
     }
 
     @Test
