@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Map;
 
 import javax.annotation.Priority;
 import javax.security.sasl.AuthenticationException;
@@ -26,17 +27,24 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.User;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
+import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
+import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This filter is responsible for parsing credentials provided with a request, and hydrating a {@link SecurityContext}
@@ -46,19 +54,44 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsExtension;
  * @author Yannick Schaus - Allow basic authentication
  */
 @PreMatching
-@Component
+@Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID + "=org.openhab.restauth")
+@ConfigurableService(category = "system", label = "API Security", description_uri = AuthFilter.CONFIG_URI)
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @Priority(Priorities.AUTHENTICATION)
 @Provider
 public class AuthFilter implements ContainerRequestFilter {
+    private final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
+
     private static final String ALT_AUTH_HEADER = "X-OPENHAB-TOKEN";
+
+    protected static final String CONFIG_URI = "system:restauth";
+    private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
+    private static final String CONFIG_NO_UNAUTHENTICATED_USER_ROLE = "noUnauthenticatedUserRole";
+
+    private boolean allowBasicAuth = false;
+    private boolean noUnauthenticatedUserRole = false;
 
     @Reference
     private JwtHelper jwtHelper;
 
     @Reference
     private UserRegistry userRegistry;
+
+    @Activate
+    protected void activate(Map<String, Object> config) {
+        modified(config);
+    }
+
+    @Modified
+    protected void modified(@Nullable Map<String, @Nullable Object> properties) {
+        if (properties != null) {
+            Object value = properties.get(CONFIG_ALLOW_BASIC_AUTH);
+            allowBasicAuth = value != null && "true".equals(value.toString());
+            value = properties.get(CONFIG_NO_UNAUTHENTICATED_USER_ROLE);
+            noUnauthenticatedUserRole = value != null && "true".equals(value.toString());
+        }
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -72,6 +105,9 @@ public class AuthFilter implements ContainerRequestFilter {
                         requestContext.setSecurityContext(new JwtSecurityContext(auth));
                         return;
                     } else if ("Basic".equals(authParts[0])) {
+                        if (!allowBasicAuth) {
+                            throw new AuthenticationException("Basic authentication is not allowed");
+                        }
                         try {
                             String[] decodedCredentials = new String(Base64.getDecoder().decode(authParts[1]), "UTF-8")
                                     .split(":");
@@ -88,7 +124,7 @@ public class AuthFilter implements ContainerRequestFilter {
                             requestContext.setSecurityContext(new UserSecurityContext(user, "Basic"));
                             return;
                         } catch (org.openhab.core.auth.AuthenticationException e) {
-                            throw new AuthenticationException("Invalid user name or password");
+                            throw new AuthenticationException("Invalid Basic authentication credentials", e);
                         }
                     }
                 }
@@ -100,7 +136,13 @@ public class AuthFilter implements ContainerRequestFilter {
                 requestContext.setSecurityContext(new JwtSecurityContext(auth));
                 return;
             }
+
+            if (!noUnauthenticatedUserRole) {
+                requestContext.setSecurityContext(new AnonymousUserSecurityContext());
+            }
+
         } catch (AuthenticationException e) {
+            logger.warn("Unauthorized API request: {}", e.getMessage());
             requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
         }
     }
