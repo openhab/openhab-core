@@ -141,7 +141,7 @@
     <dependency>
       <groupId>org.jmdns</groupId>
       <artifactId>jmdns</artifactId>
-      <version>3.5.5</version>
+      <version>3.5.6</version>
       <scope>compile</scope>
     </dependency>
 
