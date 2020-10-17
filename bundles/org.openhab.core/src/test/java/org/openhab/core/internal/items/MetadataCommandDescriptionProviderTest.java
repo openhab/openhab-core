@@ -62,6 +62,7 @@ public class MetadataCommandDescriptionProviderTest {
         metadataRegistry = new MetadataRegistryImpl();
         metadataRegistry.setManagedProvider(managedProvider);
         metadataRegistry.activate(bundleContext);
+        metadataRegistry.waitForCompletedAsyncActivationTasks();
 
         ArgumentCaptor<ServiceListener> captor = ArgumentCaptor.forClass(ServiceListener.class);
         verify(bundleContext).addServiceListener(captor.capture(), any());
