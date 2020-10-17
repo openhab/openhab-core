@@ -52,6 +52,7 @@ public class KarafAddonService implements AddonService {
             final @Reference FeaturesService featuresService) {
         this.featureInstaller = featureInstaller;
         this.featuresService = featuresService;
+        typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_AUTOMATION, "Automation"));
         typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_BINDING, "Bindings"));
         typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_MISC, "Misc"));
         typeList.add(new AddonType(FeatureInstaller.EXTENSION_TYPE_VOICE, "Voice"));
@@ -107,6 +108,9 @@ public class KarafAddonService implements AddonService {
         String version = feature.getVersion();
         String link = null;
         switch (type) {
+            case FeatureInstaller.EXTENSION_TYPE_AUTOMATION:
+                link = "https://www.openhab.org/addons/automation/" + name + "/";
+                break;
             case FeatureInstaller.EXTENSION_TYPE_BINDING:
                 link = "https://www.openhab.org/addons/bindings/" + name + "/";
                 break;

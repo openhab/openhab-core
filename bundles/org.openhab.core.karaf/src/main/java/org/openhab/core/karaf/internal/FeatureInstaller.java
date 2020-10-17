@@ -71,7 +71,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     protected static final String CONFIG_URI = "system:addons";
 
-    public static final String EXTENSION_TYPE_ACTION = "action";
+    public static final String EXTENSION_TYPE_AUTOMATION = "automation";
     public static final String EXTENSION_TYPE_BINDING = "binding";
     public static final String EXTENSION_TYPE_MISC = "misc";
     public static final String EXTENSION_TYPE_PERSISTENCE = "persistence";
@@ -91,7 +91,7 @@ public class FeatureInstaller implements ConfigurationListener {
     public static final String PREFIX = "openhab-";
     public static final String PREFIX_PACKAGE = "package-";
 
-    public static final String[] EXTENSION_TYPES = new String[] { EXTENSION_TYPE_ACTION, EXTENSION_TYPE_BINDING,
+    public static final String[] EXTENSION_TYPES = new String[] { EXTENSION_TYPE_AUTOMATION, EXTENSION_TYPE_BINDING,
             EXTENSION_TYPE_MISC, EXTENSION_TYPE_PERSISTENCE, EXTENSION_TYPE_TRANSFORMATION, EXTENSION_TYPE_UI,
             EXTENSION_TYPE_VOICE };
 
