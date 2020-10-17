@@ -368,6 +368,7 @@
 		<feature>openhab-core-auth-jaas</feature>
 		<feature>openhab-core-automation-rest</feature>
 		<feature>openhab-core-automation-module-script</feature>
+		<feature>openhab-core-automation-module-script-rulesupport</feature>
 		<feature>openhab-core-automation-module-media</feature>
 		<feature>openhab-core-io-console-karaf</feature>
 		<feature>openhab-core-io-http-auth</feature>
