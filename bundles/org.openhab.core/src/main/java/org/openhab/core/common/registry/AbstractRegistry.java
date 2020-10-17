@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
@@ -66,7 +67,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
     private final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
 
     private final @Nullable Class<P> providerClazz;
-    private @Nullable ServiceTracker<P, P> providerTracker;
+    private @Nullable CompletableFuture<ServiceTracker<P, P>> providerTrackerFuture;
 
     private final ReentrantReadWriteLock elementLock = new ReentrantReadWriteLock();
     private final ReentrantReadWriteLock.ReadLock elementReadLock = elementLock.readLock();
@@ -98,18 +99,29 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
          * multiple) rely on an active component.
          * To grant that the add and remove functions are called only for an active component, we use a provider
          * tracker.
+         * Do not open the tracker in the activation method itself as this could lead to circular dependency errors.
          */
         if (providerClazz != null) {
             Class<P> providerClazz = this.providerClazz;
-            providerTracker = new ProviderTracker(context, providerClazz);
-            providerTracker.open();
+            providerTrackerFuture = CompletableFuture.supplyAsync(() -> {
+                ServiceTracker<P, P> providerTracker = new ProviderTracker(context, providerClazz);
+                providerTracker.open();
+                return providerTracker;
+            });
         }
     }
 
     protected void deactivate() {
-        if (providerTracker != null) {
-            providerTracker.close();
-            providerTracker = null;
+        CompletableFuture<ServiceTracker<P, P>> future = providerTrackerFuture;
+        if (future != null) {
+            future.join().close();
+        }
+    }
+
+    public void waitForCompletedAsyncActivationTasks() {
+        CompletableFuture<ServiceTracker<P, P>> future = providerTrackerFuture;
+        if (future != null) {
+            future.join();
         }
     }
 
