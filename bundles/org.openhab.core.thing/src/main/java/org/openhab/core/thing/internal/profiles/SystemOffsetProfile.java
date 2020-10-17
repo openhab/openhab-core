@@ -48,9 +48,9 @@ public class SystemOffsetProfile implements StateProfile {
             SIUnits.CELSIUS).toUnit(SmartHomeUnits.KELVIN);
     private static final @Nullable QuantityType<Temperature> ZERO_FAHRENHEIT_IN_KELVIN = new QuantityType<>(0,
             ImperialUnits.FAHRENHEIT).toUnit(SmartHomeUnits.KELVIN);
+    static final String OFFSET_PARAM = "offset";
 
     private final Logger logger = LoggerFactory.getLogger(SystemOffsetProfile.class);
-    private static final String OFFSET_PARAM = "offset";
 
     private final ProfileCallback callback;
     private final ProfileContext context;
