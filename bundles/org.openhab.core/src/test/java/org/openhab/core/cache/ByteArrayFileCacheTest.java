@@ -19,14 +19,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.OpenHAB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test class for the {@link ByteArrayFileCache} class.
@@ -45,7 +49,17 @@ public class ByteArrayFileCacheTest {
     private static final String MP3_FILE_NAME = SERVICE_CACHE_FOLDER.getAbsolutePath() + "doorbell.mp3";
     private static final String TXT_FILE_NAME = SERVICE_CACHE_FOLDER.getAbsolutePath() + "doorbell.txt";
 
+    private static @Nullable File txt_file;
+
+    private final Logger logger = LoggerFactory.getLogger(ByteArrayFileCacheTest.class);
+
     private @NonNullByDefault({}) ByteArrayFileCache subject;
+
+    @BeforeAll
+    public static void init() throws IOException {
+        // create temporary file
+        txt_file = createTempFile();
+    }
 
     @BeforeEach
     public void setUp() {
@@ -93,87 +107,97 @@ public class ByteArrayFileCacheTest {
 
     @Test
     public void testGet() {
-        assertThrows(FileNotFoundException.class, () -> subject.get(MP3_FILE_NAME));
+        assertThrows(FileNotFoundException.class, () -> subject.get(TXT_FILE_NAME));
     }
 
     @Test
     public void testPut() throws IOException {
-        byte[] buffer = readFile();
-        subject.put(MP3_FILE_NAME, buffer);
+        byte[] buffer = readTempFile();
+        subject.put(TXT_FILE_NAME, buffer);
 
-        assertThat(subject.get(MP3_FILE_NAME), is(equalTo(buffer)));
+        assertThat(subject.get(TXT_FILE_NAME), is(equalTo(buffer)));
     }
 
     @Test
     public void testPutIfAbsent() throws IOException {
-        byte[] buffer = readFile();
-        subject.putIfAbsent(MP3_FILE_NAME, buffer);
+        byte[] buffer = readTempFile();
+        subject.putIfAbsent(TXT_FILE_NAME, buffer);
 
-        assertThat(subject.get(MP3_FILE_NAME), is(equalTo(buffer)));
+        assertThat(subject.get(TXT_FILE_NAME), is(equalTo(buffer)));
     }
 
     @Test
-    public void testPutIfAbsentAndGet() throws IOException {
-        byte[] buffer = readFile();
+    public void testPutIfAbsentAndGet() {
+        byte[] buffer = readTempFile();
 
-        assertThat(subject.putIfAbsentAndGet(MP3_FILE_NAME, buffer), is(equalTo(buffer)));
+        assertThat(subject.putIfAbsentAndGet(TXT_FILE_NAME, buffer), is(equalTo(buffer)));
     }
 
     @Test
-    public void testContainsKey() throws IOException {
-        assertThat(subject.containsKey(MP3_FILE_NAME), is(false));
+    public void testContainsKey() {
+        assertThat(subject.containsKey(TXT_FILE_NAME), is(false));
 
-        subject.put(MP3_FILE_NAME, readFile());
+        subject.put(TXT_FILE_NAME, readTempFile());
 
-        assertThat(subject.containsKey(MP3_FILE_NAME), is(true));
+        assertThat(subject.containsKey(TXT_FILE_NAME), is(true));
     }
 
     @Test
-    public void testRemove() throws IOException {
-        subject.put(MP3_FILE_NAME, readFile());
-        subject.remove(MP3_FILE_NAME);
+    public void testRemove() {
+        subject.put(TXT_FILE_NAME, readTempFile());
+        subject.remove(TXT_FILE_NAME);
 
-        assertThrows(FileNotFoundException.class, () -> subject.get(MP3_FILE_NAME));
+        assertThrows(FileNotFoundException.class, () -> subject.get(TXT_FILE_NAME));
     }
 
     @Test
-    public void testClear() throws IOException {
-        subject.put(MP3_FILE_NAME, readFile());
+    public void testClear() {
+        subject.put(TXT_FILE_NAME, readTempFile());
         subject.clear();
 
-        assertThrows(FileNotFoundException.class, () -> subject.get(MP3_FILE_NAME));
+        assertThrows(FileNotFoundException.class, () -> subject.get(TXT_FILE_NAME));
     }
 
     @Test
     public void clearExpiredClearsNothing() throws IOException {
-        byte[] buffer = readFile();
-        subject.put(MP3_FILE_NAME, buffer);
+        byte[] buffer = readTempFile();
+        subject.put(TXT_FILE_NAME, buffer);
         subject.clearExpired();
 
-        assertThat(subject.get(MP3_FILE_NAME), is(equalTo(buffer)));
+        assertThat(subject.get(TXT_FILE_NAME), is(equalTo(buffer)));
     }
 
     @Test
-    public void clearExpired() throws IOException {
+    public void clearExpired() {
         subject = new ByteArrayFileCache(SERVICE_PID, 1);
 
-        subject.put(MP3_FILE_NAME, readFile());
+        subject.put(TXT_FILE_NAME, readTempFile());
 
         // manipulate time of last use
-        File fileInCache = subject.getUniqueFile(MP3_FILE_NAME);
+        File fileInCache = subject.getUniqueFile(TXT_FILE_NAME);
         fileInCache.setLastModified(System.currentTimeMillis() - 2 * ByteArrayFileCache.ONE_DAY_IN_MILLIS);
 
         subject.clearExpired();
 
-        assertThrows(FileNotFoundException.class, () -> subject.get(MP3_FILE_NAME));
+        assertThrows(FileNotFoundException.class, () -> subject.get(TXT_FILE_NAME));
     }
 
-    private byte[] readFile() throws IOException {
-        byte[] buffer;
-        try (InputStream is = ByteArrayFileCacheTest.class.getResourceAsStream("/sounds/doorbell.mp3")) {
-            buffer = new byte[is.available()];
-            is.read(buffer);
+    private static File createTempFile() throws IOException {
+        final File file = File.createTempFile("doorbell", "txt");
+        file.deleteOnExit();
+        return file;
+    }
+
+    private byte[] readTempFile() {
+        if (txt_file != null) {
+            try {
+                return Files.readAllBytes(txt_file.toPath());
+            } catch (IOException e) {
+                logger.error("Error while reading temp file");
+            }
+        } else {
+            logger.error("Temp file not found");
         }
-        return buffer;
+        return new byte[0];
     }
 }

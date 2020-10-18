@@ -16,10 +16,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,17 +39,13 @@ public class ByteArrayFileCache {
 
     private final Logger logger = LoggerFactory.getLogger(ByteArrayFileCache.class);
 
-    private static final String MD5_ALGORITHM = "MD5";
-
     static final String CACHE_FOLDER_NAME = "cache";
     private static final char EXTENSION_SEPARATOR = '.';
-    private static final char UNIX_SEPARATOR = '/';
-    private static final char WINDOWS_SEPARATOR = '\\';
 
     private final File cacheFolder;
 
     static final long ONE_DAY_IN_MILLIS = TimeUnit.DAYS.toMillis(1);
-    private int expiry = 0;
+    private long expiry;
 
     private static final Map<String, File> FILES_IN_CACHE = new ConcurrentHashMap<>();
 
@@ -77,15 +71,27 @@ public class ByteArrayFileCache {
      * <code>$OPENHAB_USERDATA/cache/$servicePID/</code>.
      *
      * @param servicePID PID of the service
-     * @param int the days for how long the files stay in the cache valid. Must be positive. 0 to
-     *            disables this functionality.
+     * @param long the days for how long the files stay in the cache valid. Must be positive. 0 to
+     *            disable this functionality.
      */
-    public ByteArrayFileCache(String servicePID, int expiry) {
+    public ByteArrayFileCache(String servicePID, long expiry) {
+        this(servicePID, Duration.ofDays(expiry));
+    }
+
+    /**
+     * Creates a new {@link ByteArrayFileCache} instance for a service. Creates a <code>cache</code> folder under
+     * <code>$OPENHAB_USERDATA/cache/$servicePID/</code>.
+     *
+     * @param servicePID PID of the service
+     * @param Duration the days for how long the files stay in the cache valid. Must be positive. 0 to
+     *            disable this functionality.
+     */
+    public ByteArrayFileCache(String servicePID, Duration expiry) {
         this(servicePID);
-        if (expiry < 0) {
+        if (expiry.isNegative()) {
             throw new IllegalArgumentException("Cache expiration time must be greater than or equal to 0");
         }
-        this.expiry = expiry;
+        this.expiry = expiry.toDays();
     }
 
     /**
@@ -282,7 +288,7 @@ public class ByteArrayFileCache {
     @Nullable
     String getFileExtension(String fileName) {
         int extensionPos = fileName.lastIndexOf(EXTENSION_SEPARATOR);
-        int lastSeparatorPos = Math.max(fileName.lastIndexOf(UNIX_SEPARATOR), fileName.lastIndexOf(WINDOWS_SEPARATOR));
+        int lastSeparatorPos = fileName.lastIndexOf(File.separator);
         return lastSeparatorPos > extensionPos ? null : fileName.substring(extensionPos + 1).replaceFirst("\\?.*$", "");
     }
 
@@ -293,13 +299,6 @@ public class ByteArrayFileCache {
      * @return unique file name for the file associated with the given key
      */
     String getUniqueFileName(String key) {
-        try {
-            final MessageDigest md = MessageDigest.getInstance(MD5_ALGORITHM);
-            return String.format("%032x", new BigInteger(1, md.digest(key.getBytes(StandardCharsets.UTF_8))));
-        } catch (NoSuchAlgorithmException ex) {
-            // should not happen
-            logger.error("Could not create MD5 hash for key '{}'", key, ex);
-            return key;
-        }
+        return String.format("%032x", BigInteger.valueOf(key.hashCode()));
     }
 }
