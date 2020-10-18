@@ -89,7 +89,7 @@ public class AuthFilter implements ContainerRequestFilter {
             Object value = properties.get(CONFIG_ALLOW_BASIC_AUTH);
             allowBasicAuth = value != null && "true".equals(value.toString());
             value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
-            implicitUserRole = value != null && "false".equals(value.toString());
+            implicitUserRole = value == null || !"false".equals(value.toString());
         }
     }
 
