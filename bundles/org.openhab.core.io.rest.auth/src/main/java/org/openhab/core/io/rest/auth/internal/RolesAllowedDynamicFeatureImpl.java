@@ -31,7 +31,6 @@ import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
-import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.osgi.service.component.annotations.Component;
@@ -115,15 +114,7 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
         @Override
         public void filter(final ContainerRequestContext requestContext) throws IOException {
             if (!denyAll) {
-                // TODO: temporarily, until the complete authorization story is implemented, we consider operations
-                // allowed for user roles to be permitted unrestricted (even to unauthenticated users)
-                if (Arrays.asList(rolesAllowed).contains(Role.USER)) {
-                    return;
-                }
-
-                if (rolesAllowed.length > 0 && !isAuthenticated(requestContext)) {
-                    requestContext.abortWith(
-                            JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated"));
+                if (rolesAllowed.length == 0) {
                     return;
                 }
 
@@ -134,8 +125,13 @@ public class RolesAllowedDynamicFeatureImpl implements DynamicFeature {
                 }
             }
 
-            requestContext.abortWith(JSONResponse.createErrorResponse(Status.FORBIDDEN,
-                    "User is authenticated but doesn't have access to this resource"));
+            if (!isAuthenticated(requestContext)) {
+                requestContext
+                        .abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Authentication required"));
+                return;
+            }
+
+            requestContext.abortWith(JSONResponse.createErrorResponse(Status.FORBIDDEN, "Access denied"));
         }
 
         private static boolean isAuthenticated(final ContainerRequestContext requestContext) {

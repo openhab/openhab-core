@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="system:restauth">
+		<parameter name="allowBasicAuth" type="boolean" required="false">
+			<label>Allow Basic Authentication</label>
+			<default>false</default>
+			<description>Allow the use of Basic authentication to access protected API resources, in addition to access tokens
+				and API tokens.</description>
+		</parameter>
+		<parameter name="implicitUserRole" type="boolean" required="false">
+			<advanced>true</advanced>
+			<label>Implicit user role for unauthenticated requests</label>
+			<default>true</default>
+			<description>By default, operations requiring the "user" role are available when unauthenticated. Disabling this
+				option will enforce authorization for these operations. Warning: This causes clients that do not
+				support authentication to break.</description>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>
