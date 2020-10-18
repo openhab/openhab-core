@@ -66,7 +66,7 @@ import org.osgi.service.http.HttpService;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  */
 @Component(immediate = true, service = ChartServlet.class, configurationPid = "org.openhab.chart", //
-        property = Constants.SERVICE_PID + "=org.openhab.core.chart")
+        property = Constants.SERVICE_PID + "=org.openhab.chart")
 @ConfigurableService(category = "system", label = "Charts", description_uri = ChartServlet.CONFIG_URI)
 public class ChartServlet extends SmartHomeServlet {
 
