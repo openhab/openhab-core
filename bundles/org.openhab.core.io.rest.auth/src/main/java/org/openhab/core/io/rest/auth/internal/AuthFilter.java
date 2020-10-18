@@ -67,10 +67,10 @@ public class AuthFilter implements ContainerRequestFilter {
 
     protected static final String CONFIG_URI = "system:restauth";
     private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
-    private static final String CONFIG_NO_IMPLICIT_USER_ROLE = "noImplicitUserRole";
+    private static final String CONFIG_IMPLICIT_USER_ROLE = "implicitUserRole";
 
     private boolean allowBasicAuth = false;
-    private boolean noUnauthenticatedUserRole = false;
+    private boolean implicitUserRole = true;
 
     @Reference
     private JwtHelper jwtHelper;
@@ -88,8 +88,8 @@ public class AuthFilter implements ContainerRequestFilter {
         if (properties != null) {
             Object value = properties.get(CONFIG_ALLOW_BASIC_AUTH);
             allowBasicAuth = value != null && "true".equals(value.toString());
-            value = properties.get(CONFIG_NO_IMPLICIT_USER_ROLE);
-            noUnauthenticatedUserRole = value != null && "true".equals(value.toString());
+            value = properties.get(CONFIG_IMPLICIT_USER_ROLE);
+            implicitUserRole = value != null && "false".equals(value.toString());
         }
     }
 
@@ -137,7 +137,7 @@ public class AuthFilter implements ContainerRequestFilter {
                 return;
             }
 
-            if (!noUnauthenticatedUserRole) {
+            if (implicitUserRole) {
                 requestContext.setSecurityContext(new AnonymousUserSecurityContext());
             }
 
