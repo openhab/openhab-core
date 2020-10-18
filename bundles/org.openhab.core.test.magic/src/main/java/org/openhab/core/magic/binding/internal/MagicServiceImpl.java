@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(configurationPid = "org.openhab.magic", service = ConfigOptionProvider.class, immediate = true, //
-        property = Constants.SERVICE_PID + "=org.openhab.core.magic")
+        property = Constants.SERVICE_PID + "=org.openhab.magic")
 @ConfigurableService(category = "test", label = "Magic", description_uri = "test:magic")
 public class MagicServiceImpl implements MagicService {
     private final Logger logger = LoggerFactory.getLogger(MagicServiceImpl.class);

@@ -120,7 +120,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.http.auth.basic/${project.version}</bundle>
 
 		<feature>openhab-core-io-http-auth</feature>
-		<config name="org.openhab.core.auth">
+		<config name="org.openhab.auth">
 			enabled = true
 		</config>
 	</feature>
@@ -397,10 +397,10 @@
 		<!-- It is temperarily disabled due to https://github.com/openhab/openhab-core/issues/422 -->
 		<!-- <bundle start-level="30">mvn:org.openhab.core.bundles/org.openhab.ui.start/${project.version}</bundle> -->
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.karaf/${project.version}</bundle>
-		<config name="org.openhab.core.audio">
+		<config name="org.openhab.audio">
 			defaultSink = enhancedjavasound
 		</config>
-		<config name="org.openhab.core.voice">
+		<config name="org.openhab.voice">
 			defaultHLI = rulehli
 		</config>
 	</feature>
