@@ -67,7 +67,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
     protected static final String CONFIG_URI = "system:restauth";
     private static final String CONFIG_ALLOW_BASIC_AUTH = "allowBasicAuth";
-    private static final String CONFIG_NO_UNAUTHENTICATED_USER_ROLE = "noUnauthenticatedUserRole";
+    private static final String CONFIG_NO_IMPLICIT_USER_ROLE = "noImplicitUserRole";
 
     private boolean allowBasicAuth = false;
     private boolean noUnauthenticatedUserRole = false;
@@ -88,7 +88,7 @@ public class AuthFilter implements ContainerRequestFilter {
         if (properties != null) {
             Object value = properties.get(CONFIG_ALLOW_BASIC_AUTH);
             allowBasicAuth = value != null && "true".equals(value.toString());
-            value = properties.get(CONFIG_NO_UNAUTHENTICATED_USER_ROLE);
+            value = properties.get(CONFIG_NO_IMPLICIT_USER_ROLE);
             noUnauthenticatedUserRole = value != null && "true".equals(value.toString());
         }
     }
@@ -100,11 +100,11 @@ public class AuthFilter implements ContainerRequestFilter {
             if (authHeader != null) {
                 String[] authParts = authHeader.split(" ");
                 if (authParts.length == 2) {
-                    if ("Bearer".equals(authParts[0])) {
+                    if ("Bearer".equalsIgnoreCase(authParts[0])) {
                         Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(authParts[1]);
                         requestContext.setSecurityContext(new JwtSecurityContext(auth));
                         return;
-                    } else if ("Basic".equals(authParts[0])) {
+                    } else if ("Basic".equalsIgnoreCase(authParts[0])) {
                         if (!allowBasicAuth) {
                             throw new AuthenticationException("Basic authentication is not allowed");
                         }
