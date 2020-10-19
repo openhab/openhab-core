@@ -85,7 +85,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
 @JSONRequired
 @Path(SseResource.PATH_EVENTS)
-@RolesAllowed({ Role.USER })
+@RolesAllowed({ Role.USER, Role.ADMIN })
 @Tag(name = SseResource.PATH_EVENTS)
 @Singleton
 @NonNullByDefault
