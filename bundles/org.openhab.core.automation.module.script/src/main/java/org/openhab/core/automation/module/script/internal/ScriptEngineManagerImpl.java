@@ -44,9 +44,9 @@ import org.slf4j.LoggerFactory;
 public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
-    private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private final Map<String, ScriptEngineFactory> customSupport = new HashMap<>();
-    private final Map<String, ScriptEngineFactory> genericSupport = new HashMap<>();
+    private final Map<String, @Nullable ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
+    private final Map<String, @Nullable ScriptEngineFactory> customSupport = new HashMap<>();
+    private final Map<String, @Nullable ScriptEngineFactory> genericSupport = new HashMap<>();
     private final ScriptExtensionManager scriptExtensionManager;
 
     @Activate
@@ -57,7 +57,6 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addScriptEngineFactory(ScriptEngineFactory engineFactory) {
         List<String> scriptTypes = engineFactory.getScriptTypes();
-
         logger.trace("{}.getScriptTypes(): {}", engineFactory.getClass().getSimpleName(), scriptTypes);
         for (String scriptType : scriptTypes) {
             if (isCustomFactory(engineFactory)) {
@@ -66,26 +65,27 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 this.genericSupport.put(scriptType, engineFactory);
             }
         }
-        if (!engineFactory.getScriptTypes().isEmpty()) {
-            ScriptEngine scriptEngine = engineFactory.createScriptEngine(engineFactory.getScriptTypes().get(0));
-            if (scriptEngine != null) {
-                javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
-                logger.debug(
-                        "Initialized a {} ScriptEngineFactory for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
-                        (isCustomFactory(engineFactory)) ? "custom" : "generic", factory.getEngineName(),
-                        factory.getEngineVersion(), factory.getLanguageName(), factory.getLanguageVersion(),
-                        factory.getExtensions(), factory.getNames(), factory.getMimeTypes());
+        if (logger.isDebugEnabled()) {
+            if (!scriptTypes.isEmpty()) {
+                ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+                if (scriptEngine != null) {
+                    javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
+                    logger.debug(
+                            "Initialized a {} ScriptEngineFactory for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
+                            (isCustomFactory(engineFactory)) ? "custom" : "generic", factory.getEngineName(),
+                            factory.getEngineVersion(), factory.getLanguageName(), factory.getLanguageVersion(),
+                            factory.getExtensions(), factory.getNames(), factory.getMimeTypes());
+                } else {
+                    logger.trace("addScriptEngineFactory: engine was null");
+                }
             } else {
-                logger.trace("addScriptEngineFactory: engine was null");
+                logger.trace("addScriptEngineFactory: scriptTypes was empty");
             }
-        } else {
-            logger.trace("addScriptEngineFactory: scriptTypes was empty");
         }
     }
 
     public void removeScriptEngineFactory(ScriptEngineFactory engineFactory) {
         List<String> scriptTypes = engineFactory.getScriptTypes();
-
         logger.trace("{}.getScriptTypes(): {}", engineFactory.getClass().getSimpleName(), scriptTypes);
         for (String scriptType : scriptTypes) {
             if (isCustomFactory(engineFactory)) {
@@ -150,7 +150,6 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             ScriptEngine engine = container.getScriptEngine();
             try {
                 engine.eval(scriptData);
-
                 if (engine instanceof Invocable) {
                     Invocable inv = (Invocable) engine;
                     try {
