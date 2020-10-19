@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.security.sasl.AuthenticationException;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
 import org.jose4j.jwk.JsonWebKey;
@@ -41,6 +39,7 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.auth.Authentication;
+import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.User;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
