@@ -151,8 +151,8 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
             UserApiTokenCredentials userApiTokenCreds = (UserApiTokenCredentials) credentials;
             for (User user : getAll()) {
                 ManagedUser managedUser = (ManagedUser) user;
-                String tokenHash = hash(userApiTokenCreds.getApiToken(), managedUser.getPasswordSalt(),
-                        APITOKEN_ITERATIONS).get();
+                String[] tokenHashAndSalt = userApiTokenCreds.getApiToken().split(":");
+                String tokenHash = hash(tokenHashAndSalt[0], tokenHashAndSalt[1], APITOKEN_ITERATIONS).get();
 
                 if (managedUser.getApiTokens().stream()
                         .anyMatch(userApiToken -> tokenHash.equals(userApiToken.getApiToken()))) {
@@ -224,13 +224,13 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         }
 
         ManagedUser managedUser = (ManagedUser) user;
-        String salt = managedUser.getPasswordSalt();
+        String tokenSalt = generateSalt(KEY_LENGTH / 8).get();
         byte[] rnd = new byte[64];
         RAND.nextBytes(rnd);
         String token = "oh." + name + "." + Base64.getEncoder().encodeToString(rnd).replaceAll("(\\+|/|=)", "");
-        String tokenHash = hash(token, salt, APITOKEN_ITERATIONS).get();
+        String tokenHash = hash(token, tokenSalt, APITOKEN_ITERATIONS).get();
 
-        UserApiToken userApiToken = new UserApiToken(name, tokenHash, scope);
+        UserApiToken userApiToken = new UserApiToken(name, tokenHash + ":" + tokenSalt, scope);
 
         managedUser.getApiTokens().add(userApiToken);
         this.update(user);
