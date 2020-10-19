@@ -12,7 +12,7 @@
  */
 package org.openhab.core.persistence.internal;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -291,7 +291,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, Persi
                                             genericItem.addStateChangeListener(this);
                                             if (logger.isDebugEnabled()) {
                                                 logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
-                                                        DateFormat.getDateTimeInstance()
+                                                        DateTimeFormatter.ISO_ZONED_DATE_TIME
                                                                 .format(historicItem.getTimestamp()),
                                                         item.getName(), historicItem.getState());
                                             }
