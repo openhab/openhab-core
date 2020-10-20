@@ -102,9 +102,9 @@ public class AuthFilter implements ContainerRequestFilter {
             Authentication auth = userRegistry.authenticate(credentials);
             User user = userRegistry.get(auth.getUsername());
             if (user == null) {
-                throw new org.openhab.core.auth.AuthenticationException("User not found in registry");
+                throw new AuthenticationException("User not found in registry");
             }
-            return new UserSecurityContext(user, "ApiToken");
+            return new UserSecurityContext(user, auth, "ApiToken");
         } else {
             Authentication auth = jwtHelper.verifyAndParseJwtAccessToken(token);
             return new JwtSecurityContext(auth);
@@ -117,14 +117,20 @@ public class AuthFilter implements ContainerRequestFilter {
         Authentication auth = userRegistry.authenticate(credentials);
         User user = userRegistry.get(auth.getUsername());
         if (user == null) {
-            throw new org.openhab.core.auth.AuthenticationException("User not found in registry");
+            throw new AuthenticationException("User not found in registry");
         }
-        return new UserSecurityContext(user, "Basic");
+        return new UserSecurityContext(user, auth, "Basic");
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         try {
+            String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
+            if (altTokenHeader != null) {
+                requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
+                return;
+            }
+
             String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
             if (authHeader != null) {
                 String[] authParts = authHeader.split(" ");
@@ -158,12 +164,6 @@ public class AuthFilter implements ContainerRequestFilter {
                         }
                     }
                 }
-            }
-
-            String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
-            if (altTokenHeader != null) {
-                requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
-                return;
             }
 
             if (implicitUserRole) {

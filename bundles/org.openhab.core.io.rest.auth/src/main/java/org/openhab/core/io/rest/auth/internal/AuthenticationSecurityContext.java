@@ -12,22 +12,20 @@
  */
 package org.openhab.core.io.rest.auth.internal;
 
-import java.util.Date;
+import javax.ws.rs.core.SecurityContext;
+
+import org.openhab.core.auth.Authentication;
 
 /**
- * A DTO representing a user API token, without the sensible information.
+ * A {@link SecurityContext} holding an instance of {@link Authentication}
  *
  * @author Yannick Schaus - initial contribution
  */
-public class UserApiTokenDTO {
-    String name;
-    Date createdTime;
-    String scope;
-
-    public UserApiTokenDTO(String name, Date createdTime, String scope) {
-        super();
-        this.name = name;
-        this.createdTime = createdTime;
-        this.scope = scope;
-    }
+public interface AuthenticationSecurityContext extends SecurityContext {
+    /**
+     * Retrieves the {@link Authentication} associated with this context
+     *
+     * @return the authentication instance
+     */
+    public Authentication getAuthentication();
 }

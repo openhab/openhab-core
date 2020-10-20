@@ -13,7 +13,7 @@
 package org.openhab.core.auth;
 
 /**
- * Credentials which represent user a user API token.
+ * Credentials which represent a user API token.
  *
  * @author Yannick Schaus - Initial contribution
  */

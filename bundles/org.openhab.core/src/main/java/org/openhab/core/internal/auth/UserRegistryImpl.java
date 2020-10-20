@@ -61,6 +61,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
     private static final int PASSWORD_ITERATIONS = 65536;
     private static final int APITOKEN_ITERATIONS = 1024;
+    private static final String APITOKEN_PREFIX = "oh";
     private static final int KEY_LENGTH = 512;
     private static final String ALGORITHM = "PBKDF2WithHmacSHA512";
     private static final SecureRandom RAND = new SecureRandom();
@@ -148,16 +149,26 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
             return new Authentication(managedUser.getName(), managedUser.getRoles().stream().toArray(String[]::new));
         } else if (credentials instanceof UserApiTokenCredentials) {
-            UserApiTokenCredentials userApiTokenCreds = (UserApiTokenCredentials) credentials;
+            UserApiTokenCredentials apiTokenCreds = (UserApiTokenCredentials) credentials;
+            String[] apiTokenParts = apiTokenCreds.getApiToken().split("\\.");
+            if (apiTokenParts.length != 3 || !APITOKEN_PREFIX.equals(apiTokenParts[0])) {
+                throw new AuthenticationException("Invalid API token format");
+            }
             for (User user : getAll()) {
                 ManagedUser managedUser = (ManagedUser) user;
-                String[] tokenHashAndSalt = userApiTokenCreds.getApiToken().split(":");
-                String tokenHash = hash(tokenHashAndSalt[0], tokenHashAndSalt[1], APITOKEN_ITERATIONS).get();
+                for (UserApiToken userApiToken : managedUser.getApiTokens()) {
+                    // only check if the name in the token matches
+                    if (!userApiToken.getName().equals(apiTokenParts[1])) {
+                        continue;
+                    }
+                    String[] existingTokenHashAndSalt = userApiToken.getApiToken().split(":");
+                    String incomingTokenHash = hash(apiTokenCreds.getApiToken(), existingTokenHashAndSalt[1],
+                            APITOKEN_ITERATIONS).get();
 
-                if (managedUser.getApiTokens().stream()
-                        .anyMatch(userApiToken -> tokenHash.equals(userApiToken.getApiToken()))) {
-                    return new Authentication(managedUser.getName(),
-                            managedUser.getRoles().stream().toArray(String[]::new));
+                    if (incomingTokenHash.equals(existingTokenHashAndSalt[0])) {
+                        return new Authentication(managedUser.getName(),
+                                managedUser.getRoles().stream().toArray(String[]::new), userApiToken.getScope());
+                    }
                 }
             }
 
@@ -227,7 +238,8 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         String tokenSalt = generateSalt(KEY_LENGTH / 8).get();
         byte[] rnd = new byte[64];
         RAND.nextBytes(rnd);
-        String token = "oh." + name + "." + Base64.getEncoder().encodeToString(rnd).replaceAll("(\\+|/|=)", "");
+        String token = APITOKEN_PREFIX + "." + name + "."
+                + Base64.getEncoder().encodeToString(rnd).replaceAll("(\\+|/|=)", "");
         String tokenHash = hash(token, tokenSalt, APITOKEN_ITERATIONS).get();
 
         UserApiToken userApiToken = new UserApiToken(name, tokenHash + ":" + tokenSalt, scope);
