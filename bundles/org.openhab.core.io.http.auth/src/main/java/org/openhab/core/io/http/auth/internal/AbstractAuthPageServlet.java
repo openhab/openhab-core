@@ -39,13 +39,13 @@ import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@NonNullByDefault
 /**
  * Abstract class for servlets to perform sensible operations requiring user authentication.
  *
  * @author Yannick Schaus - initial contribution
  *
  */
+@NonNullByDefault
 public abstract class AbstractAuthPageServlet extends HttpServlet {
 
     protected static final long serialVersionUID = 5340598701104679840L;
