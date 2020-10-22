@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -68,7 +67,7 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                 buildCommandUsage(SUBCMD_RMAPITOKEN + " <userId> <tokenName>",
                         "removes (revokes) the specified API token"),
                 buildCommandUsage(SUBCMD_CLEARSESSIONS + " <userId>",
-                        "clear the refresh tokens associated with the user (will sign the user out of all sessions)");
+                        "clear the refresh tokens associated with the user (will sign the user out of all sessions)"));
     }
 
     @Override
