@@ -45,9 +45,9 @@ public class ByteArrayFileCache {
     private final File cacheFolder;
 
     static final long ONE_DAY_IN_MILLIS = TimeUnit.DAYS.toMillis(1);
-    private long expiry;
+    private final long expiry;
 
-    private static final Map<String, File> FILES_IN_CACHE = new ConcurrentHashMap<>();
+    private final Map<String, File> filesInCache = new ConcurrentHashMap<>();
 
     /**
      * Creates a new {@link ByteArrayFileCache} instance for a service. Creates a <code>cache</code> folder under
@@ -56,14 +56,7 @@ public class ByteArrayFileCache {
      * @param servicePID PID of the service
      */
     public ByteArrayFileCache(String servicePID) {
-        // TODO track and limit folder size
-        // TODO support user specific folder
-        cacheFolder = new File(new File(OpenHAB.getUserDataFolder(), CACHE_FOLDER_NAME), servicePID);
-        if (!cacheFolder.exists()) {
-            logger.debug("Creating cache folder '{}'", cacheFolder.getAbsolutePath());
-            cacheFolder.mkdirs();
-        }
-        logger.debug("Using cache folder '{}'", cacheFolder.getAbsolutePath());
+        this(servicePID, Duration.ZERO);
     }
 
     /**
@@ -87,7 +80,15 @@ public class ByteArrayFileCache {
      *            disable this functionality.
      */
     public ByteArrayFileCache(String servicePID, Duration expiry) {
-        this(servicePID);
+        // TODO track and limit folder size
+        // TODO support user specific folder
+        cacheFolder = new File(new File(OpenHAB.getUserDataFolder(), CACHE_FOLDER_NAME), servicePID);
+        if (!cacheFolder.exists()) {
+            logger.debug("Creating cache folder '{}'", cacheFolder.getAbsolutePath());
+            cacheFolder.mkdirs();
+        }
+        logger.debug("Using cache folder '{}'", cacheFolder.getAbsolutePath());
+
         if (expiry.isNegative()) {
             throw new IllegalArgumentException("Cache expiration time must be greater than or equal to 0");
         }
@@ -128,11 +129,12 @@ public class ByteArrayFileCache {
      * @param key the key with which the file is to be associated
      * @param content the content for the file to be associated with the specified key
      * @return the content of the file associated with the given key
+     * @throws IOException if an I/O error occurs reading the given file
      */
-    public byte[] putIfAbsentAndGet(String key, byte[] content) {
+    public byte[] putIfAbsentAndGet(String key, byte[] content) throws IOException {
         putIfAbsent(key, content);
 
-        return content;
+        return get(key);
     }
 
     /**
@@ -205,7 +207,7 @@ public class ByteArrayFileCache {
         File[] filesInCache = cacheFolder.listFiles();
         if (filesInCache != null && filesInCache.length > 0) {
             logger.debug("Deleting expired files from cache");
-            Arrays.stream(filesInCache).filter(file -> isExpired(file)).forEach(File::delete);
+            Arrays.stream(filesInCache).filter(this::isExpired).forEach(File::delete);
         }
     }
 
@@ -268,13 +270,13 @@ public class ByteArrayFileCache {
      */
     File getUniqueFile(String key) {
         String uniqueFileName = getUniqueFileName(key);
-        if (FILES_IN_CACHE.containsKey(uniqueFileName)) {
-            return FILES_IN_CACHE.get(uniqueFileName);
+        if (filesInCache.containsKey(uniqueFileName)) {
+            return filesInCache.get(uniqueFileName);
         } else {
             String fileExtension = getFileExtension(key);
             File fileInCache = new File(cacheFolder,
                     uniqueFileName + (fileExtension == null ? "" : EXTENSION_SEPARATOR + fileExtension));
-            FILES_IN_CACHE.put(uniqueFileName, fileInCache);
+            filesInCache.put(uniqueFileName, fileInCache);
             return fileInCache;
         }
     }

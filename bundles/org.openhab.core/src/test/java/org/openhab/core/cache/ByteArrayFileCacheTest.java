@@ -82,13 +82,13 @@ public class ByteArrayFileCacheTest {
 
     @Test
     public void testGetFileExtension() {
-        assertThat(subject.getFileExtension("/var/log/openhab2/"), is(nullValue()));
+        assertThat(subject.getFileExtension("/var/log/openhab/"), is(nullValue()));
         assertThat(subject.getFileExtension("/var/log/foo.bar/"), is(nullValue()));
         assertThat(subject.getFileExtension("doorbell.mp3"), is(equalTo("mp3")));
         assertThat(subject.getFileExtension("/tmp/doorbell.mp3"), is(equalTo("mp3")));
         assertThat(subject.getFileExtension(MP3_FILE_NAME), is(equalTo("mp3")));
         assertThat(subject.getFileExtension(TXT_FILE_NAME), is(equalTo("txt")));
-        assertThat(subject.getFileExtension("/var/log/openhab2/.."), is(""));
+        assertThat(subject.getFileExtension("/var/log/openhab/.."), is(""));
         assertThat(subject.getFileExtension(".hidden"), is(equalTo("hidden")));
         assertThat(subject.getFileExtension("C:\\Program Files (x86)\\java\\bin\\javaw.exe"), is(equalTo("exe")));
         assertThat(subject.getFileExtension("https://www.youtube.com/watch?v=qYrpPrLY868"), is(nullValue()));
@@ -119,7 +119,7 @@ public class ByteArrayFileCacheTest {
     }
 
     @Test
-    public void testPutIfAbsent() throws IOException {
+    public void testPutIfAbsentAddsANewFile() throws IOException {
         byte[] buffer = readTempFile();
         subject.putIfAbsent(TXT_FILE_NAME, buffer);
 
@@ -127,10 +127,27 @@ public class ByteArrayFileCacheTest {
     }
 
     @Test
-    public void testPutIfAbsentAndGet() {
+    public void testPutIfAbsentDoesNotOverwriteExistingFile() throws IOException {
+        byte[] buffer = readTempFile();
+        subject.putIfAbsent(TXT_FILE_NAME, buffer);
+        subject.putIfAbsent(TXT_FILE_NAME, TXT_FILE_NAME.getBytes());
+
+        assertThat(subject.get(TXT_FILE_NAME), is(equalTo(buffer)));
+    }
+
+    @Test
+    public void testPutIfAbsentAndGetAddsANewFile() throws IOException {
         byte[] buffer = readTempFile();
 
         assertThat(subject.putIfAbsentAndGet(TXT_FILE_NAME, buffer), is(equalTo(buffer)));
+    }
+
+    @Test
+    public void testPutIfAbsentAndGetDoesNotOverwriteExistingFile() throws IOException {
+        byte[] buffer = readTempFile();
+
+        subject.putIfAbsentAndGet(TXT_FILE_NAME, buffer);
+        assertThat(subject.putIfAbsentAndGet(TXT_FILE_NAME, TXT_FILE_NAME.getBytes()), is(equalTo(buffer)));
     }
 
     @Test
