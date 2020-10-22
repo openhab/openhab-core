@@ -124,8 +124,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
                 if (!tokenName.matches("[a-zA-Z0-9]*")) {
                     resp.setContentType("text/html;charset=UTF-8");
                     // TODO: i18n
-                    resp.getWriter().append(getPageBody(params,
-                            "Invalid token name already exists, please use alphanumeric characters only.", false));
+                    resp.getWriter().append(
+                            getPageBody(params, "Invalid token name, please use alphanumeric characters only.", false));
                     resp.getWriter().close();
                     return;
                 }
