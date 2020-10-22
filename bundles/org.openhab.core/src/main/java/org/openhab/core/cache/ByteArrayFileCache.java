@@ -289,9 +289,10 @@ public class ByteArrayFileCache {
      */
     @Nullable
     String getFileExtension(String fileName) {
-        int extensionPos = fileName.lastIndexOf(EXTENSION_SEPARATOR);
-        int lastSeparatorPos = fileName.lastIndexOf(File.separator);
-        return lastSeparatorPos > extensionPos ? null : fileName.substring(extensionPos + 1).replaceFirst("\\?.*$", "");
+        String strippedFileName = fileName.replaceFirst("\\?.*$", "");
+        int extensionPos = strippedFileName.lastIndexOf(EXTENSION_SEPARATOR);
+        int lastSeparatorPos = strippedFileName.lastIndexOf(File.separator);
+        return lastSeparatorPos > extensionPos ? null : strippedFileName.substring(extensionPos + 1);
     }
 
     /**

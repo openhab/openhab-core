@@ -92,6 +92,11 @@ public class ByteArrayFileCacheTest {
         assertThat(subject.getFileExtension(".hidden"), is(equalTo("hidden")));
         assertThat(subject.getFileExtension("C:\\Program Files (x86)\\java\\bin\\javaw.exe"), is(equalTo("exe")));
         assertThat(subject.getFileExtension("https://www.youtube.com/watch?v=qYrpPrLY868"), is(nullValue()));
+        assertThat(subject.getFileExtension("https://www.youtube.com/watch?v=Test.With.Dots"), is(nullValue()));
+        assertThat(subject.getFileExtension("https://host/test.xlsx?cache=false"), is("xlsx"));
+        // assertThat(subject.getFileExtension(
+        // "http://127.0.0.1:8080/image/image%3A%2F%2Fhttp%253a%252f%252f127.0.0.1%253a32400%252fphoto%252f%253a%252ftranscode%253fwidth%253d1920%2526height%253d1920%2526minSize%253d1%2526upscale%253d0%2526url%253d%252flibrary%252fmetadata%252f1896%252fthumb%252f1569782004%2526X-Plex-Token%253dXScJLJbUdcybNXFyHLuv"),
+        // is(nullValue()));
     }
 
     @Test
