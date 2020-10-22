@@ -57,18 +57,18 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_LIST, "lists all users"),
+        return List.of(buildCommandUsage(SUBCMD_LIST, "lists all users"),
                 buildCommandUsage(SUBCMD_ADD + " <userId> <password> <role>",
                         "adds a new user with the specified role"),
                 buildCommandUsage(SUBCMD_REMOVE + " <userId>", "removes the given user"),
                 buildCommandUsage(SUBCMD_CHANGEPASSWORD + " <userId> <newPassword>", "changes the password of a user"),
-                buildCommandUsage(SUBCMD_LISTAPITOKENS, "lists the API keys for all users"),
+                buildCommandUsage(SUBCMD_LISTAPITOKENS, "lists the API tokens for all users"),
                 buildCommandUsage(SUBCMD_ADDAPITOKEN + " <userId> <tokenName> <scope>",
                         "adds a new API token on behalf of the specified user for the specified scope"),
                 buildCommandUsage(SUBCMD_RMAPITOKEN + " <userId> <tokenName>",
                         "removes (revokes) the specified API token"),
                 buildCommandUsage(SUBCMD_CLEARSESSIONS + " <userId>",
-                        "clear the refresh tokens associated with the user (will sign the user out of all sessions)") });
+                        "clear the refresh tokens associated with the user (will sign the user out of all sessions)");
     }
 
     @Override
@@ -122,10 +122,9 @@ public class UserConsoleCommandExtension extends AbstractConsoleCommandExtension
                 case SUBCMD_LISTAPITOKENS:
                     userRegistry.getAll().forEach(user -> {
                         ManagedUser managedUser = (ManagedUser) user;
-                        if (managedUser.getApiTokens().size() > 0) {
-                            managedUser.getApiTokens().forEach(t -> {
-                                console.println("user=" + user.toString() + ", " + t.toString());
-                            });
+                        if (!managedUser.getApiTokens().isEmpty()) {
+                            managedUser.getApiTokens()
+                                    .forEach(t -> console.println("user=" + user.toString() + ", " + t.toString()));
                         }
                     });
                     break;

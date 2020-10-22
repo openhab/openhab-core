@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.ManagedUser;
@@ -62,82 +61,87 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
     }
 
     @Override
-    protected void doGet(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+    protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req != null && resp != null) {
-            Map<String, String[]> params = req.getParameterMap();
+        Map<String, String[]> params = req.getParameterMap();
 
-            try {
-                String message = "Create a new API token to authorize external services.";
+        try {
+            String message = "Create a new API token to authorize external services.";
 
-                // TODO: i18n
-                resp.setContentType("text/html;charset=UTF-8");
-                resp.getWriter().append(getPageBody(params, message, false));
-                resp.getWriter().close();
-            } catch (Exception e) {
-                resp.setContentType("text/plain;charset=UTF-8");
-                resp.getWriter().append(e.getMessage());
-                resp.getWriter().close();
-            }
+            // TODO: i18n
+            resp.setContentType("text/html;charset=UTF-8");
+            resp.getWriter().append(getPageBody(params, message, false));
+            resp.getWriter().close();
+        } catch (Exception e) {
+            resp.setContentType("text/plain;charset=UTF-8");
+            resp.getWriter().append(e.getMessage());
+            resp.getWriter().close();
         }
     }
 
     @Override
-    protected void doPost(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+    protected void doPost(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req != null && resp != null) {
-            Map<String, String[]> params = req.getParameterMap();
-            try {
-                if (!params.containsKey(("username"))) {
-                    throw new AuthenticationException("no username");
-                }
-                if (!params.containsKey(("password"))) {
-                    throw new AuthenticationException("no password");
-                }
-                if (!params.containsKey(("token_name"))) {
-                    throw new AuthenticationException("no new password");
-                }
-                if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
-                    throw new AuthenticationException("CSRF check failed");
-                }
-
-                removeCsrfToken(params.get("csrf_token")[0]);
-
-                String username = params.get("username")[0];
-                String password = params.get("password")[0];
-                String tokenName = params.get("token_name")[0];
-                String tokenScope = "";
-                if (params.containsKey("token_name")) {
-                    tokenScope = params.get("token_scope")[0];
-                }
-
-                User user = login(username, password);
-                String newApiToken;
-
-                if (user instanceof ManagedUser) {
-                    if (((ManagedUser) user).getApiTokens().stream()
-                            .anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
-                        resp.setContentType("text/html;charset=UTF-8");
-                        // TODO: i18n
-                        resp.getWriter().append(getPageBody(params,
-                                "A token with the same name already exists, please try again.", false));
-                        resp.getWriter().close();
-                        return;
-                    }
-                    newApiToken = userRegistry.addUserApiToken(user, tokenName, tokenScope);
-                } else {
-                    throw new AuthenticationException("User is not managed");
-                }
-
-                // TODO: i18n
-                String resultMessage = "New token created:<br /><br /><code>" + newApiToken + "</code>";
-                resultMessage += "<br /><br /><small>Please copy it now, it will not be shown again.</small>";
-                resp.setContentType("text/html;charset=UTF-8");
-                resp.getWriter().append(getResultPageBody(params, resultMessage)); // TODO: i18n
-                resp.getWriter().close();
-            } catch (AuthenticationException e) {
-                processFailedLogin(resp, params, e.getMessage());
+        Map<String, String[]> params = req.getParameterMap();
+        try {
+            if (!params.containsKey("username")) {
+                throw new AuthenticationException("no username");
             }
+            if (!params.containsKey("password")) {
+                throw new AuthenticationException("no password");
+            }
+            if (!params.containsKey("token_name")) {
+                throw new AuthenticationException("no new password");
+            }
+            if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
+                throw new AuthenticationException("CSRF check failed");
+            }
+
+            removeCsrfToken(params.get("csrf_token")[0]);
+
+            String username = params.get("username")[0];
+            String password = params.get("password")[0];
+            String tokenName = params.get("token_name")[0];
+            String tokenScope = "";
+            if (params.containsKey("token_name")) {
+                tokenScope = params.get("token_scope")[0];
+            }
+
+            User user = login(username, password);
+            String newApiToken;
+
+            if (user instanceof ManagedUser) {
+                if (((ManagedUser) user).getApiTokens().stream()
+                        .anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
+                    resp.setContentType("text/html;charset=UTF-8");
+                    // TODO: i18n
+                    resp.getWriter().append(
+                            getPageBody(params, "A token with the same name already exists, please try again.", false));
+                    resp.getWriter().close();
+                    return;
+                }
+
+                if (!tokenName.matches("[a-zA-Z0-9]*")) {
+                    resp.setContentType("text/html;charset=UTF-8");
+                    // TODO: i18n
+                    resp.getWriter().append(getPageBody(params,
+                            "Invalid token name already exists, please use alphanumeric characters only.", false));
+                    resp.getWriter().close();
+                    return;
+                }
+                newApiToken = userRegistry.addUserApiToken(user, tokenName, tokenScope);
+            } else {
+                throw new AuthenticationException("User is not managed");
+            }
+
+            // TODO: i18n
+            String resultMessage = "New token created:<br /><br /><code>" + newApiToken + "</code>";
+            resultMessage += "<br /><br /><small>Please copy it now, it will not be shown again.</small>";
+            resp.setContentType("text/html;charset=UTF-8");
+            resp.getWriter().append(getResultPageBody(params, resultMessage)); // TODO: i18n
+            resp.getWriter().close();
+        } catch (AuthenticationException e) {
+            processFailedLogin(resp, params, e.getMessage());
         }
     }
 
@@ -147,7 +151,7 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
         String buttonLabel = "Create API Token"; // TODO: i18n
         responseBody = responseBody.replace("{message}", message);
         responseBody = responseBody.replace("{formAction}", "/createApiToken");
-        responseBody = responseBody.replace("{formClass}", (hideForm) ? "hide" : "show");
+        responseBody = responseBody.replace("{formClass}", hideForm ? "hide" : "show");
         responseBody = responseBody.replace("{repeatPasswordFieldType}", "hidden");
         responseBody = responseBody.replace("{newPasswordFieldType}", "hidden");
         responseBody = responseBody.replace("{tokenNameFieldType}", "text");

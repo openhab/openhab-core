@@ -135,7 +135,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
     public Authentication authenticate(Credentials credentials) throws AuthenticationException {
         if (credentials instanceof UsernamePasswordCredentials) {
             UsernamePasswordCredentials usernamePasswordCreds = (UsernamePasswordCredentials) credentials;
-            User user = this.get(usernamePasswordCreds.getUsername());
+            User user = get(usernamePasswordCreds.getUsername());
             if (user == null) {
                 throw new AuthenticationException("User not found: " + usernamePasswordCreds.getUsername());
             }
@@ -189,7 +189,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         String passwordHash = hash(newPassword, passwordSalt, PASSWORD_ITERATIONS).get();
         managedUser.setPasswordSalt(passwordSalt);
         managedUser.setPasswordHash(passwordHash);
-        this.update(user);
+        update(user);
     }
 
     @Override
@@ -200,7 +200,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
         ManagedUser managedUser = (ManagedUser) user;
         managedUser.getSessions().add(session);
-        this.update(user);
+        update(user);
     }
 
     @Override
@@ -211,7 +211,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
         ManagedUser managedUser = (ManagedUser) user;
         managedUser.getSessions().add(session);
-        this.update(user);
+        update(user);
     }
 
     @Override
@@ -222,7 +222,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
         ManagedUser managedUser = (ManagedUser) user;
         managedUser.getSessions().clear();
-        this.update(user);
+        update(user);
     }
 
     @Override
@@ -245,7 +245,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         UserApiToken userApiToken = new UserApiToken(name, tokenHash + ":" + tokenSalt, scope);
 
         managedUser.getApiTokens().add(userApiToken);
-        this.update(user);
+        update(user);
 
         return token;
     }
@@ -258,7 +258,7 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
 
         ManagedUser managedUser = (ManagedUser) user;
         managedUser.getApiTokens().remove(userApiToken);
-        this.update(user);
+        update(user);
     }
 
     @Override

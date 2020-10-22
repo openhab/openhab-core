@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.ManagedUser;
@@ -57,43 +56,41 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
         try {
             httpService.registerServlet("/changePassword", this, null, null);
         } catch (NamespaceException | ServletException e) {
-            logger.error("Error during authorization page registration: {}", e.getMessage());
+            logger.error("Error during change password page registration: {}", e.getMessage());
         }
     }
 
     @Override
-    protected void doGet(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+    protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req != null && resp != null) {
-            Map<String, String[]> params = req.getParameterMap();
+        Map<String, String[]> params = req.getParameterMap();
 
-            try {
-                String message = "";
+        try {
+            String message = "";
 
-                resp.setContentType("text/html;charset=UTF-8");
-                resp.getWriter().append(getPageBody(params, message, false));
-                resp.getWriter().close();
-            } catch (Exception e) {
-                resp.setContentType("text/plain;charset=UTF-8");
-                resp.getWriter().append(e.getMessage());
-                resp.getWriter().close();
-            }
+            resp.setContentType("text/html;charset=UTF-8");
+            resp.getWriter().append(getPageBody(params, message, false));
+            resp.getWriter().close();
+        } catch (Exception e) {
+            resp.setContentType("text/plain;charset=UTF-8");
+            resp.getWriter().append(e.getMessage());
+            resp.getWriter().close();
         }
     }
 
     @Override
-    protected void doPost(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+    protected void doPost(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
         if (req != null && resp != null) {
             Map<String, String[]> params = req.getParameterMap();
             try {
-                if (!params.containsKey(("username"))) {
+                if (!params.containsKey("username")) {
                     throw new AuthenticationException("no username");
                 }
-                if (!params.containsKey(("password"))) {
+                if (!params.containsKey("password")) {
                     throw new AuthenticationException("no password");
                 }
-                if (!params.containsKey(("new_password"))) {
+                if (!params.containsKey("new_password")) {
                     throw new AuthenticationException("no new password");
                 }
                 if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
@@ -137,7 +134,7 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
         String buttonLabel = "Change Password"; // TODO: i18n
         responseBody = responseBody.replace("{message}", message);
         responseBody = responseBody.replace("{formAction}", "/changePassword");
-        responseBody = responseBody.replace("{formClass}", (hideForm) ? "hide" : "show");
+        responseBody = responseBody.replace("{formClass}", hideForm ? "hide" : "show");
         responseBody = responseBody.replace("{repeatPasswordFieldType}", "password");
         responseBody = responseBody.replace("{newPasswordFieldType}", "password");
         responseBody = responseBody.replace("{tokenNameFieldType}", "hidden");

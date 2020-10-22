@@ -114,7 +114,8 @@ public class TokenResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Operation(summary = "Get access and refresh tokens.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK") })
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters") })
     public Response getToken(@FormParam("grant_type") String grantType, @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri, @FormParam("client_id") String clientId,
             @FormParam("refresh_token") String refreshToken, @FormParam("code_verifier") String codeVerifier,
@@ -142,7 +143,9 @@ public class TokenResource implements RESTResource {
     @GET
     @Path("/sessions")
     @Operation(summary = "List the sessions associated to the authenticated user.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserSessionDTO.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserSessionDTO.class))),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getSessions(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
@@ -161,7 +164,9 @@ public class TokenResource implements RESTResource {
     @GET
     @Path("/apitokens")
     @Operation(summary = "List the API tokens associated to the authenticated user.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserApiTokenDTO.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserApiTokenDTO.class))),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found") })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getApiTokens(@Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {
@@ -180,7 +185,9 @@ public class TokenResource implements RESTResource {
     @DELETE
     @Path("/apitokens/{name}")
     @Operation(summary = "Revoke a specified API token associated to the authenticated user.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UserApiTokenDTO.class))) })
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User or API token not found") })
     public Response removeApiToken(@Context SecurityContext securityContext, @PathParam("name") String name) {
         if (securityContext.getUserPrincipal() == null) {
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "User is not authenticated");
@@ -205,7 +212,9 @@ public class TokenResource implements RESTResource {
     @Path("/logout")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Operation(summary = "Delete the session associated with a refresh token.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK") })
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User or refresh token not found") })
     public Response deleteSession(@FormParam("refresh_token") String refreshToken, @FormParam("id") String id,
             @Context SecurityContext securityContext) {
         if (securityContext.getUserPrincipal() == null) {

@@ -13,6 +13,7 @@
 package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -55,11 +56,10 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
     protected HttpService httpService;
     protected UserRegistry userRegistry;
     protected AuthenticationProvider authProvider;
-    @Nullable
-    protected Instant lastAuthenticationFailure;
+    protected @Nullable Instant lastAuthenticationFailure;
     protected int authenticationFailureCount = 0;
 
-    protected HashMap<String, Instant> csrfTokens = new HashMap<>();
+    protected Map<String, Instant> csrfTokens = new HashMap<>();
 
     protected String pageTemplate;
 
@@ -72,8 +72,8 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
         pageTemplate = "";
         URL resource = bundleContext.getBundle().getResource("pages/authorize.html");
         if (resource != null) {
-            try {
-                pageTemplate = new String(resource.openStream().readAllBytes(), StandardCharsets.UTF_8);
+            try (InputStream stream = resource.openStream()) {
+                pageTemplate = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

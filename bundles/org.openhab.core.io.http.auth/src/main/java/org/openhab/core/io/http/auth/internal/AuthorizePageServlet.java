@@ -73,136 +73,131 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
     }
 
     @Override
-    protected void doGet(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+    protected void doGet(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req != null && resp != null) {
-            Map<String, String[]> params = req.getParameterMap();
+        Map<String, String[]> params = req.getParameterMap();
 
-            try {
-                String message = "";
-                String scope = (params.containsKey("scope")) ? params.get("scope")[0] : "";
-                String clientId = (params.containsKey("client_id")) ? params.get("client_id")[0] : "";
+        try {
+            String message = "";
+            String scope = (params.containsKey("scope")) ? params.get("scope")[0] : "";
+            String clientId = (params.containsKey("client_id")) ? params.get("client_id")[0] : "";
 
-                // Basic sanity check
-                if (scope.contains("<") || clientId.contains("<")) {
-                    throw new IllegalArgumentException("invalid_request");
-                }
-
-                // TODO: i18n
-                if (isSignupMode()) {
-                    message = "Create a first administrator account to continue.";
-                } else {
-                    message = String.format("Sign in to grant <b>%s</b> access to <b>%s</b>:", scope, clientId);
-                }
-                resp.setContentType("text/html;charset=UTF-8");
-                resp.getWriter().append(getPageBody(params, message, false));
-                resp.getWriter().close();
-            } catch (Exception e) {
-                resp.setContentType("text/plain;charset=UTF-8");
-                resp.getWriter().append(e.getMessage());
-                resp.getWriter().close();
+            // Basic sanity check
+            if (scope.contains("<") || clientId.contains("<")) {
+                throw new IllegalArgumentException("invalid_request");
             }
+
+            // TODO: i18n
+            if (isSignupMode()) {
+                message = "Create a first administrator account to continue.";
+            } else {
+                message = String.format("Sign in to grant <b>%s</b> access to <b>%s</b>:", scope, clientId);
+            }
+            resp.setContentType("text/html;charset=UTF-8");
+            resp.getWriter().append(getPageBody(params, message, false));
+            resp.getWriter().close();
+        } catch (Exception e) {
+            resp.setContentType("text/plain;charset=UTF-8");
+            resp.getWriter().append(e.getMessage());
+            resp.getWriter().close();
         }
     }
 
     @Override
-    protected void doPost(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+    protected void doPost(@NonNullByDefault({}) HttpServletRequest req, @NonNullByDefault({}) HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req != null && resp != null) {
-            Map<String, String[]> params = req.getParameterMap();
-            try {
-                if (!params.containsKey(("username"))) {
-                    throw new AuthenticationException("no username");
-                }
-                if (!params.containsKey(("password"))) {
-                    throw new AuthenticationException("no password");
-                }
-                if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
-                    throw new AuthenticationException("CSRF check failed");
-                }
-                if (!params.containsKey(("redirect_uri"))) {
-                    throw new IllegalArgumentException("invalid_request");
-                }
-                if (!params.containsKey(("response_type"))) {
-                    throw new IllegalArgumentException("unsupported_response_type");
-                }
-                if (!params.containsKey(("client_id"))) {
-                    throw new IllegalArgumentException("unauthorized_client");
-                }
-                if (!params.containsKey(("scope"))) {
-                    throw new IllegalArgumentException("invalid_scope");
-                }
+        Map<String, String[]> params = req.getParameterMap();
+        try {
+            if (!params.containsKey("username")) {
+                throw new AuthenticationException("no username");
+            }
+            if (!params.containsKey("password")) {
+                throw new AuthenticationException("no password");
+            }
+            if (!params.containsKey("csrf_token") || !csrfTokens.containsKey(params.get("csrf_token")[0])) {
+                throw new AuthenticationException("CSRF check failed");
+            }
+            if (!params.containsKey("redirect_uri")) {
+                throw new IllegalArgumentException("invalid_request");
+            }
+            if (!params.containsKey("response_type")) {
+                throw new IllegalArgumentException("unsupported_response_type");
+            }
+            if (!params.containsKey("client_id")) {
+                throw new IllegalArgumentException("unauthorized_client");
+            }
+            if (!params.containsKey("scope")) {
+                throw new IllegalArgumentException("invalid_scope");
+            }
 
-                removeCsrfToken(params.get("csrf_token")[0]);
+            removeCsrfToken(params.get("csrf_token")[0]);
 
-                String baseRedirectUri = params.get("redirect_uri")[0];
-                String responseType = params.get("response_type")[0];
-                String clientId = params.get("redirect_uri")[0];
-                String scope = params.get("scope")[0];
+            String baseRedirectUri = params.get("redirect_uri")[0];
+            String responseType = params.get("response_type")[0];
+            String clientId = params.get("redirect_uri")[0];
+            String scope = params.get("scope")[0];
 
-                if (!("code".equals(responseType))) {
-                    throw new AuthenticationException("unsupported_response_type");
-                }
+            if (!("code".equals(responseType))) {
+                throw new AuthenticationException("unsupported_response_type");
+            }
 
-                if (!clientId.equals(baseRedirectUri)) {
-                    throw new IllegalArgumentException("unauthorized_client");
-                }
+            if (!clientId.equals(baseRedirectUri)) {
+                throw new IllegalArgumentException("unauthorized_client");
+            }
 
-                String username = params.get("username")[0];
-                String password = params.get("password")[0];
+            String username = params.get("username")[0];
+            String password = params.get("password")[0];
 
-                User user;
-                if (isSignupMode()) {
-                    // Create a first administrator account with the supplied credentials
+            User user;
+            if (isSignupMode()) {
+                // Create a first administrator account with the supplied credentials
 
-                    // first verify the password confirmation and bail out if necessary
-                    if (!params.containsKey("password_repeat") || !password.equals(params.get("password_repeat")[0])) {
-                        resp.setContentType("text/html;charset=UTF-8");
-                        // TODO: i18n
-                        resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again.", false));
-                        resp.getWriter().close();
-                        return;
-                    }
-
-                    user = userRegistry.register(username, password, Set.of(Role.ADMIN));
-                    logger.info("First user account created: {}", username);
-                } else {
-                    user = login(username, password);
-                }
-
-                String authorizationCode = UUID.randomUUID().toString().replace("-", "");
-
-                if (user instanceof ManagedUser) {
-                    String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0]
-                            : null;
-                    String codeChallengeMethod = (params.containsKey("code_challenge_method"))
-                            ? params.get("code_challenge_method")[0]
-                            : null;
-                    ManagedUser managedUser = (ManagedUser) user;
-                    PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope,
-                            codeChallenge, codeChallengeMethod);
-                    managedUser.setPendingToken(pendingToken);
-                    userRegistry.update(managedUser);
-                }
-
-                String state = params.containsKey("state") ? params.get("state")[0] : null;
-                resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, authorizationCode, null, state));
-                resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
-            } catch (AuthenticationException e) {
-                processFailedLogin(resp, params, e.getMessage());
-            } catch (IllegalArgumentException e) {
-                @Nullable
-                String baseRedirectUri = params.containsKey("redirect_uri") ? params.get("redirect_uri")[0] : null;
-                @Nullable
-                String state = params.containsKey("state") ? params.get("state")[0] : null;
-                if (baseRedirectUri != null) {
-                    resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, null, e.getMessage(), state));
-                    resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
-                } else {
-                    resp.setContentType("text/plain;charset=UTF-8");
-                    resp.getWriter().append(e.getMessage());
+                // first verify the password confirmation and bail out if necessary
+                if (!params.containsKey("password_repeat") || !password.equals(params.get("password_repeat")[0])) {
+                    resp.setContentType("text/html;charset=UTF-8");
+                    // TODO: i18n
+                    resp.getWriter().append(getPageBody(params, "Passwords don't match, please try again.", false));
                     resp.getWriter().close();
+                    return;
                 }
+
+                user = userRegistry.register(username, password, Set.of(Role.ADMIN));
+                logger.info("First user account created: {}", username);
+            } else {
+                user = login(username, password);
+            }
+
+            String authorizationCode = UUID.randomUUID().toString().replace("-", "");
+
+            if (user instanceof ManagedUser) {
+                String codeChallenge = (params.containsKey("code_challenge")) ? params.get("code_challenge")[0] : null;
+                String codeChallengeMethod = (params.containsKey("code_challenge_method"))
+                        ? params.get("code_challenge_method")[0]
+                        : null;
+                ManagedUser managedUser = (ManagedUser) user;
+                PendingToken pendingToken = new PendingToken(authorizationCode, clientId, baseRedirectUri, scope,
+                        codeChallenge, codeChallengeMethod);
+                managedUser.setPendingToken(pendingToken);
+                userRegistry.update(managedUser);
+            }
+
+            String state = params.containsKey("state") ? params.get("state")[0] : null;
+            resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, authorizationCode, null, state));
+            resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
+        } catch (AuthenticationException e) {
+            processFailedLogin(resp, params, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            @Nullable
+            String baseRedirectUri = params.containsKey("redirect_uri") ? params.get("redirect_uri")[0] : null;
+            @Nullable
+            String state = params.containsKey("state") ? params.get("state")[0] : null;
+            if (baseRedirectUri != null) {
+                resp.addHeader(HttpHeaders.LOCATION, getRedirectUri(baseRedirectUri, null, e.getMessage(), state));
+                resp.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
+            } else {
+                resp.setContentType("text/plain;charset=UTF-8");
+                resp.getWriter().append(e.getMessage());
+                resp.getWriter().close();
             }
         }
     }
