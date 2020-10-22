@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -44,9 +43,7 @@ public class ByteArrayFileCache {
 
     private final File cacheFolder;
 
-    static final long ONE_DAY_IN_MILLIS = TimeUnit.DAYS.toMillis(1);
     private final long expiry;
-
     private final Map<String, File> filesInCache = new ConcurrentHashMap<>();
 
     /**
@@ -64,7 +61,7 @@ public class ByteArrayFileCache {
      * <code>$OPENHAB_USERDATA/cache/$servicePID/</code>.
      *
      * @param servicePID PID of the service
-     * @param long the days for how long the files stay in the cache valid. Must be positive. 0 to
+     * @param expiry the duration for how long the files stay valid in the cache. Must be positive. 0 to
      *            disable this functionality.
      */
     public ByteArrayFileCache(String servicePID, long expiry) {
@@ -76,7 +73,7 @@ public class ByteArrayFileCache {
      * <code>$OPENHAB_USERDATA/cache/$servicePID/</code>.
      *
      * @param servicePID PID of the service
-     * @param Duration the days for how long the files stay in the cache valid. Must be positive. 0 to
+     * @param expiry the duration for how long the files stay valid in the cache. Must be positive. 0 to
      *            disable this functionality.
      */
     public ByteArrayFileCache(String servicePID, Duration expiry) {
@@ -92,7 +89,7 @@ public class ByteArrayFileCache {
         if (expiry.isNegative()) {
             throw new IllegalArgumentException("Cache expiration time must be greater than or equal to 0");
         }
-        this.expiry = expiry.toDays();
+        this.expiry = expiry.toMillis();
     }
 
     /**
@@ -222,7 +219,7 @@ public class ByteArrayFileCache {
         if (expiry <= 0) {
             return false;
         }
-        return expiry * ONE_DAY_IN_MILLIS < System.currentTimeMillis() - fileInCache.lastModified();
+        return expiry < System.currentTimeMillis() - fileInCache.lastModified();
     }
 
     /**

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -181,7 +182,7 @@ public class ByteArrayFileCacheTest {
     }
 
     @Test
-    public void clearExpiredClearsNothing() throws IOException {
+    public void clearExpiredClearsNothingIfExpiryNotSet() throws IOException {
         byte[] buffer = readTempFile();
         subject.put(TXT_FILE_NAME, buffer);
         subject.clearExpired();
@@ -190,14 +191,26 @@ public class ByteArrayFileCacheTest {
     }
 
     @Test
-    public void clearExpired() {
-        subject = new ByteArrayFileCache(SERVICE_PID, 1);
+    public void clearExpiredClearsNothingIfNotExpired() throws IOException {
+        subject = new ByteArrayFileCache(SERVICE_PID, Duration.ofSeconds(5));
+
+        byte[] buffer = readTempFile();
+        subject.put(TXT_FILE_NAME, buffer);
+        subject.clearExpired();
+
+        assertThat(subject.get(TXT_FILE_NAME), is(equalTo(buffer)));
+    }
+
+    @Test
+    public void clearExpiredIfExpired() {
+        Duration expiry = Duration.ofSeconds(5);
+        subject = new ByteArrayFileCache(SERVICE_PID, expiry);
 
         subject.put(TXT_FILE_NAME, readTempFile());
 
         // manipulate time of last use
         File fileInCache = subject.getUniqueFile(TXT_FILE_NAME);
-        fileInCache.setLastModified(System.currentTimeMillis() - 2 * ByteArrayFileCache.ONE_DAY_IN_MILLIS);
+        fileInCache.setLastModified(System.currentTimeMillis() - 2 * expiry.toMillis());
 
         subject.clearExpired();
 
