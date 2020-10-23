@@ -10,7 +10,7 @@ Fragment-Host: org.openhab.core.model.core
 #
 -runbundles: \
 	com.google.inject;version='[3.0.0,3.0.1)',\
-	javax.measure.unit-api;version='[1.0.0,1.0.1)',\
+	javax.measure.unit-api;version='[2.0.0,2.0.1)',\
 	log4j;version='[1.2.17,1.2.18)',\
 	org.antlr.runtime;version='[3.2.0,3.2.1)',\
 	org.apache.felix.http.servlet-api;version='[1.1.2,1.1.3)',\
@@ -26,8 +26,8 @@ Fragment-Host: org.openhab.core.model.core
 	slf4j.api;version='[1.7.25,1.7.26)',\
 	org.apache.felix.configadmin;version='[1.9.8,1.9.9)',\
 	org.eclipse.equinox.event;version='[1.4.300,1.4.301)',\
-	tec.uom.lib.uom-lib-common;version='[1.0.3,1.0.4)',\
-	tec.uom.se;version='[1.0.10,1.0.11)',\
+	tech.units.indriya;version='[2.0.4,2.0.5)',\
+	si.uom.si-units;version='[2.0.1,2.0.2)',\
 	com.google.guava;version='[27.1.0,27.1.1)',\
 	com.google.guava.failureaccess;version='[1.0.1,1.0.2)',\
 	io.github.classgraph;version='[4.8.35,4.8.36)',\
