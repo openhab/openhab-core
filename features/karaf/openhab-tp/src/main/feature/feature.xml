@@ -29,7 +29,10 @@
 
 		<!-- Measurement -->
 		<bundle dependency="true">mvn:javax.measure/unit-api/2.0</bundle>
+		<bundle dependency="true">wrap:mvn:javax.inject/javax.inject/1</bundle>
 		<bundle dependency="true">wrap:mvn:si.uom/si-units/2.0.1</bundle>
+		<bundle dependency="true">mvn:si.uom/si-quantity/2.0</bundle>
+		<bundle dependency="true">wrap:mvn:tech.uom.lib/uom-lib-common/2.0.1</bundle>
 		<bundle dependency="true">mvn:tech.units/indriya/2.0.4</bundle>
 
 		<!-- TODO: Unbundled libraries -->
